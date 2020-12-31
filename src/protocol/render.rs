@@ -630,12 +630,6 @@ impl TryParse for Directformat {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for Directformat {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for Directformat {
     type Bytes = [u8; 16];
     fn serialize(&self) -> [u8; 16] {
@@ -698,12 +692,6 @@ impl TryParse for Pictforminfo {
         let type_ = type_.into();
         let result = Pictforminfo { id, type_, depth, direct, colormap };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for Pictforminfo {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for Pictforminfo {
@@ -769,12 +757,6 @@ impl TryParse for Pictvisual {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for Pictvisual {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for Pictvisual {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
@@ -812,12 +794,6 @@ impl TryParse for Pictdepth {
         let (visuals, remaining) = crate::x11_utils::parse_list::<Pictvisual>(remaining, num_visuals.try_to_usize()?)?;
         let result = Pictdepth { depth, visuals };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for Pictdepth {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for Pictdepth {
@@ -865,12 +841,6 @@ impl TryParse for Pictscreen {
         let (depths, remaining) = crate::x11_utils::parse_list::<Pictdepth>(remaining, num_depths.try_to_usize()?)?;
         let result = Pictscreen { fallback, depths };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for Pictscreen {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for Pictscreen {
@@ -923,12 +893,6 @@ impl TryParse for Indexvalue {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for Indexvalue {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for Indexvalue {
     type Bytes = [u8; 12];
     fn serialize(&self) -> [u8; 12] {
@@ -979,12 +943,6 @@ impl TryParse for Color {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for Color {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for Color {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
@@ -1025,12 +983,6 @@ impl TryParse for Pointfix {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for Pointfix {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for Pointfix {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
@@ -1065,12 +1017,6 @@ impl TryParse for Linefix {
         let (p2, remaining) = Pointfix::try_parse(remaining)?;
         let result = Linefix { p1, p2 };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for Linefix {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for Linefix {
@@ -1117,12 +1063,6 @@ impl TryParse for Triangle {
         let (p3, remaining) = Pointfix::try_parse(remaining)?;
         let result = Triangle { p1, p2, p3 };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for Triangle {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for Triangle {
@@ -1181,12 +1121,6 @@ impl TryParse for Trapezoid {
         let (right, remaining) = Linefix::try_parse(remaining)?;
         let result = Trapezoid { top, bottom, left, right };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for Trapezoid {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for Trapezoid {
@@ -1267,12 +1201,6 @@ impl TryParse for Glyphinfo {
         let (y_off, remaining) = i16::try_parse(remaining)?;
         let result = Glyphinfo { width, height, x, y, x_off, y_off };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for Glyphinfo {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for Glyphinfo {
@@ -1411,12 +1339,6 @@ impl TryParse for QueryVersionReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for QueryVersionReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 
 /// Opcode for the QueryPictFormats request
 pub const QUERY_PICT_FORMATS_REQUEST: u8 = 1;
@@ -1514,12 +1436,6 @@ impl TryParse for QueryPictFormatsReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for QueryPictFormatsReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl QueryPictFormatsReply {
@@ -1653,12 +1569,6 @@ impl TryParse for QueryPictIndexValuesReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for QueryPictIndexValuesReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl QueryPictIndexValuesReply {
@@ -4371,12 +4281,6 @@ impl TryParse for Transform {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for Transform {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for Transform {
     type Bytes = [u8; 36];
     fn serialize(&self) -> [u8; 36] {
@@ -4642,12 +4546,6 @@ impl TryParse for QueryFiltersReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for QueryFiltersReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl QueryFiltersReply {
     /// Get the value of the `num_aliases` field.
     ///
@@ -4797,12 +4695,6 @@ impl TryParse for Animcursorelt {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for Animcursorelt {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for Animcursorelt {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
@@ -4928,12 +4820,6 @@ impl TryParse for Spanfix {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for Spanfix {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for Spanfix {
     type Bytes = [u8; 12];
     fn serialize(&self) -> [u8; 12] {
@@ -4974,12 +4860,6 @@ impl TryParse for Trap {
         let (bot, remaining) = Spanfix::try_parse(remaining)?;
         let result = Trap { top, bot };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for Trap {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for Trap {

@@ -50,12 +50,6 @@ impl TryParse for Range8 {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for Range8 {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for Range8 {
     type Bytes = [u8; 2];
     fn serialize(&self) -> [u8; 2] {
@@ -84,12 +78,6 @@ impl TryParse for Range16 {
         let (last, remaining) = u16::try_parse(remaining)?;
         let result = Range16 { first, last };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for Range16 {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for Range16 {
@@ -122,12 +110,6 @@ impl TryParse for ExtRange {
         let (minor, remaining) = Range16::try_parse(remaining)?;
         let result = ExtRange { major, minor };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for ExtRange {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for ExtRange {
@@ -176,12 +158,6 @@ impl TryParse for Range {
         let (client_died, remaining) = bool::try_parse(remaining)?;
         let result = Range { core_requests, core_replies, ext_requests, ext_replies, delivered_events, device_events, errors, client_started, client_died };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for Range {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for Range {
@@ -376,12 +352,6 @@ impl TryParse for ClientInfo {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for ClientInfo {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for ClientInfo {
     type Bytes = Vec<u8>;
     fn serialize(&self) -> Vec<u8> {
@@ -510,12 +480,6 @@ impl TryParse for QueryVersionReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for QueryVersionReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 
@@ -925,12 +889,6 @@ impl TryParse for GetContextReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for GetContextReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl GetContextReply {
     /// Get the value of the `num_intercepted_clients` field.
     ///
@@ -1047,12 +1005,6 @@ impl TryParse for EnableContextReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for EnableContextReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl EnableContextReply {

@@ -138,12 +138,6 @@ impl TryParse for QueryVersionReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for QueryVersionReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub struct SaveSetMode(u8);
@@ -561,12 +555,6 @@ impl TryParse for SelectionNotifyEvent {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for SelectionNotifyEvent {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl From<&SelectionNotifyEvent> for [u8; 32] {
     fn from(input: &SelectionNotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -848,12 +836,6 @@ impl TryParse for CursorNotifyEvent {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for CursorNotifyEvent {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl From<&CursorNotifyEvent> for [u8; 32] {
     fn from(input: &CursorNotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -1072,12 +1054,6 @@ impl TryParse for GetCursorImageReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for GetCursorImageReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 
@@ -2342,12 +2318,6 @@ impl TryParse for FetchRegionReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for FetchRegionReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl FetchRegionReply {
     /// Get the value of the `length` field.
     ///
@@ -2827,12 +2797,6 @@ impl TryParse for GetCursorNameReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for GetCursorNameReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl GetCursorNameReply {
     /// Get the value of the `nbytes` field.
     ///
@@ -2946,12 +2910,6 @@ impl TryParse for GetCursorImageAndNameReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for GetCursorImageAndNameReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl GetCursorImageAndNameReply {

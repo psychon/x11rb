@@ -131,12 +131,6 @@ impl TryParse for QueryVersionReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for QueryVersionReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 
 /// Opcode for the Start request
 pub const START_REQUEST: u8 = 1;
@@ -224,12 +218,6 @@ impl TryParse for StartReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for StartReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 
@@ -321,12 +309,6 @@ impl TryParse for EndReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for EndReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub struct Datatype(bool);
@@ -406,12 +388,6 @@ impl TryParse for Event {
         let remaining = remaining.get(32..).ok_or(ParseError::InsufficientData)?;
         let result = Event {  };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for Event {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for Event {
@@ -648,12 +624,6 @@ impl TryParse for SendReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for SendReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 
 /// Opcode for the SelectInput request
 pub const SELECT_INPUT_REQUEST: u8 = 4;
@@ -741,12 +711,6 @@ impl TryParse for SelectInputReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for SelectInputReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 

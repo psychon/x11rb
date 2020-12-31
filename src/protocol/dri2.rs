@@ -219,12 +219,6 @@ impl TryParse for DRI2Buffer {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for DRI2Buffer {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for DRI2Buffer {
     type Bytes = [u8; 20];
     fn serialize(&self) -> [u8; 20] {
@@ -278,12 +272,6 @@ impl TryParse for AttachFormat {
         let attachment = attachment.into();
         let result = AttachFormat { attachment, format };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for AttachFormat {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for AttachFormat {
@@ -409,12 +397,6 @@ impl TryParse for QueryVersionReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for QueryVersionReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 
 /// Opcode for the Connect request
 pub const CONNECT_REQUEST: u8 = 1;
@@ -523,12 +505,6 @@ impl TryParse for ConnectReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for ConnectReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl ConnectReply {
@@ -656,12 +632,6 @@ impl TryParse for AuthenticateReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for AuthenticateReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 
@@ -922,12 +892,6 @@ impl TryParse for GetBuffersReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for GetBuffersReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl GetBuffersReply {
     /// Get the value of the `count` field.
     ///
@@ -1058,12 +1022,6 @@ impl TryParse for CopyRegionReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for CopyRegionReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 
 /// Opcode for the GetBuffersWithFormat request
 pub const GET_BUFFERS_WITH_FORMAT_REQUEST: u8 = 7;
@@ -1190,12 +1148,6 @@ impl TryParse for GetBuffersWithFormatReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for GetBuffersWithFormatReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl GetBuffersWithFormatReply {
@@ -1359,12 +1311,6 @@ impl TryParse for SwapBuffersReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for SwapBuffersReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 
 /// Opcode for the GetMSC request
 pub const GET_MSC_REQUEST: u8 = 9;
@@ -1463,12 +1409,6 @@ impl TryParse for GetMSCReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for GetMSCReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 
@@ -1625,12 +1565,6 @@ impl TryParse for WaitMSCReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for WaitMSCReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 
 /// Opcode for the WaitSBC request
 pub const WAIT_SBC_REQUEST: u8 = 11;
@@ -1747,12 +1681,6 @@ impl TryParse for WaitSBCReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for WaitSBCReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 
@@ -1931,12 +1859,6 @@ impl TryParse for GetParamReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for GetParamReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 
 /// Opcode for the BufferSwapComplete event
 pub const BUFFER_SWAP_COMPLETE_EVENT: u8 = 0;
@@ -1972,12 +1894,6 @@ impl TryParse for BufferSwapCompleteEvent {
         let remaining = initial_value.get(32..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for BufferSwapCompleteEvent {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl From<&BufferSwapCompleteEvent> for [u8; 32] {
@@ -2053,12 +1969,6 @@ impl TryParse for InvalidateBuffersEvent {
         let remaining = initial_value.get(32..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for InvalidateBuffersEvent {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl From<&InvalidateBuffersEvent> for [u8; 32] {

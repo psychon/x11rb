@@ -2765,38 +2765,6 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
 
             outln!(out.indent(), "}}");
             outln!(out, "}}");
-
-            if external_params.is_empty() {
-                let value = if has_fds {
-                    "(&[u8], Vec<RawFdContainer>)"
-                } else {
-                    "&[u8]"
-                };
-                outln!(out, "impl TryFrom<{}> for {} {{", value, name);
-                out.indented(|out| {
-                    outln!(out, "type Error = ParseError;");
-                    outln!(
-                        out,
-                        "fn try_from(value: {}) -> Result<Self, Self::Error> {{",
-                        value
-                    );
-                    out.indented(|out| {
-                        if has_fds {
-                            outln!(out, "let (value, mut fds) = value;");
-                            outln!(out, "Ok(Self::try_parse_fd(value, &mut fds)?.0)");
-                        } else {
-                            outln!(out, "Ok(Self::try_parse(value)?.0)");
-                        }
-                    });
-                    outln!(out, "}}");
-                });
-                outln!(out, "}}");
-            } else {
-                outln!(
-                    out,
-                    "// Skipping TryFrom implementations because of unresolved members",
-                );
-            }
         }
 
         if generate_serialize {

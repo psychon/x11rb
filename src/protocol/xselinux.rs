@@ -131,12 +131,6 @@ impl TryParse for QueryVersionReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for QueryVersionReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 
 /// Opcode for the SetDeviceCreateContext request
 pub const SET_DEVICE_CREATE_CONTEXT_REQUEST: u8 = 1;
@@ -293,12 +287,6 @@ impl TryParse for GetDeviceCreateContextReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for GetDeviceCreateContextReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl GetDeviceCreateContextReply {
@@ -495,12 +483,6 @@ impl TryParse for GetDeviceContextReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for GetDeviceContextReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl GetDeviceContextReply {
     /// Get the value of the `context_len` field.
     ///
@@ -674,12 +656,6 @@ impl TryParse for GetWindowCreateContextReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for GetWindowCreateContextReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl GetWindowCreateContextReply {
     /// Get the value of the `context_len` field.
     ///
@@ -788,12 +764,6 @@ impl TryParse for GetWindowContextReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for GetWindowContextReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl GetWindowContextReply {
     /// Get the value of the `context_len` field.
     ///
@@ -836,12 +806,6 @@ impl TryParse for ListItem {
         let remaining = remaining.get(misalignment..).ok_or(ParseError::InsufficientData)?;
         let result = ListItem { name, object_context, data_context };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for ListItem {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for ListItem {
@@ -1050,12 +1014,6 @@ impl TryParse for GetPropertyCreateContextReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for GetPropertyCreateContextReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl GetPropertyCreateContextReply {
     /// Get the value of the `context_len` field.
     ///
@@ -1229,12 +1187,6 @@ impl TryParse for GetPropertyUseContextReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for GetPropertyUseContextReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl GetPropertyUseContextReply {
     /// Get the value of the `context_len` field.
     ///
@@ -1350,12 +1302,6 @@ impl TryParse for GetPropertyContextReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for GetPropertyContextReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl GetPropertyContextReply {
@@ -1475,12 +1421,6 @@ impl TryParse for GetPropertyDataContextReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for GetPropertyDataContextReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl GetPropertyDataContextReply {
     /// Get the value of the `context_len` field.
     ///
@@ -1586,12 +1526,6 @@ impl TryParse for ListPropertiesReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for ListPropertiesReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl ListPropertiesReply {
@@ -1767,12 +1701,6 @@ impl TryParse for GetSelectionCreateContextReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for GetSelectionCreateContextReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl GetSelectionCreateContextReply {
     /// Get the value of the `context_len` field.
     ///
@@ -1946,12 +1874,6 @@ impl TryParse for GetSelectionUseContextReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for GetSelectionUseContextReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl GetSelectionUseContextReply {
     /// Get the value of the `context_len` field.
     ///
@@ -2058,12 +1980,6 @@ impl TryParse for GetSelectionContextReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for GetSelectionContextReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl GetSelectionContextReply {
@@ -2174,12 +2090,6 @@ impl TryParse for GetSelectionDataContextReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for GetSelectionDataContextReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl GetSelectionDataContextReply {
     /// Get the value of the `context_len` field.
     ///
@@ -2274,12 +2184,6 @@ impl TryParse for ListSelectionsReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for ListSelectionsReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl ListSelectionsReply {
@@ -2388,12 +2292,6 @@ impl TryParse for GetClientContextReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for GetClientContextReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl GetClientContextReply {

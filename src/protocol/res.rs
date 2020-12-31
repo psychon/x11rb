@@ -48,12 +48,6 @@ impl TryParse for Client {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for Client {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for Client {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
@@ -88,12 +82,6 @@ impl TryParse for Type {
         let (count, remaining) = u32::try_parse(remaining)?;
         let result = Type { resource_type, count };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for Type {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for Type {
@@ -191,12 +179,6 @@ impl TryParse for ClientIdSpec {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for ClientIdSpec {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for ClientIdSpec {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
@@ -232,12 +214,6 @@ impl TryParse for ClientIdValue {
         let (value, remaining) = crate::x11_utils::parse_list::<u32>(remaining, length.checked_div(4u32).ok_or(ParseError::InvalidExpression)?.try_to_usize()?)?;
         let result = ClientIdValue { spec, value };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for ClientIdValue {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for ClientIdValue {
@@ -285,12 +261,6 @@ impl TryParse for ResourceIdSpec {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for ResourceIdSpec {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for ResourceIdSpec {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
@@ -329,12 +299,6 @@ impl TryParse for ResourceSizeSpec {
         let (use_count, remaining) = u32::try_parse(remaining)?;
         let result = ResourceSizeSpec { spec, bytes, ref_count, use_count };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for ResourceSizeSpec {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for ResourceSizeSpec {
@@ -388,12 +352,6 @@ impl TryParse for ResourceSizeValue {
         let (cross_references, remaining) = crate::x11_utils::parse_list::<ResourceSizeSpec>(remaining, num_cross_references.try_to_usize()?)?;
         let result = ResourceSizeValue { size, cross_references };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for ResourceSizeValue {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for ResourceSizeValue {
@@ -523,12 +481,6 @@ impl TryParse for QueryVersionReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for QueryVersionReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 
 /// Opcode for the QueryClients request
 pub const QUERY_CLIENTS_REQUEST: u8 = 1;
@@ -608,12 +560,6 @@ impl TryParse for QueryClientsReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for QueryClientsReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl QueryClientsReply {
@@ -723,12 +669,6 @@ impl TryParse for QueryClientResourcesReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for QueryClientResourcesReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl QueryClientResourcesReply {
     /// Get the value of the `num_types` field.
     ///
@@ -836,12 +776,6 @@ impl TryParse for QueryClientPixmapBytesReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for QueryClientPixmapBytesReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 
 /// Opcode for the QueryClientIds request
 pub const QUERY_CLIENT_IDS_REQUEST: u8 = 4;
@@ -944,12 +878,6 @@ impl TryParse for QueryClientIdsReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for QueryClientIdsReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl QueryClientIdsReply {
@@ -1079,12 +1007,6 @@ impl TryParse for QueryResourceBytesReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for QueryResourceBytesReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl QueryResourceBytesReply {

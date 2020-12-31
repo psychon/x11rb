@@ -63,12 +63,6 @@ impl TryParse for Printer {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for Printer {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl Serialize for Printer {
     type Bytes = Vec<u8>;
     fn serialize(&self) -> Vec<u8> {
@@ -463,12 +457,6 @@ impl TryParse for PrintQueryVersionReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for PrintQueryVersionReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 
 /// Opcode for the PrintGetPrinterList request
 pub const PRINT_GET_PRINTER_LIST_REQUEST: u8 = 1;
@@ -583,12 +571,6 @@ impl TryParse for PrintGetPrinterListReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for PrintGetPrinterListReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl PrintGetPrinterListReply {
@@ -903,12 +885,6 @@ impl TryParse for PrintGetContextReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for PrintGetContextReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 
 /// Opcode for the PrintDestroyContext request
 pub const PRINT_DESTROY_CONTEXT_REQUEST: u8 = 5;
@@ -1051,12 +1027,6 @@ impl TryParse for PrintGetScreenOfContextReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for PrintGetScreenOfContextReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 
@@ -1533,12 +1503,6 @@ impl TryParse for PrintGetDocumentDataReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for PrintGetDocumentDataReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl PrintGetDocumentDataReply {
     /// Get the value of the `dataLen` field.
     ///
@@ -1851,12 +1815,6 @@ impl TryParse for PrintInputSelectedReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for PrintInputSelectedReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 
 /// Opcode for the PrintGetAttributes request
 pub const PRINT_GET_ATTRIBUTES_REQUEST: u8 = 17;
@@ -1958,12 +1916,6 @@ impl TryParse for PrintGetAttributesReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for PrintGetAttributesReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl PrintGetAttributesReply {
@@ -2104,12 +2056,6 @@ impl TryParse for PrintGetOneAttributesReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for PrintGetOneAttributesReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl PrintGetOneAttributesReply {
@@ -2333,12 +2279,6 @@ impl TryParse for PrintGetPageDimensionsReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for PrintGetPageDimensionsReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 
 /// Opcode for the PrintQueryScreens request
 pub const PRINT_QUERY_SCREENS_REQUEST: u8 = 22;
@@ -2418,12 +2358,6 @@ impl TryParse for PrintQueryScreensReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for PrintQueryScreensReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl PrintQueryScreensReply {
@@ -2541,12 +2475,6 @@ impl TryParse for PrintSetImageResolutionReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for PrintSetImageResolutionReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 
 /// Opcode for the PrintGetImageResolution request
 pub const PRINT_GET_IMAGE_RESOLUTION_REQUEST: u8 = 24;
@@ -2637,12 +2565,6 @@ impl TryParse for PrintGetImageResolutionReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for PrintGetImageResolutionReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 
 /// Opcode for the Notify event
 pub const NOTIFY_EVENT: u8 = 0;
@@ -2667,12 +2589,6 @@ impl TryParse for NotifyEvent {
         let remaining = initial_value.get(32..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for NotifyEvent {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl From<&NotifyEvent> for [u8; 32] {
@@ -2746,12 +2662,6 @@ impl TryParse for AttributNotifyEvent {
         let remaining = initial_value.get(32..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for AttributNotifyEvent {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl From<&AttributNotifyEvent> for [u8; 32] {

@@ -112,12 +112,6 @@ impl TryParse for EnableReply {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for EnableReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 
 /// Extension trait defining the requests of this extension.
 pub trait ConnectionExt: RequestConnection {
