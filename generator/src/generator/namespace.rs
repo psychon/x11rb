@@ -2271,7 +2271,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                     outln!(out.indent(), "// FIXME: event parsing can fail");
                     outln!(
                         out.indent(),
-                        "{}::try_from(value).unwrap()",
+                        "{}::try_parse(value).unwrap().0",
                         rust_event_type,
                     );
                     outln!(out, "}}");

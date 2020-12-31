@@ -17552,87 +17552,87 @@ impl EventForSend {
     pub fn as_device_valuator_event(&self) -> DeviceValuatorEvent {
         let value: &[u8] = &self.0;
         // FIXME: event parsing can fail
-        DeviceValuatorEvent::try_from(value).unwrap()
+        DeviceValuatorEvent::try_parse(value).unwrap().0
     }
     pub fn as_device_key_press_event(&self) -> DeviceKeyPressEvent {
         let value: &[u8] = &self.0;
         // FIXME: event parsing can fail
-        DeviceKeyPressEvent::try_from(value).unwrap()
+        DeviceKeyPressEvent::try_parse(value).unwrap().0
     }
     pub fn as_device_key_release_event(&self) -> DeviceKeyReleaseEvent {
         let value: &[u8] = &self.0;
         // FIXME: event parsing can fail
-        DeviceKeyReleaseEvent::try_from(value).unwrap()
+        DeviceKeyReleaseEvent::try_parse(value).unwrap().0
     }
     pub fn as_device_button_press_event(&self) -> DeviceButtonPressEvent {
         let value: &[u8] = &self.0;
         // FIXME: event parsing can fail
-        DeviceButtonPressEvent::try_from(value).unwrap()
+        DeviceButtonPressEvent::try_parse(value).unwrap().0
     }
     pub fn as_device_button_release_event(&self) -> DeviceButtonReleaseEvent {
         let value: &[u8] = &self.0;
         // FIXME: event parsing can fail
-        DeviceButtonReleaseEvent::try_from(value).unwrap()
+        DeviceButtonReleaseEvent::try_parse(value).unwrap().0
     }
     pub fn as_device_motion_notify_event(&self) -> DeviceMotionNotifyEvent {
         let value: &[u8] = &self.0;
         // FIXME: event parsing can fail
-        DeviceMotionNotifyEvent::try_from(value).unwrap()
+        DeviceMotionNotifyEvent::try_parse(value).unwrap().0
     }
     pub fn as_device_focus_in_event(&self) -> DeviceFocusInEvent {
         let value: &[u8] = &self.0;
         // FIXME: event parsing can fail
-        DeviceFocusInEvent::try_from(value).unwrap()
+        DeviceFocusInEvent::try_parse(value).unwrap().0
     }
     pub fn as_device_focus_out_event(&self) -> DeviceFocusOutEvent {
         let value: &[u8] = &self.0;
         // FIXME: event parsing can fail
-        DeviceFocusOutEvent::try_from(value).unwrap()
+        DeviceFocusOutEvent::try_parse(value).unwrap().0
     }
     pub fn as_proximity_in_event(&self) -> ProximityInEvent {
         let value: &[u8] = &self.0;
         // FIXME: event parsing can fail
-        ProximityInEvent::try_from(value).unwrap()
+        ProximityInEvent::try_parse(value).unwrap().0
     }
     pub fn as_proximity_out_event(&self) -> ProximityOutEvent {
         let value: &[u8] = &self.0;
         // FIXME: event parsing can fail
-        ProximityOutEvent::try_from(value).unwrap()
+        ProximityOutEvent::try_parse(value).unwrap().0
     }
     pub fn as_device_state_notify_event(&self) -> DeviceStateNotifyEvent {
         let value: &[u8] = &self.0;
         // FIXME: event parsing can fail
-        DeviceStateNotifyEvent::try_from(value).unwrap()
+        DeviceStateNotifyEvent::try_parse(value).unwrap().0
     }
     pub fn as_device_mapping_notify_event(&self) -> DeviceMappingNotifyEvent {
         let value: &[u8] = &self.0;
         // FIXME: event parsing can fail
-        DeviceMappingNotifyEvent::try_from(value).unwrap()
+        DeviceMappingNotifyEvent::try_parse(value).unwrap().0
     }
     pub fn as_change_device_notify_event(&self) -> ChangeDeviceNotifyEvent {
         let value: &[u8] = &self.0;
         // FIXME: event parsing can fail
-        ChangeDeviceNotifyEvent::try_from(value).unwrap()
+        ChangeDeviceNotifyEvent::try_parse(value).unwrap().0
     }
     pub fn as_device_key_state_notify_event(&self) -> DeviceKeyStateNotifyEvent {
         let value: &[u8] = &self.0;
         // FIXME: event parsing can fail
-        DeviceKeyStateNotifyEvent::try_from(value).unwrap()
+        DeviceKeyStateNotifyEvent::try_parse(value).unwrap().0
     }
     pub fn as_device_button_state_notify_event(&self) -> DeviceButtonStateNotifyEvent {
         let value: &[u8] = &self.0;
         // FIXME: event parsing can fail
-        DeviceButtonStateNotifyEvent::try_from(value).unwrap()
+        DeviceButtonStateNotifyEvent::try_parse(value).unwrap().0
     }
     pub fn as_device_presence_notify_event(&self) -> DevicePresenceNotifyEvent {
         let value: &[u8] = &self.0;
         // FIXME: event parsing can fail
-        DevicePresenceNotifyEvent::try_from(value).unwrap()
+        DevicePresenceNotifyEvent::try_parse(value).unwrap().0
     }
     pub fn as_device_property_notify_event(&self) -> DevicePropertyNotifyEvent {
         let value: &[u8] = &self.0;
         // FIXME: event parsing can fail
-        DevicePropertyNotifyEvent::try_from(value).unwrap()
+        DevicePropertyNotifyEvent::try_parse(value).unwrap().0
     }
 }
 impl Serialize for EventForSend {
