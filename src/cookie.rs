@@ -299,15 +299,15 @@ macro_rules! multiple_reply_cookie {
                     Err(e) => return Some(Err(e)),
                     Ok(v) => v,
                 };
-                let reply = $reply::try_from(reply.as_ref()).map_err(ReplyError::from);
+                let reply = $reply::try_parse(reply.as_ref());
                 match reply {
                     // Is this an indicator that no more replies follow?
-                    Ok(ref reply) if Self::is_last(&reply) => None,
+                    Ok(ref reply) if Self::is_last(&reply.0) => None,
                     Ok(reply) => {
                         self.0 = Some(cookie);
-                        Some(Ok(reply))
+                        Some(Ok(reply.0))
                     }
-                    Err(e) => Some(Err(e)),
+                    Err(e) => Some(Err(e.into())),
                 }
             }
         }
