@@ -102,7 +102,7 @@ pub enum ConnectError {
     ///
     /// One situation were this error is used when libxcb indicates an error that does not match
     /// any of the defined error conditions. Thus, libxcb is violating its own API (or new error
-    /// cases were defined, but are not yet handled by x11rb)
+    /// cases were defined, but are not yet handled by x11rb).
     UnknownError,
 
     /// Error while parsing some data, see `ParseError`.
@@ -115,10 +115,10 @@ pub enum ConnectError {
 
     /// Error during parsing of display string.
     ///
-    /// This is `XCB_CONN_CLOSSED_PARSE_ERR`.
+    /// This is `XCB_CONN_CLOSED_PARSE_ERR`.
     DisplayParsingError,
 
-    /// Server does not have a screen matcing the display.
+    /// Server does not have a screen matching the display.
     ///
     /// This is `XCB_CONN_CLOSED_INVALID_SCREEN`.
     InvalidScreen,
@@ -133,7 +133,7 @@ pub enum ConnectError {
 
     /// The server rejected the connection with a `SetupAuthenticate` message.
     SetupAuthenticate(SetupAuthenticate),
-    ///
+
     /// The server rejected the connection with a `SetupFailed` message.
     SetupFailed(SetupFailed),
 }
@@ -188,7 +188,7 @@ pub enum ConnectionError {
     ///
     /// One situation were this error is used when libxcb indicates an error that does not match
     /// any of the defined error conditions. Thus, libxcb is violating its own API (or new error
-    /// cases were defined, but are not yet handled by x11rb)
+    /// cases were defined, but are not yet handled by x11rb).
     UnknownError,
 
     /// An X11 extension was not supported by the server.
@@ -253,7 +253,7 @@ impl From<std::io::Error> for ConnectionError {
 pub enum ReplyError {
     /// Some error occurred on the X11 connection.
     ConnectionError(ConnectionError),
-    /// The X11 server sent an error in response to the request.
+    /// The X11 server sent an error in response to a request.
     X11Error(X11Error),
 }
 
@@ -299,7 +299,7 @@ pub enum ReplyOrIdError {
     IdsExhausted,
     /// Some error occurred on the X11 connection.
     ConnectionError(ConnectionError),
-    /// The X11 server sent an error in response to a XC-MISC request.
+    /// The X11 server sent an error in response to a request.
     X11Error(X11Error),
 }
 
