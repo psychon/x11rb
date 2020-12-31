@@ -1,6 +1,6 @@
 //! Cookies are handles to future replies or errors from the X11 server.
 
-use std::convert::{TryFrom, TryInto};
+use std::convert::TryFrom;
 use std::marker::PhantomData;
 
 use crate::connection::{BufWithFds, DiscardMode, RequestConnection, RequestKind, SequenceNumber};
@@ -9,6 +9,7 @@ use crate::errors::{ConnectionError, ParseError, ReplyError};
 use crate::protocol::record::EnableContextReply;
 use crate::protocol::xproto::ListFontsWithInfoReply;
 use crate::utils::RawFdContainer;
+use crate::x11_utils::TryParse;
 
 /// A handle to a possible error from the X11 server.
 ///
@@ -144,7 +145,7 @@ where
 
 impl<C, R> Cookie<'_, C, R>
 where
-    R: for<'a> TryFrom<&'a [u8], Error = ParseError>,
+    R: TryParse,
     C: RequestConnection + ?Sized,
 {
     /// Construct a new cookie.
@@ -177,13 +178,13 @@ where
 
     /// Get the reply that the server sent.
     pub fn reply(self) -> Result<R, ReplyError> {
-        Ok(self.raw_reply()?.as_ref().try_into()?)
+        Ok(R::try_parse(self.raw_reply()?.as_ref())?.0)
     }
 
     /// Get the reply that the server sent, but have errors handled as events.
     pub fn reply_unchecked(self) -> Result<Option<R>, ConnectionError> {
         self.raw_reply_unchecked()?
-            .map(|buf| buf.as_ref().try_into())
+            .map(|buf| R::try_parse(buf.as_ref()).map(|r| r.0))
             .transpose()
             .map_err(Into::into)
     }

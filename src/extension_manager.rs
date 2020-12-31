@@ -158,7 +158,7 @@ mod test {
     use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
     use crate::errors::{ConnectionError, ParseError};
     use crate::utils::RawFdContainer;
-    use crate::x11_utils::{ExtInfoProvider, ExtensionInformation};
+    use crate::x11_utils::{ExtInfoProvider, ExtensionInformation, TryParse};
 
     use super::{CheckState, ExtensionManager};
 
@@ -173,7 +173,7 @@ mod test {
             _fds: Vec<RawFdContainer>,
         ) -> Result<Cookie<'_, Self, R>, ConnectionError>
         where
-            R: for<'a> TryFrom<&'a [u8], Error = ParseError>,
+            R: TryParse,
         {
             Ok(Cookie::new(self, 1))
         }

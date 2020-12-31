@@ -49,7 +49,7 @@ use crate::errors::{ConnectionError, ParseError, ReplyError, ReplyOrIdError};
 use crate::protocol::xproto::Setup;
 use crate::protocol::Event;
 use crate::utils::RawFdContainer;
-use crate::x11_utils::{ExtensionInformation, X11Error};
+use crate::x11_utils::{ExtensionInformation, TryParse, X11Error};
 
 /// Number type used for referring to things that were sent to the server in responses from the
 /// server.
@@ -119,7 +119,7 @@ pub trait RequestConnection {
         fds: Vec<RawFdContainer>,
     ) -> Result<Cookie<'_, Self, R>, ConnectionError>
     where
-        R: for<'a> TryFrom<&'a [u8], Error = ParseError>;
+        R: TryParse;
 
     /// Send a request with a reply containing file descriptors to the server.
     ///
@@ -496,7 +496,7 @@ pub enum DiscardMode {
 ///
 ///     fn send_request_with_reply<R>(&self, bufs: &[IoSlice], fds: Vec<RawFdContainer>)
 ///     -> Result<Cookie<Self, R>, ConnectionError>
-///     where R: for<'a> TryFrom<&'a [u8], Error=ParseError> {
+///     where R: TryParse {
 ///         Ok(Cookie::new(self, self.send_request(bufs, fds, true, false)?))
 ///     }
 ///

@@ -149,7 +149,7 @@ mod test {
             _: Vec<RawFdContainer>,
         ) -> Result<Cookie<'_, Self, R>, ConnectionError>
         where
-            R: for<'a> TryFrom<&'a [u8], Error = ParseError>,
+            R: TryParse,
         {
             Ok(Cookie::new(self, 42))
         }

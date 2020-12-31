@@ -69,7 +69,7 @@ impl RequestConnection for FakeConnection {
         fds: Vec<RawFdContainer>,
     ) -> Result<Cookie<Self, R>, ConnectionError>
     where
-        R: for<'a> TryFrom<&'a [u8], Error = ParseError>,
+        R: TryParse,
     {
         Ok(Cookie::new(self, self.internal_send_request(bufs, fds)?))
     }
