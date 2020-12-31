@@ -1498,7 +1498,7 @@ impl TryParse for QueryPictFormatsReply {
         let (formats, remaining) = crate::x11_utils::parse_list::<Pictforminfo>(remaining, num_formats.try_to_usize()?)?;
         let (screens, remaining) = crate::x11_utils::parse_list::<Pictscreen>(remaining, num_screens.try_to_usize()?)?;
         let mut remaining = remaining;
-        let list_length = usize::try_from(num_subpixel).or(Err(ParseError::ConversionFailed))?;
+        let list_length = num_subpixel.try_to_usize()?;
         let mut subpixels = Vec::with_capacity(list_length);
         for _ in 0..list_length {
             let (v, new_remaining) = u32::try_parse(remaining)?;

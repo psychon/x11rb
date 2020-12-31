@@ -4132,7 +4132,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                         outln!(
                             out,
                             "let list_length = \
-                             usize::try_from({}).or(Err(ParseError::ConversionFailed))?;",
+                             {}.try_to_usize()?;",
                             self.expr_to_str(
                                 length_expr,
                                 to_rust_variable_name,
@@ -4198,7 +4198,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
 
                 outln!(
                     out,
-                    "let fds_len = usize::try_from({}).or(Err(ParseError::ConversionFailed))?;",
+                    "let fds_len = {}.try_to_usize()?;",
                     self.expr_to_str(
                         &fd_list_field.length_expr,
                         to_rust_variable_name,

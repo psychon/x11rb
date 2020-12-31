@@ -2014,7 +2014,7 @@ impl TryParse for GetDeviceMotionEventsReply {
         let (device_mode, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(18..).ok_or(ParseError::InsufficientData)?;
         let mut remaining = remaining;
-        let list_length = usize::try_from(num_events).or(Err(ParseError::ConversionFailed))?;
+        let list_length = num_events.try_to_usize()?;
         let mut events = Vec::with_capacity(list_length);
         for _ in 0..list_length {
             let (v, new_remaining) = DeviceTimeCoord::try_parse(remaining, num_axes)?;

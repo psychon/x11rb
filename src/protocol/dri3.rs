@@ -980,7 +980,7 @@ impl PixmapFromBuffersRequest {
         let (bpp, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (modifier, remaining) = u64::try_parse(remaining)?;
-        let fds_len = usize::try_from(num_buffers).or(Err(ParseError::ConversionFailed))?;
+        let fds_len = num_buffers.try_to_usize()?;
         if fds.len() < fds_len { return Err(ParseError::MissingFileDescriptors) }
         let mut buffers = fds.split_off(fds_len);
         std::mem::swap(fds, &mut buffers);
@@ -1127,7 +1127,7 @@ impl TryParseFd for BuffersFromPixmapReply {
         let remaining = remaining.get(6..).ok_or(ParseError::InsufficientData)?;
         let (strides, remaining) = crate::x11_utils::parse_list::<u32>(remaining, nfd.try_to_usize()?)?;
         let (offsets, remaining) = crate::x11_utils::parse_list::<u32>(remaining, nfd.try_to_usize()?)?;
-        let fds_len = usize::try_from(nfd).or(Err(ParseError::ConversionFailed))?;
+        let fds_len = nfd.try_to_usize()?;
         if fds.len() < fds_len { return Err(ParseError::MissingFileDescriptors) }
         let mut buffers = fds.split_off(fds_len);
         std::mem::swap(fds, &mut buffers);
