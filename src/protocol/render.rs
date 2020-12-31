@@ -17,7 +17,7 @@ use std::io::IoSlice;
 #[allow(unused_imports)]
 use crate::utils::{RawFdContainer, pretty_print_bitmask, pretty_print_enum};
 #[allow(unused_imports)]
-use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse, TryParseFd};
+use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse, TryParseFd, TryIntoUSize};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
@@ -809,7 +809,7 @@ impl TryParse for Pictdepth {
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (num_visuals, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(4..).ok_or(ParseError::InsufficientData)?;
-        let (visuals, remaining) = crate::x11_utils::parse_list::<Pictvisual>(remaining, num_visuals.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (visuals, remaining) = crate::x11_utils::parse_list::<Pictvisual>(remaining, num_visuals.try_to_usize()?)?;
         let result = Pictdepth { depth, visuals };
         Ok((result, remaining))
     }
@@ -862,7 +862,7 @@ impl TryParse for Pictscreen {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (num_depths, remaining) = u32::try_parse(remaining)?;
         let (fallback, remaining) = Pictformat::try_parse(remaining)?;
-        let (depths, remaining) = crate::x11_utils::parse_list::<Pictdepth>(remaining, num_depths.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (depths, remaining) = crate::x11_utils::parse_list::<Pictdepth>(remaining, num_depths.try_to_usize()?)?;
         let result = Pictscreen { fallback, depths };
         Ok((result, remaining))
     }
@@ -1495,8 +1495,8 @@ impl TryParse for QueryPictFormatsReply {
         let (num_visuals, remaining) = u32::try_parse(remaining)?;
         let (num_subpixel, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(4..).ok_or(ParseError::InsufficientData)?;
-        let (formats, remaining) = crate::x11_utils::parse_list::<Pictforminfo>(remaining, num_formats.try_into().or(Err(ParseError::ConversionFailed))?)?;
-        let (screens, remaining) = crate::x11_utils::parse_list::<Pictscreen>(remaining, num_screens.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (formats, remaining) = crate::x11_utils::parse_list::<Pictforminfo>(remaining, num_formats.try_to_usize()?)?;
+        let (screens, remaining) = crate::x11_utils::parse_list::<Pictscreen>(remaining, num_screens.try_to_usize()?)?;
         let mut remaining = remaining;
         let list_length = usize::try_from(num_subpixel).or(Err(ParseError::ConversionFailed))?;
         let mut subpixels = Vec::with_capacity(list_length);
@@ -1644,7 +1644,7 @@ impl TryParse for QueryPictIndexValuesReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (num_values, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::InsufficientData)?;
-        let (values, remaining) = crate::x11_utils::parse_list::<Indexvalue>(remaining, num_values.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (values, remaining) = crate::x11_utils::parse_list::<Indexvalue>(remaining, num_values.try_to_usize()?)?;
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
@@ -3608,8 +3608,8 @@ impl<'input> AddGlyphsRequest<'input> {
         }
         let (glyphset, remaining) = Glyphset::try_parse(value)?;
         let (glyphs_len, remaining) = u32::try_parse(remaining)?;
-        let (glyphids, remaining) = crate::x11_utils::parse_list::<u32>(remaining, glyphs_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
-        let (glyphs, remaining) = crate::x11_utils::parse_list::<Glyphinfo>(remaining, glyphs_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (glyphids, remaining) = crate::x11_utils::parse_list::<u32>(remaining, glyphs_len.try_to_usize()?)?;
+        let (glyphs, remaining) = crate::x11_utils::parse_list::<Glyphinfo>(remaining, glyphs_len.try_to_usize()?)?;
         let (data, remaining) = remaining.split_at(remaining.len());
         let _ = remaining;
         Ok(AddGlyphsRequest {
@@ -4630,8 +4630,8 @@ impl TryParse for QueryFiltersReply {
         let (num_aliases, remaining) = u32::try_parse(remaining)?;
         let (num_filters, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(16..).ok_or(ParseError::InsufficientData)?;
-        let (aliases, remaining) = crate::x11_utils::parse_list::<u16>(remaining, num_aliases.try_into().or(Err(ParseError::ConversionFailed))?)?;
-        let (filters, remaining) = crate::x11_utils::parse_list::<xproto::Str>(remaining, num_filters.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (aliases, remaining) = crate::x11_utils::parse_list::<u16>(remaining, num_aliases.try_to_usize()?)?;
+        let (filters, remaining) = crate::x11_utils::parse_list::<xproto::Str>(remaining, num_filters.try_to_usize()?)?;
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
@@ -4740,7 +4740,7 @@ impl<'input> SetPictureFilterRequest<'input> {
         let (picture, remaining) = Picture::try_parse(value)?;
         let (filter_len, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
-        let (filter, remaining) = crate::x11_utils::parse_u8_list(remaining, filter_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (filter, remaining) = crate::x11_utils::parse_u8_list(remaining, filter_len.try_to_usize()?)?;
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
@@ -5286,8 +5286,8 @@ impl<'input> CreateLinearGradientRequest<'input> {
         let (p1, remaining) = Pointfix::try_parse(remaining)?;
         let (p2, remaining) = Pointfix::try_parse(remaining)?;
         let (num_stops, remaining) = u32::try_parse(remaining)?;
-        let (stops, remaining) = crate::x11_utils::parse_list::<Fixed>(remaining, num_stops.try_into().or(Err(ParseError::ConversionFailed))?)?;
-        let (colors, remaining) = crate::x11_utils::parse_list::<Color>(remaining, num_stops.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (stops, remaining) = crate::x11_utils::parse_list::<Fixed>(remaining, num_stops.try_to_usize()?)?;
+        let (colors, remaining) = crate::x11_utils::parse_list::<Color>(remaining, num_stops.try_to_usize()?)?;
         let _ = remaining;
         Ok(CreateLinearGradientRequest {
             picture,
@@ -5423,8 +5423,8 @@ impl<'input> CreateRadialGradientRequest<'input> {
         let (inner_radius, remaining) = Fixed::try_parse(remaining)?;
         let (outer_radius, remaining) = Fixed::try_parse(remaining)?;
         let (num_stops, remaining) = u32::try_parse(remaining)?;
-        let (stops, remaining) = crate::x11_utils::parse_list::<Fixed>(remaining, num_stops.try_into().or(Err(ParseError::ConversionFailed))?)?;
-        let (colors, remaining) = crate::x11_utils::parse_list::<Color>(remaining, num_stops.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (stops, remaining) = crate::x11_utils::parse_list::<Fixed>(remaining, num_stops.try_to_usize()?)?;
+        let (colors, remaining) = crate::x11_utils::parse_list::<Color>(remaining, num_stops.try_to_usize()?)?;
         let _ = remaining;
         Ok(CreateRadialGradientRequest {
             picture,
@@ -5548,8 +5548,8 @@ impl<'input> CreateConicalGradientRequest<'input> {
         let (center, remaining) = Pointfix::try_parse(remaining)?;
         let (angle, remaining) = Fixed::try_parse(remaining)?;
         let (num_stops, remaining) = u32::try_parse(remaining)?;
-        let (stops, remaining) = crate::x11_utils::parse_list::<Fixed>(remaining, num_stops.try_into().or(Err(ParseError::ConversionFailed))?)?;
-        let (colors, remaining) = crate::x11_utils::parse_list::<Color>(remaining, num_stops.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (stops, remaining) = crate::x11_utils::parse_list::<Fixed>(remaining, num_stops.try_to_usize()?)?;
+        let (colors, remaining) = crate::x11_utils::parse_list::<Color>(remaining, num_stops.try_to_usize()?)?;
         let _ = remaining;
         Ok(CreateConicalGradientRequest {
             picture,

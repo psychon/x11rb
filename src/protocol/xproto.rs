@@ -22,7 +22,7 @@ use std::io::IoSlice;
 #[allow(unused_imports)]
 use crate::utils::{RawFdContainer, pretty_print_bitmask, pretty_print_enum};
 #[allow(unused_imports)]
-use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse, TryParseFd};
+use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse, TryParseFd, TryIntoUSize};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
@@ -453,7 +453,7 @@ impl TryParse for Depth {
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (visuals_len, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(4..).ok_or(ParseError::InsufficientData)?;
-        let (visuals, remaining) = crate::x11_utils::parse_list::<Visualtype>(remaining, visuals_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (visuals, remaining) = crate::x11_utils::parse_list::<Visualtype>(remaining, visuals_len.try_to_usize()?)?;
         let result = Depth { depth, visuals };
         Ok((result, remaining))
     }
@@ -677,7 +677,7 @@ impl TryParse for Screen {
         let (save_unders, remaining) = bool::try_parse(remaining)?;
         let (root_depth, remaining) = u8::try_parse(remaining)?;
         let (allowed_depths_len, remaining) = u8::try_parse(remaining)?;
-        let (allowed_depths, remaining) = crate::x11_utils::parse_list::<Depth>(remaining, allowed_depths_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (allowed_depths, remaining) = crate::x11_utils::parse_list::<Depth>(remaining, allowed_depths_len.try_to_usize()?)?;
         let backing_stores = backing_stores.into();
         let result = Screen { root, default_colormap, white_pixel, black_pixel, current_input_masks, width_in_pixels, height_in_pixels, width_in_millimeters, height_in_millimeters, min_installed_maps, max_installed_maps, root_visual, backing_stores, save_unders, root_depth, allowed_depths };
         Ok((result, remaining))
@@ -752,13 +752,13 @@ impl TryParse for SetupRequest {
         let (authorization_protocol_name_len, remaining) = u16::try_parse(remaining)?;
         let (authorization_protocol_data_len, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
-        let (authorization_protocol_name, remaining) = crate::x11_utils::parse_u8_list(remaining, authorization_protocol_name_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (authorization_protocol_name, remaining) = crate::x11_utils::parse_u8_list(remaining, authorization_protocol_name_len.try_to_usize()?)?;
         let authorization_protocol_name = authorization_protocol_name.to_vec();
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
         let remaining = remaining.get(misalignment..).ok_or(ParseError::InsufficientData)?;
-        let (authorization_protocol_data, remaining) = crate::x11_utils::parse_u8_list(remaining, authorization_protocol_data_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (authorization_protocol_data, remaining) = crate::x11_utils::parse_u8_list(remaining, authorization_protocol_data_len.try_to_usize()?)?;
         let authorization_protocol_data = authorization_protocol_data.to_vec();
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
@@ -842,7 +842,7 @@ impl TryParse for SetupFailed {
         let (protocol_major_version, remaining) = u16::try_parse(remaining)?;
         let (protocol_minor_version, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u16::try_parse(remaining)?;
-        let (reason, remaining) = crate::x11_utils::parse_u8_list(remaining, reason_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (reason, remaining) = crate::x11_utils::parse_u8_list(remaining, reason_len.try_to_usize()?)?;
         let reason = reason.to_vec();
         let result = SetupFailed { status, protocol_major_version, protocol_minor_version, length, reason };
         Ok((result, remaining))
@@ -898,7 +898,7 @@ impl TryParse for SetupAuthenticate {
         let (status, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(5..).ok_or(ParseError::InsufficientData)?;
         let (length, remaining) = u16::try_parse(remaining)?;
-        let (reason, remaining) = crate::x11_utils::parse_u8_list(remaining, u32::from(length).checked_mul(4u32).ok_or(ParseError::InvalidExpression)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (reason, remaining) = crate::x11_utils::parse_u8_list(remaining, u32::from(length).checked_mul(4u32).ok_or(ParseError::InvalidExpression)?.try_to_usize()?)?;
         let reason = reason.to_vec();
         let result = SetupAuthenticate { status, reason };
         Ok((result, remaining))
@@ -1046,14 +1046,14 @@ impl TryParse for Setup {
         let (min_keycode, remaining) = Keycode::try_parse(remaining)?;
         let (max_keycode, remaining) = Keycode::try_parse(remaining)?;
         let remaining = remaining.get(4..).ok_or(ParseError::InsufficientData)?;
-        let (vendor, remaining) = crate::x11_utils::parse_u8_list(remaining, vendor_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (vendor, remaining) = crate::x11_utils::parse_u8_list(remaining, vendor_len.try_to_usize()?)?;
         let vendor = vendor.to_vec();
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
         let remaining = remaining.get(misalignment..).ok_or(ParseError::InsufficientData)?;
-        let (pixmap_formats, remaining) = crate::x11_utils::parse_list::<Format>(remaining, pixmap_formats_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
-        let (roots, remaining) = crate::x11_utils::parse_list::<Screen>(remaining, roots_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (pixmap_formats, remaining) = crate::x11_utils::parse_list::<Format>(remaining, pixmap_formats_len.try_to_usize()?)?;
+        let (roots, remaining) = crate::x11_utils::parse_list::<Screen>(remaining, roots_len.try_to_usize()?)?;
         let image_byte_order = image_byte_order.into();
         let bitmap_format_bit_order = bitmap_format_bit_order.into();
         let result = Setup { status, protocol_major_version, protocol_minor_version, length, release_number, resource_id_base, resource_id_mask, motion_buffer_size, maximum_request_length, image_byte_order, bitmap_format_bit_order, bitmap_format_scanline_unit, bitmap_format_scanline_pad, min_keycode, max_keycode, vendor, pixmap_formats, roots };
@@ -8794,7 +8794,7 @@ impl TryParse for QueryTreeReply {
         let (parent, remaining) = Window::try_parse(remaining)?;
         let (children_len, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(14..).ok_or(ParseError::InsufficientData)?;
-        let (children, remaining) = crate::x11_utils::parse_list::<Window>(remaining, children_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (children, remaining) = crate::x11_utils::parse_list::<Window>(remaining, children_len.try_to_usize()?)?;
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
@@ -8927,7 +8927,7 @@ impl<'input> InternAtomRequest<'input> {
         let _ = remaining;
         let (name_len, remaining) = u16::try_parse(value)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
-        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_to_usize()?)?;
         let _ = remaining;
         Ok(InternAtomRequest {
             only_if_exists,
@@ -9114,7 +9114,7 @@ impl TryParse for GetAtomNameReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (name_len, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(22..).ok_or(ParseError::InsufficientData)?;
-        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_to_usize()?)?;
         let name = name.to_vec();
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
@@ -9353,7 +9353,7 @@ impl<'input> ChangePropertyRequest<'input> {
         let (format, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let (data_len, remaining) = u32::try_parse(remaining)?;
-        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, data_len.checked_mul(u32::from(format)).ok_or(ParseError::InvalidExpression)?.checked_div(8u32).ok_or(ParseError::InvalidExpression)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, data_len.checked_mul(u32::from(format)).ok_or(ParseError::InvalidExpression)?.checked_div(8u32).ok_or(ParseError::InvalidExpression)?.try_to_usize()?)?;
         let _ = remaining;
         Ok(ChangePropertyRequest {
             mode,
@@ -10019,7 +10019,7 @@ impl TryParse for GetPropertyReply {
         let (bytes_after, remaining) = u32::try_parse(remaining)?;
         let (value_len, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::InsufficientData)?;
-        let (value, remaining) = crate::x11_utils::parse_u8_list(remaining, value_len.checked_mul(u32::from(format).checked_div(8u32).ok_or(ParseError::InvalidExpression)?).ok_or(ParseError::InvalidExpression)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (value, remaining) = crate::x11_utils::parse_u8_list(remaining, value_len.checked_mul(u32::from(format).checked_div(8u32).ok_or(ParseError::InvalidExpression)?).ok_or(ParseError::InvalidExpression)?.try_to_usize()?)?;
         let value = value.to_vec();
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
@@ -10120,7 +10120,7 @@ impl TryParse for ListPropertiesReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (atoms_len, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(22..).ok_or(ParseError::InsufficientData)?;
-        let (atoms, remaining) = crate::x11_utils::parse_list::<Atom>(remaining, atoms_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (atoms, remaining) = crate::x11_utils::parse_list::<Atom>(remaining, atoms_len.try_to_usize()?)?;
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
@@ -13374,7 +13374,7 @@ impl TryParse for GetMotionEventsReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (events_len, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::InsufficientData)?;
-        let (events, remaining) = crate::x11_utils::parse_list::<Timecoord>(remaining, events_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (events, remaining) = crate::x11_utils::parse_list::<Timecoord>(remaining, events_len.try_to_usize()?)?;
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
@@ -14202,7 +14202,7 @@ impl<'input> OpenFontRequest<'input> {
         let (fid, remaining) = Font::try_parse(value)?;
         let (name_len, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
-        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_to_usize()?)?;
         let _ = remaining;
         Ok(OpenFontRequest {
             fid,
@@ -14613,8 +14613,8 @@ impl TryParse for QueryFontReply {
         let (font_ascent, remaining) = i16::try_parse(remaining)?;
         let (font_descent, remaining) = i16::try_parse(remaining)?;
         let (char_infos_len, remaining) = u32::try_parse(remaining)?;
-        let (properties, remaining) = crate::x11_utils::parse_list::<Fontprop>(remaining, properties_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
-        let (char_infos, remaining) = crate::x11_utils::parse_list::<Charinfo>(remaining, char_infos_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (properties, remaining) = crate::x11_utils::parse_list::<Fontprop>(remaining, properties_len.try_to_usize()?)?;
+        let (char_infos, remaining) = crate::x11_utils::parse_list::<Charinfo>(remaining, char_infos_len.try_to_usize()?)?;
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
@@ -14879,7 +14879,7 @@ pub struct Str {
 impl TryParse for Str {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (name_len, remaining) = u8::try_parse(remaining)?;
-        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_to_usize()?)?;
         let name = name.to_vec();
         let result = Str { name };
         Ok((result, remaining))
@@ -14988,7 +14988,7 @@ impl<'input> ListFontsRequest<'input> {
         let _ = remaining;
         let (max_names, remaining) = u16::try_parse(value)?;
         let (pattern_len, remaining) = u16::try_parse(remaining)?;
-        let (pattern, remaining) = crate::x11_utils::parse_u8_list(remaining, pattern_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (pattern, remaining) = crate::x11_utils::parse_u8_list(remaining, pattern_len.try_to_usize()?)?;
         let _ = remaining;
         Ok(ListFontsRequest {
             max_names,
@@ -15048,7 +15048,7 @@ impl TryParse for ListFontsReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (names_len, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(22..).ok_or(ParseError::InsufficientData)?;
-        let (names, remaining) = crate::x11_utils::parse_list::<Str>(remaining, names_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (names, remaining) = crate::x11_utils::parse_list::<Str>(remaining, names_len.try_to_usize()?)?;
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
@@ -15149,7 +15149,7 @@ impl<'input> ListFontsWithInfoRequest<'input> {
         let _ = remaining;
         let (max_names, remaining) = u16::try_parse(value)?;
         let (pattern_len, remaining) = u16::try_parse(remaining)?;
-        let (pattern, remaining) = crate::x11_utils::parse_u8_list(remaining, pattern_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (pattern, remaining) = crate::x11_utils::parse_u8_list(remaining, pattern_len.try_to_usize()?)?;
         let _ = remaining;
         Ok(ListFontsWithInfoRequest {
             max_names,
@@ -15248,8 +15248,8 @@ impl TryParse for ListFontsWithInfoReply {
         let (font_ascent, remaining) = i16::try_parse(remaining)?;
         let (font_descent, remaining) = i16::try_parse(remaining)?;
         let (replies_hint, remaining) = u32::try_parse(remaining)?;
-        let (properties, remaining) = crate::x11_utils::parse_list::<Fontprop>(remaining, properties_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
-        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (properties, remaining) = crate::x11_utils::parse_list::<Fontprop>(remaining, properties_len.try_to_usize()?)?;
+        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_to_usize()?)?;
         let name = name.to_vec();
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
@@ -15351,7 +15351,7 @@ impl<'input> SetFontPathRequest<'input> {
         let _ = remaining;
         let (font_qty, remaining) = u16::try_parse(value)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
-        let (font, remaining) = crate::x11_utils::parse_list::<Str>(remaining, font_qty.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (font, remaining) = crate::x11_utils::parse_list::<Str>(remaining, font_qty.try_to_usize()?)?;
         let _ = remaining;
         Ok(SetFontPathRequest {
             font: Cow::Owned(font),
@@ -15448,7 +15448,7 @@ impl TryParse for GetFontPathReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (path_len, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(22..).ok_or(ParseError::InsufficientData)?;
-        let (path, remaining) = crate::x11_utils::parse_list::<Str>(remaining, path_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (path, remaining) = crate::x11_utils::parse_list::<Str>(remaining, path_len.try_to_usize()?)?;
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
@@ -17792,7 +17792,7 @@ impl<'input> SetDashesRequest<'input> {
         let (gc, remaining) = Gcontext::try_parse(value)?;
         let (dash_offset, remaining) = u16::try_parse(remaining)?;
         let (dashes_len, remaining) = u16::try_parse(remaining)?;
-        let (dashes, remaining) = crate::x11_utils::parse_u8_list(remaining, dashes_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (dashes, remaining) = crate::x11_utils::parse_u8_list(remaining, dashes_len.try_to_usize()?)?;
         let _ = remaining;
         Ok(SetDashesRequest {
             gc,
@@ -19996,7 +19996,7 @@ impl TryParse for GetImageReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (visual, remaining) = Visualid::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::InsufficientData)?;
-        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, length.checked_mul(4u32).ok_or(ParseError::InvalidExpression)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, length.checked_mul(4u32).ok_or(ParseError::InvalidExpression)?.try_to_usize()?)?;
         let data = data.to_vec();
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
@@ -20350,7 +20350,7 @@ impl<'input> ImageText8Request<'input> {
         let (gc, remaining) = Gcontext::try_parse(remaining)?;
         let (x, remaining) = i16::try_parse(remaining)?;
         let (y, remaining) = i16::try_parse(remaining)?;
-        let (string, remaining) = crate::x11_utils::parse_u8_list(remaining, string_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (string, remaining) = crate::x11_utils::parse_u8_list(remaining, string_len.try_to_usize()?)?;
         let _ = remaining;
         Ok(ImageText8Request {
             drawable,
@@ -20529,7 +20529,7 @@ impl<'input> ImageText16Request<'input> {
         let (gc, remaining) = Gcontext::try_parse(remaining)?;
         let (x, remaining) = i16::try_parse(remaining)?;
         let (y, remaining) = i16::try_parse(remaining)?;
-        let (string, remaining) = crate::x11_utils::parse_list::<Char2b>(remaining, string_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (string, remaining) = crate::x11_utils::parse_list::<Char2b>(remaining, string_len.try_to_usize()?)?;
         let _ = remaining;
         Ok(ImageText16Request {
             drawable,
@@ -21109,7 +21109,7 @@ impl TryParse for ListInstalledColormapsReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (cmaps_len, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(22..).ok_or(ParseError::InsufficientData)?;
-        let (cmaps, remaining) = crate::x11_utils::parse_list::<Colormap>(remaining, cmaps_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (cmaps, remaining) = crate::x11_utils::parse_list::<Colormap>(remaining, cmaps_len.try_to_usize()?)?;
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
@@ -21367,7 +21367,7 @@ impl<'input> AllocNamedColorRequest<'input> {
         let (cmap, remaining) = Colormap::try_parse(value)?;
         let (name_len, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
-        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_to_usize()?)?;
         let _ = remaining;
         Ok(AllocNamedColorRequest {
             cmap,
@@ -21541,8 +21541,8 @@ impl TryParse for AllocColorCellsReply {
         let (pixels_len, remaining) = u16::try_parse(remaining)?;
         let (masks_len, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::InsufficientData)?;
-        let (pixels, remaining) = crate::x11_utils::parse_list::<u32>(remaining, pixels_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
-        let (masks, remaining) = crate::x11_utils::parse_list::<u32>(remaining, masks_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (pixels, remaining) = crate::x11_utils::parse_list::<u32>(remaining, pixels_len.try_to_usize()?)?;
+        let (masks, remaining) = crate::x11_utils::parse_list::<u32>(remaining, masks_len.try_to_usize()?)?;
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
@@ -21709,7 +21709,7 @@ impl TryParse for AllocColorPlanesReply {
         let (green_mask, remaining) = u32::try_parse(remaining)?;
         let (blue_mask, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(8..).ok_or(ParseError::InsufficientData)?;
-        let (pixels, remaining) = crate::x11_utils::parse_list::<u32>(remaining, pixels_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (pixels, remaining) = crate::x11_utils::parse_list::<u32>(remaining, pixels_len.try_to_usize()?)?;
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
@@ -22120,7 +22120,7 @@ impl<'input> StoreNamedColorRequest<'input> {
         let (pixel, remaining) = u32::try_parse(remaining)?;
         let (name_len, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
-        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_to_usize()?)?;
         let _ = remaining;
         Ok(StoreNamedColorRequest {
             flags,
@@ -22309,7 +22309,7 @@ impl TryParse for QueryColorsReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (colors_len, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(22..).ok_or(ParseError::InsufficientData)?;
-        let (colors, remaining) = crate::x11_utils::parse_list::<Rgb>(remaining, colors_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (colors, remaining) = crate::x11_utils::parse_list::<Rgb>(remaining, colors_len.try_to_usize()?)?;
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
@@ -22402,7 +22402,7 @@ impl<'input> LookupColorRequest<'input> {
         let (cmap, remaining) = Colormap::try_parse(value)?;
         let (name_len, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
-        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_to_usize()?)?;
         let _ = remaining;
         Ok(LookupColorRequest {
             cmap,
@@ -23390,7 +23390,7 @@ impl<'input> QueryExtensionRequest<'input> {
         let _ = remaining;
         let (name_len, remaining) = u16::try_parse(value)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
-        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_to_usize()?)?;
         let _ = remaining;
         Ok(QueryExtensionRequest {
             name: Cow::Borrowed(name),
@@ -23551,7 +23551,7 @@ impl TryParse for ListExtensionsReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(24..).ok_or(ParseError::InsufficientData)?;
-        let (names, remaining) = crate::x11_utils::parse_list::<Str>(remaining, names_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (names, remaining) = crate::x11_utils::parse_list::<Str>(remaining, names_len.try_to_usize()?)?;
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
@@ -23644,7 +23644,7 @@ impl<'input> ChangeKeyboardMappingRequest<'input> {
         let (first_keycode, remaining) = Keycode::try_parse(value)?;
         let (keysyms_per_keycode, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
-        let (keysyms, remaining) = crate::x11_utils::parse_list::<Keysym>(remaining, u32::from(keycode_count).checked_mul(u32::from(keysyms_per_keycode)).ok_or(ParseError::InvalidExpression)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (keysyms, remaining) = crate::x11_utils::parse_list::<Keysym>(remaining, u32::from(keycode_count).checked_mul(u32::from(keysyms_per_keycode)).ok_or(ParseError::InvalidExpression)?.try_to_usize()?)?;
         let _ = remaining;
         Ok(ChangeKeyboardMappingRequest {
             keycode_count,
@@ -23765,7 +23765,7 @@ impl TryParse for GetKeyboardMappingReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(24..).ok_or(ParseError::InsufficientData)?;
-        let (keysyms, remaining) = crate::x11_utils::parse_list::<Keysym>(remaining, length.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (keysyms, remaining) = crate::x11_utils::parse_list::<Keysym>(remaining, length.try_to_usize()?)?;
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
@@ -25072,7 +25072,7 @@ impl<'input> ChangeHostsRequest<'input> {
         let family = family.into();
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (address_len, remaining) = u16::try_parse(remaining)?;
-        let (address, remaining) = crate::x11_utils::parse_u8_list(remaining, address_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (address, remaining) = crate::x11_utils::parse_u8_list(remaining, address_len.try_to_usize()?)?;
         let _ = remaining;
         Ok(ChangeHostsRequest {
             mode,
@@ -25115,7 +25115,7 @@ impl TryParse for Host {
         let (family, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (address_len, remaining) = u16::try_parse(remaining)?;
-        let (address, remaining) = crate::x11_utils::parse_u8_list(remaining, address_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (address, remaining) = crate::x11_utils::parse_u8_list(remaining, address_len.try_to_usize()?)?;
         let address = address.to_vec();
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
@@ -25237,7 +25237,7 @@ impl TryParse for ListHostsReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (hosts_len, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(22..).ok_or(ParseError::InsufficientData)?;
-        let (hosts, remaining) = crate::x11_utils::parse_list::<Host>(remaining, hosts_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (hosts, remaining) = crate::x11_utils::parse_list::<Host>(remaining, hosts_len.try_to_usize()?)?;
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
@@ -25741,7 +25741,7 @@ impl<'input> RotatePropertiesRequest<'input> {
         let (window, remaining) = Window::try_parse(value)?;
         let (atoms_len, remaining) = u16::try_parse(remaining)?;
         let (delta, remaining) = i16::try_parse(remaining)?;
-        let (atoms, remaining) = crate::x11_utils::parse_list::<Atom>(remaining, atoms_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (atoms, remaining) = crate::x11_utils::parse_list::<Atom>(remaining, atoms_len.try_to_usize()?)?;
         let _ = remaining;
         Ok(RotatePropertiesRequest {
             window,
@@ -26001,7 +26001,7 @@ impl<'input> SetPointerMappingRequest<'input> {
         let remaining = &[header.minor_opcode];
         let (map_len, remaining) = u8::try_parse(remaining)?;
         let _ = remaining;
-        let (map, remaining) = crate::x11_utils::parse_u8_list(value, map_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (map, remaining) = crate::x11_utils::parse_u8_list(value, map_len.try_to_usize()?)?;
         let _ = remaining;
         Ok(SetPointerMappingRequest {
             map: Cow::Borrowed(map),
@@ -26128,7 +26128,7 @@ impl TryParse for GetPointerMappingReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(24..).ok_or(ParseError::InsufficientData)?;
-        let (map, remaining) = crate::x11_utils::parse_u8_list(remaining, map_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (map, remaining) = crate::x11_utils::parse_u8_list(remaining, map_len.try_to_usize()?)?;
         let map = map.to_vec();
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
@@ -26280,7 +26280,7 @@ impl<'input> SetModifierMappingRequest<'input> {
         let remaining = &[header.minor_opcode];
         let (keycodes_per_modifier, remaining) = u8::try_parse(remaining)?;
         let _ = remaining;
-        let (keycodes, remaining) = crate::x11_utils::parse_u8_list(value, u32::from(keycodes_per_modifier).checked_mul(8u32).ok_or(ParseError::InvalidExpression)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (keycodes, remaining) = crate::x11_utils::parse_u8_list(value, u32::from(keycodes_per_modifier).checked_mul(8u32).ok_or(ParseError::InvalidExpression)?.try_to_usize()?)?;
         let _ = remaining;
         Ok(SetModifierMappingRequest {
             keycodes: Cow::Borrowed(keycodes),
@@ -26407,7 +26407,7 @@ impl TryParse for GetModifierMappingReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(24..).ok_or(ParseError::InsufficientData)?;
-        let (keycodes, remaining) = crate::x11_utils::parse_u8_list(remaining, u32::from(keycodes_per_modifier).checked_mul(8u32).ok_or(ParseError::InvalidExpression)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (keycodes, remaining) = crate::x11_utils::parse_u8_list(remaining, u32::from(keycodes_per_modifier).checked_mul(8u32).ok_or(ParseError::InvalidExpression)?.try_to_usize()?)?;
         let keycodes = keycodes.to_vec();
         if response_type != 1 {
             return Err(ParseError::InvalidValue);

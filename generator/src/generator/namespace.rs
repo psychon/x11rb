@@ -543,7 +543,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         outln!(out, "#[allow(unused_imports)]");
         outln!(
             out,
-            "use crate::x11_utils::{{Request, RequestHeader, Serialize, TryParse, TryParseFd}};"
+            "use crate::x11_utils::{{Request, RequestHeader, Serialize, TryParse, TryParseFd, TryIntoUSize}};"
         );
         outln!(
             out,
@@ -4056,7 +4056,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                         outln!(
                             out,
                             "let ({}, remaining) = crate::x11_utils::parse_u8_list({}, \
-                             {}.try_into().or(Err(ParseError::ConversionFailed))?)?;",
+                             {}.try_to_usize()?)?;",
                             rust_field_name,
                             from,
                             self.expr_to_str(
@@ -4098,7 +4098,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                     outln!(
                         out,
                         "let ({}, remaining) = crate::x11_utils::parse_list::<{}>(remaining, \
-                         {}.try_into().or(Err(ParseError::ConversionFailed))?)?;",
+                         {}.try_to_usize()?)?;",
                         rust_field_name,
                         rust_element_type,
                         self.expr_to_str(

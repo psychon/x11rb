@@ -17,7 +17,7 @@ use std::io::IoSlice;
 #[allow(unused_imports)]
 use crate::utils::{RawFdContainer, pretty_print_bitmask, pretty_print_enum};
 #[allow(unused_imports)]
-use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse, TryParseFd};
+use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse, TryParseFd, TryIntoUSize};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
@@ -647,7 +647,7 @@ impl TryParse for QueryScreensReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (number, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::InsufficientData)?;
-        let (screen_info, remaining) = crate::x11_utils::parse_list::<ScreenInfo>(remaining, number.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (screen_info, remaining) = crate::x11_utils::parse_list::<ScreenInfo>(remaining, number.try_to_usize()?)?;
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
