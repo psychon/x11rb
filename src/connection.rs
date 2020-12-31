@@ -436,12 +436,11 @@ pub enum DiscardMode {
 /// Example usage:
 /// ```
 /// use std::io::IoSlice;
-/// use std::convert::TryFrom;
 /// use x11rb::connection::{BufWithFds, RequestConnection, SequenceNumber, compute_length_field};
 /// use x11rb::cookie::{Cookie, CookieWithFds, VoidCookie};
 /// use x11rb::errors::{ParseError, ConnectionError};
 /// use x11rb::utils::RawFdContainer;
-/// use x11rb::x11_utils::ExtensionInformation;
+/// use x11rb::x11_utils::{ExtensionInformation, TryParse, TryParseFd};
 /// # use x11rb::connection::ReplyOrError;
 ///
 /// struct MyConnection();
@@ -502,7 +501,7 @@ pub enum DiscardMode {
 ///
 ///     fn send_request_with_reply_with_fds<R>(&self, bufs: &[IoSlice], fds: Vec<RawFdContainer>)
 ///     -> Result<CookieWithFds<Self, R>, ConnectionError>
-///     where R: for<'a> TryFrom<(&'a [u8], Vec<RawFdContainer>), Error=ParseError> {
+///     where R: TryParseFd {
 ///         Ok(CookieWithFds::new(self, self.send_request(bufs, fds, true, true)?))
 ///     }
 ///
