@@ -508,6 +508,25 @@ macro_rules! bitmask_binop {
     };
 }
 
+/// Wrapper around TryInto that produces a ParseError.
+///
+/// This trait shortens `x.try_into().or(Err(ParseError::ConversionFailed))` to `x.try_to_usize()`.
+pub(crate) trait TryIntoUSize: TryInto<usize> {
+    /// Attempt the conversion
+    fn try_to_usize(self) -> Result<usize, ParseError> {
+        self.try_into().or(Err(ParseError::ConversionFailed))
+    }
+}
+
+impl TryIntoUSize for u8 {}
+impl TryIntoUSize for u16 {}
+impl TryIntoUSize for u32 {}
+impl TryIntoUSize for u64 {}
+impl TryIntoUSize for i8 {}
+impl TryIntoUSize for i16 {}
+impl TryIntoUSize for i32 {}
+impl TryIntoUSize for i64 {}
+
 /// A helper macro for managing atoms
 ///
 /// If we need to use multiple atoms, one would normally write code such as

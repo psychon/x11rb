@@ -17,7 +17,7 @@ use std::io::IoSlice;
 #[allow(unused_imports)]
 use crate::utils::{RawFdContainer, pretty_print_bitmask, pretty_print_enum};
 #[allow(unused_imports)]
-use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse, TryParseFd};
+use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse, TryParseFd, TryIntoUSize};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
@@ -783,8 +783,8 @@ impl TryParse for GetSupportedModifiersReply {
         let (num_window_modifiers, remaining) = u32::try_parse(remaining)?;
         let (num_screen_modifiers, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(16..).ok_or(ParseError::InsufficientData)?;
-        let (window_modifiers, remaining) = crate::x11_utils::parse_list::<u64>(remaining, num_window_modifiers.try_into().or(Err(ParseError::ConversionFailed))?)?;
-        let (screen_modifiers, remaining) = crate::x11_utils::parse_list::<u64>(remaining, num_screen_modifiers.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (window_modifiers, remaining) = crate::x11_utils::parse_list::<u64>(remaining, num_window_modifiers.try_to_usize()?)?;
+        let (screen_modifiers, remaining) = crate::x11_utils::parse_list::<u64>(remaining, num_screen_modifiers.try_to_usize()?)?;
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
@@ -980,7 +980,7 @@ impl PixmapFromBuffersRequest {
         let (bpp, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (modifier, remaining) = u64::try_parse(remaining)?;
-        let fds_len = usize::try_from(num_buffers).or(Err(ParseError::ConversionFailed))?;
+        let fds_len = num_buffers.try_to_usize()?;
         if fds.len() < fds_len { return Err(ParseError::MissingFileDescriptors) }
         let mut buffers = fds.split_off(fds_len);
         std::mem::swap(fds, &mut buffers);
@@ -1125,9 +1125,9 @@ impl TryParseFd for BuffersFromPixmapReply {
         let (depth, remaining) = u8::try_parse(remaining)?;
         let (bpp, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(6..).ok_or(ParseError::InsufficientData)?;
-        let (strides, remaining) = crate::x11_utils::parse_list::<u32>(remaining, nfd.try_into().or(Err(ParseError::ConversionFailed))?)?;
-        let (offsets, remaining) = crate::x11_utils::parse_list::<u32>(remaining, nfd.try_into().or(Err(ParseError::ConversionFailed))?)?;
-        let fds_len = usize::try_from(nfd).or(Err(ParseError::ConversionFailed))?;
+        let (strides, remaining) = crate::x11_utils::parse_list::<u32>(remaining, nfd.try_to_usize()?)?;
+        let (offsets, remaining) = crate::x11_utils::parse_list::<u32>(remaining, nfd.try_to_usize()?)?;
+        let fds_len = nfd.try_to_usize()?;
         if fds.len() < fds_len { return Err(ParseError::MissingFileDescriptors) }
         let mut buffers = fds.split_off(fds_len);
         std::mem::swap(fds, &mut buffers);

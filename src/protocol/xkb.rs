@@ -17,7 +17,7 @@ use std::io::IoSlice;
 #[allow(unused_imports)]
 use crate::utils::{RawFdContainer, pretty_print_bitmask, pretty_print_enum};
 #[allow(unused_imports)]
-use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse, TryParseFd};
+use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse, TryParseFd, TryIntoUSize};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
@@ -2441,9 +2441,9 @@ pub struct CountedString16 {
 impl TryParse for CountedString16 {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (length, remaining) = u16::try_parse(remaining)?;
-        let (string, remaining) = crate::x11_utils::parse_u8_list(remaining, length.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (string, remaining) = crate::x11_utils::parse_u8_list(remaining, length.try_to_usize()?)?;
         let string = string.to_vec();
-        let (alignment_pad, remaining) = crate::x11_utils::parse_u8_list(remaining, (u32::from(length).checked_add(5u32).ok_or(ParseError::InvalidExpression)? & (!3u32)).checked_sub(u32::from(length).checked_add(2u32).ok_or(ParseError::InvalidExpression)?).ok_or(ParseError::InvalidExpression)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (alignment_pad, remaining) = crate::x11_utils::parse_u8_list(remaining, (u32::from(length).checked_add(5u32).ok_or(ParseError::InvalidExpression)? & (!3u32)).checked_sub(u32::from(length).checked_add(2u32).ok_or(ParseError::InvalidExpression)?).ok_or(ParseError::InvalidExpression)?.try_to_usize()?)?;
         let alignment_pad = alignment_pad.to_vec();
         let result = CountedString16 { string, alignment_pad };
         Ok((result, remaining))
@@ -2561,8 +2561,8 @@ impl TryParse for KeyType {
         let (n_map_entries, remaining) = u8::try_parse(remaining)?;
         let (has_preserve, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
-        let (map, remaining) = crate::x11_utils::parse_list::<KTMapEntry>(remaining, n_map_entries.try_into().or(Err(ParseError::ConversionFailed))?)?;
-        let (preserve, remaining) = crate::x11_utils::parse_list::<ModDef>(remaining, u32::from(has_preserve).checked_mul(u32::from(n_map_entries)).ok_or(ParseError::InvalidExpression)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (map, remaining) = crate::x11_utils::parse_list::<KTMapEntry>(remaining, n_map_entries.try_to_usize()?)?;
+        let (preserve, remaining) = crate::x11_utils::parse_list::<ModDef>(remaining, u32::from(has_preserve).checked_mul(u32::from(n_map_entries)).ok_or(ParseError::InvalidExpression)?.try_to_usize()?)?;
         let result = KeyType { mods_mask, mods_mods, mods_vmods, num_levels, has_preserve, map, preserve };
         Ok((result, remaining))
     }
@@ -2625,7 +2625,7 @@ impl TryParse for KeySymMap {
         let (group_info, remaining) = u8::try_parse(remaining)?;
         let (width, remaining) = u8::try_parse(remaining)?;
         let (n_syms, remaining) = u16::try_parse(remaining)?;
-        let (syms, remaining) = crate::x11_utils::parse_list::<xproto::Keysym>(remaining, n_syms.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (syms, remaining) = crate::x11_utils::parse_list::<xproto::Keysym>(remaining, n_syms.try_to_usize()?)?;
         let result = KeySymMap { kt_index, group_info, width, syms };
         Ok((result, remaining))
     }
@@ -3250,8 +3250,8 @@ impl TryParse for SetKeyType {
         let (n_map_entries, remaining) = u8::try_parse(remaining)?;
         let (preserve, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
-        let (entries, remaining) = crate::x11_utils::parse_list::<KTSetMapEntry>(remaining, n_map_entries.try_into().or(Err(ParseError::ConversionFailed))?)?;
-        let (preserve_entries, remaining) = crate::x11_utils::parse_list::<KTSetMapEntry>(remaining, u32::from(preserve).checked_mul(u32::from(n_map_entries)).ok_or(ParseError::InvalidExpression)?.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (entries, remaining) = crate::x11_utils::parse_list::<KTSetMapEntry>(remaining, n_map_entries.try_to_usize()?)?;
+        let (preserve_entries, remaining) = crate::x11_utils::parse_list::<KTSetMapEntry>(remaining, u32::from(preserve).checked_mul(u32::from(n_map_entries)).ok_or(ParseError::InvalidExpression)?.try_to_usize()?)?;
         let result = SetKeyType { mask, real_mods, virtual_mods, num_levels, preserve, entries, preserve_entries };
         Ok((result, remaining))
     }
@@ -3312,7 +3312,7 @@ impl TryParse for Outline {
         let (n_points, remaining) = u8::try_parse(remaining)?;
         let (corner_radius, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
-        let (points, remaining) = crate::x11_utils::parse_list::<xproto::Point>(remaining, n_points.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (points, remaining) = crate::x11_utils::parse_list::<xproto::Point>(remaining, n_points.try_to_usize()?)?;
         let result = Outline { corner_radius, points };
         Ok((result, remaining))
     }
@@ -3369,7 +3369,7 @@ impl TryParse for Shape {
         let (primary_ndx, remaining) = u8::try_parse(remaining)?;
         let (approx_ndx, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
-        let (outlines, remaining) = crate::x11_utils::parse_list::<Outline>(remaining, n_outlines.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (outlines, remaining) = crate::x11_utils::parse_list::<Outline>(remaining, n_outlines.try_to_usize()?)?;
         let result = Shape { name, primary_ndx, approx_ndx, outlines };
         Ok((result, remaining))
     }
@@ -3516,7 +3516,7 @@ impl TryParse for OverlayRow {
         let (row_under, remaining) = u8::try_parse(remaining)?;
         let (n_keys, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
-        let (keys, remaining) = crate::x11_utils::parse_list::<OverlayKey>(remaining, n_keys.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (keys, remaining) = crate::x11_utils::parse_list::<OverlayKey>(remaining, n_keys.try_to_usize()?)?;
         let result = OverlayRow { row_under, keys };
         Ok((result, remaining))
     }
@@ -3569,7 +3569,7 @@ impl TryParse for Overlay {
         let (name, remaining) = xproto::Atom::try_parse(remaining)?;
         let (n_rows, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
-        let (rows, remaining) = crate::x11_utils::parse_list::<OverlayRow>(remaining, n_rows.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (rows, remaining) = crate::x11_utils::parse_list::<OverlayRow>(remaining, n_rows.try_to_usize()?)?;
         let result = Overlay { name, rows };
         Ok((result, remaining))
     }
@@ -3626,7 +3626,7 @@ impl TryParse for Row {
         let (n_keys, remaining) = u8::try_parse(remaining)?;
         let (vertical, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
-        let (keys, remaining) = crate::x11_utils::parse_list::<Key>(remaining, n_keys.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (keys, remaining) = crate::x11_utils::parse_list::<Key>(remaining, n_keys.try_to_usize()?)?;
         let result = Row { top, left, vertical, keys };
         Ok((result, remaining))
     }
@@ -3745,7 +3745,7 @@ impl TryParse for Listing {
         let value = remaining;
         let (flags, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u16::try_parse(remaining)?;
-        let (string, remaining) = crate::x11_utils::parse_u8_list(remaining, length.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (string, remaining) = crate::x11_utils::parse_u8_list(remaining, length.try_to_usize()?)?;
         let string = string.to_vec();
         // Align offset to multiple of 2
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
@@ -3812,8 +3812,8 @@ impl TryParse for DeviceLedInfo {
         let (maps_present, remaining) = u32::try_parse(remaining)?;
         let (phys_indicators, remaining) = u32::try_parse(remaining)?;
         let (state, remaining) = u32::try_parse(remaining)?;
-        let (names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, names_present.count_ones().try_into().or(Err(ParseError::ConversionFailed))?)?;
-        let (maps, remaining) = crate::x11_utils::parse_list::<IndicatorMap>(remaining, maps_present.count_ones().try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, names_present.count_ones().try_to_usize()?)?;
+        let (maps, remaining) = crate::x11_utils::parse_list::<IndicatorMap>(remaining, maps_present.count_ones().try_to_usize()?)?;
         let led_class = led_class.into();
         let result = DeviceLedInfo { led_class, led_id, names_present, maps_present, phys_indicators, state, names, maps };
         Ok((result, remaining))
@@ -7940,13 +7940,13 @@ pub struct GetMapMapBitcase3 {
 impl GetMapMapBitcase3 {
     pub fn try_parse(remaining: &[u8], n_key_actions: u8, total_actions: u16) -> Result<(Self, &[u8]), ParseError> {
         let value = remaining;
-        let (acts_rtrn_count, remaining) = crate::x11_utils::parse_u8_list(remaining, n_key_actions.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (acts_rtrn_count, remaining) = crate::x11_utils::parse_u8_list(remaining, n_key_actions.try_to_usize()?)?;
         let acts_rtrn_count = acts_rtrn_count.to_vec();
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
         let remaining = remaining.get(misalignment..).ok_or(ParseError::InsufficientData)?;
-        let (acts_rtrn_acts, remaining) = crate::x11_utils::parse_list::<Action>(remaining, total_actions.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (acts_rtrn_acts, remaining) = crate::x11_utils::parse_list::<Action>(remaining, total_actions.try_to_usize()?)?;
         let result = GetMapMapBitcase3 { acts_rtrn_count, acts_rtrn_acts };
         Ok((result, remaining))
     }
@@ -7969,7 +7969,7 @@ impl GetMapMap {
         let mut outer_remaining = value;
         let types_rtrn = if switch_expr & u32::from(MapPart::KEY_TYPES) != 0 {
             let remaining = outer_remaining;
-            let (types_rtrn, remaining) = crate::x11_utils::parse_list::<KeyType>(remaining, n_types.try_into().or(Err(ParseError::ConversionFailed))?)?;
+            let (types_rtrn, remaining) = crate::x11_utils::parse_list::<KeyType>(remaining, n_types.try_to_usize()?)?;
             outer_remaining = remaining;
             Some(types_rtrn)
         } else {
@@ -7977,7 +7977,7 @@ impl GetMapMap {
         };
         let syms_rtrn = if switch_expr & u32::from(MapPart::KEY_SYMS) != 0 {
             let remaining = outer_remaining;
-            let (syms_rtrn, remaining) = crate::x11_utils::parse_list::<KeySymMap>(remaining, n_key_syms.try_into().or(Err(ParseError::ConversionFailed))?)?;
+            let (syms_rtrn, remaining) = crate::x11_utils::parse_list::<KeySymMap>(remaining, n_key_syms.try_to_usize()?)?;
             outer_remaining = remaining;
             Some(syms_rtrn)
         } else {
@@ -7992,7 +7992,7 @@ impl GetMapMap {
         };
         let behaviors_rtrn = if switch_expr & u32::from(MapPart::KEY_BEHAVIORS) != 0 {
             let remaining = outer_remaining;
-            let (behaviors_rtrn, remaining) = crate::x11_utils::parse_list::<SetBehavior>(remaining, total_key_behaviors.try_into().or(Err(ParseError::ConversionFailed))?)?;
+            let (behaviors_rtrn, remaining) = crate::x11_utils::parse_list::<SetBehavior>(remaining, total_key_behaviors.try_to_usize()?)?;
             outer_remaining = remaining;
             Some(behaviors_rtrn)
         } else {
@@ -8001,7 +8001,7 @@ impl GetMapMap {
         let vmods_rtrn = if switch_expr & u32::from(MapPart::VIRTUAL_MODS) != 0 {
             let remaining = outer_remaining;
             let value = remaining;
-            let (vmods_rtrn, remaining) = crate::x11_utils::parse_u8_list(remaining, virtual_mods.count_ones().try_into().or(Err(ParseError::ConversionFailed))?)?;
+            let (vmods_rtrn, remaining) = crate::x11_utils::parse_u8_list(remaining, virtual_mods.count_ones().try_to_usize()?)?;
             let vmods_rtrn = vmods_rtrn.to_vec();
             // Align offset to multiple of 4
             let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
@@ -8015,7 +8015,7 @@ impl GetMapMap {
         let explicit_rtrn = if switch_expr & u32::from(MapPart::EXPLICIT_COMPONENTS) != 0 {
             let remaining = outer_remaining;
             let value = remaining;
-            let (explicit_rtrn, remaining) = crate::x11_utils::parse_list::<SetExplicit>(remaining, total_key_explicit.try_into().or(Err(ParseError::ConversionFailed))?)?;
+            let (explicit_rtrn, remaining) = crate::x11_utils::parse_list::<SetExplicit>(remaining, total_key_explicit.try_to_usize()?)?;
             // Align offset to multiple of 4
             let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
             let misalignment = (4 - (offset % 4)) % 4;
@@ -8028,7 +8028,7 @@ impl GetMapMap {
         let modmap_rtrn = if switch_expr & u32::from(MapPart::MODIFIER_MAP) != 0 {
             let remaining = outer_remaining;
             let value = remaining;
-            let (modmap_rtrn, remaining) = crate::x11_utils::parse_list::<KeyModMap>(remaining, total_mod_map_keys.try_into().or(Err(ParseError::ConversionFailed))?)?;
+            let (modmap_rtrn, remaining) = crate::x11_utils::parse_list::<KeyModMap>(remaining, total_mod_map_keys.try_to_usize()?)?;
             // Align offset to multiple of 4
             let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
             let misalignment = (4 - (offset % 4)) % 4;
@@ -8040,7 +8040,7 @@ impl GetMapMap {
         };
         let vmodmap_rtrn = if switch_expr & u32::from(MapPart::VIRTUAL_MOD_MAP) != 0 {
             let remaining = outer_remaining;
-            let (vmodmap_rtrn, remaining) = crate::x11_utils::parse_list::<KeyVModMap>(remaining, total_v_mod_map_keys.try_into().or(Err(ParseError::ConversionFailed))?)?;
+            let (vmodmap_rtrn, remaining) = crate::x11_utils::parse_list::<KeyVModMap>(remaining, total_v_mod_map_keys.try_to_usize()?)?;
             outer_remaining = remaining;
             Some(vmodmap_rtrn)
         } else {
@@ -8142,13 +8142,13 @@ pub struct SetMapAuxBitcase3 {
 impl SetMapAuxBitcase3 {
     pub fn try_parse(remaining: &[u8], n_key_actions: u8, total_actions: u16) -> Result<(Self, &[u8]), ParseError> {
         let value = remaining;
-        let (actions_count, remaining) = crate::x11_utils::parse_u8_list(remaining, n_key_actions.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (actions_count, remaining) = crate::x11_utils::parse_u8_list(remaining, n_key_actions.try_to_usize()?)?;
         let actions_count = actions_count.to_vec();
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
         let remaining = remaining.get(misalignment..).ok_or(ParseError::InsufficientData)?;
-        let (actions, remaining) = crate::x11_utils::parse_list::<Action>(remaining, total_actions.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (actions, remaining) = crate::x11_utils::parse_list::<Action>(remaining, total_actions.try_to_usize()?)?;
         let result = SetMapAuxBitcase3 { actions_count, actions };
         Ok((result, remaining))
     }
@@ -8187,7 +8187,7 @@ impl SetMapAux {
         let mut outer_remaining = value;
         let types = if switch_expr & u32::from(MapPart::KEY_TYPES) != 0 {
             let remaining = outer_remaining;
-            let (types, remaining) = crate::x11_utils::parse_list::<SetKeyType>(remaining, n_types.try_into().or(Err(ParseError::ConversionFailed))?)?;
+            let (types, remaining) = crate::x11_utils::parse_list::<SetKeyType>(remaining, n_types.try_to_usize()?)?;
             outer_remaining = remaining;
             Some(types)
         } else {
@@ -8195,7 +8195,7 @@ impl SetMapAux {
         };
         let syms = if switch_expr & u32::from(MapPart::KEY_SYMS) != 0 {
             let remaining = outer_remaining;
-            let (syms, remaining) = crate::x11_utils::parse_list::<KeySymMap>(remaining, n_key_syms.try_into().or(Err(ParseError::ConversionFailed))?)?;
+            let (syms, remaining) = crate::x11_utils::parse_list::<KeySymMap>(remaining, n_key_syms.try_to_usize()?)?;
             outer_remaining = remaining;
             Some(syms)
         } else {
@@ -8210,7 +8210,7 @@ impl SetMapAux {
         };
         let behaviors = if switch_expr & u32::from(MapPart::KEY_BEHAVIORS) != 0 {
             let remaining = outer_remaining;
-            let (behaviors, remaining) = crate::x11_utils::parse_list::<SetBehavior>(remaining, total_key_behaviors.try_into().or(Err(ParseError::ConversionFailed))?)?;
+            let (behaviors, remaining) = crate::x11_utils::parse_list::<SetBehavior>(remaining, total_key_behaviors.try_to_usize()?)?;
             outer_remaining = remaining;
             Some(behaviors)
         } else {
@@ -8219,7 +8219,7 @@ impl SetMapAux {
         let vmods = if switch_expr & u32::from(MapPart::VIRTUAL_MODS) != 0 {
             let remaining = outer_remaining;
             let value = remaining;
-            let (vmods, remaining) = crate::x11_utils::parse_u8_list(remaining, virtual_mods.count_ones().try_into().or(Err(ParseError::ConversionFailed))?)?;
+            let (vmods, remaining) = crate::x11_utils::parse_u8_list(remaining, virtual_mods.count_ones().try_to_usize()?)?;
             let vmods = vmods.to_vec();
             // Align offset to multiple of 4
             let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
@@ -8232,7 +8232,7 @@ impl SetMapAux {
         };
         let explicit = if switch_expr & u32::from(MapPart::EXPLICIT_COMPONENTS) != 0 {
             let remaining = outer_remaining;
-            let (explicit, remaining) = crate::x11_utils::parse_list::<SetExplicit>(remaining, total_key_explicit.try_into().or(Err(ParseError::ConversionFailed))?)?;
+            let (explicit, remaining) = crate::x11_utils::parse_list::<SetExplicit>(remaining, total_key_explicit.try_to_usize()?)?;
             outer_remaining = remaining;
             Some(explicit)
         } else {
@@ -8240,7 +8240,7 @@ impl SetMapAux {
         };
         let modmap = if switch_expr & u32::from(MapPart::MODIFIER_MAP) != 0 {
             let remaining = outer_remaining;
-            let (modmap, remaining) = crate::x11_utils::parse_list::<KeyModMap>(remaining, total_mod_map_keys.try_into().or(Err(ParseError::ConversionFailed))?)?;
+            let (modmap, remaining) = crate::x11_utils::parse_list::<KeyModMap>(remaining, total_mod_map_keys.try_to_usize()?)?;
             outer_remaining = remaining;
             Some(modmap)
         } else {
@@ -8248,7 +8248,7 @@ impl SetMapAux {
         };
         let vmodmap = if switch_expr & u32::from(MapPart::VIRTUAL_MOD_MAP) != 0 {
             let remaining = outer_remaining;
-            let (vmodmap, remaining) = crate::x11_utils::parse_list::<KeyVModMap>(remaining, total_v_mod_map_keys.try_into().or(Err(ParseError::ConversionFailed))?)?;
+            let (vmodmap, remaining) = crate::x11_utils::parse_list::<KeyVModMap>(remaining, total_v_mod_map_keys.try_to_usize()?)?;
             outer_remaining = remaining;
             Some(vmodmap)
         } else {
@@ -8752,8 +8752,8 @@ impl TryParse for GetCompatMapReply {
         let (n_si_rtrn, remaining) = u16::try_parse(remaining)?;
         let (n_total_si, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(16..).ok_or(ParseError::InsufficientData)?;
-        let (si_rtrn, remaining) = crate::x11_utils::parse_list::<SymInterpret>(remaining, n_si_rtrn.try_into().or(Err(ParseError::ConversionFailed))?)?;
-        let (group_rtrn, remaining) = crate::x11_utils::parse_list::<ModDef>(remaining, groups_rtrn.count_ones().try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (si_rtrn, remaining) = crate::x11_utils::parse_list::<SymInterpret>(remaining, n_si_rtrn.try_to_usize()?)?;
+        let (group_rtrn, remaining) = crate::x11_utils::parse_list::<ModDef>(remaining, groups_rtrn.count_ones().try_to_usize()?)?;
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
@@ -8866,8 +8866,8 @@ impl<'input> SetCompatMapRequest<'input> {
         let (first_si, remaining) = u16::try_parse(remaining)?;
         let (n_si, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
-        let (si, remaining) = crate::x11_utils::parse_list::<SymInterpret>(remaining, n_si.try_into().or(Err(ParseError::ConversionFailed))?)?;
-        let (group_maps, remaining) = crate::x11_utils::parse_list::<ModDef>(remaining, groups.count_ones().try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (si, remaining) = crate::x11_utils::parse_list::<SymInterpret>(remaining, n_si.try_to_usize()?)?;
+        let (group_maps, remaining) = crate::x11_utils::parse_list::<ModDef>(remaining, groups.count_ones().try_to_usize()?)?;
         let _ = remaining;
         Ok(SetCompatMapRequest {
             device_spec,
@@ -9108,7 +9108,7 @@ impl TryParse for GetIndicatorMapReply {
         let (real_indicators, remaining) = u32::try_parse(remaining)?;
         let (n_indicators, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(15..).ok_or(ParseError::InsufficientData)?;
-        let (maps, remaining) = crate::x11_utils::parse_list::<IndicatorMap>(remaining, which.count_ones().try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (maps, remaining) = crate::x11_utils::parse_list::<IndicatorMap>(remaining, which.count_ones().try_to_usize()?)?;
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
@@ -9186,7 +9186,7 @@ impl<'input> SetIndicatorMapRequest<'input> {
         let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (which, remaining) = u32::try_parse(remaining)?;
-        let (maps, remaining) = crate::x11_utils::parse_list::<IndicatorMap>(remaining, which.count_ones().try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (maps, remaining) = crate::x11_utils::parse_list::<IndicatorMap>(remaining, which.count_ones().try_to_usize()?)?;
         let _ = remaining;
         Ok(SetIndicatorMapRequest {
             device_spec,
@@ -9632,13 +9632,13 @@ pub struct GetNamesValueListBitcase8 {
 impl GetNamesValueListBitcase8 {
     pub fn try_parse(remaining: &[u8], n_types: u8) -> Result<(Self, &[u8]), ParseError> {
         let value = remaining;
-        let (n_levels_per_type, remaining) = crate::x11_utils::parse_u8_list(remaining, n_types.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (n_levels_per_type, remaining) = crate::x11_utils::parse_u8_list(remaining, n_types.try_to_usize()?)?;
         let n_levels_per_type = n_levels_per_type.to_vec();
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
         let remaining = remaining.get(misalignment..).ok_or(ParseError::InsufficientData)?;
-        let (kt_level_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, n_levels_per_type.iter().try_fold(0u32, |acc, x| acc.checked_add(u32::from(*x)).ok_or(ParseError::InvalidExpression))?.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (kt_level_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, n_levels_per_type.iter().try_fold(0u32, |acc, x| acc.checked_add(u32::from(*x)).ok_or(ParseError::InvalidExpression))?.try_to_usize()?)?;
         let result = GetNamesValueListBitcase8 { n_levels_per_type, kt_level_names };
         Ok((result, remaining))
     }
@@ -9715,7 +9715,7 @@ impl GetNamesValueList {
         };
         let type_names = if switch_expr & u32::from(NameDetail::KEY_TYPE_NAMES) != 0 {
             let remaining = outer_remaining;
-            let (type_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, n_types.try_into().or(Err(ParseError::ConversionFailed))?)?;
+            let (type_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, n_types.try_to_usize()?)?;
             outer_remaining = remaining;
             Some(type_names)
         } else {
@@ -9730,7 +9730,7 @@ impl GetNamesValueList {
         };
         let indicator_names = if switch_expr & u32::from(NameDetail::INDICATOR_NAMES) != 0 {
             let remaining = outer_remaining;
-            let (indicator_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, indicators.count_ones().try_into().or(Err(ParseError::ConversionFailed))?)?;
+            let (indicator_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, indicators.count_ones().try_to_usize()?)?;
             outer_remaining = remaining;
             Some(indicator_names)
         } else {
@@ -9738,7 +9738,7 @@ impl GetNamesValueList {
         };
         let virtual_mod_names = if switch_expr & u32::from(NameDetail::VIRTUAL_MOD_NAMES) != 0 {
             let remaining = outer_remaining;
-            let (virtual_mod_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, virtual_mods.count_ones().try_into().or(Err(ParseError::ConversionFailed))?)?;
+            let (virtual_mod_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, virtual_mods.count_ones().try_to_usize()?)?;
             outer_remaining = remaining;
             Some(virtual_mod_names)
         } else {
@@ -9746,7 +9746,7 @@ impl GetNamesValueList {
         };
         let groups = if switch_expr & u32::from(NameDetail::GROUP_NAMES) != 0 {
             let remaining = outer_remaining;
-            let (groups, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, group_names.count_ones().try_into().or(Err(ParseError::ConversionFailed))?)?;
+            let (groups, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, group_names.count_ones().try_to_usize()?)?;
             outer_remaining = remaining;
             Some(groups)
         } else {
@@ -9754,7 +9754,7 @@ impl GetNamesValueList {
         };
         let key_names = if switch_expr & u32::from(NameDetail::KEY_NAMES) != 0 {
             let remaining = outer_remaining;
-            let (key_names, remaining) = crate::x11_utils::parse_list::<KeyName>(remaining, n_keys.try_into().or(Err(ParseError::ConversionFailed))?)?;
+            let (key_names, remaining) = crate::x11_utils::parse_list::<KeyName>(remaining, n_keys.try_to_usize()?)?;
             outer_remaining = remaining;
             Some(key_names)
         } else {
@@ -9762,7 +9762,7 @@ impl GetNamesValueList {
         };
         let key_aliases = if switch_expr & u32::from(NameDetail::KEY_ALIASES) != 0 {
             let remaining = outer_remaining;
-            let (key_aliases, remaining) = crate::x11_utils::parse_list::<KeyAlias>(remaining, n_key_aliases.try_into().or(Err(ParseError::ConversionFailed))?)?;
+            let (key_aliases, remaining) = crate::x11_utils::parse_list::<KeyAlias>(remaining, n_key_aliases.try_to_usize()?)?;
             outer_remaining = remaining;
             Some(key_aliases)
         } else {
@@ -9770,7 +9770,7 @@ impl GetNamesValueList {
         };
         let radio_group_names = if switch_expr & u32::from(NameDetail::RG_NAMES) != 0 {
             let remaining = outer_remaining;
-            let (radio_group_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, n_radio_groups.try_into().or(Err(ParseError::ConversionFailed))?)?;
+            let (radio_group_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, n_radio_groups.try_to_usize()?)?;
             outer_remaining = remaining;
             Some(radio_group_names)
         } else {
@@ -9845,13 +9845,13 @@ pub struct SetNamesAuxBitcase8 {
 impl SetNamesAuxBitcase8 {
     pub fn try_parse(remaining: &[u8], n_types: u8) -> Result<(Self, &[u8]), ParseError> {
         let value = remaining;
-        let (n_levels_per_type, remaining) = crate::x11_utils::parse_u8_list(remaining, n_types.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (n_levels_per_type, remaining) = crate::x11_utils::parse_u8_list(remaining, n_types.try_to_usize()?)?;
         let n_levels_per_type = n_levels_per_type.to_vec();
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
         let remaining = remaining.get(misalignment..).ok_or(ParseError::InsufficientData)?;
-        let (kt_level_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, n_levels_per_type.iter().try_fold(0u32, |acc, x| acc.checked_add(u32::from(*x)).ok_or(ParseError::InvalidExpression))?.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (kt_level_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, n_levels_per_type.iter().try_fold(0u32, |acc, x| acc.checked_add(u32::from(*x)).ok_or(ParseError::InvalidExpression))?.try_to_usize()?)?;
         let result = SetNamesAuxBitcase8 { n_levels_per_type, kt_level_names };
         Ok((result, remaining))
     }
@@ -9944,7 +9944,7 @@ impl SetNamesAux {
         };
         let type_names = if switch_expr & u32::from(NameDetail::KEY_TYPE_NAMES) != 0 {
             let remaining = outer_remaining;
-            let (type_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, n_types.try_into().or(Err(ParseError::ConversionFailed))?)?;
+            let (type_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, n_types.try_to_usize()?)?;
             outer_remaining = remaining;
             Some(type_names)
         } else {
@@ -9959,7 +9959,7 @@ impl SetNamesAux {
         };
         let indicator_names = if switch_expr & u32::from(NameDetail::INDICATOR_NAMES) != 0 {
             let remaining = outer_remaining;
-            let (indicator_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, indicators.count_ones().try_into().or(Err(ParseError::ConversionFailed))?)?;
+            let (indicator_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, indicators.count_ones().try_to_usize()?)?;
             outer_remaining = remaining;
             Some(indicator_names)
         } else {
@@ -9967,7 +9967,7 @@ impl SetNamesAux {
         };
         let virtual_mod_names = if switch_expr & u32::from(NameDetail::VIRTUAL_MOD_NAMES) != 0 {
             let remaining = outer_remaining;
-            let (virtual_mod_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, virtual_mods.count_ones().try_into().or(Err(ParseError::ConversionFailed))?)?;
+            let (virtual_mod_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, virtual_mods.count_ones().try_to_usize()?)?;
             outer_remaining = remaining;
             Some(virtual_mod_names)
         } else {
@@ -9975,7 +9975,7 @@ impl SetNamesAux {
         };
         let groups = if switch_expr & u32::from(NameDetail::GROUP_NAMES) != 0 {
             let remaining = outer_remaining;
-            let (groups, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, group_names.count_ones().try_into().or(Err(ParseError::ConversionFailed))?)?;
+            let (groups, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, group_names.count_ones().try_to_usize()?)?;
             outer_remaining = remaining;
             Some(groups)
         } else {
@@ -9983,7 +9983,7 @@ impl SetNamesAux {
         };
         let key_names = if switch_expr & u32::from(NameDetail::KEY_NAMES) != 0 {
             let remaining = outer_remaining;
-            let (key_names, remaining) = crate::x11_utils::parse_list::<KeyName>(remaining, n_keys.try_into().or(Err(ParseError::ConversionFailed))?)?;
+            let (key_names, remaining) = crate::x11_utils::parse_list::<KeyName>(remaining, n_keys.try_to_usize()?)?;
             outer_remaining = remaining;
             Some(key_names)
         } else {
@@ -9991,7 +9991,7 @@ impl SetNamesAux {
         };
         let key_aliases = if switch_expr & u32::from(NameDetail::KEY_ALIASES) != 0 {
             let remaining = outer_remaining;
-            let (key_aliases, remaining) = crate::x11_utils::parse_list::<KeyAlias>(remaining, n_key_aliases.try_into().or(Err(ParseError::ConversionFailed))?)?;
+            let (key_aliases, remaining) = crate::x11_utils::parse_list::<KeyAlias>(remaining, n_key_aliases.try_to_usize()?)?;
             outer_remaining = remaining;
             Some(key_aliases)
         } else {
@@ -9999,7 +9999,7 @@ impl SetNamesAux {
         };
         let radio_group_names = if switch_expr & u32::from(NameDetail::RG_NAMES) != 0 {
             let remaining = outer_remaining;
-            let (radio_group_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, n_radio_groups.try_into().or(Err(ParseError::ConversionFailed))?)?;
+            let (radio_group_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, n_radio_groups.try_to_usize()?)?;
             outer_remaining = remaining;
             Some(radio_group_names)
         } else {
@@ -10632,12 +10632,12 @@ impl TryParse for ListComponentsReply {
         let (n_geometries, remaining) = u16::try_parse(remaining)?;
         let (extra, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(10..).ok_or(ParseError::InsufficientData)?;
-        let (keymaps, remaining) = crate::x11_utils::parse_list::<Listing>(remaining, n_keymaps.try_into().or(Err(ParseError::ConversionFailed))?)?;
-        let (keycodes, remaining) = crate::x11_utils::parse_list::<Listing>(remaining, n_keycodes.try_into().or(Err(ParseError::ConversionFailed))?)?;
-        let (types, remaining) = crate::x11_utils::parse_list::<Listing>(remaining, n_types.try_into().or(Err(ParseError::ConversionFailed))?)?;
-        let (compat_maps, remaining) = crate::x11_utils::parse_list::<Listing>(remaining, n_compat_maps.try_into().or(Err(ParseError::ConversionFailed))?)?;
-        let (symbols, remaining) = crate::x11_utils::parse_list::<Listing>(remaining, n_symbols.try_into().or(Err(ParseError::ConversionFailed))?)?;
-        let (geometries, remaining) = crate::x11_utils::parse_list::<Listing>(remaining, n_geometries.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (keymaps, remaining) = crate::x11_utils::parse_list::<Listing>(remaining, n_keymaps.try_to_usize()?)?;
+        let (keycodes, remaining) = crate::x11_utils::parse_list::<Listing>(remaining, n_keycodes.try_to_usize()?)?;
+        let (types, remaining) = crate::x11_utils::parse_list::<Listing>(remaining, n_types.try_to_usize()?)?;
+        let (compat_maps, remaining) = crate::x11_utils::parse_list::<Listing>(remaining, n_compat_maps.try_to_usize()?)?;
+        let (symbols, remaining) = crate::x11_utils::parse_list::<Listing>(remaining, n_symbols.try_to_usize()?)?;
+        let (geometries, remaining) = crate::x11_utils::parse_list::<Listing>(remaining, n_geometries.try_to_usize()?)?;
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
@@ -10832,13 +10832,13 @@ pub struct GetKbdByNameRepliesTypesMapBitcase3 {
 impl GetKbdByNameRepliesTypesMapBitcase3 {
     pub fn try_parse(remaining: &[u8], n_key_actions: u8, total_actions: u16) -> Result<(Self, &[u8]), ParseError> {
         let value = remaining;
-        let (acts_rtrn_count, remaining) = crate::x11_utils::parse_u8_list(remaining, n_key_actions.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (acts_rtrn_count, remaining) = crate::x11_utils::parse_u8_list(remaining, n_key_actions.try_to_usize()?)?;
         let acts_rtrn_count = acts_rtrn_count.to_vec();
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
         let remaining = remaining.get(misalignment..).ok_or(ParseError::InsufficientData)?;
-        let (acts_rtrn_acts, remaining) = crate::x11_utils::parse_list::<Action>(remaining, total_actions.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (acts_rtrn_acts, remaining) = crate::x11_utils::parse_list::<Action>(remaining, total_actions.try_to_usize()?)?;
         let result = GetKbdByNameRepliesTypesMapBitcase3 { acts_rtrn_count, acts_rtrn_acts };
         Ok((result, remaining))
     }
@@ -10861,7 +10861,7 @@ impl GetKbdByNameRepliesTypesMap {
         let mut outer_remaining = value;
         let types_rtrn = if switch_expr & u32::from(MapPart::KEY_TYPES) != 0 {
             let remaining = outer_remaining;
-            let (types_rtrn, remaining) = crate::x11_utils::parse_list::<KeyType>(remaining, n_types.try_into().or(Err(ParseError::ConversionFailed))?)?;
+            let (types_rtrn, remaining) = crate::x11_utils::parse_list::<KeyType>(remaining, n_types.try_to_usize()?)?;
             outer_remaining = remaining;
             Some(types_rtrn)
         } else {
@@ -10869,7 +10869,7 @@ impl GetKbdByNameRepliesTypesMap {
         };
         let syms_rtrn = if switch_expr & u32::from(MapPart::KEY_SYMS) != 0 {
             let remaining = outer_remaining;
-            let (syms_rtrn, remaining) = crate::x11_utils::parse_list::<KeySymMap>(remaining, n_key_syms.try_into().or(Err(ParseError::ConversionFailed))?)?;
+            let (syms_rtrn, remaining) = crate::x11_utils::parse_list::<KeySymMap>(remaining, n_key_syms.try_to_usize()?)?;
             outer_remaining = remaining;
             Some(syms_rtrn)
         } else {
@@ -10884,7 +10884,7 @@ impl GetKbdByNameRepliesTypesMap {
         };
         let behaviors_rtrn = if switch_expr & u32::from(MapPart::KEY_BEHAVIORS) != 0 {
             let remaining = outer_remaining;
-            let (behaviors_rtrn, remaining) = crate::x11_utils::parse_list::<SetBehavior>(remaining, total_key_behaviors.try_into().or(Err(ParseError::ConversionFailed))?)?;
+            let (behaviors_rtrn, remaining) = crate::x11_utils::parse_list::<SetBehavior>(remaining, total_key_behaviors.try_to_usize()?)?;
             outer_remaining = remaining;
             Some(behaviors_rtrn)
         } else {
@@ -10893,7 +10893,7 @@ impl GetKbdByNameRepliesTypesMap {
         let vmods_rtrn = if switch_expr & u32::from(MapPart::VIRTUAL_MODS) != 0 {
             let remaining = outer_remaining;
             let value = remaining;
-            let (vmods_rtrn, remaining) = crate::x11_utils::parse_u8_list(remaining, virtual_mods.count_ones().try_into().or(Err(ParseError::ConversionFailed))?)?;
+            let (vmods_rtrn, remaining) = crate::x11_utils::parse_u8_list(remaining, virtual_mods.count_ones().try_to_usize()?)?;
             let vmods_rtrn = vmods_rtrn.to_vec();
             // Align offset to multiple of 4
             let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
@@ -10907,7 +10907,7 @@ impl GetKbdByNameRepliesTypesMap {
         let explicit_rtrn = if switch_expr & u32::from(MapPart::EXPLICIT_COMPONENTS) != 0 {
             let remaining = outer_remaining;
             let value = remaining;
-            let (explicit_rtrn, remaining) = crate::x11_utils::parse_list::<SetExplicit>(remaining, total_key_explicit.try_into().or(Err(ParseError::ConversionFailed))?)?;
+            let (explicit_rtrn, remaining) = crate::x11_utils::parse_list::<SetExplicit>(remaining, total_key_explicit.try_to_usize()?)?;
             // Align offset to multiple of 4
             let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
             let misalignment = (4 - (offset % 4)) % 4;
@@ -10920,7 +10920,7 @@ impl GetKbdByNameRepliesTypesMap {
         let modmap_rtrn = if switch_expr & u32::from(MapPart::MODIFIER_MAP) != 0 {
             let remaining = outer_remaining;
             let value = remaining;
-            let (modmap_rtrn, remaining) = crate::x11_utils::parse_list::<KeyModMap>(remaining, total_mod_map_keys.try_into().or(Err(ParseError::ConversionFailed))?)?;
+            let (modmap_rtrn, remaining) = crate::x11_utils::parse_list::<KeyModMap>(remaining, total_mod_map_keys.try_to_usize()?)?;
             // Align offset to multiple of 4
             let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
             let misalignment = (4 - (offset % 4)) % 4;
@@ -10932,7 +10932,7 @@ impl GetKbdByNameRepliesTypesMap {
         };
         let vmodmap_rtrn = if switch_expr & u32::from(MapPart::VIRTUAL_MOD_MAP) != 0 {
             let remaining = outer_remaining;
-            let (vmodmap_rtrn, remaining) = crate::x11_utils::parse_list::<KeyVModMap>(remaining, total_v_mod_map_keys.try_into().or(Err(ParseError::ConversionFailed))?)?;
+            let (vmodmap_rtrn, remaining) = crate::x11_utils::parse_list::<KeyVModMap>(remaining, total_v_mod_map_keys.try_to_usize()?)?;
             outer_remaining = remaining;
             Some(vmodmap_rtrn)
         } else {
@@ -11043,8 +11043,8 @@ impl TryParse for GetKbdByNameRepliesCompatMap {
         let (n_si_rtrn, remaining) = u16::try_parse(remaining)?;
         let (n_total_si, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(16..).ok_or(ParseError::InsufficientData)?;
-        let (si_rtrn, remaining) = crate::x11_utils::parse_list::<SymInterpret>(remaining, n_si_rtrn.try_into().or(Err(ParseError::ConversionFailed))?)?;
-        let (group_rtrn, remaining) = crate::x11_utils::parse_list::<ModDef>(remaining, groups_rtrn.count_ones().try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (si_rtrn, remaining) = crate::x11_utils::parse_list::<SymInterpret>(remaining, n_si_rtrn.try_to_usize()?)?;
+        let (group_rtrn, remaining) = crate::x11_utils::parse_list::<ModDef>(remaining, groups_rtrn.count_ones().try_to_usize()?)?;
         let result = GetKbdByNameRepliesCompatMap { compatmap_type, compat_device_id, compatmap_sequence, compatmap_length, groups_rtrn, first_si_rtrn, n_total_si, si_rtrn, group_rtrn };
         Ok((result, remaining))
     }
@@ -11090,7 +11090,7 @@ impl TryParse for GetKbdByNameRepliesIndicatorMaps {
         let (real_indicators, remaining) = u32::try_parse(remaining)?;
         let (n_indicators, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(15..).ok_or(ParseError::InsufficientData)?;
-        let (maps, remaining) = crate::x11_utils::parse_list::<IndicatorMap>(remaining, n_indicators.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (maps, remaining) = crate::x11_utils::parse_list::<IndicatorMap>(remaining, n_indicators.try_to_usize()?)?;
         let result = GetKbdByNameRepliesIndicatorMaps { indicatormap_type, indicator_device_id, indicatormap_sequence, indicatormap_length, which, real_indicators, maps };
         Ok((result, remaining))
     }
@@ -11124,13 +11124,13 @@ pub struct GetKbdByNameRepliesKeyNamesValueListBitcase8 {
 impl GetKbdByNameRepliesKeyNamesValueListBitcase8 {
     pub fn try_parse(remaining: &[u8], n_types: u8) -> Result<(Self, &[u8]), ParseError> {
         let value = remaining;
-        let (n_levels_per_type, remaining) = crate::x11_utils::parse_u8_list(remaining, n_types.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (n_levels_per_type, remaining) = crate::x11_utils::parse_u8_list(remaining, n_types.try_to_usize()?)?;
         let n_levels_per_type = n_levels_per_type.to_vec();
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
         let remaining = remaining.get(misalignment..).ok_or(ParseError::InsufficientData)?;
-        let (kt_level_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, n_levels_per_type.iter().try_fold(0u32, |acc, x| acc.checked_add(u32::from(*x)).ok_or(ParseError::InvalidExpression))?.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (kt_level_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, n_levels_per_type.iter().try_fold(0u32, |acc, x| acc.checked_add(u32::from(*x)).ok_or(ParseError::InvalidExpression))?.try_to_usize()?)?;
         let result = GetKbdByNameRepliesKeyNamesValueListBitcase8 { n_levels_per_type, kt_level_names };
         Ok((result, remaining))
     }
@@ -11207,7 +11207,7 @@ impl GetKbdByNameRepliesKeyNamesValueList {
         };
         let type_names = if switch_expr & u32::from(NameDetail::KEY_TYPE_NAMES) != 0 {
             let remaining = outer_remaining;
-            let (type_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, n_types.try_into().or(Err(ParseError::ConversionFailed))?)?;
+            let (type_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, n_types.try_to_usize()?)?;
             outer_remaining = remaining;
             Some(type_names)
         } else {
@@ -11222,7 +11222,7 @@ impl GetKbdByNameRepliesKeyNamesValueList {
         };
         let indicator_names = if switch_expr & u32::from(NameDetail::INDICATOR_NAMES) != 0 {
             let remaining = outer_remaining;
-            let (indicator_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, indicators.count_ones().try_into().or(Err(ParseError::ConversionFailed))?)?;
+            let (indicator_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, indicators.count_ones().try_to_usize()?)?;
             outer_remaining = remaining;
             Some(indicator_names)
         } else {
@@ -11230,7 +11230,7 @@ impl GetKbdByNameRepliesKeyNamesValueList {
         };
         let virtual_mod_names = if switch_expr & u32::from(NameDetail::VIRTUAL_MOD_NAMES) != 0 {
             let remaining = outer_remaining;
-            let (virtual_mod_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, virtual_mods.count_ones().try_into().or(Err(ParseError::ConversionFailed))?)?;
+            let (virtual_mod_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, virtual_mods.count_ones().try_to_usize()?)?;
             outer_remaining = remaining;
             Some(virtual_mod_names)
         } else {
@@ -11238,7 +11238,7 @@ impl GetKbdByNameRepliesKeyNamesValueList {
         };
         let groups = if switch_expr & u32::from(NameDetail::GROUP_NAMES) != 0 {
             let remaining = outer_remaining;
-            let (groups, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, group_names.count_ones().try_into().or(Err(ParseError::ConversionFailed))?)?;
+            let (groups, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, group_names.count_ones().try_to_usize()?)?;
             outer_remaining = remaining;
             Some(groups)
         } else {
@@ -11246,7 +11246,7 @@ impl GetKbdByNameRepliesKeyNamesValueList {
         };
         let key_names = if switch_expr & u32::from(NameDetail::KEY_NAMES) != 0 {
             let remaining = outer_remaining;
-            let (key_names, remaining) = crate::x11_utils::parse_list::<KeyName>(remaining, n_keys.try_into().or(Err(ParseError::ConversionFailed))?)?;
+            let (key_names, remaining) = crate::x11_utils::parse_list::<KeyName>(remaining, n_keys.try_to_usize()?)?;
             outer_remaining = remaining;
             Some(key_names)
         } else {
@@ -11254,7 +11254,7 @@ impl GetKbdByNameRepliesKeyNamesValueList {
         };
         let key_aliases = if switch_expr & u32::from(NameDetail::KEY_ALIASES) != 0 {
             let remaining = outer_remaining;
-            let (key_aliases, remaining) = crate::x11_utils::parse_list::<KeyAlias>(remaining, n_key_aliases.try_into().or(Err(ParseError::ConversionFailed))?)?;
+            let (key_aliases, remaining) = crate::x11_utils::parse_list::<KeyAlias>(remaining, n_key_aliases.try_to_usize()?)?;
             outer_remaining = remaining;
             Some(key_aliases)
         } else {
@@ -11262,7 +11262,7 @@ impl GetKbdByNameRepliesKeyNamesValueList {
         };
         let radio_group_names = if switch_expr & u32::from(NameDetail::RG_NAMES) != 0 {
             let remaining = outer_remaining;
-            let (radio_group_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, n_radio_groups.try_into().or(Err(ParseError::ConversionFailed))?)?;
+            let (radio_group_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, n_radio_groups.try_to_usize()?)?;
             outer_remaining = remaining;
             Some(radio_group_names)
         } else {
@@ -11621,14 +11621,14 @@ impl TryParse for GetDeviceInfoReply {
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (dev_type, remaining) = xproto::Atom::try_parse(remaining)?;
         let (name_len, remaining) = u16::try_parse(remaining)?;
-        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_to_usize()?)?;
         let name = name.to_vec();
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
         let remaining = remaining.get(misalignment..).ok_or(ParseError::InsufficientData)?;
-        let (btn_actions, remaining) = crate::x11_utils::parse_list::<Action>(remaining, n_btns_rtrn.try_into().or(Err(ParseError::ConversionFailed))?)?;
-        let (leds, remaining) = crate::x11_utils::parse_list::<DeviceLedInfo>(remaining, n_device_led_f_bs.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (btn_actions, remaining) = crate::x11_utils::parse_list::<Action>(remaining, n_btns_rtrn.try_to_usize()?)?;
+        let (leds, remaining) = crate::x11_utils::parse_list::<DeviceLedInfo>(remaining, n_device_led_f_bs.try_to_usize()?)?;
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
@@ -11757,8 +11757,8 @@ impl<'input> SetDeviceInfoRequest<'input> {
         let (n_btns, remaining) = u8::try_parse(remaining)?;
         let (change, remaining) = u16::try_parse(remaining)?;
         let (n_device_led_f_bs, remaining) = u16::try_parse(remaining)?;
-        let (btn_actions, remaining) = crate::x11_utils::parse_list::<Action>(remaining, n_btns.try_into().or(Err(ParseError::ConversionFailed))?)?;
-        let (leds, remaining) = crate::x11_utils::parse_list::<DeviceLedInfo>(remaining, n_device_led_f_bs.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (btn_actions, remaining) = crate::x11_utils::parse_list::<Action>(remaining, n_btns.try_to_usize()?)?;
+        let (leds, remaining) = crate::x11_utils::parse_list::<DeviceLedInfo>(remaining, n_device_led_f_bs.try_to_usize()?)?;
         let _ = remaining;
         Ok(SetDeviceInfoRequest {
             device_spec,
@@ -11877,7 +11877,7 @@ impl<'input> SetDebuggingFlagsRequest<'input> {
         let (flags, remaining) = u32::try_parse(remaining)?;
         let (affect_ctrls, remaining) = u32::try_parse(remaining)?;
         let (ctrls, remaining) = u32::try_parse(remaining)?;
-        let (message, remaining) = crate::x11_utils::parse_u8_list(remaining, msg_length.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (message, remaining) = crate::x11_utils::parse_u8_list(remaining, msg_length.try_to_usize()?)?;
         let _ = remaining;
         Ok(SetDebuggingFlagsRequest {
             affect_flags,

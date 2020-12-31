@@ -17,7 +17,7 @@ use std::io::IoSlice;
 #[allow(unused_imports)]
 use crate::utils::{RawFdContainer, pretty_print_bitmask, pretty_print_enum};
 #[allow(unused_imports)]
-use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse, TryParseFd};
+use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse, TryParseFd, TryIntoUSize};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
@@ -294,7 +294,7 @@ impl TryParse for ListSurfaceTypesReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (num, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::InsufficientData)?;
-        let (surfaces, remaining) = crate::x11_utils::parse_list::<SurfaceInfo>(remaining, num.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (surfaces, remaining) = crate::x11_utils::parse_list::<SurfaceInfo>(remaining, num.try_to_usize()?)?;
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
@@ -452,7 +452,7 @@ impl TryParse for CreateContextReply {
         let (height_actual, remaining) = u16::try_parse(remaining)?;
         let (flags_return, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::InsufficientData)?;
-        let (priv_data, remaining) = crate::x11_utils::parse_list::<u32>(remaining, length.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (priv_data, remaining) = crate::x11_utils::parse_list::<u32>(remaining, length.try_to_usize()?)?;
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
@@ -637,7 +637,7 @@ impl TryParse for CreateSurfaceReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(24..).ok_or(ParseError::InsufficientData)?;
-        let (priv_data, remaining) = crate::x11_utils::parse_list::<u32>(remaining, length.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (priv_data, remaining) = crate::x11_utils::parse_list::<u32>(remaining, length.try_to_usize()?)?;
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
@@ -856,7 +856,7 @@ impl TryParse for CreateSubpictureReply {
         let (component_order, remaining) = crate::x11_utils::parse_u8_list(remaining, 4)?;
         let component_order = <[u8; 4]>::try_from(component_order).unwrap();
         let remaining = remaining.get(12..).ok_or(ParseError::InsufficientData)?;
-        let (priv_data, remaining) = crate::x11_utils::parse_list::<u32>(remaining, length.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (priv_data, remaining) = crate::x11_utils::parse_list::<u32>(remaining, length.try_to_usize()?)?;
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
@@ -1043,7 +1043,7 @@ impl TryParse for ListSubpictureTypesReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (num, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::InsufficientData)?;
-        let (types, remaining) = crate::x11_utils::parse_list::<xv::ImageFormatInfo>(remaining, num.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (types, remaining) = crate::x11_utils::parse_list::<xv::ImageFormatInfo>(remaining, num.try_to_usize()?)?;
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }

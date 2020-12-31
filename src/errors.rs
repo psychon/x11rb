@@ -62,14 +62,26 @@ pub enum ParseError {
 
     /// A value was outside of its valid range.
     ///
-    /// When parsing the value of an enumeration, not all possible integer values have a defined
-    /// meaning. This error occurs when an invalid value is encountered in this context.
+    /// There are two kinds of situations where this error can happen:
     ///
-    /// For example, `xproto` has an enumeration `Place` with possible values `OnTop` (0) and
-    /// `OnBottom` (1). Any value other than 0 or 1 generates an `InvalidValue` when parsing.
+    /// 1. The protocol was violated and a nonsensical value was found.
+    /// 2. The user of the API called the wrong parsing function.
+    ///
+    /// Examples for the first kind of error:
+    ///
+    /// - One of a set of values should be present (a `<switch>` in xcb-proto-speal), but none of
+    ///   the `<cases>` matched. This can e.g. happen when parsing
+    ///   [`x11rb::protocol::xinput::InputInfo`].
+    /// - Parsing a request with a length field that is too small for the request header to fit.
+    ///
+    /// Examples for the second kind of error:
+    ///
+    /// - Parsing an X11 error with `response_type != 0`.
+    /// - Parsing an X11 reply with `response_type != 1`.
+    /// - Parsing an X11 request with the wrong value for its `minor_opcode`.
     InvalidValue,
 
-    /// Some file descriptors were expected, but none were received.
+    /// Some file descriptors were expected, but not enough were received.
     MissingFileDescriptors,
 }
 
@@ -102,7 +114,7 @@ pub enum ConnectError {
     ///
     /// One situation were this error is used when libxcb indicates an error that does not match
     /// any of the defined error conditions. Thus, libxcb is violating its own API (or new error
-    /// cases were defined, but are not yet handled by x11rb)
+    /// cases were defined, but are not yet handled by x11rb).
     UnknownError,
 
     /// Error while parsing some data, see `ParseError`.
@@ -115,10 +127,10 @@ pub enum ConnectError {
 
     /// Error during parsing of display string.
     ///
-    /// This is `XCB_CONN_CLOSSED_PARSE_ERR`.
+    /// This is `XCB_CONN_CLOSED_PARSE_ERR`.
     DisplayParsingError,
 
-    /// Server does not have a screen matcing the display.
+    /// Server does not have a screen matching the display.
     ///
     /// This is `XCB_CONN_CLOSED_INVALID_SCREEN`.
     InvalidScreen,
@@ -133,7 +145,7 @@ pub enum ConnectError {
 
     /// The server rejected the connection with a `SetupAuthenticate` message.
     SetupAuthenticate(SetupAuthenticate),
-    ///
+
     /// The server rejected the connection with a `SetupFailed` message.
     SetupFailed(SetupFailed),
 }
@@ -188,7 +200,7 @@ pub enum ConnectionError {
     ///
     /// One situation were this error is used when libxcb indicates an error that does not match
     /// any of the defined error conditions. Thus, libxcb is violating its own API (or new error
-    /// cases were defined, but are not yet handled by x11rb)
+    /// cases were defined, but are not yet handled by x11rb).
     UnknownError,
 
     /// An X11 extension was not supported by the server.
@@ -253,7 +265,7 @@ impl From<std::io::Error> for ConnectionError {
 pub enum ReplyError {
     /// Some error occurred on the X11 connection.
     ConnectionError(ConnectionError),
-    /// The X11 server sent an error in response to the request.
+    /// The X11 server sent an error in response to a request.
     X11Error(X11Error),
 }
 
@@ -299,7 +311,7 @@ pub enum ReplyOrIdError {
     IdsExhausted,
     /// Some error occurred on the X11 connection.
     ConnectionError(ConnectionError),
-    /// The X11 server sent an error in response to a XC-MISC request.
+    /// The X11 server sent an error in response to a request.
     X11Error(X11Error),
 }
 
