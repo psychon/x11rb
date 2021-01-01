@@ -207,9 +207,8 @@ fn generate_events(out: &mut Output, module: &xcbgen::defs::Module) {
                     }
                     outln!(
                         out,
-                        "xproto::{}_EVENT => return Ok(Self::{}(xproto::{}Event::try_parse(event)?.0)),",
+                        "xproto::{}_EVENT => return Ok(Self::{}(TryParse::try_parse(event)?.0)),",
                         super::camel_case_to_upper_snake(event_name),
-                        event_name,
                         event_name,
                     );
                 }
@@ -266,12 +265,10 @@ fn generate_events(out: &mut Output, module: &xcbgen::defs::Module) {
                             }
                             outln!(
                                 out.indent(),
-                                "{}::{}_EVENT => Ok(Self::{}{}({}::{}Event::try_parse(event)?.0)),",
+                                "{}::{}_EVENT => Ok(Self::{}{}(TryParse::try_parse(event)?.0)),",
                                 ns.header,
                                 super::camel_case_to_upper_snake(event_def.name()),
                                 get_ns_name_prefix(ns),
-                                event_def.name(),
-                                ns.header,
                                 event_def.name(),
                             );
                         }
@@ -325,12 +322,10 @@ fn generate_events(out: &mut Output, module: &xcbgen::defs::Module) {
                             }
                             outln!(
                                 out.indent(),
-                                "{}::{}_EVENT => Ok(Self::{}{}({}::{}Event::try_parse(event)?.0)),",
+                                "{}::{}_EVENT => Ok(Self::{}{}(TryParse::try_parse(event)?.0)),",
                                 ns.header,
                                 super::camel_case_to_upper_snake(event_def.name()),
                                 get_ns_name_prefix(ns),
-                                event_def.name(),
-                                ns.header,
                                 event_def.name(),
                             );
                         }
