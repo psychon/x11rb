@@ -7457,39 +7457,39 @@ impl Event {
         // Check if this is a core protocol event or error, or from the generic event extension
         match event_code {
             0 => return Ok(Self::Error(X11Error::try_parse(event, ext_info_provider)?)),
-            xproto::BUTTON_PRESS_EVENT => return Ok(Self::ButtonPress(xproto::ButtonPressEvent::try_parse(event)?.0)),
-            xproto::BUTTON_RELEASE_EVENT => return Ok(Self::ButtonRelease(xproto::ButtonReleaseEvent::try_parse(event)?.0)),
-            xproto::CIRCULATE_NOTIFY_EVENT => return Ok(Self::CirculateNotify(xproto::CirculateNotifyEvent::try_parse(event)?.0)),
-            xproto::CIRCULATE_REQUEST_EVENT => return Ok(Self::CirculateRequest(xproto::CirculateRequestEvent::try_parse(event)?.0)),
-            xproto::CLIENT_MESSAGE_EVENT => return Ok(Self::ClientMessage(xproto::ClientMessageEvent::try_parse(event)?.0)),
-            xproto::COLORMAP_NOTIFY_EVENT => return Ok(Self::ColormapNotify(xproto::ColormapNotifyEvent::try_parse(event)?.0)),
-            xproto::CONFIGURE_NOTIFY_EVENT => return Ok(Self::ConfigureNotify(xproto::ConfigureNotifyEvent::try_parse(event)?.0)),
-            xproto::CONFIGURE_REQUEST_EVENT => return Ok(Self::ConfigureRequest(xproto::ConfigureRequestEvent::try_parse(event)?.0)),
-            xproto::CREATE_NOTIFY_EVENT => return Ok(Self::CreateNotify(xproto::CreateNotifyEvent::try_parse(event)?.0)),
-            xproto::DESTROY_NOTIFY_EVENT => return Ok(Self::DestroyNotify(xproto::DestroyNotifyEvent::try_parse(event)?.0)),
-            xproto::ENTER_NOTIFY_EVENT => return Ok(Self::EnterNotify(xproto::EnterNotifyEvent::try_parse(event)?.0)),
-            xproto::EXPOSE_EVENT => return Ok(Self::Expose(xproto::ExposeEvent::try_parse(event)?.0)),
-            xproto::FOCUS_IN_EVENT => return Ok(Self::FocusIn(xproto::FocusInEvent::try_parse(event)?.0)),
-            xproto::FOCUS_OUT_EVENT => return Ok(Self::FocusOut(xproto::FocusOutEvent::try_parse(event)?.0)),
-            xproto::GRAPHICS_EXPOSURE_EVENT => return Ok(Self::GraphicsExposure(xproto::GraphicsExposureEvent::try_parse(event)?.0)),
-            xproto::GRAVITY_NOTIFY_EVENT => return Ok(Self::GravityNotify(xproto::GravityNotifyEvent::try_parse(event)?.0)),
-            xproto::KEY_PRESS_EVENT => return Ok(Self::KeyPress(xproto::KeyPressEvent::try_parse(event)?.0)),
-            xproto::KEY_RELEASE_EVENT => return Ok(Self::KeyRelease(xproto::KeyReleaseEvent::try_parse(event)?.0)),
-            xproto::KEYMAP_NOTIFY_EVENT => return Ok(Self::KeymapNotify(xproto::KeymapNotifyEvent::try_parse(event)?.0)),
-            xproto::LEAVE_NOTIFY_EVENT => return Ok(Self::LeaveNotify(xproto::LeaveNotifyEvent::try_parse(event)?.0)),
-            xproto::MAP_NOTIFY_EVENT => return Ok(Self::MapNotify(xproto::MapNotifyEvent::try_parse(event)?.0)),
-            xproto::MAP_REQUEST_EVENT => return Ok(Self::MapRequest(xproto::MapRequestEvent::try_parse(event)?.0)),
-            xproto::MAPPING_NOTIFY_EVENT => return Ok(Self::MappingNotify(xproto::MappingNotifyEvent::try_parse(event)?.0)),
-            xproto::MOTION_NOTIFY_EVENT => return Ok(Self::MotionNotify(xproto::MotionNotifyEvent::try_parse(event)?.0)),
-            xproto::NO_EXPOSURE_EVENT => return Ok(Self::NoExposure(xproto::NoExposureEvent::try_parse(event)?.0)),
-            xproto::PROPERTY_NOTIFY_EVENT => return Ok(Self::PropertyNotify(xproto::PropertyNotifyEvent::try_parse(event)?.0)),
-            xproto::REPARENT_NOTIFY_EVENT => return Ok(Self::ReparentNotify(xproto::ReparentNotifyEvent::try_parse(event)?.0)),
-            xproto::RESIZE_REQUEST_EVENT => return Ok(Self::ResizeRequest(xproto::ResizeRequestEvent::try_parse(event)?.0)),
-            xproto::SELECTION_CLEAR_EVENT => return Ok(Self::SelectionClear(xproto::SelectionClearEvent::try_parse(event)?.0)),
-            xproto::SELECTION_NOTIFY_EVENT => return Ok(Self::SelectionNotify(xproto::SelectionNotifyEvent::try_parse(event)?.0)),
-            xproto::SELECTION_REQUEST_EVENT => return Ok(Self::SelectionRequest(xproto::SelectionRequestEvent::try_parse(event)?.0)),
-            xproto::UNMAP_NOTIFY_EVENT => return Ok(Self::UnmapNotify(xproto::UnmapNotifyEvent::try_parse(event)?.0)),
-            xproto::VISIBILITY_NOTIFY_EVENT => return Ok(Self::VisibilityNotify(xproto::VisibilityNotifyEvent::try_parse(event)?.0)),
+            xproto::BUTTON_PRESS_EVENT => return Ok(Self::ButtonPress(TryParse::try_parse(event)?.0)),
+            xproto::BUTTON_RELEASE_EVENT => return Ok(Self::ButtonRelease(TryParse::try_parse(event)?.0)),
+            xproto::CIRCULATE_NOTIFY_EVENT => return Ok(Self::CirculateNotify(TryParse::try_parse(event)?.0)),
+            xproto::CIRCULATE_REQUEST_EVENT => return Ok(Self::CirculateRequest(TryParse::try_parse(event)?.0)),
+            xproto::CLIENT_MESSAGE_EVENT => return Ok(Self::ClientMessage(TryParse::try_parse(event)?.0)),
+            xproto::COLORMAP_NOTIFY_EVENT => return Ok(Self::ColormapNotify(TryParse::try_parse(event)?.0)),
+            xproto::CONFIGURE_NOTIFY_EVENT => return Ok(Self::ConfigureNotify(TryParse::try_parse(event)?.0)),
+            xproto::CONFIGURE_REQUEST_EVENT => return Ok(Self::ConfigureRequest(TryParse::try_parse(event)?.0)),
+            xproto::CREATE_NOTIFY_EVENT => return Ok(Self::CreateNotify(TryParse::try_parse(event)?.0)),
+            xproto::DESTROY_NOTIFY_EVENT => return Ok(Self::DestroyNotify(TryParse::try_parse(event)?.0)),
+            xproto::ENTER_NOTIFY_EVENT => return Ok(Self::EnterNotify(TryParse::try_parse(event)?.0)),
+            xproto::EXPOSE_EVENT => return Ok(Self::Expose(TryParse::try_parse(event)?.0)),
+            xproto::FOCUS_IN_EVENT => return Ok(Self::FocusIn(TryParse::try_parse(event)?.0)),
+            xproto::FOCUS_OUT_EVENT => return Ok(Self::FocusOut(TryParse::try_parse(event)?.0)),
+            xproto::GRAPHICS_EXPOSURE_EVENT => return Ok(Self::GraphicsExposure(TryParse::try_parse(event)?.0)),
+            xproto::GRAVITY_NOTIFY_EVENT => return Ok(Self::GravityNotify(TryParse::try_parse(event)?.0)),
+            xproto::KEY_PRESS_EVENT => return Ok(Self::KeyPress(TryParse::try_parse(event)?.0)),
+            xproto::KEY_RELEASE_EVENT => return Ok(Self::KeyRelease(TryParse::try_parse(event)?.0)),
+            xproto::KEYMAP_NOTIFY_EVENT => return Ok(Self::KeymapNotify(TryParse::try_parse(event)?.0)),
+            xproto::LEAVE_NOTIFY_EVENT => return Ok(Self::LeaveNotify(TryParse::try_parse(event)?.0)),
+            xproto::MAP_NOTIFY_EVENT => return Ok(Self::MapNotify(TryParse::try_parse(event)?.0)),
+            xproto::MAP_REQUEST_EVENT => return Ok(Self::MapRequest(TryParse::try_parse(event)?.0)),
+            xproto::MAPPING_NOTIFY_EVENT => return Ok(Self::MappingNotify(TryParse::try_parse(event)?.0)),
+            xproto::MOTION_NOTIFY_EVENT => return Ok(Self::MotionNotify(TryParse::try_parse(event)?.0)),
+            xproto::NO_EXPOSURE_EVENT => return Ok(Self::NoExposure(TryParse::try_parse(event)?.0)),
+            xproto::PROPERTY_NOTIFY_EVENT => return Ok(Self::PropertyNotify(TryParse::try_parse(event)?.0)),
+            xproto::REPARENT_NOTIFY_EVENT => return Ok(Self::ReparentNotify(TryParse::try_parse(event)?.0)),
+            xproto::RESIZE_REQUEST_EVENT => return Ok(Self::ResizeRequest(TryParse::try_parse(event)?.0)),
+            xproto::SELECTION_CLEAR_EVENT => return Ok(Self::SelectionClear(TryParse::try_parse(event)?.0)),
+            xproto::SELECTION_NOTIFY_EVENT => return Ok(Self::SelectionNotify(TryParse::try_parse(event)?.0)),
+            xproto::SELECTION_REQUEST_EVENT => return Ok(Self::SelectionRequest(TryParse::try_parse(event)?.0)),
+            xproto::UNMAP_NOTIFY_EVENT => return Ok(Self::UnmapNotify(TryParse::try_parse(event)?.0)),
+            xproto::VISIBILITY_NOTIFY_EVENT => return Ok(Self::VisibilityNotify(TryParse::try_parse(event)?.0)),
             xproto::GE_GENERIC_EVENT => return Self::from_generic_event(event, ext_info_provider),
             _ => {}
         }
@@ -7499,98 +7499,98 @@ impl Event {
             #[cfg(feature = "damage")]
             Some((damage::X11_EXTENSION_NAME, ext_info)) => {
                 match event_code - ext_info.first_event {
-                    damage::NOTIFY_EVENT => Ok(Self::DamageNotify(damage::NotifyEvent::try_parse(event)?.0)),
+                    damage::NOTIFY_EVENT => Ok(Self::DamageNotify(TryParse::try_parse(event)?.0)),
                     _ => Ok(Self::Unknown(event.to_vec())),
                 }
             }
             #[cfg(feature = "dri2")]
             Some((dri2::X11_EXTENSION_NAME, ext_info)) => {
                 match event_code - ext_info.first_event {
-                    dri2::BUFFER_SWAP_COMPLETE_EVENT => Ok(Self::Dri2BufferSwapComplete(dri2::BufferSwapCompleteEvent::try_parse(event)?.0)),
-                    dri2::INVALIDATE_BUFFERS_EVENT => Ok(Self::Dri2InvalidateBuffers(dri2::InvalidateBuffersEvent::try_parse(event)?.0)),
+                    dri2::BUFFER_SWAP_COMPLETE_EVENT => Ok(Self::Dri2BufferSwapComplete(TryParse::try_parse(event)?.0)),
+                    dri2::INVALIDATE_BUFFERS_EVENT => Ok(Self::Dri2InvalidateBuffers(TryParse::try_parse(event)?.0)),
                     _ => Ok(Self::Unknown(event.to_vec())),
                 }
             }
             #[cfg(feature = "glx")]
             Some((glx::X11_EXTENSION_NAME, ext_info)) => {
                 match event_code - ext_info.first_event {
-                    glx::BUFFER_SWAP_COMPLETE_EVENT => Ok(Self::GlxBufferSwapComplete(glx::BufferSwapCompleteEvent::try_parse(event)?.0)),
-                    glx::PBUFFER_CLOBBER_EVENT => Ok(Self::GlxPbufferClobber(glx::PbufferClobberEvent::try_parse(event)?.0)),
+                    glx::BUFFER_SWAP_COMPLETE_EVENT => Ok(Self::GlxBufferSwapComplete(TryParse::try_parse(event)?.0)),
+                    glx::PBUFFER_CLOBBER_EVENT => Ok(Self::GlxPbufferClobber(TryParse::try_parse(event)?.0)),
                     _ => Ok(Self::Unknown(event.to_vec())),
                 }
             }
             #[cfg(feature = "present")]
             Some((present::X11_EXTENSION_NAME, ext_info)) => {
                 match event_code - ext_info.first_event {
-                    present::GENERIC_EVENT => Ok(Self::PresentGeneric(present::GenericEvent::try_parse(event)?.0)),
+                    present::GENERIC_EVENT => Ok(Self::PresentGeneric(TryParse::try_parse(event)?.0)),
                     _ => Ok(Self::Unknown(event.to_vec())),
                 }
             }
             #[cfg(feature = "randr")]
             Some((randr::X11_EXTENSION_NAME, ext_info)) => {
                 match event_code - ext_info.first_event {
-                    randr::NOTIFY_EVENT => Ok(Self::RandrNotify(randr::NotifyEvent::try_parse(event)?.0)),
-                    randr::SCREEN_CHANGE_NOTIFY_EVENT => Ok(Self::RandrScreenChangeNotify(randr::ScreenChangeNotifyEvent::try_parse(event)?.0)),
+                    randr::NOTIFY_EVENT => Ok(Self::RandrNotify(TryParse::try_parse(event)?.0)),
+                    randr::SCREEN_CHANGE_NOTIFY_EVENT => Ok(Self::RandrScreenChangeNotify(TryParse::try_parse(event)?.0)),
                     _ => Ok(Self::Unknown(event.to_vec())),
                 }
             }
             #[cfg(feature = "screensaver")]
             Some((screensaver::X11_EXTENSION_NAME, ext_info)) => {
                 match event_code - ext_info.first_event {
-                    screensaver::NOTIFY_EVENT => Ok(Self::ScreensaverNotify(screensaver::NotifyEvent::try_parse(event)?.0)),
+                    screensaver::NOTIFY_EVENT => Ok(Self::ScreensaverNotify(TryParse::try_parse(event)?.0)),
                     _ => Ok(Self::Unknown(event.to_vec())),
                 }
             }
             #[cfg(feature = "shape")]
             Some((shape::X11_EXTENSION_NAME, ext_info)) => {
                 match event_code - ext_info.first_event {
-                    shape::NOTIFY_EVENT => Ok(Self::ShapeNotify(shape::NotifyEvent::try_parse(event)?.0)),
+                    shape::NOTIFY_EVENT => Ok(Self::ShapeNotify(TryParse::try_parse(event)?.0)),
                     _ => Ok(Self::Unknown(event.to_vec())),
                 }
             }
             #[cfg(feature = "shm")]
             Some((shm::X11_EXTENSION_NAME, ext_info)) => {
                 match event_code - ext_info.first_event {
-                    shm::COMPLETION_EVENT => Ok(Self::ShmCompletion(shm::CompletionEvent::try_parse(event)?.0)),
+                    shm::COMPLETION_EVENT => Ok(Self::ShmCompletion(TryParse::try_parse(event)?.0)),
                     _ => Ok(Self::Unknown(event.to_vec())),
                 }
             }
             #[cfg(feature = "sync")]
             Some((sync::X11_EXTENSION_NAME, ext_info)) => {
                 match event_code - ext_info.first_event {
-                    sync::ALARM_NOTIFY_EVENT => Ok(Self::SyncAlarmNotify(sync::AlarmNotifyEvent::try_parse(event)?.0)),
-                    sync::COUNTER_NOTIFY_EVENT => Ok(Self::SyncCounterNotify(sync::CounterNotifyEvent::try_parse(event)?.0)),
+                    sync::ALARM_NOTIFY_EVENT => Ok(Self::SyncAlarmNotify(TryParse::try_parse(event)?.0)),
+                    sync::COUNTER_NOTIFY_EVENT => Ok(Self::SyncCounterNotify(TryParse::try_parse(event)?.0)),
                     _ => Ok(Self::Unknown(event.to_vec())),
                 }
             }
             #[cfg(feature = "xfixes")]
             Some((xfixes::X11_EXTENSION_NAME, ext_info)) => {
                 match event_code - ext_info.first_event {
-                    xfixes::CURSOR_NOTIFY_EVENT => Ok(Self::XfixesCursorNotify(xfixes::CursorNotifyEvent::try_parse(event)?.0)),
-                    xfixes::SELECTION_NOTIFY_EVENT => Ok(Self::XfixesSelectionNotify(xfixes::SelectionNotifyEvent::try_parse(event)?.0)),
+                    xfixes::CURSOR_NOTIFY_EVENT => Ok(Self::XfixesCursorNotify(TryParse::try_parse(event)?.0)),
+                    xfixes::SELECTION_NOTIFY_EVENT => Ok(Self::XfixesSelectionNotify(TryParse::try_parse(event)?.0)),
                     _ => Ok(Self::Unknown(event.to_vec())),
                 }
             }
             #[cfg(feature = "xinput")]
             Some((xinput::X11_EXTENSION_NAME, ext_info)) => {
                 match event_code - ext_info.first_event {
-                    xinput::CHANGE_DEVICE_NOTIFY_EVENT => Ok(Self::XinputChangeDeviceNotify(xinput::ChangeDeviceNotifyEvent::try_parse(event)?.0)),
-                    xinput::DEVICE_BUTTON_PRESS_EVENT => Ok(Self::XinputDeviceButtonPress(xinput::DeviceButtonPressEvent::try_parse(event)?.0)),
-                    xinput::DEVICE_BUTTON_RELEASE_EVENT => Ok(Self::XinputDeviceButtonRelease(xinput::DeviceButtonReleaseEvent::try_parse(event)?.0)),
-                    xinput::DEVICE_BUTTON_STATE_NOTIFY_EVENT => Ok(Self::XinputDeviceButtonStateNotify(xinput::DeviceButtonStateNotifyEvent::try_parse(event)?.0)),
-                    xinput::DEVICE_FOCUS_IN_EVENT => Ok(Self::XinputDeviceFocusIn(xinput::DeviceFocusInEvent::try_parse(event)?.0)),
-                    xinput::DEVICE_FOCUS_OUT_EVENT => Ok(Self::XinputDeviceFocusOut(xinput::DeviceFocusOutEvent::try_parse(event)?.0)),
-                    xinput::DEVICE_KEY_PRESS_EVENT => Ok(Self::XinputDeviceKeyPress(xinput::DeviceKeyPressEvent::try_parse(event)?.0)),
-                    xinput::DEVICE_KEY_RELEASE_EVENT => Ok(Self::XinputDeviceKeyRelease(xinput::DeviceKeyReleaseEvent::try_parse(event)?.0)),
-                    xinput::DEVICE_KEY_STATE_NOTIFY_EVENT => Ok(Self::XinputDeviceKeyStateNotify(xinput::DeviceKeyStateNotifyEvent::try_parse(event)?.0)),
-                    xinput::DEVICE_MAPPING_NOTIFY_EVENT => Ok(Self::XinputDeviceMappingNotify(xinput::DeviceMappingNotifyEvent::try_parse(event)?.0)),
-                    xinput::DEVICE_MOTION_NOTIFY_EVENT => Ok(Self::XinputDeviceMotionNotify(xinput::DeviceMotionNotifyEvent::try_parse(event)?.0)),
-                    xinput::DEVICE_PRESENCE_NOTIFY_EVENT => Ok(Self::XinputDevicePresenceNotify(xinput::DevicePresenceNotifyEvent::try_parse(event)?.0)),
-                    xinput::DEVICE_PROPERTY_NOTIFY_EVENT => Ok(Self::XinputDevicePropertyNotify(xinput::DevicePropertyNotifyEvent::try_parse(event)?.0)),
-                    xinput::DEVICE_STATE_NOTIFY_EVENT => Ok(Self::XinputDeviceStateNotify(xinput::DeviceStateNotifyEvent::try_parse(event)?.0)),
-                    xinput::DEVICE_VALUATOR_EVENT => Ok(Self::XinputDeviceValuator(xinput::DeviceValuatorEvent::try_parse(event)?.0)),
-                    xinput::PROXIMITY_IN_EVENT => Ok(Self::XinputProximityIn(xinput::ProximityInEvent::try_parse(event)?.0)),
-                    xinput::PROXIMITY_OUT_EVENT => Ok(Self::XinputProximityOut(xinput::ProximityOutEvent::try_parse(event)?.0)),
+                    xinput::CHANGE_DEVICE_NOTIFY_EVENT => Ok(Self::XinputChangeDeviceNotify(TryParse::try_parse(event)?.0)),
+                    xinput::DEVICE_BUTTON_PRESS_EVENT => Ok(Self::XinputDeviceButtonPress(TryParse::try_parse(event)?.0)),
+                    xinput::DEVICE_BUTTON_RELEASE_EVENT => Ok(Self::XinputDeviceButtonRelease(TryParse::try_parse(event)?.0)),
+                    xinput::DEVICE_BUTTON_STATE_NOTIFY_EVENT => Ok(Self::XinputDeviceButtonStateNotify(TryParse::try_parse(event)?.0)),
+                    xinput::DEVICE_FOCUS_IN_EVENT => Ok(Self::XinputDeviceFocusIn(TryParse::try_parse(event)?.0)),
+                    xinput::DEVICE_FOCUS_OUT_EVENT => Ok(Self::XinputDeviceFocusOut(TryParse::try_parse(event)?.0)),
+                    xinput::DEVICE_KEY_PRESS_EVENT => Ok(Self::XinputDeviceKeyPress(TryParse::try_parse(event)?.0)),
+                    xinput::DEVICE_KEY_RELEASE_EVENT => Ok(Self::XinputDeviceKeyRelease(TryParse::try_parse(event)?.0)),
+                    xinput::DEVICE_KEY_STATE_NOTIFY_EVENT => Ok(Self::XinputDeviceKeyStateNotify(TryParse::try_parse(event)?.0)),
+                    xinput::DEVICE_MAPPING_NOTIFY_EVENT => Ok(Self::XinputDeviceMappingNotify(TryParse::try_parse(event)?.0)),
+                    xinput::DEVICE_MOTION_NOTIFY_EVENT => Ok(Self::XinputDeviceMotionNotify(TryParse::try_parse(event)?.0)),
+                    xinput::DEVICE_PRESENCE_NOTIFY_EVENT => Ok(Self::XinputDevicePresenceNotify(TryParse::try_parse(event)?.0)),
+                    xinput::DEVICE_PROPERTY_NOTIFY_EVENT => Ok(Self::XinputDevicePropertyNotify(TryParse::try_parse(event)?.0)),
+                    xinput::DEVICE_STATE_NOTIFY_EVENT => Ok(Self::XinputDeviceStateNotify(TryParse::try_parse(event)?.0)),
+                    xinput::DEVICE_VALUATOR_EVENT => Ok(Self::XinputDeviceValuator(TryParse::try_parse(event)?.0)),
+                    xinput::PROXIMITY_IN_EVENT => Ok(Self::XinputProximityIn(TryParse::try_parse(event)?.0)),
+                    xinput::PROXIMITY_OUT_EVENT => Ok(Self::XinputProximityOut(TryParse::try_parse(event)?.0)),
                     _ => Ok(Self::Unknown(event.to_vec())),
                 }
             }
@@ -7600,34 +7600,34 @@ impl Event {
                     return Ok(Self::Unknown(event.to_vec()));
                 }
                 match *event.get(1).ok_or(ParseError::InsufficientData)? {
-                    xkb::ACCESS_X_NOTIFY_EVENT => Ok(Self::XkbAccessXNotify(xkb::AccessXNotifyEvent::try_parse(event)?.0)),
-                    xkb::ACTION_MESSAGE_EVENT => Ok(Self::XkbActionMessage(xkb::ActionMessageEvent::try_parse(event)?.0)),
-                    xkb::BELL_NOTIFY_EVENT => Ok(Self::XkbBellNotify(xkb::BellNotifyEvent::try_parse(event)?.0)),
-                    xkb::COMPAT_MAP_NOTIFY_EVENT => Ok(Self::XkbCompatMapNotify(xkb::CompatMapNotifyEvent::try_parse(event)?.0)),
-                    xkb::CONTROLS_NOTIFY_EVENT => Ok(Self::XkbControlsNotify(xkb::ControlsNotifyEvent::try_parse(event)?.0)),
-                    xkb::EXTENSION_DEVICE_NOTIFY_EVENT => Ok(Self::XkbExtensionDeviceNotify(xkb::ExtensionDeviceNotifyEvent::try_parse(event)?.0)),
-                    xkb::INDICATOR_MAP_NOTIFY_EVENT => Ok(Self::XkbIndicatorMapNotify(xkb::IndicatorMapNotifyEvent::try_parse(event)?.0)),
-                    xkb::INDICATOR_STATE_NOTIFY_EVENT => Ok(Self::XkbIndicatorStateNotify(xkb::IndicatorStateNotifyEvent::try_parse(event)?.0)),
-                    xkb::MAP_NOTIFY_EVENT => Ok(Self::XkbMapNotify(xkb::MapNotifyEvent::try_parse(event)?.0)),
-                    xkb::NAMES_NOTIFY_EVENT => Ok(Self::XkbNamesNotify(xkb::NamesNotifyEvent::try_parse(event)?.0)),
-                    xkb::NEW_KEYBOARD_NOTIFY_EVENT => Ok(Self::XkbNewKeyboardNotify(xkb::NewKeyboardNotifyEvent::try_parse(event)?.0)),
-                    xkb::STATE_NOTIFY_EVENT => Ok(Self::XkbStateNotify(xkb::StateNotifyEvent::try_parse(event)?.0)),
+                    xkb::ACCESS_X_NOTIFY_EVENT => Ok(Self::XkbAccessXNotify(TryParse::try_parse(event)?.0)),
+                    xkb::ACTION_MESSAGE_EVENT => Ok(Self::XkbActionMessage(TryParse::try_parse(event)?.0)),
+                    xkb::BELL_NOTIFY_EVENT => Ok(Self::XkbBellNotify(TryParse::try_parse(event)?.0)),
+                    xkb::COMPAT_MAP_NOTIFY_EVENT => Ok(Self::XkbCompatMapNotify(TryParse::try_parse(event)?.0)),
+                    xkb::CONTROLS_NOTIFY_EVENT => Ok(Self::XkbControlsNotify(TryParse::try_parse(event)?.0)),
+                    xkb::EXTENSION_DEVICE_NOTIFY_EVENT => Ok(Self::XkbExtensionDeviceNotify(TryParse::try_parse(event)?.0)),
+                    xkb::INDICATOR_MAP_NOTIFY_EVENT => Ok(Self::XkbIndicatorMapNotify(TryParse::try_parse(event)?.0)),
+                    xkb::INDICATOR_STATE_NOTIFY_EVENT => Ok(Self::XkbIndicatorStateNotify(TryParse::try_parse(event)?.0)),
+                    xkb::MAP_NOTIFY_EVENT => Ok(Self::XkbMapNotify(TryParse::try_parse(event)?.0)),
+                    xkb::NAMES_NOTIFY_EVENT => Ok(Self::XkbNamesNotify(TryParse::try_parse(event)?.0)),
+                    xkb::NEW_KEYBOARD_NOTIFY_EVENT => Ok(Self::XkbNewKeyboardNotify(TryParse::try_parse(event)?.0)),
+                    xkb::STATE_NOTIFY_EVENT => Ok(Self::XkbStateNotify(TryParse::try_parse(event)?.0)),
                     _ => Ok(Self::Unknown(event.to_vec())),
                 }
             }
             #[cfg(feature = "xprint")]
             Some((xprint::X11_EXTENSION_NAME, ext_info)) => {
                 match event_code - ext_info.first_event {
-                    xprint::ATTRIBUT_NOTIFY_EVENT => Ok(Self::XprintAttributNotify(xprint::AttributNotifyEvent::try_parse(event)?.0)),
-                    xprint::NOTIFY_EVENT => Ok(Self::XprintNotify(xprint::NotifyEvent::try_parse(event)?.0)),
+                    xprint::ATTRIBUT_NOTIFY_EVENT => Ok(Self::XprintAttributNotify(TryParse::try_parse(event)?.0)),
+                    xprint::NOTIFY_EVENT => Ok(Self::XprintNotify(TryParse::try_parse(event)?.0)),
                     _ => Ok(Self::Unknown(event.to_vec())),
                 }
             }
             #[cfg(feature = "xv")]
             Some((xv::X11_EXTENSION_NAME, ext_info)) => {
                 match event_code - ext_info.first_event {
-                    xv::PORT_NOTIFY_EVENT => Ok(Self::XvPortNotify(xv::PortNotifyEvent::try_parse(event)?.0)),
-                    xv::VIDEO_NOTIFY_EVENT => Ok(Self::XvVideoNotify(xv::VideoNotifyEvent::try_parse(event)?.0)),
+                    xv::PORT_NOTIFY_EVENT => Ok(Self::XvPortNotify(TryParse::try_parse(event)?.0)),
+                    xv::VIDEO_NOTIFY_EVENT => Ok(Self::XvVideoNotify(TryParse::try_parse(event)?.0)),
                     _ => Ok(Self::Unknown(event.to_vec())),
                 }
             }
@@ -7648,42 +7648,42 @@ impl Event {
             #[cfg(feature = "present")]
             Some(present::X11_EXTENSION_NAME) => {
                 match ge_event.event_type {
-                    present::COMPLETE_NOTIFY_EVENT => Ok(Self::PresentCompleteNotify(present::CompleteNotifyEvent::try_parse(event)?.0)),
-                    present::CONFIGURE_NOTIFY_EVENT => Ok(Self::PresentConfigureNotify(present::ConfigureNotifyEvent::try_parse(event)?.0)),
-                    present::IDLE_NOTIFY_EVENT => Ok(Self::PresentIdleNotify(present::IdleNotifyEvent::try_parse(event)?.0)),
-                    present::REDIRECT_NOTIFY_EVENT => Ok(Self::PresentRedirectNotify(present::RedirectNotifyEvent::try_parse(event)?.0)),
+                    present::COMPLETE_NOTIFY_EVENT => Ok(Self::PresentCompleteNotify(TryParse::try_parse(event)?.0)),
+                    present::CONFIGURE_NOTIFY_EVENT => Ok(Self::PresentConfigureNotify(TryParse::try_parse(event)?.0)),
+                    present::IDLE_NOTIFY_EVENT => Ok(Self::PresentIdleNotify(TryParse::try_parse(event)?.0)),
+                    present::REDIRECT_NOTIFY_EVENT => Ok(Self::PresentRedirectNotify(TryParse::try_parse(event)?.0)),
                     _ => Ok(Self::Unknown(event.to_vec())),
                 }
             }
             #[cfg(feature = "xinput")]
             Some(xinput::X11_EXTENSION_NAME) => {
                 match ge_event.event_type {
-                    xinput::BARRIER_HIT_EVENT => Ok(Self::XinputBarrierHit(xinput::BarrierHitEvent::try_parse(event)?.0)),
-                    xinput::BARRIER_LEAVE_EVENT => Ok(Self::XinputBarrierLeave(xinput::BarrierLeaveEvent::try_parse(event)?.0)),
-                    xinput::BUTTON_PRESS_EVENT => Ok(Self::XinputButtonPress(xinput::ButtonPressEvent::try_parse(event)?.0)),
-                    xinput::BUTTON_RELEASE_EVENT => Ok(Self::XinputButtonRelease(xinput::ButtonReleaseEvent::try_parse(event)?.0)),
-                    xinput::DEVICE_CHANGED_EVENT => Ok(Self::XinputDeviceChanged(xinput::DeviceChangedEvent::try_parse(event)?.0)),
-                    xinput::ENTER_EVENT => Ok(Self::XinputEnter(xinput::EnterEvent::try_parse(event)?.0)),
-                    xinput::FOCUS_IN_EVENT => Ok(Self::XinputFocusIn(xinput::FocusInEvent::try_parse(event)?.0)),
-                    xinput::FOCUS_OUT_EVENT => Ok(Self::XinputFocusOut(xinput::FocusOutEvent::try_parse(event)?.0)),
-                    xinput::HIERARCHY_EVENT => Ok(Self::XinputHierarchy(xinput::HierarchyEvent::try_parse(event)?.0)),
-                    xinput::KEY_PRESS_EVENT => Ok(Self::XinputKeyPress(xinput::KeyPressEvent::try_parse(event)?.0)),
-                    xinput::KEY_RELEASE_EVENT => Ok(Self::XinputKeyRelease(xinput::KeyReleaseEvent::try_parse(event)?.0)),
-                    xinput::LEAVE_EVENT => Ok(Self::XinputLeave(xinput::LeaveEvent::try_parse(event)?.0)),
-                    xinput::MOTION_EVENT => Ok(Self::XinputMotion(xinput::MotionEvent::try_parse(event)?.0)),
-                    xinput::PROPERTY_EVENT => Ok(Self::XinputProperty(xinput::PropertyEvent::try_parse(event)?.0)),
-                    xinput::RAW_BUTTON_PRESS_EVENT => Ok(Self::XinputRawButtonPress(xinput::RawButtonPressEvent::try_parse(event)?.0)),
-                    xinput::RAW_BUTTON_RELEASE_EVENT => Ok(Self::XinputRawButtonRelease(xinput::RawButtonReleaseEvent::try_parse(event)?.0)),
-                    xinput::RAW_KEY_PRESS_EVENT => Ok(Self::XinputRawKeyPress(xinput::RawKeyPressEvent::try_parse(event)?.0)),
-                    xinput::RAW_KEY_RELEASE_EVENT => Ok(Self::XinputRawKeyRelease(xinput::RawKeyReleaseEvent::try_parse(event)?.0)),
-                    xinput::RAW_MOTION_EVENT => Ok(Self::XinputRawMotion(xinput::RawMotionEvent::try_parse(event)?.0)),
-                    xinput::RAW_TOUCH_BEGIN_EVENT => Ok(Self::XinputRawTouchBegin(xinput::RawTouchBeginEvent::try_parse(event)?.0)),
-                    xinput::RAW_TOUCH_END_EVENT => Ok(Self::XinputRawTouchEnd(xinput::RawTouchEndEvent::try_parse(event)?.0)),
-                    xinput::RAW_TOUCH_UPDATE_EVENT => Ok(Self::XinputRawTouchUpdate(xinput::RawTouchUpdateEvent::try_parse(event)?.0)),
-                    xinput::TOUCH_BEGIN_EVENT => Ok(Self::XinputTouchBegin(xinput::TouchBeginEvent::try_parse(event)?.0)),
-                    xinput::TOUCH_END_EVENT => Ok(Self::XinputTouchEnd(xinput::TouchEndEvent::try_parse(event)?.0)),
-                    xinput::TOUCH_OWNERSHIP_EVENT => Ok(Self::XinputTouchOwnership(xinput::TouchOwnershipEvent::try_parse(event)?.0)),
-                    xinput::TOUCH_UPDATE_EVENT => Ok(Self::XinputTouchUpdate(xinput::TouchUpdateEvent::try_parse(event)?.0)),
+                    xinput::BARRIER_HIT_EVENT => Ok(Self::XinputBarrierHit(TryParse::try_parse(event)?.0)),
+                    xinput::BARRIER_LEAVE_EVENT => Ok(Self::XinputBarrierLeave(TryParse::try_parse(event)?.0)),
+                    xinput::BUTTON_PRESS_EVENT => Ok(Self::XinputButtonPress(TryParse::try_parse(event)?.0)),
+                    xinput::BUTTON_RELEASE_EVENT => Ok(Self::XinputButtonRelease(TryParse::try_parse(event)?.0)),
+                    xinput::DEVICE_CHANGED_EVENT => Ok(Self::XinputDeviceChanged(TryParse::try_parse(event)?.0)),
+                    xinput::ENTER_EVENT => Ok(Self::XinputEnter(TryParse::try_parse(event)?.0)),
+                    xinput::FOCUS_IN_EVENT => Ok(Self::XinputFocusIn(TryParse::try_parse(event)?.0)),
+                    xinput::FOCUS_OUT_EVENT => Ok(Self::XinputFocusOut(TryParse::try_parse(event)?.0)),
+                    xinput::HIERARCHY_EVENT => Ok(Self::XinputHierarchy(TryParse::try_parse(event)?.0)),
+                    xinput::KEY_PRESS_EVENT => Ok(Self::XinputKeyPress(TryParse::try_parse(event)?.0)),
+                    xinput::KEY_RELEASE_EVENT => Ok(Self::XinputKeyRelease(TryParse::try_parse(event)?.0)),
+                    xinput::LEAVE_EVENT => Ok(Self::XinputLeave(TryParse::try_parse(event)?.0)),
+                    xinput::MOTION_EVENT => Ok(Self::XinputMotion(TryParse::try_parse(event)?.0)),
+                    xinput::PROPERTY_EVENT => Ok(Self::XinputProperty(TryParse::try_parse(event)?.0)),
+                    xinput::RAW_BUTTON_PRESS_EVENT => Ok(Self::XinputRawButtonPress(TryParse::try_parse(event)?.0)),
+                    xinput::RAW_BUTTON_RELEASE_EVENT => Ok(Self::XinputRawButtonRelease(TryParse::try_parse(event)?.0)),
+                    xinput::RAW_KEY_PRESS_EVENT => Ok(Self::XinputRawKeyPress(TryParse::try_parse(event)?.0)),
+                    xinput::RAW_KEY_RELEASE_EVENT => Ok(Self::XinputRawKeyRelease(TryParse::try_parse(event)?.0)),
+                    xinput::RAW_MOTION_EVENT => Ok(Self::XinputRawMotion(TryParse::try_parse(event)?.0)),
+                    xinput::RAW_TOUCH_BEGIN_EVENT => Ok(Self::XinputRawTouchBegin(TryParse::try_parse(event)?.0)),
+                    xinput::RAW_TOUCH_END_EVENT => Ok(Self::XinputRawTouchEnd(TryParse::try_parse(event)?.0)),
+                    xinput::RAW_TOUCH_UPDATE_EVENT => Ok(Self::XinputRawTouchUpdate(TryParse::try_parse(event)?.0)),
+                    xinput::TOUCH_BEGIN_EVENT => Ok(Self::XinputTouchBegin(TryParse::try_parse(event)?.0)),
+                    xinput::TOUCH_END_EVENT => Ok(Self::XinputTouchEnd(TryParse::try_parse(event)?.0)),
+                    xinput::TOUCH_OWNERSHIP_EVENT => Ok(Self::XinputTouchOwnership(TryParse::try_parse(event)?.0)),
+                    xinput::TOUCH_UPDATE_EVENT => Ok(Self::XinputTouchUpdate(TryParse::try_parse(event)?.0)),
                     _ => Ok(Self::Unknown(event.to_vec())),
                 }
             }
