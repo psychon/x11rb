@@ -8,7 +8,8 @@ As you may know, the code generator uses an XML description of the X11 protocol
 from `xcb-proto`. This document will show some examples of the XML description
 followed by the Rust code that is generated for it.
 
-The following code is generated at the beginning of a module:
+The following code is generated at the beginning of a module (example for
+`xproto`; other modules have some slight differences):
 ```rust
 // This file contains generated code. Do not edit directly.
 // To regenerate this, run 'make'.
@@ -32,9 +33,9 @@ use std::convert::TryFrom;
 use std::convert::TryInto;
 use std::io::IoSlice;
 #[allow(unused_imports)]
-use crate::utils::RawFdContainer;
+use crate::utils::{RawFdContainer, pretty_print_bitmask, pretty_print_enum};
 #[allow(unused_imports)]
-use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse, TryParseFd};
+use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse, TryParseFd, TryIntoUSize};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
@@ -70,8 +71,7 @@ could send a list of structs to the X11 server.
 ```
 The server can send structs to us. For this reason, there is a `TryParse` trait
 that is implemented on structs. This trait is used by the generated code, for
-example to parse a list of `Point`s. For easier use, additionally `TryFrom` is
-implemented for some inputs.
+example to parse a list of `Point`s.
 
 We must also be able to send structs to the server. This is handled through the
 `Serialize` trait that produces data in the native endian.
@@ -88,12 +88,6 @@ impl TryParse for Point {
         let (y, remaining) = i16::try_parse(remaining)?;
         let result = Point { x, y };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for Point {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for Point {
@@ -146,15 +140,9 @@ impl TryParse for Depth {
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (visuals_len, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(4..).ok_or(ParseError::InsufficientData)?;
-        let (visuals, remaining) = crate::x11_utils::parse_list::<Visualtype>(remaining, visuals_len.try_into().or(Err(ParseError::ConversionFailed))?)?;
+        let (visuals, remaining) = crate::x11_utils::parse_list::<Visualtype>(remaining, visuals_len.try_to_usize()?)?;
         let result = Depth { depth, visuals };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for Depth {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 impl Serialize for Depth {
@@ -193,6 +181,11 @@ impl Depth {
 
 ## Enumerations
 
+Enumerations have a set of defined values, similar to rust `enum`s. However,
+they are not represented as `enum`s since there are cases where the X11 server
+violates the X11 protocol. These cases previously caused `ParseError`. Thus,
+enumerations are now represented as a newtype around numbers.
+
 ### 'Real' enumerations
 
 ```xml
@@ -206,69 +199,51 @@ Depending on the largest value, appropriate `From` and `TryFrom` implementations
 are generated.
 
 ```rust
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum BackingStore {
-    NotUseful = 0,
-    WhenMapped = 1,
-    Always = 2,
-}
-impl From<BackingStore> for u8 {
-    fn from(input: BackingStore) -> Self {
-        match input {
-            BackingStore::NotUseful => 0,
-            BackingStore::WhenMapped => 1,
-            BackingStore::Always => 2,
-        }
-    }
-}
-impl From<BackingStore> for Option<u8> {
-    fn from(input: BackingStore) -> Self {
-        Some(u8::from(input))
-    }
-}
-impl From<BackingStore> for u16 {
-    fn from(input: BackingStore) -> Self {
-        Self::from(u8::from(input))
-    }
-}
-impl From<BackingStore> for Option<u16> {
-    fn from(input: BackingStore) -> Self {
-        Some(u16::from(input))
-    }
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub struct BackingStore(u32);
+impl BackingStore {
+    pub const NOT_USEFUL: Self = Self(0);
+    pub const WHEN_MAPPED: Self = Self(1);
+    pub const ALWAYS: Self = Self(2);
 }
 impl From<BackingStore> for u32 {
+    #[inline]
     fn from(input: BackingStore) -> Self {
-        Self::from(u8::from(input))
+        input.0
     }
 }
 impl From<BackingStore> for Option<u32> {
+    #[inline]
     fn from(input: BackingStore) -> Self {
-        Some(u32::from(input))
+        Some(input.0)
     }
 }
-impl TryFrom<u8> for BackingStore {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(BackingStore::NotUseful),
-            1 => Ok(BackingStore::WhenMapped),
-            2 => Ok(BackingStore::Always),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<u8> for BackingStore {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value.into())
     }
 }
-impl TryFrom<u16> for BackingStore {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+impl From<u16> for BackingStore {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value.into())
     }
 }
-impl TryFrom<u32> for BackingStore {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+impl From<u32> for BackingStore {
+    #[inline]
+    fn from(value: u32) -> Self {
+        Self(value)
+    }
+}
+impl std::fmt::Debug for BackingStore  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::NOT_USEFUL.0, "NOT_USEFUL", "NotUseful"),
+            (Self::WHEN_MAPPED.0, "WHEN_MAPPED", "WhenMapped"),
+            (Self::ALWAYS.0, "ALWAYS", "Always"),
+        ];
+        pretty_print_enum(fmt, self.0, &variants)
     }
 }
 ```
@@ -290,82 +265,71 @@ implementations of `BitOr` and `BitOrAssign`.
 ```
 
 ```rust
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[allow(non_camel_case_types)]
-#[repr(u8)]
-#[non_exhaustive]
-pub enum ConfigWindow {
-    X = 1 << 0,
-    Y = 1 << 1,
-    Width = 1 << 2,
-    Height = 1 << 3,
-    BorderWidth = 1 << 4,
-    Sibling = 1 << 5,
-    StackMode = 1 << 6,
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub struct ConfigWindow(u8);
+impl ConfigWindow {
+    pub const X: Self = Self(1 << 0);
+    pub const Y: Self = Self(1 << 1);
+    pub const WIDTH: Self = Self(1 << 2);
+    pub const HEIGHT: Self = Self(1 << 3);
+    pub const BORDER_WIDTH: Self = Self(1 << 4);
+    pub const SIBLING: Self = Self(1 << 5);
+    pub const STACK_MODE: Self = Self(1 << 6);
 }
 impl From<ConfigWindow> for u8 {
+    #[inline]
     fn from(input: ConfigWindow) -> Self {
-        match input {
-            ConfigWindow::X => 1 << 0,
-            ConfigWindow::Y => 1 << 1,
-            ConfigWindow::Width => 1 << 2,
-            ConfigWindow::Height => 1 << 3,
-            ConfigWindow::BorderWidth => 1 << 4,
-            ConfigWindow::Sibling => 1 << 5,
-            ConfigWindow::StackMode => 1 << 6,
-        }
+        input.0
     }
 }
 impl From<ConfigWindow> for Option<u8> {
+    #[inline]
     fn from(input: ConfigWindow) -> Self {
-        Some(u8::from(input))
+        Some(input.0)
     }
 }
 impl From<ConfigWindow> for u16 {
+    #[inline]
     fn from(input: ConfigWindow) -> Self {
-        Self::from(u8::from(input))
+        u16::from(input.0)
     }
 }
 impl From<ConfigWindow> for Option<u16> {
+    #[inline]
     fn from(input: ConfigWindow) -> Self {
-        Some(u16::from(input))
+        Some(u16::from(input.0))
     }
 }
 impl From<ConfigWindow> for u32 {
+    #[inline]
     fn from(input: ConfigWindow) -> Self {
-        Self::from(u8::from(input))
+        u32::from(input.0)
     }
 }
 impl From<ConfigWindow> for Option<u32> {
+    #[inline]
     fn from(input: ConfigWindow) -> Self {
-        Some(u32::from(input))
+        Some(u32::from(input.0))
     }
 }
-impl TryFrom<u8> for ConfigWindow {
-    type Error = ParseError;
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            1 => Ok(ConfigWindow::X),
-            2 => Ok(ConfigWindow::Y),
-            4 => Ok(ConfigWindow::Width),
-            8 => Ok(ConfigWindow::Height),
-            16 => Ok(ConfigWindow::BorderWidth),
-            32 => Ok(ConfigWindow::Sibling),
-            64 => Ok(ConfigWindow::StackMode),
-            _ => Err(ParseError::InvalidValue),
-        }
+impl From<u8> for ConfigWindow {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value)
     }
 }
-impl TryFrom<u16> for ConfigWindow {
-    type Error = ParseError;
-    fn try_from(value: u16) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
-    }
-}
-impl TryFrom<u32> for ConfigWindow {
-    type Error = ParseError;
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        Self::try_from(u8::try_from(value).or(Err(ParseError::InvalidValue))?)
+impl std::fmt::Debug for ConfigWindow  {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let variants = [
+            (Self::X.0.into(), "X", "X"),
+            (Self::Y.0.into(), "Y", "Y"),
+            (Self::WIDTH.0.into(), "WIDTH", "Width"),
+            (Self::HEIGHT.0.into(), "HEIGHT", "Height"),
+            (Self::BORDER_WIDTH.0.into(), "BORDER_WIDTH", "BorderWidth"),
+            (Self::SIBLING.0.into(), "SIBLING", "Sibling"),
+            (Self::STACK_MODE.0.into(), "STACK_MODE", "StackMode"),
+        ];
+        pretty_print_bitmask(fmt, self.0.into(), &variants)
     }
 }
 bitmask_binop!(ConfigWindow, u8);
@@ -610,12 +574,6 @@ impl TryParse for KeyPressEvent {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&[u8]> for KeyPressEvent {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
-    }
-}
 impl From<&KeyPressEvent> for [u8; 32] {
     fn from(input: &KeyPressEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -710,10 +668,11 @@ impl<C: RequestConnection + ?Sized> ConnectionExt for C {}
 
 ```xml
 <request name="NoOperation" opcode="127" />
+```
 The request is represented by a structure that contains all of the request's
 fields. This `struct` can be constructed explicitly and then `.send()` to an X11
 server.
-```
+
 This code is generated in the module:
 ```rust
 /// Opcode for the NoOperation request
@@ -722,7 +681,7 @@ pub const NO_OPERATION_REQUEST: u8 = 127;
 pub struct NoOperationRequest;
 impl NoOperationRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -738,13 +697,13 @@ impl NoOperationRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_without_reply(&slices, fds)?)
     }
@@ -805,7 +764,7 @@ pub const GET_INPUT_FOCUS_REQUEST: u8 = 43;
 pub struct GetInputFocusRequest;
 impl GetInputFocusRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<'input, Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -821,13 +780,13 @@ impl GetInputFocusRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<Cookie<'_, Conn, GetInputFocusReply>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_with_reply(&slices, fds)?)
     }
@@ -882,18 +841,12 @@ impl TryParse for GetInputFocusReply {
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
-        let revert_to = revert_to.try_into()?;
+        let revert_to = revert_to.into();
         let result = GetInputFocusReply { revert_to, sequence, length, focus };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&[u8]> for GetInputFocusReply {
-    type Error = ParseError;
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self::try_parse(value)?.0)
     }
 }
 ```
@@ -1049,7 +1002,7 @@ pub struct ConfigureWindowRequest<'input> {
 }
 impl<'input> ConfigureWindowRequest<'input> {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
+    fn serialize<Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
     where
         Conn: RequestConnection + ?Sized,
     {
@@ -1080,13 +1033,13 @@ impl<'input> ConfigureWindowRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into(), value_list_bytes.into(), padding0.into()], vec![]))
+        (vec![request0.into(), value_list_bytes.into(), padding0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let (bytes, fds) = self.serialize(conn);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         Ok(conn.send_request_without_reply(&slices, fds)?)
     }
