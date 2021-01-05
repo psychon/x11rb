@@ -525,9 +525,6 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         }
         outln!(out, "");
         outln!(out, "#![allow(clippy::too_many_arguments)]");
-        outln!(out, "#![allow(clippy::identity_op)]");
-        outln!(out, "#![allow(clippy::trivially_copy_pass_by_ref)]");
-        outln!(out, "#![allow(clippy::eq_op)]");
         outln!(out, "");
         outln!(out, "#[allow(unused_imports)]");
         outln!(out, "use std::borrow::Cow;");
