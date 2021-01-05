@@ -4,9 +4,6 @@
 //! Bindings to the `Record` X11 extension.
 
 #![allow(clippy::too_many_arguments)]
-#![allow(clippy::identity_op)]
-#![allow(clippy::trivially_copy_pass_by_ref)]
-#![allow(clippy::eq_op)]
 
 #[allow(unused_imports)]
 use std::borrow::Cow;
