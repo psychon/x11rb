@@ -727,6 +727,7 @@ pub enum InputInfoInfo {
     Key(InputInfoInfoKey),
     Button(InputInfoInfoButton),
     Valuator(InputInfoInfoValuator),
+    InvalidValue(u32),
 }
 impl InputInfoInfo {
     fn try_parse(value: &[u8], class_id: u8) -> Result<(Self, &[u8]), ParseError> {
@@ -752,7 +753,7 @@ impl InputInfoInfo {
             parse_result = Some(InputInfoInfo::Valuator(valuator));
         }
         match parse_result {
-            None => Err(ParseError::InvalidValue),
+            None => Ok((InputInfoInfo::InvalidValue(switch_expr), outer_remaining)),
             Some(result) => Ok((result, outer_remaining)),
         }
     }
@@ -790,6 +791,7 @@ impl InputInfoInfo {
             InputInfoInfo::Key(key) => key.serialize_into(bytes),
             InputInfoInfo::Button(button) => button.serialize_into(bytes),
             InputInfoInfo::Valuator(valuator) => valuator.serialize_into(bytes),
+            InputInfoInfo::InvalidValue(_) => panic!("attempted to serialize invalid switch case"),
         }
     }
 }
@@ -799,6 +801,7 @@ impl InputInfoInfo {
             InputInfoInfo::Key(_) => u32::from(InputClass::KEY),
             InputInfoInfo::Button(_) => u32::from(InputClass::BUTTON),
             InputInfoInfo::Valuator(_) => u32::from(InputClass::VALUATOR),
+            InputInfoInfo::InvalidValue(switch_expr) => *switch_expr,
         }
     }
 }
@@ -4042,6 +4045,7 @@ pub enum FeedbackStateData {
     Integer(FeedbackStateDataInteger),
     Led(FeedbackStateDataLed),
     Bell(FeedbackStateDataBell),
+    InvalidValue(u32),
 }
 impl FeedbackStateData {
     fn try_parse(value: &[u8], class_id: u8) -> Result<(Self, &[u8]), ParseError> {
@@ -4085,7 +4089,7 @@ impl FeedbackStateData {
             parse_result = Some(FeedbackStateData::Bell(bell));
         }
         match parse_result {
-            None => Err(ParseError::InvalidValue),
+            None => Ok((FeedbackStateData::InvalidValue(switch_expr), outer_remaining)),
             Some(result) => Ok((result, outer_remaining)),
         }
     }
@@ -4144,6 +4148,7 @@ impl FeedbackStateData {
             FeedbackStateData::Integer(integer) => integer.serialize_into(bytes),
             FeedbackStateData::Led(led) => led.serialize_into(bytes),
             FeedbackStateData::Bell(bell) => bell.serialize_into(bytes),
+            FeedbackStateData::InvalidValue(_) => panic!("attempted to serialize invalid switch case"),
         }
     }
 }
@@ -4156,6 +4161,7 @@ impl FeedbackStateData {
             FeedbackStateData::Integer(_) => u32::from(FeedbackClass::INTEGER),
             FeedbackStateData::Led(_) => u32::from(FeedbackClass::LED),
             FeedbackStateData::Bell(_) => u32::from(FeedbackClass::BELL),
+            FeedbackStateData::InvalidValue(switch_expr) => *switch_expr,
         }
     }
 }
@@ -4919,6 +4925,7 @@ pub enum FeedbackCtlData {
     Integer(FeedbackCtlDataInteger),
     Led(FeedbackCtlDataLed),
     Bell(FeedbackCtlDataBell),
+    InvalidValue(u32),
 }
 impl FeedbackCtlData {
     fn try_parse(value: &[u8], class_id: u8) -> Result<(Self, &[u8]), ParseError> {
@@ -4962,7 +4969,7 @@ impl FeedbackCtlData {
             parse_result = Some(FeedbackCtlData::Bell(bell));
         }
         match parse_result {
-            None => Err(ParseError::InvalidValue),
+            None => Ok((FeedbackCtlData::InvalidValue(switch_expr), outer_remaining)),
             Some(result) => Ok((result, outer_remaining)),
         }
     }
@@ -5021,6 +5028,7 @@ impl FeedbackCtlData {
             FeedbackCtlData::Integer(integer) => integer.serialize_into(bytes),
             FeedbackCtlData::Led(led) => led.serialize_into(bytes),
             FeedbackCtlData::Bell(bell) => bell.serialize_into(bytes),
+            FeedbackCtlData::InvalidValue(_) => panic!("attempted to serialize invalid switch case"),
         }
     }
 }
@@ -5033,6 +5041,7 @@ impl FeedbackCtlData {
             FeedbackCtlData::Integer(_) => u32::from(FeedbackClass::INTEGER),
             FeedbackCtlData::Led(_) => u32::from(FeedbackClass::LED),
             FeedbackCtlData::Bell(_) => u32::from(FeedbackClass::BELL),
+            FeedbackCtlData::InvalidValue(switch_expr) => *switch_expr,
         }
     }
 }
@@ -6344,6 +6353,7 @@ pub enum InputStateData {
     Key(InputStateDataKey),
     Button(InputStateDataButton),
     Valuator(InputStateDataValuator),
+    InvalidValue(u32),
 }
 impl InputStateData {
     fn try_parse(value: &[u8], class_id: u8) -> Result<(Self, &[u8]), ParseError> {
@@ -6369,7 +6379,7 @@ impl InputStateData {
             parse_result = Some(InputStateData::Valuator(valuator));
         }
         match parse_result {
-            None => Err(ParseError::InvalidValue),
+            None => Ok((InputStateData::InvalidValue(switch_expr), outer_remaining)),
             Some(result) => Ok((result, outer_remaining)),
         }
     }
@@ -6407,6 +6417,7 @@ impl InputStateData {
             InputStateData::Key(key) => key.serialize_into(bytes),
             InputStateData::Button(button) => button.serialize_into(bytes),
             InputStateData::Valuator(valuator) => valuator.serialize_into(bytes),
+            InputStateData::InvalidValue(_) => panic!("attempted to serialize invalid switch case"),
         }
     }
 }
@@ -6416,6 +6427,7 @@ impl InputStateData {
             InputStateData::Key(_) => u32::from(InputClass::KEY),
             InputStateData::Button(_) => u32::from(InputClass::BUTTON),
             InputStateData::Valuator(_) => u32::from(InputClass::VALUATOR),
+            InputStateData::InvalidValue(switch_expr) => *switch_expr,
         }
     }
 }
@@ -7378,6 +7390,7 @@ pub enum DeviceStateData {
     Core(DeviceStateDataCore),
     Enable(u8),
     AbsArea(DeviceStateDataAbsArea),
+    InvalidValue(u32),
 }
 impl DeviceStateData {
     fn try_parse(value: &[u8], control_id: u16) -> Result<(Self, &[u8]), ParseError> {
@@ -7417,7 +7430,7 @@ impl DeviceStateData {
             parse_result = Some(DeviceStateData::AbsArea(abs_area));
         }
         match parse_result {
-            None => Err(ParseError::InvalidValue),
+            None => Ok((DeviceStateData::InvalidValue(switch_expr), outer_remaining)),
             Some(result) => Ok((result, outer_remaining)),
         }
     }
@@ -7473,6 +7486,7 @@ impl DeviceStateData {
                 bytes.extend_from_slice(&[0; 3]);
             }
             DeviceStateData::AbsArea(abs_area) => abs_area.serialize_into(bytes),
+            DeviceStateData::InvalidValue(_) => panic!("attempted to serialize invalid switch case"),
         }
     }
 }
@@ -7484,6 +7498,7 @@ impl DeviceStateData {
             DeviceStateData::Core(_) => u32::from(DeviceControl::CORE),
             DeviceStateData::Enable(_) => u32::from(DeviceControl::ENABLE),
             DeviceStateData::AbsArea(_) => u32::from(DeviceControl::ABSAREA),
+            DeviceStateData::InvalidValue(switch_expr) => *switch_expr,
         }
     }
 }
@@ -8169,6 +8184,7 @@ pub enum DeviceCtlData {
     Core(DeviceCtlDataCore),
     Enable(u8),
     AbsArea(DeviceCtlDataAbsArea),
+    InvalidValue(u32),
 }
 impl DeviceCtlData {
     fn try_parse(value: &[u8], control_id: u16) -> Result<(Self, &[u8]), ParseError> {
@@ -8208,7 +8224,7 @@ impl DeviceCtlData {
             parse_result = Some(DeviceCtlData::AbsArea(abs_area));
         }
         match parse_result {
-            None => Err(ParseError::InvalidValue),
+            None => Ok((DeviceCtlData::InvalidValue(switch_expr), outer_remaining)),
             Some(result) => Ok((result, outer_remaining)),
         }
     }
@@ -8264,6 +8280,7 @@ impl DeviceCtlData {
                 bytes.extend_from_slice(&[0; 3]);
             }
             DeviceCtlData::AbsArea(abs_area) => abs_area.serialize_into(bytes),
+            DeviceCtlData::InvalidValue(_) => panic!("attempted to serialize invalid switch case"),
         }
     }
 }
@@ -8275,6 +8292,7 @@ impl DeviceCtlData {
             DeviceCtlData::Core(_) => u32::from(DeviceControl::CORE),
             DeviceCtlData::Enable(_) => u32::from(DeviceControl::ENABLE),
             DeviceCtlData::AbsArea(_) => u32::from(DeviceControl::ABSAREA),
+            DeviceCtlData::InvalidValue(switch_expr) => *switch_expr,
         }
     }
 }
@@ -8590,6 +8608,7 @@ pub enum ChangeDevicePropertyAux {
     Data8(Vec<u8>),
     Data16(Vec<u16>),
     Data32(Vec<u32>),
+    InvalidValue(u32),
 }
 impl ChangeDevicePropertyAux {
     fn try_parse(value: &[u8], format: u8, num_items: u32) -> Result<(Self, &[u8]), ParseError> {
@@ -8629,7 +8648,7 @@ impl ChangeDevicePropertyAux {
             parse_result = Some(ChangeDevicePropertyAux::Data32(data32));
         }
         match parse_result {
-            None => Err(ParseError::InvalidValue),
+            None => Ok((ChangeDevicePropertyAux::InvalidValue(switch_expr), outer_remaining)),
             Some(result) => Ok((result, outer_remaining)),
         }
     }
@@ -8678,6 +8697,7 @@ impl ChangeDevicePropertyAux {
                 assert_eq!(data32.len(), usize::try_from(num_items).unwrap(), "`data32` has an incorrect length");
                 data32.serialize_into(bytes);
             }
+            ChangeDevicePropertyAux::InvalidValue(_) => panic!("attempted to serialize invalid switch case"),
         }
     }
 }
@@ -8687,6 +8707,7 @@ impl ChangeDevicePropertyAux {
             ChangeDevicePropertyAux::Data8(_) => u32::from(PropertyFormat::M8_BITS),
             ChangeDevicePropertyAux::Data16(_) => u32::from(PropertyFormat::M16_BITS),
             ChangeDevicePropertyAux::Data32(_) => u32::from(PropertyFormat::M32_BITS),
+            ChangeDevicePropertyAux::InvalidValue(switch_expr) => *switch_expr,
         }
     }
 }
@@ -8999,6 +9020,7 @@ pub enum GetDevicePropertyItems {
     Data8(Vec<u8>),
     Data16(Vec<u16>),
     Data32(Vec<u32>),
+    InvalidValue(u32),
 }
 impl GetDevicePropertyItems {
     fn try_parse(value: &[u8], format: u8, num_items: u32) -> Result<(Self, &[u8]), ParseError> {
@@ -9038,7 +9060,7 @@ impl GetDevicePropertyItems {
             parse_result = Some(GetDevicePropertyItems::Data32(data32));
         }
         match parse_result {
-            None => Err(ParseError::InvalidValue),
+            None => Ok((GetDevicePropertyItems::InvalidValue(switch_expr), outer_remaining)),
             Some(result) => Ok((result, outer_remaining)),
         }
     }
@@ -10111,6 +10133,7 @@ pub enum HierarchyChangeData {
     RemoveMaster(HierarchyChangeDataRemoveMaster),
     AttachSlave(HierarchyChangeDataAttachSlave),
     DetachSlave(HierarchyChangeDataDetachSlave),
+    InvalidValue(u32),
 }
 impl HierarchyChangeData {
     fn try_parse(value: &[u8], type_: u16) -> Result<(Self, &[u8]), ParseError> {
@@ -10142,7 +10165,7 @@ impl HierarchyChangeData {
             parse_result = Some(HierarchyChangeData::DetachSlave(detach_slave));
         }
         match parse_result {
-            None => Err(ParseError::InvalidValue),
+            None => Ok((HierarchyChangeData::InvalidValue(switch_expr), outer_remaining)),
             Some(result) => Ok((result, outer_remaining)),
         }
     }
@@ -10187,6 +10210,7 @@ impl HierarchyChangeData {
             HierarchyChangeData::RemoveMaster(remove_master) => remove_master.serialize_into(bytes),
             HierarchyChangeData::AttachSlave(attach_slave) => attach_slave.serialize_into(bytes),
             HierarchyChangeData::DetachSlave(detach_slave) => detach_slave.serialize_into(bytes),
+            HierarchyChangeData::InvalidValue(_) => panic!("attempted to serialize invalid switch case"),
         }
     }
 }
@@ -10197,6 +10221,7 @@ impl HierarchyChangeData {
             HierarchyChangeData::RemoveMaster(_) => u32::from(HierarchyChangeType::REMOVE_MASTER),
             HierarchyChangeData::AttachSlave(_) => u32::from(HierarchyChangeType::ATTACH_SLAVE),
             HierarchyChangeData::DetachSlave(_) => u32::from(HierarchyChangeType::DETACH_SLAVE),
+            HierarchyChangeData::InvalidValue(switch_expr) => *switch_expr,
         }
     }
 }
@@ -11698,6 +11723,7 @@ pub enum DeviceClassData {
     Valuator(DeviceClassDataValuator),
     Scroll(DeviceClassDataScroll),
     Touch(DeviceClassDataTouch),
+    InvalidValue(u32),
 }
 impl DeviceClassData {
     fn try_parse(value: &[u8], type_: u16) -> Result<(Self, &[u8]), ParseError> {
@@ -11735,7 +11761,7 @@ impl DeviceClassData {
             parse_result = Some(DeviceClassData::Touch(touch));
         }
         match parse_result {
-            None => Err(ParseError::InvalidValue),
+            None => Ok((DeviceClassData::InvalidValue(switch_expr), outer_remaining)),
             Some(result) => Ok((result, outer_remaining)),
         }
     }
@@ -11787,6 +11813,7 @@ impl DeviceClassData {
             DeviceClassData::Valuator(valuator) => valuator.serialize_into(bytes),
             DeviceClassData::Scroll(scroll) => scroll.serialize_into(bytes),
             DeviceClassData::Touch(touch) => touch.serialize_into(bytes),
+            DeviceClassData::InvalidValue(_) => panic!("attempted to serialize invalid switch case"),
         }
     }
 }
@@ -11798,6 +11825,7 @@ impl DeviceClassData {
             DeviceClassData::Valuator(_) => u32::from(DeviceClassType::VALUATOR),
             DeviceClassData::Scroll(_) => u32::from(DeviceClassType::SCROLL),
             DeviceClassData::Touch(_) => u32::from(DeviceClassType::TOUCH),
+            DeviceClassData::InvalidValue(switch_expr) => *switch_expr,
         }
     }
 }
@@ -13358,6 +13386,7 @@ pub enum XIChangePropertyAux {
     Data8(Vec<u8>),
     Data16(Vec<u16>),
     Data32(Vec<u32>),
+    InvalidValue(u32),
 }
 impl XIChangePropertyAux {
     fn try_parse(value: &[u8], format: u8, num_items: u32) -> Result<(Self, &[u8]), ParseError> {
@@ -13397,7 +13426,7 @@ impl XIChangePropertyAux {
             parse_result = Some(XIChangePropertyAux::Data32(data32));
         }
         match parse_result {
-            None => Err(ParseError::InvalidValue),
+            None => Ok((XIChangePropertyAux::InvalidValue(switch_expr), outer_remaining)),
             Some(result) => Ok((result, outer_remaining)),
         }
     }
@@ -13446,6 +13475,7 @@ impl XIChangePropertyAux {
                 assert_eq!(data32.len(), usize::try_from(num_items).unwrap(), "`data32` has an incorrect length");
                 data32.serialize_into(bytes);
             }
+            XIChangePropertyAux::InvalidValue(_) => panic!("attempted to serialize invalid switch case"),
         }
     }
 }
@@ -13455,6 +13485,7 @@ impl XIChangePropertyAux {
             XIChangePropertyAux::Data8(_) => u32::from(PropertyFormat::M8_BITS),
             XIChangePropertyAux::Data16(_) => u32::from(PropertyFormat::M16_BITS),
             XIChangePropertyAux::Data32(_) => u32::from(PropertyFormat::M32_BITS),
+            XIChangePropertyAux::InvalidValue(switch_expr) => *switch_expr,
         }
     }
 }
@@ -13772,6 +13803,7 @@ pub enum XIGetPropertyItems {
     Data8(Vec<u8>),
     Data16(Vec<u16>),
     Data32(Vec<u32>),
+    InvalidValue(u32),
 }
 impl XIGetPropertyItems {
     fn try_parse(value: &[u8], format: u8, num_items: u32) -> Result<(Self, &[u8]), ParseError> {
@@ -13811,7 +13843,7 @@ impl XIGetPropertyItems {
             parse_result = Some(XIGetPropertyItems::Data32(data32));
         }
         match parse_result {
-            None => Err(ParseError::InvalidValue),
+            None => Ok((XIGetPropertyItems::InvalidValue(switch_expr), outer_remaining)),
             Some(result) => Ok((result, outer_remaining)),
         }
     }

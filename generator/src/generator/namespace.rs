@@ -190,12 +190,19 @@ pub(super) fn generate_request_reply_enum(
             outln!(out, "}}");
         });
         outln!(out, "}}");
-        outln!(out, "/// Convert this Request into an owned version with no borrows.");
+        outln!(
+            out,
+            "/// Convert this Request into an owned version with no borrows."
+        );
         outln!(out, "pub fn into_owned(self) -> Request<'static> {{");
         out.indented(|out| {
             outln!(out, "match self {{");
             out.indented(|out| {
-                outln!(out, "Request::Unknown(header, body) => Request::Unknown(header, Cow::Owned(body.into_owned())),");
+                outln!(
+                    out,
+                    "Request::Unknown(header, body) => Request::Unknown(header, \
+                     Cow::Owned(body.into_owned())),"
+                );
                 for ns in namespaces.iter() {
                     let has_feature = super::ext_has_feature(&ns.header);
 
@@ -540,7 +547,8 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         outln!(out, "#[allow(unused_imports)]");
         outln!(
             out,
-            "use crate::x11_utils::{{Request, RequestHeader, Serialize, TryParse, TryParseFd, TryIntoUSize}};"
+            "use crate::x11_utils::{{Request, RequestHeader, Serialize, TryParse, TryParseFd, \
+             TryIntoUSize}};"
         );
         outln!(
             out,
@@ -2668,7 +2676,8 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 outln!(out, "impl TryParseFd for {} {{", name);
                 outln!(
                     out.indent(),
-                    "fn try_parse_fd<'a>({}: &'a [u8], fds: &mut Vec<RawFdContainer>) -> Result<(Self, &'a [u8]), ParseError> {{",
+                    "fn try_parse_fd<'a>({}: &'a [u8], fds: &mut Vec<RawFdContainer>) -> \
+                     Result<(Self, &'a [u8]), ParseError> {{",
                     input_name,
                 );
             } else if !external_params.is_empty() {
@@ -2685,8 +2694,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                     .collect::<Vec<_>>();
                 outln!(
                     out.indent(),
-                    "pub fn try_parse({}: &[u8], {}) -> Result<(Self, &[u8]), ParseError> \
-                     {{",
+                    "pub fn try_parse({}: &[u8], {}) -> Result<(Self, &[u8]), ParseError> {{",
                     input_name,
                     p.join(", "),
                 );
@@ -3224,6 +3232,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                     }
                 }
             }
+            outln!(out.indent(), "InvalidValue(u32),");
             outln!(out, "}}");
         }
 
@@ -3318,6 +3327,11 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                                 ),
                             );
                         }
+                        outln!(
+                            out.indent(),
+                            "{}::InvalidValue(switch_expr) => *switch_expr,",
+                            name,
+                        );
                         outln!(out, "}}");
                     } else {
                         outln!(out, "let mut expr_value = 0;");
@@ -3577,7 +3591,11 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                         outln!(out, "}}");
                     }
                     outln!(out, "match parse_result {{");
-                    outln!(out.indent(), "None => Err(ParseError::InvalidValue),");
+                    outln!(
+                        out.indent(),
+                        "None => Ok(({}::InvalidValue(switch_expr), outer_remaining)),",
+                        name,
+                    );
                     outln!(
                         out.indent(),
                         "Some(result) => Ok((result, outer_remaining)),",
@@ -3917,6 +3935,12 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                                 }
                             }
                         }
+                        outln!(
+                            out,
+                            "{}::InvalidValue(_) => panic!(\"attempted to serialize invalid \
+                             switch case\"),",
+                            name
+                        );
                     });
                     outln!(out, "}}");
                 }
@@ -4096,8 +4120,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                     if let Some(ref length_expr) = list_field.length_expr {
                         outln!(
                             out,
-                            "let list_length = \
-                             {}.try_to_usize()?;",
+                            "let list_length = {}.try_to_usize()?;",
                             self.expr_to_str(
                                 length_expr,
                                 to_rust_variable_name,
@@ -4581,8 +4604,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             self.expr_to_str(&switch.expr, to_rust_variable_name, true, true, false);
         outln!(
             out,
-            "assert_eq!(self.switch_expr(), {}, \"switch `{}` has an inconsistent \
-             discriminant\");",
+            "assert_eq!(self.switch_expr(), {}, \"switch `{}` has an inconsistent discriminant\");",
             switch_expr_str,
             rust_field_name,
         );

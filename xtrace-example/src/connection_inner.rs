@@ -54,9 +54,9 @@ impl ConnectionInner {
         let byte_order = 0x42;
         if byte_order != packet[0] {
             eprintln!(
-                "Client is unexpected byte order {:x} != {:x}, only native byte order is supported!",
-                byte_order,
-                packet[0],
+                "Client is unexpected byte order {:x} != {:x}, only native byte order is \
+                 supported!",
+                byte_order, packet[0],
             );
         }
         print_parse::<xproto::SetupRequest>(packet);
