@@ -1,3 +1,40 @@
+# Version 0.8.0 (2021-XX-XX)
+
+New features:
+* Added a `resource_manager` library for querying the X11 resource database
+  (Xrm).
+* Added a `from_configure_request(&ConfigureRequestEvent)` function to
+  `xproto::ConfigureWindowAux`.
+
+Fixes:
+* Rework `<enum>` representation so that we can represent invalid values from
+  the X11 server. This mainly fixes problems with XInput.
+* The `cursor` code now depends on the Xrm code for proper database support.
+
+Breaking changes:
+* Reword `<enum>` representation: Instead of using a Rust `enum`, we now use a
+  newtype around an integer. The named variants are provided as associated
+  constants instead of enum variants. Due to Rust's naming rules, this means
+  that e.g. `xproto::EventMask::ButtonRelease` is now called `BUTTON_RELEASE`.
+* `ParseError` no longer implements `From<Infallible>`.
+* Enumerations no longer implement conversion to `bool`.
+* Removed unused `TryFrom<uXX>` implementations for enumerations.
+* Removed `TryFrom<&[u8]>` implementations from the generated code.
+
+Minor changes:
+* Removed some unnecessary `unwrap()`s in the generated code.
+* Minor improvements to the code generator.
+* Fixed some new clippy warnings.
+* Binary operations on enumeration values now preserve the type instead of
+  mapping to integers (e.g. `ConfigWindow::WIDTH | 0` now has type
+  `ConfigWindow` instead of `u8`).
+* Add a `Debug` impl to enums that selects between `UPPER_CASE` and `CamelCase`
+  based on the `alternate()` flag.
+* Documentation improvements
+* Added an internal helper trait `TryIntoUSize` to shorten the conversion from
+  other numbers to `usize`.
+* Remove some no longer necessary `#![allow]`s from the generated code.
+
 # Version 0.7.0 (2020-10-11)
 
 New features:
