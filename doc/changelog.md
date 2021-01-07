@@ -9,6 +9,9 @@ New features:
 Fixes:
 * Rework `<enum>` representation so that we can represent invalid values from
   the X11 server. This mainly fixes problems with XInput.
+* Add an `InvalidValue` variant to the representation of `<switch>`es. This
+  variant is used when the server sends an invalid value for the `<switch>`
+  discriminant. This fixes problems with XInput.
 * The `cursor` code now depends on the Xrm code for proper database support.
 
 Breaking changes:
