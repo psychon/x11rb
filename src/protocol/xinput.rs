@@ -761,7 +761,7 @@ impl InputInfoInfo {
             parse_result = Some(InputInfoInfo::Valuator(valuator));
         }
         match parse_result {
-            None => Ok((InputInfoInfo::InvalidValue(switch_expr), outer_remaining)),
+            None => Ok((InputInfoInfo::InvalidValue(switch_expr), &[])),
             Some(result) => Ok((result, outer_remaining)),
         }
     }
@@ -4105,7 +4105,7 @@ impl FeedbackStateData {
             parse_result = Some(FeedbackStateData::Bell(bell));
         }
         match parse_result {
-            None => Ok((FeedbackStateData::InvalidValue(switch_expr), outer_remaining)),
+            None => Ok((FeedbackStateData::InvalidValue(switch_expr), &[])),
             Some(result) => Ok((result, outer_remaining)),
         }
     }
@@ -4993,7 +4993,7 @@ impl FeedbackCtlData {
             parse_result = Some(FeedbackCtlData::Bell(bell));
         }
         match parse_result {
-            None => Ok((FeedbackCtlData::InvalidValue(switch_expr), outer_remaining)),
+            None => Ok((FeedbackCtlData::InvalidValue(switch_expr), &[])),
             Some(result) => Ok((result, outer_remaining)),
         }
     }
@@ -6411,7 +6411,7 @@ impl InputStateData {
             parse_result = Some(InputStateData::Valuator(valuator));
         }
         match parse_result {
-            None => Ok((InputStateData::InvalidValue(switch_expr), outer_remaining)),
+            None => Ok((InputStateData::InvalidValue(switch_expr), &[])),
             Some(result) => Ok((result, outer_remaining)),
         }
     }
@@ -7470,7 +7470,7 @@ impl DeviceStateData {
             parse_result = Some(DeviceStateData::AbsArea(abs_area));
         }
         match parse_result {
-            None => Ok((DeviceStateData::InvalidValue(switch_expr), outer_remaining)),
+            None => Ok((DeviceStateData::InvalidValue(switch_expr), &[])),
             Some(result) => Ok((result, outer_remaining)),
         }
     }
@@ -8272,7 +8272,7 @@ impl DeviceCtlData {
             parse_result = Some(DeviceCtlData::AbsArea(abs_area));
         }
         match parse_result {
-            None => Ok((DeviceCtlData::InvalidValue(switch_expr), outer_remaining)),
+            None => Ok((DeviceCtlData::InvalidValue(switch_expr), &[])),
             Some(result) => Ok((result, outer_remaining)),
         }
     }
@@ -8704,7 +8704,7 @@ impl ChangeDevicePropertyAux {
             parse_result = Some(ChangeDevicePropertyAux::Data32(data32));
         }
         match parse_result {
-            None => Ok((ChangeDevicePropertyAux::InvalidValue(switch_expr), outer_remaining)),
+            None => Ok((ChangeDevicePropertyAux::InvalidValue(switch_expr), &[])),
             Some(result) => Ok((result, outer_remaining)),
         }
     }
@@ -9124,7 +9124,7 @@ impl GetDevicePropertyItems {
             parse_result = Some(GetDevicePropertyItems::Data32(data32));
         }
         match parse_result {
-            None => Ok((GetDevicePropertyItems::InvalidValue(switch_expr), outer_remaining)),
+            None => Ok((GetDevicePropertyItems::InvalidValue(switch_expr), &[])),
             Some(result) => Ok((result, outer_remaining)),
         }
     }
@@ -10237,7 +10237,7 @@ impl HierarchyChangeData {
             parse_result = Some(HierarchyChangeData::DetachSlave(detach_slave));
         }
         match parse_result {
-            None => Ok((HierarchyChangeData::InvalidValue(switch_expr), outer_remaining)),
+            None => Ok((HierarchyChangeData::InvalidValue(switch_expr), &[])),
             Some(result) => Ok((result, outer_remaining)),
         }
     }
@@ -11841,7 +11841,7 @@ impl DeviceClassData {
             parse_result = Some(DeviceClassData::Touch(touch));
         }
         match parse_result {
-            None => Ok((DeviceClassData::InvalidValue(switch_expr), outer_remaining)),
+            None => Ok((DeviceClassData::InvalidValue(switch_expr), &[])),
             Some(result) => Ok((result, outer_remaining)),
         }
     }
@@ -13514,7 +13514,7 @@ impl XIChangePropertyAux {
             parse_result = Some(XIChangePropertyAux::Data32(data32));
         }
         match parse_result {
-            None => Ok((XIChangePropertyAux::InvalidValue(switch_expr), outer_remaining)),
+            None => Ok((XIChangePropertyAux::InvalidValue(switch_expr), &[])),
             Some(result) => Ok((result, outer_remaining)),
         }
     }
@@ -13939,7 +13939,7 @@ impl XIGetPropertyItems {
             parse_result = Some(XIGetPropertyItems::Data32(data32));
         }
         match parse_result {
-            None => Ok((XIGetPropertyItems::InvalidValue(switch_expr), outer_remaining)),
+            None => Ok((XIGetPropertyItems::InvalidValue(switch_expr), &[])),
             Some(result) => Ok((result, outer_remaining)),
         }
     }

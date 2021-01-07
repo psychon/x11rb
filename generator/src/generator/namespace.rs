@@ -3616,7 +3616,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                     outln!(out, "match parse_result {{");
                     outln!(
                         out.indent(),
-                        "None => Ok(({}::InvalidValue(switch_expr), outer_remaining)),",
+                        "None => Ok(({}::InvalidValue(switch_expr), &[])),",
                         name,
                     );
                     outln!(
