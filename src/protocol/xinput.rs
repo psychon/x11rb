@@ -727,6 +727,14 @@ pub enum InputInfoInfo {
     Key(InputInfoInfoKey),
     Button(InputInfoInfoButton),
     Valuator(InputInfoInfoValuator),
+    /// This variant is returned when the server sends a discriminant
+    /// value that does not match any of the defined by the protocol.
+    ///
+    /// Usually, this should be considered a parsing error, but there
+    /// are some cases where the server violates the protocol.
+    ///
+    /// Trying to use `serialize` or `serialize_into` with this variant
+    /// will raise a panic.
     InvalidValue(u32),
 }
 impl InputInfoInfo {
@@ -4045,6 +4053,14 @@ pub enum FeedbackStateData {
     Integer(FeedbackStateDataInteger),
     Led(FeedbackStateDataLed),
     Bell(FeedbackStateDataBell),
+    /// This variant is returned when the server sends a discriminant
+    /// value that does not match any of the defined by the protocol.
+    ///
+    /// Usually, this should be considered a parsing error, but there
+    /// are some cases where the server violates the protocol.
+    ///
+    /// Trying to use `serialize` or `serialize_into` with this variant
+    /// will raise a panic.
     InvalidValue(u32),
 }
 impl FeedbackStateData {
@@ -4925,6 +4941,14 @@ pub enum FeedbackCtlData {
     Integer(FeedbackCtlDataInteger),
     Led(FeedbackCtlDataLed),
     Bell(FeedbackCtlDataBell),
+    /// This variant is returned when the server sends a discriminant
+    /// value that does not match any of the defined by the protocol.
+    ///
+    /// Usually, this should be considered a parsing error, but there
+    /// are some cases where the server violates the protocol.
+    ///
+    /// Trying to use `serialize` or `serialize_into` with this variant
+    /// will raise a panic.
     InvalidValue(u32),
 }
 impl FeedbackCtlData {
@@ -6353,6 +6377,14 @@ pub enum InputStateData {
     Key(InputStateDataKey),
     Button(InputStateDataButton),
     Valuator(InputStateDataValuator),
+    /// This variant is returned when the server sends a discriminant
+    /// value that does not match any of the defined by the protocol.
+    ///
+    /// Usually, this should be considered a parsing error, but there
+    /// are some cases where the server violates the protocol.
+    ///
+    /// Trying to use `serialize` or `serialize_into` with this variant
+    /// will raise a panic.
     InvalidValue(u32),
 }
 impl InputStateData {
@@ -7390,6 +7422,14 @@ pub enum DeviceStateData {
     Core(DeviceStateDataCore),
     Enable(u8),
     AbsArea(DeviceStateDataAbsArea),
+    /// This variant is returned when the server sends a discriminant
+    /// value that does not match any of the defined by the protocol.
+    ///
+    /// Usually, this should be considered a parsing error, but there
+    /// are some cases where the server violates the protocol.
+    ///
+    /// Trying to use `serialize` or `serialize_into` with this variant
+    /// will raise a panic.
     InvalidValue(u32),
 }
 impl DeviceStateData {
@@ -8184,6 +8224,14 @@ pub enum DeviceCtlData {
     Core(DeviceCtlDataCore),
     Enable(u8),
     AbsArea(DeviceCtlDataAbsArea),
+    /// This variant is returned when the server sends a discriminant
+    /// value that does not match any of the defined by the protocol.
+    ///
+    /// Usually, this should be considered a parsing error, but there
+    /// are some cases where the server violates the protocol.
+    ///
+    /// Trying to use `serialize` or `serialize_into` with this variant
+    /// will raise a panic.
     InvalidValue(u32),
 }
 impl DeviceCtlData {
@@ -8608,6 +8656,14 @@ pub enum ChangeDevicePropertyAux {
     Data8(Vec<u8>),
     Data16(Vec<u16>),
     Data32(Vec<u32>),
+    /// This variant is returned when the server sends a discriminant
+    /// value that does not match any of the defined by the protocol.
+    ///
+    /// Usually, this should be considered a parsing error, but there
+    /// are some cases where the server violates the protocol.
+    ///
+    /// Trying to use `serialize` or `serialize_into` with this variant
+    /// will raise a panic.
     InvalidValue(u32),
 }
 impl ChangeDevicePropertyAux {
@@ -9020,6 +9076,14 @@ pub enum GetDevicePropertyItems {
     Data8(Vec<u8>),
     Data16(Vec<u16>),
     Data32(Vec<u32>),
+    /// This variant is returned when the server sends a discriminant
+    /// value that does not match any of the defined by the protocol.
+    ///
+    /// Usually, this should be considered a parsing error, but there
+    /// are some cases where the server violates the protocol.
+    ///
+    /// Trying to use `serialize` or `serialize_into` with this variant
+    /// will raise a panic.
     InvalidValue(u32),
 }
 impl GetDevicePropertyItems {
@@ -10133,6 +10197,14 @@ pub enum HierarchyChangeData {
     RemoveMaster(HierarchyChangeDataRemoveMaster),
     AttachSlave(HierarchyChangeDataAttachSlave),
     DetachSlave(HierarchyChangeDataDetachSlave),
+    /// This variant is returned when the server sends a discriminant
+    /// value that does not match any of the defined by the protocol.
+    ///
+    /// Usually, this should be considered a parsing error, but there
+    /// are some cases where the server violates the protocol.
+    ///
+    /// Trying to use `serialize` or `serialize_into` with this variant
+    /// will raise a panic.
     InvalidValue(u32),
 }
 impl HierarchyChangeData {
@@ -11723,6 +11795,14 @@ pub enum DeviceClassData {
     Valuator(DeviceClassDataValuator),
     Scroll(DeviceClassDataScroll),
     Touch(DeviceClassDataTouch),
+    /// This variant is returned when the server sends a discriminant
+    /// value that does not match any of the defined by the protocol.
+    ///
+    /// Usually, this should be considered a parsing error, but there
+    /// are some cases where the server violates the protocol.
+    ///
+    /// Trying to use `serialize` or `serialize_into` with this variant
+    /// will raise a panic.
     InvalidValue(u32),
 }
 impl DeviceClassData {
@@ -13386,6 +13466,14 @@ pub enum XIChangePropertyAux {
     Data8(Vec<u8>),
     Data16(Vec<u16>),
     Data32(Vec<u32>),
+    /// This variant is returned when the server sends a discriminant
+    /// value that does not match any of the defined by the protocol.
+    ///
+    /// Usually, this should be considered a parsing error, but there
+    /// are some cases where the server violates the protocol.
+    ///
+    /// Trying to use `serialize` or `serialize_into` with this variant
+    /// will raise a panic.
     InvalidValue(u32),
 }
 impl XIChangePropertyAux {
@@ -13803,6 +13891,14 @@ pub enum XIGetPropertyItems {
     Data8(Vec<u8>),
     Data16(Vec<u16>),
     Data32(Vec<u32>),
+    /// This variant is returned when the server sends a discriminant
+    /// value that does not match any of the defined by the protocol.
+    ///
+    /// Usually, this should be considered a parsing error, but there
+    /// are some cases where the server violates the protocol.
+    ///
+    /// Trying to use `serialize` or `serialize_into` with this variant
+    /// will raise a panic.
     InvalidValue(u32),
 }
 impl XIGetPropertyItems {

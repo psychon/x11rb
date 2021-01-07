@@ -3232,6 +3232,29 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                     }
                 }
             }
+            outln!(
+                out.indent(),
+                "/// This variant is returned when the server sends a discriminant",
+            );
+            outln!(
+                out.indent(),
+                "/// value that does not match any of the defined by the protocol.",
+            );
+            outln!(out.indent(), "///");
+            outln!(
+                out.indent(),
+                "/// Usually, this should be considered a parsing error, but there",
+            );
+            outln!(
+                out.indent(),
+                "/// are some cases where the server violates the protocol.",
+            );
+            outln!(out.indent(), "///");
+            outln!(
+                out.indent(),
+                "/// Trying to use `serialize` or `serialize_into` with this variant",
+            );
+            outln!(out.indent(), "/// will raise a panic.");
             outln!(out.indent(), "InvalidValue(u32),");
             outln!(out, "}}");
         }
