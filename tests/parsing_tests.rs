@@ -133,3 +133,36 @@ fn parse_setup() -> Result<(), ParseError> {
 
     Ok(())
 }
+
+#[cfg(feature = "xinput")]
+#[test]
+fn parse_xi_get_property_reply_format_0() {
+    let mut s = Vec::new();
+
+    s.push(1); // response_type
+    s.push(0); // pad
+    s.extend(&0u16.to_ne_bytes()); // sequence
+    s.extend(&0u32.to_ne_bytes()); // length
+    s.extend(&0u32.to_ne_bytes()); // type
+    s.extend(&0u32.to_ne_bytes()); // bytes_after
+    s.extend(&0u32.to_ne_bytes()); // num_items
+    s.push(0); // format
+    s.extend(&[0; 11]); // pad
+
+    use x11rb::protocol::xinput::{XIGetPropertyItems, XIGetPropertyReply};
+    let empty: &[u8] = &[];
+    assert_eq!(
+        XIGetPropertyReply::try_parse(&s),
+        Ok((
+            XIGetPropertyReply {
+                sequence: 0,
+                length: 0,
+                type_: 0,
+                bytes_after: 0,
+                num_items: 0,
+                items: XIGetPropertyItems::InvalidValue(0),
+            },
+            empty,
+        )),
+    );
+}

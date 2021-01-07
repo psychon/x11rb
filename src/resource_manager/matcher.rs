@@ -294,7 +294,12 @@ fn compare_matches(match1: &[MatchKind], match2: &[MatchKind]) -> Ordering {
         Ordering::Equal
     }
 
-    assert_eq!(match1.len(), match2.len(), "Both matches should have the same length (which is guaranteed by the current implementation of check_match())");
+    assert_eq!(
+        match1.len(),
+        match2.len(),
+        "Both matches should have the same length (which is guaranteed by the current \
+         implementation of check_match())"
+    );
     for (m1, m2) in match1.iter().zip(match2.iter()) {
         let ordering = rule1(m1, m2)
             .then_with(|| rule1(m2, m1).reverse())
