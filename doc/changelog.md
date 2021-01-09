@@ -1,4 +1,4 @@
-# Version 0.8.0 (2021-XX-XX)
+# Version 0.8.0 (2021-01-09)
 
 New features:
 * Added a `resource_manager` library for querying the X11 resource database
