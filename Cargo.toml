@@ -20,7 +20,7 @@ exclude = [
 
 [dependencies]
 libc = { version = "0.2", optional = true }
-libloading = { version = "0.6.6", optional = true }
+libloading = { version = "0.7.0", optional = true }
 once_cell = { version = "1.5.2", optional = true }
 gethostname = "0.2.1"
 
