@@ -24,17 +24,6 @@ pub(crate) mod libxcb_library {
     }
 
     impl LibxcbLibrary {
-        fn open_lib() -> Result<libloading::Library, LibxcbLoadError> {
-            // TODO: Names for non-unix platforms
-            #[cfg(unix)]
-            const LIB_NAME: &str = "libxcb.so.1";
-            #[cfg(not(unix))]
-            compile_error!("dl-libxcb feature is not supported on non-unix");
-
-            libloading::Library::new(LIB_NAME)
-                .map_err(|e| LibxcbLoadError::OpenLibError(LIB_NAME.into(), e.to_string()))
-        }
-
         /// # Safety
         ///
         /// The functions pointers in `funcs` do not have lifetime,
@@ -42,7 +31,14 @@ pub(crate) mod libxcb_library {
         #[cold]
         #[inline(never)]
         unsafe fn load() -> Result<Self, LibxcbLoadError> {
-            let library = Self::open_lib()?;
+            // TODO: Names for non-unix platforms
+            #[cfg(unix)]
+            const LIB_NAME: &str = "libxcb.so.1";
+            #[cfg(not(unix))]
+            compile_error!("dl-libxcb feature is not supported on non-unix");
+
+            let library = libloading::Library::new(LIB_NAME)
+                .map_err(|e| LibxcbLoadError::OpenLibError(LIB_NAME.into(), e.to_string()))?;
             let funcs = LibxcbFuncs::new(&library).map_err(|(symbol, e)| {
                 LibxcbLoadError::GetSymbolError(symbol.into(), e.to_string())
             })?;
