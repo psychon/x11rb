@@ -100,13 +100,13 @@
 //! Additionally, the following flags exist:
 //! * `allow-unsafe-code`: Enable features that require `unsafe`. Without this flag,
 //!   `x11rb::xcb_ffi::XCBConnection` and some support code for it are unavailable.
-//! * `cursor`: Enable the code in [x11rb::cursor] for loading cursor files.
-//! * `resource_manager`: Enable the code in [x11rb::resource_manager] for loading and querying the
+//! * `cursor`: Enable the code in [crate::cursor] for loading cursor files.
+//! * `resource_manager`: Enable the code in [crate::resource_manager] for loading and querying the
 //!   X11 resource database.
-//! * `image`: Enable the code in [x11rb::image] for working with pixel image data.
+//! * `image`: Enable the code in [crate::image] for working with pixel image data.
 //! * `dl-libxcb`: Enabling this feature will prevent from libxcb being linked to the
 //!   resulting executable. Instead libxcb will be dynamically loaded at runtime.
-//!   This feature adds the `x11rb::xcb_ffi::load_libxcb` function, that allows to load
+//!   This feature adds the [`crate::xcb_ffi::load_libxcb`] function, that allows to load
 //!   libxcb and check for success or failure.
 //!
 //! # Integrating x11rb with an Event Loop
