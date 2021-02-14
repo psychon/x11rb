@@ -265,7 +265,7 @@ pub(crate) fn get_auth_impl(
         let entry = entry?;
 
         if address_matches((family, address), (entry.family, &entry.address))
-            && display_number_matches(&entry.number, &display[..])
+            && display_number_matches(&entry.number, display)
             && entry.name == MIT_MAGIC_COOKIE_1
         {
             return Ok(Some((entry.name, entry.data)));
