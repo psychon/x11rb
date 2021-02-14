@@ -69,9 +69,9 @@ pub enum ParseError {
     ///
     /// Examples for the first kind of error:
     ///
-    /// - One of a set of values should be present (a `<switch>` in xcb-proto-speal), but none of
+    /// - One of a set of values should be present (a `<switch>` in xcb-proto-speak), but none of
     ///   the `<cases>` matched. This can e.g. happen when parsing
-    ///   [`x11rb::protocol::xinput::InputInfo`].
+    ///   [`crate::protocol::xinput::InputInfo`].
     /// - Parsing a request with a length field that is too small for the request header to fit.
     ///
     /// Examples for the second kind of error:

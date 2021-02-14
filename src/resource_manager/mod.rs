@@ -178,7 +178,7 @@ impl Database {
     /// This function parses data like `Some.Entry: Value\n#include "some_file"\n` and returns the
     /// resulting resource database. Parsing cannot fail since unparsable lines are simply ignored.
     ///
-    /// See [`new_from_data_with_base_directory`] for a version that allows to provide a path that
+    /// See [`Self::new_from_data_with_base_directory`] for a version that allows to provide a path that
     /// is used for resolving relative `#include` statements.
     pub fn new_from_data(data: &[u8]) -> Self {
         let mut entries = Vec::new();

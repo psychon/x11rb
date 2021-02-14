@@ -678,8 +678,8 @@ impl<'a> Image<'a> {
 
     /// Get an image from the X11 server.
     ///
-    /// This function sends a [`GetImage`](crate::protocol::xproto::GetImage) request, waits for
-    /// its response and wraps it in a new `Image`.
+    /// This function sends a [`GetImage`](crate::protocol::xproto::GetImageRequest) request, waits
+    /// for its response and wraps it in a new `Image`.
     ///
     /// The returned image contains the rectangle with top left corner `(x, y)` and size `(width,
     /// height)` of the given `drawable`.
@@ -730,8 +730,8 @@ impl<'a> Image<'a> {
 
     /// Put an image to the X11 server.
     ///
-    /// This function sends a [`PutImage`](crate::protocol::xproto::PutImage) request. This will
-    /// upload this image to the given `drawable` to position `(dst_x, dst_y)`.
+    /// This function sends a [`PutImage`](crate::protocol::xproto::PutImageRequest) request. This
+    /// will upload this image to the given `drawable` to position `(dst_x, dst_y)`.
     ///
     /// The server's maximum request size is honored. This means that a too large `PutImage`
     /// request is automatically split up into smaller pieces. Thus, if this function returns an
@@ -857,7 +857,7 @@ impl<'a> Image<'a> {
     /// Set a single pixel in this image.
     ///
     /// The pixel at position `(x, y)` will be set to the value `pixel`. `pixel` is truncated to
-    /// this image's [`bits_per_pixel()`].
+    /// this image's [`Self::bits_per_pixel`].
     ///
     /// If the image was constructed from a `Cow::Borrowed` access to its pixel data, this causes
     /// the whole pixel data to be copied. See [`Image::new`] and [`Image::data_mut`].
