@@ -1474,13 +1474,13 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                     if gathered.reply_has_fds {
                         outln!(
                             out,
-                            "Ok(conn.send_request_with_reply_with_fds(&slices, fds)?)",
+                            "conn.send_request_with_reply_with_fds(&slices, fds)",
                         );
                     } else {
-                        outln!(out, "Ok(conn.send_request_with_reply(&slices, fds)?)",);
+                        outln!(out, "conn.send_request_with_reply(&slices, fds)",);
                     }
                 } else {
-                    outln!(out, "Ok(conn.send_request_without_reply(&slices, fds)?)",);
+                    outln!(out, "conn.send_request_without_reply(&slices, fds)",);
                 }
             });
             outln!(out, "}}");
