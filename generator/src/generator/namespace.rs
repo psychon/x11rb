@@ -3491,8 +3491,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                                     outln!(out, "outer_remaining = remaining;");
                                 }
                                 CaseInfo::MultiField(_, struct_name) => {
-                                    let mut parse_params = Vec::new();
-                                    parse_params.push(String::from("outer_remaining"));
+                                    let mut parse_params = vec![String::from("outer_remaining")];
                                     for p in case.external_params.borrow().iter() {
                                         parse_params.push(to_rust_variable_name(&p.name));
                                     }
@@ -3583,8 +3582,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                                     outln!(out, "outer_remaining = remaining;");
                                 }
                                 CaseInfo::MultiField(_, struct_name) => {
-                                    let mut parse_params = Vec::new();
-                                    parse_params.push(String::from("outer_remaining"));
+                                    let mut parse_params = vec![String::from("outer_remaining")];
                                     for p in case.external_params.borrow().iter() {
                                         parse_params.push(to_rust_variable_name(&p.name));
                                     }
@@ -4180,8 +4178,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 } else {
                     format!("{}{}", switch_prefix, to_rust_type_name(&switch_field.name))
                 };
-                let mut parse_params = Vec::new();
-                parse_params.push(String::from("remaining"));
+                let mut parse_params = vec![String::from("remaining")];
                 for ext_param in switch_field.external_params.borrow().iter() {
                     parse_params.push(to_rust_variable_name(&ext_param.name));
                 }
@@ -5631,8 +5628,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
 
     /// Returns the parameters needed by the `try_parse` function for `type_`.
     fn get_type_parse_params(&self, type_: &xcbdefs::TypeRef, remaining: &str) -> Vec<String> {
-        let mut params = Vec::new();
-        params.push(String::from(remaining));
+        let mut params = vec![String::from(remaining)];
 
         let original_type = if let xcbdefs::TypeRef::Alias(type_alias_def) = type_ {
             type_alias_def.upgrade().unwrap().get_original_type()
