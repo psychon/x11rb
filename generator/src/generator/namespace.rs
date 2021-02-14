@@ -1472,10 +1472,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                     )
                 } else if request_def.reply.is_some() {
                     if gathered.reply_has_fds {
-                        outln!(
-                            out,
-                            "conn.send_request_with_reply_with_fds(&slices, fds)",
-                        );
+                        outln!(out, "conn.send_request_with_reply_with_fds(&slices, fds)");
                     } else {
                         outln!(out, "conn.send_request_with_reply(&slices, fds)",);
                     }
