@@ -33,7 +33,7 @@ jobs:
            - rust: stable
            - rust: beta
              #fixme: remove this hack
-             clippy_args: -A clippy::manual_strip
+             clippy_args: -A clippy::manual_strip -A clippy::upper_case_acronyms
      steps:
        - uses: actions/checkout@v2
        - name: Install rustfmt and clippy
@@ -56,7 +56,7 @@ jobs:
          uses: actions-rs/cargo@v1
          with:
            command: clippy
-           args: -p x11rb --all-targets -- -D warnings         
+           args: -p x11rb --all-targets -- -D warnings ${{ matrix.clippy_args }}
 
        - name: clippy x11rb with allow-unsafe-code but without dl-libxcb
          uses: actions-rs/cargo@v1

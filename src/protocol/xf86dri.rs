@@ -106,7 +106,7 @@ impl QueryVersionRequest {
     {
         let (bytes, fds) = self.serialize(conn)?;
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-        Ok(conn.send_request_with_reply(&slices, fds)?)
+        conn.send_request_with_reply(&slices, fds)
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -196,7 +196,7 @@ impl QueryDirectRenderingCapableRequest {
     {
         let (bytes, fds) = self.serialize(conn)?;
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-        Ok(conn.send_request_with_reply(&slices, fds)?)
+        conn.send_request_with_reply(&slices, fds)
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -286,7 +286,7 @@ impl OpenConnectionRequest {
     {
         let (bytes, fds) = self.serialize(conn)?;
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-        Ok(conn.send_request_with_reply(&slices, fds)?)
+        conn.send_request_with_reply(&slices, fds)
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -398,7 +398,7 @@ impl CloseConnectionRequest {
     {
         let (bytes, fds) = self.serialize(conn)?;
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-        Ok(conn.send_request_without_reply(&slices, fds)?)
+        conn.send_request_without_reply(&slices, fds)
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -463,7 +463,7 @@ impl GetClientDriverNameRequest {
     {
         let (bytes, fds) = self.serialize(conn)?;
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-        Ok(conn.send_request_with_reply(&slices, fds)?)
+        conn.send_request_with_reply(&slices, fds)
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -589,7 +589,7 @@ impl CreateContextRequest {
     {
         let (bytes, fds) = self.serialize(conn)?;
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-        Ok(conn.send_request_with_reply(&slices, fds)?)
+        conn.send_request_with_reply(&slices, fds)
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -691,7 +691,7 @@ impl DestroyContextRequest {
     {
         let (bytes, fds) = self.serialize(conn)?;
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-        Ok(conn.send_request_without_reply(&slices, fds)?)
+        conn.send_request_without_reply(&slices, fds)
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -765,7 +765,7 @@ impl CreateDrawableRequest {
     {
         let (bytes, fds) = self.serialize(conn)?;
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-        Ok(conn.send_request_with_reply(&slices, fds)?)
+        conn.send_request_with_reply(&slices, fds)
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -864,7 +864,7 @@ impl DestroyDrawableRequest {
     {
         let (bytes, fds) = self.serialize(conn)?;
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-        Ok(conn.send_request_without_reply(&slices, fds)?)
+        conn.send_request_without_reply(&slices, fds)
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -938,7 +938,7 @@ impl GetDrawableInfoRequest {
     {
         let (bytes, fds) = self.serialize(conn)?;
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-        Ok(conn.send_request_with_reply(&slices, fds)?)
+        conn.send_request_with_reply(&slices, fds)
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -1079,7 +1079,7 @@ impl GetDeviceInfoRequest {
     {
         let (bytes, fds) = self.serialize(conn)?;
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-        Ok(conn.send_request_with_reply(&slices, fds)?)
+        conn.send_request_with_reply(&slices, fds)
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -1201,7 +1201,7 @@ impl AuthConnectionRequest {
     {
         let (bytes, fds) = self.serialize(conn)?;
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-        Ok(conn.send_request_with_reply(&slices, fds)?)
+        conn.send_request_with_reply(&slices, fds)
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {

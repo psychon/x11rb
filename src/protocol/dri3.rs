@@ -76,7 +76,7 @@ impl QueryVersionRequest {
     {
         let (bytes, fds) = self.serialize(conn)?;
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-        Ok(conn.send_request_with_reply(&slices, fds)?)
+        conn.send_request_with_reply(&slices, fds)
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -177,7 +177,7 @@ impl OpenRequest {
     {
         let (bytes, fds) = self.serialize(conn)?;
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-        Ok(conn.send_request_with_reply_with_fds(&slices, fds)?)
+        conn.send_request_with_reply_with_fds(&slices, fds)
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -304,7 +304,7 @@ impl PixmapFromBufferRequest {
     {
         let (bytes, fds) = self.serialize(conn)?;
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-        Ok(conn.send_request_without_reply(&slices, fds)?)
+        conn.send_request_without_reply(&slices, fds)
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request_fd(header: RequestHeader, value: &[u8], fds: &mut Vec<RawFdContainer>) -> Result<Self, ParseError> {
@@ -396,7 +396,7 @@ impl BufferFromPixmapRequest {
     {
         let (bytes, fds) = self.serialize(conn)?;
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-        Ok(conn.send_request_with_reply_with_fds(&slices, fds)?)
+        conn.send_request_with_reply_with_fds(&slices, fds)
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -514,7 +514,7 @@ impl FenceFromFDRequest {
     {
         let (bytes, fds) = self.serialize(conn)?;
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-        Ok(conn.send_request_without_reply(&slices, fds)?)
+        conn.send_request_without_reply(&slices, fds)
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request_fd(header: RequestHeader, value: &[u8], fds: &mut Vec<RawFdContainer>) -> Result<Self, ParseError> {
@@ -598,7 +598,7 @@ impl FDFromFenceRequest {
     {
         let (bytes, fds) = self.serialize(conn)?;
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-        Ok(conn.send_request_with_reply_with_fds(&slices, fds)?)
+        conn.send_request_with_reply_with_fds(&slices, fds)
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -702,7 +702,7 @@ impl GetSupportedModifiersRequest {
     {
         let (bytes, fds) = self.serialize(conn)?;
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-        Ok(conn.send_request_with_reply(&slices, fds)?)
+        conn.send_request_with_reply(&slices, fds)
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -919,7 +919,7 @@ impl PixmapFromBuffersRequest {
     {
         let (bytes, fds) = self.serialize(conn)?;
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-        Ok(conn.send_request_without_reply(&slices, fds)?)
+        conn.send_request_without_reply(&slices, fds)
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request_fd(header: RequestHeader, value: &[u8], fds: &mut Vec<RawFdContainer>) -> Result<Self, ParseError> {
@@ -1035,7 +1035,7 @@ impl BuffersFromPixmapRequest {
     {
         let (bytes, fds) = self.serialize(conn)?;
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-        Ok(conn.send_request_with_reply_with_fds(&slices, fds)?)
+        conn.send_request_with_reply_with_fds(&slices, fds)
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {

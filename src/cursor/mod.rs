@@ -50,13 +50,13 @@ impl<C: Connection> Cookie<'_, '_, C> {
             render_version = (version.major_version, version.minor_version);
             picture_format = find_format(&formats.reply()?);
         }
-        Ok(Self::from_replies(
+        Self::from_replies(
             self.conn,
             self.screen,
             self.resource_database,
             render_version,
             picture_format,
-        )?)
+        )
     }
 
     /// Get the handle from the replies from the X11 server

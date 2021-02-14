@@ -1279,7 +1279,7 @@ impl QueryVersionRequest {
     {
         let (bytes, fds) = self.serialize(conn)?;
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-        Ok(conn.send_request_with_reply(&slices, fds)?)
+        conn.send_request_with_reply(&slices, fds)
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -1368,7 +1368,7 @@ impl QueryPictFormatsRequest {
     {
         let (bytes, fds) = self.serialize(conn)?;
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-        Ok(conn.send_request_with_reply(&slices, fds)?)
+        conn.send_request_with_reply(&slices, fds)
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -1515,7 +1515,7 @@ impl QueryPictIndexValuesRequest {
     {
         let (bytes, fds) = self.serialize(conn)?;
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-        Ok(conn.send_request_with_reply(&slices, fds)?)
+        conn.send_request_with_reply(&slices, fds)
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -1945,7 +1945,7 @@ impl<'input> CreatePictureRequest<'input> {
     {
         let (bytes, fds) = self.serialize(conn)?;
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-        Ok(conn.send_request_without_reply(&slices, fds)?)
+        conn.send_request_without_reply(&slices, fds)
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -2340,7 +2340,7 @@ impl<'input> ChangePictureRequest<'input> {
     {
         let (bytes, fds) = self.serialize(conn)?;
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-        Ok(conn.send_request_without_reply(&slices, fds)?)
+        conn.send_request_without_reply(&slices, fds)
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -2429,7 +2429,7 @@ impl<'input> SetPictureClipRectanglesRequest<'input> {
     {
         let (bytes, fds) = self.serialize(conn)?;
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-        Ok(conn.send_request_without_reply(&slices, fds)?)
+        conn.send_request_without_reply(&slices, fds)
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -2519,7 +2519,7 @@ impl FreePictureRequest {
     {
         let (bytes, fds) = self.serialize(conn)?;
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-        Ok(conn.send_request_without_reply(&slices, fds)?)
+        conn.send_request_without_reply(&slices, fds)
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -2634,7 +2634,7 @@ impl CompositeRequest {
     {
         let (bytes, fds) = self.serialize(conn)?;
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-        Ok(conn.send_request_without_reply(&slices, fds)?)
+        conn.send_request_without_reply(&slices, fds)
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -2767,7 +2767,7 @@ impl<'input> TrapezoidsRequest<'input> {
     {
         let (bytes, fds) = self.serialize(conn)?;
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-        Ok(conn.send_request_without_reply(&slices, fds)?)
+        conn.send_request_without_reply(&slices, fds)
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -2902,7 +2902,7 @@ impl<'input> TrianglesRequest<'input> {
     {
         let (bytes, fds) = self.serialize(conn)?;
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-        Ok(conn.send_request_without_reply(&slices, fds)?)
+        conn.send_request_without_reply(&slices, fds)
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -3037,7 +3037,7 @@ impl<'input> TriStripRequest<'input> {
     {
         let (bytes, fds) = self.serialize(conn)?;
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-        Ok(conn.send_request_without_reply(&slices, fds)?)
+        conn.send_request_without_reply(&slices, fds)
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -3172,7 +3172,7 @@ impl<'input> TriFanRequest<'input> {
     {
         let (bytes, fds) = self.serialize(conn)?;
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-        Ok(conn.send_request_without_reply(&slices, fds)?)
+        conn.send_request_without_reply(&slices, fds)
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -3282,7 +3282,7 @@ impl CreateGlyphSetRequest {
     {
         let (bytes, fds) = self.serialize(conn)?;
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-        Ok(conn.send_request_without_reply(&slices, fds)?)
+        conn.send_request_without_reply(&slices, fds)
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -3356,7 +3356,7 @@ impl ReferenceGlyphSetRequest {
     {
         let (bytes, fds) = self.serialize(conn)?;
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-        Ok(conn.send_request_without_reply(&slices, fds)?)
+        conn.send_request_without_reply(&slices, fds)
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -3424,7 +3424,7 @@ impl FreeGlyphSetRequest {
     {
         let (bytes, fds) = self.serialize(conn)?;
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-        Ok(conn.send_request_without_reply(&slices, fds)?)
+        conn.send_request_without_reply(&slices, fds)
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -3506,7 +3506,7 @@ impl<'input> AddGlyphsRequest<'input> {
     {
         let (bytes, fds) = self.serialize(conn)?;
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-        Ok(conn.send_request_without_reply(&slices, fds)?)
+        conn.send_request_without_reply(&slices, fds)
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -3595,7 +3595,7 @@ impl<'input> FreeGlyphsRequest<'input> {
     {
         let (bytes, fds) = self.serialize(conn)?;
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-        Ok(conn.send_request_without_reply(&slices, fds)?)
+        conn.send_request_without_reply(&slices, fds)
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -3713,7 +3713,7 @@ impl<'input> CompositeGlyphs8Request<'input> {
     {
         let (bytes, fds) = self.serialize(conn)?;
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-        Ok(conn.send_request_without_reply(&slices, fds)?)
+        conn.send_request_without_reply(&slices, fds)
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -3850,7 +3850,7 @@ impl<'input> CompositeGlyphs16Request<'input> {
     {
         let (bytes, fds) = self.serialize(conn)?;
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-        Ok(conn.send_request_without_reply(&slices, fds)?)
+        conn.send_request_without_reply(&slices, fds)
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -3987,7 +3987,7 @@ impl<'input> CompositeGlyphs32Request<'input> {
     {
         let (bytes, fds) = self.serialize(conn)?;
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-        Ok(conn.send_request_without_reply(&slices, fds)?)
+        conn.send_request_without_reply(&slices, fds)
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -4109,7 +4109,7 @@ impl<'input> FillRectanglesRequest<'input> {
     {
         let (bytes, fds) = self.serialize(conn)?;
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-        Ok(conn.send_request_without_reply(&slices, fds)?)
+        conn.send_request_without_reply(&slices, fds)
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -4215,7 +4215,7 @@ impl CreateCursorRequest {
     {
         let (bytes, fds) = self.serialize(conn)?;
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-        Ok(conn.send_request_without_reply(&slices, fds)?)
+        conn.send_request_without_reply(&slices, fds)
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -4419,7 +4419,7 @@ impl SetPictureTransformRequest {
     {
         let (bytes, fds) = self.serialize(conn)?;
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-        Ok(conn.send_request_without_reply(&slices, fds)?)
+        conn.send_request_without_reply(&slices, fds)
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -4487,7 +4487,7 @@ impl QueryFiltersRequest {
     {
         let (bytes, fds) = self.serialize(conn)?;
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-        Ok(conn.send_request_with_reply(&slices, fds)?)
+        conn.send_request_with_reply(&slices, fds)
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -4625,7 +4625,7 @@ impl<'input> SetPictureFilterRequest<'input> {
     {
         let (bytes, fds) = self.serialize(conn)?;
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-        Ok(conn.send_request_without_reply(&slices, fds)?)
+        conn.send_request_without_reply(&slices, fds)
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -4758,7 +4758,7 @@ impl<'input> CreateAnimCursorRequest<'input> {
     {
         let (bytes, fds) = self.serialize(conn)?;
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-        Ok(conn.send_request_without_reply(&slices, fds)?)
+        conn.send_request_without_reply(&slices, fds)
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -4949,7 +4949,7 @@ impl<'input> AddTrapsRequest<'input> {
     {
         let (bytes, fds) = self.serialize(conn)?;
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-        Ok(conn.send_request_without_reply(&slices, fds)?)
+        conn.send_request_without_reply(&slices, fds)
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -5049,7 +5049,7 @@ impl CreateSolidFillRequest {
     {
         let (bytes, fds) = self.serialize(conn)?;
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-        Ok(conn.send_request_without_reply(&slices, fds)?)
+        conn.send_request_without_reply(&slices, fds)
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -5152,7 +5152,7 @@ impl<'input> CreateLinearGradientRequest<'input> {
     {
         let (bytes, fds) = self.serialize(conn)?;
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-        Ok(conn.send_request_without_reply(&slices, fds)?)
+        conn.send_request_without_reply(&slices, fds)
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -5287,7 +5287,7 @@ impl<'input> CreateRadialGradientRequest<'input> {
     {
         let (bytes, fds) = self.serialize(conn)?;
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-        Ok(conn.send_request_without_reply(&slices, fds)?)
+        conn.send_request_without_reply(&slices, fds)
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -5414,7 +5414,7 @@ impl<'input> CreateConicalGradientRequest<'input> {
     {
         let (bytes, fds) = self.serialize(conn)?;
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-        Ok(conn.send_request_without_reply(&slices, fds)?)
+        conn.send_request_without_reply(&slices, fds)
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {

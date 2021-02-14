@@ -181,9 +181,10 @@ fn test_poly_segment() -> Result<(), ReplyError> {
     let length: u16 = (12 + segments.len() * 8) as u16 / 4;
     conn.poly_segment(drawable, gc, &segments)?;
 
-    let mut expected = Vec::new();
-    expected.push(x11rb::protocol::xproto::POLY_SEGMENT_REQUEST);
-    expected.push(0); // padding
+    let mut expected = vec![
+        x11rb::protocol::xproto::POLY_SEGMENT_REQUEST,
+        0, // padding
+    ];
     expected.extend(&length.to_ne_bytes()); // length, not in the xml
     expected.extend(&drawable.to_ne_bytes());
     expected.extend(&gc.to_ne_bytes());
@@ -208,13 +209,14 @@ fn test_big_requests() -> Result<(), ConnectionError> {
     let length: u32 = (16 + big_request_length_field + big_buffer.len() as u32 + padding) / 4;
     conn.poly_text16(drawable, gc, x, y, &big_buffer)?;
 
-    let mut expected = Vec::new();
-    expected.push(x11rb::protocol::xproto::POLY_TEXT16_REQUEST);
-    // padding
-    expected.push(0);
-    // Length of zero: we use big requests
-    expected.push(0);
-    expected.push(0);
+    let mut expected = vec![
+        x11rb::protocol::xproto::POLY_TEXT16_REQUEST,
+        // padding
+        0,
+        // Length of zero: we use big requests
+        0,
+        0,
+    ];
     // Actual length
     expected.extend(&length.to_ne_bytes());
 
@@ -260,9 +262,7 @@ fn test_send_event() -> Result<(), ConnectionError> {
     let event_mask: u32 = 7;
     conn.send_event(propagate, destination, event_mask, event)?;
 
-    let mut expected = Vec::new();
-    expected.push(x11rb::protocol::xproto::SEND_EVENT_REQUEST);
-    expected.push(propagate as _);
+    let mut expected = vec![x11rb::protocol::xproto::SEND_EVENT_REQUEST, propagate as _];
     expected.extend(&((12u16 + 32u16) / 4).to_ne_bytes());
     expected.extend(&destination.to_ne_bytes());
     expected.extend(&event_mask.to_ne_bytes());

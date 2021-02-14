@@ -209,10 +209,7 @@ mod test_parse_inherits {
             b"Hi\nInherits = \t ; whatever ;,::; stuff : i s ,: \tthis \t \nInherits=ignored\n";
         let mut input = Cursor::new(&input[..]);
         let result = parse_inherits_impl(&mut input).unwrap();
-        assert_eq!(
-            result,
-            vec![&"whatever"[..], &"stuff"[..], &"i s"[..], &"this"[..]]
-        );
+        assert_eq!(result, vec!["whatever", "stuff", "i s", "this"]);
     }
 }
 
