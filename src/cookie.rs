@@ -165,13 +165,13 @@ where
     /// Get the raw reply that the server sent.
     pub fn raw_reply(self) -> Result<C::Buf, ReplyError> {
         let conn = self.raw_cookie.connection;
-        Ok(conn.wait_for_reply_or_error(self.raw_cookie.into_sequence_number())?)
+        conn.wait_for_reply_or_error(self.raw_cookie.into_sequence_number())
     }
 
     /// Get the raw reply that the server sent, but have errors handled as events.
     pub fn raw_reply_unchecked(self) -> Result<Option<C::Buf>, ConnectionError> {
         let conn = self.raw_cookie.connection;
-        Ok(conn.wait_for_reply(self.raw_cookie.into_sequence_number())?)
+        conn.wait_for_reply(self.raw_cookie.into_sequence_number())
     }
 
     /// Get the reply that the server sent.
@@ -244,7 +244,7 @@ where
     /// Get the raw reply that the server sent.
     pub fn raw_reply(self) -> Result<BufWithFds<C::Buf>, ReplyError> {
         let conn = self.raw_cookie.connection;
-        Ok(conn.wait_for_reply_with_fds(self.raw_cookie.into_sequence_number())?)
+        conn.wait_for_reply_with_fds(self.raw_cookie.into_sequence_number())
     }
 
     /// Get the reply that the server sent.
