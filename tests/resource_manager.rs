@@ -192,9 +192,8 @@ mod test {
             sequence: SequenceNumber,
         ) -> Result<ReplyOrError<Self::Buf>, ConnectionError> {
             let value = self.1.as_ref().map(|v| &v[..]).unwrap_or(&[]);
-            let mut reply = Vec::new();
             // response type
-            reply.push(1);
+            let mut reply = vec![1];
             // format
             if value.is_empty() {
                 reply.push(0);

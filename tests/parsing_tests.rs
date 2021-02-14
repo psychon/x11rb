@@ -137,10 +137,10 @@ fn parse_setup() -> Result<(), ParseError> {
 #[cfg(feature = "xinput")]
 #[test]
 fn parse_xi_get_property_reply_format_0() {
-    let mut s = Vec::new();
-
-    s.push(1); // response_type
-    s.push(0); // pad
+    let mut s = vec![
+        1, // response_type
+        0, // pad
+    ];
     s.extend(&0u16.to_ne_bytes()); // sequence
     s.extend(&0u32.to_ne_bytes()); // length
     s.extend(&0u32.to_ne_bytes()); // type
