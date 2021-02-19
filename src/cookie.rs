@@ -1,4 +1,48 @@
 //! Cookies are handles to future replies or errors from the X11 server.
+//!
+//! When sending a request, you get back a cookie. There are different cookies for different
+//! kinds of requests.
+//!
+//! For requests without a reply, you get a [`VoidCookie`]. Requests with a reply are represented
+//! by a [`Cookie`] or a [`CookieWithFds`] if the reply also contains file descriptors.
+//! Additionally, there are two special cases for requests which generate more than one reply:
+//! [`ListFontsWithInfoCookie`] and [`RecordEnableContextCookie`].
+//!
+//! # Handling X11 errors
+//!
+//! The X11 server can answer requests with an error packet for various reasons, e.g. because an
+//! invalid window ID was given. There are three options what can be done with errors:
+//!
+//! - Errors can appear as X11 events in `wait_for_event()` (in XCB, this is called "unchecked")
+//! - Errors can be checked for locally after a request was sent (in XCB, this is called "checked")
+//! - Errors can be completely ignored (the closest analog in XCB would be `xcb_discard_reply()`)
+//!
+//! There is an additional difference between requests with and without replies.
+//!
+//! ## Requests without a reply
+//!
+//! For requests that do not have a reply, you get an instance of `VoidCookie` after sending the
+//! request. The different behaviors can be achieved via interacting with this cookie as foolows:
+//!
+//! | What?           | How?                       |
+//! | --------------- | -------------------------- |
+//! | Treat as events | Just drop the cookie       |
+//! | Check locally   | `VoidCookie::check`        |
+//! | Ignore          | `VoidCookie::ignore_error` |
+//!
+//! ## Requests with a reply
+//!
+//! For requests with a reply, an additional option is what should happen to the reply. You can get
+//! the reply, but any errors are still treated as events. This allows to centralise X11 error
+//! handling a bit in case you only want to log errors.
+//!
+//! The following things can be done with the `Cookie` that you get after sending a request with an
+//! error.
+//!
+//! | Reply  | Errors locally/ignored             | Errors as events          |
+//! | ------ | ---------------------------------- | ------------------------- |
+//! | Get    | `Cookie::reply`                    | `Cookie::reply_unchecked` |
+//! | Ignore | `Cookie::discard_reply_and_errors` | Just drop the cookie      |
 
 use std::marker::PhantomData;
 
@@ -13,6 +57,9 @@ use crate::x11_utils::{TryParse, TryParseFd};
 ///
 /// When sending a request for which no reply is expected, this library returns a `VoidCookie`.
 /// This `VoidCookie` can then later be used to check if the X11 server sent an error.
+///
+/// See [crate::cookie#requests-without-a-reply] for infos on the different ways to handle X11
+/// errors in response to a request.
 #[derive(Debug)]
 pub struct VoidCookie<'a, C>
 where
@@ -132,6 +179,9 @@ where
 ///
 /// When sending a request to the X11 server, this library returns a `Cookie`. This `Cookie` can
 /// then later be used to get the response that the server sent.
+///
+/// See [crate::cookie#requests-with-a-reply] for infos on the different ways to handle X11
+/// errors in response to a request.
 #[derive(Debug)]
 pub struct Cookie<'a, C, R>
 where
@@ -211,6 +261,9 @@ where
 /// then later be used to get the response that the server sent.
 ///
 /// This variant of `Cookie` represents a response that can contain `RawFd`s.
+///
+/// See [crate::cookie#requests-with-a-reply] for infos on the different ways to handle X11
+/// errors in response to a request.
 #[derive(Debug)]
 pub struct CookieWithFds<'a, C, R>
 where
