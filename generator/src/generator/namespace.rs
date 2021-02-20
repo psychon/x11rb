@@ -5251,14 +5251,11 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
 
     fn get_normal_type_name(&self, id: usize, name: &str) -> String {
         let mut caches = self.caches.borrow_mut();
-        match caches.rust_type_names.entry(id) {
-            HashMapEntry::Occupied(entry) => entry.get().clone(),
-            HashMapEntry::Vacant(entry) => {
-                let name = to_rust_type_name(name);
-                entry.insert(name.clone());
-                name
-            }
-        }
+        caches
+            .rust_type_names
+            .entry(id)
+            .or_insert_with(|| to_rust_type_name(name))
+            .clone()
     }
 
     fn get_struct_rust_name(&self, struct_def: &xcbdefs::StructDef) -> String {
@@ -6044,16 +6041,11 @@ fn gather_deducible_fields(fields: &[xcbdefs::FieldDef]) -> HashMap<String, Dedu
                 .any(|field| field.name() == Some(field_name.as_str()));
 
             if is_not_ext_param {
-                match deducible_fields.entry(field_name) {
-                    HashMapEntry::Occupied(_) => {
-                        // field used more than once,
-                        // deduce it from the first use
-                        // (do not replace entry)
-                    }
-                    HashMapEntry::Vacant(entry) => {
-                        entry.insert(deducible_field);
-                    }
-                }
+                // If the field is used more than once, deduce it from the first use
+                // (do not replace entry).
+                deducible_fields
+                    .entry(field_name)
+                    .or_insert(deducible_field);
             }
         }
     }
