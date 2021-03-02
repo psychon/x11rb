@@ -122,7 +122,6 @@
     //single_use_lifetimes,
     trivial_casts,
     trivial_numeric_casts,
-    unreachable_pub,
     unused_import_braces,
     unused_results,
     clippy::cast_lossless,
@@ -135,6 +134,8 @@
     unused_qualifications,
     // Not everything in x11rb::protocol has doc comments
     missing_docs,
+    // Connection implementations are conditionally reexported based on enabled features
+    unreachable_pub,
 )]
 #![allow(
     // This suggests a method that was stabilised in Rust 1.45, while our MSRV is 1.40.
@@ -171,9 +172,13 @@ pub mod resource_manager;
 #[cfg(test)]
 mod test;
 
-use connection::Connection;
 use errors::ConnectError;
 use protocol::xproto::{Keysym, Timestamp};
+
+#[cfg(feature = "allow-unsafe-code")]
+pub use crate::connection::xcb::{Buffer, X11Connection};
+#[cfg(not(feature = "allow-unsafe-code"))]
+pub use crate::connection::rust::{Buffer, X11Connection};
 
 /// Establish a new connection to an X11 server.
 ///
@@ -182,20 +187,8 @@ use protocol::xproto::{Keysym, Timestamp};
 /// used.
 pub fn connect(
     dpy_name: Option<&str>,
-) -> Result<(impl Connection + Send + Sync, usize), ConnectError> {
-    #[cfg(feature = "allow-unsafe-code")]
-    {
-        let dpy_name = dpy_name
-            .map(std::ffi::CString::new)
-            .transpose()
-            .map_err(|_| ConnectError::DisplayParsingError)?;
-        let dpy_name = dpy_name.as_deref();
-        xcb_ffi::XCBConnection::connect(dpy_name)
-    }
-    #[cfg(not(feature = "allow-unsafe-code"))]
-    {
-        rust_connection::RustConnection::connect(dpy_name)
-    }
+) -> Result<(X11Connection, usize), ConnectError> {
+    X11Connection::connect(dpy_name)
 }
 
 /// The universal null resource or null atom parameter value for many core X requests

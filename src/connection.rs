@@ -3,6 +3,10 @@
 //! This module contains the `Connection` trait and related definitions. The code in this module is
 //! used by each concrete implementation of the X11 protocol.
 
+pub(crate) mod rust;
+#[cfg(feature = "allow-unsafe-code")]
+pub(crate) mod xcb;
+
 use std::borrow::Cow;
 use std::convert::{TryFrom, TryInto};
 use std::io::IoSlice;
