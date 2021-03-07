@@ -84,6 +84,13 @@ multiple async tasks.
 Another highlight is `no_std` support.
 
 
+## xcb-sys
+
+The [xcb-sys crate](https://crates.io/crates/xcb-sys) uses bindgen to
+automatically generate a Rust API from libxcb's C headers. Everything is unsafe
+and as a user you are basically writing C code in Rust.
+
+
 ## x11rb (this project)
 
 x11rb, the x11 rust bindings, is based on the XML description of the X11
