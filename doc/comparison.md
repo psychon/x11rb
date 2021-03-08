@@ -90,6 +90,10 @@ The [xcb-sys crate](https://crates.io/crates/xcb-sys) uses bindgen to
 automatically generate a Rust API from libxcb's C headers. Everything is unsafe
 and as a user you are basically writing C code in Rust.
 
+Put differently: There is lots of existing documentation (for C code) and
+reference code (written in C) that you can use. It is pretty much directly
+transferable to this library.
+
 
 ## x11rb (this project)
 
