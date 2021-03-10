@@ -1,4 +1,4 @@
-# Version 0.8.1 (2021-XX-XX)
+# Version 0.8.1 (2021-03-10)
 
 Minor changes:
 * Update to latest version of crate dependencies.
