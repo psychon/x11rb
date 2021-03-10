@@ -1,3 +1,11 @@
+# Version 0.8.1 (2021-XX-XX)
+
+Minor changes:
+* Update to latest version of crate dependencies.
+* Fix some warnings from rustdoc.
+* Deal with warnings from newest clippy.
+* Try to clarify the documentation for X11 error handling.
+
 # Version 0.8.0 (2021-01-09)
 
 New features:
