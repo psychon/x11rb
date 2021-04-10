@@ -73,7 +73,7 @@ pub struct RustConnection<S: Stream = DefaultStream> {
     // lock based only on a atomic variable would be more efficient.
     packet_reader: Mutex<PacketReader>,
     reader_condition: Condvar,
-    id_allocator: Mutex<id_allocator::IDAllocator>,
+    id_allocator: Mutex<id_allocator::IdAllocator>,
     setup: Setup,
     extension_manager: Mutex<ExtensionManager>,
     maximum_request_bytes: Mutex<MaxRequestBytes>,
@@ -187,7 +187,7 @@ impl<S: Stream> RustConnection<S> {
         setup: Setup,
     ) -> Result<Self, ConnectError> {
         let allocator =
-            id_allocator::IDAllocator::new(setup.resource_id_base, setup.resource_id_mask)?;
+            id_allocator::IdAllocator::new(setup.resource_id_base, setup.resource_id_mask)?;
         Ok(RustConnection {
             inner: Mutex::new(inner),
             stream,
