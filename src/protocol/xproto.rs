@@ -4734,6 +4734,26 @@ impl From<ClientMessageEvent> for [u8; 32] {
         Self::from(&input)
     }
 }
+impl ClientMessageEvent {
+    /// Create a new `ClientMessageEvent`.
+    ///
+    /// This function simplifies the creation of a `ClientMessageEvent` by applying
+    /// some useful defaults:
+    /// - `response_type = CLIENT_MESSAGE_EVENT`
+    /// - `sequence = 0`
+    ///
+    /// The other fields are set from the parameters given to this function.
+    pub fn new(format: u8, window: Window, type_: impl Into<Atom>, data: impl Into<ClientMessageData>) -> Self {
+        Self {
+            response_type: CLIENT_MESSAGE_EVENT,
+            format,
+            sequence: 0,
+            window,
+            type_: type_.into(),
+            data: data.into(),
+        }
+    }
+}
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub struct Mapping(u8);

@@ -143,3 +143,39 @@ pub fn from_configure_request(event: &ConfigureRequestEvent) -> Self {{
         outln!(out, "}}");
     }
 }
+
+pub(super) fn handle_event(
+    event_name: &str,
+    event_full_def: &xcbdefs::EventFullDef,
+    out: &mut Output,
+) {
+    let ns = event_full_def.namespace.upgrade().unwrap();
+    if event_name == "ClientMessage" && ns.header == "xproto" {
+        outln!(out, "impl ClientMessageEvent {{");
+        out.indented(|out| {
+            outln!(out, "/// Create a new `ClientMessageEvent`.");
+            outln!(out, "///");
+            outln!(out, "/// This function simplifies the creation of a `ClientMessageEvent` by applying");
+            outln!(out, "/// some useful defaults:");
+            outln!(out, "/// - `response_type = CLIENT_MESSAGE_EVENT`");
+            outln!(out, "/// - `sequence = 0`");
+            outln!(out, "///");
+            outln!(out, "/// The other fields are set from the parameters given to this function.");
+            outln!(out, "pub fn new(format: u8, window: Window, type_: impl Into<Atom>, data: impl Into<ClientMessageData>) -> Self {{");
+            out.indented(|out| {
+                outln!(out, "Self {{");
+                out.indented(|out| {
+                    outln!(out, "response_type: CLIENT_MESSAGE_EVENT,");
+                    outln!(out, "format,");
+                    outln!(out, "sequence: 0,");
+                    outln!(out, "window,");
+                    outln!(out, "type_: type_.into(),");
+                    outln!(out, "data: data.into(),");
+                });
+                outln!(out, "}}");
+            });
+            outln!(out, "}}");
+        });
+        outln!(out, "}}");
+    }
+}
