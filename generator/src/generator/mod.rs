@@ -29,6 +29,9 @@ pub(crate) fn generate(module: &xcbgen::defs::Module) -> HashMap<PathBuf, String
          [`xproto`](xproto/index.html).",
     );
     outln!(main_out, "");
+    outln!(main_out, "// Clippy does not like some names from the XML.");
+    outln!(main_out, "#![allow(clippy::upper_case_acronyms)]");
+    outln!(main_out, "");
     outln!(main_out, "use std::borrow::Cow;");
     outln!(main_out, "use std::convert::TryInto;");
     outln!(main_out, "use crate::errors::ParseError;");
