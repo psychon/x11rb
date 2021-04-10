@@ -46,7 +46,7 @@ impl WindowState {
 
 /// The state of the full WM
 #[derive(Debug)]
-struct WMState<'a, C: Connection> {
+struct WmState<'a, C: Connection> {
     conn: &'a C,
     screen_num: usize,
     black_gc: Gcontext,
@@ -60,8 +60,8 @@ struct WMState<'a, C: Connection> {
     drag_window: Option<(Window, (i16, i16))>,
 }
 
-impl<'a, C: Connection> WMState<'a, C> {
-    fn new(conn: &'a C, screen_num: usize) -> Result<WMState<'a, C>, ReplyOrIdError> {
+impl<'a, C: Connection> WmState<'a, C> {
+    fn new(conn: &'a C, screen_num: usize) -> Result<WmState<'a, C>, ReplyOrIdError> {
         let screen = &conn.setup().roots[screen_num];
         let black_gc = conn.generate_id()?;
         let font = conn.generate_id()?;
@@ -78,7 +78,7 @@ impl<'a, C: Connection> WMState<'a, C> {
         let wm_protocols = conn.intern_atom(false, b"WM_PROTOCOLS")?;
         let wm_delete_window = conn.intern_atom(false, b"WM_DELETE_WINDOW")?;
 
-        Ok(WMState {
+        Ok(WmState {
             conn,
             screen_num,
             black_gc,
@@ -414,7 +414,7 @@ fn main() {
 
     become_wm(conn, screen).unwrap();
 
-    let mut wm_state = WMState::new(conn, screen_num).unwrap();
+    let mut wm_state = WmState::new(conn, screen_num).unwrap();
     wm_state.scan_windows().unwrap();
 
     util::start_timeout_thread(conn1.clone(), screen.root);
