@@ -907,8 +907,12 @@ impl<'a> Image<'a> {
             }
             BitsPerPixel::B32 => {
                 let (p0, p1, p2, p3) = match self.byte_order {
-                    ImageOrder::LeastSignificantByteFirst => (pixel, pixel >> 8, pixel >> 16, pixel >> 24),
-                    ImageOrder::MostSignificantByteFirst => (pixel >> 24, pixel >> 16, pixel >> 8, pixel),
+                    ImageOrder::LeastSignificantByteFirst => {
+                        (pixel, pixel >> 8, pixel >> 16, pixel >> 24)
+                    }
+                    ImageOrder::MostSignificantByteFirst => {
+                        (pixel >> 24, pixel >> 16, pixel >> 8, pixel)
+                    }
                 };
                 data[row_start + 4 * x + 3] = p3 as u8;
                 data[row_start + 4 * x + 2] = p2 as u8;
@@ -967,8 +971,12 @@ impl<'a> Image<'a> {
                 let p1 = u32::from(self.data[row_start + 4 * x + 1]);
                 let p0 = u32::from(self.data[row_start + 4 * x]);
                 match self.byte_order {
-                    ImageOrder::LeastSignificantByteFirst => p0 | (p1 << 8) | (p2 << 16) | (p3 << 24),
-                    ImageOrder::MostSignificantByteFirst => p3 | (p2 << 8) | (p1 << 16) | (p0 << 24),
+                    ImageOrder::LeastSignificantByteFirst => {
+                        p0 | (p1 << 8) | (p2 << 16) | (p3 << 24)
+                    }
+                    ImageOrder::MostSignificantByteFirst => {
+                        p3 | (p2 << 8) | (p1 << 16) | (p0 << 24)
+                    }
                 }
             }
         }
