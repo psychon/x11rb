@@ -43,6 +43,7 @@ pub type BufWithFds = crate::connection::BufWithFds<Buffer>;
 ///
 /// This type wraps `*mut xcb_connection_t` that is provided by libxcb. It provides a rust
 /// interface to this C library.
+#[allow(clippy::upper_case_acronyms)]
 #[derive(Debug)]
 pub struct XCBConnection {
     conn: raw_ffi::XcbConnectionWrapper,
