@@ -32,8 +32,6 @@ jobs:
          include:
            - rust: stable
            - rust: beta
-             #fixme: remove this hack
-             clippy_args: -A clippy::manual_strip -A clippy::upper_case_acronyms
      steps:
        - uses: actions/checkout@v2
        - name: Install rustfmt and clippy
