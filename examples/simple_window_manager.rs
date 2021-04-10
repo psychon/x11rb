@@ -358,15 +358,12 @@ impl<'a, C: Connection> WmState<'a, C> {
         }
         if let Some(state) = self.find_window_by_id(event.event) {
             if event.event_x >= state.close_x_position() {
-                let data = [self.wm_delete_window, 0, 0, 0, 0];
-                let event = ClientMessageEvent {
-                    response_type: CLIENT_MESSAGE_EVENT,
-                    format: 32,
-                    sequence: 0,
-                    window: state.window,
-                    type_: self.wm_protocols,
-                    data: data.into(),
-                };
+                let event = ClientMessageEvent::new(
+                    32,
+                    state.window,
+                    self.wm_protocols,
+                    [self.wm_delete_window, 0, 0, 0, 0],
+                );
                 self.conn
                     .send_event(false, state.window, EventMask::NO_EVENT, &event)?;
             }
