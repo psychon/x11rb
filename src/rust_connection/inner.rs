@@ -2,7 +2,7 @@
 
 use std::collections::VecDeque;
 
-use super::{BufWithFds, RawEventAndSeqNumber, ReplyFDKind, WriteBuffer};
+use super::{BufWithFds, RawEventAndSeqNumber, ReplyFdKind, WriteBuffer};
 use crate::connection::{DiscardMode, SequenceNumber};
 use crate::utils::RawFdContainer;
 
@@ -69,11 +69,11 @@ impl ConnectionInner {
     ///
     /// When this returns `None`, a sync with the server is necessary. Afterwards, the caller
     /// should try again.
-    pub(crate) fn send_request(&mut self, kind: ReplyFDKind) -> Option<SequenceNumber> {
+    pub(crate) fn send_request(&mut self, kind: ReplyFdKind) -> Option<SequenceNumber> {
         let has_response = match kind {
-            ReplyFDKind::NoReply => false,
-            ReplyFDKind::ReplyWithoutFDs => true,
-            ReplyFDKind::ReplyWithFDs => true,
+            ReplyFdKind::NoReply => false,
+            ReplyFdKind::ReplyWithoutFDs => true,
+            ReplyFdKind::ReplyWithFDs => true,
         };
         if self.next_reply_expected + SequenceNumber::from(u16::max_value())
             <= self.last_sequence_written
@@ -94,7 +94,7 @@ impl ConnectionInner {
         let sent_request = SentRequest {
             seqno,
             discard_mode: None,
-            has_fds: kind == ReplyFDKind::ReplyWithFDs,
+            has_fds: kind == ReplyFdKind::ReplyWithFDs,
         };
         self.sent_requests.push_back(sent_request);
 
@@ -308,7 +308,7 @@ impl ConnectionInner {
 
 #[cfg(test)]
 mod test {
-    use super::{ConnectionInner, ReplyFDKind};
+    use super::{ConnectionInner, ReplyFdKind};
 
     #[test]
     fn insert_sync_no_reply() {
@@ -318,47 +318,47 @@ mod test {
         let mut connection = ConnectionInner::new();
 
         for num in 1..0x10000 {
-            let seqno = connection.send_request(ReplyFDKind::NoReply);
+            let seqno = connection.send_request(ReplyFdKind::NoReply);
             assert_eq!(Some(num), seqno);
         }
         // request 0x10000 should be a sync, hence the next one is 0x10001
-        let seqno = connection.send_request(ReplyFDKind::NoReply);
+        let seqno = connection.send_request(ReplyFdKind::NoReply);
         assert_eq!(None, seqno);
 
-        let seqno = connection.send_request(ReplyFDKind::ReplyWithoutFDs);
+        let seqno = connection.send_request(ReplyFdKind::ReplyWithoutFDs);
         assert_eq!(Some(0x10000), seqno);
 
-        let seqno = connection.send_request(ReplyFDKind::NoReply);
+        let seqno = connection.send_request(ReplyFdKind::NoReply);
         assert_eq!(Some(0x10001), seqno);
     }
 
     #[test]
     fn insert_no_sync_with_reply() {
-        // Compared to the previous test, this uses ReplyFDKind::ReplyWithoutFDs, so no sync needs to
+        // Compared to the previous test, this uses ReplyFdKind::ReplyWithoutFDs, so no sync needs to
         // be inserted.
 
         let mut connection = ConnectionInner::new();
 
         for num in 1..=0x10001 {
-            let seqno = connection.send_request(ReplyFDKind::ReplyWithoutFDs);
+            let seqno = connection.send_request(ReplyFdKind::ReplyWithoutFDs);
             assert_eq!(Some(num), seqno);
         }
     }
 
     #[test]
     fn insert_no_sync_when_already_syncing() {
-        // This test sends enough ReplyFDKind::NoReply requests that a sync becomes necessary on
-        // the next request. Then it sends a ReplyFDKind::ReplyWithoutFDs request so that no sync is
+        // This test sends enough ReplyFdKind::NoReply requests that a sync becomes necessary on
+        // the next request. Then it sends a ReplyFdKind::ReplyWithoutFDs request so that no sync is
         // necessary. This is a regression test: Once upon a time, an unnecessary sync was done.
 
         let mut connection = ConnectionInner::new();
 
         for num in 1..0x10000 {
-            let seqno = connection.send_request(ReplyFDKind::NoReply);
+            let seqno = connection.send_request(ReplyFdKind::NoReply);
             assert_eq!(Some(num), seqno);
         }
 
-        let seqno = connection.send_request(ReplyFDKind::ReplyWithoutFDs);
+        let seqno = connection.send_request(ReplyFdKind::ReplyWithoutFDs);
         assert_eq!(Some(0x10000), seqno);
     }
 }

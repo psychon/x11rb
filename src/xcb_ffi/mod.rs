@@ -43,9 +43,10 @@ pub type BufWithFds = crate::connection::BufWithFds<Buffer>;
 ///
 /// This type wraps `*mut xcb_connection_t` that is provided by libxcb. It provides a rust
 /// interface to this C library.
+#[allow(clippy::upper_case_acronyms)]
 #[derive(Debug)]
 pub struct XCBConnection {
-    conn: raw_ffi::XCBConnectionWrapper,
+    conn: raw_ffi::XcbConnectionWrapper,
     setup: Setup,
     ext_mgr: Mutex<ExtensionManager>,
     errors: pending_errors::PendingErrors,
@@ -68,7 +69,7 @@ impl XCBConnection {
             EXT_NOTSUPPORTED => ConnectionError::UnsupportedExtension,
             MEM_INSUFFICIENT => ConnectionError::InsufficientMemory,
             REQ_LEN_EXCEED => ConnectionError::MaximumRequestLengthExceeded,
-            FDPASSING_FAILED => ConnectionError::FDPassingFailed,
+            FDPASSING_FAILED => ConnectionError::FdPassingFailed,
             _ => ConnectionError::UnknownError,
             // Not possible here: PARSE_ERR, INVALID_SCREEN
         }
@@ -98,7 +99,7 @@ impl XCBConnection {
         unsafe {
             let mut screen: c_int = 0;
             let dpy_ptr = dpy_name.map_or(null(), |s| s.as_ptr());
-            let connection = raw_ffi::XCBConnectionWrapper::new(
+            let connection = raw_ffi::XcbConnectionWrapper::new(
                 raw_ffi::xcb_connect(dpy_ptr, &mut screen),
                 true,
             );
@@ -136,7 +137,7 @@ impl XCBConnection {
         let ptr = ptr as *mut raw_ffi::xcb_connection_t;
         let setup = raw_ffi::xcb_get_setup(ptr);
         Ok(XCBConnection {
-            conn: raw_ffi::XCBConnectionWrapper::new(ptr, should_drop),
+            conn: raw_ffi::XcbConnectionWrapper::new(ptr, should_drop),
             setup: Self::parse_setup(setup)?,
             ext_mgr: Default::default(),
             errors: Default::default(),

@@ -466,9 +466,9 @@ number_enum! {
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
 pub enum ImageOrder {
     /// Least significant byte first
-    LSBFirst,
+    LsbFirst,
     /// Most significant byte first
-    MSBFirst,
+    MsbFirst,
 }
 
 impl TryFrom<XprotoImageOrder> for ImageOrder {
@@ -476,8 +476,8 @@ impl TryFrom<XprotoImageOrder> for ImageOrder {
 
     fn try_from(value: XprotoImageOrder) -> Result<Self, ParseError> {
         match value {
-            XprotoImageOrder::LSB_FIRST => Ok(Self::LSBFirst),
-            XprotoImageOrder::MSB_FIRST => Ok(Self::MSBFirst),
+            XprotoImageOrder::LSB_FIRST => Ok(Self::LsbFirst),
+            XprotoImageOrder::MSB_FIRST => Ok(Self::MsbFirst),
             _ => Err(ParseError::InvalidValue),
         }
     }
@@ -723,7 +723,7 @@ impl<'a> Image<'a> {
             format.scanline_pad.try_into()?,
             reply.depth,
             format.bits_per_pixel.try_into()?,
-            ImageOrder::MSBFirst,
+            ImageOrder::MsbFirst,
             Cow::Owned(reply.data),
         )
     }
@@ -879,7 +879,7 @@ impl<'a> Image<'a> {
             BitsPerPixel::B4 => {
                 let mut pixel = pixel & 0x0f;
                 let odd_x = x % 2 == 1;
-                let mask = if odd_x == (self.byte_order == ImageOrder::MSBFirst) {
+                let mask = if odd_x == (self.byte_order == ImageOrder::MsbFirst) {
                     pixel <<= 4;
                     0xf0
                 } else {
@@ -890,16 +890,16 @@ impl<'a> Image<'a> {
             BitsPerPixel::B8 => data[row_start + x] = pixel as u8,
             BitsPerPixel::B16 => {
                 let (p0, p1) = match self.byte_order {
-                    ImageOrder::LSBFirst => (pixel, pixel >> 8),
-                    ImageOrder::MSBFirst => (pixel >> 8, pixel),
+                    ImageOrder::LsbFirst => (pixel, pixel >> 8),
+                    ImageOrder::MsbFirst => (pixel >> 8, pixel),
                 };
                 data[row_start + 2 * x + 1] = p1 as u8;
                 data[row_start + 2 * x] = p0 as u8;
             }
             BitsPerPixel::B24 => {
                 let (p0, p1, p2) = match self.byte_order {
-                    ImageOrder::LSBFirst => (pixel, pixel >> 8, pixel >> 16),
-                    ImageOrder::MSBFirst => (pixel >> 16, pixel >> 8, pixel),
+                    ImageOrder::LsbFirst => (pixel, pixel >> 8, pixel >> 16),
+                    ImageOrder::MsbFirst => (pixel >> 16, pixel >> 8, pixel),
                 };
                 data[row_start + 3 * x + 2] = p2 as u8;
                 data[row_start + 3 * x + 1] = p1 as u8;
@@ -907,8 +907,8 @@ impl<'a> Image<'a> {
             }
             BitsPerPixel::B32 => {
                 let (p0, p1, p2, p3) = match self.byte_order {
-                    ImageOrder::LSBFirst => (pixel, pixel >> 8, pixel >> 16, pixel >> 24),
-                    ImageOrder::MSBFirst => (pixel >> 24, pixel >> 16, pixel >> 8, pixel),
+                    ImageOrder::LsbFirst => (pixel, pixel >> 8, pixel >> 16, pixel >> 24),
+                    ImageOrder::MsbFirst => (pixel >> 24, pixel >> 16, pixel >> 8, pixel),
                 };
                 data[row_start + 4 * x + 3] = p3 as u8;
                 data[row_start + 4 * x + 2] = p2 as u8;
@@ -937,7 +937,7 @@ impl<'a> Image<'a> {
             BitsPerPixel::B4 => {
                 let byte = u32::from(self.data[row_start + x / 2]);
                 let odd_x = x % 2 == 1;
-                if odd_x == (self.byte_order == ImageOrder::MSBFirst) {
+                if odd_x == (self.byte_order == ImageOrder::MsbFirst) {
                     byte >> 4
                 } else {
                     byte & 0x0f
@@ -948,8 +948,8 @@ impl<'a> Image<'a> {
                 let p1 = u32::from(self.data[row_start + 2 * x + 1]);
                 let p0 = u32::from(self.data[row_start + 2 * x]);
                 match self.byte_order {
-                    ImageOrder::LSBFirst => p0 | (p1 << 8),
-                    ImageOrder::MSBFirst => p1 | (p0 << 8),
+                    ImageOrder::LsbFirst => p0 | (p1 << 8),
+                    ImageOrder::MsbFirst => p1 | (p0 << 8),
                 }
             }
             BitsPerPixel::B24 => {
@@ -957,8 +957,8 @@ impl<'a> Image<'a> {
                 let p1 = u32::from(self.data[row_start + 3 * x + 1]);
                 let p0 = u32::from(self.data[row_start + 3 * x]);
                 match self.byte_order {
-                    ImageOrder::LSBFirst => p0 | (p1 << 8) | (p2 << 16),
-                    ImageOrder::MSBFirst => p2 | (p1 << 8) | (p0 << 16),
+                    ImageOrder::LsbFirst => p0 | (p1 << 8) | (p2 << 16),
+                    ImageOrder::MsbFirst => p2 | (p1 << 8) | (p0 << 16),
                 }
             }
             BitsPerPixel::B32 => {
@@ -967,8 +967,8 @@ impl<'a> Image<'a> {
                 let p1 = u32::from(self.data[row_start + 4 * x + 1]);
                 let p0 = u32::from(self.data[row_start + 4 * x]);
                 match self.byte_order {
-                    ImageOrder::LSBFirst => p0 | (p1 << 8) | (p2 << 16) | (p3 << 24),
-                    ImageOrder::MSBFirst => p3 | (p2 << 8) | (p1 << 16) | (p0 << 24),
+                    ImageOrder::LsbFirst => p0 | (p1 << 8) | (p2 << 16) | (p3 << 24),
+                    ImageOrder::MsbFirst => p3 | (p2 << 8) | (p1 << 16) | (p0 << 24),
                 }
             }
         }
@@ -977,8 +977,8 @@ impl<'a> Image<'a> {
 
 fn compute_depth_1_address(x: usize, order: ImageOrder) -> (usize, usize) {
     let bit = match order {
-        ImageOrder::MSBFirst => 7 - x % 8,
-        ImageOrder::LSBFirst => x % 8,
+        ImageOrder::MsbFirst => 7 - x % 8,
+        ImageOrder::LsbFirst => x % 8,
     };
     (x / 8, bit)
 }
@@ -998,7 +998,7 @@ mod test_image {
             ScanlinePad::Pad16,
             depth,
             BitsPerPixel::B8,
-            ImageOrder::MSBFirst,
+            ImageOrder::MsbFirst,
             Cow::Owned(vec![0]),
         );
         assert_eq!(result.unwrap_err(), ParseError::InsufficientData);
@@ -1013,7 +1013,7 @@ mod test_image {
             ScanlinePad::Pad16,
             depth,
             BitsPerPixel::B8,
-            ImageOrder::MSBFirst,
+            ImageOrder::MsbFirst,
             Cow::Owned(vec![42, 125]),
         )
         .unwrap();
@@ -1022,7 +1022,7 @@ mod test_image {
         assert_eq!(image.scanline_pad(), ScanlinePad::Pad16);
         assert_eq!(image.depth(), depth);
         assert_eq!(image.bits_per_pixel(), BitsPerPixel::B8);
-        assert_eq!(image.byte_order(), ImageOrder::MSBFirst);
+        assert_eq!(image.byte_order(), ImageOrder::MsbFirst);
         assert_eq!(image.data(), [42, 125]);
     }
 
@@ -1034,7 +1034,7 @@ mod test_image {
             ScanlinePad::Pad32,
             1,
             BitsPerPixel::B1,
-            ImageOrder::MSBFirst,
+            ImageOrder::MsbFirst,
         );
         for x in 0..8 {
             image.put_pixel(x, 0, 1);
@@ -1074,7 +1074,7 @@ mod test_image {
             ScanlinePad::Pad16,
             1,
             BitsPerPixel::B4,
-            ImageOrder::MSBFirst,
+            ImageOrder::MsbFirst,
         );
         for pos in 0..=0xf {
             image.put_pixel(pos % 8, pos / 8, pos.into());
@@ -1093,7 +1093,7 @@ mod test_image {
             ScanlinePad::Pad8,
             1,
             BitsPerPixel::B8,
-            ImageOrder::MSBFirst,
+            ImageOrder::MsbFirst,
         );
         for x in 0..=0xff {
             image.put_pixel(x, 0, x.into());
@@ -1114,7 +1114,7 @@ mod test_image {
             ScanlinePad::Pad32,
             1,
             BitsPerPixel::B16,
-            ImageOrder::MSBFirst,
+            ImageOrder::MsbFirst,
         );
         image.put_pixel(0, 0, 0xAB_36_18_F8);
         image.put_pixel(4, 0, 0x12_34_56_78);
@@ -1141,7 +1141,7 @@ mod test_image {
             ScanlinePad::Pad32,
             1,
             BitsPerPixel::B32,
-            ImageOrder::MSBFirst,
+            ImageOrder::MsbFirst,
         );
         image.put_pixel(0, 0, 0xAB_36_18_F8);
         image.put_pixel(1, 0, 0x12_34_56_78);
@@ -1164,7 +1164,7 @@ mod test_image {
             ScanlinePad::Pad32,
             1,
             BitsPerPixel::B1,
-            ImageOrder::MSBFirst,
+            ImageOrder::MsbFirst,
             Cow::Borrowed(&DATA),
         )
         .unwrap();
@@ -1184,7 +1184,7 @@ mod test_image {
             ScanlinePad::Pad32,
             1,
             BitsPerPixel::B4,
-            ImageOrder::MSBFirst,
+            ImageOrder::MsbFirst,
             Cow::Borrowed(&DATA),
         )
         .unwrap();
@@ -1204,7 +1204,7 @@ mod test_image {
             ScanlinePad::Pad32,
             1,
             BitsPerPixel::B8,
-            ImageOrder::MSBFirst,
+            ImageOrder::MsbFirst,
             Cow::Borrowed(&DATA),
         )
         .unwrap();
@@ -1224,7 +1224,7 @@ mod test_image {
             ScanlinePad::Pad32,
             1,
             BitsPerPixel::B16,
-            ImageOrder::MSBFirst,
+            ImageOrder::MsbFirst,
             Cow::Borrowed(&DATA),
         )
         .unwrap();
@@ -1244,7 +1244,7 @@ mod test_image {
             ScanlinePad::Pad32,
             1,
             BitsPerPixel::B32,
-            ImageOrder::MSBFirst,
+            ImageOrder::MsbFirst,
             Cow::Borrowed(&DATA),
         )
         .unwrap();

@@ -45,7 +45,7 @@ enum MaxRequestBytes {
 type MutexGuardInner<'a> = MutexGuard<'a, inner::ConnectionInner>;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
-pub(crate) enum ReplyFDKind {
+pub(crate) enum ReplyFdKind {
     NoReply,
     ReplyWithoutFDs,
     ReplyWithFDs,
@@ -73,7 +73,7 @@ pub struct RustConnection<S: Stream = DefaultStream> {
     // lock based only on a atomic variable would be more efficient.
     packet_reader: Mutex<PacketReader>,
     reader_condition: Condvar,
-    id_allocator: Mutex<id_allocator::IDAllocator>,
+    id_allocator: Mutex<id_allocator::IdAllocator>,
     setup: Setup,
     extension_manager: Mutex<ExtensionManager>,
     maximum_request_bytes: Mutex<MaxRequestBytes>,
@@ -187,7 +187,7 @@ impl<S: Stream> RustConnection<S> {
         setup: Setup,
     ) -> Result<Self, ConnectError> {
         let allocator =
-            id_allocator::IDAllocator::new(setup.resource_id_base, setup.resource_id_mask)?;
+            id_allocator::IdAllocator::new(setup.resource_id_base, setup.resource_id_mask)?;
         Ok(RustConnection {
             inner: Mutex::new(inner),
             stream,
@@ -208,7 +208,7 @@ impl<S: Stream> RustConnection<S> {
         &self,
         bufs: &[IoSlice<'_>],
         fds: Vec<RawFdContainer>,
-        kind: ReplyFDKind,
+        kind: ReplyFdKind,
     ) -> Result<SequenceNumber, ConnectionError> {
         let mut storage = Default::default();
         let bufs = compute_length_field(self, bufs, &mut storage)?;
@@ -251,7 +251,7 @@ impl<S: Stream> RustConnection<S> {
         ];
 
         let seqno = inner
-            .send_request(ReplyFDKind::ReplyWithoutFDs)
+            .send_request(ReplyFdKind::ReplyWithoutFDs)
             .expect("Sending a HasResponse request should not be blocked by syncs");
         inner.discard_reply(seqno, DiscardMode::DiscardReplyAndError);
         let inner = self.write_all_vectored(inner, &[IoSlice::new(&request)], Vec::new())?;
@@ -455,7 +455,7 @@ impl<S: Stream> RequestConnection for RustConnection<S> {
     {
         Ok(Cookie::new(
             self,
-            self.send_request(bufs, fds, ReplyFDKind::ReplyWithoutFDs)?,
+            self.send_request(bufs, fds, ReplyFdKind::ReplyWithoutFDs)?,
         ))
     }
 
@@ -469,7 +469,7 @@ impl<S: Stream> RequestConnection for RustConnection<S> {
     {
         Ok(CookieWithFds::new(
             self,
-            self.send_request(bufs, fds, ReplyFDKind::ReplyWithFDs)?,
+            self.send_request(bufs, fds, ReplyFdKind::ReplyWithFDs)?,
         ))
     }
 
@@ -480,7 +480,7 @@ impl<S: Stream> RequestConnection for RustConnection<S> {
     ) -> Result<VoidCookie<'_, Self>, ConnectionError> {
         Ok(VoidCookie::new(
             self,
-            self.send_request(bufs, fds, ReplyFDKind::NoReply)?,
+            self.send_request(bufs, fds, ReplyFdKind::NoReply)?,
         ))
     }
 

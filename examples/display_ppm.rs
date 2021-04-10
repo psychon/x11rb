@@ -245,7 +245,7 @@ mod ppm_parser {
             ScanlinePad::Pad8,
             24,
             BitsPerPixel::B24,
-            ImageOrder::MSBFirst,
+            ImageOrder::MsbFirst,
         );
         input.read_exact(image.data_mut())?;
 

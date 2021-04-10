@@ -6,6 +6,9 @@
 //! Each sub-module of this module corresponds to one X11 extension. It contains all the
 //! definitions from that extension. The core X11 protocol is in [`xproto`](xproto/index.html).
 
+// Clippy does not like some names from the XML.
+#![allow(clippy::upper_case_acronyms)]
+
 use std::borrow::Cow;
 use std::convert::TryInto;
 use crate::errors::ParseError;

@@ -136,12 +136,12 @@ pub enum ConnectError {
     InvalidScreen,
 
     /// An I/O error occurred on the connection.
-    IOError(std::io::Error),
+    IoError(std::io::Error),
 
     /// Invalid ID mask provided by the server.
     ///
     /// The value of `resource_id_mask` in the `Setup` provided by the server was zero.
-    ZeroIDMask,
+    ZeroIdMask,
 
     /// The server rejected the connection with a `SetupAuthenticate` message.
     SetupAuthenticate(SetupAuthenticate),
@@ -170,8 +170,8 @@ impl std::fmt::Display for ConnectError {
             ConnectError::DisplayParsingError => write!(f, "Display parsing error"),
             ConnectError::InvalidScreen => write!(f, "Invalid screen"),
             ConnectError::ParseError(err) => err.fmt(f),
-            ConnectError::IOError(err) => err.fmt(f),
-            ConnectError::ZeroIDMask => write!(f, "XID mask was zero"),
+            ConnectError::IoError(err) => err.fmt(f),
+            ConnectError::ZeroIdMask => write!(f, "XID mask was zero"),
             ConnectError::SetupFailed(err) => display(f, "X11 setup failed", &err.reason),
             ConnectError::SetupAuthenticate(err) => {
                 display(f, "X11 authentication failed", &err.reason)
@@ -188,7 +188,7 @@ impl From<ParseError> for ConnectError {
 
 impl From<std::io::Error> for ConnectError {
     fn from(err: std::io::Error) -> Self {
-        ConnectError::IOError(err)
+        ConnectError::IoError(err)
     }
 }
 
@@ -216,7 +216,7 @@ pub enum ConnectionError {
     /// File descriptor passing failed.
     ///
     /// This corresponds to `XCB_CONN_CLOSED_FDPASSING_FAILED`.
-    FDPassingFailed,
+    FdPassingFailed,
 
     /// Error while parsing some data, see `ParseError`.
     ParseError(ParseError),
@@ -227,7 +227,7 @@ pub enum ConnectionError {
     InsufficientMemory,
 
     /// An I/O error occurred on the connection.
-    IOError(std::io::Error),
+    IoError(std::io::Error),
 }
 
 impl std::error::Error for ConnectionError {}
@@ -241,9 +241,9 @@ impl std::fmt::Display for ConnectionError {
             ConnectionError::MaximumRequestLengthExceeded => {
                 write!(f, "Maximum request length exceeded")
             }
-            ConnectionError::FDPassingFailed => write!(f, "FD passing failed"),
+            ConnectionError::FdPassingFailed => write!(f, "FD passing failed"),
             ConnectionError::ParseError(err) => err.fmt(f),
-            ConnectionError::IOError(err) => err.fmt(f),
+            ConnectionError::IoError(err) => err.fmt(f),
         }
     }
 }
@@ -256,7 +256,7 @@ impl From<ParseError> for ConnectionError {
 
 impl From<std::io::Error> for ConnectionError {
     fn from(err: std::io::Error) -> Self {
-        ConnectionError::IOError(err)
+        ConnectionError::IoError(err)
     }
 }
 

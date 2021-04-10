@@ -28,17 +28,17 @@ pub(crate) struct xcb_connection_t {
 }
 
 #[derive(Debug)]
-pub(crate) struct XCBConnectionWrapper {
+pub(crate) struct XcbConnectionWrapper {
     ptr: NonNull<xcb_connection_t>,
     should_drop: bool,
 }
 
 // libxcb is fully thread-safe (well, except for xcb_disconnect()), so the following is
 // actually fine and safe:
-unsafe impl Send for XCBConnectionWrapper {}
-unsafe impl Sync for XCBConnectionWrapper {}
+unsafe impl Send for XcbConnectionWrapper {}
+unsafe impl Sync for XcbConnectionWrapper {}
 
-impl Drop for XCBConnectionWrapper {
+impl Drop for XcbConnectionWrapper {
     fn drop(&mut self) {
         if self.should_drop {
             unsafe {
@@ -48,7 +48,7 @@ impl Drop for XCBConnectionWrapper {
     }
 }
 
-impl XCBConnectionWrapper {
+impl XcbConnectionWrapper {
     pub(crate) unsafe fn new(ptr: *mut xcb_connection_t, should_drop: bool) -> Self {
         Self {
             ptr: NonNull::new_unchecked(ptr),

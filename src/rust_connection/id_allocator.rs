@@ -12,20 +12,20 @@ use crate::protocol::xc_misc::{self, ConnectionExt as _, GetXIDRangeReply};
 /// > allocates resource IDs [..] by choosing a value with only some subset of these bits set and
 /// > ORing it with resource-id-base.
 #[derive(Debug)]
-pub(crate) struct IDAllocator {
+pub(crate) struct IdAllocator {
     next_id: u32,
     max_id: u32,
     increment: u32,
 }
 
-impl IDAllocator {
+impl IdAllocator {
     /// Create a new instance of an ID allocator.
     ///
     /// The arguments should be the `resource_id_base` and `resource_id_mask` values that the X11
     /// server sent in a `Setup` response.
     pub(crate) fn new(id_base: u32, id_mask: u32) -> Result<Self, ConnectError> {
         if id_mask == 0 {
-            return Err(ConnectError::ZeroIDMask);
+            return Err(ConnectError::ZeroIdMask);
         }
         // Find the right-most set bit in id_mask, e.g. for 0b110, this results in 0b010.
         let increment = id_mask & (1 + !id_mask);
@@ -87,7 +87,7 @@ mod test {
     use crate::errors::ReplyOrIdError;
     use crate::protocol::xc_misc::GetXIDRangeReply;
 
-    use super::IDAllocator;
+    use super::IdAllocator;
 
     fn unreachable_cb() -> Result<GetXIDRangeReply, ReplyOrIdError> {
         unreachable!()
@@ -95,7 +95,7 @@ mod test {
 
     #[test]
     fn exhaustive() {
-        let mut allocator = IDAllocator::new(0x2800, 0x1ff).unwrap();
+        let mut allocator = IdAllocator::new(0x2800, 0x1ff).unwrap();
         for expected in 0x2800..=0x29ff {
             assert_eq!(
                 expected,
@@ -108,7 +108,7 @@ mod test {
 
     #[test]
     fn increment() {
-        let mut allocator = IDAllocator::new(0, 0b1100).unwrap();
+        let mut allocator = IdAllocator::new(0, 0b1100).unwrap();
         assert_eq!(0b0000, allocator.generate_id_impl(unreachable_cb).unwrap());
         assert_eq!(0b0100, allocator.generate_id_impl(unreachable_cb).unwrap());
         assert_eq!(0b1000, allocator.generate_id_impl(unreachable_cb).unwrap());
@@ -120,7 +120,7 @@ mod test {
     #[test]
     fn new_range() {
         let reply = generate_get_xid_range_reply(0x13370, 3);
-        let mut allocator = IDAllocator::new(0x420, 2).unwrap();
+        let mut allocator = IdAllocator::new(0x420, 2).unwrap();
         assert_eq!(0x420, allocator.generate_id_impl(unreachable_cb).unwrap());
         assert_eq!(0x422, allocator.generate_id_impl(unreachable_cb).unwrap());
         // At this point the range is exhausted and a GetXIDRange request is sent
@@ -135,8 +135,8 @@ mod test {
 
     #[test]
     fn invalid_arg() {
-        let err = IDAllocator::new(1234, 0).unwrap_err();
-        if let super::ConnectError::ZeroIDMask = err {
+        let err = IdAllocator::new(1234, 0).unwrap_err();
+        if let super::ConnectError::ZeroIdMask = err {
         } else {
             panic!("Wrong error: {:?}", err);
         }

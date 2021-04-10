@@ -159,8 +159,8 @@ impl<C: Connection> Drop for FreePixmap<'_, C> {
         self.0.free_pixmap(self.1).unwrap();
     }
 }
-struct FreeGC<'c, C: Connection>(&'c C, Gcontext);
-impl<C: Connection> Drop for FreeGC<'_, C> {
+struct FreeGc<'c, C: Connection>(&'c C, Gcontext);
+impl<C: Connection> Drop for FreeGc<'_, C> {
     fn drop(&mut self) {
         self.0.free_gc(self.1).unwrap();
     }
@@ -187,7 +187,7 @@ fn shape_window<C: Connection>(
 
     // Fill the pixmap with what will indicate "transparent"
     let gc = create_gc_with_foreground(conn, pixmap.1, 0)?;
-    let _free_gc = FreeGC(conn, gc);
+    let _free_gc = FreeGc(conn, gc);
 
     let rect = Rectangle {
         x: 0,

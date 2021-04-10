@@ -496,7 +496,7 @@ fn my_create_gc<A: Connection>(
 
 #[allow(unused)]
 #[derive(Debug, Clone, Copy, Default)]
-pub struct RenamedCreateGCAux {
+pub struct RenamedCreateGcAux {
     pub function: Option<u32>,
     pub plane_mask: Option<u32>,
     pub foreground: Option<u32>,
