@@ -25,7 +25,7 @@ impl IdAllocator {
     /// server sent in a `Setup` response.
     pub(crate) fn new(id_base: u32, id_mask: u32) -> Result<Self, ConnectError> {
         if id_mask == 0 {
-            return Err(ConnectError::ZeroIDMask);
+            return Err(ConnectError::ZeroIdMask);
         }
         // Find the right-most set bit in id_mask, e.g. for 0b110, this results in 0b010.
         let increment = id_mask & (1 + !id_mask);
@@ -136,7 +136,7 @@ mod test {
     #[test]
     fn invalid_arg() {
         let err = IdAllocator::new(1234, 0).unwrap_err();
-        if let super::ConnectError::ZeroIDMask = err {
+        if let super::ConnectError::ZeroIdMask = err {
         } else {
             panic!("Wrong error: {:?}", err);
         }

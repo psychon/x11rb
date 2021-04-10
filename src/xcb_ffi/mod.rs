@@ -68,7 +68,7 @@ impl XCBConnection {
             EXT_NOTSUPPORTED => ConnectionError::UnsupportedExtension,
             MEM_INSUFFICIENT => ConnectionError::InsufficientMemory,
             REQ_LEN_EXCEED => ConnectionError::MaximumRequestLengthExceeded,
-            FDPASSING_FAILED => ConnectionError::FDPassingFailed,
+            FDPASSING_FAILED => ConnectionError::FdPassingFailed,
             _ => ConnectionError::UnknownError,
             // Not possible here: PARSE_ERR, INVALID_SCREEN
         }
