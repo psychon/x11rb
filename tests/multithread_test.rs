@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use x11rb::connection::Connection as _;
 use x11rb::protocol::xproto::{
-    ClientMessageData, ClientMessageEvent, ConnectionExt as _, EventMask, CLIENT_MESSAGE_EVENT,
+    ClientMessageEvent, ConnectionExt as _, EventMask, CLIENT_MESSAGE_EVENT,
 };
 
 // Regression test for https://github.com/psychon/x11rb/issues/231
@@ -27,15 +27,8 @@ fn multithread_test() {
         }
         eprintln!("all replies received successfully");
 
-        let event = ClientMessageEvent {
-            response_type: CLIENT_MESSAGE_EVENT,
-            format: 32,
-            sequence: 0,
-            window: 0,
-            // Just anything, we don't care
-            type_: 1,
-            data: ClientMessageData::from([0, 0, 0, 0, 0]),
-        };
+        // Just anything, we don't care
+        let event = ClientMessageEvent::new(32, 0, 1u32, [0, 0, 0, 0, 0]);
 
         conn1
             .send_event(false, 0u32, EventMask::NO_EVENT, &event)

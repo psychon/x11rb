@@ -1924,6 +1924,8 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             self.emit_event_or_error_serialize(&full_name, &*fields, &deducible_fields, out);
         }
 
+        special_cases::handle_event(name, event_full_def, out);
+
         outln!(out, "");
     }
 

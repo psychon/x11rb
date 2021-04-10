@@ -10,10 +10,8 @@ mod util {
 
     use x11rb::connection::Connection;
     use x11rb::protocol::xproto::{
-        ClientMessageData, ClientMessageEvent, ConnectionExt as _, EventMask, CLIENT_MESSAGE_EVENT,
-        Window,
+        ClientMessageEvent, ConnectionExt as _, EventMask, Window,
     };
-    use x11rb::x11_utils::TryParse;
 
     pub fn start_timeout_thread<C>(conn: Arc<C>, window: Window)
     where
@@ -33,17 +31,12 @@ mod util {
 
             thread::sleep(Duration::from_secs(timeout));
 
-            let mut data = [0; 20];
-            data[..4].copy_from_slice(&wm_delete_window.reply().unwrap().atom.to_ne_bytes());
-            let (data, _): (ClientMessageData, _) = TryParse::try_parse(&data).unwrap();
-            let event = ClientMessageEvent {
-                response_type: CLIENT_MESSAGE_EVENT,
-                format: 32,
-                sequence: 0,
+            let event = ClientMessageEvent::new(
+                32,
                 window,
-                type_: wm_protocols.reply().unwrap().atom,
-                data,
-            };
+                wm_protocols.reply().unwrap().atom,
+                [wm_delete_window.reply().unwrap().atom, 0, 0, 0, 0],
+            );
 
             if let Err(err) = conn.send_event(false, window, EventMask::NO_EVENT, &event) {
                 eprintln!("Error while sending event: {:?}", err);
