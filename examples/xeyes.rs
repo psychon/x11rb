@@ -270,7 +270,7 @@ fn create_gc_with_foreground<C: Connection>(
 }
 
 fn main() {
-    let (conn, screen_num) = x11rb::connect(None).expect("Failed to connect to the X11 server");
+    let (conn, screen_num) = connect(None).expect("Failed to connect to the X11 server");
 
     // The following is only needed for start_timeout_thread(), which is used for 'tests'
     let conn1 = std::sync::Arc::new(conn);
@@ -375,4 +375,5 @@ fn main() {
     }
 }
 
+include!("integration_test_util/connect.rs");
 include!("integration_test_util/util.rs");

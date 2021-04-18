@@ -5,7 +5,7 @@ extern crate x11rb;
 use x11rb::protocol::xproto::{ConnectionExt, FontDraw};
 
 fn main() {
-    let (conn, _) = x11rb::connect(None).unwrap();
+    let (conn, _) = connect(None).unwrap();
 
     println!("DIR  MIN  MAX EXIST DFLT PROP ASC DESC NAME");
     for reply in conn.list_fonts_with_info(u16::max_value(), b"*").unwrap() {
@@ -45,3 +45,5 @@ fn main() {
         );
     }
 }
+
+include!("integration_test_util/connect.rs");

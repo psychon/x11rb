@@ -118,7 +118,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         Some(arg) => ppm_parser::parse_ppm_file(&arg)?,
     };
 
-    let (conn, screen_num) = x11rb::connect(None)?;
+    let (conn, screen_num) = connect(None)?;
 
     // The following is only needed for start_timeout_thread(), which is used for 'tests'
     let conn1 = std::sync::Arc::new(conn);
@@ -291,4 +291,5 @@ const BUILTIN_IMAGE: [u8; 35] = [
     0xff, 0xff, 0x00,
 ];
 
+include!("integration_test_util/connect.rs");
 include!("integration_test_util/util.rs");
