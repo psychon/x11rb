@@ -26,8 +26,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // From https://www.x.org/releases/X11R7.6/doc/recordproto/record.html:
     // "The typical communication model for a recording client is to open two connections to the
     // server and use one for RC control and the other for reading protocol data."
-    let (ctrl_conn, _) = x11rb::connect(None)?;
-    let (data_conn, _) = x11rb::connect(None)?;
+    let (ctrl_conn, _) = connect(None)?;
+    let (data_conn, _) = connect(None)?;
 
     // Check if the record extension is supported.
     if ctrl_conn
@@ -167,3 +167,5 @@ fn print_reply_data(data: &[u8]) -> Result<(&[u8], bool), ParseError> {
         }
     }
 }
+
+include!("integration_test_util/connect.rs");

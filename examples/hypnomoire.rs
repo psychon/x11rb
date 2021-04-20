@@ -33,7 +33,7 @@ struct WindowState {
 }
 
 fn main() {
-    let (conn, screen_num) = x11rb::connect(None).unwrap();
+    let (conn, screen_num) = connect(None).unwrap();
     let conn = Arc::new(conn);
     let screen = &conn.setup().roots[screen_num];
 
@@ -275,3 +275,4 @@ fn find_window_by_id(
 }
 
 include!("integration_test_util/util.rs");
+include!("integration_test_util/connect.rs");

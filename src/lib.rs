@@ -171,31 +171,17 @@ pub mod resource_manager;
 #[cfg(test)]
 mod test;
 
-use connection::Connection;
 use errors::ConnectError;
 use protocol::xproto::{Keysym, Timestamp};
 
 /// Establish a new connection to an X11 server.
 ///
-/// If a `dpy_name` is provided, it describes the display that should be connected to, for
-/// example `127.0.0.1:1`. If no value is provided, the `$DISPLAY` environment variable is
-/// used.
+/// This function is identical to
+/// [RustConnection::connect](crate::rust_connection::RustConnection::connect).
 pub fn connect(
     dpy_name: Option<&str>,
-) -> Result<(impl Connection + Send + Sync, usize), ConnectError> {
-    #[cfg(feature = "allow-unsafe-code")]
-    {
-        let dpy_name = dpy_name
-            .map(std::ffi::CString::new)
-            .transpose()
-            .map_err(|_| ConnectError::DisplayParsingError)?;
-        let dpy_name = dpy_name.as_deref();
-        xcb_ffi::XCBConnection::connect(dpy_name)
-    }
-    #[cfg(not(feature = "allow-unsafe-code"))]
-    {
-        rust_connection::RustConnection::connect(dpy_name)
-    }
+) -> Result<(rust_connection::RustConnection, usize), ConnectError> {
+    rust_connection::RustConnection::connect(dpy_name)
 }
 
 /// The universal null resource or null atom parameter value for many core X requests

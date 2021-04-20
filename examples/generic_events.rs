@@ -11,7 +11,7 @@ use x11rb::protocol::{present, Event};
 use x11rb::COPY_DEPTH_FROM_PARENT;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let (conn, screen_num) = x11rb::connect(None)?;
+    let (conn, screen_num) = connect(None)?;
     let screen = &conn.setup().roots[screen_num];
 
     if conn
@@ -84,3 +84,5 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     Ok(())
 }
+
+include!("integration_test_util/connect.rs");

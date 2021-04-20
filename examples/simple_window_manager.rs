@@ -401,7 +401,7 @@ fn become_wm<C: Connection>(conn: &C, screen: &Screen) -> Result<(), ReplyError>
 }
 
 fn main() {
-    let (conn, screen_num) = x11rb::connect(None).unwrap();
+    let (conn, screen_num) = connect(None).unwrap();
 
     // The following is only needed for start_timeout_thread(), which is used for 'tests'
     let conn1 = std::sync::Arc::new(conn);
@@ -434,4 +434,5 @@ fn main() {
     }
 }
 
+include!("integration_test_util/connect.rs");
 include!("integration_test_util/util.rs");

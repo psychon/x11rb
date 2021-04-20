@@ -145,7 +145,7 @@ fn receive_fd<C: Connection>(conn: &C, screen_num: usize) -> Result<(), ReplyOrI
 
 fn main() {
     let file = make_file().expect("Failed to create temporary file for FD passing");
-    match x11rb::connect(None) {
+    match connect(None) {
         Err(err) => eprintln!("Failed to connect to the X11 server: {}", err),
         Ok((conn, screen_num)) => {
             // Check for SHM 1.2 support (needed for fd passing)
@@ -170,3 +170,5 @@ fn main() {
         }
     }
 }
+
+include!("integration_test_util/connect.rs");

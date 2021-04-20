@@ -16,7 +16,7 @@ use x11rb::wrapper::ConnectionExt as _;
 const INVALID_WINDOW: u32 = 0;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let (conn, _) = x11rb::connect(None).unwrap();
+    let (conn, _) = connect(None).unwrap();
 
     // For requests with responses, there are four possibilities:
 
@@ -81,3 +81,5 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     Ok(())
 }
+
+include!("integration_test_util/connect.rs");
