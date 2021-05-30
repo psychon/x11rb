@@ -48,7 +48,6 @@ fn run_in_request(request_def: &defs::RequestDef, module: &defs::Module) {
         });
         fields.insert(0, major_opcode_field);
         fields.insert(1, minor_opcode_field);
-        fields.insert(2, length_field);
     } else {
         fields.insert(0, major_opcode_field);
         if fields.get(1).and_then(|field| field.size()) != Some(1) {
@@ -60,8 +59,8 @@ fn run_in_request(request_def: &defs::RequestDef, module: &defs::Module) {
                 }),
             );
         }
-        fields.insert(2, length_field);
     }
+    fields.insert(2, length_field);
     run_in_field_list(&mut fields, module);
     if let Some(ref reply_def) = request_def.reply {
         run_in_reply(reply_def, module);
