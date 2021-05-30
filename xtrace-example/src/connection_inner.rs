@@ -254,14 +254,17 @@ impl ExtInfo {
 }
 
 impl ExtInfoProvider for ExtInfo {
-    fn get_from_major_opcode(&self, major_opcode: u8) -> Option<(&str, ExtensionInformation)> {
+    fn get_from_major_opcode(
+        &self,
+        major_opcode: u8,
+    ) -> Option<(&'static str, ExtensionInformation)> {
         self.exts
             .iter()
             .find(|(_, ext)| ext.major_opcode == major_opcode)
             .map(|(s, ext)| (s.as_ref(), *ext))
     }
 
-    fn get_from_event_code(&self, event_code: u8) -> Option<(&str, ExtensionInformation)> {
+    fn get_from_event_code(&self, event_code: u8) -> Option<(&'static str, ExtensionInformation)> {
         self.exts
             .iter()
             .filter(|(_, ext)| ext.first_event <= event_code)
@@ -269,7 +272,7 @@ impl ExtInfoProvider for ExtInfo {
             .map(|(s, ext)| (s.as_ref(), *ext))
     }
 
-    fn get_from_error_code(&self, error_code: u8) -> Option<(&str, ExtensionInformation)> {
+    fn get_from_error_code(&self, error_code: u8) -> Option<(&'static str, ExtensionInformation)> {
         self.exts
             .iter()
             .filter(|(_, ext)| ext.first_error <= error_code)
