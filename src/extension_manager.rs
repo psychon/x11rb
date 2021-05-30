@@ -98,7 +98,7 @@ impl ExtensionManager {
 }
 
 impl ExtInfoProvider for ExtensionManager {
-    fn get_from_major_opcode(&self, major_opcode: u8) -> Option<(&str, ExtensionInformation)> {
+    fn get_from_major_opcode(&self, major_opcode: u8) -> Option<(&'static str, ExtensionInformation)> {
         self.0
             .iter()
             .filter_map(|(name, state)| {
@@ -111,7 +111,7 @@ impl ExtInfoProvider for ExtensionManager {
             .find(|(_, info)| info.major_opcode == major_opcode)
     }
 
-    fn get_from_event_code(&self, event_code: u8) -> Option<(&str, ExtensionInformation)> {
+    fn get_from_event_code(&self, event_code: u8) -> Option<(&'static str, ExtensionInformation)> {
         self.0
             .iter()
             .filter_map(|(name, state)| {
@@ -128,7 +128,7 @@ impl ExtInfoProvider for ExtensionManager {
             .max_by_key(|(_, info)| info.first_event)
     }
 
-    fn get_from_error_code(&self, error_code: u8) -> Option<(&str, ExtensionInformation)> {
+    fn get_from_error_code(&self, error_code: u8) -> Option<(&'static str, ExtensionInformation)> {
         self.0
             .iter()
             .filter_map(|(name, state)| {

@@ -117,15 +117,15 @@ pub struct ExtensionInformation {
 pub trait ExtInfoProvider {
     /// Returns the information of the extension that whose
     /// opcode is `major_opcode`.
-    fn get_from_major_opcode(&self, major_opcode: u8) -> Option<(&str, ExtensionInformation)>;
+    fn get_from_major_opcode(&self, major_opcode: u8) -> Option<(&'static str, ExtensionInformation)>;
 
     /// Returns the information of the extension that whose
     /// event number range includes `event_number`.
-    fn get_from_event_code(&self, event_code: u8) -> Option<(&str, ExtensionInformation)>;
+    fn get_from_event_code(&self, event_code: u8) -> Option<(&'static str, ExtensionInformation)>;
 
     /// Returns the information of the extension that whose
     /// error number range includes `error_number`.
-    fn get_from_error_code(&self, error_code: u8) -> Option<(&str, ExtensionInformation)>;
+    fn get_from_error_code(&self, error_code: u8) -> Option<(&'static str, ExtensionInformation)>;
 }
 
 /// A type implementing this trait can be parsed from some raw bytes.
