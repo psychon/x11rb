@@ -98,7 +98,10 @@ impl ExtensionManager {
 }
 
 impl ExtInfoProvider for ExtensionManager {
-    fn get_from_major_opcode(&self, major_opcode: u8) -> Option<(&'static str, ExtensionInformation)> {
+    fn get_from_major_opcode(
+        &self,
+        major_opcode: u8,
+    ) -> Option<(&'static str, ExtensionInformation)> {
         self.0
             .iter()
             .filter_map(|(name, state)| {

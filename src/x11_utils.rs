@@ -7,7 +7,7 @@
 use std::convert::TryInto;
 
 use crate::errors::ParseError;
-use crate::protocol::{ErrorKind, request_name};
+use crate::protocol::{request_name, ErrorKind};
 use crate::utils::RawFdContainer;
 
 /// Representation of an X11 error packet that was sent by the server.
@@ -47,7 +47,9 @@ impl X11Error {
             Err(ParseError::InvalidValue)
         } else {
             let error_kind = ErrorKind::from_wire_error_code(error_code, ext_info_provider);
-            let extension = ext_info_provider.get_from_major_opcode(major_opcode).map(|(ext, _)| ext);
+            let extension = ext_info_provider
+                .get_from_major_opcode(major_opcode)
+                .map(|(ext, _)| ext);
             let request = request_name(extension, major_opcode, minor_opcode);
             Ok(X11Error {
                 error_kind,
@@ -125,7 +127,10 @@ pub struct ExtensionInformation {
 pub trait ExtInfoProvider {
     /// Returns the information of the extension that whose
     /// opcode is `major_opcode`.
-    fn get_from_major_opcode(&self, major_opcode: u8) -> Option<(&'static str, ExtensionInformation)>;
+    fn get_from_major_opcode(
+        &self,
+        major_opcode: u8,
+    ) -> Option<(&'static str, ExtensionInformation)>;
 
     /// Returns the information of the extension that whose
     /// event number range includes `event_number`.

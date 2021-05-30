@@ -274,8 +274,10 @@ pub(super) fn generate_request_reply_enum(
     }
     outln!(out, "");
 
-
-    outln!(out, "/// Get the name of a request from its extension name and opcodes.");
+    outln!(
+        out,
+        "/// Get the name of a request from its extension name and opcodes.",
+    );
     outln!(out, "pub(crate) fn request_name(extension: Option<&str>, major_opcode: u8, minor_opcode: u16) -> Option<&'static str> {{");
     out.indented(|out| {
         outln!(out, "// Check if this is a core protocol request.");
@@ -294,14 +296,20 @@ pub(super) fn generate_request_reply_enum(
         out.indented(|out| {
             for ns in namespaces.iter() {
                 if ns.header == "xproto" {
-                    continue
+                    continue;
                 }
                 let has_feature = super::ext_has_feature(&ns.header);
                 for def in sorted_requests(ns) {
                     if has_feature {
                         outln!(out, "#[cfg(feature = \"{}\")]", ns.header);
                     }
-                    outln!(out, "(Some({}::X11_EXTENSION_NAME), {}) => Some(\"{}\"),", ns.header, def.opcode, def.name);
+                    outln!(
+                        out,
+                        "(Some({}::X11_EXTENSION_NAME), {}) => Some(\"{}\"),",
+                        ns.header,
+                        def.opcode,
+                        def.name,
+                    );
                 }
             }
             outln!(out, "_ => None,");
