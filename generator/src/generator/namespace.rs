@@ -1172,17 +1172,15 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                                     list_length, None,
                                     "fixed length arrays in requests must be [u8; N]"
                                 );
+                                let bytes_name = postfix_var_name(&rust_field_name, "bytes");
                                 if self.can_use_simple_list_parsing(&list_field.element_type) {
-                                    let bytes_name = postfix_var_name(&rust_field_name, "bytes");
                                     outln!(
                                         tmp_out,
                                         "let {} = self.{}.serialize();",
                                         bytes_name,
                                         rust_field_name,
                                     );
-                                    next_slice = Some((bytes_name, IovecConversion::Into));
                                 } else {
-                                    let bytes_name = postfix_var_name(&rust_field_name, "bytes");
                                     outln!(tmp_out, "let mut {} = Vec::new();", bytes_name);
                                     outln!(tmp_out, "for element in {}.iter() {{", rust_field_name);
                                     tmp_out.indented(|tmp_out| {
@@ -1195,8 +1193,8 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                                         );
                                     });
                                     outln!(tmp_out, "}}");
-                                    next_slice = Some((bytes_name, IovecConversion::Into));
                                 }
+                                next_slice = Some((bytes_name, IovecConversion::Into));
                             }
                         }
                         xcbdefs::FieldDef::Switch(switch_field) => {
@@ -5378,7 +5376,6 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                         ));
                         generics.push((generic_param, String::from("Into<[u8; 32]>")));
                         preamble.push(String::from("let event = Cow::Owned(event.into());"));
-                        needs_lifetime = true;
                     } else {
                         let element_type =
                             self.field_value_type_to_rust_type(&list_field.element_type);
@@ -5404,8 +5401,8 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                             };
                         args.push((rust_field_name.clone(), rust_field_type.clone()));
                         request_args.push((rust_field_name, rust_field_type));
-                        needs_lifetime = true;
                     }
+                    needs_lifetime = true;
                 }
                 xcbdefs::FieldDef::Switch(switch_field) => {
                     let rust_field_name = to_rust_variable_name(&switch_field.name);
