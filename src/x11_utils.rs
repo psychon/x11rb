@@ -7,7 +7,7 @@
 use std::convert::TryInto;
 
 use crate::errors::ParseError;
-use crate::protocol::ErrorKind;
+use crate::protocol::{ErrorKind, request_name};
 use crate::utils::RawFdContainer;
 
 /// Representation of an X11 error packet that was sent by the server.
@@ -26,7 +26,9 @@ pub struct X11Error {
     /// The major opcode of the request that caused this error.
     pub major_opcode: u8,
     /// Information about the extension that caused this error.
-    pub extension: Option<&'static str>
+    pub extension: Option<&'static str>,
+    /// Name of the request that caused this error.
+    pub request: Option<&'static str>,
 }
 
 impl X11Error {
@@ -46,6 +48,7 @@ impl X11Error {
         } else {
             let error_kind = ErrorKind::from_wire_error_code(error_code, ext_info_provider);
             let extension = ext_info_provider.get_from_major_opcode(major_opcode).map(|(ext, _)| ext);
+            let request = request_name(extension, major_opcode, minor_opcode);
             Ok(X11Error {
                 error_kind,
                 error_code,
@@ -54,6 +57,7 @@ impl X11Error {
                 minor_opcode,
                 major_opcode,
                 extension,
+                request,
             })
         }
     }

@@ -273,6 +273,43 @@ pub(super) fn generate_request_reply_enum(
         }
     }
     outln!(out, "");
+
+
+    outln!(out, "/// Get the name of a request from its extension name and opcodes.");
+    outln!(out, "pub(crate) fn request_name(extension: Option<&str>, major_opcode: u8, minor_opcode: u16) -> Option<&'static str> {{");
+    out.indented(|out| {
+        outln!(out, "// Check if this is a core protocol request.");
+        outln!(out, "match major_opcode {{");
+        out.indented(|out| {
+            let xproto_ns = module.namespace("xproto").unwrap();
+            for def in sorted_requests(&*xproto_ns) {
+                outln!(out, "{} => return Some(\"{}\"),", def.opcode, def.name);
+            }
+            outln!(out, "_ => (),");
+        });
+        outln!(out, "}}");
+
+        outln!(out, "// Check the extension");
+        outln!(out, "match (extension, minor_opcode) {{");
+        out.indented(|out| {
+            for ns in namespaces.iter() {
+                if ns.header == "xproto" {
+                    continue
+                }
+                let has_feature = super::ext_has_feature(&ns.header);
+                for def in sorted_requests(ns) {
+                    if has_feature {
+                        outln!(out, "#[cfg(feature = \"{}\")]", ns.header);
+                    }
+                    outln!(out, "(Some({}::X11_EXTENSION_NAME), {}) => Some(\"{}\"),", ns.header, def.opcode, def.name);
+                }
+            }
+            outln!(out, "_ => None,");
+        });
+        outln!(out, "}}");
+    });
+    outln!(out, "}}");
+    outln!(out, "");
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -6297,4 +6334,10 @@ fn ename_to_camel_case(name: &str) -> String {
     }
     name[..1].make_ascii_uppercase();
     name
+}
+
+fn sorted_requests(ns: &xcbgen::defs::Namespace) -> Vec<Rc<xcbgen::defs::RequestDef>> {
+    let mut events: Vec<_> = ns.request_defs.borrow().values().cloned().collect();
+    events.sort_by(|a, b| a.opcode.cmp(&b.opcode));
+    events
 }
