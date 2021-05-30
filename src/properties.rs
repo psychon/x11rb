@@ -796,7 +796,7 @@ mod test {
         assert_eq!(wm_hints.icon_position, None);
         assert_eq!(wm_hints.icon_mask, None);
         assert_eq!(wm_hints.window_group, Some(0x0060_0009));
-        assert_eq!(wm_hints.urgent, false);
+        assert!(!wm_hints.urgent);
 
         assert_eq!(input, wm_hints.serialize());
     }
