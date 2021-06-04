@@ -8,13 +8,46 @@ use crate::errors::{ConnectionError, ParseError, ReplyError};
 use crate::protocol::xproto::{self, Atom, AtomEnum, GetPropertyReply, Window};
 use crate::x11_utils::{Serialize, TryParse};
 
+macro_rules! property_cookie {
+    {
+        $(#[$meta:meta])*
+        pub struct $cookie_name:ident: $struct_name:ident,
+        $from_reply:expr,
+    } => {
+        $(#[$meta])*
+        #[derive(Debug)]
+        pub struct $cookie_name<'a, Conn: RequestConnection + ?Sized>(Cookie<'a, Conn, GetPropertyReply>);
+
+        impl<'a, Conn> $cookie_name<'a, Conn>
+        where
+            Conn: RequestConnection + ?Sized,
+        {
+            /// Get the reply that the server sent.
+            pub fn reply(self) -> Result<$struct_name, ReplyError> {
+                Ok($from_reply(self.0.reply()?)?)
+            }
+
+            /// Get the reply that the server sent, but have errors handled as events.
+            pub fn reply_unchecked(self) -> Result<Option<$struct_name>, ConnectionError> {
+                self.0
+                    .reply_unchecked()?
+                    .map($from_reply)
+                    .transpose()
+                    .map_err(Into::into)
+            }
+        }
+    }
+}
+
 // WM_CLASS
 
-/// A cookie for getting a window's `WM_CLASS` property.
-///
-/// See `WmClass`.
-#[derive(Debug)]
-pub struct WmClassCookie<'a, Conn: RequestConnection + ?Sized>(Cookie<'a, Conn, GetPropertyReply>);
+property_cookie! {
+    /// A cookie for getting a window's `WM_CLASS` property.
+    ///
+    /// See `WmClass`.
+    pub struct WmClassCookie: WmClass,
+    WmClass::from_reply,
+}
 
 impl<'a, Conn> WmClassCookie<'a, Conn>
 where
@@ -31,20 +64,6 @@ where
             0,
             2048,
         )?))
-    }
-
-    /// Get the reply that the server sent.
-    pub fn reply(self) -> Result<WmClass, ReplyError> {
-        Ok(WmClass::from_reply(self.0.reply()?)?)
-    }
-
-    /// Get the reply that the server sent, but have errors handled as events.
-    pub fn reply_unchecked(self) -> Result<Option<WmClass>, ConnectionError> {
-        self.0
-            .reply_unchecked()?
-            .map(WmClass::from_reply)
-            .transpose()
-            .map_err(Into::into)
     }
 }
 
@@ -136,11 +155,11 @@ pub enum WmSizeHintsSpecification {
     ProgramSpecified,
 }
 
-/// A cookie for getting a window's `WM_SIZE_HINTS` property.
-#[derive(Debug)]
-pub struct WmSizeHintsCookie<'a, Conn: RequestConnection + ?Sized>(
-    Cookie<'a, Conn, GetPropertyReply>,
-);
+property_cookie! {
+    /// A cookie for getting a window's `WM_SIZE_HINTS` property.
+    pub struct WmSizeHintsCookie: WmSizeHints,
+    |reply| WmSizeHints::from_reply(&reply),
+}
 
 const NUM_WM_SIZE_HINTS_ELEMENTS: u32 = 18;
 
@@ -163,20 +182,6 @@ where
             0,
             NUM_WM_SIZE_HINTS_ELEMENTS,
         )?))
-    }
-
-    /// Get the reply that the server sent.
-    pub fn reply(self) -> Result<WmSizeHints, ReplyError> {
-        Ok(WmSizeHints::from_reply(&self.0.reply()?)?)
-    }
-
-    /// Get the reply that the server sent, but have errors handled as events.
-    pub fn reply_unchecked(self) -> Result<Option<WmSizeHints>, ConnectionError> {
-        self.0
-            .reply_unchecked()?
-            .map(|r| WmSizeHints::from_reply(&r))
-            .transpose()
-            .map_err(Into::into)
     }
 }
 
@@ -433,12 +438,14 @@ impl Serialize for WmSizeHints {
 }
 
 // WM_HINTS
-
-/// A cookie for getting a window's `WM_HINTS` property.
-///
-/// See `WmHints`.
-#[derive(Debug)]
-pub struct WmHintsCookie<'a, Conn: RequestConnection + ?Sized>(Cookie<'a, Conn, GetPropertyReply>);
+//
+property_cookie! {
+    /// A cookie for getting a window's `WM_HINTS` property.
+    ///
+    /// See `WmHints`.
+    pub struct WmHintsCookie: WmHints,
+    |reply| WmHints::from_reply(&reply),
+}
 
 const NUM_WM_HINTS_ELEMENTS: u32 = 9;
 
@@ -457,20 +464,6 @@ where
             0,
             NUM_WM_HINTS_ELEMENTS,
         )?))
-    }
-
-    /// Get the reply that the server sent.
-    pub fn reply(self) -> Result<WmHints, ReplyError> {
-        Ok(WmHints::from_reply(&self.0.reply()?)?)
-    }
-
-    /// Get the reply that the server sent, but have errors handled as events.
-    pub fn reply_unchecked(self) -> Result<Option<WmHints>, ConnectionError> {
-        self.0
-            .reply_unchecked()?
-            .map(|r| WmHints::from_reply(&r))
-            .transpose()
-            .map_err(Into::into)
     }
 }
 
