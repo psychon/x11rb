@@ -11,16 +11,10 @@ use libc::{mmap, MAP_FAILED, MAP_SHARED, PROT_READ, PROT_WRITE};
 use x11rb::connection::Connection;
 use x11rb::errors::{ConnectionError, ReplyError, ReplyOrIdError};
 use x11rb::protocol::shm::{self, ConnectionExt as _};
-use x11rb::protocol::xproto::{self, ConnectionExt as _, ImageFormat};
+use x11rb::protocol::xproto::{self, ImageFormat};
+use x11rb::wrapper::PixmapWrapper;
 
 const TEMP_FILE_CONTENT: [u8; 8] = [0x00, 0x01, 0x02, 0x03, 0xff, 0xfe, 0xfd, 0xfc];
-
-struct FreePixmap<'c, C: Connection>(&'c C, xproto::Pixmap);
-impl<C: Connection> Drop for FreePixmap<'_, C> {
-    fn drop(&mut self) {
-        self.0.free_pixmap(self.1).unwrap();
-    }
-}
 
 /// Get the supported SHM version from the X11 server
 fn check_shm_version<C: Connection>(conn: &C) -> Result<Option<(u16, u16)>, ReplyError> {
@@ -59,10 +53,10 @@ fn get_shared_memory_content_at_offset<C: Connection>(
         shmseg,
         offset,
     )?;
-    let pixmap = FreePixmap(conn, pixmap);
+    let pixmap = PixmapWrapper::for_pixmap(conn, pixmap);
 
     let image =
-        xproto::get_image(conn, ImageFormat::Z_PIXMAP, pixmap.1, 0, 0, width, 1, !0)?.reply()?;
+        xproto::get_image(conn, ImageFormat::Z_PIXMAP, pixmap.pixmap(), 0, 0, width, 1, !0)?.reply()?;
     Ok(image.data)
 }
 
