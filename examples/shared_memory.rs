@@ -55,8 +55,17 @@ fn get_shared_memory_content_at_offset<C: Connection>(
     )?;
     let pixmap = PixmapWrapper::for_pixmap(conn, pixmap);
 
-    let image =
-        xproto::get_image(conn, ImageFormat::Z_PIXMAP, pixmap.pixmap(), 0, 0, width, 1, !0)?.reply()?;
+    let image = xproto::get_image(
+        conn,
+        ImageFormat::Z_PIXMAP,
+        pixmap.pixmap(),
+        0,
+        0,
+        width,
+        1,
+        !0,
+    )?
+    .reply()?;
     Ok(image.data)
 }
 

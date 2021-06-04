@@ -3,8 +3,8 @@
 use std::convert::TryInto;
 use std::marker::PhantomData;
 
-use super::cookie::VoidCookie;
 use super::connection::Connection;
+use super::cookie::VoidCookie;
 use super::errors::{ConnectionError, ReplyError, ReplyOrIdError};
 use super::protocol::xproto::{self, Atom, ConnectionExt as XProtoConnectionExt, PropMode, Window};
 use super::x11_utils::TryParse;
@@ -197,8 +197,7 @@ resource_wrapper! {
     free: free_pixmap,
 }
 
-impl<'c, C: Connection> PixmapWrapper<'c, C>
-{
+impl<'c, C: Connection> PixmapWrapper<'c, C> {
     /// Create a new pixmap and return a pixmap wrapper and a cookie.
     ///
     /// This is a thin wrapper around [xproto::create_pixmap] that allocates a id for the pixmap.
@@ -207,7 +206,13 @@ impl<'c, C: Connection> PixmapWrapper<'c, C>
     /// [xproto::create_pixmap].
     ///
     /// Errors can come from the call to [Connection::generate_id] or [xproto::create_pixmap].
-    pub fn create_pixmap_and_get_cookie(conn: &'c C, depth: u8, drawable: u32, width: u16, height: u16) -> Result<(Self, VoidCookie<'c, C>), ReplyOrIdError> {
+    pub fn create_pixmap_and_get_cookie(
+        conn: &'c C,
+        depth: u8,
+        drawable: u32,
+        width: u16,
+        height: u16,
+    ) -> Result<(Self, VoidCookie<'c, C>), ReplyOrIdError> {
         let id = conn.generate_id()?;
         let cookie = conn.create_pixmap(depth, id, drawable, width, height)?;
         Ok((Self::for_pixmap(conn, id), cookie))
@@ -220,7 +225,13 @@ impl<'c, C: Connection> PixmapWrapper<'c, C>
     /// it in `Drop`.
     ///
     /// Errors can come from the call to [Connection::generate_id] or [xproto::create_pixmap].
-    pub fn create_pixmap(conn: &'c C, depth: u8, drawable: u32, width: u16, height: u16) -> Result<Self, ReplyOrIdError> {
+    pub fn create_pixmap(
+        conn: &'c C,
+        depth: u8,
+        drawable: u32,
+        width: u16,
+        height: u16,
+    ) -> Result<Self, ReplyOrIdError> {
         Ok(Self::create_pixmap_and_get_cookie(conn, depth, drawable, width, height)?.0)
     }
 }
@@ -235,8 +246,7 @@ resource_wrapper! {
     free: destroy_window,
 }
 
-impl<'c, C: Connection> WindowWrapper<'c, C>
-{
+impl<'c, C: Connection> WindowWrapper<'c, C> {
     /// Create a new window and return a window wrapper and a cookie.
     ///
     /// This is a thin wrapper around [xproto::create_window] that allocates a id for the window.
@@ -259,7 +269,19 @@ impl<'c, C: Connection> WindowWrapper<'c, C>
         value_list: &'input xproto::CreateWindowAux,
     ) -> Result<(Self, VoidCookie<'c, C>), ReplyOrIdError> {
         let id = conn.generate_id()?;
-        let cookie = conn.create_window(depth, id, parent, x, y, width, height, border_width, class, visual, value_list)?;
+        let cookie = conn.create_window(
+            depth,
+            id,
+            parent,
+            x,
+            y,
+            width,
+            height,
+            border_width,
+            class,
+            visual,
+            value_list,
+        )?;
         Ok((Self::for_window(conn, id), cookie))
     }
 
@@ -283,7 +305,20 @@ impl<'c, C: Connection> WindowWrapper<'c, C>
         visual: xproto::Visualid,
         value_list: &'input xproto::CreateWindowAux,
     ) -> Result<Self, ReplyOrIdError> {
-        Ok(Self::create_window_and_get_cookie(conn, depth, parent, x, y, width, height, border_width, class, visual, value_list)?.0)
+        Ok(Self::create_window_and_get_cookie(
+            conn,
+            depth,
+            parent,
+            x,
+            y,
+            width,
+            height,
+            border_width,
+            class,
+            visual,
+            value_list,
+        )?
+        .0)
     }
 }
 
@@ -297,8 +332,7 @@ resource_wrapper! {
     free: close_font,
 }
 
-impl<'c, C: Connection> FontWrapper<'c, C>
-{
+impl<'c, C: Connection> FontWrapper<'c, C> {
     /// Create a new font and return a font wrapper and a cookie.
     ///
     /// This is a thin wrapper around [xproto::create_font] that allocates a id for the font.
@@ -307,7 +341,10 @@ impl<'c, C: Connection> FontWrapper<'c, C>
     /// [xproto::create_font].
     ///
     /// Errors can come from the call to [Connection::generate_id] or [xproto::create_font].
-    pub fn open_font_and_get_cookie<'input>(conn: &'c C, name: &'input [u8]) -> Result<(Self, VoidCookie<'c, C>), ReplyOrIdError> {
+    pub fn open_font_and_get_cookie<'input>(
+        conn: &'c C,
+        name: &'input [u8],
+    ) -> Result<(Self, VoidCookie<'c, C>), ReplyOrIdError> {
         let id = conn.generate_id()?;
         let cookie = conn.open_font(id, name)?;
         Ok((Self::for_font(conn, id), cookie))
@@ -335,8 +372,7 @@ resource_wrapper! {
     free: free_gc,
 }
 
-impl<'c, C: Connection> GcontextWrapper<'c, C>
-{
+impl<'c, C: Connection> GcontextWrapper<'c, C> {
     /// Create a new graphics context and return a graphics context wrapper and a cookie.
     ///
     /// This is a thin wrapper around [xproto::create_gc] that allocates a id for the graphics
@@ -345,7 +381,11 @@ impl<'c, C: Connection> GcontextWrapper<'c, C>
     /// the call to [xproto::create_gc].
     ///
     /// Errors can come from the call to [Connection::generate_id] or [xproto::create_gc].
-    pub fn create_gc_and_get_cookie<'input>(conn: &'c C, drawable: xproto::Drawable, value_list: &'input xproto::CreateGCAux) -> Result<(Self, VoidCookie<'c, C>), ReplyOrIdError> {
+    pub fn create_gc_and_get_cookie<'input>(
+        conn: &'c C,
+        drawable: xproto::Drawable,
+        value_list: &'input xproto::CreateGCAux,
+    ) -> Result<(Self, VoidCookie<'c, C>), ReplyOrIdError> {
         let id = conn.generate_id()?;
         let cookie = conn.create_gc(id, drawable, value_list)?;
         Ok((Self::for_gc(conn, id), cookie))
@@ -358,7 +398,11 @@ impl<'c, C: Connection> GcontextWrapper<'c, C>
     /// graphics context and frees it in `Drop`.
     ///
     /// Errors can come from the call to [Connection::generate_id] or [xproto::create_gc].
-    pub fn create_gc<'input>(conn: &'c C, drawable: xproto::Drawable, value_list: &'input xproto::CreateGCAux) -> Result<Self, ReplyOrIdError> {
+    pub fn create_gc<'input>(
+        conn: &'c C,
+        drawable: xproto::Drawable,
+        value_list: &'input xproto::CreateGCAux,
+    ) -> Result<Self, ReplyOrIdError> {
         Ok(Self::create_gc_and_get_cookie(conn, drawable, value_list)?.0)
     }
 }
@@ -373,8 +417,7 @@ resource_wrapper! {
     free: free_colormap,
 }
 
-impl<'c, C: Connection> ColormapWrapper<'c, C>
-{
+impl<'c, C: Connection> ColormapWrapper<'c, C> {
     /// Create a new colormap and return a colormap wrapper and a cookie.
     ///
     /// This is a thin wrapper around [xproto::create_colormap] that allocates a id for the
@@ -383,7 +426,12 @@ impl<'c, C: Connection> ColormapWrapper<'c, C>
     /// to [xproto::create_colormap].
     ///
     /// Errors can come from the call to [Connection::generate_id] or [xproto::create_colormap].
-    pub fn create_colormap_and_get_cookie(conn: &'c C, alloc: xproto::ColormapAlloc, window: Window, visual: xproto::Visualid) -> Result<(Self, VoidCookie<'c, C>), ReplyOrIdError> {
+    pub fn create_colormap_and_get_cookie(
+        conn: &'c C,
+        alloc: xproto::ColormapAlloc,
+        window: Window,
+        visual: xproto::Visualid,
+    ) -> Result<(Self, VoidCookie<'c, C>), ReplyOrIdError> {
         let id = conn.generate_id()?;
         let cookie = conn.create_colormap(alloc, id, window, visual)?;
         Ok((Self::for_colormap(conn, id), cookie))
@@ -396,7 +444,12 @@ impl<'c, C: Connection> ColormapWrapper<'c, C>
     /// colormap and frees it in `Drop`.
     ///
     /// Errors can come from the call to [Connection::generate_id] or [xproto::create_colormap].
-    pub fn create_colormap(conn: &'c C, alloc: xproto::ColormapAlloc, window: Window, visual: xproto::Visualid) -> Result<Self, ReplyOrIdError> {
+    pub fn create_colormap(
+        conn: &'c C,
+        alloc: xproto::ColormapAlloc,
+        window: Window,
+        visual: xproto::Visualid,
+    ) -> Result<Self, ReplyOrIdError> {
         Ok(Self::create_colormap_and_get_cookie(conn, alloc, window, visual)?.0)
     }
 }
@@ -411,8 +464,7 @@ resource_wrapper! {
     free: free_cursor,
 }
 
-impl<'c, C: Connection> CursorWrapper<'c, C>
-{
+impl<'c, C: Connection> CursorWrapper<'c, C> {
     /// Create a new cursor and return a cursor wrapper and a cookie.
     ///
     /// This is a thin wrapper around [xproto::create_cursor] that allocates a id for the cursor.
@@ -421,9 +473,24 @@ impl<'c, C: Connection> CursorWrapper<'c, C>
     /// [xproto::create_cursor].
     ///
     /// Errors can come from the call to [Connection::generate_id] or [xproto::create_cursor].
-    pub fn create_cursor_and_get_cookie<A: Into<xproto::Pixmap>>(conn: &'c C, source: xproto::Pixmap, mask: A, fore_red: u16, fore_green: u16, fore_blue: u16, back_red: u16, back_green: u16, back_blue: u16, x: u16, y: u16) -> Result<(Self, VoidCookie<'c, C>), ReplyOrIdError> {
+    pub fn create_cursor_and_get_cookie<A: Into<xproto::Pixmap>>(
+        conn: &'c C,
+        source: xproto::Pixmap,
+        mask: A,
+        fore_red: u16,
+        fore_green: u16,
+        fore_blue: u16,
+        back_red: u16,
+        back_green: u16,
+        back_blue: u16,
+        x: u16,
+        y: u16,
+    ) -> Result<(Self, VoidCookie<'c, C>), ReplyOrIdError> {
         let id = conn.generate_id()?;
-        let cookie = conn.create_cursor(id, source, mask, fore_red, fore_green, fore_blue, back_red, back_green, back_blue, x, y)?;
+        let cookie = conn.create_cursor(
+            id, source, mask, fore_red, fore_green, fore_blue, back_red, back_green, back_blue, x,
+            y,
+        )?;
         Ok((Self::for_cursor(conn, id), cookie))
     }
 
@@ -434,8 +501,24 @@ impl<'c, C: Connection> CursorWrapper<'c, C>
     /// it in `Drop`.
     ///
     /// Errors can come from the call to [Connection::generate_id] or [xproto::create_cursor].
-    pub fn create_cursor<A: Into<xproto::Pixmap>>(conn: &'c C, source: xproto::Pixmap, mask: A, fore_red: u16, fore_green: u16, fore_blue: u16, back_red: u16, back_green: u16, back_blue: u16, x: u16, y: u16) -> Result<Self, ReplyOrIdError> {
-        Ok(Self::create_cursor_and_get_cookie(conn, source, mask, fore_red, fore_green, fore_blue, back_red, back_green, back_blue, x, y)?.0)
+    pub fn create_cursor<A: Into<xproto::Pixmap>>(
+        conn: &'c C,
+        source: xproto::Pixmap,
+        mask: A,
+        fore_red: u16,
+        fore_green: u16,
+        fore_blue: u16,
+        back_red: u16,
+        back_green: u16,
+        back_blue: u16,
+        x: u16,
+        y: u16,
+    ) -> Result<Self, ReplyOrIdError> {
+        Ok(Self::create_cursor_and_get_cookie(
+            conn, source, mask, fore_red, fore_green, fore_blue, back_red, back_green, back_blue,
+            x, y,
+        )?
+        .0)
     }
 
     /// Create a new cursor and return a cursor wrapper and a cookie.
@@ -446,9 +529,33 @@ impl<'c, C: Connection> CursorWrapper<'c, C>
     /// [xproto::create_glyph_cursor].
     ///
     /// Errors can come from the call to [Connection::generate_id] or [xproto::create_glyph_cursor].
-    pub fn create_glyph_cursor_and_get_cookie<A: Into<xproto::Font>>(conn: &'c C, source_font: xproto::Font, mask_font: A, source_char: u16, mask_char: u16, fore_red: u16, fore_green: u16, fore_blue: u16, back_red: u16, back_green: u16, back_blue: u16) -> Result<(Self, VoidCookie<'c, C>), ReplyOrIdError> {
+    pub fn create_glyph_cursor_and_get_cookie<A: Into<xproto::Font>>(
+        conn: &'c C,
+        source_font: xproto::Font,
+        mask_font: A,
+        source_char: u16,
+        mask_char: u16,
+        fore_red: u16,
+        fore_green: u16,
+        fore_blue: u16,
+        back_red: u16,
+        back_green: u16,
+        back_blue: u16,
+    ) -> Result<(Self, VoidCookie<'c, C>), ReplyOrIdError> {
         let id = conn.generate_id()?;
-        let cookie = conn.create_glyph_cursor(id, source_font, mask_font, source_char, mask_char, fore_red, fore_green, fore_blue, back_red, back_green, back_blue)?;
+        let cookie = conn.create_glyph_cursor(
+            id,
+            source_font,
+            mask_font,
+            source_char,
+            mask_char,
+            fore_red,
+            fore_green,
+            fore_blue,
+            back_red,
+            back_green,
+            back_blue,
+        )?;
         Ok((Self::for_cursor(conn, id), cookie))
     }
 
@@ -459,7 +566,32 @@ impl<'c, C: Connection> CursorWrapper<'c, C>
     /// and frees it in `Drop`.
     ///
     /// Errors can come from the call to [Connection::generate_id] or [xproto::create_glyph_cursor].
-    pub fn create_glyph_cursor<A: Into<xproto::Font>>(conn: &'c C, source_font: xproto::Font, mask_font: A, source_char: u16, mask_char: u16, fore_red: u16, fore_green: u16, fore_blue: u16, back_red: u16, back_green: u16, back_blue: u16) -> Result<Self, ReplyOrIdError> {
-        Ok(Self::create_glyph_cursor_and_get_cookie(conn, source_font, mask_font, source_char, mask_char, fore_red, fore_green, fore_blue, back_red, back_green, back_blue)?.0)
+    pub fn create_glyph_cursor<A: Into<xproto::Font>>(
+        conn: &'c C,
+        source_font: xproto::Font,
+        mask_font: A,
+        source_char: u16,
+        mask_char: u16,
+        fore_red: u16,
+        fore_green: u16,
+        fore_blue: u16,
+        back_red: u16,
+        back_green: u16,
+        back_blue: u16,
+    ) -> Result<Self, ReplyOrIdError> {
+        Ok(Self::create_glyph_cursor_and_get_cookie(
+            conn,
+            source_font,
+            mask_font,
+            source_char,
+            mask_char,
+            fore_red,
+            fore_green,
+            fore_blue,
+            back_red,
+            back_green,
+            back_blue,
+        )?
+        .0)
     }
 }

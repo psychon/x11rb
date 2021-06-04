@@ -267,7 +267,14 @@ fn main() {
         wm_delete_window.reply().unwrap().atom,
     );
     let win_id = setup_window(conn, screen, window_size, wm_protocols, wm_delete_window).unwrap();
-    let mut pixmap = PixmapWrapper::create_pixmap(conn, screen.root_depth, win_id, window_size.0, window_size.1).unwrap();
+    let mut pixmap = PixmapWrapper::create_pixmap(
+        conn,
+        screen.root_depth,
+        win_id,
+        window_size.0,
+        window_size.1,
+    )
+    .unwrap();
 
     let black_gc = create_gc_with_foreground(conn, win_id, screen.black_pixel).unwrap();
     let white_gc = create_gc_with_foreground(conn, win_id, screen.white_pixel).unwrap();
@@ -292,8 +299,14 @@ fn main() {
                 }
                 Event::ConfigureNotify(event) => {
                     window_size = (event.width, event.height);
-                    pixmap = PixmapWrapper::create_pixmap(conn, screen.root_depth, win_id, window_size.0, window_size.1)
-                        .unwrap();
+                    pixmap = PixmapWrapper::create_pixmap(
+                        conn,
+                        screen.root_depth,
+                        win_id,
+                        window_size.0,
+                        window_size.1,
+                    )
+                    .unwrap();
                     need_reshape = true;
                 }
                 Event::MotionNotify(event) => {
@@ -328,7 +341,14 @@ fn main() {
         if need_repaint {
             // Draw new pupils
             let pos = compute_pupils(window_size, mouse_position);
-            draw_eyes(conn, pixmap.pixmap(), black_gc.gc(), white_gc.gc(), window_size).unwrap();
+            draw_eyes(
+                conn,
+                pixmap.pixmap(),
+                black_gc.gc(),
+                white_gc.gc(),
+                window_size,
+            )
+            .unwrap();
             draw_pupils(conn, pixmap.pixmap(), black_gc.gc(), pos).unwrap();
 
             // Copy drawing from pixmap to window
