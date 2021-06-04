@@ -255,6 +255,7 @@ impl<'c, C: Connection> WindowWrapper<'c, C> {
     /// [xproto::create_window].
     ///
     /// Errors can come from the call to [Connection::generate_id] or [xproto::create_window].
+    #[allow(clippy::too_many_arguments)]
     pub fn create_window_and_get_cookie<'input>(
         conn: &'c C,
         depth: u8,
@@ -292,6 +293,7 @@ impl<'c, C: Connection> WindowWrapper<'c, C> {
     /// it in `Drop`.
     ///
     /// Errors can come from the call to [Connection::generate_id] or [xproto::create_window].
+    #[allow(clippy::too_many_arguments)]
     pub fn create_window<'input>(
         conn: &'c C,
         depth: u8,
@@ -473,6 +475,7 @@ impl<'c, C: Connection> CursorWrapper<'c, C> {
     /// [xproto::create_cursor].
     ///
     /// Errors can come from the call to [Connection::generate_id] or [xproto::create_cursor].
+    #[allow(clippy::too_many_arguments)]
     pub fn create_cursor_and_get_cookie<A: Into<xproto::Pixmap>>(
         conn: &'c C,
         source: xproto::Pixmap,
@@ -501,6 +504,7 @@ impl<'c, C: Connection> CursorWrapper<'c, C> {
     /// it in `Drop`.
     ///
     /// Errors can come from the call to [Connection::generate_id] or [xproto::create_cursor].
+    #[allow(clippy::too_many_arguments)]
     pub fn create_cursor<A: Into<xproto::Pixmap>>(
         conn: &'c C,
         source: xproto::Pixmap,
@@ -529,6 +533,7 @@ impl<'c, C: Connection> CursorWrapper<'c, C> {
     /// [xproto::create_glyph_cursor].
     ///
     /// Errors can come from the call to [Connection::generate_id] or [xproto::create_glyph_cursor].
+    #[allow(clippy::too_many_arguments)]
     pub fn create_glyph_cursor_and_get_cookie<A: Into<xproto::Font>>(
         conn: &'c C,
         source_font: xproto::Font,
@@ -566,6 +571,7 @@ impl<'c, C: Connection> CursorWrapper<'c, C> {
     /// and frees it in `Drop`.
     ///
     /// Errors can come from the call to [Connection::generate_id] or [xproto::create_glyph_cursor].
+    #[allow(clippy::too_many_arguments)]
     pub fn create_glyph_cursor<A: Into<xproto::Font>>(
         conn: &'c C,
         source_font: xproto::Font,
