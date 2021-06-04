@@ -181,7 +181,7 @@ macro_rules! resource_wrapper {
         }
         impl<'c, C: Connection> Drop for $name<'c, C> {
             fn drop(&mut self) {
-                let _ = self.0.$freer(self.1);
+                let _ = (self.0).$freer(self.1);
             }
         }
     }
