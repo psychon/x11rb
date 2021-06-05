@@ -7,7 +7,7 @@ use x11rb::errors::{ConnectionError, ReplyOrIdError};
 use x11rb::protocol::shape::{self, ConnectionExt as _};
 use x11rb::protocol::xproto::*;
 use x11rb::protocol::Event;
-use x11rb::wrapper::ConnectionExt as _;
+use x11rb::wrapper::{ConnectionExt as _, GcontextWrapper, PixmapWrapper};
 use x11rb::COPY_DEPTH_FROM_PARENT;
 
 const PUPIL_SIZE: i16 = 50;
@@ -153,41 +153,16 @@ fn compute_pupils(window_size: (u16, u16), mouse_position: (i16, i16)) -> ((i16,
     )
 }
 
-struct FreePixmap<'c, C: Connection>(&'c C, Pixmap);
-impl<C: Connection> Drop for FreePixmap<'_, C> {
-    fn drop(&mut self) {
-        self.0.free_pixmap(self.1).unwrap();
-    }
-}
-struct FreeGc<'c, C: Connection>(&'c C, Gcontext);
-impl<C: Connection> Drop for FreeGc<'_, C> {
-    fn drop(&mut self) {
-        self.0.free_gc(self.1).unwrap();
-    }
-}
-
-fn create_pixmap_wrapper<C: Connection>(
-    conn: &C,
-    depth: u8,
-    drawable: Drawable,
-    size: (u16, u16),
-) -> Result<FreePixmap<C>, ReplyOrIdError> {
-    let pixmap = conn.generate_id()?;
-    conn.create_pixmap(depth, pixmap, drawable, size.0, size.1)?;
-    Ok(FreePixmap(conn, pixmap))
-}
-
 fn shape_window<C: Connection>(
     conn: &C,
     win_id: Window,
     window_size: (u16, u16),
 ) -> Result<(), ReplyOrIdError> {
     // Create a pixmap for the shape
-    let pixmap = create_pixmap_wrapper(conn, 1, win_id, window_size)?;
+    let pixmap = PixmapWrapper::create_pixmap(conn, 1, win_id, window_size.0, window_size.1)?;
 
     // Fill the pixmap with what will indicate "transparent"
-    let gc = create_gc_with_foreground(conn, pixmap.1, 0)?;
-    let _free_gc = FreeGc(conn, gc);
+    let gc = create_gc_with_foreground(conn, pixmap.pixmap(), 0)?;
 
     let rect = Rectangle {
         x: 0,
@@ -195,15 +170,15 @@ fn shape_window<C: Connection>(
         width: window_size.0,
         height: window_size.1,
     };
-    conn.poly_fill_rectangle(pixmap.1, gc, &[rect])?;
+    conn.poly_fill_rectangle(pixmap.pixmap(), gc.gc(), &[rect])?;
 
     // Draw the eyes as "not transparent"
     let values = ChangeGCAux::new().foreground(1);
-    conn.change_gc(gc, &values)?;
-    draw_eyes(conn, pixmap.1, gc, gc, window_size)?;
+    conn.change_gc(gc.gc(), &values)?;
+    draw_eyes(conn, pixmap.pixmap(), gc.gc(), gc.gc(), window_size)?;
 
     // Set the shape of the window
-    conn.shape_mask(shape::SO::SET, shape::SK::BOUNDING, win_id, 0, 0, pixmap.1)?;
+    conn.shape_mask(shape::SO::SET, shape::SK::BOUNDING, win_id, 0, 0, &pixmap)?;
     Ok(())
 }
 
@@ -260,13 +235,14 @@ fn create_gc_with_foreground<C: Connection>(
     conn: &C,
     win_id: Window,
     foreground: u32,
-) -> Result<Gcontext, ReplyOrIdError> {
-    let gc = conn.generate_id()?;
-    let gc_aux = CreateGCAux::new()
-        .graphics_exposures(0)
-        .foreground(foreground);
-    conn.create_gc(gc, win_id, &gc_aux)?;
-    Ok(gc)
+) -> Result<GcontextWrapper<'_, C>, ReplyOrIdError> {
+    GcontextWrapper::create_gc(
+        conn,
+        win_id,
+        &CreateGCAux::new()
+            .graphics_exposures(0)
+            .foreground(foreground),
+    )
 }
 
 fn main() {
@@ -291,7 +267,14 @@ fn main() {
         wm_delete_window.reply().unwrap().atom,
     );
     let win_id = setup_window(conn, screen, window_size, wm_protocols, wm_delete_window).unwrap();
-    let mut pixmap = create_pixmap_wrapper(conn, screen.root_depth, win_id, window_size).unwrap();
+    let mut pixmap = PixmapWrapper::create_pixmap(
+        conn,
+        screen.root_depth,
+        win_id,
+        window_size.0,
+        window_size.1,
+    )
+    .unwrap();
 
     let black_gc = create_gc_with_foreground(conn, win_id, screen.black_pixel).unwrap();
     let white_gc = create_gc_with_foreground(conn, win_id, screen.white_pixel).unwrap();
@@ -316,8 +299,14 @@ fn main() {
                 }
                 Event::ConfigureNotify(event) => {
                     window_size = (event.width, event.height);
-                    pixmap = create_pixmap_wrapper(conn, screen.root_depth, win_id, window_size)
-                        .unwrap();
+                    pixmap = PixmapWrapper::create_pixmap(
+                        conn,
+                        screen.root_depth,
+                        win_id,
+                        window_size.0,
+                        window_size.1,
+                    )
+                    .unwrap();
                     need_reshape = true;
                 }
                 Event::MotionNotify(event) => {
@@ -352,14 +341,21 @@ fn main() {
         if need_repaint {
             // Draw new pupils
             let pos = compute_pupils(window_size, mouse_position);
-            draw_eyes(conn, pixmap.1, black_gc, white_gc, window_size).unwrap();
-            draw_pupils(conn, pixmap.1, black_gc, pos).unwrap();
+            draw_eyes(
+                conn,
+                pixmap.pixmap(),
+                black_gc.gc(),
+                white_gc.gc(),
+                window_size,
+            )
+            .unwrap();
+            draw_pupils(conn, pixmap.pixmap(), black_gc.gc(), pos).unwrap();
 
             // Copy drawing from pixmap to window
             conn.copy_area(
-                pixmap.1,
+                pixmap.pixmap(),
                 win_id,
-                white_gc,
+                white_gc.gc(),
                 0,
                 0,
                 0,
