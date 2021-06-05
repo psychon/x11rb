@@ -152,6 +152,7 @@ macro_rules! resource_wrapper {
         pub struct $name:ident: $inner:ty,
         wrap: $wrapper:ident,
         get: $getter:ident,
+        consume: $consumer:ident,
         free: $freer:ident,
     } => {
         $(#[$meta])*
@@ -171,6 +172,15 @@ macro_rules! resource_wrapper {
             /// Get the XID of the wrapped resource
             pub fn $getter(&self) -> $inner {
                 self.1
+            }
+
+            /// Assume ownership of the XID of the wrapped resource
+            ///
+            /// This function destroys this wrapper without freeing the underlying resource.
+            pub fn $consumer(self) -> $inner {
+                let id = self.1;
+                std::mem::forget(self);
+                id
             }
         }
 
@@ -194,6 +204,7 @@ resource_wrapper! {
     pub struct PixmapWrapper: xproto::Pixmap,
     wrap: for_pixmap,
     get: pixmap,
+    consume: into_pixmap,
     free: free_pixmap,
 }
 
@@ -243,6 +254,7 @@ resource_wrapper! {
     pub struct WindowWrapper: Window,
     wrap: for_window,
     get: window,
+    consume: into_window,
     free: destroy_window,
 }
 
@@ -331,6 +343,7 @@ resource_wrapper! {
     pub struct FontWrapper: xproto::Font,
     wrap: for_font,
     get: font,
+    consume: into_font,
     free: close_font,
 }
 
@@ -371,6 +384,7 @@ resource_wrapper! {
     pub struct GcontextWrapper: xproto::Gcontext,
     wrap: for_gc,
     get: gc,
+    consume: into_gc,
     free: free_gc,
 }
 
@@ -416,6 +430,7 @@ resource_wrapper! {
     pub struct ColormapWrapper: xproto::Colormap,
     wrap: for_colormap,
     get: colormap,
+    consume: into_colormap,
     free: free_colormap,
 }
 
@@ -463,6 +478,7 @@ resource_wrapper! {
     pub struct CursorWrapper: xproto::Cursor,
     wrap: for_cursor,
     get: cursor,
+    consume: into_cursor,
     free: free_cursor,
 }
 
