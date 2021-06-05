@@ -81,15 +81,10 @@ pub const QUERY_VERSION_REQUEST: u8 = 0;
 pub struct QueryVersionRequest;
 impl QueryVersionRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
-    where
-        Conn: RequestConnection + ?Sized,
-    {
-        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-            .ok_or(ConnectionError::UnsupportedExtension)?;
+    fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
         let length_so_far = 0;
         let mut request0 = vec![
-            extension_information.major_opcode,
+            major_opcode,
             QUERY_VERSION_REQUEST,
             0,
             0,
@@ -98,13 +93,16 @@ impl QueryVersionRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<Cookie<'_, Conn, QueryVersionReply>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let major_opcode = conn.extension_information(X11_EXTENSION_NAME)?
+                                .ok_or(ConnectionError::UnsupportedExtension)?
+                                .major_opcode;
+        let (bytes, fds) = self.serialize(major_opcode);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         conn.send_request_with_reply(&slices, fds)
     }
@@ -166,16 +164,11 @@ pub struct QueryDirectRenderingCapableRequest {
 }
 impl QueryDirectRenderingCapableRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
-    where
-        Conn: RequestConnection + ?Sized,
-    {
-        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-            .ok_or(ConnectionError::UnsupportedExtension)?;
+    fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
         let length_so_far = 0;
         let screen_bytes = self.screen.serialize();
         let mut request0 = vec![
-            extension_information.major_opcode,
+            major_opcode,
             QUERY_DIRECT_RENDERING_CAPABLE_REQUEST,
             0,
             0,
@@ -188,13 +181,16 @@ impl QueryDirectRenderingCapableRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<Cookie<'_, Conn, QueryDirectRenderingCapableReply>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let major_opcode = conn.extension_information(X11_EXTENSION_NAME)?
+                                .ok_or(ConnectionError::UnsupportedExtension)?
+                                .major_opcode;
+        let (bytes, fds) = self.serialize(major_opcode);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         conn.send_request_with_reply(&slices, fds)
     }
@@ -256,16 +252,11 @@ pub struct OpenConnectionRequest {
 }
 impl OpenConnectionRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
-    where
-        Conn: RequestConnection + ?Sized,
-    {
-        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-            .ok_or(ConnectionError::UnsupportedExtension)?;
+    fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
         let length_so_far = 0;
         let screen_bytes = self.screen.serialize();
         let mut request0 = vec![
-            extension_information.major_opcode,
+            major_opcode,
             OPEN_CONNECTION_REQUEST,
             0,
             0,
@@ -278,13 +269,16 @@ impl OpenConnectionRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<Cookie<'_, Conn, OpenConnectionReply>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let major_opcode = conn.extension_information(X11_EXTENSION_NAME)?
+                                .ok_or(ConnectionError::UnsupportedExtension)?
+                                .major_opcode;
+        let (bytes, fds) = self.serialize(major_opcode);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         conn.send_request_with_reply(&slices, fds)
     }
@@ -368,16 +362,11 @@ pub struct CloseConnectionRequest {
 }
 impl CloseConnectionRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
-    where
-        Conn: RequestConnection + ?Sized,
-    {
-        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-            .ok_or(ConnectionError::UnsupportedExtension)?;
+    fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
         let length_so_far = 0;
         let screen_bytes = self.screen.serialize();
         let mut request0 = vec![
-            extension_information.major_opcode,
+            major_opcode,
             CLOSE_CONNECTION_REQUEST,
             0,
             0,
@@ -390,13 +379,16 @@ impl CloseConnectionRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let major_opcode = conn.extension_information(X11_EXTENSION_NAME)?
+                                .ok_or(ConnectionError::UnsupportedExtension)?
+                                .major_opcode;
+        let (bytes, fds) = self.serialize(major_opcode);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         conn.send_request_without_reply(&slices, fds)
     }
@@ -433,16 +425,11 @@ pub struct GetClientDriverNameRequest {
 }
 impl GetClientDriverNameRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
-    where
-        Conn: RequestConnection + ?Sized,
-    {
-        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-            .ok_or(ConnectionError::UnsupportedExtension)?;
+    fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
         let length_so_far = 0;
         let screen_bytes = self.screen.serialize();
         let mut request0 = vec![
-            extension_information.major_opcode,
+            major_opcode,
             GET_CLIENT_DRIVER_NAME_REQUEST,
             0,
             0,
@@ -455,13 +442,16 @@ impl GetClientDriverNameRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<Cookie<'_, Conn, GetClientDriverNameReply>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let major_opcode = conn.extension_information(X11_EXTENSION_NAME)?
+                                .ok_or(ConnectionError::UnsupportedExtension)?
+                                .major_opcode;
+        let (bytes, fds) = self.serialize(major_opcode);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         conn.send_request_with_reply(&slices, fds)
     }
@@ -549,18 +539,13 @@ pub struct CreateContextRequest {
 }
 impl CreateContextRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
-    where
-        Conn: RequestConnection + ?Sized,
-    {
-        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-            .ok_or(ConnectionError::UnsupportedExtension)?;
+    fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
         let length_so_far = 0;
         let screen_bytes = self.screen.serialize();
         let visual_bytes = self.visual.serialize();
         let context_bytes = self.context.serialize();
         let mut request0 = vec![
-            extension_information.major_opcode,
+            major_opcode,
             CREATE_CONTEXT_REQUEST,
             0,
             0,
@@ -581,13 +566,16 @@ impl CreateContextRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<Cookie<'_, Conn, CreateContextReply>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let major_opcode = conn.extension_information(X11_EXTENSION_NAME)?
+                                .ok_or(ConnectionError::UnsupportedExtension)?
+                                .major_opcode;
+        let (bytes, fds) = self.serialize(major_opcode);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         conn.send_request_with_reply(&slices, fds)
     }
@@ -656,17 +644,12 @@ pub struct DestroyContextRequest {
 }
 impl DestroyContextRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
-    where
-        Conn: RequestConnection + ?Sized,
-    {
-        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-            .ok_or(ConnectionError::UnsupportedExtension)?;
+    fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
         let length_so_far = 0;
         let screen_bytes = self.screen.serialize();
         let context_bytes = self.context.serialize();
         let mut request0 = vec![
-            extension_information.major_opcode,
+            major_opcode,
             DESTROY_CONTEXT_REQUEST,
             0,
             0,
@@ -683,13 +666,16 @@ impl DestroyContextRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let major_opcode = conn.extension_information(X11_EXTENSION_NAME)?
+                                .ok_or(ConnectionError::UnsupportedExtension)?
+                                .major_opcode;
+        let (bytes, fds) = self.serialize(major_opcode);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         conn.send_request_without_reply(&slices, fds)
     }
@@ -730,17 +716,12 @@ pub struct CreateDrawableRequest {
 }
 impl CreateDrawableRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
-    where
-        Conn: RequestConnection + ?Sized,
-    {
-        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-            .ok_or(ConnectionError::UnsupportedExtension)?;
+    fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
         let length_so_far = 0;
         let screen_bytes = self.screen.serialize();
         let drawable_bytes = self.drawable.serialize();
         let mut request0 = vec![
-            extension_information.major_opcode,
+            major_opcode,
             CREATE_DRAWABLE_REQUEST,
             0,
             0,
@@ -757,13 +738,16 @@ impl CreateDrawableRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<Cookie<'_, Conn, CreateDrawableReply>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let major_opcode = conn.extension_information(X11_EXTENSION_NAME)?
+                                .ok_or(ConnectionError::UnsupportedExtension)?
+                                .major_opcode;
+        let (bytes, fds) = self.serialize(major_opcode);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         conn.send_request_with_reply(&slices, fds)
     }
@@ -829,17 +813,12 @@ pub struct DestroyDrawableRequest {
 }
 impl DestroyDrawableRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
-    where
-        Conn: RequestConnection + ?Sized,
-    {
-        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-            .ok_or(ConnectionError::UnsupportedExtension)?;
+    fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
         let length_so_far = 0;
         let screen_bytes = self.screen.serialize();
         let drawable_bytes = self.drawable.serialize();
         let mut request0 = vec![
-            extension_information.major_opcode,
+            major_opcode,
             DESTROY_DRAWABLE_REQUEST,
             0,
             0,
@@ -856,13 +835,16 @@ impl DestroyDrawableRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let major_opcode = conn.extension_information(X11_EXTENSION_NAME)?
+                                .ok_or(ConnectionError::UnsupportedExtension)?
+                                .major_opcode;
+        let (bytes, fds) = self.serialize(major_opcode);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         conn.send_request_without_reply(&slices, fds)
     }
@@ -903,17 +885,12 @@ pub struct GetDrawableInfoRequest {
 }
 impl GetDrawableInfoRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
-    where
-        Conn: RequestConnection + ?Sized,
-    {
-        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-            .ok_or(ConnectionError::UnsupportedExtension)?;
+    fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
         let length_so_far = 0;
         let screen_bytes = self.screen.serialize();
         let drawable_bytes = self.drawable.serialize();
         let mut request0 = vec![
-            extension_information.major_opcode,
+            major_opcode,
             GET_DRAWABLE_INFO_REQUEST,
             0,
             0,
@@ -930,13 +907,16 @@ impl GetDrawableInfoRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<Cookie<'_, Conn, GetDrawableInfoReply>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let major_opcode = conn.extension_information(X11_EXTENSION_NAME)?
+                                .ok_or(ConnectionError::UnsupportedExtension)?
+                                .major_opcode;
+        let (bytes, fds) = self.serialize(major_opcode);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         conn.send_request_with_reply(&slices, fds)
     }
@@ -1049,16 +1029,11 @@ pub struct GetDeviceInfoRequest {
 }
 impl GetDeviceInfoRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
-    where
-        Conn: RequestConnection + ?Sized,
-    {
-        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-            .ok_or(ConnectionError::UnsupportedExtension)?;
+    fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
         let length_so_far = 0;
         let screen_bytes = self.screen.serialize();
         let mut request0 = vec![
-            extension_information.major_opcode,
+            major_opcode,
             GET_DEVICE_INFO_REQUEST,
             0,
             0,
@@ -1071,13 +1046,16 @@ impl GetDeviceInfoRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<Cookie<'_, Conn, GetDeviceInfoReply>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let major_opcode = conn.extension_information(X11_EXTENSION_NAME)?
+                                .ok_or(ConnectionError::UnsupportedExtension)?
+                                .major_opcode;
+        let (bytes, fds) = self.serialize(major_opcode);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         conn.send_request_with_reply(&slices, fds)
     }
@@ -1166,17 +1144,12 @@ pub struct AuthConnectionRequest {
 }
 impl AuthConnectionRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>
-    where
-        Conn: RequestConnection + ?Sized,
-    {
-        let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
-            .ok_or(ConnectionError::UnsupportedExtension)?;
+    fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
         let length_so_far = 0;
         let screen_bytes = self.screen.serialize();
         let magic_bytes = self.magic.serialize();
         let mut request0 = vec![
-            extension_information.major_opcode,
+            major_opcode,
             AUTH_CONNECTION_REQUEST,
             0,
             0,
@@ -1193,13 +1166,16 @@ impl AuthConnectionRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        Ok((vec![request0.into()], vec![]))
+        (vec![request0.into()], vec![])
     }
     pub fn send<Conn>(self, conn: &Conn) -> Result<Cookie<'_, Conn, AuthConnectionReply>, ConnectionError>
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn)?;
+        let major_opcode = conn.extension_information(X11_EXTENSION_NAME)?
+                                .ok_or(ConnectionError::UnsupportedExtension)?
+                                .major_opcode;
+        let (bytes, fds) = self.serialize(major_opcode);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         conn.send_request_with_reply(&slices, fds)
     }

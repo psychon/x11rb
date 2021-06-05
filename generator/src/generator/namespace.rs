@@ -974,11 +974,11 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             outln!(out, "#[derive({})]", derives.join(", "));
         }
 
-        let (struct_lifetime_block, serialize_lifetime_block, parse_lifetime_block) =
+        let (struct_lifetime_block, serialize_lifetime_return, parse_lifetime_block) =
             if gathered.needs_lifetime {
-                ("<'input>", "", "'input ")
+                ("<'input>", "'input", "'input ")
             } else {
-                ("", "'input, ", "")
+                ("", "'static", "")
             };
 
         let has_members = !gathered.request_args.is_empty();
@@ -1019,33 +1019,11 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             );
             outln!(
                 out,
-                "fn serialize<{lifetime}Conn>(self, conn: &Conn) -> {return_type}",
-                lifetime = serialize_lifetime_block,
-                return_type = if is_xproto {
-                    "BufWithFds<PiecewiseBuf<'input>>"
-                } else {
-                    "Result<BufWithFds<PiecewiseBuf<'input>>, ConnectionError>"
-                }
+                "fn serialize(self{opcode}) -> BufWithFds<PiecewiseBuf<{lifetime}>> {{",
+                opcode = if is_xproto { "" } else { ", major_opcode: u8" },
+                lifetime = serialize_lifetime_return,
             );
-            outln!(out, "where");
-            outln!(out.indent(), "Conn: RequestConnection + ?Sized,");
-            outln!(out, "{{");
             out.indented(|out| {
-                if ns.ext_info.is_some() {
-                    outln!(
-                        out,
-                        "let extension_information = \
-                         conn.extension_information(X11_EXTENSION_NAME)?",
-                    );
-                    outln!(
-                        out.indent(),
-                        ".ok_or(ConnectionError::UnsupportedExtension)?;"
-                    );
-                } else {
-                    // Silence a warning about an unused `conn`.
-                    outln!(out, "let _ = conn;");
-                }
-
                 let fields = request_def.fields.borrow();
 
                 let has_expr_fields = fields.iter().any(|field| {
@@ -1123,8 +1101,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                         xcbdefs::FieldDef::Normal(normal_field) => {
                             if normal_field.name == "major_opcode" {
                                 if ns.ext_info.is_some() {
-                                    fixed_fields_bytes
-                                        .push(String::from("extension_information.major_opcode"));
+                                    fixed_fields_bytes.push(String::from("major_opcode"));
                                 } else {
                                     fixed_fields_bytes.push(format!(
                                         "{}_REQUEST",
@@ -1456,11 +1433,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                     slices = slices_arg,
                     fds = fds_arg,
                 );
-                if is_xproto {
-                    outln!(out, "{}", result);
-                } else {
-                    outln!(out, "Ok({})", result);
-                }
+                outln!(out, "{}", result);
             });
             outln!(out, "}}");
 
@@ -1492,10 +1465,18 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             outln!(out.indent(), "Conn: RequestConnection + ?Sized,");
             outln!(out, "{{");
             out.indented(|out| {
+                if !is_xproto {
+                    outln!(
+                        out,
+                        "let major_opcode = conn.extension_information(X11_EXTENSION_NAME)?
+                        .ok_or(ConnectionError::UnsupportedExtension)?
+                        .major_opcode;",
+                    );
+                }
                 outln!(
                     out,
-                    "let (bytes, fds) = self.serialize(conn){};",
-                    if is_xproto { "" } else { "?" }
+                    "let (bytes, fds) = self.serialize({});",
+                    if is_xproto { "" } else { "major_opcode" }
                 );
                 outln!(
                     out,
