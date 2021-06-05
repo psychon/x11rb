@@ -661,6 +661,22 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 ext_info.major_version,
                 ext_info.minor_version,
             );
+
+            outln!(out, "");
+            outln!(out, "/// Get the major opcode of this extension");
+            outln!(out, "fn major_opcode<Conn: RequestConnection + ?Sized>(conn: &Conn) -> Result<u8, ConnectionError> {{");
+            out.indented(|out| {
+                outln!(
+                    out,
+                    "let info = conn.extension_information(X11_EXTENSION_NAME)?;",
+                );
+                outln!(
+                    out,
+                    "let info = info.ok_or(ConnectionError::UnsupportedExtension)?;",
+                );
+                outln!(out, "Ok(info.major_opcode)");
+            });
+            outln!(out, "}}");
         }
         outln!(out, "");
 
@@ -1465,18 +1481,10 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             outln!(out.indent(), "Conn: RequestConnection + ?Sized,");
             outln!(out, "{{");
             out.indented(|out| {
-                if !is_xproto {
-                    outln!(
-                        out,
-                        "let major_opcode = conn.extension_information(X11_EXTENSION_NAME)?
-                        .ok_or(ConnectionError::UnsupportedExtension)?
-                        .major_opcode;",
-                    );
-                }
                 outln!(
                     out,
                     "let (bytes, fds) = self.serialize({});",
-                    if is_xproto { "" } else { "major_opcode" }
+                    if is_xproto { "" } else { "major_opcode(conn)?" }
                 );
                 outln!(
                     out,

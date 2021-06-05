@@ -31,6 +31,13 @@ pub const X11_EXTENSION_NAME: &str = "Generic Event Extension";
 /// send the maximum version of the extension that you need.
 pub const X11_XML_VERSION: (u32, u32) = (1, 0);
 
+/// Get the major opcode of this extension
+fn major_opcode<Conn: RequestConnection + ?Sized>(conn: &Conn) -> Result<u8, ConnectionError> {
+    let info = conn.extension_information(X11_EXTENSION_NAME)?;
+    let info = info.ok_or(ConnectionError::UnsupportedExtension)?;
+    Ok(info.major_opcode)
+}
+
 /// Opcode for the QueryVersion request
 pub const QUERY_VERSION_REQUEST: u8 = 0;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -64,10 +71,7 @@ impl QueryVersionRequest {
     where
         Conn: RequestConnection + ?Sized,
     {
-        let major_opcode = conn.extension_information(X11_EXTENSION_NAME)?
-                                .ok_or(ConnectionError::UnsupportedExtension)?
-                                .major_opcode;
-        let (bytes, fds) = self.serialize(major_opcode);
+        let (bytes, fds) = self.serialize(major_opcode(conn)?);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         conn.send_request_with_reply(&slices, fds)
     }

@@ -31,6 +31,13 @@ pub const X11_EXTENSION_NAME: &str = "XFree86-DRI";
 /// send the maximum version of the extension that you need.
 pub const X11_XML_VERSION: (u32, u32) = (4, 1);
 
+/// Get the major opcode of this extension
+fn major_opcode<Conn: RequestConnection + ?Sized>(conn: &Conn) -> Result<u8, ConnectionError> {
+    let info = conn.extension_information(X11_EXTENSION_NAME)?;
+    let info = info.ok_or(ConnectionError::UnsupportedExtension)?;
+    Ok(info.major_opcode)
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct DrmClipRect {
     pub x1: i16,
@@ -99,10 +106,7 @@ impl QueryVersionRequest {
     where
         Conn: RequestConnection + ?Sized,
     {
-        let major_opcode = conn.extension_information(X11_EXTENSION_NAME)?
-                                .ok_or(ConnectionError::UnsupportedExtension)?
-                                .major_opcode;
-        let (bytes, fds) = self.serialize(major_opcode);
+        let (bytes, fds) = self.serialize(major_opcode(conn)?);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         conn.send_request_with_reply(&slices, fds)
     }
@@ -187,10 +191,7 @@ impl QueryDirectRenderingCapableRequest {
     where
         Conn: RequestConnection + ?Sized,
     {
-        let major_opcode = conn.extension_information(X11_EXTENSION_NAME)?
-                                .ok_or(ConnectionError::UnsupportedExtension)?
-                                .major_opcode;
-        let (bytes, fds) = self.serialize(major_opcode);
+        let (bytes, fds) = self.serialize(major_opcode(conn)?);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         conn.send_request_with_reply(&slices, fds)
     }
@@ -275,10 +276,7 @@ impl OpenConnectionRequest {
     where
         Conn: RequestConnection + ?Sized,
     {
-        let major_opcode = conn.extension_information(X11_EXTENSION_NAME)?
-                                .ok_or(ConnectionError::UnsupportedExtension)?
-                                .major_opcode;
-        let (bytes, fds) = self.serialize(major_opcode);
+        let (bytes, fds) = self.serialize(major_opcode(conn)?);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         conn.send_request_with_reply(&slices, fds)
     }
@@ -385,10 +383,7 @@ impl CloseConnectionRequest {
     where
         Conn: RequestConnection + ?Sized,
     {
-        let major_opcode = conn.extension_information(X11_EXTENSION_NAME)?
-                                .ok_or(ConnectionError::UnsupportedExtension)?
-                                .major_opcode;
-        let (bytes, fds) = self.serialize(major_opcode);
+        let (bytes, fds) = self.serialize(major_opcode(conn)?);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         conn.send_request_without_reply(&slices, fds)
     }
@@ -448,10 +443,7 @@ impl GetClientDriverNameRequest {
     where
         Conn: RequestConnection + ?Sized,
     {
-        let major_opcode = conn.extension_information(X11_EXTENSION_NAME)?
-                                .ok_or(ConnectionError::UnsupportedExtension)?
-                                .major_opcode;
-        let (bytes, fds) = self.serialize(major_opcode);
+        let (bytes, fds) = self.serialize(major_opcode(conn)?);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         conn.send_request_with_reply(&slices, fds)
     }
@@ -572,10 +564,7 @@ impl CreateContextRequest {
     where
         Conn: RequestConnection + ?Sized,
     {
-        let major_opcode = conn.extension_information(X11_EXTENSION_NAME)?
-                                .ok_or(ConnectionError::UnsupportedExtension)?
-                                .major_opcode;
-        let (bytes, fds) = self.serialize(major_opcode);
+        let (bytes, fds) = self.serialize(major_opcode(conn)?);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         conn.send_request_with_reply(&slices, fds)
     }
@@ -672,10 +661,7 @@ impl DestroyContextRequest {
     where
         Conn: RequestConnection + ?Sized,
     {
-        let major_opcode = conn.extension_information(X11_EXTENSION_NAME)?
-                                .ok_or(ConnectionError::UnsupportedExtension)?
-                                .major_opcode;
-        let (bytes, fds) = self.serialize(major_opcode);
+        let (bytes, fds) = self.serialize(major_opcode(conn)?);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         conn.send_request_without_reply(&slices, fds)
     }
@@ -744,10 +730,7 @@ impl CreateDrawableRequest {
     where
         Conn: RequestConnection + ?Sized,
     {
-        let major_opcode = conn.extension_information(X11_EXTENSION_NAME)?
-                                .ok_or(ConnectionError::UnsupportedExtension)?
-                                .major_opcode;
-        let (bytes, fds) = self.serialize(major_opcode);
+        let (bytes, fds) = self.serialize(major_opcode(conn)?);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         conn.send_request_with_reply(&slices, fds)
     }
@@ -841,10 +824,7 @@ impl DestroyDrawableRequest {
     where
         Conn: RequestConnection + ?Sized,
     {
-        let major_opcode = conn.extension_information(X11_EXTENSION_NAME)?
-                                .ok_or(ConnectionError::UnsupportedExtension)?
-                                .major_opcode;
-        let (bytes, fds) = self.serialize(major_opcode);
+        let (bytes, fds) = self.serialize(major_opcode(conn)?);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         conn.send_request_without_reply(&slices, fds)
     }
@@ -913,10 +893,7 @@ impl GetDrawableInfoRequest {
     where
         Conn: RequestConnection + ?Sized,
     {
-        let major_opcode = conn.extension_information(X11_EXTENSION_NAME)?
-                                .ok_or(ConnectionError::UnsupportedExtension)?
-                                .major_opcode;
-        let (bytes, fds) = self.serialize(major_opcode);
+        let (bytes, fds) = self.serialize(major_opcode(conn)?);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         conn.send_request_with_reply(&slices, fds)
     }
@@ -1052,10 +1029,7 @@ impl GetDeviceInfoRequest {
     where
         Conn: RequestConnection + ?Sized,
     {
-        let major_opcode = conn.extension_information(X11_EXTENSION_NAME)?
-                                .ok_or(ConnectionError::UnsupportedExtension)?
-                                .major_opcode;
-        let (bytes, fds) = self.serialize(major_opcode);
+        let (bytes, fds) = self.serialize(major_opcode(conn)?);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         conn.send_request_with_reply(&slices, fds)
     }
@@ -1172,10 +1146,7 @@ impl AuthConnectionRequest {
     where
         Conn: RequestConnection + ?Sized,
     {
-        let major_opcode = conn.extension_information(X11_EXTENSION_NAME)?
-                                .ok_or(ConnectionError::UnsupportedExtension)?
-                                .major_opcode;
-        let (bytes, fds) = self.serialize(major_opcode);
+        let (bytes, fds) = self.serialize(major_opcode(conn)?);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         conn.send_request_with_reply(&slices, fds)
     }

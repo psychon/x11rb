@@ -32,6 +32,13 @@ pub const X11_EXTENSION_NAME: &str = "XpExtension";
 /// send the maximum version of the extension that you need.
 pub const X11_XML_VERSION: (u32, u32) = (1, 0);
 
+/// Get the major opcode of this extension
+fn major_opcode<Conn: RequestConnection + ?Sized>(conn: &Conn) -> Result<u8, ConnectionError> {
+    let info = conn.extension_information(X11_EXTENSION_NAME)?;
+    let info = info.ok_or(ConnectionError::UnsupportedExtension)?;
+    Ok(info.major_opcode)
+}
+
 pub type String8 = u8;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -398,10 +405,7 @@ impl PrintQueryVersionRequest {
     where
         Conn: RequestConnection + ?Sized,
     {
-        let major_opcode = conn.extension_information(X11_EXTENSION_NAME)?
-                                .ok_or(ConnectionError::UnsupportedExtension)?
-                                .major_opcode;
-        let (bytes, fds) = self.serialize(major_opcode);
+        let (bytes, fds) = self.serialize(major_opcode(conn)?);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         conn.send_request_with_reply(&slices, fds)
     }
@@ -496,10 +500,7 @@ impl<'input> PrintGetPrinterListRequest<'input> {
     where
         Conn: RequestConnection + ?Sized,
     {
-        let major_opcode = conn.extension_information(X11_EXTENSION_NAME)?
-                                .ok_or(ConnectionError::UnsupportedExtension)?
-                                .major_opcode;
-        let (bytes, fds) = self.serialize(major_opcode);
+        let (bytes, fds) = self.serialize(major_opcode(conn)?);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         conn.send_request_with_reply(&slices, fds)
     }
@@ -606,10 +607,7 @@ impl PrintRehashPrinterListRequest {
     where
         Conn: RequestConnection + ?Sized,
     {
-        let major_opcode = conn.extension_information(X11_EXTENSION_NAME)?
-                                .ok_or(ConnectionError::UnsupportedExtension)?
-                                .major_opcode;
-        let (bytes, fds) = self.serialize(major_opcode);
+        let (bytes, fds) = self.serialize(major_opcode(conn)?);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         conn.send_request_without_reply(&slices, fds)
     }
@@ -683,10 +681,7 @@ impl<'input> CreateContextRequest<'input> {
     where
         Conn: RequestConnection + ?Sized,
     {
-        let major_opcode = conn.extension_information(X11_EXTENSION_NAME)?
-                                .ok_or(ConnectionError::UnsupportedExtension)?
-                                .major_opcode;
-        let (bytes, fds) = self.serialize(major_opcode);
+        let (bytes, fds) = self.serialize(major_opcode(conn)?);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         conn.send_request_without_reply(&slices, fds)
     }
@@ -762,10 +757,7 @@ impl PrintSetContextRequest {
     where
         Conn: RequestConnection + ?Sized,
     {
-        let major_opcode = conn.extension_information(X11_EXTENSION_NAME)?
-                                .ok_or(ConnectionError::UnsupportedExtension)?
-                                .major_opcode;
-        let (bytes, fds) = self.serialize(major_opcode);
+        let (bytes, fds) = self.serialize(major_opcode(conn)?);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         conn.send_request_without_reply(&slices, fds)
     }
@@ -818,10 +810,7 @@ impl PrintGetContextRequest {
     where
         Conn: RequestConnection + ?Sized,
     {
-        let major_opcode = conn.extension_information(X11_EXTENSION_NAME)?
-                                .ok_or(ConnectionError::UnsupportedExtension)?
-                                .major_opcode;
-        let (bytes, fds) = self.serialize(major_opcode);
+        let (bytes, fds) = self.serialize(major_opcode(conn)?);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         conn.send_request_with_reply(&slices, fds)
     }
@@ -902,10 +891,7 @@ impl PrintDestroyContextRequest {
     where
         Conn: RequestConnection + ?Sized,
     {
-        let major_opcode = conn.extension_information(X11_EXTENSION_NAME)?
-                                .ok_or(ConnectionError::UnsupportedExtension)?
-                                .major_opcode;
-        let (bytes, fds) = self.serialize(major_opcode);
+        let (bytes, fds) = self.serialize(major_opcode(conn)?);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         conn.send_request_without_reply(&slices, fds)
     }
@@ -958,10 +944,7 @@ impl PrintGetScreenOfContextRequest {
     where
         Conn: RequestConnection + ?Sized,
     {
-        let major_opcode = conn.extension_information(X11_EXTENSION_NAME)?
-                                .ok_or(ConnectionError::UnsupportedExtension)?
-                                .major_opcode;
-        let (bytes, fds) = self.serialize(major_opcode);
+        let (bytes, fds) = self.serialize(major_opcode(conn)?);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         conn.send_request_with_reply(&slices, fds)
     }
@@ -1042,10 +1025,7 @@ impl PrintStartJobRequest {
     where
         Conn: RequestConnection + ?Sized,
     {
-        let major_opcode = conn.extension_information(X11_EXTENSION_NAME)?
-                                .ok_or(ConnectionError::UnsupportedExtension)?
-                                .major_opcode;
-        let (bytes, fds) = self.serialize(major_opcode);
+        let (bytes, fds) = self.serialize(major_opcode(conn)?);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         conn.send_request_without_reply(&slices, fds)
     }
@@ -1105,10 +1085,7 @@ impl PrintEndJobRequest {
     where
         Conn: RequestConnection + ?Sized,
     {
-        let major_opcode = conn.extension_information(X11_EXTENSION_NAME)?
-                                .ok_or(ConnectionError::UnsupportedExtension)?
-                                .major_opcode;
-        let (bytes, fds) = self.serialize(major_opcode);
+        let (bytes, fds) = self.serialize(major_opcode(conn)?);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         conn.send_request_without_reply(&slices, fds)
     }
@@ -1168,10 +1145,7 @@ impl PrintStartDocRequest {
     where
         Conn: RequestConnection + ?Sized,
     {
-        let major_opcode = conn.extension_information(X11_EXTENSION_NAME)?
-                                .ok_or(ConnectionError::UnsupportedExtension)?
-                                .major_opcode;
-        let (bytes, fds) = self.serialize(major_opcode);
+        let (bytes, fds) = self.serialize(major_opcode(conn)?);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         conn.send_request_without_reply(&slices, fds)
     }
@@ -1231,10 +1205,7 @@ impl PrintEndDocRequest {
     where
         Conn: RequestConnection + ?Sized,
     {
-        let major_opcode = conn.extension_information(X11_EXTENSION_NAME)?
-                                .ok_or(ConnectionError::UnsupportedExtension)?
-                                .major_opcode;
-        let (bytes, fds) = self.serialize(major_opcode);
+        let (bytes, fds) = self.serialize(major_opcode(conn)?);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         conn.send_request_without_reply(&slices, fds)
     }
@@ -1316,10 +1287,7 @@ impl<'input> PrintPutDocumentDataRequest<'input> {
     where
         Conn: RequestConnection + ?Sized,
     {
-        let major_opcode = conn.extension_information(X11_EXTENSION_NAME)?
-                                .ok_or(ConnectionError::UnsupportedExtension)?
-                                .major_opcode;
-        let (bytes, fds) = self.serialize(major_opcode);
+        let (bytes, fds) = self.serialize(major_opcode(conn)?);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         conn.send_request_without_reply(&slices, fds)
     }
@@ -1406,10 +1374,7 @@ impl PrintGetDocumentDataRequest {
     where
         Conn: RequestConnection + ?Sized,
     {
-        let major_opcode = conn.extension_information(X11_EXTENSION_NAME)?
-                                .ok_or(ConnectionError::UnsupportedExtension)?
-                                .major_opcode;
-        let (bytes, fds) = self.serialize(major_opcode);
+        let (bytes, fds) = self.serialize(major_opcode(conn)?);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         conn.send_request_with_reply(&slices, fds)
     }
@@ -1519,10 +1484,7 @@ impl PrintStartPageRequest {
     where
         Conn: RequestConnection + ?Sized,
     {
-        let major_opcode = conn.extension_information(X11_EXTENSION_NAME)?
-                                .ok_or(ConnectionError::UnsupportedExtension)?
-                                .major_opcode;
-        let (bytes, fds) = self.serialize(major_opcode);
+        let (bytes, fds) = self.serialize(major_opcode(conn)?);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         conn.send_request_without_reply(&slices, fds)
     }
@@ -1582,10 +1544,7 @@ impl PrintEndPageRequest {
     where
         Conn: RequestConnection + ?Sized,
     {
-        let major_opcode = conn.extension_information(X11_EXTENSION_NAME)?
-                                .ok_or(ConnectionError::UnsupportedExtension)?
-                                .major_opcode;
-        let (bytes, fds) = self.serialize(major_opcode);
+        let (bytes, fds) = self.serialize(major_opcode(conn)?);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         conn.send_request_without_reply(&slices, fds)
     }
@@ -1652,10 +1611,7 @@ impl PrintSelectInputRequest {
     where
         Conn: RequestConnection + ?Sized,
     {
-        let major_opcode = conn.extension_information(X11_EXTENSION_NAME)?
-                                .ok_or(ConnectionError::UnsupportedExtension)?
-                                .major_opcode;
-        let (bytes, fds) = self.serialize(major_opcode);
+        let (bytes, fds) = self.serialize(major_opcode(conn)?);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         conn.send_request_without_reply(&slices, fds)
     }
@@ -1718,10 +1674,7 @@ impl PrintInputSelectedRequest {
     where
         Conn: RequestConnection + ?Sized,
     {
-        let major_opcode = conn.extension_information(X11_EXTENSION_NAME)?
-                                .ok_or(ConnectionError::UnsupportedExtension)?
-                                .major_opcode;
-        let (bytes, fds) = self.serialize(major_opcode);
+        let (bytes, fds) = self.serialize(major_opcode(conn)?);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         conn.send_request_with_reply(&slices, fds)
     }
@@ -1814,10 +1767,7 @@ impl PrintGetAttributesRequest {
     where
         Conn: RequestConnection + ?Sized,
     {
-        let major_opcode = conn.extension_information(X11_EXTENSION_NAME)?
-                                .ok_or(ConnectionError::UnsupportedExtension)?
-                                .major_opcode;
-        let (bytes, fds) = self.serialize(major_opcode);
+        let (bytes, fds) = self.serialize(major_opcode(conn)?);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         conn.send_request_with_reply(&slices, fds)
     }
@@ -1940,10 +1890,7 @@ impl<'input> PrintGetOneAttributesRequest<'input> {
     where
         Conn: RequestConnection + ?Sized,
     {
-        let major_opcode = conn.extension_information(X11_EXTENSION_NAME)?
-                                .ok_or(ConnectionError::UnsupportedExtension)?
-                                .major_opcode;
-        let (bytes, fds) = self.serialize(major_opcode);
+        let (bytes, fds) = self.serialize(major_opcode(conn)?);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         conn.send_request_with_reply(&slices, fds)
     }
@@ -2080,10 +2027,7 @@ impl<'input> PrintSetAttributesRequest<'input> {
     where
         Conn: RequestConnection + ?Sized,
     {
-        let major_opcode = conn.extension_information(X11_EXTENSION_NAME)?
-                                .ok_or(ConnectionError::UnsupportedExtension)?
-                                .major_opcode;
-        let (bytes, fds) = self.serialize(major_opcode);
+        let (bytes, fds) = self.serialize(major_opcode(conn)?);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         conn.send_request_without_reply(&slices, fds)
     }
@@ -2166,10 +2110,7 @@ impl PrintGetPageDimensionsRequest {
     where
         Conn: RequestConnection + ?Sized,
     {
-        let major_opcode = conn.extension_information(X11_EXTENSION_NAME)?
-                                .ok_or(ConnectionError::UnsupportedExtension)?
-                                .major_opcode;
-        let (bytes, fds) = self.serialize(major_opcode);
+        let (bytes, fds) = self.serialize(major_opcode(conn)?);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         conn.send_request_with_reply(&slices, fds)
     }
@@ -2257,10 +2198,7 @@ impl PrintQueryScreensRequest {
     where
         Conn: RequestConnection + ?Sized,
     {
-        let major_opcode = conn.extension_information(X11_EXTENSION_NAME)?
-                                .ok_or(ConnectionError::UnsupportedExtension)?
-                                .major_opcode;
-        let (bytes, fds) = self.serialize(major_opcode);
+        let (bytes, fds) = self.serialize(major_opcode(conn)?);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         conn.send_request_with_reply(&slices, fds)
     }
@@ -2364,10 +2302,7 @@ impl PrintSetImageResolutionRequest {
     where
         Conn: RequestConnection + ?Sized,
     {
-        let major_opcode = conn.extension_information(X11_EXTENSION_NAME)?
-                                .ok_or(ConnectionError::UnsupportedExtension)?
-                                .major_opcode;
-        let (bytes, fds) = self.serialize(major_opcode);
+        let (bytes, fds) = self.serialize(major_opcode(conn)?);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         conn.send_request_with_reply(&slices, fds)
     }
@@ -2456,10 +2391,7 @@ impl PrintGetImageResolutionRequest {
     where
         Conn: RequestConnection + ?Sized,
     {
-        let major_opcode = conn.extension_information(X11_EXTENSION_NAME)?
-                                .ok_or(ConnectionError::UnsupportedExtension)?
-                                .major_opcode;
-        let (bytes, fds) = self.serialize(major_opcode);
+        let (bytes, fds) = self.serialize(major_opcode(conn)?);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         conn.send_request_with_reply(&slices, fds)
     }
