@@ -45,7 +45,7 @@ pub(crate) fn generate(module: &xcbgen::defs::Module) -> HashMap<PathBuf, String
     );
     outln!(main_out, "");
 
-    let caches = RefCell::new(namespace::Caches::default());
+    let caches = RefCell::new(namespace::helpers::Caches::default());
     caches.borrow_mut().gather_enum_infos(module);
 
     let mut enum_cases = HashMap::new();
