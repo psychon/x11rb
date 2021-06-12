@@ -7,6 +7,7 @@ use std::path::PathBuf;
 #[macro_use]
 mod output;
 mod error_events;
+mod requests_replies;
 mod namespace;
 mod special_cases;
 
@@ -63,7 +64,7 @@ pub(crate) fn generate(module: &xcbgen::defs::Module) -> HashMap<PathBuf, String
     }
     outln!(main_out, "");
 
-    namespace::generate_request_reply_enum(&mut main_out, module, enum_cases);
+    requests_replies::generate(&mut main_out, module, enum_cases);
     error_events::generate(&mut main_out, module);
 
     out_map.insert(PathBuf::from("mod.rs"), main_out.into_data());
