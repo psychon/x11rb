@@ -5,7 +5,7 @@ use xcbgen::defs as xcbdefs;
 use super::{
     CaseInfo, DeducibleField, Derives, FieldContainer, NamespaceGenerator,
     Output, StructSizeConstraint, expr_to_str, gather_deducible_fields, parse,
-    serialize, to_rust_type_name, to_rust_variable_name,
+    serialize, struct_type, to_rust_type_name, to_rust_variable_name,
 };
 
 pub(super) fn emit_switch_type(
@@ -90,7 +90,8 @@ pub(super) fn emit_switch_type(
             let ext_params = case.external_params.borrow();
 
             generator.filter_derives_for_fields(&mut derives, &*case_fields, false);
-            generator.emit_struct_type(
+            struct_type::emit_struct_type(
+                generator,
                 &type_name,
                 &type_name,
                 derives,

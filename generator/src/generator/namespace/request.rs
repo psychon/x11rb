@@ -5,7 +5,8 @@ use super::{
     CaseInfo, DeducibleField, Derives, expr_to_str, FieldContainer,
     NamespaceGenerator, Output, PerModuleEnumCases, StructSizeConstraint,
     gather_deducible_fields, get_ns_name_prefix, parse, serialize,
-    special_cases, switch, to_rust_type_name, to_rust_variable_name,
+    special_cases, struct_type, switch, to_rust_type_name,
+    to_rust_variable_name,
 };
 
 use xcbgen::defs as xcbdefs;
@@ -232,7 +233,8 @@ pub(super) fn generate_request(
         let reply_fields = reply.fields.borrow();
         let mut reply_derives = Derives::all();
         generator.filter_derives_for_fields(&mut reply_derives, &*reply_fields, false);
-        generator.emit_struct_type(
+        struct_type::emit_struct_type(
+            generator,
             &reply_struct_name,
             &name,
             reply_derives,
