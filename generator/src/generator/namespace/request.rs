@@ -2,19 +2,10 @@ use std::borrow::Cow;
 use std::collections::HashMap;
 
 use super::{
-    StructSizeConstraint,
-    NamespaceGenerator,
-    Output,
-    DeducibleField,
-    CaseInfo,
-    special_cases,
+    CaseInfo, DeducibleField, Derives, FieldContainer, NamespaceGenerator,
+    Output, PerModuleEnumCases, StructSizeConstraint, gather_deducible_fields,
+    get_ns_name_prefix, serialize, special_cases, to_rust_type_name,
     to_rust_variable_name,
-    PerModuleEnumCases,
-    gather_deducible_fields,
-    to_rust_type_name,
-    get_ns_name_prefix,
-    Derives,
-    FieldContainer,
 };
 
 use xcbgen::defs as xcbdefs;
@@ -460,7 +451,8 @@ fn emit_request_struct(
                 let mut next_slice = None;
 
                 let mut tmp_out = Output::new();
-                generator.emit_assert_for_field_serialize(
+                serialize::emit_assert_for_field_serialize(
+                    generator,
                     field,
                     deducible_fields,
                     |field_name| {
@@ -554,7 +546,8 @@ fn emit_request_struct(
                                     out,
                                     "let {} = {};",
                                     bytes_name,
-                                    generator.emit_value_serialize(
+                                    serialize::emit_value_serialize(
+                                        generator,
                                         &normal_field.type_,
                                         &field_name,
                                         was_deduced,
@@ -603,7 +596,8 @@ fn emit_request_struct(
                                 outln!(tmp_out, "let mut {} = Vec::new();", bytes_name);
                                 outln!(tmp_out, "for element in {}.iter() {{", rust_field_name);
                                 tmp_out.indented(|tmp_out| {
-                                    generator.emit_value_serialize_into(
+                                    serialize::emit_value_serialize_into(
+                                        generator,
                                         &list_field.element_type,
                                         "element",
                                         false,
@@ -672,7 +666,8 @@ fn emit_request_struct(
                             out,
                             "let {} = {};",
                             bytes_name,
-                            generator.emit_value_serialize(
+                            serialize::emit_value_serialize(
+                                generator,
                                 &expr_field.type_,
                                 &rust_field_name,
                                 false,
