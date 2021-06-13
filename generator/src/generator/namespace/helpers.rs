@@ -479,32 +479,6 @@ pub(super) enum FieldContainer {
     Other,
 }
 
-/// Formats an integer such as clippy does not complain.
-///
-/// `1234567` produces `"1_234_567"`
-pub(super) fn format_literal_integer(value: u32) -> String {
-    let value = value.to_string();
-    if value.len() > 5 {
-        let offset = value.len() % 3;
-        let mut result = String::new();
-        let mut i = offset;
-        while i < value.len() {
-            if !result.is_empty() {
-                result.push('_');
-            }
-            result.push_str(&value[i..(i + 3)]);
-            i += 3;
-        }
-        if offset != 0 {
-            result.insert(0, '_');
-            result.insert_str(0, &value[0..offset]);
-        }
-        result
-    } else {
-        value
-    }
-}
-
 pub(super) fn needs_match_by_value(field: &xcbdefs::FieldDef) -> bool {
     match field {
         xcbdefs::FieldDef::Normal(normal_field) => {

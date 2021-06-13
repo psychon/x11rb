@@ -19,12 +19,15 @@ mod header;
 mod request;
 mod serialize;
 mod parse;
+mod expr_to_str;
+
+use expr_to_str::expr_to_str;
 
 use helpers::{
     Caches, CaseInfo, DeducibleField, DeducibleFieldOp, DeducibleLengthFieldOp,
     Derives, FieldContainer,
     StructSizeConstraint, ename_to_camel_case, ename_to_rust,
-    format_literal_integer, gather_deducible_fields, needs_match_by_value,
+    gather_deducible_fields, needs_match_by_value,
     postfix_var_name, prefix_var_name, to_rust_enum_type_name,
     to_rust_type_name, to_rust_variable_name,
 };
@@ -664,7 +667,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                             out.indent(),
                             "pub const {}: Self = Self({});",
                             rust_item_name,
-                            format_literal_integer(value),
+                            expr_to_str::format_literal_integer(value),
                         );
                     }
                     xcbdefs::EnumValue::Bit(bit) => {
@@ -1609,7 +1612,8 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                                 "{}::{}(_) => {},",
                                 name,
                                 rust_field_name,
-                                self.expr_to_str(
+                                expr_to_str(
+                                    self,
                                     &case.exprs[0],
                                     to_rust_variable_name,
                                     true,
@@ -1640,7 +1644,8 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                             outln!(
                                 out.indent(),
                                 "expr_value |= {};",
-                                self.expr_to_str(
+                                expr_to_str(
+                                    self,
                                     &case.exprs[0],
                                     to_rust_variable_name,
                                     true,
@@ -1700,7 +1705,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 outln!(
                     out,
                     "let switch_expr = {};",
-                    self.expr_to_str(&switch.expr, to_rust_variable_name, false, true, false),
+                    expr_to_str(self, &switch.expr, to_rust_variable_name, false, true, false),
                 );
                 outln!(out, "let mut outer_remaining = value;");
                 if switch.kind == xcbdefs::SwitchKind::BitCase {
@@ -1708,7 +1713,8 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                     for (case, case_info) in switch.cases.iter().zip(case_infos.iter()) {
                         let mut case_expr_str = format!(
                             "switch_expr & {} != 0",
-                            self.expr_to_str(
+                            expr_to_str(
+                                self,
                                 &case.exprs[0],
                                 to_rust_variable_name,
                                 false,
@@ -1718,7 +1724,8 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                         );
                         for expr in case.exprs[1..].iter() {
                             case_expr_str.push_str(" || switch_expr & ");
-                            case_expr_str.push_str(&self.expr_to_str(
+                            case_expr_str.push_str(&expr_to_str(
+                                self,
                                 expr,
                                 to_rust_variable_name,
                                 false,
@@ -1797,7 +1804,8 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                     for (case, case_info) in switch.cases.iter().zip(case_infos.iter()) {
                         let mut case_expr_str = format!(
                             "switch_expr == {}",
-                            self.expr_to_str(
+                            expr_to_str(
+                                self,
                                 &case.exprs[0],
                                 to_rust_variable_name,
                                 false,
@@ -1807,7 +1815,8 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                         );
                         for expr in case.exprs[1..].iter() {
                             case_expr_str.push_str(" || switch_expr == ");
-                            case_expr_str.push_str(&self.expr_to_str(
+                            case_expr_str.push_str(&expr_to_str(
+                                self,
                                 expr,
                                 to_rust_variable_name,
                                 false,
@@ -2341,7 +2350,8 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                         DeducibleFieldOp::None => String::new(),
                         DeducibleFieldOp::Or(or_expr) => format!(
                             " | {expr}",
-                            expr = self.expr_to_str(
+                            expr = expr_to_str(
+                                self,
                                 &*or_expr,
                                 &mut wrap_field_ref,
                                 true,
@@ -2503,281 +2513,6 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         assert!(has_doc);
     }
 
-    #[inline]
-    fn expr_to_str(
-        &self,
-        expr: &xcbdefs::Expression,
-        mut wrap_field_ref: impl FnMut(&str) -> String,
-        panic_on_overflow: bool,
-        cast_to_u32: bool,
-        needs_parens: bool,
-    ) -> String {
-        self.expr_to_str_impl(
-            expr,
-            &mut wrap_field_ref,
-            panic_on_overflow,
-            cast_to_u32,
-            needs_parens,
-        )
-    }
-
-    fn expr_to_str_impl(
-        &self,
-        expr: &xcbdefs::Expression,
-        wrap_field_ref: &mut dyn FnMut(&str) -> String,
-        panic_on_overflow: bool,
-        cast_to_u32: bool,
-        needs_parens: bool,
-    ) -> String {
-        match expr {
-            xcbdefs::Expression::BinaryOp(bin_op_expr) => {
-                let err_handler = if panic_on_overflow {
-                    ".unwrap()"
-                } else {
-                    ".ok_or(ParseError::InvalidExpression)?"
-                };
-                match bin_op_expr.operator {
-                    xcbdefs::BinaryOperator::Add => format!(
-                        "{}.checked_add({}){}",
-                        self.expr_to_str_impl(
-                            &bin_op_expr.lhs,
-                            wrap_field_ref,
-                            panic_on_overflow,
-                            true,
-                            true,
-                        ),
-                        self.expr_to_str_impl(
-                            &bin_op_expr.rhs,
-                            wrap_field_ref,
-                            panic_on_overflow,
-                            true,
-                            false,
-                        ),
-                        err_handler,
-                    ),
-                    xcbdefs::BinaryOperator::Sub => format!(
-                        "{}.checked_sub({}){}",
-                        self.expr_to_str_impl(
-                            &bin_op_expr.lhs,
-                            wrap_field_ref,
-                            panic_on_overflow,
-                            true,
-                            true,
-                        ),
-                        self.expr_to_str_impl(
-                            &bin_op_expr.rhs,
-                            wrap_field_ref,
-                            panic_on_overflow,
-                            true,
-                            false,
-                        ),
-                        err_handler,
-                    ),
-                    xcbdefs::BinaryOperator::Mul => format!(
-                        "{}.checked_mul({}){}",
-                        self.expr_to_str_impl(
-                            &bin_op_expr.lhs,
-                            wrap_field_ref,
-                            panic_on_overflow,
-                            true,
-                            true,
-                        ),
-                        self.expr_to_str_impl(
-                            &bin_op_expr.rhs,
-                            wrap_field_ref,
-                            panic_on_overflow,
-                            true,
-                            false,
-                        ),
-                        err_handler,
-                    ),
-                    xcbdefs::BinaryOperator::Div => format!(
-                        "{}.checked_div({}){}",
-                        self.expr_to_str_impl(
-                            &bin_op_expr.lhs,
-                            wrap_field_ref,
-                            panic_on_overflow,
-                            true,
-                            true,
-                        ),
-                        self.expr_to_str_impl(
-                            &bin_op_expr.rhs,
-                            wrap_field_ref,
-                            panic_on_overflow,
-                            true,
-                            false,
-                        ),
-                        err_handler,
-                    ),
-                    xcbdefs::BinaryOperator::And => {
-                        let lhs_str = self.expr_to_str_impl(
-                            &bin_op_expr.lhs,
-                            wrap_field_ref,
-                            panic_on_overflow,
-                            true,
-                            true,
-                        );
-                        let rhs_str = self.expr_to_str_impl(
-                            &bin_op_expr.rhs,
-                            wrap_field_ref,
-                            panic_on_overflow,
-                            true,
-                            true,
-                        );
-                        if needs_parens {
-                            format!("({} & {})", lhs_str, rhs_str)
-                        } else {
-                            format!("{} & {}", lhs_str, rhs_str)
-                        }
-                    }
-                    xcbdefs::BinaryOperator::Or => {
-                        let lhs_str = self.expr_to_str_impl(
-                            &bin_op_expr.lhs,
-                            wrap_field_ref,
-                            panic_on_overflow,
-                            true,
-                            true,
-                        );
-                        let rhs_str = self.expr_to_str_impl(
-                            &bin_op_expr.rhs,
-                            wrap_field_ref,
-                            panic_on_overflow,
-                            true,
-                            true,
-                        );
-                        if needs_parens {
-                            format!("({} | {})", lhs_str, rhs_str)
-                        } else {
-                            format!("{} | {}", lhs_str, rhs_str)
-                        }
-                    }
-                    // I'm not sure know how to handle overflow here,
-                    // but this operator never appears in the XMLs
-                    xcbdefs::BinaryOperator::Shl => unimplemented!(),
-                }
-            }
-            xcbdefs::Expression::UnaryOp(unary_op_expr) => match unary_op_expr.operator {
-                xcbdefs::UnaryOperator::Not => {
-                    let rhs_str = self.expr_to_str_impl(
-                        &unary_op_expr.rhs,
-                        wrap_field_ref,
-                        panic_on_overflow,
-                        true,
-                        true,
-                    );
-                    if needs_parens {
-                        format!("(!{})", rhs_str)
-                    } else {
-                        format!("!{}", rhs_str)
-                    }
-                }
-            },
-            xcbdefs::Expression::FieldRef(field_ref_expr) => {
-                let resolved_field_ref = field_ref_expr.resolved.get().unwrap();
-                let value = match resolved_field_ref.ref_kind {
-                    xcbdefs::FieldRefKind::LocalField => wrap_field_ref(&field_ref_expr.field_name),
-                    xcbdefs::FieldRefKind::ExtParam => wrap_field_ref(&field_ref_expr.field_name),
-                    xcbdefs::FieldRefKind::SumOfRef => {
-                        format!("x.{}", to_rust_variable_name(&field_ref_expr.field_name))
-                    }
-                };
-                let field_is_card32 = match resolved_field_ref.field_type {
-                    xcbdefs::TypeRef::BuiltIn(xcbdefs::BuiltInType::Card32) => true,
-                    _ => false,
-                };
-                if cast_to_u32 && !field_is_card32 {
-                    format!("u32::from({})", value)
-                } else {
-                    value
-                }
-            }
-            xcbdefs::Expression::ParamRef(param_ref_expr) => {
-                let rust_field_name = to_rust_variable_name(&param_ref_expr.field_name);
-                let param_is_card32 = match param_ref_expr.type_.get_resolved() {
-                    xcbdefs::TypeRef::BuiltIn(xcbdefs::BuiltInType::Card32) => true,
-                    _ => false,
-                };
-                if cast_to_u32 && !param_is_card32 {
-                    format!("u32::from({})", rust_field_name)
-                } else {
-                    rust_field_name
-                }
-            }
-            xcbdefs::Expression::EnumRef(enum_ref_expr) => {
-                let rust_enum_type = self.type_to_rust_type(enum_ref_expr.enum_.get_resolved());
-                let rust_variant_name = ename_to_rust(&enum_ref_expr.variant);
-                format!("u32::from({}::{})", rust_enum_type, rust_variant_name)
-            }
-            xcbdefs::Expression::PopCount(pop_count_expr) => {
-                let arg = self.expr_to_str_impl(
-                    pop_count_expr,
-                    wrap_field_ref,
-                    panic_on_overflow,
-                    false,
-                    true,
-                );
-                format!("{}.count_ones()", arg)
-            }
-            xcbdefs::Expression::SumOf(sum_of_expr) => {
-                // nested sum-of not supported
-                assert_ne!(
-                    sum_of_expr.resolved_field.get().unwrap().ref_kind,
-                    xcbdefs::FieldRefKind::SumOfRef
-                );
-                let field_value = match sum_of_expr.resolved_field.get().unwrap().ref_kind {
-                    xcbdefs::FieldRefKind::LocalField => wrap_field_ref(&sum_of_expr.field_name),
-                    xcbdefs::FieldRefKind::ExtParam => {
-                        to_rust_variable_name(&sum_of_expr.field_name)
-                    }
-                    // nested sum-of not supported
-                    xcbdefs::FieldRefKind::SumOfRef => unreachable!(),
-                };
-                if panic_on_overflow {
-                    format!(
-                        "{}.iter().fold(0u32, |acc, x| acc.checked_add({}).unwrap())",
-                        field_value,
-                        self.expr_to_str_impl(
-                            &sum_of_expr.operand,
-                            wrap_field_ref,
-                            panic_on_overflow,
-                            true,
-                            true,
-                        ),
-                    )
-                } else {
-                    format!(
-                        "{}.iter().try_fold(0u32, |acc, x| \
-                         acc.checked_add({}).ok_or(ParseError::InvalidExpression))?",
-                        field_value,
-                        self.expr_to_str_impl(
-                            &sum_of_expr.operand,
-                            wrap_field_ref,
-                            panic_on_overflow,
-                            true,
-                            true,
-                        ),
-                    )
-                }
-            }
-            xcbdefs::Expression::ListElementRef => {
-                if cast_to_u32 {
-                    "u32::from(*x)".into()
-                } else if needs_parens {
-                    "(*x)".into()
-                } else {
-                    "*x".into()
-                }
-            }
-            xcbdefs::Expression::Value(value) => {
-                let value_str = format_literal_integer(*value);
-                format!("{}u32", value_str)
-            }
-            xcbdefs::Expression::Bit(bit) => {
-                let value_str = format_literal_integer(1u32 << *bit);
-                format!("{}u32", value_str)
-            }
-        }
-    }
 
     fn name_is_used_by_non_enum(&self, name: &str, ns: &xcbdefs::Namespace) -> bool {
         for type_def in ns.type_defs.borrow().values() {

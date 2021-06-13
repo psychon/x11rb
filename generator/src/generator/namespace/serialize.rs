@@ -4,8 +4,8 @@ use std::convert::TryFrom;
 use xcbgen::defs as xcbdefs;
 
 use super::{
-    DeducibleField, NamespaceGenerator, Output, parse, postfix_var_name,
-    to_rust_variable_name,
+    DeducibleField, NamespaceGenerator, Output, expr_to_str, parse,
+    postfix_var_name, to_rust_variable_name,
 };
 
 /// Returns `Some(bytes)` if the serialized result is a single
@@ -265,7 +265,8 @@ pub(super) fn emit_assert_for_field_serialize(
 
             if needs_assert {
                 let rust_field_name = to_rust_variable_name(&list_field.name);
-                let length_expr_str = generator.expr_to_str(
+                let length_expr_str = expr_to_str(
+                    generator,
                     list_field.length_expr.as_ref().unwrap(),
                     &mut wrap_field_ref,
                     true,
@@ -299,7 +300,8 @@ pub(super) fn emit_assert_for_field_serialize(
 
             if needs_assert {
                 let rust_field_name = to_rust_variable_name(&fd_list_field.name);
-                let length_expr_str = generator.expr_to_str(
+                let length_expr_str = expr_to_str(
+                    generator,
                     &fd_list_field.length_expr,
                     &mut wrap_field_ref,
                     true,
@@ -329,7 +331,7 @@ pub(super) fn emit_assert_for_switch_serialize(
 ) {
     let rust_field_name = to_rust_variable_name(&switch.name);
     let switch_expr_str =
-        generator.expr_to_str(&switch.expr, to_rust_variable_name, true, true, false);
+        expr_to_str(generator, &switch.expr, to_rust_variable_name, true, true, false);
     outln!(
         out,
         "assert_eq!(self.switch_expr(), {}, \"switch `{}` has an inconsistent discriminant\");",

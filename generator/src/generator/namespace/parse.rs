@@ -3,7 +3,7 @@ use std::convert::TryFrom;
 use xcbgen::defs as xcbdefs;
 
 use super::{
-    FieldContainer, NamespaceGenerator, Output, to_rust_type_name,
+    FieldContainer, NamespaceGenerator, Output, expr_to_str, to_rust_type_name,
     to_rust_variable_name,
 };
 
@@ -90,7 +90,8 @@ pub(super) fn emit_field_parse(
                          {}.try_to_usize()?)?;",
                         rust_field_name,
                         from,
-                        generator.expr_to_str(
+                        expr_to_str(
+                            generator,
                             length_expr,
                             to_rust_variable_name,
                             false,
@@ -132,7 +133,8 @@ pub(super) fn emit_field_parse(
                      {}.try_to_usize()?)?;",
                     rust_field_name,
                     rust_element_type,
-                    generator.expr_to_str(
+                    expr_to_str(
+                        generator,
                         list_field.length_expr.as_ref().unwrap(),
                         to_rust_variable_name,
                         false,
@@ -163,7 +165,8 @@ pub(super) fn emit_field_parse(
                     outln!(
                         out,
                         "let list_length = {}.try_to_usize()?;",
-                        generator.expr_to_str(
+                        expr_to_str(
+                            generator,
                             length_expr,
                             to_rust_variable_name,
                             false,
@@ -228,7 +231,8 @@ pub(super) fn emit_field_parse(
             outln!(
                 out,
                 "let fds_len = {}.try_to_usize()?;",
-                generator.expr_to_str(
+                expr_to_str(
+                    generator,
                     &fd_list_field.length_expr,
                     to_rust_variable_name,
                     false,

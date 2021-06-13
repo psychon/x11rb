@@ -2,10 +2,10 @@ use std::borrow::Cow;
 use std::collections::HashMap;
 
 use super::{
-    CaseInfo, DeducibleField, Derives, FieldContainer, NamespaceGenerator,
-    Output, PerModuleEnumCases, StructSizeConstraint, gather_deducible_fields,
-    get_ns_name_prefix, parse, serialize, special_cases, to_rust_type_name,
-    to_rust_variable_name,
+    CaseInfo, DeducibleField, Derives, expr_to_str, FieldContainer,
+    NamespaceGenerator, Output, PerModuleEnumCases, StructSizeConstraint,
+    gather_deducible_fields, get_ns_name_prefix, parse, serialize,
+    special_cases, to_rust_type_name, to_rust_variable_name,
 };
 
 use xcbgen::defs as xcbdefs;
@@ -649,7 +649,8 @@ fn emit_request_struct(
                                 out,
                                 "let {} = {} != 0;",
                                 rust_field_name,
-                                generator.expr_to_str(
+                                expr_to_str(
+                                    generator,
                                     &expr_field.expr,
                                     to_rust_variable_name,
                                     true,
