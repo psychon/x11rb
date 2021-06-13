@@ -22,9 +22,13 @@ use crate::utils::{RawFdContainer, pretty_print_bitmask, pretty_print_enum};
 use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse, TryParseFd, TryIntoUSize};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
+use crate::connection::Connection;
+#[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
 use crate::cookie::ListFontsWithInfoCookie;
 use crate::errors::{ConnectionError, ParseError};
+#[allow(unused_imports)]
+use crate::errors::ReplyOrIdError;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Char2b {
@@ -27584,3 +27588,75 @@ pub trait ConnectionExt: RequestConnection {
 }
 
 impl<C: RequestConnection + ?Sized> ConnectionExt for C {}
+
+/// A RAII-like wrapper around a [Pixmap].
+///
+/// Instances of this struct represent a Pixmap that is freed in `Drop`.
+///
+/// Any errors during `Drop` are silently ignored. Most likely an error here means that your
+/// X11 connection is broken and later requests will also fail.
+#[derive(Debug)]
+pub struct PixmapWrapper<'c, C: RequestConnection>(&'c C, Pixmap);
+
+impl<'c, C: RequestConnection> PixmapWrapper<'c, C>
+{
+    /// Assume ownership of the given resource and destroy it in `Drop`.
+    pub fn for_pixmap(conn: &'c C, id: Pixmap) -> Self {
+        PixmapWrapper(conn, id)
+    }
+
+    /// Get the XID of the wrapped resource
+    pub fn pixmap(&self) -> Pixmap {
+        self.1
+    }
+
+    /// Assume ownership of the XID of the wrapped resource
+    ///
+    /// This function destroys this wrapper without freeing the underlying resource.
+    pub fn into_pixmap(self) -> Pixmap {
+        let id = self.1;
+        std::mem::forget(self);
+        id
+    }
+}
+
+impl<'c, C: Connection> PixmapWrapper<'c, C>
+{
+
+    /// Create a new Pixmap and return a Pixmap wrapper and a cookie.
+    ///
+    /// This is a thin wrapper around [create_pixmap] that allocates an id for the Pixmap.
+    /// This function returns the resulting `PixmapWrapper` that owns the created Pixmap and frees
+    /// it in `Drop`. This also returns a `VoidCookie` that comes from the call to
+    /// [create_pixmap].
+    ///
+    /// Errors can come from the call to [Connection::generate_id] or [create_pixmap].
+    pub fn create_pixmap_and_get_cookie(conn: &'c C, depth: u8, drawable: Drawable, width: u16, height: u16) -> Result<(Self, VoidCookie<'c, C>), ReplyOrIdError> {
+        let pid = conn.generate_id()?;
+        let cookie = conn.create_pixmap(depth, pid, drawable, width, height)?;
+        Ok((Self::for_pixmap(conn, pid), cookie))
+    }
+
+    /// Create a new Pixmap and return a Pixmap wrapper
+    ///
+    /// This is a thin wrapper around [create_pixmap] that allocates an id for the Pixmap.
+    /// This function returns the resulting `PixmapWrapper` that owns the created Pixmap and frees
+    /// it in `Drop`.
+    ///
+    /// Errors can come from the call to [Connection::generate_id] or [create_pixmap].
+    pub fn create_pixmap(conn: &'c C, depth: u8, drawable: Drawable, width: u16, height: u16) -> Result<Self, ReplyOrIdError> {
+        Ok(Self::create_pixmap_and_get_cookie(conn, depth, drawable, width, height)?.0)
+    }
+}
+
+impl<C: RequestConnection> From<&PixmapWrapper<'_, C>> for Pixmap {
+    fn from(from: &PixmapWrapper<'_, C>) -> Self {
+        from.1
+    }
+}
+
+impl<C: RequestConnection> Drop for PixmapWrapper<'_, C> {
+    fn drop(&mut self) {
+        let _ = (self.0).free_pixmap(self.1);
+    }
+}

@@ -17,8 +17,12 @@ use crate::utils::{RawFdContainer, pretty_print_bitmask, pretty_print_enum};
 use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse, TryParseFd, TryIntoUSize};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
+use crate::connection::Connection;
+#[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
 use crate::errors::{ConnectionError, ParseError};
+#[allow(unused_imports)]
+use crate::errors::ReplyOrIdError;
 use super::xfixes;
 use super::xproto;
 

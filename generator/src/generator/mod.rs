@@ -51,7 +51,11 @@ pub(crate) fn generate(module: &xcbgen::defs::Module) -> HashMap<PathBuf, String
     let mut enum_cases = HashMap::new();
     for ns in module.sorted_namespaces() {
         let mut ns_out = Output::new();
-        namespace::generate(&ns, &caches, &mut ns_out, &mut enum_cases);
+        let wrapper_info = match ns.ext_info {
+            None => &XPROTO_RESOURCES[..],
+            Some(_) => &[],
+        };
+        namespace::generate(&ns, &caches, &mut ns_out, &mut enum_cases, wrapper_info);
         out_map.insert(
             PathBuf::from(format!("{}.rs", ns.header)),
             ns_out.into_data(),
@@ -211,3 +215,20 @@ pub(crate) fn get_ns_name_prefix(ns: &xcbgen::defs::Namespace) -> String {
         String::new()
     }
 }
+
+struct ResourceInfo<'a> {
+    resource_name: &'a str,
+    create_requests: [Option<&'a str>; 2],
+    free_request: &'a str,
+}
+
+const XPROTO_RESOURCES: [ResourceInfo<'static>; 1] = [
+    ResourceInfo {
+        resource_name: "Pixmap",
+        create_requests: [
+            Some("CreatePixmap"),
+            None,
+        ],
+        free_request: "FreePixmap",
+    },
+];

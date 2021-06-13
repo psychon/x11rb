@@ -47,6 +47,8 @@ pub(super) fn write_header(out: &mut Output, ns: &xcbdefs::Namespace) {
         "use crate::connection::{{BufWithFds, PiecewiseBuf, RequestConnection}};"
     );
     outln!(out, "#[allow(unused_imports)]");
+    outln!(out, "use crate::connection::Connection;");
+    outln!(out, "#[allow(unused_imports)]");
     outln!(
         out,
         "use crate::cookie::{{Cookie, CookieWithFds, VoidCookie}};"
@@ -58,6 +60,8 @@ pub(super) fn write_header(out: &mut Output, ns: &xcbdefs::Namespace) {
         outln!(out, "use crate::cookie::RecordEnableContextCookie;");
     }
     outln!(out, "use crate::errors::{{ConnectionError, ParseError}};");
+    outln!(out, "#[allow(unused_imports)]");
+    outln!(out, "use crate::errors::ReplyOrIdError;");
 
     let mut imports = ns
         .imports
