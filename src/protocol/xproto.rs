@@ -27631,7 +27631,8 @@ impl<'c, C: Connection> PixmapWrapper<'c, C>
     /// [create_pixmap].
     ///
     /// Errors can come from the call to [Connection::generate_id] or [create_pixmap].
-    pub fn create_pixmap_and_get_cookie(conn: &'c C, depth: u8, drawable: Drawable, width: u16, height: u16) -> Result<(Self, VoidCookie<'c, C>), ReplyOrIdError> {
+    pub fn create_pixmap_and_get_cookie(conn: &'c C, depth: u8, drawable: Drawable, width: u16, height: u16) -> Result<(Self, VoidCookie<'c, C>), ReplyOrIdError>
+    {
         let pid = conn.generate_id()?;
         let cookie = conn.create_pixmap(depth, pid, drawable, width, height)?;
         Ok((Self::for_pixmap(conn, pid), cookie))
@@ -27644,7 +27645,8 @@ impl<'c, C: Connection> PixmapWrapper<'c, C>
     /// it in `Drop`.
     ///
     /// Errors can come from the call to [Connection::generate_id] or [create_pixmap].
-    pub fn create_pixmap(conn: &'c C, depth: u8, drawable: Drawable, width: u16, height: u16) -> Result<Self, ReplyOrIdError> {
+    pub fn create_pixmap(conn: &'c C, depth: u8, drawable: Drawable, width: u16, height: u16) -> Result<Self, ReplyOrIdError>
+    {
         Ok(Self::create_pixmap_and_get_cookie(conn, depth, drawable, width, height)?.0)
     }
 }
@@ -27703,7 +27705,8 @@ impl<'c, C: Connection> WindowWrapper<'c, C>
     /// [create_window].
     ///
     /// Errors can come from the call to [Connection::generate_id] or [create_window].
-    pub fn create_window_and_get_cookie(conn: &'c C, depth: u8, parent: Window, x: i16, y: i16, width: u16, height: u16, border_width: u16, class: WindowClass, visual: Visualid, value_list: &CreateWindowAux) -> Result<(Self, VoidCookie<'c, C>), ReplyOrIdError> {
+    pub fn create_window_and_get_cookie(conn: &'c C, depth: u8, parent: Window, x: i16, y: i16, width: u16, height: u16, border_width: u16, class: WindowClass, visual: Visualid, value_list: &CreateWindowAux) -> Result<(Self, VoidCookie<'c, C>), ReplyOrIdError>
+    {
         let wid = conn.generate_id()?;
         let cookie = conn.create_window(depth, wid, parent, x, y, width, height, border_width, class, visual, value_list)?;
         Ok((Self::for_window(conn, wid), cookie))
@@ -27716,7 +27719,8 @@ impl<'c, C: Connection> WindowWrapper<'c, C>
     /// it in `Drop`.
     ///
     /// Errors can come from the call to [Connection::generate_id] or [create_window].
-    pub fn create_window(conn: &'c C, depth: u8, parent: Window, x: i16, y: i16, width: u16, height: u16, border_width: u16, class: WindowClass, visual: Visualid, value_list: &CreateWindowAux) -> Result<Self, ReplyOrIdError> {
+    pub fn create_window(conn: &'c C, depth: u8, parent: Window, x: i16, y: i16, width: u16, height: u16, border_width: u16, class: WindowClass, visual: Visualid, value_list: &CreateWindowAux) -> Result<Self, ReplyOrIdError>
+    {
         Ok(Self::create_window_and_get_cookie(conn, depth, parent, x, y, width, height, border_width, class, visual, value_list)?.0)
     }
 }
@@ -27775,7 +27779,8 @@ impl<'c, C: Connection> FontWrapper<'c, C>
     /// [open_font].
     ///
     /// Errors can come from the call to [Connection::generate_id] or [open_font].
-    pub fn open_font_and_get_cookie(conn: &'c C, name: &[u8]) -> Result<(Self, VoidCookie<'c, C>), ReplyOrIdError> {
+    pub fn open_font_and_get_cookie(conn: &'c C, name: &[u8]) -> Result<(Self, VoidCookie<'c, C>), ReplyOrIdError>
+    {
         let fid = conn.generate_id()?;
         let cookie = conn.open_font(fid, name)?;
         Ok((Self::for_font(conn, fid), cookie))
@@ -27788,7 +27793,8 @@ impl<'c, C: Connection> FontWrapper<'c, C>
     /// it in `Drop`.
     ///
     /// Errors can come from the call to [Connection::generate_id] or [open_font].
-    pub fn open_font(conn: &'c C, name: &[u8]) -> Result<Self, ReplyOrIdError> {
+    pub fn open_font(conn: &'c C, name: &[u8]) -> Result<Self, ReplyOrIdError>
+    {
         Ok(Self::open_font_and_get_cookie(conn, name)?.0)
     }
 }
@@ -27847,7 +27853,8 @@ impl<'c, C: Connection> GcontextWrapper<'c, C>
     /// [create_gc].
     ///
     /// Errors can come from the call to [Connection::generate_id] or [create_gc].
-    pub fn create_gc_and_get_cookie(conn: &'c C, drawable: Drawable, value_list: &CreateGCAux) -> Result<(Self, VoidCookie<'c, C>), ReplyOrIdError> {
+    pub fn create_gc_and_get_cookie(conn: &'c C, drawable: Drawable, value_list: &CreateGCAux) -> Result<(Self, VoidCookie<'c, C>), ReplyOrIdError>
+    {
         let cid = conn.generate_id()?;
         let cookie = conn.create_gc(cid, drawable, value_list)?;
         Ok((Self::for_gcontext(conn, cid), cookie))
@@ -27860,7 +27867,8 @@ impl<'c, C: Connection> GcontextWrapper<'c, C>
     /// it in `Drop`.
     ///
     /// Errors can come from the call to [Connection::generate_id] or [create_gc].
-    pub fn create_gc(conn: &'c C, drawable: Drawable, value_list: &CreateGCAux) -> Result<Self, ReplyOrIdError> {
+    pub fn create_gc(conn: &'c C, drawable: Drawable, value_list: &CreateGCAux) -> Result<Self, ReplyOrIdError>
+    {
         Ok(Self::create_gc_and_get_cookie(conn, drawable, value_list)?.0)
     }
 }
@@ -27919,7 +27927,8 @@ impl<'c, C: Connection> ColormapWrapper<'c, C>
     /// [create_colormap].
     ///
     /// Errors can come from the call to [Connection::generate_id] or [create_colormap].
-    pub fn create_colormap_and_get_cookie(conn: &'c C, alloc: ColormapAlloc, window: Window, visual: Visualid) -> Result<(Self, VoidCookie<'c, C>), ReplyOrIdError> {
+    pub fn create_colormap_and_get_cookie(conn: &'c C, alloc: ColormapAlloc, window: Window, visual: Visualid) -> Result<(Self, VoidCookie<'c, C>), ReplyOrIdError>
+    {
         let mid = conn.generate_id()?;
         let cookie = conn.create_colormap(alloc, mid, window, visual)?;
         Ok((Self::for_colormap(conn, mid), cookie))
@@ -27932,7 +27941,8 @@ impl<'c, C: Connection> ColormapWrapper<'c, C>
     /// it in `Drop`.
     ///
     /// Errors can come from the call to [Connection::generate_id] or [create_colormap].
-    pub fn create_colormap(conn: &'c C, alloc: ColormapAlloc, window: Window, visual: Visualid) -> Result<Self, ReplyOrIdError> {
+    pub fn create_colormap(conn: &'c C, alloc: ColormapAlloc, window: Window, visual: Visualid) -> Result<Self, ReplyOrIdError>
+    {
         Ok(Self::create_colormap_and_get_cookie(conn, alloc, window, visual)?.0)
     }
 }
@@ -27991,7 +28001,10 @@ impl<'c, C: Connection> CursorWrapper<'c, C>
     /// [create_cursor].
     ///
     /// Errors can come from the call to [Connection::generate_id] or [create_cursor].
-    pub fn create_cursor_and_get_cookie(conn: &'c C, source: Pixmap, mask: Pixmap, fore_red: u16, fore_green: u16, fore_blue: u16, back_red: u16, back_green: u16, back_blue: u16, x: u16, y: u16) -> Result<(Self, VoidCookie<'c, C>), ReplyOrIdError> {
+    pub fn create_cursor_and_get_cookie<A>(conn: &'c C, source: Pixmap, mask: A, fore_red: u16, fore_green: u16, fore_blue: u16, back_red: u16, back_green: u16, back_blue: u16, x: u16, y: u16) -> Result<(Self, VoidCookie<'c, C>), ReplyOrIdError>
+    where
+        A: Into<Pixmap>,
+    {
         let cid = conn.generate_id()?;
         let cookie = conn.create_cursor(cid, source, mask, fore_red, fore_green, fore_blue, back_red, back_green, back_blue, x, y)?;
         Ok((Self::for_cursor(conn, cid), cookie))
@@ -28004,7 +28017,10 @@ impl<'c, C: Connection> CursorWrapper<'c, C>
     /// it in `Drop`.
     ///
     /// Errors can come from the call to [Connection::generate_id] or [create_cursor].
-    pub fn create_cursor(conn: &'c C, source: Pixmap, mask: Pixmap, fore_red: u16, fore_green: u16, fore_blue: u16, back_red: u16, back_green: u16, back_blue: u16, x: u16, y: u16) -> Result<Self, ReplyOrIdError> {
+    pub fn create_cursor<A>(conn: &'c C, source: Pixmap, mask: A, fore_red: u16, fore_green: u16, fore_blue: u16, back_red: u16, back_green: u16, back_blue: u16, x: u16, y: u16) -> Result<Self, ReplyOrIdError>
+    where
+        A: Into<Pixmap>,
+    {
         Ok(Self::create_cursor_and_get_cookie(conn, source, mask, fore_red, fore_green, fore_blue, back_red, back_green, back_blue, x, y)?.0)
     }
 
@@ -28016,7 +28032,10 @@ impl<'c, C: Connection> CursorWrapper<'c, C>
     /// [create_glyph_cursor].
     ///
     /// Errors can come from the call to [Connection::generate_id] or [create_glyph_cursor].
-    pub fn create_glyph_cursor_and_get_cookie(conn: &'c C, source_font: Font, mask_font: Font, source_char: u16, mask_char: u16, fore_red: u16, fore_green: u16, fore_blue: u16, back_red: u16, back_green: u16, back_blue: u16) -> Result<(Self, VoidCookie<'c, C>), ReplyOrIdError> {
+    pub fn create_glyph_cursor_and_get_cookie<A>(conn: &'c C, source_font: Font, mask_font: A, source_char: u16, mask_char: u16, fore_red: u16, fore_green: u16, fore_blue: u16, back_red: u16, back_green: u16, back_blue: u16) -> Result<(Self, VoidCookie<'c, C>), ReplyOrIdError>
+    where
+        A: Into<Font>,
+    {
         let cid = conn.generate_id()?;
         let cookie = conn.create_glyph_cursor(cid, source_font, mask_font, source_char, mask_char, fore_red, fore_green, fore_blue, back_red, back_green, back_blue)?;
         Ok((Self::for_cursor(conn, cid), cookie))
@@ -28029,7 +28048,10 @@ impl<'c, C: Connection> CursorWrapper<'c, C>
     /// it in `Drop`.
     ///
     /// Errors can come from the call to [Connection::generate_id] or [create_glyph_cursor].
-    pub fn create_glyph_cursor(conn: &'c C, source_font: Font, mask_font: Font, source_char: u16, mask_char: u16, fore_red: u16, fore_green: u16, fore_blue: u16, back_red: u16, back_green: u16, back_blue: u16) -> Result<Self, ReplyOrIdError> {
+    pub fn create_glyph_cursor<A>(conn: &'c C, source_font: Font, mask_font: A, source_char: u16, mask_char: u16, fore_red: u16, fore_green: u16, fore_blue: u16, back_red: u16, back_green: u16, back_blue: u16) -> Result<Self, ReplyOrIdError>
+    where
+        A: Into<Font>,
+    {
         Ok(Self::create_glyph_cursor_and_get_cookie(conn, source_font, mask_font, source_char, mask_char, fore_red, fore_green, fore_blue, back_red, back_green, back_blue)?.0)
     }
 }

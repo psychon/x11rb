@@ -100,10 +100,14 @@ fn generate_creator(
     let request_fields = request_def.fields.borrow();
     let deducible_fields = gather_deducible_fields(&*request_fields);
 
+    let mut letter_iter = b'A'..=b'Z';
+
     let function_name = camel_case_to_lower_snake(&request_def.name);
     let mut function_args = "conn: &'c C".to_string();
     let mut forward_args_with_resource = Vec::new();
     let mut forward_args_without_resource = Vec::new();
+    let mut generics = Vec::new();
+    let mut wheres = Vec::new();
 
     for field in request_fields.iter() {
         if !generator.field_is_visible(field, &deducible_fields) {
@@ -121,7 +125,30 @@ fn generate_creator(
             xcbdefs::FieldDef::Fd(_) => unimplemented!(),
             xcbdefs::FieldDef::FdList(_) => unimplemented!(),
             xcbdefs::FieldDef::Normal(normal_field) => {
-                (to_rust_variable_name(&normal_field.name), generator.field_value_type_to_rust_type(&normal_field.type_))
+                let rust_field_name = to_rust_variable_name(&normal_field.name);
+                let rust_field_type = generator.field_value_type_to_rust_type(&normal_field.type_);
+
+                let use_into = if generator
+                    .use_enum_type_in_field(&normal_field.type_)
+                    .is_none()
+                {
+                    match normal_field.type_.value_set {
+                        xcbdefs::FieldValueSet::None => false,
+                        _ => true,
+                    }
+                } else {
+                    false
+                };
+
+                if use_into {
+                    let generic_param = format!("{}", char::from(letter_iter.next().unwrap()));
+                    let where_ = format!("{}: Into<{}>", generic_param, rust_field_type);
+                    generics.push(generic_param.clone());
+                    wheres.push(where_);
+                    (rust_field_name, generic_param)
+                } else {
+                    (rust_field_name, rust_field_type)
+                }
             }
             xcbdefs::FieldDef::List(list_field) => {
                 let field_name = to_rust_variable_name(&list_field.name);
@@ -147,6 +174,12 @@ fn generate_creator(
         forward_args_with_resource.push(rust_field_name);
     }
 
+    let generics_decl = if generics.is_empty() {
+        "".to_string()
+    } else {
+        format!("<{}>", generics.join(", "))
+    };
+
     outln!(out, "");
     outln!(out, "/// Create a new {name} and return a {name} wrapper and a cookie.", name = resource_name);
     outln!(out, "///");
@@ -156,7 +189,9 @@ fn generate_creator(
     outln!(out, "/// [{}].", function_name);
     outln!(out, "///");
     outln!(out, "/// Errors can come from the call to [Connection::generate_id] or [{}].", function_name);
-    outln!(out, "pub fn {}_and_get_cookie({}) -> Result<(Self, VoidCookie<'c, C>), ReplyOrIdError> {{", function_name, function_args);
+    outln!(out, "pub fn {}_and_get_cookie{}({}) -> Result<(Self, VoidCookie<'c, C>), ReplyOrIdError>", function_name, generics_decl, function_args);
+    emit_where(out, &wheres);
+    outln!(out, "{{");
     outln!(out.indent(), "let {} = conn.generate_id()?;", request_info.created_argument);
     outln!(out.indent(), "let cookie = conn.{}({})?;", function_name, forward_args_with_resource.join(", "));
     outln!(out.indent(), "Ok((Self::for_{}(conn, {}), cookie))", lower_name, request_info.created_argument);
@@ -170,7 +205,18 @@ fn generate_creator(
     outln!(out, "/// it in `Drop`.");
     outln!(out, "///");
     outln!(out, "/// Errors can come from the call to [Connection::generate_id] or [{}].", function_name);
-    outln!(out, "pub fn {}({}) -> Result<Self, ReplyOrIdError> {{", function_name, function_args);
+    outln!(out, "pub fn {}{}({}) -> Result<Self, ReplyOrIdError>", function_name, generics_decl, function_args);
+    emit_where(out, &wheres);
+    outln!(out, "{{");
     outln!(out.indent(), "Ok(Self::{}_and_get_cookie(conn, {})?.0)", function_name, forward_args_without_resource.join(", "));
     outln!(out, "}}");
+}
+
+fn emit_where(out: &mut Output, wheres: &[String]) {
+    if !wheres.is_empty() {
+        outln!(out, "where");
+        for where_ in wheres.iter() {
+            outln!(out.indent(), "{},", where_);
+        }
+    }
 }
