@@ -27804,3 +27804,244 @@ impl<C: RequestConnection> Drop for FontWrapper<'_, C> {
         let _ = (self.0).close_font(self.1);
     }
 }
+
+/// A RAII-like wrapper around a [Gcontext].
+///
+/// Instances of this struct represent a Gcontext that is freed in `Drop`.
+///
+/// Any errors during `Drop` are silently ignored. Most likely an error here means that your
+/// X11 connection is broken and later requests will also fail.
+#[derive(Debug)]
+pub struct GcontextWrapper<'c, C: RequestConnection>(&'c C, Gcontext);
+
+impl<'c, C: RequestConnection> GcontextWrapper<'c, C>
+{
+    /// Assume ownership of the given resource and destroy it in `Drop`.
+    pub fn for_gcontext(conn: &'c C, id: Gcontext) -> Self {
+        GcontextWrapper(conn, id)
+    }
+
+    /// Get the XID of the wrapped resource
+    pub fn gcontext(&self) -> Gcontext {
+        self.1
+    }
+
+    /// Assume ownership of the XID of the wrapped resource
+    ///
+    /// This function destroys this wrapper without freeing the underlying resource.
+    pub fn into_gcontext(self) -> Gcontext {
+        let id = self.1;
+        std::mem::forget(self);
+        id
+    }
+}
+
+impl<'c, C: Connection> GcontextWrapper<'c, C>
+{
+
+    /// Create a new Gcontext and return a Gcontext wrapper and a cookie.
+    ///
+    /// This is a thin wrapper around [create_gc] that allocates an id for the Gcontext.
+    /// This function returns the resulting `GcontextWrapper` that owns the created Gcontext and frees
+    /// it in `Drop`. This also returns a `VoidCookie` that comes from the call to
+    /// [create_gc].
+    ///
+    /// Errors can come from the call to [Connection::generate_id] or [create_gc].
+    pub fn create_gc_and_get_cookie(conn: &'c C, drawable: Drawable, value_list: &CreateGCAux) -> Result<(Self, VoidCookie<'c, C>), ReplyOrIdError> {
+        let cid = conn.generate_id()?;
+        let cookie = conn.create_gc(cid, drawable, value_list)?;
+        Ok((Self::for_gcontext(conn, cid), cookie))
+    }
+
+    /// Create a new Gcontext and return a Gcontext wrapper
+    ///
+    /// This is a thin wrapper around [create_gc] that allocates an id for the Gcontext.
+    /// This function returns the resulting `GcontextWrapper` that owns the created Gcontext and frees
+    /// it in `Drop`.
+    ///
+    /// Errors can come from the call to [Connection::generate_id] or [create_gc].
+    pub fn create_gc(conn: &'c C, drawable: Drawable, value_list: &CreateGCAux) -> Result<Self, ReplyOrIdError> {
+        Ok(Self::create_gc_and_get_cookie(conn, drawable, value_list)?.0)
+    }
+}
+
+impl<C: RequestConnection> From<&GcontextWrapper<'_, C>> for Gcontext {
+    fn from(from: &GcontextWrapper<'_, C>) -> Self {
+        from.1
+    }
+}
+
+impl<C: RequestConnection> Drop for GcontextWrapper<'_, C> {
+    fn drop(&mut self) {
+        let _ = (self.0).free_gc(self.1);
+    }
+}
+
+/// A RAII-like wrapper around a [Colormap].
+///
+/// Instances of this struct represent a Colormap that is freed in `Drop`.
+///
+/// Any errors during `Drop` are silently ignored. Most likely an error here means that your
+/// X11 connection is broken and later requests will also fail.
+#[derive(Debug)]
+pub struct ColormapWrapper<'c, C: RequestConnection>(&'c C, Colormap);
+
+impl<'c, C: RequestConnection> ColormapWrapper<'c, C>
+{
+    /// Assume ownership of the given resource and destroy it in `Drop`.
+    pub fn for_colormap(conn: &'c C, id: Colormap) -> Self {
+        ColormapWrapper(conn, id)
+    }
+
+    /// Get the XID of the wrapped resource
+    pub fn colormap(&self) -> Colormap {
+        self.1
+    }
+
+    /// Assume ownership of the XID of the wrapped resource
+    ///
+    /// This function destroys this wrapper without freeing the underlying resource.
+    pub fn into_colormap(self) -> Colormap {
+        let id = self.1;
+        std::mem::forget(self);
+        id
+    }
+}
+
+impl<'c, C: Connection> ColormapWrapper<'c, C>
+{
+
+    /// Create a new Colormap and return a Colormap wrapper and a cookie.
+    ///
+    /// This is a thin wrapper around [create_colormap] that allocates an id for the Colormap.
+    /// This function returns the resulting `ColormapWrapper` that owns the created Colormap and frees
+    /// it in `Drop`. This also returns a `VoidCookie` that comes from the call to
+    /// [create_colormap].
+    ///
+    /// Errors can come from the call to [Connection::generate_id] or [create_colormap].
+    pub fn create_colormap_and_get_cookie(conn: &'c C, alloc: ColormapAlloc, window: Window, visual: Visualid) -> Result<(Self, VoidCookie<'c, C>), ReplyOrIdError> {
+        let mid = conn.generate_id()?;
+        let cookie = conn.create_colormap(alloc, mid, window, visual)?;
+        Ok((Self::for_colormap(conn, mid), cookie))
+    }
+
+    /// Create a new Colormap and return a Colormap wrapper
+    ///
+    /// This is a thin wrapper around [create_colormap] that allocates an id for the Colormap.
+    /// This function returns the resulting `ColormapWrapper` that owns the created Colormap and frees
+    /// it in `Drop`.
+    ///
+    /// Errors can come from the call to [Connection::generate_id] or [create_colormap].
+    pub fn create_colormap(conn: &'c C, alloc: ColormapAlloc, window: Window, visual: Visualid) -> Result<Self, ReplyOrIdError> {
+        Ok(Self::create_colormap_and_get_cookie(conn, alloc, window, visual)?.0)
+    }
+}
+
+impl<C: RequestConnection> From<&ColormapWrapper<'_, C>> for Colormap {
+    fn from(from: &ColormapWrapper<'_, C>) -> Self {
+        from.1
+    }
+}
+
+impl<C: RequestConnection> Drop for ColormapWrapper<'_, C> {
+    fn drop(&mut self) {
+        let _ = (self.0).free_colormap(self.1);
+    }
+}
+
+/// A RAII-like wrapper around a [Cursor].
+///
+/// Instances of this struct represent a Cursor that is freed in `Drop`.
+///
+/// Any errors during `Drop` are silently ignored. Most likely an error here means that your
+/// X11 connection is broken and later requests will also fail.
+#[derive(Debug)]
+pub struct CursorWrapper<'c, C: RequestConnection>(&'c C, Cursor);
+
+impl<'c, C: RequestConnection> CursorWrapper<'c, C>
+{
+    /// Assume ownership of the given resource and destroy it in `Drop`.
+    pub fn for_cursor(conn: &'c C, id: Cursor) -> Self {
+        CursorWrapper(conn, id)
+    }
+
+    /// Get the XID of the wrapped resource
+    pub fn cursor(&self) -> Cursor {
+        self.1
+    }
+
+    /// Assume ownership of the XID of the wrapped resource
+    ///
+    /// This function destroys this wrapper without freeing the underlying resource.
+    pub fn into_cursor(self) -> Cursor {
+        let id = self.1;
+        std::mem::forget(self);
+        id
+    }
+}
+
+impl<'c, C: Connection> CursorWrapper<'c, C>
+{
+
+    /// Create a new Cursor and return a Cursor wrapper and a cookie.
+    ///
+    /// This is a thin wrapper around [create_cursor] that allocates an id for the Cursor.
+    /// This function returns the resulting `CursorWrapper` that owns the created Cursor and frees
+    /// it in `Drop`. This also returns a `VoidCookie` that comes from the call to
+    /// [create_cursor].
+    ///
+    /// Errors can come from the call to [Connection::generate_id] or [create_cursor].
+    pub fn create_cursor_and_get_cookie(conn: &'c C, source: Pixmap, mask: Pixmap, fore_red: u16, fore_green: u16, fore_blue: u16, back_red: u16, back_green: u16, back_blue: u16, x: u16, y: u16) -> Result<(Self, VoidCookie<'c, C>), ReplyOrIdError> {
+        let cid = conn.generate_id()?;
+        let cookie = conn.create_cursor(cid, source, mask, fore_red, fore_green, fore_blue, back_red, back_green, back_blue, x, y)?;
+        Ok((Self::for_cursor(conn, cid), cookie))
+    }
+
+    /// Create a new Cursor and return a Cursor wrapper
+    ///
+    /// This is a thin wrapper around [create_cursor] that allocates an id for the Cursor.
+    /// This function returns the resulting `CursorWrapper` that owns the created Cursor and frees
+    /// it in `Drop`.
+    ///
+    /// Errors can come from the call to [Connection::generate_id] or [create_cursor].
+    pub fn create_cursor(conn: &'c C, source: Pixmap, mask: Pixmap, fore_red: u16, fore_green: u16, fore_blue: u16, back_red: u16, back_green: u16, back_blue: u16, x: u16, y: u16) -> Result<Self, ReplyOrIdError> {
+        Ok(Self::create_cursor_and_get_cookie(conn, source, mask, fore_red, fore_green, fore_blue, back_red, back_green, back_blue, x, y)?.0)
+    }
+
+    /// Create a new Cursor and return a Cursor wrapper and a cookie.
+    ///
+    /// This is a thin wrapper around [create_glyph_cursor] that allocates an id for the Cursor.
+    /// This function returns the resulting `CursorWrapper` that owns the created Cursor and frees
+    /// it in `Drop`. This also returns a `VoidCookie` that comes from the call to
+    /// [create_glyph_cursor].
+    ///
+    /// Errors can come from the call to [Connection::generate_id] or [create_glyph_cursor].
+    pub fn create_glyph_cursor_and_get_cookie(conn: &'c C, source_font: Font, mask_font: Font, source_char: u16, mask_char: u16, fore_red: u16, fore_green: u16, fore_blue: u16, back_red: u16, back_green: u16, back_blue: u16) -> Result<(Self, VoidCookie<'c, C>), ReplyOrIdError> {
+        let cid = conn.generate_id()?;
+        let cookie = conn.create_glyph_cursor(cid, source_font, mask_font, source_char, mask_char, fore_red, fore_green, fore_blue, back_red, back_green, back_blue)?;
+        Ok((Self::for_cursor(conn, cid), cookie))
+    }
+
+    /// Create a new Cursor and return a Cursor wrapper
+    ///
+    /// This is a thin wrapper around [create_glyph_cursor] that allocates an id for the Cursor.
+    /// This function returns the resulting `CursorWrapper` that owns the created Cursor and frees
+    /// it in `Drop`.
+    ///
+    /// Errors can come from the call to [Connection::generate_id] or [create_glyph_cursor].
+    pub fn create_glyph_cursor(conn: &'c C, source_font: Font, mask_font: Font, source_char: u16, mask_char: u16, fore_red: u16, fore_green: u16, fore_blue: u16, back_red: u16, back_green: u16, back_blue: u16) -> Result<Self, ReplyOrIdError> {
+        Ok(Self::create_glyph_cursor_and_get_cookie(conn, source_font, mask_font, source_char, mask_char, fore_red, fore_green, fore_blue, back_red, back_green, back_blue)?.0)
+    }
+}
+
+impl<C: RequestConnection> From<&CursorWrapper<'_, C>> for Cursor {
+    fn from(from: &CursorWrapper<'_, C>) -> Self {
+        from.1
+    }
+}
+
+impl<C: RequestConnection> Drop for CursorWrapper<'_, C> {
+    fn drop(&mut self) {
+        let _ = (self.0).free_cursor(self.1);
+    }
+}

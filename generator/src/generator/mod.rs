@@ -227,7 +227,7 @@ struct ResourceInfo<'a> {
     free_request: &'a str,
 }
 
-const XPROTO_RESOURCES: [ResourceInfo<'static>; 3] = [
+const XPROTO_RESOURCES: [ResourceInfo<'static>; 6] = [
     ResourceInfo {
         resource_name: "Pixmap",
         create_requests: [
@@ -260,5 +260,41 @@ const XPROTO_RESOURCES: [ResourceInfo<'static>; 3] = [
             None,
         ],
         free_request: "CloseFont",
+    },
+    ResourceInfo {
+        resource_name: "Gcontext",
+        create_requests: [
+            Some(CreateInfo {
+                request_name: "CreateGC",
+                created_argument: "cid",
+            }),
+            None,
+        ],
+        free_request: "FreeGC",
+    },
+    ResourceInfo {
+        resource_name: "Colormap",
+        create_requests: [
+            Some(CreateInfo {
+                request_name: "CreateColormap",
+                created_argument: "mid",
+            }),
+            None,
+        ],
+        free_request: "FreeColormap",
+    },
+    ResourceInfo {
+        resource_name: "Cursor",
+        create_requests: [
+            Some(CreateInfo {
+                request_name: "CreateCursor",
+                created_argument: "cid",
+            }),
+            Some(CreateInfo {
+                request_name: "CreateGlyphCursor",
+                created_argument: "cid",
+            }),
+        ],
+        free_request: "FreeCursor",
     },
 ];
