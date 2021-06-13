@@ -3,9 +3,9 @@ use std::collections::HashMap;
 use xcbgen::defs as xcbdefs;
 
 use super::{
-    DeducibleField, DeducibleLengthFieldOp, Derives, FieldContainer,
-    NamespaceGenerator, Output, StructSizeConstraint, gather_deducible_fields,
-    parse, serialize, switch, to_rust_variable_name,
+    gather_deducible_fields, parse, serialize, switch, to_rust_variable_name, DeducibleField,
+    DeducibleLengthFieldOp, Derives, FieldContainer, NamespaceGenerator, Output,
+    StructSizeConstraint,
 };
 
 // FIXME: `skip_length_field` is broken

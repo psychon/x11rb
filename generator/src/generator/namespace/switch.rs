@@ -3,9 +3,9 @@ use std::collections::HashMap;
 use xcbgen::defs as xcbdefs;
 
 use super::{
-    CaseInfo, DeducibleField, Derives, FieldContainer, NamespaceGenerator,
-    Output, StructSizeConstraint, expr_to_str, gather_deducible_fields, parse,
-    serialize, struct_type, to_rust_type_name, to_rust_variable_name,
+    expr_to_str, gather_deducible_fields, parse, serialize, struct_type, to_rust_type_name,
+    to_rust_variable_name, CaseInfo, DeducibleField, Derives, FieldContainer, NamespaceGenerator,
+    Output, StructSizeConstraint,
 };
 
 pub(super) fn emit_switch_type(
@@ -58,9 +58,7 @@ pub(super) fn emit_switch_type(
         }
 
         if let Some(field_index) = single_field_index {
-            if let xcbdefs::FieldDef::Switch(ref switch_field) =
-                case.fields.borrow()[field_index]
-            {
+            if let xcbdefs::FieldDef::Switch(ref switch_field) = case.fields.borrow()[field_index] {
                 generate_switch(
                     generator,
                     name,
@@ -214,8 +212,7 @@ pub(super) fn emit_switch_type(
         outln!(out, "impl {} {{", name);
         out.indented(|out| {
             for (case, case_info) in switch.cases.iter().zip(case_infos.iter()) {
-                let (rust_case_var_name, rust_case_type_name, rust_case_type) = match case_info
-                {
+                let (rust_case_var_name, rust_case_type_name, rust_case_type) = match case_info {
                     CaseInfo::SingleField(index) => {
                         let fields = case.fields.borrow();
                         let single_field = &fields[*index];
@@ -279,9 +276,7 @@ pub(super) fn emit_switch_type(
                             CaseInfo::SingleField(index) => {
                                 to_rust_type_name(case.fields.borrow()[*index].name().unwrap())
                             }
-                            CaseInfo::MultiField(field_name, _) => {
-                                to_rust_type_name(field_name)
-                            }
+                            CaseInfo::MultiField(field_name, _) => to_rust_type_name(field_name),
                         };
                         outln!(
                             out.indent(),
@@ -309,9 +304,9 @@ pub(super) fn emit_switch_type(
                     for (case, case_info) in switch.cases.iter().zip(case_infos.iter()) {
                         assert_eq!(case.exprs.len(), 1);
                         let rust_field_name = match case_info {
-                            CaseInfo::SingleField(index) => to_rust_variable_name(
-                                case.fields.borrow()[*index].name().unwrap(),
-                            ),
+                            CaseInfo::SingleField(index) => {
+                                to_rust_variable_name(case.fields.borrow()[*index].name().unwrap())
+                            }
                             CaseInfo::MultiField(field_name, _) => {
                                 to_rust_variable_name(field_name)
                             }
@@ -381,7 +376,14 @@ fn emit_switch_try_parse(
             outln!(
                 out,
                 "let switch_expr = {};",
-                expr_to_str(generator, &switch.expr, to_rust_variable_name, false, true, false),
+                expr_to_str(
+                    generator,
+                    &switch.expr,
+                    to_rust_variable_name,
+                    false,
+                    true,
+                    false,
+                ),
             );
             outln!(out, "let mut outer_remaining = value;");
             if switch.kind == xcbdefs::SwitchKind::BitCase {
@@ -418,9 +420,7 @@ fn emit_switch_try_parse(
                             let field_name = single_field.name().unwrap();
                             to_rust_variable_name(field_name)
                         }
-                        CaseInfo::MultiField(field_name, _) => {
-                            to_rust_variable_name(field_name)
-                        }
+                        CaseInfo::MultiField(field_name, _) => to_rust_variable_name(field_name),
                     };
 
                     outln!(out, "let {} = if {} {{", rust_case_name, case_expr_str);
@@ -429,7 +429,10 @@ fn emit_switch_try_parse(
                             CaseInfo::SingleField(_) => {
                                 outln!(out, "let remaining = outer_remaining;");
                                 let case_fields = case.fields.borrow();
-                                NamespaceGenerator::emit_let_value_for_dynamic_align(&*case_fields, out);
+                                NamespaceGenerator::emit_let_value_for_dynamic_align(
+                                    &*case_fields,
+                                    out,
+                                );
                                 for field in case_fields.iter() {
                                     parse::emit_field_parse(
                                         generator,
@@ -523,7 +526,10 @@ fn emit_switch_try_parse(
                             CaseInfo::SingleField(_) => {
                                 outln!(out, "let remaining = outer_remaining;");
                                 let case_fields = case.fields.borrow();
-                                NamespaceGenerator::emit_let_value_for_dynamic_align(&*case_fields, out);
+                                NamespaceGenerator::emit_let_value_for_dynamic_align(
+                                    &*case_fields,
+                                    out,
+                                );
                                 for field in case_fields.iter() {
                                     parse::emit_field_parse(
                                         generator,
@@ -783,8 +789,7 @@ fn emit_variable_size_switch_serialize(
                             let fields = case.fields.borrow();
                             let single_field = &fields[*index];
                             let single_field_name = single_field.name().unwrap();
-                            let rust_single_field_name =
-                                to_rust_variable_name(single_field_name);
+                            let rust_single_field_name = to_rust_variable_name(single_field_name);
                             let deducible_fields = gather_deducible_fields(&*fields);
                             let qual = if needs_match_by_value(single_field) {
                                 ""

@@ -14,24 +14,22 @@ use super::output::Output;
 use super::requests_replies::{EnumCases, PerModuleEnumCases};
 use super::{get_ns_name_prefix, special_cases};
 
-pub(super) mod helpers;
-mod header;
-mod serialize;
-mod parse;
 mod expr_to_str;
-mod struct_type;
+mod header;
+pub(super) mod helpers;
+mod parse;
 mod request;
+mod serialize;
+mod struct_type;
 mod switch;
 
 use expr_to_str::expr_to_str;
 
 use helpers::{
-    Caches, CaseInfo, DeducibleField, DeducibleFieldOp, DeducibleLengthFieldOp,
-    Derives, FieldContainer,
-    StructSizeConstraint, ename_to_camel_case, ename_to_rust,
-    gather_deducible_fields,
-    postfix_var_name, prefix_var_name, to_rust_enum_type_name,
-    to_rust_type_name, to_rust_variable_name,
+    ename_to_camel_case, ename_to_rust, gather_deducible_fields, postfix_var_name, prefix_var_name,
+    to_rust_enum_type_name, to_rust_type_name, to_rust_variable_name, Caches, CaseInfo,
+    DeducibleField, DeducibleFieldOp, DeducibleLengthFieldOp, Derives, FieldContainer,
+    StructSizeConstraint,
 };
 
 /// Generate a Rust module for namespace `ns`.
@@ -1095,7 +1093,6 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         // Empty doc?
         assert!(has_doc);
     }
-
 
     fn name_is_used_by_non_enum(&self, name: &str, ns: &xcbdefs::Namespace) -> bool {
         for type_def in ns.type_defs.borrow().values() {

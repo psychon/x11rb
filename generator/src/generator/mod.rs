@@ -7,8 +7,8 @@ use std::path::PathBuf;
 #[macro_use]
 mod output;
 mod error_events;
-mod requests_replies;
 mod namespace;
+mod requests_replies;
 mod special_cases;
 
 use output::Output;

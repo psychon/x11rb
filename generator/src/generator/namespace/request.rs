@@ -2,11 +2,9 @@ use std::borrow::Cow;
 use std::collections::HashMap;
 
 use super::{
-    CaseInfo, DeducibleField, Derives, expr_to_str, FieldContainer,
-    NamespaceGenerator, Output, PerModuleEnumCases, StructSizeConstraint,
-    gather_deducible_fields, get_ns_name_prefix, parse, serialize,
-    special_cases, struct_type, switch, to_rust_type_name,
-    to_rust_variable_name,
+    expr_to_str, gather_deducible_fields, get_ns_name_prefix, parse, serialize, special_cases,
+    struct_type, switch, to_rust_type_name, to_rust_variable_name, CaseInfo, DeducibleField,
+    Derives, FieldContainer, NamespaceGenerator, Output, PerModuleEnumCases, StructSizeConstraint,
 };
 
 use xcbgen::defs as xcbdefs;
@@ -151,7 +149,13 @@ pub(super) fn generate_request(
         if let Some(aux_start_align) = switch_fields[0].required_start_align {
             assert_eq!(aux_start_align.offset(), 0);
         }
-        generate_aux(generator, request_def, switch_fields[0], &function_name, out);
+        generate_aux(
+            generator,
+            request_def,
+            switch_fields[0],
+            &function_name,
+            out,
+        );
     }
 
     outln!(out, "/// Opcode for the {} request", name);
@@ -164,7 +168,14 @@ pub(super) fn generate_request(
 
     let gathered = gather_request_fields(generator, request_def, &deducible_fields);
 
-    emit_request_struct(generator, request_def, &name, &deducible_fields, &gathered, out);
+    emit_request_struct(
+        generator,
+        request_def,
+        &name,
+        &deducible_fields,
+        &gathered,
+        out,
+    );
     let ns_prefix = get_ns_name_prefix(generator.ns);
     let lifetime_block = if gathered.needs_lifetime {
         "<'input>"
@@ -199,8 +210,22 @@ pub(super) fn generate_request(
             name = name,
         ));
     }
-    emit_request_function(generator, request_def, &name, &function_name, &gathered, out);
-    emit_request_trait_function(generator, request_def, &name, &function_name, &gathered, trait_out);
+    emit_request_function(
+        generator,
+        request_def,
+        &name,
+        &function_name,
+        &gathered,
+        out,
+    );
+    emit_request_trait_function(
+        generator,
+        request_def,
+        &name,
+        &function_name,
+        &gathered,
+        trait_out,
+    );
 
     super::special_cases::handle_request(request_def, out);
 
@@ -289,8 +314,15 @@ fn generate_aux(
             "Auxiliary and optional information for the `{}` function",
             function_name,
         );
-        let cases_infos =
-            switch::emit_switch_type(generator, switch_field, &aux_name, true, true, Some(&doc), out);
+        let cases_infos = switch::emit_switch_type(
+            generator,
+            switch_field,
+            &aux_name,
+            true,
+            true,
+            Some(&doc),
+            out,
+        );
 
         outln!(out, "impl {} {{", aux_name);
         out.indented(|out| {
@@ -579,15 +611,17 @@ fn emit_request_struct(
                             } else {
                                 IovecConversion::None
                             };
-                            next_slice =
-                                Some((format!("self.{}", rust_field_name), conversion));
+                            next_slice = Some((format!("self.{}", rust_field_name), conversion));
                         } else {
                             assert_eq!(
                                 list_length, None,
                                 "fixed length arrays in requests must be [u8; N]"
                             );
                             let bytes_name = super::postfix_var_name(&rust_field_name, "bytes");
-                            if parse::can_use_simple_list_parsing(generator, &list_field.element_type) {
+                            if parse::can_use_simple_list_parsing(
+                                generator,
+                                &list_field.element_type,
+                            ) {
                                 outln!(
                                     tmp_out,
                                     "let {} = self.{}.serialize();",
@@ -736,8 +770,9 @@ fn emit_request_struct(
                             IovecConversion::Into => {
                                 request_slices.push(format!("{}.into()", next_slice))
                             }
-                            IovecConversion::CowStripLength => request_slices
-                                .push(format!("Cow::Owned({}.to_vec())", next_slice)),
+                            IovecConversion::CowStripLength => {
+                                request_slices.push(format!("Cow::Owned({}.to_vec())", next_slice))
+                            }
                         }
                     }
                 }
@@ -835,8 +870,7 @@ fn emit_request_struct(
         // Sending method
         let is_xproto = ns.header == "xproto";
         let is_list_fonts_with_info = request_def.name == "ListFontsWithInfo" && is_xproto;
-        let is_record_enable_context =
-            request_def.name == "EnableContext" && ns.header == "record";
+        let is_record_enable_context = request_def.name == "EnableContext" && ns.header == "record";
         let ret_type = if is_list_fonts_with_info || is_record_enable_context {
             assert!(request_def.reply.is_some());
             match (is_list_fonts_with_info, is_record_enable_context) {
@@ -1078,8 +1112,7 @@ fn emit_request_function(
     out: &mut Output,
 ) {
     let ns = request_def.namespace.upgrade().unwrap();
-    let is_list_fonts_with_info =
-        request_def.name == "ListFontsWithInfo" && ns.header == "xproto";
+    let is_list_fonts_with_info = request_def.name == "ListFontsWithInfo" && ns.header == "xproto";
     let is_send_event = request_def.name == "SendEvent" && ns.header == "xproto";
     let is_record_enable_context = request_def.name == "EnableContext" && ns.header == "record";
 
@@ -1181,8 +1214,7 @@ fn emit_request_trait_function(
     out: &mut Output,
 ) {
     let ns = request_def.namespace.upgrade().unwrap();
-    let is_list_fonts_with_info =
-        request_def.name == "ListFontsWithInfo" && ns.header == "xproto";
+    let is_list_fonts_with_info = request_def.name == "ListFontsWithInfo" && ns.header == "xproto";
     let is_send_event = request_def.name == "SendEvent" && ns.header == "xproto";
     let is_record_enable_context = request_def.name == "EnableContext" && ns.header == "record";
     let needs_lifetime = gathered.needs_lifetime && !is_send_event;
@@ -1319,7 +1351,10 @@ fn gather_request_fields(
                     || (is_change_property && normal_field.name == "type")
                 {
                     true
-                } else if generator.use_enum_type_in_field(&normal_field.type_).is_none() {
+                } else if generator
+                    .use_enum_type_in_field(&normal_field.type_)
+                    .is_none()
+                {
                     match normal_field.type_.value_set {
                         xcbdefs::FieldValueSet::None => false,
                         _ => true,
@@ -1373,10 +1408,10 @@ fn gather_request_fields(
                             }
                         } else {
                             assert_eq!(
-                            list_field.length(),
-                            None,
-                            "Fixed length arrays of types other than u8 are not implemented"
-                        );
+                                list_field.length(),
+                                None,
+                                "Fixed length arrays of types other than u8 are not implemented"
+                            );
 
                             Type::VariableOwnership(format!("[{}]", element_type))
                         };
@@ -1387,10 +1422,8 @@ fn gather_request_fields(
             }
             xcbdefs::FieldDef::Switch(switch_field) => {
                 let rust_field_name = to_rust_variable_name(&switch_field.name);
-                let rust_field_type = Type::VariableOwnership(format!(
-                    "{}Aux",
-                    to_rust_type_name(&request_def.name)
-                ));
+                let rust_field_type =
+                    Type::VariableOwnership(format!("{}Aux", to_rust_type_name(&request_def.name)));
                 args.push((rust_field_name.clone(), rust_field_type.clone()));
                 request_args.push((rust_field_name, rust_field_type));
                 needs_lifetime = true;
@@ -1414,8 +1447,7 @@ fn gather_request_fields(
                     rust_field_name.clone(),
                     Type::Simple("Vec<RawFdContainer>".into()),
                 ));
-                request_args
-                    .push((rust_field_name, Type::Simple("Vec<RawFdContainer>".into())));
+                request_args.push((rust_field_name, Type::Simple("Vec<RawFdContainer>".into())));
                 fd_lists.push(fd_list_field.name.clone());
             }
             xcbdefs::FieldDef::Expr(_) => unreachable!(),

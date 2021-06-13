@@ -1,6 +1,6 @@
 use xcbgen::defs as xcbdefs;
 
-use super::{NamespaceGenerator, ename_to_rust, to_rust_variable_name};
+use super::{ename_to_rust, to_rust_variable_name, NamespaceGenerator};
 
 #[inline]
 pub(super) fn expr_to_str(
@@ -240,9 +240,7 @@ fn expr_to_str_impl(
             );
             let field_value = match sum_of_expr.resolved_field.get().unwrap().ref_kind {
                 xcbdefs::FieldRefKind::LocalField => wrap_field_ref(&sum_of_expr.field_name),
-                xcbdefs::FieldRefKind::ExtParam => {
-                    to_rust_variable_name(&sum_of_expr.field_name)
-                }
+                xcbdefs::FieldRefKind::ExtParam => to_rust_variable_name(&sum_of_expr.field_name),
                 // nested sum-of not supported
                 xcbdefs::FieldRefKind::SumOfRef => unreachable!(),
             };

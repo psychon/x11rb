@@ -321,7 +321,9 @@ pub(super) enum DeducibleFieldOp {
 
 /// Gathers deducible fields (fields whose value can be calculated
 /// from other fields) from a list of fields.
-pub(super) fn gather_deducible_fields(fields: &[xcbdefs::FieldDef]) -> HashMap<String, DeducibleField> {
+pub(super) fn gather_deducible_fields(
+    fields: &[xcbdefs::FieldDef],
+) -> HashMap<String, DeducibleField> {
     fn extract_length(expr: &xcbdefs::Expression) -> Option<(String, DeducibleLengthFieldOp)> {
         match expr {
             xcbdefs::Expression::FieldRef(field_ref_expr) => Some((

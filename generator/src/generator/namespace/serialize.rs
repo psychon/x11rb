@@ -4,8 +4,8 @@ use std::convert::TryFrom;
 use xcbgen::defs as xcbdefs;
 
 use super::{
-    DeducibleField, NamespaceGenerator, Output, expr_to_str, parse,
-    postfix_var_name, to_rust_variable_name,
+    expr_to_str, parse, postfix_var_name, to_rust_variable_name, DeducibleField,
+    NamespaceGenerator, Output,
 };
 
 /// Returns `Some(bytes)` if the serialized result is a single
@@ -81,13 +81,17 @@ pub(super) fn emit_field_serialize(
                 for i in 0..list_length {
                     let src_value = format!("{}[{}]", wrap_field_ref(&list_field.name), i);
                     let rust_field_name = to_rust_variable_name(&list_field.name);
-                    let bytes_name =
-                        postfix_var_name(&rust_field_name, &format!("{}_bytes", i));
+                    let bytes_name = postfix_var_name(&rust_field_name, &format!("{}_bytes", i));
                     outln!(
                         out,
                         "let {} = {};",
                         bytes_name,
-                        emit_value_serialize(generator, &list_field.element_type, &src_value, false),
+                        emit_value_serialize(
+                            generator,
+                            &list_field.element_type,
+                            &src_value,
+                            false,
+                        ),
                     );
                     for j in 0..element_size {
                         result_bytes.push(format!("{}[{}]", bytes_name, j));
@@ -290,9 +294,7 @@ pub(super) fn emit_assert_for_field_serialize(
                 !deducible_fields
                     .values()
                     .any(|deducible_field| match deducible_field {
-                        DeducibleField::LengthOf(list_name, _) => {
-                            *list_name == fd_list_field.name
-                        }
+                        DeducibleField::LengthOf(list_name, _) => *list_name == fd_list_field.name,
                         DeducibleField::CaseSwitchExpr(_, _) => false,
                         DeducibleField::BitCaseSwitchExpr(_, _) => false,
                     })
@@ -330,8 +332,14 @@ pub(super) fn emit_assert_for_switch_serialize(
     out: &mut Output,
 ) {
     let rust_field_name = to_rust_variable_name(&switch.name);
-    let switch_expr_str =
-        expr_to_str(generator, &switch.expr, to_rust_variable_name, true, true, false);
+    let switch_expr_str = expr_to_str(
+        generator,
+        &switch.expr,
+        to_rust_variable_name,
+        true,
+        true,
+        false,
+    );
     outln!(
         out,
         "assert_eq!(self.switch_expr(), {}, \"switch `{}` has an inconsistent discriminant\");",

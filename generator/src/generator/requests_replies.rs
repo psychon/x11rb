@@ -1,5 +1,5 @@
-use std::rc::Rc;
 use std::collections::HashMap;
+use std::rc::Rc;
 
 use xcbgen::defs as xcbdefs;
 
@@ -24,11 +24,7 @@ pub(super) struct PerModuleEnumCases {
 pub(super) type EnumCases = HashMap<String, PerModuleEnumCases>;
 
 /// Generate the Request and Reply enums containing all possible requests and replies, respectively.
-pub(super) fn generate(
-    out: &mut Output,
-    module: &xcbdefs::Module,
-    mut enum_cases: EnumCases,
-) {
+pub(super) fn generate(out: &mut Output, module: &xcbdefs::Module, mut enum_cases: EnumCases) {
     let namespaces = module.sorted_namespaces();
 
     outln!(out, "/// Enumeration of all possible X11 requests.");

@@ -3,8 +3,8 @@ use std::convert::TryFrom;
 use xcbgen::defs as xcbdefs;
 
 use super::{
-    FieldContainer, NamespaceGenerator, Output, expr_to_str, to_rust_type_name,
-    to_rust_variable_name,
+    expr_to_str, to_rust_type_name, to_rust_variable_name, FieldContainer, NamespaceGenerator,
+    Output,
 };
 
 pub(super) fn emit_field_parse(
@@ -298,18 +298,18 @@ pub(super) fn emit_field_post_parse(field: &xcbdefs::FieldDef, out: &mut Output)
     }
 }
 
-fn emit_value_parse(generator: &NamespaceGenerator<'_, '_>, type_: &xcbdefs::FieldValueType, from: &str) -> String {
+fn emit_value_parse(
+    generator: &NamespaceGenerator<'_, '_>,
+    type_: &xcbdefs::FieldValueType,
+    from: &str,
+) -> String {
     let type_type = type_.type_.get_resolved();
     let rust_type = generator.type_to_rust_type(type_type);
     let params = generator.get_type_parse_params(type_type, from);
     format!("{}::try_parse({})?", rust_type, params.join(", "))
 }
 
-fn emit_value_post_parse(
-    type_: &xcbdefs::FieldValueType,
-    var_name: &str,
-    out: &mut Output,
-) {
+fn emit_value_post_parse(type_: &xcbdefs::FieldValueType, var_name: &str, out: &mut Output) {
     if let xcbdefs::FieldValueSet::Enum(_) = type_.value_set {
         // Handle turning things into enum instances.
         outln!(out, "let {var} = {var}.into();", var = var_name);
@@ -324,10 +324,13 @@ fn needs_post_parse(type_: &xcbdefs::FieldValueType) -> bool {
     }
 }
 
-pub(super) fn can_use_simple_list_parsing(generator: &NamespaceGenerator<'_, '_>, type_: &xcbdefs::FieldValueType) -> bool {
-    generator.get_type_parse_params(&type_.type_.get_resolved(), "")
+pub(super) fn can_use_simple_list_parsing(
+    generator: &NamespaceGenerator<'_, '_>,
+    type_: &xcbdefs::FieldValueType,
+) -> bool {
+    generator
+        .get_type_parse_params(&type_.type_.get_resolved(), "")
         .len()
         == 1
         && !needs_post_parse(type_)
 }
-
