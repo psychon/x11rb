@@ -102,10 +102,9 @@ fn generate_creator(
 
     let function_name = camel_case_to_lower_snake(&request_def.name);
     let mut function_args = "conn: &'c C".to_string();
-    let mut forward_args_with_resource = String::new();
-    let mut forward_args_without_resource = String::new();
+    let mut forward_args_with_resource = Vec::new();
+    let mut forward_args_without_resource = Vec::new();
 
-    let mut prefix = "";
     for field in request_fields.iter() {
         if !generator.field_is_visible(field, &deducible_fields) {
             continue;
@@ -121,9 +120,19 @@ fn generate_creator(
             xcbdefs::FieldDef::VirtualLen(_) => unimplemented!(),
             xcbdefs::FieldDef::Fd(_) => unimplemented!(),
             xcbdefs::FieldDef::FdList(_) => unimplemented!(),
-            xcbdefs::FieldDef::List(_) => unimplemented!(),
             xcbdefs::FieldDef::Normal(normal_field) => {
                 (to_rust_variable_name(&normal_field.name), generator.field_value_type_to_rust_type(&normal_field.type_))
+            }
+            xcbdefs::FieldDef::List(list_field) => {
+                let field_name = to_rust_variable_name(&list_field.name);
+                assert!(generator.rust_value_type_is_u8(&list_field.element_type));
+                let element_type = generator.field_value_type_to_rust_type(&list_field.element_type);
+                let field_type = if let Some(list_len) = list_field.length() {
+                    format!("&[{}; {}]", element_type, list_len)
+                } else {
+                    format!("&[{}]", element_type)
+                };
+                (field_name, field_type)
             }
             xcbdefs::FieldDef::Switch(switch_field) => {
                 (to_rust_variable_name(&switch_field.name), format!("&{}Aux", to_rust_type_name(request_name)))
@@ -132,13 +141,10 @@ fn generate_creator(
         if !request_info.created_argument.eq_ignore_ascii_case(&rust_field_name) {
             function_args.push_str(&format!(", {}: {}", rust_field_name, rust_field_type));
 
-            forward_args_without_resource.push_str(prefix);
-            forward_args_without_resource.push_str(&rust_field_name);
+            forward_args_without_resource.push(rust_field_name.clone());
         }
 
-        forward_args_with_resource.push_str(prefix);
-        forward_args_with_resource.push_str(&rust_field_name);
-        prefix = ", ";
+        forward_args_with_resource.push(rust_field_name);
     }
 
     outln!(out, "");
@@ -152,7 +158,7 @@ fn generate_creator(
     outln!(out, "/// Errors can come from the call to [Connection::generate_id] or [{}].", function_name);
     outln!(out, "pub fn {}_and_get_cookie({}) -> Result<(Self, VoidCookie<'c, C>), ReplyOrIdError> {{", function_name, function_args);
     outln!(out.indent(), "let {} = conn.generate_id()?;", request_info.created_argument);
-    outln!(out.indent(), "let cookie = conn.{}({})?;", function_name, forward_args_with_resource);
+    outln!(out.indent(), "let cookie = conn.{}({})?;", function_name, forward_args_with_resource.join(", "));
     outln!(out.indent(), "Ok((Self::for_{}(conn, {}), cookie))", lower_name, request_info.created_argument);
     outln!(out, "}}");
     outln!(out, "");
@@ -165,6 +171,6 @@ fn generate_creator(
     outln!(out, "///");
     outln!(out, "/// Errors can come from the call to [Connection::generate_id] or [{}].", function_name);
     outln!(out, "pub fn {}({}) -> Result<Self, ReplyOrIdError> {{", function_name, function_args);
-    outln!(out.indent(), "Ok(Self::{}_and_get_cookie(conn, {})?.0)", function_name, forward_args_without_resource);
+    outln!(out.indent(), "Ok(Self::{}_and_get_cookie(conn, {})?.0)", function_name, forward_args_without_resource.join(", "));
     outln!(out, "}}");
 }

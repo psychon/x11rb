@@ -198,47 +198,6 @@ macro_rules! resource_wrapper {
 }
 
 resource_wrapper! {
-    /// A RAII-like wrapper around a [xproto::Font].
-    ///
-    /// Instances of this struct represent a font that is freed in `Drop`.
-    pub struct FontWrapper: xproto::Font,
-    wrap: for_font,
-    get: font,
-    consume: into_font,
-    free: close_font,
-}
-
-impl<'c, C: Connection> FontWrapper<'c, C> {
-    /// Create a new font and return a font wrapper and a cookie.
-    ///
-    /// This is a thin wrapper around [xproto::create_font] that allocates a id for the font.
-    /// This function returns the resulting `FontWrapper` that owns the created font and frees
-    /// it in `Drop`. This also returns a `VoidCookie` that comes from the call to
-    /// [xproto::create_font].
-    ///
-    /// Errors can come from the call to [Connection::generate_id] or [xproto::create_font].
-    pub fn open_font_and_get_cookie<'input>(
-        conn: &'c C,
-        name: &'input [u8],
-    ) -> Result<(Self, VoidCookie<'c, C>), ReplyOrIdError> {
-        let id = conn.generate_id()?;
-        let cookie = conn.open_font(id, name)?;
-        Ok((Self::for_font(conn, id), cookie))
-    }
-
-    /// Create a new font and return a font wrapper
-    ///
-    /// This is a thin wrapper around [xproto::create_font] that allocates a id for the font.
-    /// This function returns the resulting `FontWrapper` that owns the created font and frees
-    /// it in `Drop`.
-    ///
-    /// Errors can come from the call to [Connection::generate_id] or [xproto::create_font].
-    pub fn open_font<'input>(conn: &'c C, name: &'input [u8]) -> Result<Self, ReplyOrIdError> {
-        Ok(Self::open_font_and_get_cookie(conn, name)?.0)
-    }
-}
-
-resource_wrapper! {
     /// A RAII-like wrapper around a [xproto::Gcontext].
     ///
     /// Instances of this struct represent a graphics context that is freed in `Drop`.

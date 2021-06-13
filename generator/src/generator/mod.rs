@@ -227,7 +227,7 @@ struct ResourceInfo<'a> {
     free_request: &'a str,
 }
 
-const XPROTO_RESOURCES: [ResourceInfo<'static>; 2] = [
+const XPROTO_RESOURCES: [ResourceInfo<'static>; 3] = [
     ResourceInfo {
         resource_name: "Pixmap",
         create_requests: [
@@ -249,5 +249,16 @@ const XPROTO_RESOURCES: [ResourceInfo<'static>; 2] = [
             None,
         ],
         free_request: "DestroyWindow",
+    },
+    ResourceInfo {
+        resource_name: "Font",
+        create_requests: [
+            Some(CreateInfo {
+                request_name: "OpenFont",
+                created_argument: "fid",
+            }),
+            None,
+        ],
+        free_request: "CloseFont",
     },
 ];

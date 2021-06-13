@@ -27732,3 +27732,75 @@ impl<C: RequestConnection> Drop for WindowWrapper<'_, C> {
         let _ = (self.0).destroy_window(self.1);
     }
 }
+
+/// A RAII-like wrapper around a [Font].
+///
+/// Instances of this struct represent a Font that is freed in `Drop`.
+///
+/// Any errors during `Drop` are silently ignored. Most likely an error here means that your
+/// X11 connection is broken and later requests will also fail.
+#[derive(Debug)]
+pub struct FontWrapper<'c, C: RequestConnection>(&'c C, Font);
+
+impl<'c, C: RequestConnection> FontWrapper<'c, C>
+{
+    /// Assume ownership of the given resource and destroy it in `Drop`.
+    pub fn for_font(conn: &'c C, id: Font) -> Self {
+        FontWrapper(conn, id)
+    }
+
+    /// Get the XID of the wrapped resource
+    pub fn font(&self) -> Font {
+        self.1
+    }
+
+    /// Assume ownership of the XID of the wrapped resource
+    ///
+    /// This function destroys this wrapper without freeing the underlying resource.
+    pub fn into_font(self) -> Font {
+        let id = self.1;
+        std::mem::forget(self);
+        id
+    }
+}
+
+impl<'c, C: Connection> FontWrapper<'c, C>
+{
+
+    /// Create a new Font and return a Font wrapper and a cookie.
+    ///
+    /// This is a thin wrapper around [open_font] that allocates an id for the Font.
+    /// This function returns the resulting `FontWrapper` that owns the created Font and frees
+    /// it in `Drop`. This also returns a `VoidCookie` that comes from the call to
+    /// [open_font].
+    ///
+    /// Errors can come from the call to [Connection::generate_id] or [open_font].
+    pub fn open_font_and_get_cookie(conn: &'c C, name: &[u8]) -> Result<(Self, VoidCookie<'c, C>), ReplyOrIdError> {
+        let fid = conn.generate_id()?;
+        let cookie = conn.open_font(fid, name)?;
+        Ok((Self::for_font(conn, fid), cookie))
+    }
+
+    /// Create a new Font and return a Font wrapper
+    ///
+    /// This is a thin wrapper around [open_font] that allocates an id for the Font.
+    /// This function returns the resulting `FontWrapper` that owns the created Font and frees
+    /// it in `Drop`.
+    ///
+    /// Errors can come from the call to [Connection::generate_id] or [open_font].
+    pub fn open_font(conn: &'c C, name: &[u8]) -> Result<Self, ReplyOrIdError> {
+        Ok(Self::open_font_and_get_cookie(conn, name)?.0)
+    }
+}
+
+impl<C: RequestConnection> From<&FontWrapper<'_, C>> for Font {
+    fn from(from: &FontWrapper<'_, C>) -> Self {
+        from.1
+    }
+}
+
+impl<C: RequestConnection> Drop for FontWrapper<'_, C> {
+    fn drop(&mut self) {
+        let _ = (self.0).close_font(self.1);
+    }
+}
