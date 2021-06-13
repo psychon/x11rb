@@ -1,18 +1,7 @@
-use std::borrow::Cow;
 use std::collections::hash_map::Entry as HashMapEntry;
 use std::collections::HashMap;
 
 use xcbgen::defs as xcbdefs;
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub(super) enum IovecConversion {
-    // No conversion is required.
-    None,
-    // A simple .into() is enough.
-    Into,
-    // Call cow_strip_length.
-    CowStripLength,
-}
 
 #[derive(Copy, Clone)]
 pub(crate) struct EnumInfo {
@@ -488,100 +477,6 @@ pub(super) enum FieldContainer {
     Request(String),
     /// The field belongs to something else.
     Other,
-}
-
-/// A helper to represent either simple or borrowed types.
-#[derive(Debug, Clone)]
-pub(super) enum Type {
-    /// This type is simple can we can just use the string provided.
-    Simple(String),
-    /// This type has a lifetime and needs to be a borrow or a Cow, depending
-    /// on the context. But during parsing it has to be a Cow::Owned because
-    /// it is generated.
-    VariableOwnership(String),
-    /// This type has a lifetime and needs to be a borrow or a Cow, but
-    /// when parsing it can be borrowed from the byte stream.
-    VariableOwnershipRawBytes(String),
-}
-
-impl Type {
-    /// Does this type need a Cow::Owned?
-    pub(super) fn needs_owned_cow(&self) -> bool {
-        match self {
-            Type::Simple(_) | Type::VariableOwnershipRawBytes(_) => false,
-            Type::VariableOwnership(_) => true,
-        }
-    }
-
-    /// Does this type need a Cow::Borrowed?
-    pub(super) fn needs_borrowed_cow(&self) -> bool {
-        match self {
-            Type::Simple(_) | Type::VariableOwnership(_) => false,
-            Type::VariableOwnershipRawBytes(_) => true,
-        }
-    }
-
-    /// Does this type need a Cow?
-    pub(super) fn needs_any_cow(&self) -> bool {
-        match self {
-            Type::Simple(_) => false,
-            Type::VariableOwnership(_) | Type::VariableOwnershipRawBytes(_) => true,
-        }
-    }
-
-    /// Render this type in a form suitable for function arguments.
-    pub(super) fn as_argument(&self) -> Cow<'_, str> {
-        match self {
-            Type::Simple(ref type_) => type_.into(),
-            Type::VariableOwnership(ref type_) | Type::VariableOwnershipRawBytes(ref type_) => {
-                format!("&'input {}", type_).into()
-            }
-        }
-    }
-
-    /// Render this type in a form suitable for struct fields.
-    pub(super) fn as_field(&self) -> Cow<'_, str> {
-        match self {
-            Type::Simple(ref type_) => type_.into(),
-            Type::VariableOwnership(ref type_) | Type::VariableOwnershipRawBytes(ref type_) => {
-                format!("Cow<'input, {}>", type_).into()
-            }
-        }
-    }
-}
-
-/// Some information about the fields of a request.
-pub(super) struct GatheredRequestFields {
-    pub(super) reply_has_fds: bool,
-    /// Whether lifetimes in the request need to be explicitly
-    /// specified. If a request function takes any other
-    /// references other than the connection object, we'll need
-    /// to disambiguate the lifetimes for rustc.
-    pub(super) needs_lifetime: bool,
-    /// Function arguments
-    /// `(name, type)`
-    pub(super) args: Vec<(String, Type)>,
-    /// Request arguments
-    /// The type here has been converted as necessary.
-    /// `(name, type)`
-    pub(super) request_args: Vec<(String, Type)>,
-    /// Generic type parameters
-    ///
-    /// `(name, where clause)`
-    pub(super) generics: Vec<(String, String)>,
-    /// Code at the beginning of the function.
-    pub(super) preamble: Vec<String>,
-    /// Single FD fields
-    pub(super) single_fds: Vec<String>,
-    /// FD list fields
-    pub(super) fd_lists: Vec<String>,
-}
-
-impl GatheredRequestFields {
-    /// Does the request have fds in it?
-    pub(super) fn has_fds(&self) -> bool {
-        !self.single_fds.is_empty() || !self.fd_lists.is_empty()
-    }
 }
 
 /// Formats an integer such as clippy does not complain.
