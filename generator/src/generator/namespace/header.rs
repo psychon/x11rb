@@ -47,7 +47,7 @@ pub(super) fn write_header(out: &mut Output, ns: &xcbdefs::Namespace) {
         "use crate::connection::{{BufWithFds, PiecewiseBuf, RequestConnection}};"
     );
     outln!(out, "#[allow(unused_imports)]");
-    outln!(out, "use crate::connection::Connection;");
+    outln!(out, "use crate::connection::Connection as X11Connection;");
     outln!(out, "#[allow(unused_imports)]");
     outln!(
         out,

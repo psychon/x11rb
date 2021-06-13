@@ -11,8 +11,7 @@ use libc::{mmap, MAP_FAILED, MAP_SHARED, PROT_READ, PROT_WRITE};
 use x11rb::connection::Connection;
 use x11rb::errors::{ConnectionError, ReplyError, ReplyOrIdError};
 use x11rb::protocol::shm::{self, ConnectionExt as _};
-use x11rb::protocol::xproto::{self, ImageFormat};
-use x11rb::wrapper::PixmapWrapper;
+use x11rb::protocol::xproto::{self, ImageFormat, PixmapWrapper};
 
 const TEMP_FILE_CONTENT: [u8; 8] = [0x00, 0x01, 0x02, 0x03, 0xff, 0xfe, 0xfd, 0xfc];
 

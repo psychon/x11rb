@@ -52,7 +52,7 @@ pub(super) fn generate(
     outln!(out, "}}");
     outln!(out, "");
 
-    outln!(out, "impl<'c, C: Connection> {}<'c, C>", wrapper);
+    outln!(out, "impl<'c, C: X11Connection> {}<'c, C>", wrapper);
     outln!(out, "{{");
     out.indented(|out| {
         for create_request in info.create_requests.iter() {
@@ -188,7 +188,7 @@ fn generate_creator(
     outln!(out, "/// it in `Drop`. This also returns a `VoidCookie` that comes from the call to");
     outln!(out, "/// [{}].", function_name);
     outln!(out, "///");
-    outln!(out, "/// Errors can come from the call to [Connection::generate_id] or [{}].", function_name);
+    outln!(out, "/// Errors can come from the call to [X11Connection::generate_id] or [{}].", function_name);
     outln!(out, "pub fn {}_and_get_cookie{}({}) -> Result<(Self, VoidCookie<'c, C>), ReplyOrIdError>", function_name, generics_decl, function_args);
     emit_where(out, &wheres);
     outln!(out, "{{");
@@ -204,7 +204,7 @@ fn generate_creator(
     outln!(out, "/// This function returns the resulting `{}` that owns the created {} and frees", wrapper_name, resource_name);
     outln!(out, "/// it in `Drop`.");
     outln!(out, "///");
-    outln!(out, "/// Errors can come from the call to [Connection::generate_id] or [{}].", function_name);
+    outln!(out, "/// Errors can come from the call to [X11Connection::generate_id] or [{}].", function_name);
     outln!(out, "pub fn {}{}({}) -> Result<Self, ReplyOrIdError>", function_name, generics_decl, function_args);
     emit_where(out, &wheres);
     outln!(out, "{{");
