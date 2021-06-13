@@ -5,7 +5,7 @@ use super::{
     CaseInfo, DeducibleField, Derives, expr_to_str, FieldContainer,
     NamespaceGenerator, Output, PerModuleEnumCases, StructSizeConstraint,
     gather_deducible_fields, get_ns_name_prefix, parse, serialize,
-    special_cases, to_rust_type_name, to_rust_variable_name,
+    special_cases, switch, to_rust_type_name, to_rust_variable_name,
 };
 
 use xcbgen::defs as xcbdefs;
@@ -281,14 +281,14 @@ fn generate_aux(
     let aux_name = format!("{}Aux", request_def.name);
 
     if switch_field.kind == xcbdefs::SwitchKind::Case {
-        generator.emit_switch_type(switch_field, &aux_name, true, true, None, out);
+        switch::emit_switch_type(generator, switch_field, &aux_name, true, true, None, out);
     } else {
         let doc = format!(
             "Auxiliary and optional information for the `{}` function",
             function_name,
         );
         let cases_infos =
-            generator.emit_switch_type(switch_field, &aux_name, true, true, Some(&doc), out);
+            switch::emit_switch_type(generator, switch_field, &aux_name, true, true, Some(&doc), out);
 
         outln!(out, "impl {} {{", aux_name);
         out.indented(|out| {

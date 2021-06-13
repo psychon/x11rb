@@ -479,20 +479,6 @@ pub(super) enum FieldContainer {
     Other,
 }
 
-pub(super) fn needs_match_by_value(field: &xcbdefs::FieldDef) -> bool {
-    match field {
-        xcbdefs::FieldDef::Normal(normal_field) => {
-            match normal_field.type_.type_.get_resolved().get_original_type() {
-                xcbdefs::TypeRef::BuiltIn(_) => true,
-                xcbdefs::TypeRef::Xid(_) => true,
-                xcbdefs::TypeRef::XidUnion(_) => true,
-                _ => false,
-            }
-        }
-        _ => false,
-    }
-}
-
 /// Converts a type name from the XML to a rust
 /// type name (in CamelCase).
 ///
