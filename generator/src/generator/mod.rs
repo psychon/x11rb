@@ -216,19 +216,38 @@ pub(crate) fn get_ns_name_prefix(ns: &xcbgen::defs::Namespace) -> String {
     }
 }
 
+struct CreateInfo<'a> {
+    request_name: &'a str,
+    created_argument: &'a str,
+}
+
 struct ResourceInfo<'a> {
     resource_name: &'a str,
-    create_requests: [Option<&'a str>; 2],
+    create_requests: [Option<CreateInfo<'a>>; 2],
     free_request: &'a str,
 }
 
-const XPROTO_RESOURCES: [ResourceInfo<'static>; 1] = [
+const XPROTO_RESOURCES: [ResourceInfo<'static>; 2] = [
     ResourceInfo {
         resource_name: "Pixmap",
         create_requests: [
-            Some("CreatePixmap"),
+            Some(CreateInfo {
+                request_name: "CreatePixmap",
+                created_argument: "pid",
+            }),
             None,
         ],
         free_request: "FreePixmap",
+    },
+    ResourceInfo {
+        resource_name: "Window",
+        create_requests: [
+            Some(CreateInfo {
+                request_name: "CreateWindow",
+                created_argument: "wid",
+            }),
+            None,
+        ],
+        free_request: "DestroyWindow",
     },
 ];

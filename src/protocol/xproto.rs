@@ -27660,3 +27660,75 @@ impl<C: RequestConnection> Drop for PixmapWrapper<'_, C> {
         let _ = (self.0).free_pixmap(self.1);
     }
 }
+
+/// A RAII-like wrapper around a [Window].
+///
+/// Instances of this struct represent a Window that is freed in `Drop`.
+///
+/// Any errors during `Drop` are silently ignored. Most likely an error here means that your
+/// X11 connection is broken and later requests will also fail.
+#[derive(Debug)]
+pub struct WindowWrapper<'c, C: RequestConnection>(&'c C, Window);
+
+impl<'c, C: RequestConnection> WindowWrapper<'c, C>
+{
+    /// Assume ownership of the given resource and destroy it in `Drop`.
+    pub fn for_window(conn: &'c C, id: Window) -> Self {
+        WindowWrapper(conn, id)
+    }
+
+    /// Get the XID of the wrapped resource
+    pub fn window(&self) -> Window {
+        self.1
+    }
+
+    /// Assume ownership of the XID of the wrapped resource
+    ///
+    /// This function destroys this wrapper without freeing the underlying resource.
+    pub fn into_window(self) -> Window {
+        let id = self.1;
+        std::mem::forget(self);
+        id
+    }
+}
+
+impl<'c, C: Connection> WindowWrapper<'c, C>
+{
+
+    /// Create a new Window and return a Window wrapper and a cookie.
+    ///
+    /// This is a thin wrapper around [create_window] that allocates an id for the Window.
+    /// This function returns the resulting `WindowWrapper` that owns the created Window and frees
+    /// it in `Drop`. This also returns a `VoidCookie` that comes from the call to
+    /// [create_window].
+    ///
+    /// Errors can come from the call to [Connection::generate_id] or [create_window].
+    pub fn create_window_and_get_cookie(conn: &'c C, depth: u8, parent: Window, x: i16, y: i16, width: u16, height: u16, border_width: u16, class: WindowClass, visual: Visualid, value_list: &CreateWindowAux) -> Result<(Self, VoidCookie<'c, C>), ReplyOrIdError> {
+        let wid = conn.generate_id()?;
+        let cookie = conn.create_window(depth, wid, parent, x, y, width, height, border_width, class, visual, value_list)?;
+        Ok((Self::for_window(conn, wid), cookie))
+    }
+
+    /// Create a new Window and return a Window wrapper
+    ///
+    /// This is a thin wrapper around [create_window] that allocates an id for the Window.
+    /// This function returns the resulting `WindowWrapper` that owns the created Window and frees
+    /// it in `Drop`.
+    ///
+    /// Errors can come from the call to [Connection::generate_id] or [create_window].
+    pub fn create_window(conn: &'c C, depth: u8, parent: Window, x: i16, y: i16, width: u16, height: u16, border_width: u16, class: WindowClass, visual: Visualid, value_list: &CreateWindowAux) -> Result<Self, ReplyOrIdError> {
+        Ok(Self::create_window_and_get_cookie(conn, depth, parent, x, y, width, height, border_width, class, visual, value_list)?.0)
+    }
+}
+
+impl<C: RequestConnection> From<&WindowWrapper<'_, C>> for Window {
+    fn from(from: &WindowWrapper<'_, C>) -> Self {
+        from.1
+    }
+}
+
+impl<C: RequestConnection> Drop for WindowWrapper<'_, C> {
+    fn drop(&mut self) {
+        let _ = (self.0).destroy_window(self.1);
+    }
+}

@@ -3,11 +3,9 @@ use std::rc::Rc;
 use xcbgen::defs as xcbdefs;
 
 use super::{
-    to_rust_variable_name,
-    Output,
-    NamespaceGenerator,
+    gather_deducible_fields, to_rust_type_name, to_rust_variable_name, NamespaceGenerator, Output,
 };
-use super::super::{camel_case_to_lower_snake, ResourceInfo};
+use super::super::{camel_case_to_lower_snake, CreateInfo, ResourceInfo};
 
 pub(super) fn generate(
     generator: &NamespaceGenerator<'_, '_>,
@@ -85,62 +83,63 @@ pub(super) fn generate(
 fn generate_creator(
     generator: &NamespaceGenerator<'_, '_>,
     out: &mut Output,
-    request: &str,
+    request_info: &CreateInfo<'_>,
     resource_name: &str,
     wrapper_name: &str,
     lower_name: &str,
 ) {
+    let request_name = request_info.request_name;
     let request_def = Rc::clone(generator
         .ns
         .request_defs
         .borrow()
-        .get(request)
+        .get(request_name)
         .unwrap_or_else(|| {
-            panic!("Did not find request {} in namespace {}", request, generator.ns.header);
+            panic!("Did not find request {} in namespace {}", request_name, generator.ns.header);
         }));
+    let request_fields = request_def.fields.borrow();
+    let deducible_fields = gather_deducible_fields(&*request_fields);
 
     let function_name = camel_case_to_lower_snake(&request_def.name);
     let mut function_args = "conn: &'c C".to_string();
     let mut forward_args_with_resource = String::new();
     let mut forward_args_without_resource = String::new();
 
-    let mut resource_arg_name = None;
     let mut prefix = "";
-    for field in request_def.fields.borrow().iter() {
+    for field in request_fields.iter() {
+        if !generator.field_is_visible(field, &deducible_fields) {
+            continue;
+        }
         match field.name() {
             Some("major_opcode") | Some("minor_opcode") | Some("length") => continue,
             _ => {}
         }
 
-        match field {
+        let (rust_field_name, rust_field_type) = match field {
             xcbdefs::FieldDef::Pad(_) => unimplemented!(),
             xcbdefs::FieldDef::Expr(_) => unimplemented!(),
             xcbdefs::FieldDef::VirtualLen(_) => unimplemented!(),
             xcbdefs::FieldDef::Fd(_) => unimplemented!(),
             xcbdefs::FieldDef::FdList(_) => unimplemented!(),
-            xcbdefs::FieldDef::Normal(normal_field) => {
-                let rust_field_name = to_rust_variable_name(&normal_field.name);
-                if resource_name.eq_ignore_ascii_case(normal_field.type_.type_.name()) {
-                    assert!(resource_arg_name.is_none());
-                    resource_arg_name = Some(rust_field_name.clone());
-                } else {
-                    let rust_field_type = generator.field_value_type_to_rust_type(&normal_field.type_);
-
-                    function_args.push_str(&format!(", {}: {}", rust_field_name, rust_field_type));
-
-                    forward_args_without_resource.push_str(prefix);
-                    forward_args_without_resource.push_str(&rust_field_name);
-                }
-
-                forward_args_with_resource.push_str(prefix);
-                forward_args_with_resource.push_str(&rust_field_name);
-                prefix = ", ";
-            }
             xcbdefs::FieldDef::List(_) => unimplemented!(),
-            xcbdefs::FieldDef::Switch(_) => unimplemented!(),
+            xcbdefs::FieldDef::Normal(normal_field) => {
+                (to_rust_variable_name(&normal_field.name), generator.field_value_type_to_rust_type(&normal_field.type_))
+            }
+            xcbdefs::FieldDef::Switch(switch_field) => {
+                (to_rust_variable_name(&switch_field.name), format!("&{}Aux", to_rust_type_name(request_name)))
+            }
+        };
+        if !request_info.created_argument.eq_ignore_ascii_case(&rust_field_name) {
+            function_args.push_str(&format!(", {}: {}", rust_field_name, rust_field_type));
+
+            forward_args_without_resource.push_str(prefix);
+            forward_args_without_resource.push_str(&rust_field_name);
         }
+
+        forward_args_with_resource.push_str(prefix);
+        forward_args_with_resource.push_str(&rust_field_name);
+        prefix = ", ";
     }
-    assert!(resource_arg_name.is_some());
 
     outln!(out, "");
     outln!(out, "/// Create a new {name} and return a {name} wrapper and a cookie.", name = resource_name);
@@ -152,9 +151,9 @@ fn generate_creator(
     outln!(out, "///");
     outln!(out, "/// Errors can come from the call to [Connection::generate_id] or [{}].", function_name);
     outln!(out, "pub fn {}_and_get_cookie({}) -> Result<(Self, VoidCookie<'c, C>), ReplyOrIdError> {{", function_name, function_args);
-    outln!(out.indent(), "let {} = conn.generate_id()?;", resource_arg_name.as_ref().unwrap());
+    outln!(out.indent(), "let {} = conn.generate_id()?;", request_info.created_argument);
     outln!(out.indent(), "let cookie = conn.{}({})?;", function_name, forward_args_with_resource);
-    outln!(out.indent(), "Ok((Self::for_{}(conn, {}), cookie))", lower_name, resource_arg_name.as_ref().unwrap());
+    outln!(out.indent(), "Ok((Self::for_{}(conn, {}), cookie))", lower_name, request_info.created_argument);
     outln!(out, "}}");
     outln!(out, "");
 
