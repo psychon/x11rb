@@ -4,7 +4,7 @@ use std::collections::HashMap;
 use super::{
     CaseInfo, DeducibleField, Derives, FieldContainer, NamespaceGenerator,
     Output, PerModuleEnumCases, StructSizeConstraint, gather_deducible_fields,
-    get_ns_name_prefix, serialize, special_cases, to_rust_type_name,
+    get_ns_name_prefix, parse, serialize, special_cases, to_rust_type_name,
     to_rust_variable_name,
 };
 
@@ -585,7 +585,7 @@ fn emit_request_struct(
                                 "fixed length arrays in requests must be [u8; N]"
                             );
                             let bytes_name = super::postfix_var_name(&rust_field_name, "bytes");
-                            if generator.can_use_simple_list_parsing(&list_field.element_type) {
+                            if parse::can_use_simple_list_parsing(generator, &list_field.element_type) {
                                 outln!(
                                     tmp_out,
                                     "let {} = self.{}.serialize();",
@@ -958,7 +958,8 @@ fn emit_request_struct(
                 } else {
                     "remaining"
                 };
-                generator.emit_field_parse(
+                parse::emit_field_parse(
+                    generator,
                     field,
                     "",
                     from,
@@ -970,7 +971,7 @@ fn emit_request_struct(
                     .map(|field_name| deducible_fields.contains_key(field_name))
                     .unwrap_or(false)
                 {
-                    generator.emit_field_post_parse(field, out);
+                    parse::emit_field_post_parse(field, out);
                 }
 
                 if !seen_complete_header {

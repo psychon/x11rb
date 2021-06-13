@@ -4,10 +4,7 @@ use std::convert::TryFrom;
 use xcbgen::defs as xcbdefs;
 
 use super::{
-    DeducibleField,
-    NamespaceGenerator,
-    Output,
-    postfix_var_name,
+    DeducibleField, NamespaceGenerator, Output, parse, postfix_var_name,
     to_rust_variable_name,
 };
 
@@ -197,7 +194,7 @@ pub(super) fn emit_field_serialize_into(
                     bytes_name,
                     wrap_field_ref(&list_field.name),
                 );
-            } else if generator.can_use_simple_list_parsing(&list_field.element_type) {
+            } else if parse::can_use_simple_list_parsing(generator, &list_field.element_type) {
                 outln!(
                     out,
                     "{}.serialize_into({});",
