@@ -8,6 +8,7 @@ use std::path::PathBuf;
 mod output;
 mod error_events;
 mod namespace;
+mod requests_replies;
 mod special_cases;
 
 use output::Output;
@@ -44,7 +45,7 @@ pub(crate) fn generate(module: &xcbgen::defs::Module) -> HashMap<PathBuf, String
     );
     outln!(main_out, "");
 
-    let caches = RefCell::new(namespace::Caches::default());
+    let caches = RefCell::new(namespace::helpers::Caches::default());
     caches.borrow_mut().gather_enum_infos(module);
 
     let mut enum_cases = HashMap::new();
@@ -63,7 +64,7 @@ pub(crate) fn generate(module: &xcbgen::defs::Module) -> HashMap<PathBuf, String
     }
     outln!(main_out, "");
 
-    namespace::generate_request_reply_enum(&mut main_out, module, enum_cases);
+    requests_replies::generate(&mut main_out, module, enum_cases);
     error_events::generate(&mut main_out, module);
 
     out_map.insert(PathBuf::from("mod.rs"), main_out.into_data());
