@@ -7,7 +7,7 @@ use x11rb::errors::{ConnectionError, ReplyOrIdError};
 use x11rb::protocol::shape::{self, ConnectionExt as _};
 use x11rb::protocol::xproto::*;
 use x11rb::protocol::Event;
-use x11rb::wrapper::{ConnectionExt as _, GcontextWrapper, PixmapWrapper};
+use x11rb::wrapper::ConnectionExt as _;
 use x11rb::COPY_DEPTH_FROM_PARENT;
 
 const PUPIL_SIZE: i16 = 50;
@@ -170,12 +170,18 @@ fn shape_window<C: Connection>(
         width: window_size.0,
         height: window_size.1,
     };
-    conn.poly_fill_rectangle(pixmap.pixmap(), gc.gc(), &[rect])?;
+    conn.poly_fill_rectangle(pixmap.pixmap(), gc.gcontext(), &[rect])?;
 
     // Draw the eyes as "not transparent"
     let values = ChangeGCAux::new().foreground(1);
-    conn.change_gc(gc.gc(), &values)?;
-    draw_eyes(conn, pixmap.pixmap(), gc.gc(), gc.gc(), window_size)?;
+    conn.change_gc(gc.gcontext(), &values)?;
+    draw_eyes(
+        conn,
+        pixmap.pixmap(),
+        gc.gcontext(),
+        gc.gcontext(),
+        window_size,
+    )?;
 
     // Set the shape of the window
     conn.shape_mask(shape::SO::SET, shape::SK::BOUNDING, win_id, 0, 0, &pixmap)?;
@@ -344,18 +350,18 @@ fn main() {
             draw_eyes(
                 conn,
                 pixmap.pixmap(),
-                black_gc.gc(),
-                white_gc.gc(),
+                black_gc.gcontext(),
+                white_gc.gcontext(),
                 window_size,
             )
             .unwrap();
-            draw_pupils(conn, pixmap.pixmap(), black_gc.gc(), pos).unwrap();
+            draw_pupils(conn, pixmap.pixmap(), black_gc.gcontext(), pos).unwrap();
 
             // Copy drawing from pixmap to window
             conn.copy_area(
                 pixmap.pixmap(),
                 win_id,
-                white_gc.gc(),
+                white_gc.gcontext(),
                 0,
                 0,
                 0,

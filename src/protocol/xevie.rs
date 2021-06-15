@@ -17,8 +17,12 @@ use crate::utils::{RawFdContainer, pretty_print_bitmask, pretty_print_enum};
 use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse, TryParseFd, TryIntoUSize};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
+use crate::connection::Connection as X11Connection;
+#[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
 use crate::errors::{ConnectionError, ParseError};
+#[allow(unused_imports)]
+use crate::errors::ReplyOrIdError;
 
 /// The X11 name of the extension for QueryExtension
 pub const X11_EXTENSION_NAME: &str = "XEVIE";

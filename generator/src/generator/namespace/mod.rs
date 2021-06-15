@@ -19,6 +19,7 @@ mod header;
 pub(super) mod helpers;
 mod parse;
 mod request;
+mod resource_wrapper;
 mod serialize;
 mod struct_type;
 mod switch;
@@ -38,8 +39,9 @@ pub(super) fn generate(
     caches: &RefCell<Caches>,
     out: &mut Output,
     enum_cases: &mut EnumCases,
+    resource_info: &[super::ResourceInfo<'_>],
 ) {
-    NamespaceGenerator::new(ns, caches).generate(out, enum_cases);
+    NamespaceGenerator::new(ns, caches).generate(out, enum_cases, resource_info);
 }
 
 struct NamespaceGenerator<'ns, 'c> {
@@ -65,7 +67,12 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         }
     }
 
-    fn generate(&self, out: &mut Output, enum_cases: &mut EnumCases) {
+    fn generate(
+        &self,
+        out: &mut Output,
+        enum_cases: &mut EnumCases,
+        resource_info: &[super::ResourceInfo<'_>],
+    ) {
         super::write_code_header(out);
         header::write_header(out, &self.ns);
 
@@ -129,6 +136,10 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             out,
             "impl<C: RequestConnection + ?Sized> ConnectionExt for C {{}}",
         );
+
+        for info in resource_info {
+            resource_wrapper::generate(self, out, info);
+        }
     }
 
     fn generate_event_full_def(&self, event_full_def: &xcbdefs::EventFullDef, out: &mut Output) {
