@@ -67,7 +67,12 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         }
     }
 
-    fn generate(&self, out: &mut Output, enum_cases: &mut EnumCases, resource_info: &[super::ResourceInfo<'_>]) {
+    fn generate(
+        &self,
+        out: &mut Output,
+        enum_cases: &mut EnumCases,
+        resource_info: &[super::ResourceInfo<'_>],
+    ) {
         super::write_code_header(out);
         header::write_header(out, &self.ns);
 

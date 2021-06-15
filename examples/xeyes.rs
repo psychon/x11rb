@@ -7,7 +7,7 @@ use x11rb::errors::{ConnectionError, ReplyOrIdError};
 use x11rb::protocol::shape::{self, ConnectionExt as _};
 use x11rb::protocol::xproto::*;
 use x11rb::protocol::Event;
-use x11rb::wrapper::{ConnectionExt as _,};
+use x11rb::wrapper::ConnectionExt as _;
 use x11rb::COPY_DEPTH_FROM_PARENT;
 
 const PUPIL_SIZE: i16 = 50;
@@ -175,7 +175,13 @@ fn shape_window<C: Connection>(
     // Draw the eyes as "not transparent"
     let values = ChangeGCAux::new().foreground(1);
     conn.change_gc(gc.gcontext(), &values)?;
-    draw_eyes(conn, pixmap.pixmap(), gc.gcontext(), gc.gcontext(), window_size)?;
+    draw_eyes(
+        conn,
+        pixmap.pixmap(),
+        gc.gcontext(),
+        gc.gcontext(),
+        window_size,
+    )?;
 
     // Set the shape of the window
     conn.shape_mask(shape::SO::SET, shape::SK::BOUNDING, win_id, 0, 0, &pixmap)?;
