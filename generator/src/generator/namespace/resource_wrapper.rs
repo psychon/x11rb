@@ -95,17 +95,15 @@ pub(super) fn generate(
     outln!(out, "impl<'c, C: X11Connection> {}<'c, C>", wrapper);
     outln!(out, "{{");
     out.indented(|out| {
-        for create_request in info.create_requests.iter() {
-            if let Some(request) = create_request {
-                generate_creator(
-                    generator,
-                    out,
-                    request,
-                    info.resource_name,
-                    &wrapper,
-                    &lower_name,
-                );
-            }
+        for create_request in info.create_requests.iter().flatten() {
+            generate_creator(
+                generator,
+                out,
+                create_request,
+                info.resource_name,
+                &wrapper,
+                &lower_name,
+            );
         }
     });
     outln!(out, "}}");
