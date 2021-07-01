@@ -190,7 +190,11 @@ where
 }
 
 /// Draw the window content
-fn do_draw(cr: &cairo::Context, (width, height): (f64, f64), transparency: bool) {
+fn do_draw(
+    cr: &cairo::Context,
+    (width, height): (f64, f64),
+    transparency: bool,
+) -> Result<(), cairo::Error> {
     use std::f64::consts::PI;
 
     // Draw a background
@@ -200,7 +204,7 @@ fn do_draw(cr: &cairo::Context, (width, height): (f64, f64), transparency: bool)
     } else {
         cr.set_source_rgb(0.9, 1.0, 0.9);
     }
-    cr.paint();
+    cr.paint()?;
     if transparency {
         cr.set_operator(cairo::Operator::Over);
     }
@@ -211,9 +215,9 @@ fn do_draw(cr: &cairo::Context, (width, height): (f64, f64), transparency: bool)
     cr.rel_line_to(radius, 0.0);
     cr.close_path();
     cr.set_source_rgba(1.0, 0.0, 0.0, 0.3);
-    cr.fill_preserve();
+    cr.fill_preserve()?;
     cr.set_source_rgb(1.0, 0.0, 0.0);
-    cr.stroke();
+    cr.stroke()?;
 
     // Draw a cross
     cr.move_to(0.0, 0.0);
@@ -222,13 +226,15 @@ fn do_draw(cr: &cairo::Context, (width, height): (f64, f64), transparency: bool)
     cr.line_to(0.0, height);
 
     cr.set_source_rgb(0.0, 0.0, 0.0);
-    cr.stroke();
+    cr.stroke()?;
 
     // Add some text somewhere
     cr.set_source_rgb(0.1, 0.1, 0.7);
     cr.move_to(10.0, 30.0);
     cr.set_font_size(30.0);
-    cr.show_text("Hi there");
+    cr.show_text("Hi there")?;
+
+    Ok(())
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -293,8 +299,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             event_option = conn.poll_for_event()?;
         }
         if need_redraw {
-            let cr = cairo::Context::new(&surface);
-            do_draw(&cr, (width as _, height as _), transparency);
+            let cr = cairo::Context::new(&surface).expect("failed to create cairo context");
+            do_draw(&cr, (width as _, height as _), transparency).expect("failed to draw");
             surface.flush();
         }
     }
