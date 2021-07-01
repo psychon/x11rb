@@ -5,7 +5,7 @@ pull_request_rules:
       - "#approved-reviews-by>=1"
       - status-success=continuous-integration/appveyor/pr
       - status-success=big-endian-test
-      - status-success=build (1.40.0)
+      - status-success=build (1.41.0)
       - status-success=build (stable)
       - status-success=clippy-rustfmt (stable)
       - status-success=code_gen
