@@ -32,6 +32,8 @@ pub(crate) fn generate(module: &xcbgen::defs::Module) -> HashMap<PathBuf, String
     outln!(main_out, "");
     outln!(main_out, "// Clippy does not like some names from the XML.");
     outln!(main_out, "#![allow(clippy::upper_case_acronyms)]");
+    outln!(main_out, "// This is not easy to fix, so ignore it.");
+    outln!(main_out, "#![allow(clippy::needless_borrow)]");
     outln!(main_out, "");
     outln!(main_out, "use std::borrow::Cow;");
     outln!(main_out, "use std::convert::TryInto;");

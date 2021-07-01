@@ -334,26 +334,26 @@ impl<'a> TypeResolver<'a> {
         if let Some(header) = header {
             if header == ns.header {
                 let event = ns
-                    .get_event(&name)
+                    .get_event(name)
                     .ok_or_else(|| ResolveError::UnknownEventName(named_event.name().into()))?;
                 named_event.set_resolved(event);
             } else {
                 let imported_ns = ns
-                    .get_import(&header)
+                    .get_import(header)
                     .ok_or_else(|| ResolveError::UnknownEventName(named_event.name().into()))?;
                 let event = imported_ns
-                    .get_event(&name)
+                    .get_event(name)
                     .ok_or_else(|| ResolveError::UnknownEventName(named_event.name().into()))?;
                 named_event.set_resolved(event);
             }
             Ok(())
         } else {
-            let event = if let Some(event) = ns.get_event(&name) {
+            let event = if let Some(event) = ns.get_event(name) {
                 event
             } else {
                 let mut event = None;
                 for imported_ns in ns.imports.borrow().values().map(defs::Import::ns) {
-                    if let Some(event_in_import) = imported_ns.get_event(&name) {
+                    if let Some(event_in_import) = imported_ns.get_event(name) {
                         if event.is_some() {
                             return Err(ResolveError::AmbiguousEventName(
                                 named_event.name().into(),
@@ -378,26 +378,26 @@ impl<'a> TypeResolver<'a> {
         if let Some(header) = header {
             if header == ns.header {
                 let error = ns
-                    .get_error(&name)
+                    .get_error(name)
                     .ok_or_else(|| ResolveError::UnknownErrorName(named_error.name().into()))?;
                 named_error.set_resolved(error);
             } else {
                 let imported_ns = ns
-                    .get_import(&header)
+                    .get_import(header)
                     .ok_or_else(|| ResolveError::UnknownErrorName(named_error.name().into()))?;
                 let error = imported_ns
-                    .get_error(&name)
+                    .get_error(name)
                     .ok_or_else(|| ResolveError::UnknownErrorName(named_error.name().into()))?;
                 named_error.set_resolved(error);
             }
             Ok(())
         } else {
-            let error = if let Some(error) = ns.get_error(&name) {
+            let error = if let Some(error) = ns.get_error(name) {
                 error
             } else {
                 let mut error = None;
                 for imported_ns in ns.imports.borrow().values().map(defs::Import::ns) {
-                    if let Some(error_in_import) = imported_ns.get_error(&name) {
+                    if let Some(error_in_import) = imported_ns.get_error(name) {
                         if error.is_some() {
                             return Err(ResolveError::AmbiguousErrorName(
                                 named_error.name().into(),
@@ -423,15 +423,15 @@ impl<'a> TypeResolver<'a> {
         if let Some(header) = header {
             if header == ns.header {
                 let type_ = ns
-                    .get_type(&name)
+                    .get_type(name)
                     .ok_or_else(|| ResolveError::UnknownTypeName(named_type.name().into()))?;
                 named_type.set_resolved(type_);
             } else {
                 let imported_ns = ns
-                    .get_import(&header)
+                    .get_import(header)
                     .ok_or_else(|| ResolveError::UnknownTypeName(named_type.name().into()))?;
                 let type_ = imported_ns
-                    .get_type(&name)
+                    .get_type(name)
                     .ok_or_else(|| ResolveError::UnknownTypeName(named_type.name().into()))?;
                 named_type.set_resolved(type_);
             }
@@ -452,12 +452,12 @@ impl<'a> TypeResolver<'a> {
                 "double" => defs::TypeRef::BuiltIn(defs::BuiltInType::Double),
                 "void" => defs::TypeRef::BuiltIn(defs::BuiltInType::Void),
                 _ => {
-                    if let Some(type_) = ns.get_type(&name) {
+                    if let Some(type_) = ns.get_type(name) {
                         type_
                     } else {
                         let mut type_ = None;
                         for imported_ns in ns.imports.borrow().values().map(defs::Import::ns) {
-                            if let Some(type_in_import) = imported_ns.get_type(&name) {
+                            if let Some(type_in_import) = imported_ns.get_type(name) {
                                 if type_.is_some() {
                                     return Err(ResolveError::AmbiguousTypeName(
                                         named_type.name().into(),

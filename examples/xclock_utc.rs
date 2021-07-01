@@ -260,7 +260,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let atoms = Atoms::new(conn)?.reply()?;
 
     let (mut width, mut height) = (100, 100);
-    let win_id = create_window(conn, &screen, &atoms, (width, height))?;
+    let win_id = create_window(conn, screen, &atoms, (width, height))?;
 
     let gc_id = conn.generate_id().unwrap();
     conn.create_gc(gc_id, win_id, &CreateGCAux::default())?;
@@ -293,7 +293,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             }
         }
 
-        redraw(conn, &screen, win_id, gc_id, (width, height))?;
+        redraw(conn, screen, win_id, gc_id, (width, height))?;
         conn.flush()?;
     }
 }

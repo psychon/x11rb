@@ -48,7 +48,7 @@ impl PacketReader {
             let initial_packet = &self.pending_packet[0..MINIMAL_PACKET_LENGTH]
                 .try_into()
                 .unwrap();
-            let extra = extra_length(&initial_packet);
+            let extra = extra_length(initial_packet);
             assert_eq!(self.pending_packet.len(), MINIMAL_PACKET_LENGTH + extra);
 
             out_packets.push(std::mem::replace(

@@ -8,6 +8,8 @@
 
 // Clippy does not like some names from the XML.
 #![allow(clippy::upper_case_acronyms)]
+// This is not easy to fix, so ignore it.
+#![allow(clippy::needless_borrow)]
 
 use std::borrow::Cow;
 use std::convert::TryInto;

@@ -63,7 +63,7 @@ fn main() {
 
     for win in windows.iter() {
         let conn2 = Arc::clone(&conn);
-        let win = Arc::clone(&win);
+        let win = Arc::clone(win);
         thread::spawn(move || run(conn2, win, screen_num, white, black));
     }
 
