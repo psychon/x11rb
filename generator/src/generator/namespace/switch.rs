@@ -966,7 +966,7 @@ fn case_has_single_visible_field(
         .fields
         .borrow()
         .iter()
-        .filter(|case_field| generator.field_is_visible(case_field, &deducible_fields))
+        .filter(|case_field| generator.field_is_visible(case_field, deducible_fields))
         .count();
     assert!(num_visible_fields > 0);
     num_visible_fields == 1

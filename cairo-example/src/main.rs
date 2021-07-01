@@ -242,7 +242,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // composite manager starting/stopping at runtime.
     let transparency = composite_manager_running(&conn, screen_num)?;
 
-    let window = create_window(&conn, &screen, &atoms, (width, height), depth, visualid)?;
+    let window = create_window(&conn, screen, &atoms, (width, height), depth, visualid)?;
 
     // Here comes all the interaction between cairo and x11rb:
     let mut visual = find_xcb_visualtype(&conn, visualid).unwrap();

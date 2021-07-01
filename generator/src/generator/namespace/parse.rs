@@ -329,7 +329,7 @@ pub(super) fn can_use_simple_list_parsing(
     type_: &xcbdefs::FieldValueType,
 ) -> bool {
     generator
-        .get_type_parse_params(&type_.type_.get_resolved(), "")
+        .get_type_parse_params(type_.type_.get_resolved(), "")
         .len()
         == 1
         && !needs_post_parse(type_)

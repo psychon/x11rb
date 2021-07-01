@@ -54,7 +54,7 @@ pub(super) fn emit_struct_type(
                 outln!(
                     out.indent(),
                     "pub {}: {},",
-                    to_rust_variable_name(&field_name),
+                    to_rust_variable_name(field_name),
                     field_type
                 );
             }
@@ -268,7 +268,7 @@ pub(super) fn emit_struct_type(
                     field_type
                 );
                 out.indented(|out| {
-                    outln!(out, "self.{}.len()", to_rust_variable_name(&list_name));
+                    outln!(out, "self.{}.len()", to_rust_variable_name(list_name));
                     match op {
                         DeducibleLengthFieldOp::None => {}
                         DeducibleLengthFieldOp::Mul(n) => {

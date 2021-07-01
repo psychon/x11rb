@@ -74,7 +74,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         resource_info: &[super::ResourceInfo<'_>],
     ) {
         super::write_code_header(out);
-        header::write_header(out, &self.ns);
+        header::write_header(out, self.ns);
 
         let mut trait_out = Output::new();
 
@@ -172,7 +172,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         } else {
             StructSizeConstraint::Fixed(32)
         };
-        self.emit_event_opcode(name, number, &event_full_def, out);
+        self.emit_event_opcode(name, number, event_full_def, out);
 
         let full_name = format!("{}Event", name);
 
@@ -836,7 +836,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
     }
 
     fn generate_type_alias_def(&self, type_alias_def: &xcbdefs::TypeAliasDef, out: &mut Output) {
-        let rust_new_name = self.get_type_alias_rust_name(&type_alias_def);
+        let rust_new_name = self.get_type_alias_rust_name(type_alias_def);
         outln!(
             out,
             "pub type {} = {};",
@@ -919,7 +919,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                             out,
                             "let {} = {}.switch_expr();",
                             dst_var_name,
-                            wrap_field_ref(&switch_field_name),
+                            wrap_field_ref(switch_field_name),
                         );
                     } else {
                         outln!(
@@ -927,7 +927,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                             "let {} = {}::try_from({}.switch_expr()).unwrap();",
                             dst_var_name,
                             rust_field_type,
-                            wrap_field_ref(&switch_field_name),
+                            wrap_field_ref(switch_field_name),
                         );
                     }
                 } else {
@@ -958,7 +958,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                             out,
                             "let {} = {}.switch_expr();",
                             dst_var_name,
-                            wrap_field_ref(&switch_field_name),
+                            wrap_field_ref(switch_field_name),
                         );
                     } else {
                         outln!(
@@ -966,7 +966,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                             "let {} = {}::try_from({}.switch_expr(){}).unwrap();",
                             dst_var_name,
                             rust_field_type,
-                            wrap_field_ref(&switch_field_name),
+                            wrap_field_ref(switch_field_name),
                             op_str,
                         );
                     }

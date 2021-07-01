@@ -13,7 +13,7 @@ pub(super) fn generate(
     info: &ResourceInfo<'_>,
 ) {
     let lower_name = info.resource_name.to_ascii_lowercase();
-    let free_function = camel_case_to_lower_snake(&info.free_request);
+    let free_function = camel_case_to_lower_snake(info.free_request);
     let wrapper = format!("{}Wrapper", info.resource_name);
     outln!(out, "");
     outln!(

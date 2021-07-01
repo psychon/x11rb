@@ -528,14 +528,14 @@ fn emit_request_struct(
                             } else {
                                 fixed_fields_bytes.push(format!(
                                     "{}_REQUEST",
-                                    super::super::camel_case_to_upper_snake(&name),
+                                    super::super::camel_case_to_upper_snake(name),
                                 ));
                             }
                         } else if normal_field.name == "minor_opcode" {
                             assert!(ns.ext_info.is_some());
                             fixed_fields_bytes.push(format!(
                                 "{}_REQUEST",
-                                super::super::camel_case_to_upper_snake(&name),
+                                super::super::camel_case_to_upper_snake(name),
                             ));
                         } else if normal_field.name == "length" {
                             // the actual length will be calculated later
@@ -955,7 +955,7 @@ fn emit_request_struct(
                 outln!(
                     out,
                     "if header.minor_opcode != {}_REQUEST {{",
-                    super::super::camel_case_to_upper_snake(&name),
+                    super::super::camel_case_to_upper_snake(name),
                 );
                 outln!(out.indent(), "return Err(ParseError::InvalidValue);");
                 outln!(out, "}}");
@@ -965,7 +965,7 @@ fn emit_request_struct(
                 outln!(
                     out,
                     "if header.major_opcode != {}_REQUEST {{",
-                    super::super::camel_case_to_upper_snake(&name),
+                    super::super::camel_case_to_upper_snake(name),
                 );
                 outln!(out.indent(), "return Err(ParseError::InvalidValue);");
                 outln!(out, "}}");

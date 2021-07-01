@@ -702,7 +702,7 @@ impl<'a> Image<'a> {
         }
         .send(conn)?
         .reply()?;
-        Ok(Self::get_from_reply(&conn.setup(), width, height, reply)?)
+        Ok(Self::get_from_reply(conn.setup(), width, height, reply)?)
     }
 
     /// Construct an `Image` from a `GetImageReply`.
@@ -770,7 +770,7 @@ impl<'a> Image<'a> {
                 dst_y: dst_y + i16::try_from(y_offset).unwrap(),
                 left_pad: 0, // Must always be 0 for ZPixmap
                 depth: self.depth,
-                data: Cow::Borrowed(&data),
+                data: Cow::Borrowed(data),
             };
             result.push(request.send(conn)?);
 
