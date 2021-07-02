@@ -1,5 +1,3 @@
-#![allow(clippy::match_like_matches_macro)]
-
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::path::PathBuf;
