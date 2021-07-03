@@ -136,12 +136,6 @@
     // Not everything in x11rb::protocol has doc comments
     missing_docs,
 )]
-#![allow(
-    // This suggests a method that was stabilised in Rust 1.45, while our MSRV is 1.41.
-    clippy::manual_strip,
-    // This suggests a macro that was stabilised in Rust 1.42, while our MSRV is 1.41.
-    clippy::match_like_matches_macro,
-)]
 #![cfg_attr(not(feature = "allow-unsafe-code"), forbid(unsafe_code))]
 
 // Only contains documentation, but no "actual rust"
