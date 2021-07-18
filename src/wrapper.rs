@@ -144,3 +144,30 @@ pub trait ConnectionExt: XProtoConnectionExt {
     }
 }
 impl<C: XProtoConnectionExt + ?Sized> ConnectionExt for C {}
+
+/// A RAII-like wrapper around [grab_server] and [ungrab_server].
+///
+/// Instances of this struct represent that we sent a [grab_server] request. When this struct is
+/// dropped, an [ungrab_server] request is sent.
+///
+/// Any errors during `Drop` are silently ignored. Most likely an error here means that your
+/// X11 connection is broken and later requests will also fail.
+#[derive(Debug)]
+pub struct GrabServer<'c, C: XProtoConnectionExt>(&'c C);
+
+impl<'c, C: XProtoConnectionExt> GrabServer<'c, C> {
+    /// Grab the server by sending a [grab_server] request.
+    ///
+    /// The returned type will call [ungrab_server] when it is dropped.
+    pub fn grab(conn: &'c C) -> Result<Self, ConnectionError> {
+        // Grab the server, return any errors, ignore the resulting VoidCookie
+        drop(conn.grab_server()?);
+        Ok(Self(conn))
+    }
+}
+
+impl<C: XProtoConnectionExt> Drop for GrabServer<'_, C> {
+    fn drop(&mut self) {
+        let _ = (self.0).ungrab_server();
+    }
+}
