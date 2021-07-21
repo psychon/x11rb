@@ -108,23 +108,10 @@ mod unsafe_code {
 pub use unsafe_code::CSlice;
 
 #[cfg(unix)]
-pub(crate) fn nix_error_to_io(e: nix::Error) -> std::io::Error {
-    match e {
-        nix::Error::Sys(errno) => errno.into(),
-        nix::Error::InvalidPath | nix::Error::InvalidUtf8 => {
-            std::io::Error::new(std::io::ErrorKind::InvalidInput, e)
-        }
-        nix::Error::UnsupportedOperation => std::io::Error::new(std::io::ErrorKind::Other, e),
-    }
-}
-
-#[cfg(unix)]
 mod raw_fd_container {
     use std::mem::forget;
     #[cfg(unix)]
     use std::os::unix::io::{AsRawFd, IntoRawFd, RawFd};
-
-    use super::nix_error_to_io;
 
     /// A simple wrapper around RawFd that closes the fd on drop.
     ///
@@ -152,9 +139,7 @@ mod raw_fd_container {
         /// of the `dup`ed version, whereas the original `RawFdContainer`
         /// will keep the ownership of its FD.
         pub fn try_clone(&self) -> Result<Self, std::io::Error> {
-            Ok(Self::new(
-                nix::unistd::dup(self.0).map_err(nix_error_to_io)?,
-            ))
+            Ok(Self::new(nix::unistd::dup(self.0)?))
         }
 
         /// Get the `RawFd` out of this `RawFdContainer`.
@@ -174,7 +159,7 @@ mod raw_fd_container {
         /// the caller to handle errors.
         pub fn close(self) -> Result<(), std::io::Error> {
             let fd = self.into_raw_fd();
-            nix::unistd::close(fd).map_err(nix_error_to_io)
+            nix::unistd::close(fd).map_err(|e| e.into())
         }
     }
 

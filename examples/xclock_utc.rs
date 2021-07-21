@@ -195,7 +195,7 @@ fn poll_with_timeout(
                 }
             }
             // try again
-            Err(nix::Error::Sys(nix::errno::Errno::EINTR)) => {}
+            Err(nix::Error::EINTR) => {}
             Err(e) => return Err(e.into()),
         }
         if start_instant.elapsed() >= timeout {
