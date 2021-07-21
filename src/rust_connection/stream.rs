@@ -8,8 +8,6 @@ use std::os::unix::net::UnixStream;
 use std::os::windows::io::{AsRawSocket, IntoRawSocket, RawSocket};
 
 use super::xauth::Family;
-#[cfg(unix)]
-use crate::utils::nix_error_to_io;
 use crate::utils::RawFdContainer;
 
 /// The kind of operation that one want to poll for.
@@ -355,8 +353,8 @@ fn do_write(
             match sendmsg(fd, iov, cmsgs, flags, addr) {
                 Ok(n) => return Ok(n),
                 // try again
-                Err(nix::Error::Sys(nix::errno::Errno::EINTR)) => {}
-                Err(e) => return Err(nix_error_to_io(e)),
+                Err(nix::Error::EINTR) => {}
+                Err(e) => return Err(e.into()),
             }
         }
     }
@@ -381,7 +379,6 @@ impl Stream for DefaultStream {
     fn poll(&self, mode: PollMode) -> Result<()> {
         #[cfg(unix)]
         {
-            use nix::errno::Errno;
             use nix::poll::{poll, PollFd, PollFlags};
 
             let mut poll_flags = PollFlags::empty();
@@ -396,8 +393,8 @@ impl Stream for DefaultStream {
             loop {
                 match poll(&mut poll_fds, -1) {
                     Ok(_) => break,
-                    Err(nix::Error::Sys(Errno::EINTR)) => {}
-                    Err(e) => return Err(nix_error_to_io(e)),
+                    Err(nix::Error::EINTR) => {}
+                    Err(e) => return Err(e.into()),
                 }
             }
             // Let the errors (POLLERR) be handled when trying to read or write.
@@ -445,8 +442,8 @@ impl Stream for DefaultStream {
                 match recvmsg(fd, &iov[..], Some(&mut cmsg), MsgFlags::empty()) {
                     Ok(msg) => break msg,
                     // try again
-                    Err(nix::Error::Sys(nix::errno::Errno::EINTR)) => {}
-                    Err(e) => return Err(nix_error_to_io(e)),
+                    Err(nix::Error::EINTR) => {}
+                    Err(e) => return Err(e.into()),
                 }
             };
 
