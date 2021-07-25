@@ -153,7 +153,7 @@ fn generate_creator(
     lower_name: &str,
     uses: &mut BTreeSet<String>,
 ) {
-    let (request_ext, request_name) = match request_info.request_name.split_once(':') {
+    let (request_ext, request_name) = match split_once(request_info.request_name, ':') {
         None => (None, request_info.request_name),
         Some((ext_name, request_name)) => (Some(ext_name), request_name),
     };
@@ -400,5 +400,33 @@ fn emit_where(out: &mut Output, wheres: &[String]) {
         for where_ in wheres.iter() {
             outln!(out.indent(), "{},", where_);
         }
+    }
+}
+
+// This is a poor man's reimplementation of str::split_once().
+// TODO: Get rid of this once our MSRV reaches 1.52.0
+fn split_once(string: &str, pattern: char) -> Option<(&str, &str)> {
+    string
+        .find(pattern)
+        .map(|index| (&string[..index], &string[(index + pattern.len_utf8())..]))
+}
+
+#[cfg(test)]
+mod test {
+    use super::split_once;
+
+    #[test]
+    fn split_once_no_match() {
+        assert_eq!(None, split_once("abcdef", 'z'));
+        assert_eq!(None, split_once("äöü€æ@", 'ß'));
+        assert_eq!(None, split_once("abcdef", '𝄞'));
+    }
+
+    #[test]
+    fn split_once_match() {
+        assert_eq!(Some(("abc", "ef")), split_once("abcdef", 'd'));
+        assert_eq!(Some(("", "aa")), split_once("aaa", 'a'));
+        assert_eq!(Some(("a", "c")), split_once("aäc", 'ä'));
+        assert_eq!(Some(("abü", "äö")), split_once("abü𝄞äö", '𝄞'));
     }
 }
