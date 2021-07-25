@@ -128,7 +128,7 @@ pub(super) fn generate(
     );
     out.indented(|out| {
         outln!(out, "fn drop(&mut self) {{");
-        outln!(out.indent(), "let _ = (self.0).{}(self.1);", free_function);
+        outln!(out.indent(), "let _ = {}(self.0, self.1);", free_function);
         outln!(out, "}}");
     });
     outln!(out, "}}");
@@ -290,7 +290,7 @@ fn generate_creator(
     );
     outln!(
         out.indent(),
-        "let cookie = conn.{}({})?;",
+        "let cookie = {}(conn, {})?;",
         function_name,
         forward_args_with_resource.join(", "),
     );

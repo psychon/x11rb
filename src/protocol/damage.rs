@@ -611,3 +611,77 @@ pub trait ConnectionExt: RequestConnection {
 }
 
 impl<C: RequestConnection + ?Sized> ConnectionExt for C {}
+
+/// A RAII-like wrapper around a [Damage].
+///
+/// Instances of this struct represent a Damage that is freed in `Drop`.
+///
+/// Any errors during `Drop` are silently ignored. Most likely an error here means that your
+/// X11 connection is broken and later requests will also fail.
+#[derive(Debug)]
+pub struct DamageWrapper<'c, C: RequestConnection>(&'c C, Damage);
+
+impl<'c, C: RequestConnection> DamageWrapper<'c, C>
+{
+    /// Assume ownership of the given resource and destroy it in `Drop`.
+    pub fn for_damage(conn: &'c C, id: Damage) -> Self {
+        DamageWrapper(conn, id)
+    }
+
+    /// Get the XID of the wrapped resource
+    pub fn damage(&self) -> Damage {
+        self.1
+    }
+
+    /// Assume ownership of the XID of the wrapped resource
+    ///
+    /// This function destroys this wrapper without freeing the underlying resource.
+    pub fn into_damage(self) -> Damage {
+        let id = self.1;
+        std::mem::forget(self);
+        id
+    }
+}
+
+impl<'c, C: X11Connection> DamageWrapper<'c, C>
+{
+
+    /// Create a new Damage and return a Damage wrapper and a cookie.
+    ///
+    /// This is a thin wrapper around [create] that allocates an id for the Damage.
+    /// This function returns the resulting `DamageWrapper` that owns the created Damage and frees
+    /// it in `Drop`. This also returns a `VoidCookie` that comes from the call to
+    /// [create].
+    ///
+    /// Errors can come from the call to [X11Connection::generate_id] or [create].
+    pub fn create_and_get_cookie(conn: &'c C, drawable: xproto::Drawable, level: ReportLevel) -> Result<(Self, VoidCookie<'c, C>), ReplyOrIdError>
+    {
+        let damage = conn.generate_id()?;
+        let cookie = create(conn, damage, drawable, level)?;
+        Ok((Self::for_damage(conn, damage), cookie))
+    }
+
+    /// Create a new Damage and return a Damage wrapper
+    ///
+    /// This is a thin wrapper around [create] that allocates an id for the Damage.
+    /// This function returns the resulting `DamageWrapper` that owns the created Damage and frees
+    /// it in `Drop`.
+    ///
+    /// Errors can come from the call to [X11Connection::generate_id] or [create].
+    pub fn create(conn: &'c C, drawable: xproto::Drawable, level: ReportLevel) -> Result<Self, ReplyOrIdError>
+    {
+        Ok(Self::create_and_get_cookie(conn, drawable, level)?.0)
+    }
+}
+
+impl<C: RequestConnection> From<&DamageWrapper<'_, C>> for Damage {
+    fn from(from: &DamageWrapper<'_, C>) -> Self {
+        from.1
+    }
+}
+
+impl<C: RequestConnection> Drop for DamageWrapper<'_, C> {
+    fn drop(&mut self) {
+        let _ = destroy(self.0, self.1);
+    }
+}

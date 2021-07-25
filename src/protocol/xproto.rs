@@ -27634,7 +27634,7 @@ impl<'c, C: X11Connection> PixmapWrapper<'c, C>
     pub fn create_pixmap_and_get_cookie(conn: &'c C, depth: u8, drawable: Drawable, width: u16, height: u16) -> Result<(Self, VoidCookie<'c, C>), ReplyOrIdError>
     {
         let pid = conn.generate_id()?;
-        let cookie = conn.create_pixmap(depth, pid, drawable, width, height)?;
+        let cookie = create_pixmap(conn, depth, pid, drawable, width, height)?;
         Ok((Self::for_pixmap(conn, pid), cookie))
     }
 
@@ -27659,7 +27659,7 @@ impl<C: RequestConnection> From<&PixmapWrapper<'_, C>> for Pixmap {
 
 impl<C: RequestConnection> Drop for PixmapWrapper<'_, C> {
     fn drop(&mut self) {
-        let _ = (self.0).free_pixmap(self.1);
+        let _ = free_pixmap(self.0, self.1);
     }
 }
 
@@ -27708,7 +27708,7 @@ impl<'c, C: X11Connection> WindowWrapper<'c, C>
     pub fn create_window_and_get_cookie(conn: &'c C, depth: u8, parent: Window, x: i16, y: i16, width: u16, height: u16, border_width: u16, class: WindowClass, visual: Visualid, value_list: &CreateWindowAux) -> Result<(Self, VoidCookie<'c, C>), ReplyOrIdError>
     {
         let wid = conn.generate_id()?;
-        let cookie = conn.create_window(depth, wid, parent, x, y, width, height, border_width, class, visual, value_list)?;
+        let cookie = create_window(conn, depth, wid, parent, x, y, width, height, border_width, class, visual, value_list)?;
         Ok((Self::for_window(conn, wid), cookie))
     }
 
@@ -27733,7 +27733,7 @@ impl<C: RequestConnection> From<&WindowWrapper<'_, C>> for Window {
 
 impl<C: RequestConnection> Drop for WindowWrapper<'_, C> {
     fn drop(&mut self) {
-        let _ = (self.0).destroy_window(self.1);
+        let _ = destroy_window(self.0, self.1);
     }
 }
 
@@ -27782,7 +27782,7 @@ impl<'c, C: X11Connection> FontWrapper<'c, C>
     pub fn open_font_and_get_cookie(conn: &'c C, name: &[u8]) -> Result<(Self, VoidCookie<'c, C>), ReplyOrIdError>
     {
         let fid = conn.generate_id()?;
-        let cookie = conn.open_font(fid, name)?;
+        let cookie = open_font(conn, fid, name)?;
         Ok((Self::for_font(conn, fid), cookie))
     }
 
@@ -27807,7 +27807,7 @@ impl<C: RequestConnection> From<&FontWrapper<'_, C>> for Font {
 
 impl<C: RequestConnection> Drop for FontWrapper<'_, C> {
     fn drop(&mut self) {
-        let _ = (self.0).close_font(self.1);
+        let _ = close_font(self.0, self.1);
     }
 }
 
@@ -27856,7 +27856,7 @@ impl<'c, C: X11Connection> GcontextWrapper<'c, C>
     pub fn create_gc_and_get_cookie(conn: &'c C, drawable: Drawable, value_list: &CreateGCAux) -> Result<(Self, VoidCookie<'c, C>), ReplyOrIdError>
     {
         let cid = conn.generate_id()?;
-        let cookie = conn.create_gc(cid, drawable, value_list)?;
+        let cookie = create_gc(conn, cid, drawable, value_list)?;
         Ok((Self::for_gcontext(conn, cid), cookie))
     }
 
@@ -27881,7 +27881,7 @@ impl<C: RequestConnection> From<&GcontextWrapper<'_, C>> for Gcontext {
 
 impl<C: RequestConnection> Drop for GcontextWrapper<'_, C> {
     fn drop(&mut self) {
-        let _ = (self.0).free_gc(self.1);
+        let _ = free_gc(self.0, self.1);
     }
 }
 
@@ -27930,7 +27930,7 @@ impl<'c, C: X11Connection> ColormapWrapper<'c, C>
     pub fn create_colormap_and_get_cookie(conn: &'c C, alloc: ColormapAlloc, window: Window, visual: Visualid) -> Result<(Self, VoidCookie<'c, C>), ReplyOrIdError>
     {
         let mid = conn.generate_id()?;
-        let cookie = conn.create_colormap(alloc, mid, window, visual)?;
+        let cookie = create_colormap(conn, alloc, mid, window, visual)?;
         Ok((Self::for_colormap(conn, mid), cookie))
     }
 
@@ -27955,7 +27955,7 @@ impl<C: RequestConnection> From<&ColormapWrapper<'_, C>> for Colormap {
 
 impl<C: RequestConnection> Drop for ColormapWrapper<'_, C> {
     fn drop(&mut self) {
-        let _ = (self.0).free_colormap(self.1);
+        let _ = free_colormap(self.0, self.1);
     }
 }
 
@@ -28006,7 +28006,7 @@ impl<'c, C: X11Connection> CursorWrapper<'c, C>
         A: Into<Pixmap>,
     {
         let cid = conn.generate_id()?;
-        let cookie = conn.create_cursor(cid, source, mask, fore_red, fore_green, fore_blue, back_red, back_green, back_blue, x, y)?;
+        let cookie = create_cursor(conn, cid, source, mask, fore_red, fore_green, fore_blue, back_red, back_green, back_blue, x, y)?;
         Ok((Self::for_cursor(conn, cid), cookie))
     }
 
@@ -28037,7 +28037,7 @@ impl<'c, C: X11Connection> CursorWrapper<'c, C>
         A: Into<Font>,
     {
         let cid = conn.generate_id()?;
-        let cookie = conn.create_glyph_cursor(cid, source_font, mask_font, source_char, mask_char, fore_red, fore_green, fore_blue, back_red, back_green, back_blue)?;
+        let cookie = create_glyph_cursor(conn, cid, source_font, mask_font, source_char, mask_char, fore_red, fore_green, fore_blue, back_red, back_green, back_blue)?;
         Ok((Self::for_cursor(conn, cid), cookie))
     }
 
@@ -28064,6 +28064,6 @@ impl<C: RequestConnection> From<&CursorWrapper<'_, C>> for Cursor {
 
 impl<C: RequestConnection> Drop for CursorWrapper<'_, C> {
     fn drop(&mut self) {
-        let _ = (self.0).free_cursor(self.1);
+        let _ = free_cursor(self.0, self.1);
     }
 }
