@@ -8,7 +8,7 @@ pub(super) fn expr_to_str(
     expr: &xcbdefs::Expression,
     mut wrap_field_ref: impl FnMut(&str) -> String,
     panic_on_overflow: bool,
-    cast_to_u32: bool,
+    cast_to_type: Option<&str>,
     needs_parens: bool,
 ) -> String {
     expr_to_str_impl(
@@ -16,7 +16,7 @@ pub(super) fn expr_to_str(
         expr,
         &mut wrap_field_ref,
         panic_on_overflow,
-        cast_to_u32,
+        cast_to_type,
         needs_parens,
     )
 }
@@ -26,7 +26,7 @@ fn expr_to_str_impl(
     expr: &xcbdefs::Expression,
     wrap_field_ref: &mut dyn FnMut(&str) -> String,
     panic_on_overflow: bool,
-    cast_to_u32: bool,
+    cast_to_type: Option<&str>,
     needs_parens: bool,
 ) -> String {
     match expr {
@@ -44,7 +44,7 @@ fn expr_to_str_impl(
                         &bin_op_expr.lhs,
                         wrap_field_ref,
                         panic_on_overflow,
-                        true,
+                        Some("u32"),
                         true,
                     ),
                     expr_to_str_impl(
@@ -52,7 +52,7 @@ fn expr_to_str_impl(
                         &bin_op_expr.rhs,
                         wrap_field_ref,
                         panic_on_overflow,
-                        true,
+                        Some("u32"),
                         false,
                     ),
                     err_handler,
@@ -64,7 +64,7 @@ fn expr_to_str_impl(
                         &bin_op_expr.lhs,
                         wrap_field_ref,
                         panic_on_overflow,
-                        true,
+                        Some("u32"),
                         true,
                     ),
                     expr_to_str_impl(
@@ -72,7 +72,7 @@ fn expr_to_str_impl(
                         &bin_op_expr.rhs,
                         wrap_field_ref,
                         panic_on_overflow,
-                        true,
+                        Some("u32"),
                         false,
                     ),
                     err_handler,
@@ -84,7 +84,7 @@ fn expr_to_str_impl(
                         &bin_op_expr.lhs,
                         wrap_field_ref,
                         panic_on_overflow,
-                        true,
+                        Some("u32"),
                         true,
                     ),
                     expr_to_str_impl(
@@ -92,7 +92,7 @@ fn expr_to_str_impl(
                         &bin_op_expr.rhs,
                         wrap_field_ref,
                         panic_on_overflow,
-                        true,
+                        Some("u32"),
                         false,
                     ),
                     err_handler,
@@ -104,7 +104,7 @@ fn expr_to_str_impl(
                         &bin_op_expr.lhs,
                         wrap_field_ref,
                         panic_on_overflow,
-                        true,
+                        Some("u32"),
                         true,
                     ),
                     expr_to_str_impl(
@@ -112,7 +112,7 @@ fn expr_to_str_impl(
                         &bin_op_expr.rhs,
                         wrap_field_ref,
                         panic_on_overflow,
-                        true,
+                        Some("u32"),
                         false,
                     ),
                     err_handler,
@@ -123,7 +123,7 @@ fn expr_to_str_impl(
                         &bin_op_expr.lhs,
                         wrap_field_ref,
                         panic_on_overflow,
-                        true,
+                        Some("u32"),
                         true,
                     );
                     let rhs_str = expr_to_str_impl(
@@ -131,7 +131,7 @@ fn expr_to_str_impl(
                         &bin_op_expr.rhs,
                         wrap_field_ref,
                         panic_on_overflow,
-                        true,
+                        Some("u32"),
                         true,
                     );
                     if needs_parens {
@@ -146,7 +146,7 @@ fn expr_to_str_impl(
                         &bin_op_expr.lhs,
                         wrap_field_ref,
                         panic_on_overflow,
-                        true,
+                        Some("u32"),
                         true,
                     );
                     let rhs_str = expr_to_str_impl(
@@ -154,7 +154,7 @@ fn expr_to_str_impl(
                         &bin_op_expr.rhs,
                         wrap_field_ref,
                         panic_on_overflow,
-                        true,
+                        Some("u32"),
                         true,
                     );
                     if needs_parens {
@@ -175,7 +175,7 @@ fn expr_to_str_impl(
                     &unary_op_expr.rhs,
                     wrap_field_ref,
                     panic_on_overflow,
-                    true,
+                    Some("u32"),
                     true,
                 );
                 if needs_parens {
@@ -198,20 +198,18 @@ fn expr_to_str_impl(
                 xcbdefs::TypeRef::BuiltIn(xcbdefs::BuiltInType::Card32) => true,
                 _ => false,
             };
-            if cast_to_u32 && !field_is_card32 {
-                format!("u32::from({})", value)
+            if field_is_card32 && cast_to_type == Some("u32") {
+                value
+            } else if let Some(t) = cast_to_type {
+                format!("{}::from({})", t, value)
             } else {
                 value
             }
         }
         xcbdefs::Expression::ParamRef(param_ref_expr) => {
             let rust_field_name = to_rust_variable_name(&param_ref_expr.field_name);
-            let param_is_card32 = match param_ref_expr.type_.get_resolved() {
-                xcbdefs::TypeRef::BuiltIn(xcbdefs::BuiltInType::Card32) => true,
-                _ => false,
-            };
-            if cast_to_u32 && !param_is_card32 {
-                format!("u32::from({})", rust_field_name)
+            if let Some(t) = cast_to_type {
+                format!("{}::from({})", t, rust_field_name)
             } else {
                 rust_field_name
             }
@@ -227,7 +225,7 @@ fn expr_to_str_impl(
                 pop_count_expr,
                 wrap_field_ref,
                 panic_on_overflow,
-                false,
+                None,
                 true,
             );
             format!("{}.count_ones()", arg)
@@ -253,7 +251,7 @@ fn expr_to_str_impl(
                         &sum_of_expr.operand,
                         wrap_field_ref,
                         panic_on_overflow,
-                        true,
+                        Some("u32"),
                         true,
                     ),
                 )
@@ -267,15 +265,15 @@ fn expr_to_str_impl(
                         &sum_of_expr.operand,
                         wrap_field_ref,
                         panic_on_overflow,
-                        true,
+                        Some("u32"),
                         true,
                     ),
                 )
             }
         }
         xcbdefs::Expression::ListElementRef => {
-            if cast_to_u32 {
-                "u32::from(*x)".into()
+            if let Some(t) = cast_to_type {
+                format!("{}::from(*x)", t)
             } else if needs_parens {
                 "(*x)".into()
             } else {

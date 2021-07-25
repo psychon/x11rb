@@ -950,7 +950,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                                 &*or_expr,
                                 &mut wrap_field_ref,
                                 true,
-                                false,
+                                None,
                                 true,
                             )
                         ),

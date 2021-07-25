@@ -274,7 +274,7 @@ pub(super) fn emit_assert_for_field_serialize(
                     list_field.length_expr.as_ref().unwrap(),
                     &mut wrap_field_ref,
                     true,
-                    false,
+                    None,
                     false,
                 );
                 outln!(
@@ -307,7 +307,7 @@ pub(super) fn emit_assert_for_field_serialize(
                     &fd_list_field.length_expr,
                     &mut wrap_field_ref,
                     true,
-                    false,
+                    None,
                     false,
                 );
                 outln!(
@@ -337,7 +337,7 @@ pub(super) fn emit_assert_for_switch_serialize(
         &switch.expr,
         to_rust_variable_name,
         true,
-        true,
+        Some("u32"),
         false,
     );
     outln!(

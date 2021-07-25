@@ -288,7 +288,7 @@ pub(super) fn emit_switch_type(
                                 &case.exprs[0],
                                 to_rust_variable_name,
                                 true,
-                                true,
+                                Some("u32"),
                                 false,
                             ),
                         );
@@ -320,7 +320,7 @@ pub(super) fn emit_switch_type(
                                 &case.exprs[0],
                                 to_rust_variable_name,
                                 true,
-                                true,
+                                Some("u32"),
                                 false,
                             ),
                         );
@@ -381,7 +381,7 @@ fn emit_switch_try_parse(
                     &switch.expr,
                     to_rust_variable_name,
                     false,
-                    true,
+                    Some("u32"),
                     false,
                 ),
             );
@@ -396,7 +396,7 @@ fn emit_switch_try_parse(
                             &case.exprs[0],
                             to_rust_variable_name,
                             false,
-                            true,
+                            Some("u32"),
                             true,
                         ),
                     );
@@ -407,7 +407,7 @@ fn emit_switch_try_parse(
                             expr,
                             to_rust_variable_name,
                             false,
-                            true,
+                            Some("u32"),
                             true,
                         ));
                         case_expr_str.push_str(" != 0");
@@ -488,7 +488,7 @@ fn emit_switch_try_parse(
                             &case.exprs[0],
                             to_rust_variable_name,
                             false,
-                            true,
+                            Some("u32"),
                             true,
                         ),
                     );
@@ -499,7 +499,7 @@ fn emit_switch_try_parse(
                             expr,
                             to_rust_variable_name,
                             false,
-                            true,
+                            Some("u32"),
                             true,
                         ));
                     }

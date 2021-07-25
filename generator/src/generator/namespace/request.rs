@@ -690,7 +690,7 @@ fn emit_request_struct(
                                     &expr_field.expr,
                                     to_rust_variable_name,
                                     true,
-                                    true,
+                                    Some("u32"),
                                     true,
                                 ),
                             );
