@@ -54,7 +54,7 @@ pub(crate) fn generate(module: &xcbgen::defs::Module) -> HashMap<PathBuf, String
         let mut ns_out = Output::new();
         let wrapper_info = resources::for_extension(&ns.header);
         namespace::generate(
-            &module,
+            module,
             &ns,
             &caches,
             &mut ns_out,
