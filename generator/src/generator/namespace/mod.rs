@@ -927,7 +927,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                     } else {
                         outln!(
                             out,
-                            "let {} = {}::try_from({}.switch_expr()).unwrap();",
+                            "let {} = {}::from({}.switch_expr());",
                             dst_var_name,
                             rust_field_type,
                             wrap_field_ref(switch_field_name),
