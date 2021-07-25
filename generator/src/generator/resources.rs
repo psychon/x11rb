@@ -8,7 +8,7 @@ pub(super) fn for_extension(extension: &str) -> &'static [ResourceInfo<'static>]
         .unwrap_or(&[])
 }
 
-const EXTENSION_RESOURCES: [(&str, &[ResourceInfo<'_>]); 3] = [
+const EXTENSION_RESOURCES: [(&str, &[ResourceInfo<'_>]); 4] = [
     (
         "xproto",
         &[
@@ -88,6 +88,39 @@ const EXTENSION_RESOURCES: [(&str, &[ResourceInfo<'_>]); 3] = [
                 created_argument: "context",
             }],
             free_request: "FreeContext",
+        }],
+    ),
+    (
+        "xfixes",
+        &[ResourceInfo {
+            resource_name: "Region",
+            create_requests: &[
+                CreateInfo {
+                    request_name: "CreateRegion",
+                    created_argument: "region",
+                },
+                CreateInfo {
+                    request_name: "CreateRegionFromBitmap",
+                    created_argument: "region",
+                },
+                CreateInfo {
+                    request_name: "CreateRegionFromWindow",
+                    created_argument: "region",
+                },
+                CreateInfo {
+                    request_name: "CreateRegionFromGC",
+                    created_argument: "region",
+                },
+                CreateInfo {
+                    request_name: "CreateRegionFromPicture",
+                    created_argument: "region",
+                },
+                CreateInfo {
+                    request_name: "composite:CreateRegionFromBorderClip",
+                    created_argument: "region",
+                },
+            ],
+            free_request: "DestroyRegion",
         }],
     ),
 ];

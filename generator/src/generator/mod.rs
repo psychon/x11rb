@@ -53,7 +53,14 @@ pub(crate) fn generate(module: &xcbgen::defs::Module) -> HashMap<PathBuf, String
     for ns in module.sorted_namespaces() {
         let mut ns_out = Output::new();
         let wrapper_info = resources::for_extension(&ns.header);
-        namespace::generate(&ns, &caches, &mut ns_out, &mut enum_cases, wrapper_info);
+        namespace::generate(
+            &module,
+            &ns,
+            &caches,
+            &mut ns_out,
+            &mut enum_cases,
+            wrapper_info,
+        );
         out_map.insert(
             PathBuf::from(format!("{}.rs", ns.header)),
             ns_out.into_data(),

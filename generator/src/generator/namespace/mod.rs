@@ -31,16 +31,18 @@ use helpers::{
 
 /// Generate a Rust module for namespace `ns`.
 pub(super) fn generate(
+    module: &xcbgen::defs::Module,
     ns: &xcbdefs::Namespace,
     caches: &RefCell<Caches>,
     out: &mut Output,
     enum_cases: &mut EnumCases,
     resource_info: &[super::ResourceInfo<'_>],
 ) {
-    NamespaceGenerator::new(ns, caches).generate(out, enum_cases, resource_info);
+    NamespaceGenerator::new(module, ns, caches).generate(out, enum_cases, resource_info);
 }
 
 struct NamespaceGenerator<'ns, 'c> {
+    module: &'ns xcbgen::defs::Module,
     ns: &'ns xcbdefs::Namespace,
     caches: &'c RefCell<Caches>,
 
@@ -50,13 +52,18 @@ struct NamespaceGenerator<'ns, 'c> {
 
 impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
     #[inline]
-    fn new(ns: &'ns xcbdefs::Namespace, caches: &'c RefCell<Caches>) -> Self {
+    fn new(
+        module: &'ns xcbgen::defs::Module,
+        ns: &'ns xcbdefs::Namespace,
+        caches: &'c RefCell<Caches>,
+    ) -> Self {
         let option_name = if ns.header == "present" {
             "std::option::Option"
         } else {
             "Option"
         };
         NamespaceGenerator {
+            module,
             ns,
             caches,
             option_name,
