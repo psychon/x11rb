@@ -6198,79 +6198,79 @@ pub struct SelectEventsAux {
 }
 impl SelectEventsAux {
     fn try_parse(value: &[u8], affect_which: u16, clear: u16, select_all: u16) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = u32::from(affect_which) & ((!u32::from(clear)) & (!u32::from(select_all)));
+        let switch_expr = affect_which & ((!clear) & (!select_all));
         let mut outer_remaining = value;
-        let bitcase1 = if switch_expr & u32::from(EventType::NEW_KEYBOARD_NOTIFY) != 0 {
+        let bitcase1 = if switch_expr & u16::from(EventType::NEW_KEYBOARD_NOTIFY) != 0 {
             let (bitcase1, new_remaining) = SelectEventsAuxBitcase1::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             Some(bitcase1)
         } else {
             None
         };
-        let bitcase2 = if switch_expr & u32::from(EventType::STATE_NOTIFY) != 0 {
+        let bitcase2 = if switch_expr & u16::from(EventType::STATE_NOTIFY) != 0 {
             let (bitcase2, new_remaining) = SelectEventsAuxBitcase2::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             Some(bitcase2)
         } else {
             None
         };
-        let bitcase3 = if switch_expr & u32::from(EventType::CONTROLS_NOTIFY) != 0 {
+        let bitcase3 = if switch_expr & u16::from(EventType::CONTROLS_NOTIFY) != 0 {
             let (bitcase3, new_remaining) = SelectEventsAuxBitcase3::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             Some(bitcase3)
         } else {
             None
         };
-        let bitcase4 = if switch_expr & u32::from(EventType::INDICATOR_STATE_NOTIFY) != 0 {
+        let bitcase4 = if switch_expr & u16::from(EventType::INDICATOR_STATE_NOTIFY) != 0 {
             let (bitcase4, new_remaining) = SelectEventsAuxBitcase4::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             Some(bitcase4)
         } else {
             None
         };
-        let bitcase5 = if switch_expr & u32::from(EventType::INDICATOR_MAP_NOTIFY) != 0 {
+        let bitcase5 = if switch_expr & u16::from(EventType::INDICATOR_MAP_NOTIFY) != 0 {
             let (bitcase5, new_remaining) = SelectEventsAuxBitcase5::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             Some(bitcase5)
         } else {
             None
         };
-        let bitcase6 = if switch_expr & u32::from(EventType::NAMES_NOTIFY) != 0 {
+        let bitcase6 = if switch_expr & u16::from(EventType::NAMES_NOTIFY) != 0 {
             let (bitcase6, new_remaining) = SelectEventsAuxBitcase6::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             Some(bitcase6)
         } else {
             None
         };
-        let bitcase7 = if switch_expr & u32::from(EventType::COMPAT_MAP_NOTIFY) != 0 {
+        let bitcase7 = if switch_expr & u16::from(EventType::COMPAT_MAP_NOTIFY) != 0 {
             let (bitcase7, new_remaining) = SelectEventsAuxBitcase7::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             Some(bitcase7)
         } else {
             None
         };
-        let bitcase8 = if switch_expr & u32::from(EventType::BELL_NOTIFY) != 0 {
+        let bitcase8 = if switch_expr & u16::from(EventType::BELL_NOTIFY) != 0 {
             let (bitcase8, new_remaining) = SelectEventsAuxBitcase8::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             Some(bitcase8)
         } else {
             None
         };
-        let bitcase9 = if switch_expr & u32::from(EventType::ACTION_MESSAGE) != 0 {
+        let bitcase9 = if switch_expr & u16::from(EventType::ACTION_MESSAGE) != 0 {
             let (bitcase9, new_remaining) = SelectEventsAuxBitcase9::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             Some(bitcase9)
         } else {
             None
         };
-        let bitcase10 = if switch_expr & u32::from(EventType::ACCESS_X_NOTIFY) != 0 {
+        let bitcase10 = if switch_expr & u16::from(EventType::ACCESS_X_NOTIFY) != 0 {
             let (bitcase10, new_remaining) = SelectEventsAuxBitcase10::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             Some(bitcase10)
         } else {
             None
         };
-        let bitcase11 = if switch_expr & u32::from(EventType::EXTENSION_DEVICE_NOTIFY) != 0 {
+        let bitcase11 = if switch_expr & u16::from(EventType::EXTENSION_DEVICE_NOTIFY) != 0 {
             let (bitcase11, new_remaining) = SelectEventsAuxBitcase11::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             Some(bitcase11)
@@ -6289,7 +6289,7 @@ impl SelectEventsAux {
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, affect_which: u16, clear: u16, select_all: u16) {
-        assert_eq!(self.switch_expr(), u32::from(affect_which) & ((!u32::from(clear)) & (!u32::from(select_all))), "switch `details` has an inconsistent discriminant");
+        assert_eq!(self.switch_expr(), affect_which & ((!clear) & (!select_all)), "switch `details` has an inconsistent discriminant");
         if let Some(ref bitcase1) = self.bitcase1 {
             bitcase1.serialize_into(bytes);
         }
@@ -6326,40 +6326,40 @@ impl SelectEventsAux {
     }
 }
 impl SelectEventsAux {
-    fn switch_expr(&self) -> u32 {
+    fn switch_expr(&self) -> u16 {
         let mut expr_value = 0;
         if self.bitcase1.is_some() {
-            expr_value |= u32::from(EventType::NEW_KEYBOARD_NOTIFY);
+            expr_value |= u16::from(EventType::NEW_KEYBOARD_NOTIFY);
         }
         if self.bitcase2.is_some() {
-            expr_value |= u32::from(EventType::STATE_NOTIFY);
+            expr_value |= u16::from(EventType::STATE_NOTIFY);
         }
         if self.bitcase3.is_some() {
-            expr_value |= u32::from(EventType::CONTROLS_NOTIFY);
+            expr_value |= u16::from(EventType::CONTROLS_NOTIFY);
         }
         if self.bitcase4.is_some() {
-            expr_value |= u32::from(EventType::INDICATOR_STATE_NOTIFY);
+            expr_value |= u16::from(EventType::INDICATOR_STATE_NOTIFY);
         }
         if self.bitcase5.is_some() {
-            expr_value |= u32::from(EventType::INDICATOR_MAP_NOTIFY);
+            expr_value |= u16::from(EventType::INDICATOR_MAP_NOTIFY);
         }
         if self.bitcase6.is_some() {
-            expr_value |= u32::from(EventType::NAMES_NOTIFY);
+            expr_value |= u16::from(EventType::NAMES_NOTIFY);
         }
         if self.bitcase7.is_some() {
-            expr_value |= u32::from(EventType::COMPAT_MAP_NOTIFY);
+            expr_value |= u16::from(EventType::COMPAT_MAP_NOTIFY);
         }
         if self.bitcase8.is_some() {
-            expr_value |= u32::from(EventType::BELL_NOTIFY);
+            expr_value |= u16::from(EventType::BELL_NOTIFY);
         }
         if self.bitcase9.is_some() {
-            expr_value |= u32::from(EventType::ACTION_MESSAGE);
+            expr_value |= u16::from(EventType::ACTION_MESSAGE);
         }
         if self.bitcase10.is_some() {
-            expr_value |= u32::from(EventType::ACCESS_X_NOTIFY);
+            expr_value |= u16::from(EventType::ACCESS_X_NOTIFY);
         }
         if self.bitcase11.is_some() {
-            expr_value |= u32::from(EventType::EXTENSION_DEVICE_NOTIFY);
+            expr_value |= u16::from(EventType::EXTENSION_DEVICE_NOTIFY);
         }
         expr_value
     }
@@ -6442,7 +6442,7 @@ impl<'input> SelectEventsRequest<'input> {
     fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'input>> {
         let length_so_far = 0;
         let device_spec_bytes = self.device_spec.serialize();
-        let affect_which = u16::try_from(self.details.switch_expr() | (u32::from(self.clear) | u32::from(self.select_all))).unwrap();
+        let affect_which: u16 = self.details.switch_expr() | (self.clear | self.select_all);
         let affect_which_bytes = affect_which.serialize();
         let clear_bytes = self.clear.serialize();
         let select_all_bytes = self.select_all.serialize();
@@ -7578,9 +7578,9 @@ pub struct GetMapMap {
 }
 impl GetMapMap {
     fn try_parse(value: &[u8], present: u16, n_types: u8, n_key_syms: u8, n_key_actions: u8, total_actions: u16, total_key_behaviors: u8, virtual_mods: u16, total_key_explicit: u8, total_mod_map_keys: u8, total_v_mod_map_keys: u8) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = u32::from(present);
+        let switch_expr = present;
         let mut outer_remaining = value;
-        let types_rtrn = if switch_expr & u32::from(MapPart::KEY_TYPES) != 0 {
+        let types_rtrn = if switch_expr & u16::from(MapPart::KEY_TYPES) != 0 {
             let remaining = outer_remaining;
             let (types_rtrn, remaining) = crate::x11_utils::parse_list::<KeyType>(remaining, n_types.try_to_usize()?)?;
             outer_remaining = remaining;
@@ -7588,7 +7588,7 @@ impl GetMapMap {
         } else {
             None
         };
-        let syms_rtrn = if switch_expr & u32::from(MapPart::KEY_SYMS) != 0 {
+        let syms_rtrn = if switch_expr & u16::from(MapPart::KEY_SYMS) != 0 {
             let remaining = outer_remaining;
             let (syms_rtrn, remaining) = crate::x11_utils::parse_list::<KeySymMap>(remaining, n_key_syms.try_to_usize()?)?;
             outer_remaining = remaining;
@@ -7596,14 +7596,14 @@ impl GetMapMap {
         } else {
             None
         };
-        let bitcase3 = if switch_expr & u32::from(MapPart::KEY_ACTIONS) != 0 {
+        let bitcase3 = if switch_expr & u16::from(MapPart::KEY_ACTIONS) != 0 {
             let (bitcase3, new_remaining) = GetMapMapBitcase3::try_parse(outer_remaining, n_key_actions, total_actions)?;
             outer_remaining = new_remaining;
             Some(bitcase3)
         } else {
             None
         };
-        let behaviors_rtrn = if switch_expr & u32::from(MapPart::KEY_BEHAVIORS) != 0 {
+        let behaviors_rtrn = if switch_expr & u16::from(MapPart::KEY_BEHAVIORS) != 0 {
             let remaining = outer_remaining;
             let (behaviors_rtrn, remaining) = crate::x11_utils::parse_list::<SetBehavior>(remaining, total_key_behaviors.try_to_usize()?)?;
             outer_remaining = remaining;
@@ -7611,7 +7611,7 @@ impl GetMapMap {
         } else {
             None
         };
-        let vmods_rtrn = if switch_expr & u32::from(MapPart::VIRTUAL_MODS) != 0 {
+        let vmods_rtrn = if switch_expr & u16::from(MapPart::VIRTUAL_MODS) != 0 {
             let remaining = outer_remaining;
             let value = remaining;
             let (vmods_rtrn, remaining) = crate::x11_utils::parse_u8_list(remaining, virtual_mods.count_ones().try_to_usize()?)?;
@@ -7625,7 +7625,7 @@ impl GetMapMap {
         } else {
             None
         };
-        let explicit_rtrn = if switch_expr & u32::from(MapPart::EXPLICIT_COMPONENTS) != 0 {
+        let explicit_rtrn = if switch_expr & u16::from(MapPart::EXPLICIT_COMPONENTS) != 0 {
             let remaining = outer_remaining;
             let value = remaining;
             let (explicit_rtrn, remaining) = crate::x11_utils::parse_list::<SetExplicit>(remaining, total_key_explicit.try_to_usize()?)?;
@@ -7638,7 +7638,7 @@ impl GetMapMap {
         } else {
             None
         };
-        let modmap_rtrn = if switch_expr & u32::from(MapPart::MODIFIER_MAP) != 0 {
+        let modmap_rtrn = if switch_expr & u16::from(MapPart::MODIFIER_MAP) != 0 {
             let remaining = outer_remaining;
             let value = remaining;
             let (modmap_rtrn, remaining) = crate::x11_utils::parse_list::<KeyModMap>(remaining, total_mod_map_keys.try_to_usize()?)?;
@@ -7651,7 +7651,7 @@ impl GetMapMap {
         } else {
             None
         };
-        let vmodmap_rtrn = if switch_expr & u32::from(MapPart::VIRTUAL_MOD_MAP) != 0 {
+        let vmodmap_rtrn = if switch_expr & u16::from(MapPart::VIRTUAL_MOD_MAP) != 0 {
             let remaining = outer_remaining;
             let (vmodmap_rtrn, remaining) = crate::x11_utils::parse_list::<KeyVModMap>(remaining, total_v_mod_map_keys.try_to_usize()?)?;
             outer_remaining = remaining;
@@ -7789,9 +7789,9 @@ pub struct SetMapAux {
 }
 impl SetMapAux {
     fn try_parse(value: &[u8], present: u16, n_types: u8, n_key_syms: u8, n_key_actions: u8, total_actions: u16, total_key_behaviors: u8, virtual_mods: u16, total_key_explicit: u8, total_mod_map_keys: u8, total_v_mod_map_keys: u8) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = u32::from(present);
+        let switch_expr = present;
         let mut outer_remaining = value;
-        let types = if switch_expr & u32::from(MapPart::KEY_TYPES) != 0 {
+        let types = if switch_expr & u16::from(MapPart::KEY_TYPES) != 0 {
             let remaining = outer_remaining;
             let (types, remaining) = crate::x11_utils::parse_list::<SetKeyType>(remaining, n_types.try_to_usize()?)?;
             outer_remaining = remaining;
@@ -7799,7 +7799,7 @@ impl SetMapAux {
         } else {
             None
         };
-        let syms = if switch_expr & u32::from(MapPart::KEY_SYMS) != 0 {
+        let syms = if switch_expr & u16::from(MapPart::KEY_SYMS) != 0 {
             let remaining = outer_remaining;
             let (syms, remaining) = crate::x11_utils::parse_list::<KeySymMap>(remaining, n_key_syms.try_to_usize()?)?;
             outer_remaining = remaining;
@@ -7807,14 +7807,14 @@ impl SetMapAux {
         } else {
             None
         };
-        let bitcase3 = if switch_expr & u32::from(MapPart::KEY_ACTIONS) != 0 {
+        let bitcase3 = if switch_expr & u16::from(MapPart::KEY_ACTIONS) != 0 {
             let (bitcase3, new_remaining) = SetMapAuxBitcase3::try_parse(outer_remaining, n_key_actions, total_actions)?;
             outer_remaining = new_remaining;
             Some(bitcase3)
         } else {
             None
         };
-        let behaviors = if switch_expr & u32::from(MapPart::KEY_BEHAVIORS) != 0 {
+        let behaviors = if switch_expr & u16::from(MapPart::KEY_BEHAVIORS) != 0 {
             let remaining = outer_remaining;
             let (behaviors, remaining) = crate::x11_utils::parse_list::<SetBehavior>(remaining, total_key_behaviors.try_to_usize()?)?;
             outer_remaining = remaining;
@@ -7822,7 +7822,7 @@ impl SetMapAux {
         } else {
             None
         };
-        let vmods = if switch_expr & u32::from(MapPart::VIRTUAL_MODS) != 0 {
+        let vmods = if switch_expr & u16::from(MapPart::VIRTUAL_MODS) != 0 {
             let remaining = outer_remaining;
             let value = remaining;
             let (vmods, remaining) = crate::x11_utils::parse_u8_list(remaining, virtual_mods.count_ones().try_to_usize()?)?;
@@ -7836,7 +7836,7 @@ impl SetMapAux {
         } else {
             None
         };
-        let explicit = if switch_expr & u32::from(MapPart::EXPLICIT_COMPONENTS) != 0 {
+        let explicit = if switch_expr & u16::from(MapPart::EXPLICIT_COMPONENTS) != 0 {
             let remaining = outer_remaining;
             let (explicit, remaining) = crate::x11_utils::parse_list::<SetExplicit>(remaining, total_key_explicit.try_to_usize()?)?;
             outer_remaining = remaining;
@@ -7844,7 +7844,7 @@ impl SetMapAux {
         } else {
             None
         };
-        let modmap = if switch_expr & u32::from(MapPart::MODIFIER_MAP) != 0 {
+        let modmap = if switch_expr & u16::from(MapPart::MODIFIER_MAP) != 0 {
             let remaining = outer_remaining;
             let (modmap, remaining) = crate::x11_utils::parse_list::<KeyModMap>(remaining, total_mod_map_keys.try_to_usize()?)?;
             outer_remaining = remaining;
@@ -7852,7 +7852,7 @@ impl SetMapAux {
         } else {
             None
         };
-        let vmodmap = if switch_expr & u32::from(MapPart::VIRTUAL_MOD_MAP) != 0 {
+        let vmodmap = if switch_expr & u16::from(MapPart::VIRTUAL_MOD_MAP) != 0 {
             let remaining = outer_remaining;
             let (vmodmap, remaining) = crate::x11_utils::parse_list::<KeyVModMap>(remaining, total_v_mod_map_keys.try_to_usize()?)?;
             outer_remaining = remaining;
@@ -7872,7 +7872,7 @@ impl SetMapAux {
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, present: u16, n_types: u8, n_key_syms: u8, n_key_actions: u8, total_actions: u16, total_key_behaviors: u8, virtual_mods: u16, total_key_explicit: u8, total_mod_map_keys: u8, total_v_mod_map_keys: u8) {
-        assert_eq!(self.switch_expr(), u32::from(present), "switch `values` has an inconsistent discriminant");
+        assert_eq!(self.switch_expr(), present, "switch `values` has an inconsistent discriminant");
         if let Some(ref types) = self.types {
             assert_eq!(types.len(), usize::try_from(n_types).unwrap(), "`types` has an incorrect length");
             types.serialize_into(bytes);
@@ -7908,31 +7908,31 @@ impl SetMapAux {
     }
 }
 impl SetMapAux {
-    fn switch_expr(&self) -> u32 {
+    fn switch_expr(&self) -> u16 {
         let mut expr_value = 0;
         if self.types.is_some() {
-            expr_value |= u32::from(MapPart::KEY_TYPES);
+            expr_value |= u16::from(MapPart::KEY_TYPES);
         }
         if self.syms.is_some() {
-            expr_value |= u32::from(MapPart::KEY_SYMS);
+            expr_value |= u16::from(MapPart::KEY_SYMS);
         }
         if self.bitcase3.is_some() {
-            expr_value |= u32::from(MapPart::KEY_ACTIONS);
+            expr_value |= u16::from(MapPart::KEY_ACTIONS);
         }
         if self.behaviors.is_some() {
-            expr_value |= u32::from(MapPart::KEY_BEHAVIORS);
+            expr_value |= u16::from(MapPart::KEY_BEHAVIORS);
         }
         if self.vmods.is_some() {
-            expr_value |= u32::from(MapPart::VIRTUAL_MODS);
+            expr_value |= u16::from(MapPart::VIRTUAL_MODS);
         }
         if self.explicit.is_some() {
-            expr_value |= u32::from(MapPart::EXPLICIT_COMPONENTS);
+            expr_value |= u16::from(MapPart::EXPLICIT_COMPONENTS);
         }
         if self.modmap.is_some() {
-            expr_value |= u32::from(MapPart::MODIFIER_MAP);
+            expr_value |= u16::from(MapPart::MODIFIER_MAP);
         }
         if self.vmodmap.is_some() {
-            expr_value |= u32::from(MapPart::VIRTUAL_MOD_MAP);
+            expr_value |= u16::from(MapPart::VIRTUAL_MOD_MAP);
         }
         expr_value
     }
@@ -8020,7 +8020,7 @@ impl<'input> SetMapRequest<'input> {
     fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'input>> {
         let length_so_far = 0;
         let device_spec_bytes = self.device_spec.serialize();
-        let present = u16::try_from(self.values.switch_expr()).unwrap();
+        let present: u16 = self.values.switch_expr();
         let present_bytes = present.serialize();
         let flags_bytes = self.flags.serialize();
         let min_key_code_bytes = self.min_key_code.serialize();
@@ -9748,7 +9748,7 @@ impl<'input> SetNamesRequest<'input> {
         let length_so_far = 0;
         let device_spec_bytes = self.device_spec.serialize();
         let virtual_mods_bytes = self.virtual_mods.serialize();
-        let which = self.values.switch_expr();
+        let which: u32 = self.values.switch_expr();
         let which_bytes = which.serialize();
         let first_type_bytes = self.first_type.serialize();
         let n_types_bytes = self.n_types.serialize();
@@ -10353,9 +10353,9 @@ pub struct GetKbdByNameRepliesTypesMap {
 }
 impl GetKbdByNameRepliesTypesMap {
     fn try_parse(value: &[u8], present: u16, n_types: u8, n_key_syms: u8, n_key_actions: u8, total_actions: u16, total_key_behaviors: u8, virtual_mods: u16, total_key_explicit: u8, total_mod_map_keys: u8, total_v_mod_map_keys: u8) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = u32::from(present);
+        let switch_expr = present;
         let mut outer_remaining = value;
-        let types_rtrn = if switch_expr & u32::from(MapPart::KEY_TYPES) != 0 {
+        let types_rtrn = if switch_expr & u16::from(MapPart::KEY_TYPES) != 0 {
             let remaining = outer_remaining;
             let (types_rtrn, remaining) = crate::x11_utils::parse_list::<KeyType>(remaining, n_types.try_to_usize()?)?;
             outer_remaining = remaining;
@@ -10363,7 +10363,7 @@ impl GetKbdByNameRepliesTypesMap {
         } else {
             None
         };
-        let syms_rtrn = if switch_expr & u32::from(MapPart::KEY_SYMS) != 0 {
+        let syms_rtrn = if switch_expr & u16::from(MapPart::KEY_SYMS) != 0 {
             let remaining = outer_remaining;
             let (syms_rtrn, remaining) = crate::x11_utils::parse_list::<KeySymMap>(remaining, n_key_syms.try_to_usize()?)?;
             outer_remaining = remaining;
@@ -10371,14 +10371,14 @@ impl GetKbdByNameRepliesTypesMap {
         } else {
             None
         };
-        let bitcase3 = if switch_expr & u32::from(MapPart::KEY_ACTIONS) != 0 {
+        let bitcase3 = if switch_expr & u16::from(MapPart::KEY_ACTIONS) != 0 {
             let (bitcase3, new_remaining) = GetKbdByNameRepliesTypesMapBitcase3::try_parse(outer_remaining, n_key_actions, total_actions)?;
             outer_remaining = new_remaining;
             Some(bitcase3)
         } else {
             None
         };
-        let behaviors_rtrn = if switch_expr & u32::from(MapPart::KEY_BEHAVIORS) != 0 {
+        let behaviors_rtrn = if switch_expr & u16::from(MapPart::KEY_BEHAVIORS) != 0 {
             let remaining = outer_remaining;
             let (behaviors_rtrn, remaining) = crate::x11_utils::parse_list::<SetBehavior>(remaining, total_key_behaviors.try_to_usize()?)?;
             outer_remaining = remaining;
@@ -10386,7 +10386,7 @@ impl GetKbdByNameRepliesTypesMap {
         } else {
             None
         };
-        let vmods_rtrn = if switch_expr & u32::from(MapPart::VIRTUAL_MODS) != 0 {
+        let vmods_rtrn = if switch_expr & u16::from(MapPart::VIRTUAL_MODS) != 0 {
             let remaining = outer_remaining;
             let value = remaining;
             let (vmods_rtrn, remaining) = crate::x11_utils::parse_u8_list(remaining, virtual_mods.count_ones().try_to_usize()?)?;
@@ -10400,7 +10400,7 @@ impl GetKbdByNameRepliesTypesMap {
         } else {
             None
         };
-        let explicit_rtrn = if switch_expr & u32::from(MapPart::EXPLICIT_COMPONENTS) != 0 {
+        let explicit_rtrn = if switch_expr & u16::from(MapPart::EXPLICIT_COMPONENTS) != 0 {
             let remaining = outer_remaining;
             let value = remaining;
             let (explicit_rtrn, remaining) = crate::x11_utils::parse_list::<SetExplicit>(remaining, total_key_explicit.try_to_usize()?)?;
@@ -10413,7 +10413,7 @@ impl GetKbdByNameRepliesTypesMap {
         } else {
             None
         };
-        let modmap_rtrn = if switch_expr & u32::from(MapPart::MODIFIER_MAP) != 0 {
+        let modmap_rtrn = if switch_expr & u16::from(MapPart::MODIFIER_MAP) != 0 {
             let remaining = outer_remaining;
             let value = remaining;
             let (modmap_rtrn, remaining) = crate::x11_utils::parse_list::<KeyModMap>(remaining, total_mod_map_keys.try_to_usize()?)?;
@@ -10426,7 +10426,7 @@ impl GetKbdByNameRepliesTypesMap {
         } else {
             None
         };
-        let vmodmap_rtrn = if switch_expr & u32::from(MapPart::VIRTUAL_MOD_MAP) != 0 {
+        let vmodmap_rtrn = if switch_expr & u16::from(MapPart::VIRTUAL_MOD_MAP) != 0 {
             let remaining = outer_remaining;
             let (vmodmap_rtrn, remaining) = crate::x11_utils::parse_list::<KeyVModMap>(remaining, total_v_mod_map_keys.try_to_usize()?)?;
             outer_remaining = remaining;
@@ -10847,37 +10847,37 @@ pub struct GetKbdByNameReplies {
 }
 impl GetKbdByNameReplies {
     fn try_parse(value: &[u8], reported: u16) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = u32::from(reported);
+        let switch_expr = reported;
         let mut outer_remaining = value;
-        let types = if switch_expr & u32::from(GBNDetail::TYPES) != 0 || switch_expr & u32::from(GBNDetail::CLIENT_SYMBOLS) != 0 || switch_expr & u32::from(GBNDetail::SERVER_SYMBOLS) != 0 {
+        let types = if switch_expr & u16::from(GBNDetail::TYPES) != 0 || switch_expr & u16::from(GBNDetail::CLIENT_SYMBOLS) != 0 || switch_expr & u16::from(GBNDetail::SERVER_SYMBOLS) != 0 {
             let (types, new_remaining) = GetKbdByNameRepliesTypes::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             Some(types)
         } else {
             None
         };
-        let compat_map = if switch_expr & u32::from(GBNDetail::COMPAT_MAP) != 0 {
+        let compat_map = if switch_expr & u16::from(GBNDetail::COMPAT_MAP) != 0 {
             let (compat_map, new_remaining) = GetKbdByNameRepliesCompatMap::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             Some(compat_map)
         } else {
             None
         };
-        let indicator_maps = if switch_expr & u32::from(GBNDetail::INDICATOR_MAPS) != 0 {
+        let indicator_maps = if switch_expr & u16::from(GBNDetail::INDICATOR_MAPS) != 0 {
             let (indicator_maps, new_remaining) = GetKbdByNameRepliesIndicatorMaps::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             Some(indicator_maps)
         } else {
             None
         };
-        let key_names = if switch_expr & u32::from(GBNDetail::KEY_NAMES) != 0 || switch_expr & u32::from(GBNDetail::OTHER_NAMES) != 0 {
+        let key_names = if switch_expr & u16::from(GBNDetail::KEY_NAMES) != 0 || switch_expr & u16::from(GBNDetail::OTHER_NAMES) != 0 {
             let (key_names, new_remaining) = GetKbdByNameRepliesKeyNames::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             Some(key_names)
         } else {
             None
         };
-        let geometry = if switch_expr & u32::from(GBNDetail::GEOMETRY) != 0 {
+        let geometry = if switch_expr & u16::from(GBNDetail::GEOMETRY) != 0 {
             let (geometry, new_remaining) = GetKbdByNameRepliesGeometry::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             Some(geometry)

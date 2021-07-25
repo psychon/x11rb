@@ -95,7 +95,7 @@ pub(super) fn emit_field_parse(
                             length_expr,
                             to_rust_variable_name,
                             false,
-                            false,
+                            None,
                             true,
                         ),
                     );
@@ -138,7 +138,7 @@ pub(super) fn emit_field_parse(
                         list_field.length_expr.as_ref().unwrap(),
                         to_rust_variable_name,
                         false,
-                        false,
+                        None,
                         true,
                     ),
                 );
@@ -170,7 +170,7 @@ pub(super) fn emit_field_parse(
                             length_expr,
                             to_rust_variable_name,
                             false,
-                            false,
+                            None,
                             false,
                         ),
                     );
@@ -236,7 +236,7 @@ pub(super) fn emit_field_parse(
                     &fd_list_field.length_expr,
                     to_rust_variable_name,
                     false,
-                    false,
+                    None,
                     false,
                 ),
             );

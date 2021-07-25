@@ -1273,7 +1273,7 @@ impl<'input> CreateAlarmRequest<'input> {
     fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'input>> {
         let length_so_far = 0;
         let id_bytes = self.id.serialize();
-        let value_mask = self.value_list.switch_expr();
+        let value_mask: u32 = self.value_list.switch_expr();
         let value_mask_bytes = value_mask.serialize();
         let mut request0 = vec![
             major_opcode,
@@ -1513,7 +1513,7 @@ impl<'input> ChangeAlarmRequest<'input> {
     fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'input>> {
         let length_so_far = 0;
         let id_bytes = self.id.serialize();
-        let value_mask = self.value_list.switch_expr();
+        let value_mask: u32 = self.value_list.switch_expr();
         let value_mask_bytes = value_mask.serialize();
         let mut request0 = vec![
             major_opcode,

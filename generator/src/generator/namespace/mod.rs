@@ -20,7 +20,7 @@ mod serialize;
 mod struct_type;
 mod switch;
 
-use expr_to_str::expr_to_str;
+use expr_to_str::{expr_to_str, expr_type};
 
 use helpers::{
     ename_to_camel_case, ename_to_rust, gather_deducible_fields, postfix_var_name, prefix_var_name,
@@ -917,22 +917,13 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 if let xcbdefs::FieldDef::Normal(normal_field) = field {
                     let field_type = normal_field.type_.type_.get_resolved();
                     let rust_field_type = self.type_to_rust_type(field_type);
-                    if let xcbdefs::TypeRef::BuiltIn(xcbdefs::BuiltInType::Card32) = field_type {
-                        outln!(
-                            out,
-                            "let {} = {}.switch_expr();",
-                            dst_var_name,
-                            wrap_field_ref(switch_field_name),
-                        );
-                    } else {
-                        outln!(
-                            out,
-                            "let {} = {}::try_from({}.switch_expr()).unwrap();",
-                            dst_var_name,
-                            rust_field_type,
-                            wrap_field_ref(switch_field_name),
-                        );
-                    }
+                    outln!(
+                        out,
+                        "let {}: {} = {}.switch_expr();",
+                        dst_var_name,
+                        rust_field_type,
+                        wrap_field_ref(switch_field_name),
+                    );
                 } else {
                     unreachable!();
                 }
@@ -950,29 +941,19 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                                 &*or_expr,
                                 &mut wrap_field_ref,
                                 true,
-                                false,
+                                Some(&rust_field_type),
                                 true,
                             )
                         ),
                     };
-                    if let xcbdefs::TypeRef::BuiltIn(xcbdefs::BuiltInType::Card32) = field_type {
-                        assert!(op_str.is_empty());
-                        outln!(
-                            out,
-                            "let {} = {}.switch_expr();",
-                            dst_var_name,
-                            wrap_field_ref(switch_field_name),
-                        );
-                    } else {
-                        outln!(
-                            out,
-                            "let {} = {}::try_from({}.switch_expr(){}).unwrap();",
-                            dst_var_name,
-                            rust_field_type,
-                            wrap_field_ref(switch_field_name),
-                            op_str,
-                        );
-                    }
+                    outln!(
+                        out,
+                        "let {}: {} = {}.switch_expr(){};",
+                        dst_var_name,
+                        rust_field_type,
+                        wrap_field_ref(switch_field_name),
+                        op_str,
+                    );
                 } else {
                     unreachable!();
                 }

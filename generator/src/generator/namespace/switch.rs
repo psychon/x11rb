@@ -3,9 +3,9 @@ use std::collections::HashMap;
 use xcbgen::defs as xcbdefs;
 
 use super::{
-    expr_to_str, gather_deducible_fields, parse, serialize, struct_type, to_rust_type_name,
-    to_rust_variable_name, CaseInfo, DeducibleField, Derives, FieldContainer, NamespaceGenerator,
-    Output, StructSizeConstraint,
+    expr_to_str, expr_type, gather_deducible_fields, parse, serialize, struct_type,
+    to_rust_type_name, to_rust_variable_name, CaseInfo, DeducibleField, Derives, FieldContainer,
+    NamespaceGenerator, Output, StructSizeConstraint,
 };
 
 pub(super) fn emit_switch_type(
@@ -108,6 +108,9 @@ pub(super) fn emit_switch_type(
         }
     }
 
+    // Figure out the return type for switch_expr()
+    let switch_expr_type = expr_type(&switch.expr, "u32");
+
     if let Some(doc) = doc {
         outln!(out, "/// {}", doc);
     }
@@ -200,12 +203,12 @@ pub(super) fn emit_switch_type(
             "/// Trying to use `serialize` or `serialize_into` with this variant",
         );
         outln!(out.indent(), "/// will raise a panic.");
-        outln!(out.indent(), "InvalidValue(u32),");
+        outln!(out.indent(), "InvalidValue({}),", switch_expr_type);
         outln!(out, "}}");
     }
 
     if generate_try_parse {
-        emit_switch_try_parse(generator, switch, name, &case_infos, out);
+        emit_switch_try_parse(generator, switch, name, &case_infos, switch_expr_type, out);
     }
 
     if switch.kind == xcbdefs::SwitchKind::Case {
@@ -254,9 +257,24 @@ pub(super) fn emit_switch_type(
 
     if generate_serialize {
         if let Some(size) = switch.size() {
-            emit_fixed_size_switch_serialize(generator, switch, name, &case_infos, size, out);
+            emit_fixed_size_switch_serialize(
+                generator,
+                switch,
+                name,
+                &case_infos,
+                switch_expr_type,
+                size,
+                out,
+            );
         } else {
-            emit_variable_size_switch_serialize(generator, switch, name, &case_infos, out);
+            emit_variable_size_switch_serialize(
+                generator,
+                switch,
+                name,
+                &case_infos,
+                switch_expr_type,
+                out,
+            );
         }
     }
 
@@ -266,7 +284,7 @@ pub(super) fn emit_switch_type(
     if generate_switch_expr_fn {
         outln!(out, "impl {} {{", name);
         out.indented(|out| {
-            outln!(out, "fn switch_expr(&self) -> u32 {{");
+            outln!(out, "fn switch_expr(&self) -> {} {{", switch_expr_type);
             out.indented(|out| {
                 if switch.kind == xcbdefs::SwitchKind::Case {
                     outln!(out, "match self {{");
@@ -288,7 +306,7 @@ pub(super) fn emit_switch_type(
                                 &case.exprs[0],
                                 to_rust_variable_name,
                                 true,
-                                true,
+                                Some(switch_expr_type),
                                 false,
                             ),
                         );
@@ -320,7 +338,7 @@ pub(super) fn emit_switch_type(
                                 &case.exprs[0],
                                 to_rust_variable_name,
                                 true,
-                                true,
+                                Some(switch_expr_type),
                                 false,
                             ),
                         );
@@ -342,6 +360,7 @@ fn emit_switch_try_parse(
     switch: &xcbdefs::SwitchField,
     name: &str,
     case_infos: &[CaseInfo],
+    switch_expr_type: &str,
     out: &mut Output,
 ) {
     let external_params = switch.external_params.borrow();
@@ -381,7 +400,7 @@ fn emit_switch_try_parse(
                     &switch.expr,
                     to_rust_variable_name,
                     false,
-                    true,
+                    Some(switch_expr_type),
                     false,
                 ),
             );
@@ -396,7 +415,7 @@ fn emit_switch_try_parse(
                             &case.exprs[0],
                             to_rust_variable_name,
                             false,
-                            true,
+                            Some(switch_expr_type),
                             true,
                         ),
                     );
@@ -407,7 +426,7 @@ fn emit_switch_try_parse(
                             expr,
                             to_rust_variable_name,
                             false,
-                            true,
+                            Some(switch_expr_type),
                             true,
                         ));
                         case_expr_str.push_str(" != 0");
@@ -488,7 +507,7 @@ fn emit_switch_try_parse(
                             &case.exprs[0],
                             to_rust_variable_name,
                             false,
-                            true,
+                            Some(switch_expr_type),
                             true,
                         ),
                     );
@@ -499,7 +518,7 @@ fn emit_switch_try_parse(
                             expr,
                             to_rust_variable_name,
                             false,
-                            true,
+                            Some(switch_expr_type),
                             true,
                         ));
                     }
@@ -596,6 +615,7 @@ fn emit_fixed_size_switch_serialize(
     switch: &xcbdefs::SwitchField,
     name: &str,
     case_infos: &[CaseInfo],
+    switch_expr_type: &str,
     size: u32,
     out: &mut Output,
 ) {
@@ -622,7 +642,7 @@ fn emit_fixed_size_switch_serialize(
             size,
         );
         out.indented(|out| {
-            serialize::emit_assert_for_switch_serialize(generator, switch, out);
+            serialize::emit_assert_for_switch_serialize(generator, switch, switch_expr_type, out);
             outln!(out, "match self {{");
             out.indented(|out| {
                 for (case, case_info) in switch.cases.iter().zip(case_infos.iter()) {
@@ -742,6 +762,7 @@ fn emit_variable_size_switch_serialize(
     switch: &xcbdefs::SwitchField,
     name: &str,
     case_infos: &[CaseInfo],
+    switch_expr_type: &str,
     out: &mut Output,
 ) {
     let external_params = switch.external_params.borrow();
@@ -781,7 +802,7 @@ fn emit_variable_size_switch_serialize(
             ext_params_arg_defs
         );
         out.indented(|out| {
-            serialize::emit_assert_for_switch_serialize(generator, switch, out);
+            serialize::emit_assert_for_switch_serialize(generator, switch, switch_expr_type, out);
             if switch.kind == xcbdefs::SwitchKind::BitCase {
                 for (case, case_info) in switch.cases.iter().zip(case_infos.iter()) {
                     match case_info {

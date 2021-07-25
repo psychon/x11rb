@@ -5751,7 +5751,7 @@ impl<'input> CreateWindowRequest<'input> {
         let border_width_bytes = self.border_width.serialize();
         let class_bytes = u16::from(self.class).serialize();
         let visual_bytes = self.visual.serialize();
-        let value_mask = self.value_list.switch_expr();
+        let value_mask: u32 = self.value_list.switch_expr();
         let value_mask_bytes = value_mask.serialize();
         let mut request0 = vec![
             CREATE_WINDOW_REQUEST,
@@ -6306,7 +6306,7 @@ impl<'input> ChangeWindowAttributesRequest<'input> {
     fn serialize(self) -> BufWithFds<PiecewiseBuf<'input>> {
         let length_so_far = 0;
         let window_bytes = self.window.serialize();
-        let value_mask = self.value_list.switch_expr();
+        let value_mask: u32 = self.value_list.switch_expr();
         let value_mask_bytes = value_mask.serialize();
         let mut request0 = vec![
             CHANGE_WINDOW_ATTRIBUTES_REQUEST,
@@ -7609,9 +7609,9 @@ pub struct ConfigureWindowAux {
 }
 impl ConfigureWindowAux {
     fn try_parse(value: &[u8], value_mask: u16) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = u32::from(value_mask);
+        let switch_expr = value_mask;
         let mut outer_remaining = value;
-        let x = if switch_expr & u32::from(ConfigWindow::X) != 0 {
+        let x = if switch_expr & u16::from(ConfigWindow::X) != 0 {
             let remaining = outer_remaining;
             let (x, remaining) = i32::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -7619,7 +7619,7 @@ impl ConfigureWindowAux {
         } else {
             None
         };
-        let y = if switch_expr & u32::from(ConfigWindow::Y) != 0 {
+        let y = if switch_expr & u16::from(ConfigWindow::Y) != 0 {
             let remaining = outer_remaining;
             let (y, remaining) = i32::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -7627,7 +7627,7 @@ impl ConfigureWindowAux {
         } else {
             None
         };
-        let width = if switch_expr & u32::from(ConfigWindow::WIDTH) != 0 {
+        let width = if switch_expr & u16::from(ConfigWindow::WIDTH) != 0 {
             let remaining = outer_remaining;
             let (width, remaining) = u32::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -7635,7 +7635,7 @@ impl ConfigureWindowAux {
         } else {
             None
         };
-        let height = if switch_expr & u32::from(ConfigWindow::HEIGHT) != 0 {
+        let height = if switch_expr & u16::from(ConfigWindow::HEIGHT) != 0 {
             let remaining = outer_remaining;
             let (height, remaining) = u32::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -7643,7 +7643,7 @@ impl ConfigureWindowAux {
         } else {
             None
         };
-        let border_width = if switch_expr & u32::from(ConfigWindow::BORDER_WIDTH) != 0 {
+        let border_width = if switch_expr & u16::from(ConfigWindow::BORDER_WIDTH) != 0 {
             let remaining = outer_remaining;
             let (border_width, remaining) = u32::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -7651,7 +7651,7 @@ impl ConfigureWindowAux {
         } else {
             None
         };
-        let sibling = if switch_expr & u32::from(ConfigWindow::SIBLING) != 0 {
+        let sibling = if switch_expr & u16::from(ConfigWindow::SIBLING) != 0 {
             let remaining = outer_remaining;
             let (sibling, remaining) = Window::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -7659,7 +7659,7 @@ impl ConfigureWindowAux {
         } else {
             None
         };
-        let stack_mode = if switch_expr & u32::from(ConfigWindow::STACK_MODE) != 0 {
+        let stack_mode = if switch_expr & u16::from(ConfigWindow::STACK_MODE) != 0 {
             let remaining = outer_remaining;
             let (stack_mode, remaining) = u32::try_parse(remaining)?;
             let stack_mode = stack_mode.into();
@@ -7680,7 +7680,7 @@ impl ConfigureWindowAux {
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, value_mask: u16) {
-        assert_eq!(self.switch_expr(), u32::from(value_mask), "switch `value_list` has an inconsistent discriminant");
+        assert_eq!(self.switch_expr(), value_mask, "switch `value_list` has an inconsistent discriminant");
         if let Some(x) = self.x {
             x.serialize_into(bytes);
         }
@@ -7705,28 +7705,28 @@ impl ConfigureWindowAux {
     }
 }
 impl ConfigureWindowAux {
-    fn switch_expr(&self) -> u32 {
+    fn switch_expr(&self) -> u16 {
         let mut expr_value = 0;
         if self.x.is_some() {
-            expr_value |= u32::from(ConfigWindow::X);
+            expr_value |= u16::from(ConfigWindow::X);
         }
         if self.y.is_some() {
-            expr_value |= u32::from(ConfigWindow::Y);
+            expr_value |= u16::from(ConfigWindow::Y);
         }
         if self.width.is_some() {
-            expr_value |= u32::from(ConfigWindow::WIDTH);
+            expr_value |= u16::from(ConfigWindow::WIDTH);
         }
         if self.height.is_some() {
-            expr_value |= u32::from(ConfigWindow::HEIGHT);
+            expr_value |= u16::from(ConfigWindow::HEIGHT);
         }
         if self.border_width.is_some() {
-            expr_value |= u32::from(ConfigWindow::BORDER_WIDTH);
+            expr_value |= u16::from(ConfigWindow::BORDER_WIDTH);
         }
         if self.sibling.is_some() {
-            expr_value |= u32::from(ConfigWindow::SIBLING);
+            expr_value |= u16::from(ConfigWindow::SIBLING);
         }
         if self.stack_mode.is_some() {
-            expr_value |= u32::from(ConfigWindow::STACK_MODE);
+            expr_value |= u16::from(ConfigWindow::STACK_MODE);
         }
         expr_value
     }
@@ -7867,7 +7867,7 @@ impl<'input> ConfigureWindowRequest<'input> {
     fn serialize(self) -> BufWithFds<PiecewiseBuf<'input>> {
         let length_so_far = 0;
         let window_bytes = self.window.serialize();
-        let value_mask = u16::try_from(self.value_list.switch_expr()).unwrap();
+        let value_mask: u16 = self.value_list.switch_expr();
         let value_mask_bytes = value_mask.serialize();
         let mut request0 = vec![
             CONFIGURE_WINDOW_REQUEST,
@@ -16267,7 +16267,7 @@ impl<'input> CreateGCRequest<'input> {
         let length_so_far = 0;
         let cid_bytes = self.cid.serialize();
         let drawable_bytes = self.drawable.serialize();
-        let value_mask = self.value_list.switch_expr();
+        let value_mask: u32 = self.value_list.switch_expr();
         let value_mask_bytes = value_mask.serialize();
         let mut request0 = vec![
             CREATE_GC_REQUEST,
@@ -16932,7 +16932,7 @@ impl<'input> ChangeGCRequest<'input> {
     fn serialize(self) -> BufWithFds<PiecewiseBuf<'input>> {
         let length_so_far = 0;
         let gc_bytes = self.gc.serialize();
-        let value_mask = self.value_list.switch_expr();
+        let value_mask: u32 = self.value_list.switch_expr();
         let value_mask_bytes = value_mask.serialize();
         let mut request0 = vec![
             CHANGE_GC_REQUEST,
@@ -23308,7 +23308,7 @@ impl<'input> ChangeKeyboardControlRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     fn serialize(self) -> BufWithFds<PiecewiseBuf<'input>> {
         let length_so_far = 0;
-        let value_mask = self.value_list.switch_expr();
+        let value_mask: u32 = self.value_list.switch_expr();
         let value_mask_bytes = value_mask.serialize();
         let mut request0 = vec![
             CHANGE_KEYBOARD_CONTROL_REQUEST,
