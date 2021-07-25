@@ -217,7 +217,12 @@ fn expr_to_str_impl(
         xcbdefs::Expression::EnumRef(enum_ref_expr) => {
             let rust_enum_type = generator.type_to_rust_type(enum_ref_expr.enum_.get_resolved());
             let rust_variant_name = ename_to_rust(&enum_ref_expr.variant);
-            format!("u32::from({}::{})", rust_enum_type, rust_variant_name)
+            format!(
+                "{}::from({}::{})",
+                cast_to_type.unwrap_or("u32"),
+                rust_enum_type,
+                rust_variant_name,
+            )
         }
         xcbdefs::Expression::PopCount(pop_count_expr) => {
             let arg = expr_to_str_impl(

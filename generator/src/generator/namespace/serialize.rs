@@ -329,6 +329,7 @@ pub(super) fn emit_assert_for_field_serialize(
 pub(super) fn emit_assert_for_switch_serialize(
     generator: &NamespaceGenerator<'_, '_>,
     switch: &xcbdefs::SwitchField,
+    switch_expr_type: &str,
     out: &mut Output,
 ) {
     let rust_field_name = to_rust_variable_name(&switch.name);
@@ -337,7 +338,7 @@ pub(super) fn emit_assert_for_switch_serialize(
         &switch.expr,
         to_rust_variable_name,
         true,
-        Some("u32"),
+        Some(switch_expr_type),
         false,
     );
     outln!(
