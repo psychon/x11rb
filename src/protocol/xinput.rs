@@ -741,26 +741,26 @@ pub enum InputInfoInfo {
     ///
     /// Trying to use `serialize` or `serialize_into` with this variant
     /// will raise a panic.
-    InvalidValue(u32),
+    InvalidValue(u8),
 }
 impl InputInfoInfo {
     fn try_parse(value: &[u8], class_id: u8) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = u32::from(class_id);
+        let switch_expr = u8::from(class_id);
         let mut outer_remaining = value;
         let mut parse_result = None;
-        if switch_expr == u32::from(InputClass::KEY) {
+        if switch_expr == u8::from(InputClass::KEY) {
             let (key, new_remaining) = InputInfoInfoKey::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(InputInfoInfo::Key(key));
         }
-        if switch_expr == u32::from(InputClass::BUTTON) {
+        if switch_expr == u8::from(InputClass::BUTTON) {
             let (button, new_remaining) = InputInfoInfoButton::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(InputInfoInfo::Button(button));
         }
-        if switch_expr == u32::from(InputClass::VALUATOR) {
+        if switch_expr == u8::from(InputClass::VALUATOR) {
             let (valuator, new_remaining) = InputInfoInfoValuator::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
@@ -800,7 +800,7 @@ impl InputInfoInfo {
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, class_id: u8) {
-        assert_eq!(self.switch_expr(), u32::from(class_id), "switch `info` has an inconsistent discriminant");
+        assert_eq!(self.switch_expr(), u8::from(class_id), "switch `info` has an inconsistent discriminant");
         match self {
             InputInfoInfo::Key(key) => key.serialize_into(bytes),
             InputInfoInfo::Button(button) => button.serialize_into(bytes),
@@ -810,11 +810,11 @@ impl InputInfoInfo {
     }
 }
 impl InputInfoInfo {
-    fn switch_expr(&self) -> u32 {
+    fn switch_expr(&self) -> u8 {
         match self {
-            InputInfoInfo::Key(_) => u32::from(InputClass::KEY),
-            InputInfoInfo::Button(_) => u32::from(InputClass::BUTTON),
-            InputInfoInfo::Valuator(_) => u32::from(InputClass::VALUATOR),
+            InputInfoInfo::Key(_) => u8::from(InputClass::KEY),
+            InputInfoInfo::Button(_) => u8::from(InputClass::BUTTON),
+            InputInfoInfo::Valuator(_) => u8::from(InputClass::VALUATOR),
             InputInfoInfo::InvalidValue(switch_expr) => *switch_expr,
         }
     }
@@ -3967,44 +3967,44 @@ pub enum FeedbackStateData {
     ///
     /// Trying to use `serialize` or `serialize_into` with this variant
     /// will raise a panic.
-    InvalidValue(u32),
+    InvalidValue(u8),
 }
 impl FeedbackStateData {
     fn try_parse(value: &[u8], class_id: u8) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = u32::from(class_id);
+        let switch_expr = u8::from(class_id);
         let mut outer_remaining = value;
         let mut parse_result = None;
-        if switch_expr == u32::from(FeedbackClass::KEYBOARD) {
+        if switch_expr == u8::from(FeedbackClass::KEYBOARD) {
             let (keyboard, new_remaining) = FeedbackStateDataKeyboard::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(FeedbackStateData::Keyboard(keyboard));
         }
-        if switch_expr == u32::from(FeedbackClass::POINTER) {
+        if switch_expr == u8::from(FeedbackClass::POINTER) {
             let (pointer, new_remaining) = FeedbackStateDataPointer::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(FeedbackStateData::Pointer(pointer));
         }
-        if switch_expr == u32::from(FeedbackClass::STRING) {
+        if switch_expr == u8::from(FeedbackClass::STRING) {
             let (string, new_remaining) = FeedbackStateDataString::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(FeedbackStateData::String(string));
         }
-        if switch_expr == u32::from(FeedbackClass::INTEGER) {
+        if switch_expr == u8::from(FeedbackClass::INTEGER) {
             let (integer, new_remaining) = FeedbackStateDataInteger::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(FeedbackStateData::Integer(integer));
         }
-        if switch_expr == u32::from(FeedbackClass::LED) {
+        if switch_expr == u8::from(FeedbackClass::LED) {
             let (led, new_remaining) = FeedbackStateDataLed::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(FeedbackStateData::Led(led));
         }
-        if switch_expr == u32::from(FeedbackClass::BELL) {
+        if switch_expr == u8::from(FeedbackClass::BELL) {
             let (bell, new_remaining) = FeedbackStateDataBell::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
@@ -4062,7 +4062,7 @@ impl FeedbackStateData {
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, class_id: u8) {
-        assert_eq!(self.switch_expr(), u32::from(class_id), "switch `data` has an inconsistent discriminant");
+        assert_eq!(self.switch_expr(), u8::from(class_id), "switch `data` has an inconsistent discriminant");
         match self {
             FeedbackStateData::Keyboard(keyboard) => keyboard.serialize_into(bytes),
             FeedbackStateData::Pointer(pointer) => pointer.serialize_into(bytes),
@@ -4075,14 +4075,14 @@ impl FeedbackStateData {
     }
 }
 impl FeedbackStateData {
-    fn switch_expr(&self) -> u32 {
+    fn switch_expr(&self) -> u8 {
         match self {
-            FeedbackStateData::Keyboard(_) => u32::from(FeedbackClass::KEYBOARD),
-            FeedbackStateData::Pointer(_) => u32::from(FeedbackClass::POINTER),
-            FeedbackStateData::String(_) => u32::from(FeedbackClass::STRING),
-            FeedbackStateData::Integer(_) => u32::from(FeedbackClass::INTEGER),
-            FeedbackStateData::Led(_) => u32::from(FeedbackClass::LED),
-            FeedbackStateData::Bell(_) => u32::from(FeedbackClass::BELL),
+            FeedbackStateData::Keyboard(_) => u8::from(FeedbackClass::KEYBOARD),
+            FeedbackStateData::Pointer(_) => u8::from(FeedbackClass::POINTER),
+            FeedbackStateData::String(_) => u8::from(FeedbackClass::STRING),
+            FeedbackStateData::Integer(_) => u8::from(FeedbackClass::INTEGER),
+            FeedbackStateData::Led(_) => u8::from(FeedbackClass::LED),
+            FeedbackStateData::Bell(_) => u8::from(FeedbackClass::BELL),
             FeedbackStateData::InvalidValue(switch_expr) => *switch_expr,
         }
     }
@@ -4850,44 +4850,44 @@ pub enum FeedbackCtlData {
     ///
     /// Trying to use `serialize` or `serialize_into` with this variant
     /// will raise a panic.
-    InvalidValue(u32),
+    InvalidValue(u8),
 }
 impl FeedbackCtlData {
     fn try_parse(value: &[u8], class_id: u8) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = u32::from(class_id);
+        let switch_expr = u8::from(class_id);
         let mut outer_remaining = value;
         let mut parse_result = None;
-        if switch_expr == u32::from(FeedbackClass::KEYBOARD) {
+        if switch_expr == u8::from(FeedbackClass::KEYBOARD) {
             let (keyboard, new_remaining) = FeedbackCtlDataKeyboard::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(FeedbackCtlData::Keyboard(keyboard));
         }
-        if switch_expr == u32::from(FeedbackClass::POINTER) {
+        if switch_expr == u8::from(FeedbackClass::POINTER) {
             let (pointer, new_remaining) = FeedbackCtlDataPointer::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(FeedbackCtlData::Pointer(pointer));
         }
-        if switch_expr == u32::from(FeedbackClass::STRING) {
+        if switch_expr == u8::from(FeedbackClass::STRING) {
             let (string, new_remaining) = FeedbackCtlDataString::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(FeedbackCtlData::String(string));
         }
-        if switch_expr == u32::from(FeedbackClass::INTEGER) {
+        if switch_expr == u8::from(FeedbackClass::INTEGER) {
             let (integer, new_remaining) = FeedbackCtlDataInteger::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(FeedbackCtlData::Integer(integer));
         }
-        if switch_expr == u32::from(FeedbackClass::LED) {
+        if switch_expr == u8::from(FeedbackClass::LED) {
             let (led, new_remaining) = FeedbackCtlDataLed::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(FeedbackCtlData::Led(led));
         }
-        if switch_expr == u32::from(FeedbackClass::BELL) {
+        if switch_expr == u8::from(FeedbackClass::BELL) {
             let (bell, new_remaining) = FeedbackCtlDataBell::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
@@ -4945,7 +4945,7 @@ impl FeedbackCtlData {
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, class_id: u8) {
-        assert_eq!(self.switch_expr(), u32::from(class_id), "switch `data` has an inconsistent discriminant");
+        assert_eq!(self.switch_expr(), u8::from(class_id), "switch `data` has an inconsistent discriminant");
         match self {
             FeedbackCtlData::Keyboard(keyboard) => keyboard.serialize_into(bytes),
             FeedbackCtlData::Pointer(pointer) => pointer.serialize_into(bytes),
@@ -4958,14 +4958,14 @@ impl FeedbackCtlData {
     }
 }
 impl FeedbackCtlData {
-    fn switch_expr(&self) -> u32 {
+    fn switch_expr(&self) -> u8 {
         match self {
-            FeedbackCtlData::Keyboard(_) => u32::from(FeedbackClass::KEYBOARD),
-            FeedbackCtlData::Pointer(_) => u32::from(FeedbackClass::POINTER),
-            FeedbackCtlData::String(_) => u32::from(FeedbackClass::STRING),
-            FeedbackCtlData::Integer(_) => u32::from(FeedbackClass::INTEGER),
-            FeedbackCtlData::Led(_) => u32::from(FeedbackClass::LED),
-            FeedbackCtlData::Bell(_) => u32::from(FeedbackClass::BELL),
+            FeedbackCtlData::Keyboard(_) => u8::from(FeedbackClass::KEYBOARD),
+            FeedbackCtlData::Pointer(_) => u8::from(FeedbackClass::POINTER),
+            FeedbackCtlData::String(_) => u8::from(FeedbackClass::STRING),
+            FeedbackCtlData::Integer(_) => u8::from(FeedbackClass::INTEGER),
+            FeedbackCtlData::Led(_) => u8::from(FeedbackClass::LED),
+            FeedbackCtlData::Bell(_) => u8::from(FeedbackClass::BELL),
             FeedbackCtlData::InvalidValue(switch_expr) => *switch_expr,
         }
     }
@@ -6251,26 +6251,26 @@ pub enum InputStateData {
     ///
     /// Trying to use `serialize` or `serialize_into` with this variant
     /// will raise a panic.
-    InvalidValue(u32),
+    InvalidValue(u8),
 }
 impl InputStateData {
     fn try_parse(value: &[u8], class_id: u8) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = u32::from(class_id);
+        let switch_expr = u8::from(class_id);
         let mut outer_remaining = value;
         let mut parse_result = None;
-        if switch_expr == u32::from(InputClass::KEY) {
+        if switch_expr == u8::from(InputClass::KEY) {
             let (key, new_remaining) = InputStateDataKey::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(InputStateData::Key(key));
         }
-        if switch_expr == u32::from(InputClass::BUTTON) {
+        if switch_expr == u8::from(InputClass::BUTTON) {
             let (button, new_remaining) = InputStateDataButton::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(InputStateData::Button(button));
         }
-        if switch_expr == u32::from(InputClass::VALUATOR) {
+        if switch_expr == u8::from(InputClass::VALUATOR) {
             let (valuator, new_remaining) = InputStateDataValuator::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
@@ -6310,7 +6310,7 @@ impl InputStateData {
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, class_id: u8) {
-        assert_eq!(self.switch_expr(), u32::from(class_id), "switch `data` has an inconsistent discriminant");
+        assert_eq!(self.switch_expr(), u8::from(class_id), "switch `data` has an inconsistent discriminant");
         match self {
             InputStateData::Key(key) => key.serialize_into(bytes),
             InputStateData::Button(button) => button.serialize_into(bytes),
@@ -6320,11 +6320,11 @@ impl InputStateData {
     }
 }
 impl InputStateData {
-    fn switch_expr(&self) -> u32 {
+    fn switch_expr(&self) -> u8 {
         match self {
-            InputStateData::Key(_) => u32::from(InputClass::KEY),
-            InputStateData::Button(_) => u32::from(InputClass::BUTTON),
-            InputStateData::Valuator(_) => u32::from(InputClass::VALUATOR),
+            InputStateData::Key(_) => u8::from(InputClass::KEY),
+            InputStateData::Button(_) => u8::from(InputClass::BUTTON),
+            InputStateData::Valuator(_) => u8::from(InputClass::VALUATOR),
             InputStateData::InvalidValue(switch_expr) => *switch_expr,
         }
     }
@@ -7281,32 +7281,32 @@ pub enum DeviceStateData {
     ///
     /// Trying to use `serialize` or `serialize_into` with this variant
     /// will raise a panic.
-    InvalidValue(u32),
+    InvalidValue(u16),
 }
 impl DeviceStateData {
     fn try_parse(value: &[u8], control_id: u16) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = u32::from(control_id);
+        let switch_expr = u16::from(control_id);
         let mut outer_remaining = value;
         let mut parse_result = None;
-        if switch_expr == u32::from(DeviceControl::RESOLUTION) {
+        if switch_expr == u16::from(DeviceControl::RESOLUTION) {
             let (resolution, new_remaining) = DeviceStateDataResolution::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceStateData::Resolution(resolution));
         }
-        if switch_expr == u32::from(DeviceControl::ABSCALIB) {
+        if switch_expr == u16::from(DeviceControl::ABSCALIB) {
             let (abs_calib, new_remaining) = DeviceStateDataAbsCalib::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceStateData::AbsCalib(abs_calib));
         }
-        if switch_expr == u32::from(DeviceControl::CORE) {
+        if switch_expr == u16::from(DeviceControl::CORE) {
             let (core, new_remaining) = DeviceStateDataCore::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceStateData::Core(core));
         }
-        if switch_expr == u32::from(DeviceControl::ENABLE) {
+        if switch_expr == u16::from(DeviceControl::ENABLE) {
             let remaining = outer_remaining;
             let (enable, remaining) = u8::try_parse(remaining)?;
             let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
@@ -7314,7 +7314,7 @@ impl DeviceStateData {
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceStateData::Enable(enable));
         }
-        if switch_expr == u32::from(DeviceControl::ABSAREA) {
+        if switch_expr == u16::from(DeviceControl::ABSAREA) {
             let (abs_area, new_remaining) = DeviceStateDataAbsArea::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
@@ -7366,7 +7366,7 @@ impl DeviceStateData {
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, control_id: u16) {
-        assert_eq!(self.switch_expr(), u32::from(control_id), "switch `data` has an inconsistent discriminant");
+        assert_eq!(self.switch_expr(), u16::from(control_id), "switch `data` has an inconsistent discriminant");
         match self {
             DeviceStateData::Resolution(resolution) => resolution.serialize_into(bytes),
             DeviceStateData::AbsCalib(abs_calib) => abs_calib.serialize_into(bytes),
@@ -7382,13 +7382,13 @@ impl DeviceStateData {
     }
 }
 impl DeviceStateData {
-    fn switch_expr(&self) -> u32 {
+    fn switch_expr(&self) -> u16 {
         match self {
-            DeviceStateData::Resolution(_) => u32::from(DeviceControl::RESOLUTION),
-            DeviceStateData::AbsCalib(_) => u32::from(DeviceControl::ABSCALIB),
-            DeviceStateData::Core(_) => u32::from(DeviceControl::CORE),
-            DeviceStateData::Enable(_) => u32::from(DeviceControl::ENABLE),
-            DeviceStateData::AbsArea(_) => u32::from(DeviceControl::ABSAREA),
+            DeviceStateData::Resolution(_) => u16::from(DeviceControl::RESOLUTION),
+            DeviceStateData::AbsCalib(_) => u16::from(DeviceControl::ABSCALIB),
+            DeviceStateData::Core(_) => u16::from(DeviceControl::CORE),
+            DeviceStateData::Enable(_) => u16::from(DeviceControl::ENABLE),
+            DeviceStateData::AbsArea(_) => u16::from(DeviceControl::ABSAREA),
             DeviceStateData::InvalidValue(switch_expr) => *switch_expr,
         }
     }
@@ -8078,32 +8078,32 @@ pub enum DeviceCtlData {
     ///
     /// Trying to use `serialize` or `serialize_into` with this variant
     /// will raise a panic.
-    InvalidValue(u32),
+    InvalidValue(u16),
 }
 impl DeviceCtlData {
     fn try_parse(value: &[u8], control_id: u16) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = u32::from(control_id);
+        let switch_expr = u16::from(control_id);
         let mut outer_remaining = value;
         let mut parse_result = None;
-        if switch_expr == u32::from(DeviceControl::RESOLUTION) {
+        if switch_expr == u16::from(DeviceControl::RESOLUTION) {
             let (resolution, new_remaining) = DeviceCtlDataResolution::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceCtlData::Resolution(resolution));
         }
-        if switch_expr == u32::from(DeviceControl::ABSCALIB) {
+        if switch_expr == u16::from(DeviceControl::ABSCALIB) {
             let (abs_calib, new_remaining) = DeviceCtlDataAbsCalib::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceCtlData::AbsCalib(abs_calib));
         }
-        if switch_expr == u32::from(DeviceControl::CORE) {
+        if switch_expr == u16::from(DeviceControl::CORE) {
             let (core, new_remaining) = DeviceCtlDataCore::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceCtlData::Core(core));
         }
-        if switch_expr == u32::from(DeviceControl::ENABLE) {
+        if switch_expr == u16::from(DeviceControl::ENABLE) {
             let remaining = outer_remaining;
             let (enable, remaining) = u8::try_parse(remaining)?;
             let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
@@ -8111,7 +8111,7 @@ impl DeviceCtlData {
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceCtlData::Enable(enable));
         }
-        if switch_expr == u32::from(DeviceControl::ABSAREA) {
+        if switch_expr == u16::from(DeviceControl::ABSAREA) {
             let (abs_area, new_remaining) = DeviceCtlDataAbsArea::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
@@ -8163,7 +8163,7 @@ impl DeviceCtlData {
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, control_id: u16) {
-        assert_eq!(self.switch_expr(), u32::from(control_id), "switch `data` has an inconsistent discriminant");
+        assert_eq!(self.switch_expr(), u16::from(control_id), "switch `data` has an inconsistent discriminant");
         match self {
             DeviceCtlData::Resolution(resolution) => resolution.serialize_into(bytes),
             DeviceCtlData::AbsCalib(abs_calib) => abs_calib.serialize_into(bytes),
@@ -8179,13 +8179,13 @@ impl DeviceCtlData {
     }
 }
 impl DeviceCtlData {
-    fn switch_expr(&self) -> u32 {
+    fn switch_expr(&self) -> u16 {
         match self {
-            DeviceCtlData::Resolution(_) => u32::from(DeviceControl::RESOLUTION),
-            DeviceCtlData::AbsCalib(_) => u32::from(DeviceControl::ABSCALIB),
-            DeviceCtlData::Core(_) => u32::from(DeviceControl::CORE),
-            DeviceCtlData::Enable(_) => u32::from(DeviceControl::ENABLE),
-            DeviceCtlData::AbsArea(_) => u32::from(DeviceControl::ABSAREA),
+            DeviceCtlData::Resolution(_) => u16::from(DeviceControl::RESOLUTION),
+            DeviceCtlData::AbsCalib(_) => u16::from(DeviceControl::ABSCALIB),
+            DeviceCtlData::Core(_) => u16::from(DeviceControl::CORE),
+            DeviceCtlData::Enable(_) => u16::from(DeviceControl::ENABLE),
+            DeviceCtlData::AbsArea(_) => u16::from(DeviceControl::ABSAREA),
             DeviceCtlData::InvalidValue(switch_expr) => *switch_expr,
         }
     }
@@ -8500,14 +8500,14 @@ pub enum ChangeDevicePropertyAux {
     ///
     /// Trying to use `serialize` or `serialize_into` with this variant
     /// will raise a panic.
-    InvalidValue(u32),
+    InvalidValue(u8),
 }
 impl ChangeDevicePropertyAux {
     fn try_parse(value: &[u8], format: u8, num_items: u32) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = u32::from(format);
+        let switch_expr = u8::from(format);
         let mut outer_remaining = value;
         let mut parse_result = None;
-        if switch_expr == u32::from(PropertyFormat::M8_BITS) {
+        if switch_expr == u8::from(PropertyFormat::M8_BITS) {
             let remaining = outer_remaining;
             let value = remaining;
             let (data8, remaining) = crate::x11_utils::parse_u8_list(remaining, num_items.try_to_usize()?)?;
@@ -8520,7 +8520,7 @@ impl ChangeDevicePropertyAux {
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(ChangeDevicePropertyAux::Data8(data8));
         }
-        if switch_expr == u32::from(PropertyFormat::M16_BITS) {
+        if switch_expr == u8::from(PropertyFormat::M16_BITS) {
             let remaining = outer_remaining;
             let value = remaining;
             let (data16, remaining) = crate::x11_utils::parse_list::<u16>(remaining, num_items.try_to_usize()?)?;
@@ -8532,7 +8532,7 @@ impl ChangeDevicePropertyAux {
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(ChangeDevicePropertyAux::Data16(data16));
         }
-        if switch_expr == u32::from(PropertyFormat::M32_BITS) {
+        if switch_expr == u8::from(PropertyFormat::M32_BITS) {
             let remaining = outer_remaining;
             let (data32, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_items.try_to_usize()?)?;
             outer_remaining = remaining;
@@ -8573,7 +8573,7 @@ impl ChangeDevicePropertyAux {
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, format: u8, num_items: u32) {
-        assert_eq!(self.switch_expr(), u32::from(format), "switch `items` has an inconsistent discriminant");
+        assert_eq!(self.switch_expr(), u8::from(format), "switch `items` has an inconsistent discriminant");
         match self {
             ChangeDevicePropertyAux::Data8(data8) => {
                 assert_eq!(data8.len(), usize::try_from(num_items).unwrap(), "`data8` has an incorrect length");
@@ -8594,11 +8594,11 @@ impl ChangeDevicePropertyAux {
     }
 }
 impl ChangeDevicePropertyAux {
-    fn switch_expr(&self) -> u32 {
+    fn switch_expr(&self) -> u8 {
         match self {
-            ChangeDevicePropertyAux::Data8(_) => u32::from(PropertyFormat::M8_BITS),
-            ChangeDevicePropertyAux::Data16(_) => u32::from(PropertyFormat::M16_BITS),
-            ChangeDevicePropertyAux::Data32(_) => u32::from(PropertyFormat::M32_BITS),
+            ChangeDevicePropertyAux::Data8(_) => u8::from(PropertyFormat::M8_BITS),
+            ChangeDevicePropertyAux::Data16(_) => u8::from(PropertyFormat::M16_BITS),
+            ChangeDevicePropertyAux::Data32(_) => u8::from(PropertyFormat::M32_BITS),
             ChangeDevicePropertyAux::InvalidValue(switch_expr) => *switch_expr,
         }
     }
@@ -8905,14 +8905,14 @@ pub enum GetDevicePropertyItems {
     ///
     /// Trying to use `serialize` or `serialize_into` with this variant
     /// will raise a panic.
-    InvalidValue(u32),
+    InvalidValue(u8),
 }
 impl GetDevicePropertyItems {
     fn try_parse(value: &[u8], format: u8, num_items: u32) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = u32::from(format);
+        let switch_expr = u8::from(format);
         let mut outer_remaining = value;
         let mut parse_result = None;
-        if switch_expr == u32::from(PropertyFormat::M8_BITS) {
+        if switch_expr == u8::from(PropertyFormat::M8_BITS) {
             let remaining = outer_remaining;
             let value = remaining;
             let (data8, remaining) = crate::x11_utils::parse_u8_list(remaining, num_items.try_to_usize()?)?;
@@ -8925,7 +8925,7 @@ impl GetDevicePropertyItems {
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(GetDevicePropertyItems::Data8(data8));
         }
-        if switch_expr == u32::from(PropertyFormat::M16_BITS) {
+        if switch_expr == u8::from(PropertyFormat::M16_BITS) {
             let remaining = outer_remaining;
             let value = remaining;
             let (data16, remaining) = crate::x11_utils::parse_list::<u16>(remaining, num_items.try_to_usize()?)?;
@@ -8937,7 +8937,7 @@ impl GetDevicePropertyItems {
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(GetDevicePropertyItems::Data16(data16));
         }
-        if switch_expr == u32::from(PropertyFormat::M32_BITS) {
+        if switch_expr == u8::from(PropertyFormat::M32_BITS) {
             let remaining = outer_remaining;
             let (data32, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_items.try_to_usize()?)?;
             outer_remaining = remaining;
@@ -10011,32 +10011,32 @@ pub enum HierarchyChangeData {
     ///
     /// Trying to use `serialize` or `serialize_into` with this variant
     /// will raise a panic.
-    InvalidValue(u32),
+    InvalidValue(u16),
 }
 impl HierarchyChangeData {
     fn try_parse(value: &[u8], type_: u16) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = u32::from(type_);
+        let switch_expr = u16::from(type_);
         let mut outer_remaining = value;
         let mut parse_result = None;
-        if switch_expr == u32::from(HierarchyChangeType::ADD_MASTER) {
+        if switch_expr == u16::from(HierarchyChangeType::ADD_MASTER) {
             let (add_master, new_remaining) = HierarchyChangeDataAddMaster::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(HierarchyChangeData::AddMaster(add_master));
         }
-        if switch_expr == u32::from(HierarchyChangeType::REMOVE_MASTER) {
+        if switch_expr == u16::from(HierarchyChangeType::REMOVE_MASTER) {
             let (remove_master, new_remaining) = HierarchyChangeDataRemoveMaster::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(HierarchyChangeData::RemoveMaster(remove_master));
         }
-        if switch_expr == u32::from(HierarchyChangeType::ATTACH_SLAVE) {
+        if switch_expr == u16::from(HierarchyChangeType::ATTACH_SLAVE) {
             let (attach_slave, new_remaining) = HierarchyChangeDataAttachSlave::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(HierarchyChangeData::AttachSlave(attach_slave));
         }
-        if switch_expr == u32::from(HierarchyChangeType::DETACH_SLAVE) {
+        if switch_expr == u16::from(HierarchyChangeType::DETACH_SLAVE) {
             let (detach_slave, new_remaining) = HierarchyChangeDataDetachSlave::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
@@ -10082,7 +10082,7 @@ impl HierarchyChangeData {
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, type_: u16) {
-        assert_eq!(self.switch_expr(), u32::from(type_), "switch `data` has an inconsistent discriminant");
+        assert_eq!(self.switch_expr(), u16::from(type_), "switch `data` has an inconsistent discriminant");
         match self {
             HierarchyChangeData::AddMaster(add_master) => add_master.serialize_into(bytes),
             HierarchyChangeData::RemoveMaster(remove_master) => remove_master.serialize_into(bytes),
@@ -10093,12 +10093,12 @@ impl HierarchyChangeData {
     }
 }
 impl HierarchyChangeData {
-    fn switch_expr(&self) -> u32 {
+    fn switch_expr(&self) -> u16 {
         match self {
-            HierarchyChangeData::AddMaster(_) => u32::from(HierarchyChangeType::ADD_MASTER),
-            HierarchyChangeData::RemoveMaster(_) => u32::from(HierarchyChangeType::REMOVE_MASTER),
-            HierarchyChangeData::AttachSlave(_) => u32::from(HierarchyChangeType::ATTACH_SLAVE),
-            HierarchyChangeData::DetachSlave(_) => u32::from(HierarchyChangeType::DETACH_SLAVE),
+            HierarchyChangeData::AddMaster(_) => u16::from(HierarchyChangeType::ADD_MASTER),
+            HierarchyChangeData::RemoveMaster(_) => u16::from(HierarchyChangeType::REMOVE_MASTER),
+            HierarchyChangeData::AttachSlave(_) => u16::from(HierarchyChangeType::ATTACH_SLAVE),
+            HierarchyChangeData::DetachSlave(_) => u16::from(HierarchyChangeType::DETACH_SLAVE),
             HierarchyChangeData::InvalidValue(switch_expr) => *switch_expr,
         }
     }
@@ -11584,38 +11584,38 @@ pub enum DeviceClassData {
     ///
     /// Trying to use `serialize` or `serialize_into` with this variant
     /// will raise a panic.
-    InvalidValue(u32),
+    InvalidValue(u16),
 }
 impl DeviceClassData {
     fn try_parse(value: &[u8], type_: u16) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = u32::from(type_);
+        let switch_expr = u16::from(type_);
         let mut outer_remaining = value;
         let mut parse_result = None;
-        if switch_expr == u32::from(DeviceClassType::KEY) {
+        if switch_expr == u16::from(DeviceClassType::KEY) {
             let (key, new_remaining) = DeviceClassDataKey::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceClassData::Key(key));
         }
-        if switch_expr == u32::from(DeviceClassType::BUTTON) {
+        if switch_expr == u16::from(DeviceClassType::BUTTON) {
             let (button, new_remaining) = DeviceClassDataButton::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceClassData::Button(button));
         }
-        if switch_expr == u32::from(DeviceClassType::VALUATOR) {
+        if switch_expr == u16::from(DeviceClassType::VALUATOR) {
             let (valuator, new_remaining) = DeviceClassDataValuator::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceClassData::Valuator(valuator));
         }
-        if switch_expr == u32::from(DeviceClassType::SCROLL) {
+        if switch_expr == u16::from(DeviceClassType::SCROLL) {
             let (scroll, new_remaining) = DeviceClassDataScroll::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceClassData::Scroll(scroll));
         }
-        if switch_expr == u32::from(DeviceClassType::TOUCH) {
+        if switch_expr == u16::from(DeviceClassType::TOUCH) {
             let (touch, new_remaining) = DeviceClassDataTouch::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
@@ -11667,7 +11667,7 @@ impl DeviceClassData {
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, type_: u16) {
-        assert_eq!(self.switch_expr(), u32::from(type_), "switch `data` has an inconsistent discriminant");
+        assert_eq!(self.switch_expr(), u16::from(type_), "switch `data` has an inconsistent discriminant");
         match self {
             DeviceClassData::Key(key) => key.serialize_into(bytes),
             DeviceClassData::Button(button) => button.serialize_into(bytes),
@@ -11679,13 +11679,13 @@ impl DeviceClassData {
     }
 }
 impl DeviceClassData {
-    fn switch_expr(&self) -> u32 {
+    fn switch_expr(&self) -> u16 {
         match self {
-            DeviceClassData::Key(_) => u32::from(DeviceClassType::KEY),
-            DeviceClassData::Button(_) => u32::from(DeviceClassType::BUTTON),
-            DeviceClassData::Valuator(_) => u32::from(DeviceClassType::VALUATOR),
-            DeviceClassData::Scroll(_) => u32::from(DeviceClassType::SCROLL),
-            DeviceClassData::Touch(_) => u32::from(DeviceClassType::TOUCH),
+            DeviceClassData::Key(_) => u16::from(DeviceClassType::KEY),
+            DeviceClassData::Button(_) => u16::from(DeviceClassType::BUTTON),
+            DeviceClassData::Valuator(_) => u16::from(DeviceClassType::VALUATOR),
+            DeviceClassData::Scroll(_) => u16::from(DeviceClassType::SCROLL),
+            DeviceClassData::Touch(_) => u16::from(DeviceClassType::TOUCH),
             DeviceClassData::InvalidValue(switch_expr) => *switch_expr,
         }
     }
@@ -13210,14 +13210,14 @@ pub enum XIChangePropertyAux {
     ///
     /// Trying to use `serialize` or `serialize_into` with this variant
     /// will raise a panic.
-    InvalidValue(u32),
+    InvalidValue(u8),
 }
 impl XIChangePropertyAux {
     fn try_parse(value: &[u8], format: u8, num_items: u32) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = u32::from(format);
+        let switch_expr = u8::from(format);
         let mut outer_remaining = value;
         let mut parse_result = None;
-        if switch_expr == u32::from(PropertyFormat::M8_BITS) {
+        if switch_expr == u8::from(PropertyFormat::M8_BITS) {
             let remaining = outer_remaining;
             let value = remaining;
             let (data8, remaining) = crate::x11_utils::parse_u8_list(remaining, num_items.try_to_usize()?)?;
@@ -13230,7 +13230,7 @@ impl XIChangePropertyAux {
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(XIChangePropertyAux::Data8(data8));
         }
-        if switch_expr == u32::from(PropertyFormat::M16_BITS) {
+        if switch_expr == u8::from(PropertyFormat::M16_BITS) {
             let remaining = outer_remaining;
             let value = remaining;
             let (data16, remaining) = crate::x11_utils::parse_list::<u16>(remaining, num_items.try_to_usize()?)?;
@@ -13242,7 +13242,7 @@ impl XIChangePropertyAux {
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(XIChangePropertyAux::Data16(data16));
         }
-        if switch_expr == u32::from(PropertyFormat::M32_BITS) {
+        if switch_expr == u8::from(PropertyFormat::M32_BITS) {
             let remaining = outer_remaining;
             let (data32, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_items.try_to_usize()?)?;
             outer_remaining = remaining;
@@ -13283,7 +13283,7 @@ impl XIChangePropertyAux {
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, format: u8, num_items: u32) {
-        assert_eq!(self.switch_expr(), u32::from(format), "switch `items` has an inconsistent discriminant");
+        assert_eq!(self.switch_expr(), u8::from(format), "switch `items` has an inconsistent discriminant");
         match self {
             XIChangePropertyAux::Data8(data8) => {
                 assert_eq!(data8.len(), usize::try_from(num_items).unwrap(), "`data8` has an incorrect length");
@@ -13304,11 +13304,11 @@ impl XIChangePropertyAux {
     }
 }
 impl XIChangePropertyAux {
-    fn switch_expr(&self) -> u32 {
+    fn switch_expr(&self) -> u8 {
         match self {
-            XIChangePropertyAux::Data8(_) => u32::from(PropertyFormat::M8_BITS),
-            XIChangePropertyAux::Data16(_) => u32::from(PropertyFormat::M16_BITS),
-            XIChangePropertyAux::Data32(_) => u32::from(PropertyFormat::M32_BITS),
+            XIChangePropertyAux::Data8(_) => u8::from(PropertyFormat::M8_BITS),
+            XIChangePropertyAux::Data16(_) => u8::from(PropertyFormat::M16_BITS),
+            XIChangePropertyAux::Data32(_) => u8::from(PropertyFormat::M32_BITS),
             XIChangePropertyAux::InvalidValue(switch_expr) => *switch_expr,
         }
     }
@@ -13620,14 +13620,14 @@ pub enum XIGetPropertyItems {
     ///
     /// Trying to use `serialize` or `serialize_into` with this variant
     /// will raise a panic.
-    InvalidValue(u32),
+    InvalidValue(u8),
 }
 impl XIGetPropertyItems {
     fn try_parse(value: &[u8], format: u8, num_items: u32) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = u32::from(format);
+        let switch_expr = u8::from(format);
         let mut outer_remaining = value;
         let mut parse_result = None;
-        if switch_expr == u32::from(PropertyFormat::M8_BITS) {
+        if switch_expr == u8::from(PropertyFormat::M8_BITS) {
             let remaining = outer_remaining;
             let value = remaining;
             let (data8, remaining) = crate::x11_utils::parse_u8_list(remaining, num_items.try_to_usize()?)?;
@@ -13640,7 +13640,7 @@ impl XIGetPropertyItems {
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(XIGetPropertyItems::Data8(data8));
         }
-        if switch_expr == u32::from(PropertyFormat::M16_BITS) {
+        if switch_expr == u8::from(PropertyFormat::M16_BITS) {
             let remaining = outer_remaining;
             let value = remaining;
             let (data16, remaining) = crate::x11_utils::parse_list::<u16>(remaining, num_items.try_to_usize()?)?;
@@ -13652,7 +13652,7 @@ impl XIGetPropertyItems {
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(XIGetPropertyItems::Data16(data16));
         }
-        if switch_expr == u32::from(PropertyFormat::M32_BITS) {
+        if switch_expr == u8::from(PropertyFormat::M32_BITS) {
             let remaining = outer_remaining;
             let (data32, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_items.try_to_usize()?)?;
             outer_remaining = remaining;

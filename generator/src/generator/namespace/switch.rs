@@ -109,7 +109,20 @@ pub(super) fn emit_switch_type(
     }
 
     // Figure out the return type for switch_expr()
-    let switch_expr_type = "u32";
+    let switch_expr_type = match &switch.expr {
+        xcbdefs::Expression::FieldRef(field) => match field.resolved.get().unwrap().field_type {
+            xcbdefs::TypeRef::BuiltIn(xcbdefs::BuiltInType::Card8) => "u8",
+            xcbdefs::TypeRef::BuiltIn(xcbdefs::BuiltInType::Card16) => "u16",
+            xcbdefs::TypeRef::BuiltIn(xcbdefs::BuiltInType::Card32) => "u32",
+            xcbdefs::TypeRef::BuiltIn(xcbdefs::BuiltInType::Card64) => "u64",
+            xcbdefs::TypeRef::BuiltIn(xcbdefs::BuiltInType::Int8) => "i8",
+            xcbdefs::TypeRef::BuiltIn(xcbdefs::BuiltInType::Int16) => "i16",
+            xcbdefs::TypeRef::BuiltIn(xcbdefs::BuiltInType::Int32) => "i32",
+            xcbdefs::TypeRef::BuiltIn(xcbdefs::BuiltInType::Int64) => "i64",
+            _ => "u32",
+        },
+        _ => "u32",
+    };
 
     if let Some(doc) = doc {
         outln!(out, "/// {}", doc);
@@ -415,7 +428,7 @@ fn emit_switch_try_parse(
                             &case.exprs[0],
                             to_rust_variable_name,
                             false,
-                            Some("u32"),
+                            Some(switch_expr_type),
                             true,
                         ),
                     );
@@ -426,7 +439,7 @@ fn emit_switch_try_parse(
                             expr,
                             to_rust_variable_name,
                             false,
-                            Some("u32"),
+                            Some(switch_expr_type),
                             true,
                         ));
                         case_expr_str.push_str(" != 0");
@@ -507,7 +520,7 @@ fn emit_switch_try_parse(
                             &case.exprs[0],
                             to_rust_variable_name,
                             false,
-                            Some("u32"),
+                            Some(switch_expr_type),
                             true,
                         ),
                     );
@@ -518,7 +531,7 @@ fn emit_switch_try_parse(
                             expr,
                             to_rust_variable_name,
                             false,
-                            Some("u32"),
+                            Some(switch_expr_type),
                             true,
                         ));
                     }
