@@ -1,8 +1,9 @@
+use std::collections::BTreeSet;
 use std::rc::Rc;
 
 use xcbgen::defs as xcbdefs;
 
-use super::super::{camel_case_to_lower_snake, CreateInfo, ResourceInfo};
+use super::super::{camel_case_to_lower_snake, ext_has_feature, CreateInfo, ResourceInfo};
 use super::{
     gather_deducible_fields, to_rust_type_name, to_rust_variable_name, NamespaceGenerator, Output,
 };
@@ -92,10 +93,12 @@ pub(super) fn generate(
     outln!(out, "}}");
     outln!(out, "");
 
+    let mut uses = BTreeSet::new();
+
     outln!(out, "impl<'c, C: X11Connection> {}<'c, C>", wrapper);
     outln!(out, "{{");
     out.indented(|out| {
-        for create_request in info.create_requests.iter().flatten() {
+        for create_request in info.create_requests.iter() {
             generate_creator(
                 generator,
                 out,
@@ -103,10 +106,17 @@ pub(super) fn generate(
                 info.resource_name,
                 &wrapper,
                 &lower_name,
+                &mut uses,
             );
         }
     });
     outln!(out, "}}");
+    // Add "use"s for other extensions that appear in the wrapper type
+    for header in uses.iter() {
+        outln!(out, "#[cfg(feature = \"{}\")]", header);
+        outln!(out, "#[allow(unused_imports)]");
+        outln!(out, "use super::{};", header);
+    }
     outln!(out, "");
     outln!(
         out,
@@ -128,7 +138,7 @@ pub(super) fn generate(
     );
     out.indented(|out| {
         outln!(out, "fn drop(&mut self) {{");
-        outln!(out.indent(), "let _ = (self.0).{}(self.1);", free_function);
+        outln!(out.indent(), "let _ = {}(self.0, self.1);", free_function);
         outln!(out, "}}");
     });
     outln!(out, "}}");
@@ -141,11 +151,27 @@ fn generate_creator(
     resource_name: &str,
     wrapper_name: &str,
     lower_name: &str,
+    uses: &mut BTreeSet<String>,
 ) {
-    let request_name = request_info.request_name;
+    let (request_ext, request_name) = match split_once(request_info.request_name, ':') {
+        None => (None, request_info.request_name),
+        Some((ext_name, request_name)) => (Some(ext_name), request_name),
+    };
+    let request_ns = request_ext.map(|ext_name| {
+        generator.module.namespace(ext_name).unwrap_or_else(|| {
+            panic!(
+                "Could not find namespace {} for resolving request name {}",
+                ext_name, request_info.request_name,
+            );
+        })
+    });
+    let has_feature = request_ns
+        .as_ref()
+        .map(|ns| ext_has_feature(&ns.header))
+        .unwrap_or(false);
+    let request_ns = request_ns.as_deref().unwrap_or(generator.ns);
     let request_def = Rc::clone(
-        generator
-            .ns
+        request_ns
             .request_defs
             .borrow()
             .get(request_name)
@@ -159,9 +185,20 @@ fn generate_creator(
     let request_fields = request_def.fields.borrow();
     let deducible_fields = gather_deducible_fields(&*request_fields);
 
+    if request_ext.is_some() {
+        uses.insert(request_ns.header.clone());
+    }
+
     let mut letter_iter = b'A'..=b'Z';
 
-    let function_name = camel_case_to_lower_snake(&request_def.name);
+    let function_raw_name = camel_case_to_lower_snake(&request_def.name);
+    let (function_raw_name, function_name) = match request_ext {
+        Some(_) => (
+            format!("{}_{}", request_ns.header, function_raw_name),
+            format!("super::{}::{}", request_ns.header, function_raw_name),
+        ),
+        None => (function_raw_name.clone(), function_raw_name),
+    };
     let mut function_args = "conn: &'c C".to_string();
     let mut forward_args_with_resource = Vec::new();
     let mut forward_args_without_resource = Vec::new();
@@ -181,7 +218,13 @@ fn generate_creator(
             xcbdefs::FieldDef::Pad(_) => unimplemented!(),
             xcbdefs::FieldDef::Expr(_) => unimplemented!(),
             xcbdefs::FieldDef::VirtualLen(_) => unimplemented!(),
-            xcbdefs::FieldDef::Fd(_) => unimplemented!(),
+            xcbdefs::FieldDef::Fd(fd_field) => {
+                let generic_param = format!("{}", char::from(letter_iter.next().unwrap()));
+                let where_ = format!("{}: Into<RawFdContainer>", generic_param);
+                generics.push(generic_param.clone());
+                wheres.push(where_);
+                (fd_field.name.clone(), generic_param)
+            }
             xcbdefs::FieldDef::FdList(_) => unimplemented!(),
             xcbdefs::FieldDef::Normal(normal_field) => {
                 let rust_field_name = to_rust_variable_name(&normal_field.name);
@@ -211,7 +254,6 @@ fn generate_creator(
             }
             xcbdefs::FieldDef::List(list_field) => {
                 let field_name = to_rust_variable_name(&list_field.name);
-                assert!(generator.rust_value_type_is_u8(&list_field.element_type));
                 let element_type =
                     generator.field_value_type_to_rust_type(&list_field.element_type);
                 let field_type = if let Some(list_len) = list_field.length() {
@@ -274,10 +316,13 @@ fn generate_creator(
         "/// Errors can come from the call to [X11Connection::generate_id] or [{}].",
         function_name,
     );
+    if has_feature {
+        outln!(out, "#[cfg(feature = \"{}\")]", request_ns.header);
+    }
     outln!(
         out,
         "pub fn {}_and_get_cookie{}({}) -> Result<(Self, VoidCookie<'c, C>), ReplyOrIdError>",
-        function_name,
+        function_raw_name,
         generics_decl,
         function_args,
     );
@@ -290,7 +335,7 @@ fn generate_creator(
     );
     outln!(
         out.indent(),
-        "let cookie = conn.{}({})?;",
+        "let cookie = {}(conn, {})?;",
         function_name,
         forward_args_with_resource.join(", "),
     );
@@ -328,10 +373,13 @@ fn generate_creator(
         "/// Errors can come from the call to [X11Connection::generate_id] or [{}].",
         function_name,
     );
+    if has_feature {
+        outln!(out, "#[cfg(feature = \"{}\")]", request_ns.header);
+    }
     outln!(
         out,
         "pub fn {}{}({}) -> Result<Self, ReplyOrIdError>",
-        function_name,
+        function_raw_name,
         generics_decl,
         function_args,
     );
@@ -340,7 +388,7 @@ fn generate_creator(
     outln!(
         out.indent(),
         "Ok(Self::{}_and_get_cookie(conn, {})?.0)",
-        function_name,
+        function_raw_name,
         forward_args_without_resource.join(", "),
     );
     outln!(out, "}}");
@@ -352,5 +400,33 @@ fn emit_where(out: &mut Output, wheres: &[String]) {
         for where_ in wheres.iter() {
             outln!(out.indent(), "{},", where_);
         }
+    }
+}
+
+// This is a poor man's reimplementation of str::split_once().
+// TODO: Get rid of this once our MSRV reaches 1.52.0
+fn split_once(string: &str, pattern: char) -> Option<(&str, &str)> {
+    string
+        .find(pattern)
+        .map(|index| (&string[..index], &string[(index + pattern.len_utf8())..]))
+}
+
+#[cfg(test)]
+mod test {
+    use super::split_once;
+
+    #[test]
+    fn split_once_no_match() {
+        assert_eq!(None, split_once("abcdef", 'z'));
+        assert_eq!(None, split_once("äöü€æ@", 'ß'));
+        assert_eq!(None, split_once("abcdef", '𝄞'));
+    }
+
+    #[test]
+    fn split_once_match() {
+        assert_eq!(Some(("abc", "ef")), split_once("abcdef", 'd'));
+        assert_eq!(Some(("", "aa")), split_once("aaa", 'a'));
+        assert_eq!(Some(("a", "c")), split_once("aäc", 'ä'));
+        assert_eq!(Some(("abü", "äö")), split_once("abü𝄞äö", '𝄞'));
     }
 }

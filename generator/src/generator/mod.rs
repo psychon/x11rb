@@ -7,6 +7,7 @@ mod output;
 mod error_events;
 mod namespace;
 mod requests_replies;
+mod resources;
 mod special_cases;
 
 use output::Output;
@@ -51,11 +52,15 @@ pub(crate) fn generate(module: &xcbgen::defs::Module) -> HashMap<PathBuf, String
     let mut enum_cases = HashMap::new();
     for ns in module.sorted_namespaces() {
         let mut ns_out = Output::new();
-        let wrapper_info = match ns.ext_info {
-            None => &XPROTO_RESOURCES[..],
-            Some(_) => &[],
-        };
-        namespace::generate(&ns, &caches, &mut ns_out, &mut enum_cases, wrapper_info);
+        let wrapper_info = resources::for_extension(&ns.header);
+        namespace::generate(
+            module,
+            &ns,
+            &caches,
+            &mut ns_out,
+            &mut enum_cases,
+            wrapper_info,
+        );
         out_map.insert(
             PathBuf::from(format!("{}.rs", ns.header)),
             ns_out.into_data(),
@@ -223,78 +228,6 @@ struct CreateInfo<'a> {
 
 struct ResourceInfo<'a> {
     resource_name: &'a str,
-    create_requests: [Option<CreateInfo<'a>>; 2],
+    create_requests: &'a [CreateInfo<'a>],
     free_request: &'a str,
 }
-
-const XPROTO_RESOURCES: [ResourceInfo<'static>; 6] = [
-    ResourceInfo {
-        resource_name: "Pixmap",
-        create_requests: [
-            Some(CreateInfo {
-                request_name: "CreatePixmap",
-                created_argument: "pid",
-            }),
-            None,
-        ],
-        free_request: "FreePixmap",
-    },
-    ResourceInfo {
-        resource_name: "Window",
-        create_requests: [
-            Some(CreateInfo {
-                request_name: "CreateWindow",
-                created_argument: "wid",
-            }),
-            None,
-        ],
-        free_request: "DestroyWindow",
-    },
-    ResourceInfo {
-        resource_name: "Font",
-        create_requests: [
-            Some(CreateInfo {
-                request_name: "OpenFont",
-                created_argument: "fid",
-            }),
-            None,
-        ],
-        free_request: "CloseFont",
-    },
-    ResourceInfo {
-        resource_name: "Gcontext",
-        create_requests: [
-            Some(CreateInfo {
-                request_name: "CreateGC",
-                created_argument: "cid",
-            }),
-            None,
-        ],
-        free_request: "FreeGC",
-    },
-    ResourceInfo {
-        resource_name: "Colormap",
-        create_requests: [
-            Some(CreateInfo {
-                request_name: "CreateColormap",
-                created_argument: "mid",
-            }),
-            None,
-        ],
-        free_request: "FreeColormap",
-    },
-    ResourceInfo {
-        resource_name: "Cursor",
-        create_requests: [
-            Some(CreateInfo {
-                request_name: "CreateCursor",
-                created_argument: "cid",
-            }),
-            Some(CreateInfo {
-                request_name: "CreateGlyphCursor",
-                created_argument: "cid",
-            }),
-        ],
-        free_request: "FreeCursor",
-    },
-];

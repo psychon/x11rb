@@ -1159,3 +1159,77 @@ pub trait ConnectionExt: RequestConnection {
 }
 
 impl<C: RequestConnection + ?Sized> ConnectionExt for C {}
+
+/// A RAII-like wrapper around a [Context].
+///
+/// Instances of this struct represent a Context that is freed in `Drop`.
+///
+/// Any errors during `Drop` are silently ignored. Most likely an error here means that your
+/// X11 connection is broken and later requests will also fail.
+#[derive(Debug)]
+pub struct ContextWrapper<'c, C: RequestConnection>(&'c C, Context);
+
+impl<'c, C: RequestConnection> ContextWrapper<'c, C>
+{
+    /// Assume ownership of the given resource and destroy it in `Drop`.
+    pub fn for_context(conn: &'c C, id: Context) -> Self {
+        ContextWrapper(conn, id)
+    }
+
+    /// Get the XID of the wrapped resource
+    pub fn context(&self) -> Context {
+        self.1
+    }
+
+    /// Assume ownership of the XID of the wrapped resource
+    ///
+    /// This function destroys this wrapper without freeing the underlying resource.
+    pub fn into_context(self) -> Context {
+        let id = self.1;
+        std::mem::forget(self);
+        id
+    }
+}
+
+impl<'c, C: X11Connection> ContextWrapper<'c, C>
+{
+
+    /// Create a new Context and return a Context wrapper and a cookie.
+    ///
+    /// This is a thin wrapper around [create_context] that allocates an id for the Context.
+    /// This function returns the resulting `ContextWrapper` that owns the created Context and frees
+    /// it in `Drop`. This also returns a `VoidCookie` that comes from the call to
+    /// [create_context].
+    ///
+    /// Errors can come from the call to [X11Connection::generate_id] or [create_context].
+    pub fn create_context_and_get_cookie(conn: &'c C, element_header: ElementHeader, client_specs: &[ClientSpec], ranges: &[Range]) -> Result<(Self, VoidCookie<'c, C>), ReplyOrIdError>
+    {
+        let context = conn.generate_id()?;
+        let cookie = create_context(conn, context, element_header, client_specs, ranges)?;
+        Ok((Self::for_context(conn, context), cookie))
+    }
+
+    /// Create a new Context and return a Context wrapper
+    ///
+    /// This is a thin wrapper around [create_context] that allocates an id for the Context.
+    /// This function returns the resulting `ContextWrapper` that owns the created Context and frees
+    /// it in `Drop`.
+    ///
+    /// Errors can come from the call to [X11Connection::generate_id] or [create_context].
+    pub fn create_context(conn: &'c C, element_header: ElementHeader, client_specs: &[ClientSpec], ranges: &[Range]) -> Result<Self, ReplyOrIdError>
+    {
+        Ok(Self::create_context_and_get_cookie(conn, element_header, client_specs, ranges)?.0)
+    }
+}
+
+impl<C: RequestConnection> From<&ContextWrapper<'_, C>> for Context {
+    fn from(from: &ContextWrapper<'_, C>) -> Self {
+        from.1
+    }
+}
+
+impl<C: RequestConnection> Drop for ContextWrapper<'_, C> {
+    fn drop(&mut self) {
+        let _ = free_context(self.0, self.1);
+    }
+}

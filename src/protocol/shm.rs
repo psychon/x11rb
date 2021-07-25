@@ -1004,3 +1004,108 @@ pub trait ConnectionExt: RequestConnection {
 }
 
 impl<C: RequestConnection + ?Sized> ConnectionExt for C {}
+
+/// A RAII-like wrapper around a [Seg].
+///
+/// Instances of this struct represent a Seg that is freed in `Drop`.
+///
+/// Any errors during `Drop` are silently ignored. Most likely an error here means that your
+/// X11 connection is broken and later requests will also fail.
+#[derive(Debug)]
+pub struct SegWrapper<'c, C: RequestConnection>(&'c C, Seg);
+
+impl<'c, C: RequestConnection> SegWrapper<'c, C>
+{
+    /// Assume ownership of the given resource and destroy it in `Drop`.
+    pub fn for_seg(conn: &'c C, id: Seg) -> Self {
+        SegWrapper(conn, id)
+    }
+
+    /// Get the XID of the wrapped resource
+    pub fn seg(&self) -> Seg {
+        self.1
+    }
+
+    /// Assume ownership of the XID of the wrapped resource
+    ///
+    /// This function destroys this wrapper without freeing the underlying resource.
+    pub fn into_seg(self) -> Seg {
+        let id = self.1;
+        std::mem::forget(self);
+        id
+    }
+}
+
+impl<'c, C: X11Connection> SegWrapper<'c, C>
+{
+
+    /// Create a new Seg and return a Seg wrapper and a cookie.
+    ///
+    /// This is a thin wrapper around [attach] that allocates an id for the Seg.
+    /// This function returns the resulting `SegWrapper` that owns the created Seg and frees
+    /// it in `Drop`. This also returns a `VoidCookie` that comes from the call to
+    /// [attach].
+    ///
+    /// Errors can come from the call to [X11Connection::generate_id] or [attach].
+    pub fn attach_and_get_cookie(conn: &'c C, shmid: u32, read_only: bool) -> Result<(Self, VoidCookie<'c, C>), ReplyOrIdError>
+    {
+        let shmseg = conn.generate_id()?;
+        let cookie = attach(conn, shmseg, shmid, read_only)?;
+        Ok((Self::for_seg(conn, shmseg), cookie))
+    }
+
+    /// Create a new Seg and return a Seg wrapper
+    ///
+    /// This is a thin wrapper around [attach] that allocates an id for the Seg.
+    /// This function returns the resulting `SegWrapper` that owns the created Seg and frees
+    /// it in `Drop`.
+    ///
+    /// Errors can come from the call to [X11Connection::generate_id] or [attach].
+    pub fn attach(conn: &'c C, shmid: u32, read_only: bool) -> Result<Self, ReplyOrIdError>
+    {
+        Ok(Self::attach_and_get_cookie(conn, shmid, read_only)?.0)
+    }
+
+    /// Create a new Seg and return a Seg wrapper and a cookie.
+    ///
+    /// This is a thin wrapper around [attach_fd] that allocates an id for the Seg.
+    /// This function returns the resulting `SegWrapper` that owns the created Seg and frees
+    /// it in `Drop`. This also returns a `VoidCookie` that comes from the call to
+    /// [attach_fd].
+    ///
+    /// Errors can come from the call to [X11Connection::generate_id] or [attach_fd].
+    pub fn attach_fd_and_get_cookie<A>(conn: &'c C, shm_fd: A, read_only: bool) -> Result<(Self, VoidCookie<'c, C>), ReplyOrIdError>
+    where
+        A: Into<RawFdContainer>,
+    {
+        let shmseg = conn.generate_id()?;
+        let cookie = attach_fd(conn, shmseg, shm_fd, read_only)?;
+        Ok((Self::for_seg(conn, shmseg), cookie))
+    }
+
+    /// Create a new Seg and return a Seg wrapper
+    ///
+    /// This is a thin wrapper around [attach_fd] that allocates an id for the Seg.
+    /// This function returns the resulting `SegWrapper` that owns the created Seg and frees
+    /// it in `Drop`.
+    ///
+    /// Errors can come from the call to [X11Connection::generate_id] or [attach_fd].
+    pub fn attach_fd<A>(conn: &'c C, shm_fd: A, read_only: bool) -> Result<Self, ReplyOrIdError>
+    where
+        A: Into<RawFdContainer>,
+    {
+        Ok(Self::attach_fd_and_get_cookie(conn, shm_fd, read_only)?.0)
+    }
+}
+
+impl<C: RequestConnection> From<&SegWrapper<'_, C>> for Seg {
+    fn from(from: &SegWrapper<'_, C>) -> Self {
+        from.1
+    }
+}
+
+impl<C: RequestConnection> Drop for SegWrapper<'_, C> {
+    fn drop(&mut self) {
+        let _ = detach(self.0, self.1);
+    }
+}
