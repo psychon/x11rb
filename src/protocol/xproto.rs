@@ -7867,7 +7867,7 @@ impl<'input> ConfigureWindowRequest<'input> {
     fn serialize(self) -> BufWithFds<PiecewiseBuf<'input>> {
         let length_so_far = 0;
         let window_bytes = self.window.serialize();
-        let value_mask = u16::try_from(self.value_list.switch_expr()).unwrap();
+        let value_mask = u16::from(self.value_list.switch_expr());
         let value_mask_bytes = value_mask.serialize();
         let mut request0 = vec![
             CONFIGURE_WINDOW_REQUEST,

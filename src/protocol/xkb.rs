@@ -6198,79 +6198,79 @@ pub struct SelectEventsAux {
 }
 impl SelectEventsAux {
     fn try_parse(value: &[u8], affect_which: u16, clear: u16, select_all: u16) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = u32::from(affect_which) & ((!u32::from(clear)) & (!u32::from(select_all)));
+        let switch_expr = u16::from(affect_which) & ((!u16::from(clear)) & (!u16::from(select_all)));
         let mut outer_remaining = value;
-        let bitcase1 = if switch_expr & u32::from(EventType::NEW_KEYBOARD_NOTIFY) != 0 {
+        let bitcase1 = if switch_expr & u16::from(EventType::NEW_KEYBOARD_NOTIFY) != 0 {
             let (bitcase1, new_remaining) = SelectEventsAuxBitcase1::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             Some(bitcase1)
         } else {
             None
         };
-        let bitcase2 = if switch_expr & u32::from(EventType::STATE_NOTIFY) != 0 {
+        let bitcase2 = if switch_expr & u16::from(EventType::STATE_NOTIFY) != 0 {
             let (bitcase2, new_remaining) = SelectEventsAuxBitcase2::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             Some(bitcase2)
         } else {
             None
         };
-        let bitcase3 = if switch_expr & u32::from(EventType::CONTROLS_NOTIFY) != 0 {
+        let bitcase3 = if switch_expr & u16::from(EventType::CONTROLS_NOTIFY) != 0 {
             let (bitcase3, new_remaining) = SelectEventsAuxBitcase3::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             Some(bitcase3)
         } else {
             None
         };
-        let bitcase4 = if switch_expr & u32::from(EventType::INDICATOR_STATE_NOTIFY) != 0 {
+        let bitcase4 = if switch_expr & u16::from(EventType::INDICATOR_STATE_NOTIFY) != 0 {
             let (bitcase4, new_remaining) = SelectEventsAuxBitcase4::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             Some(bitcase4)
         } else {
             None
         };
-        let bitcase5 = if switch_expr & u32::from(EventType::INDICATOR_MAP_NOTIFY) != 0 {
+        let bitcase5 = if switch_expr & u16::from(EventType::INDICATOR_MAP_NOTIFY) != 0 {
             let (bitcase5, new_remaining) = SelectEventsAuxBitcase5::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             Some(bitcase5)
         } else {
             None
         };
-        let bitcase6 = if switch_expr & u32::from(EventType::NAMES_NOTIFY) != 0 {
+        let bitcase6 = if switch_expr & u16::from(EventType::NAMES_NOTIFY) != 0 {
             let (bitcase6, new_remaining) = SelectEventsAuxBitcase6::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             Some(bitcase6)
         } else {
             None
         };
-        let bitcase7 = if switch_expr & u32::from(EventType::COMPAT_MAP_NOTIFY) != 0 {
+        let bitcase7 = if switch_expr & u16::from(EventType::COMPAT_MAP_NOTIFY) != 0 {
             let (bitcase7, new_remaining) = SelectEventsAuxBitcase7::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             Some(bitcase7)
         } else {
             None
         };
-        let bitcase8 = if switch_expr & u32::from(EventType::BELL_NOTIFY) != 0 {
+        let bitcase8 = if switch_expr & u16::from(EventType::BELL_NOTIFY) != 0 {
             let (bitcase8, new_remaining) = SelectEventsAuxBitcase8::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             Some(bitcase8)
         } else {
             None
         };
-        let bitcase9 = if switch_expr & u32::from(EventType::ACTION_MESSAGE) != 0 {
+        let bitcase9 = if switch_expr & u16::from(EventType::ACTION_MESSAGE) != 0 {
             let (bitcase9, new_remaining) = SelectEventsAuxBitcase9::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             Some(bitcase9)
         } else {
             None
         };
-        let bitcase10 = if switch_expr & u32::from(EventType::ACCESS_X_NOTIFY) != 0 {
+        let bitcase10 = if switch_expr & u16::from(EventType::ACCESS_X_NOTIFY) != 0 {
             let (bitcase10, new_remaining) = SelectEventsAuxBitcase10::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             Some(bitcase10)
         } else {
             None
         };
-        let bitcase11 = if switch_expr & u32::from(EventType::EXTENSION_DEVICE_NOTIFY) != 0 {
+        let bitcase11 = if switch_expr & u16::from(EventType::EXTENSION_DEVICE_NOTIFY) != 0 {
             let (bitcase11, new_remaining) = SelectEventsAuxBitcase11::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             Some(bitcase11)
@@ -6289,7 +6289,7 @@ impl SelectEventsAux {
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, affect_which: u16, clear: u16, select_all: u16) {
-        assert_eq!(self.switch_expr(), u32::from(affect_which) & ((!u32::from(clear)) & (!u32::from(select_all))), "switch `details` has an inconsistent discriminant");
+        assert_eq!(self.switch_expr(), u16::from(affect_which) & ((!u16::from(clear)) & (!u16::from(select_all))), "switch `details` has an inconsistent discriminant");
         if let Some(ref bitcase1) = self.bitcase1 {
             bitcase1.serialize_into(bytes);
         }
@@ -6326,40 +6326,40 @@ impl SelectEventsAux {
     }
 }
 impl SelectEventsAux {
-    fn switch_expr(&self) -> u32 {
+    fn switch_expr(&self) -> u16 {
         let mut expr_value = 0;
         if self.bitcase1.is_some() {
-            expr_value |= u32::from(EventType::NEW_KEYBOARD_NOTIFY);
+            expr_value |= u16::from(EventType::NEW_KEYBOARD_NOTIFY);
         }
         if self.bitcase2.is_some() {
-            expr_value |= u32::from(EventType::STATE_NOTIFY);
+            expr_value |= u16::from(EventType::STATE_NOTIFY);
         }
         if self.bitcase3.is_some() {
-            expr_value |= u32::from(EventType::CONTROLS_NOTIFY);
+            expr_value |= u16::from(EventType::CONTROLS_NOTIFY);
         }
         if self.bitcase4.is_some() {
-            expr_value |= u32::from(EventType::INDICATOR_STATE_NOTIFY);
+            expr_value |= u16::from(EventType::INDICATOR_STATE_NOTIFY);
         }
         if self.bitcase5.is_some() {
-            expr_value |= u32::from(EventType::INDICATOR_MAP_NOTIFY);
+            expr_value |= u16::from(EventType::INDICATOR_MAP_NOTIFY);
         }
         if self.bitcase6.is_some() {
-            expr_value |= u32::from(EventType::NAMES_NOTIFY);
+            expr_value |= u16::from(EventType::NAMES_NOTIFY);
         }
         if self.bitcase7.is_some() {
-            expr_value |= u32::from(EventType::COMPAT_MAP_NOTIFY);
+            expr_value |= u16::from(EventType::COMPAT_MAP_NOTIFY);
         }
         if self.bitcase8.is_some() {
-            expr_value |= u32::from(EventType::BELL_NOTIFY);
+            expr_value |= u16::from(EventType::BELL_NOTIFY);
         }
         if self.bitcase9.is_some() {
-            expr_value |= u32::from(EventType::ACTION_MESSAGE);
+            expr_value |= u16::from(EventType::ACTION_MESSAGE);
         }
         if self.bitcase10.is_some() {
-            expr_value |= u32::from(EventType::ACCESS_X_NOTIFY);
+            expr_value |= u16::from(EventType::ACCESS_X_NOTIFY);
         }
         if self.bitcase11.is_some() {
-            expr_value |= u32::from(EventType::EXTENSION_DEVICE_NOTIFY);
+            expr_value |= u16::from(EventType::EXTENSION_DEVICE_NOTIFY);
         }
         expr_value
     }
@@ -6442,7 +6442,7 @@ impl<'input> SelectEventsRequest<'input> {
     fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'input>> {
         let length_so_far = 0;
         let device_spec_bytes = self.device_spec.serialize();
-        let affect_which = u16::try_from(self.details.switch_expr() | (u32::from(self.clear) | u32::from(self.select_all))).unwrap();
+        let affect_which = u16::from(self.details.switch_expr() | (u16::from(self.clear) | u16::from(self.select_all)));
         let affect_which_bytes = affect_which.serialize();
         let clear_bytes = self.clear.serialize();
         let select_all_bytes = self.select_all.serialize();
@@ -8020,7 +8020,7 @@ impl<'input> SetMapRequest<'input> {
     fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'input>> {
         let length_so_far = 0;
         let device_spec_bytes = self.device_spec.serialize();
-        let present = u16::try_from(self.values.switch_expr()).unwrap();
+        let present = u16::from(self.values.switch_expr());
         let present_bytes = present.serialize();
         let flags_bytes = self.flags.serialize();
         let min_key_code_bytes = self.min_key_code.serialize();

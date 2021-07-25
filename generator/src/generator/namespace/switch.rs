@@ -109,20 +109,7 @@ pub(super) fn emit_switch_type(
     }
 
     // Figure out the return type for switch_expr()
-    let switch_expr_type = match &switch.expr {
-        xcbdefs::Expression::FieldRef(field) => match field.resolved.get().unwrap().field_type {
-            xcbdefs::TypeRef::BuiltIn(xcbdefs::BuiltInType::Card8) => "u8",
-            xcbdefs::TypeRef::BuiltIn(xcbdefs::BuiltInType::Card16) => "u16",
-            xcbdefs::TypeRef::BuiltIn(xcbdefs::BuiltInType::Card32) => "u32",
-            xcbdefs::TypeRef::BuiltIn(xcbdefs::BuiltInType::Card64) => "u64",
-            xcbdefs::TypeRef::BuiltIn(xcbdefs::BuiltInType::Int8) => "i8",
-            xcbdefs::TypeRef::BuiltIn(xcbdefs::BuiltInType::Int16) => "i16",
-            xcbdefs::TypeRef::BuiltIn(xcbdefs::BuiltInType::Int32) => "i32",
-            xcbdefs::TypeRef::BuiltIn(xcbdefs::BuiltInType::Int64) => "i64",
-            _ => "u32",
-        },
-        _ => "u32",
-    };
+    let switch_expr_type = expr_type(&switch.expr, "u32");
 
     if let Some(doc) = doc {
         outln!(out, "/// {}", doc);
@@ -1017,5 +1004,32 @@ fn needs_match_by_value(field: &xcbdefs::FieldDef) -> bool {
             }
         }
         _ => false,
+    }
+}
+
+fn expr_type<'a>(expr: &xcbdefs::Expression, fallback: &'a str) -> &'a str {
+    match expr {
+        xcbdefs::Expression::FieldRef(field) => match field.resolved.get().unwrap().field_type {
+            xcbdefs::TypeRef::BuiltIn(xcbdefs::BuiltInType::Card8) => "u8",
+            xcbdefs::TypeRef::BuiltIn(xcbdefs::BuiltInType::Card16) => "u16",
+            xcbdefs::TypeRef::BuiltIn(xcbdefs::BuiltInType::Card32) => "u32",
+            xcbdefs::TypeRef::BuiltIn(xcbdefs::BuiltInType::Card64) => "u64",
+            xcbdefs::TypeRef::BuiltIn(xcbdefs::BuiltInType::Int8) => "i8",
+            xcbdefs::TypeRef::BuiltIn(xcbdefs::BuiltInType::Int16) => "i16",
+            xcbdefs::TypeRef::BuiltIn(xcbdefs::BuiltInType::Int32) => "i32",
+            xcbdefs::TypeRef::BuiltIn(xcbdefs::BuiltInType::Int64) => "i64",
+            _ => "u32",
+        },
+        xcbdefs::Expression::UnaryOp(op) => expr_type(&op.rhs, fallback),
+        xcbdefs::Expression::BinaryOp(op) => {
+            let lhs = expr_type(&op.lhs, fallback);
+            let rhs = expr_type(&op.rhs, fallback);
+            if lhs == rhs {
+                lhs
+            } else {
+                fallback
+            }
+        }
+        _ => "u32",
     }
 }

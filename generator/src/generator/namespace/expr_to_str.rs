@@ -44,7 +44,7 @@ fn expr_to_str_impl(
                         &bin_op_expr.lhs,
                         wrap_field_ref,
                         panic_on_overflow,
-                        Some("u32"),
+                        Some(cast_to_type.unwrap_or("u32")),
                         true,
                     ),
                     expr_to_str_impl(
@@ -52,7 +52,7 @@ fn expr_to_str_impl(
                         &bin_op_expr.rhs,
                         wrap_field_ref,
                         panic_on_overflow,
-                        Some("u32"),
+                        Some(cast_to_type.unwrap_or("u32")),
                         false,
                     ),
                     err_handler,
@@ -64,7 +64,7 @@ fn expr_to_str_impl(
                         &bin_op_expr.lhs,
                         wrap_field_ref,
                         panic_on_overflow,
-                        Some("u32"),
+                        Some(cast_to_type.unwrap_or("u32")),
                         true,
                     ),
                     expr_to_str_impl(
@@ -72,7 +72,7 @@ fn expr_to_str_impl(
                         &bin_op_expr.rhs,
                         wrap_field_ref,
                         panic_on_overflow,
-                        Some("u32"),
+                        Some(cast_to_type.unwrap_or("u32")),
                         false,
                     ),
                     err_handler,
@@ -84,7 +84,7 @@ fn expr_to_str_impl(
                         &bin_op_expr.lhs,
                         wrap_field_ref,
                         panic_on_overflow,
-                        Some("u32"),
+                        Some(cast_to_type.unwrap_or("u32")),
                         true,
                     ),
                     expr_to_str_impl(
@@ -92,7 +92,7 @@ fn expr_to_str_impl(
                         &bin_op_expr.rhs,
                         wrap_field_ref,
                         panic_on_overflow,
-                        Some("u32"),
+                        Some(cast_to_type.unwrap_or("u32")),
                         false,
                     ),
                     err_handler,
@@ -104,7 +104,7 @@ fn expr_to_str_impl(
                         &bin_op_expr.lhs,
                         wrap_field_ref,
                         panic_on_overflow,
-                        Some("u32"),
+                        Some(cast_to_type.unwrap_or("u32")),
                         true,
                     ),
                     expr_to_str_impl(
@@ -112,7 +112,7 @@ fn expr_to_str_impl(
                         &bin_op_expr.rhs,
                         wrap_field_ref,
                         panic_on_overflow,
-                        Some("u32"),
+                        Some(cast_to_type.unwrap_or("u32")),
                         false,
                     ),
                     err_handler,
@@ -123,7 +123,7 @@ fn expr_to_str_impl(
                         &bin_op_expr.lhs,
                         wrap_field_ref,
                         panic_on_overflow,
-                        Some("u32"),
+                        Some(cast_to_type.unwrap_or("u32")),
                         true,
                     );
                     let rhs_str = expr_to_str_impl(
@@ -131,7 +131,7 @@ fn expr_to_str_impl(
                         &bin_op_expr.rhs,
                         wrap_field_ref,
                         panic_on_overflow,
-                        Some("u32"),
+                        Some(cast_to_type.unwrap_or("u32")),
                         true,
                     );
                     if needs_parens {
@@ -146,7 +146,7 @@ fn expr_to_str_impl(
                         &bin_op_expr.lhs,
                         wrap_field_ref,
                         panic_on_overflow,
-                        Some("u32"),
+                        Some(cast_to_type.unwrap_or("u32")),
                         true,
                     );
                     let rhs_str = expr_to_str_impl(
@@ -154,7 +154,7 @@ fn expr_to_str_impl(
                         &bin_op_expr.rhs,
                         wrap_field_ref,
                         panic_on_overflow,
-                        Some("u32"),
+                        Some(cast_to_type.unwrap_or("u32")),
                         true,
                     );
                     if needs_parens {
@@ -175,7 +175,7 @@ fn expr_to_str_impl(
                     &unary_op_expr.rhs,
                     wrap_field_ref,
                     panic_on_overflow,
-                    Some("u32"),
+                    Some(cast_to_type.unwrap_or("u32")),
                     true,
                 );
                 if needs_parens {
