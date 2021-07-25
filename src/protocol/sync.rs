@@ -2563,3 +2563,261 @@ pub trait ConnectionExt: RequestConnection {
 }
 
 impl<C: RequestConnection + ?Sized> ConnectionExt for C {}
+
+/// A RAII-like wrapper around a [Counter].
+///
+/// Instances of this struct represent a Counter that is freed in `Drop`.
+///
+/// Any errors during `Drop` are silently ignored. Most likely an error here means that your
+/// X11 connection is broken and later requests will also fail.
+#[derive(Debug)]
+pub struct CounterWrapper<'c, C: RequestConnection>(&'c C, Counter);
+
+impl<'c, C: RequestConnection> CounterWrapper<'c, C>
+{
+    /// Assume ownership of the given resource and destroy it in `Drop`.
+    pub fn for_counter(conn: &'c C, id: Counter) -> Self {
+        CounterWrapper(conn, id)
+    }
+
+    /// Get the XID of the wrapped resource
+    pub fn counter(&self) -> Counter {
+        self.1
+    }
+
+    /// Assume ownership of the XID of the wrapped resource
+    ///
+    /// This function destroys this wrapper without freeing the underlying resource.
+    pub fn into_counter(self) -> Counter {
+        let id = self.1;
+        std::mem::forget(self);
+        id
+    }
+}
+
+impl<'c, C: X11Connection> CounterWrapper<'c, C>
+{
+
+    /// Create a new Counter and return a Counter wrapper and a cookie.
+    ///
+    /// This is a thin wrapper around [create_counter] that allocates an id for the Counter.
+    /// This function returns the resulting `CounterWrapper` that owns the created Counter and frees
+    /// it in `Drop`. This also returns a `VoidCookie` that comes from the call to
+    /// [create_counter].
+    ///
+    /// Errors can come from the call to [X11Connection::generate_id] or [create_counter].
+    pub fn create_counter_and_get_cookie(conn: &'c C, initial_value: Int64) -> Result<(Self, VoidCookie<'c, C>), ReplyOrIdError>
+    {
+        let id = conn.generate_id()?;
+        let cookie = create_counter(conn, id, initial_value)?;
+        Ok((Self::for_counter(conn, id), cookie))
+    }
+
+    /// Create a new Counter and return a Counter wrapper
+    ///
+    /// This is a thin wrapper around [create_counter] that allocates an id for the Counter.
+    /// This function returns the resulting `CounterWrapper` that owns the created Counter and frees
+    /// it in `Drop`.
+    ///
+    /// Errors can come from the call to [X11Connection::generate_id] or [create_counter].
+    pub fn create_counter(conn: &'c C, initial_value: Int64) -> Result<Self, ReplyOrIdError>
+    {
+        Ok(Self::create_counter_and_get_cookie(conn, initial_value)?.0)
+    }
+}
+
+impl<C: RequestConnection> From<&CounterWrapper<'_, C>> for Counter {
+    fn from(from: &CounterWrapper<'_, C>) -> Self {
+        from.1
+    }
+}
+
+impl<C: RequestConnection> Drop for CounterWrapper<'_, C> {
+    fn drop(&mut self) {
+        let _ = destroy_counter(self.0, self.1);
+    }
+}
+
+/// A RAII-like wrapper around a [Alarm].
+///
+/// Instances of this struct represent a Alarm that is freed in `Drop`.
+///
+/// Any errors during `Drop` are silently ignored. Most likely an error here means that your
+/// X11 connection is broken and later requests will also fail.
+#[derive(Debug)]
+pub struct AlarmWrapper<'c, C: RequestConnection>(&'c C, Alarm);
+
+impl<'c, C: RequestConnection> AlarmWrapper<'c, C>
+{
+    /// Assume ownership of the given resource and destroy it in `Drop`.
+    pub fn for_alarm(conn: &'c C, id: Alarm) -> Self {
+        AlarmWrapper(conn, id)
+    }
+
+    /// Get the XID of the wrapped resource
+    pub fn alarm(&self) -> Alarm {
+        self.1
+    }
+
+    /// Assume ownership of the XID of the wrapped resource
+    ///
+    /// This function destroys this wrapper without freeing the underlying resource.
+    pub fn into_alarm(self) -> Alarm {
+        let id = self.1;
+        std::mem::forget(self);
+        id
+    }
+}
+
+impl<'c, C: X11Connection> AlarmWrapper<'c, C>
+{
+
+    /// Create a new Alarm and return a Alarm wrapper and a cookie.
+    ///
+    /// This is a thin wrapper around [create_alarm] that allocates an id for the Alarm.
+    /// This function returns the resulting `AlarmWrapper` that owns the created Alarm and frees
+    /// it in `Drop`. This also returns a `VoidCookie` that comes from the call to
+    /// [create_alarm].
+    ///
+    /// Errors can come from the call to [X11Connection::generate_id] or [create_alarm].
+    pub fn create_alarm_and_get_cookie(conn: &'c C, value_list: &CreateAlarmAux) -> Result<(Self, VoidCookie<'c, C>), ReplyOrIdError>
+    {
+        let id = conn.generate_id()?;
+        let cookie = create_alarm(conn, id, value_list)?;
+        Ok((Self::for_alarm(conn, id), cookie))
+    }
+
+    /// Create a new Alarm and return a Alarm wrapper
+    ///
+    /// This is a thin wrapper around [create_alarm] that allocates an id for the Alarm.
+    /// This function returns the resulting `AlarmWrapper` that owns the created Alarm and frees
+    /// it in `Drop`.
+    ///
+    /// Errors can come from the call to [X11Connection::generate_id] or [create_alarm].
+    pub fn create_alarm(conn: &'c C, value_list: &CreateAlarmAux) -> Result<Self, ReplyOrIdError>
+    {
+        Ok(Self::create_alarm_and_get_cookie(conn, value_list)?.0)
+    }
+}
+
+impl<C: RequestConnection> From<&AlarmWrapper<'_, C>> for Alarm {
+    fn from(from: &AlarmWrapper<'_, C>) -> Self {
+        from.1
+    }
+}
+
+impl<C: RequestConnection> Drop for AlarmWrapper<'_, C> {
+    fn drop(&mut self) {
+        let _ = destroy_alarm(self.0, self.1);
+    }
+}
+
+/// A RAII-like wrapper around a [Fence].
+///
+/// Instances of this struct represent a Fence that is freed in `Drop`.
+///
+/// Any errors during `Drop` are silently ignored. Most likely an error here means that your
+/// X11 connection is broken and later requests will also fail.
+#[derive(Debug)]
+pub struct FenceWrapper<'c, C: RequestConnection>(&'c C, Fence);
+
+impl<'c, C: RequestConnection> FenceWrapper<'c, C>
+{
+    /// Assume ownership of the given resource and destroy it in `Drop`.
+    pub fn for_fence(conn: &'c C, id: Fence) -> Self {
+        FenceWrapper(conn, id)
+    }
+
+    /// Get the XID of the wrapped resource
+    pub fn fence(&self) -> Fence {
+        self.1
+    }
+
+    /// Assume ownership of the XID of the wrapped resource
+    ///
+    /// This function destroys this wrapper without freeing the underlying resource.
+    pub fn into_fence(self) -> Fence {
+        let id = self.1;
+        std::mem::forget(self);
+        id
+    }
+}
+
+impl<'c, C: X11Connection> FenceWrapper<'c, C>
+{
+
+    /// Create a new Fence and return a Fence wrapper and a cookie.
+    ///
+    /// This is a thin wrapper around [create_fence] that allocates an id for the Fence.
+    /// This function returns the resulting `FenceWrapper` that owns the created Fence and frees
+    /// it in `Drop`. This also returns a `VoidCookie` that comes from the call to
+    /// [create_fence].
+    ///
+    /// Errors can come from the call to [X11Connection::generate_id] or [create_fence].
+    pub fn create_fence_and_get_cookie(conn: &'c C, drawable: xproto::Drawable, initially_triggered: bool) -> Result<(Self, VoidCookie<'c, C>), ReplyOrIdError>
+    {
+        let fence = conn.generate_id()?;
+        let cookie = create_fence(conn, drawable, fence, initially_triggered)?;
+        Ok((Self::for_fence(conn, fence), cookie))
+    }
+
+    /// Create a new Fence and return a Fence wrapper
+    ///
+    /// This is a thin wrapper around [create_fence] that allocates an id for the Fence.
+    /// This function returns the resulting `FenceWrapper` that owns the created Fence and frees
+    /// it in `Drop`.
+    ///
+    /// Errors can come from the call to [X11Connection::generate_id] or [create_fence].
+    pub fn create_fence(conn: &'c C, drawable: xproto::Drawable, initially_triggered: bool) -> Result<Self, ReplyOrIdError>
+    {
+        Ok(Self::create_fence_and_get_cookie(conn, drawable, initially_triggered)?.0)
+    }
+
+    /// Create a new Fence and return a Fence wrapper and a cookie.
+    ///
+    /// This is a thin wrapper around [super::dri3::fence_from_fd] that allocates an id for the Fence.
+    /// This function returns the resulting `FenceWrapper` that owns the created Fence and frees
+    /// it in `Drop`. This also returns a `VoidCookie` that comes from the call to
+    /// [super::dri3::fence_from_fd].
+    ///
+    /// Errors can come from the call to [X11Connection::generate_id] or [super::dri3::fence_from_fd].
+    #[cfg(feature = "dri3")]
+    pub fn dri3_fence_from_fd_and_get_cookie<A>(conn: &'c C, drawable: xproto::Drawable, initially_triggered: bool, fence_fd: A) -> Result<(Self, VoidCookie<'c, C>), ReplyOrIdError>
+    where
+        A: Into<RawFdContainer>,
+    {
+        let fence = conn.generate_id()?;
+        let cookie = super::dri3::fence_from_fd(conn, drawable, fence, initially_triggered, fence_fd)?;
+        Ok((Self::for_fence(conn, fence), cookie))
+    }
+
+    /// Create a new Fence and return a Fence wrapper
+    ///
+    /// This is a thin wrapper around [super::dri3::fence_from_fd] that allocates an id for the Fence.
+    /// This function returns the resulting `FenceWrapper` that owns the created Fence and frees
+    /// it in `Drop`.
+    ///
+    /// Errors can come from the call to [X11Connection::generate_id] or [super::dri3::fence_from_fd].
+    #[cfg(feature = "dri3")]
+    pub fn dri3_fence_from_fd<A>(conn: &'c C, drawable: xproto::Drawable, initially_triggered: bool, fence_fd: A) -> Result<Self, ReplyOrIdError>
+    where
+        A: Into<RawFdContainer>,
+    {
+        Ok(Self::dri3_fence_from_fd_and_get_cookie(conn, drawable, initially_triggered, fence_fd)?.0)
+    }
+}
+#[cfg(feature = "dri3")]
+#[allow(unused_imports)]
+use super::dri3;
+
+impl<C: RequestConnection> From<&FenceWrapper<'_, C>> for Fence {
+    fn from(from: &FenceWrapper<'_, C>) -> Self {
+        from.1
+    }
+}
+
+impl<C: RequestConnection> Drop for FenceWrapper<'_, C> {
+    fn drop(&mut self) {
+        let _ = destroy_fence(self.0, self.1);
+    }
+}

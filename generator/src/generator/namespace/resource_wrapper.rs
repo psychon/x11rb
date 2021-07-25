@@ -218,7 +218,13 @@ fn generate_creator(
             xcbdefs::FieldDef::Pad(_) => unimplemented!(),
             xcbdefs::FieldDef::Expr(_) => unimplemented!(),
             xcbdefs::FieldDef::VirtualLen(_) => unimplemented!(),
-            xcbdefs::FieldDef::Fd(_) => unimplemented!(),
+            xcbdefs::FieldDef::Fd(fd_field) => {
+                let generic_param = format!("{}", char::from(letter_iter.next().unwrap()));
+                let where_ = format!("{}: Into<RawFdContainer>", generic_param);
+                generics.push(generic_param.clone());
+                wheres.push(where_);
+                (fd_field.name.clone(), generic_param)
+            }
             xcbdefs::FieldDef::FdList(_) => unimplemented!(),
             xcbdefs::FieldDef::Normal(normal_field) => {
                 let rust_field_name = to_rust_variable_name(&normal_field.name);

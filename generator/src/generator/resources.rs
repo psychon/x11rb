@@ -8,7 +8,7 @@ pub(super) fn for_extension(extension: &str) -> &'static [ResourceInfo<'static>]
         .unwrap_or(&[])
 }
 
-const EXTENSION_RESOURCES: [(&str, &[ResourceInfo<'_>]); 4] = [
+const EXTENSION_RESOURCES: [(&str, &[ResourceInfo<'_>]); 5] = [
     (
         "xproto",
         &[
@@ -89,6 +89,41 @@ const EXTENSION_RESOURCES: [(&str, &[ResourceInfo<'_>]); 4] = [
             }],
             free_request: "FreeContext",
         }],
+    ),
+    (
+        "sync",
+        &[
+            ResourceInfo {
+                resource_name: "Counter",
+                create_requests: &[CreateInfo {
+                    request_name: "CreateCounter",
+                    created_argument: "id",
+                }],
+                free_request: "DestroyCounter",
+            },
+            ResourceInfo {
+                resource_name: "Alarm",
+                create_requests: &[CreateInfo {
+                    request_name: "CreateAlarm",
+                    created_argument: "id",
+                }],
+                free_request: "DestroyAlarm",
+            },
+            ResourceInfo {
+                resource_name: "Fence",
+                create_requests: &[
+                    CreateInfo {
+                        request_name: "CreateFence",
+                        created_argument: "fence",
+                    },
+                    CreateInfo {
+                        request_name: "dri3:FenceFromFD",
+                        created_argument: "fence",
+                    },
+                ],
+                free_request: "DestroyFence",
+            },
+        ],
     ),
     (
         "xfixes",
