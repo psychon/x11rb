@@ -8,7 +8,7 @@ pub(super) fn for_extension(extension: &str) -> &'static [ResourceInfo<'static>]
         .unwrap_or(&[])
 }
 
-const EXTENSION_RESOURCES: [(&str, &[ResourceInfo<'_>]); 5] = [
+const EXTENSION_RESOURCES: [(&str, &[ResourceInfo<'_>]); 7] = [
     (
         "xproto",
         &[
@@ -88,6 +88,62 @@ const EXTENSION_RESOURCES: [(&str, &[ResourceInfo<'_>]); 5] = [
                 created_argument: "context",
             }],
             free_request: "FreeContext",
+        }],
+    ),
+    (
+        "render",
+        &[
+            ResourceInfo {
+                resource_name: "Picture",
+                create_requests: &[
+                    CreateInfo {
+                        request_name: "CreatePicture",
+                        created_argument: "pid",
+                    },
+                    CreateInfo {
+                        request_name: "CreateSolidFill",
+                        created_argument: "picture",
+                    },
+                    CreateInfo {
+                        request_name: "CreateLinearGradient",
+                        created_argument: "picture",
+                    },
+                    CreateInfo {
+                        request_name: "CreateRadialGradient",
+                        created_argument: "picture",
+                    },
+                    CreateInfo {
+                        request_name: "CreateConicalGradient",
+                        created_argument: "picture",
+                    },
+                ],
+                free_request: "FreePicture",
+            },
+            ResourceInfo {
+                resource_name: "Glyphset",
+                create_requests: &[CreateInfo {
+                    request_name: "CreateGlyphSet",
+                    created_argument: "gsid",
+                }],
+                free_request: "FreeGlyphSet",
+            },
+        ],
+    ),
+    (
+        "shm",
+        &[ResourceInfo {
+            resource_name: "Seg",
+            create_requests: &[
+                CreateInfo {
+                    request_name: "Attach",
+                    created_argument: "shmseg",
+                },
+                CreateInfo {
+                    request_name: "AttachFd",
+                    created_argument: "shmseg",
+                },
+            ],
+            free_request: "Detach",
         }],
     ),
     (
