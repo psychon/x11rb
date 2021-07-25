@@ -169,7 +169,7 @@ fn generate_creator(
         .as_ref()
         .map(|ns| ext_has_feature(&ns.header))
         .unwrap_or(false);
-    let request_ns = request_ns.as_ref().map(|ns| &**ns).unwrap_or(generator.ns);
+    let request_ns = request_ns.as_deref().unwrap_or(generator.ns);
     let request_def = Rc::clone(
         request_ns
             .request_defs
