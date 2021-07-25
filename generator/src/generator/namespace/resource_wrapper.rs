@@ -211,7 +211,6 @@ fn generate_creator(
             }
             xcbdefs::FieldDef::List(list_field) => {
                 let field_name = to_rust_variable_name(&list_field.name);
-                assert!(generator.rust_value_type_is_u8(&list_field.element_type));
                 let element_type =
                     generator.field_value_type_to_rust_type(&list_field.element_type);
                 let field_type = if let Some(list_len) = list_field.length() {

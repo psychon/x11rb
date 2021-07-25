@@ -8,7 +8,7 @@ pub(super) fn for_extension(extension: &str) -> &'static [ResourceInfo<'static>]
         .unwrap_or(&[])
 }
 
-const EXTENSION_RESOURCES: [(&str, &[ResourceInfo<'_>]); 2] = [
+const EXTENSION_RESOURCES: [(&str, &[ResourceInfo<'_>]); 3] = [
     (
         "xproto",
         &[
@@ -77,6 +77,17 @@ const EXTENSION_RESOURCES: [(&str, &[ResourceInfo<'_>]); 2] = [
                 created_argument: "damage",
             }],
             free_request: "Destroy",
+        }],
+    ),
+    (
+        "record",
+        &[ResourceInfo {
+            resource_name: "Context",
+            create_requests: &[CreateInfo {
+                request_name: "CreateContext",
+                created_argument: "context",
+            }],
+            free_request: "FreeContext",
         }],
     ),
 ];
