@@ -843,7 +843,7 @@ impl Serialize for InputInfo {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(2);
-        let class_id = u8::from(self.info.switch_expr());
+        let class_id: u8 = self.info.switch_expr();
         class_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.info.serialize_into(bytes, class_id);
@@ -4113,7 +4113,7 @@ impl Serialize for FeedbackState {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(4);
-        let class_id = u8::from(self.data.switch_expr());
+        let class_id: u8 = self.data.switch_expr();
         class_id.serialize_into(bytes);
         self.feedback_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
@@ -4996,7 +4996,7 @@ impl Serialize for FeedbackCtl {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(4);
-        let class_id = u8::from(self.data.switch_expr());
+        let class_id: u8 = self.data.switch_expr();
         class_id.serialize_into(bytes);
         self.feedback_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
@@ -6353,7 +6353,7 @@ impl Serialize for InputState {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(2);
-        let class_id = u8::from(self.data.switch_expr());
+        let class_id: u8 = self.data.switch_expr();
         class_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.data.serialize_into(bytes, class_id);
@@ -7417,7 +7417,7 @@ impl Serialize for DeviceState {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(4);
-        let control_id = u16::from(self.data.switch_expr());
+        let control_id: u16 = self.data.switch_expr();
         control_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.data.serialize_into(bytes, control_id);
@@ -8214,7 +8214,7 @@ impl Serialize for DeviceCtl {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(4);
-        let control_id = u16::from(self.data.switch_expr());
+        let control_id: u16 = self.data.switch_expr();
         control_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.data.serialize_into(bytes, control_id);
@@ -8622,7 +8622,7 @@ impl<'input> ChangeDevicePropertyRequest<'input> {
         let property_bytes = self.property.serialize();
         let type_bytes = self.type_.serialize();
         let device_id_bytes = self.device_id.serialize();
-        let format = u8::from(self.items.switch_expr());
+        let format: u8 = self.items.switch_expr();
         let format_bytes = format.serialize();
         let mode_bytes = u8::from(self.mode).serialize();
         let num_items_bytes = self.num_items.serialize();
@@ -10127,7 +10127,7 @@ impl Serialize for HierarchyChange {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(4);
-        let type_ = u16::from(self.data.switch_expr());
+        let type_: u16 = self.data.switch_expr();
         type_.serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.data.serialize_into(bytes, type_);
@@ -11716,7 +11716,7 @@ impl Serialize for DeviceClass {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(6);
-        let type_ = u16::from(self.data.switch_expr());
+        let type_: u16 = self.data.switch_expr();
         type_.serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.sourceid.serialize_into(bytes);
@@ -13331,7 +13331,7 @@ impl<'input> XIChangePropertyRequest<'input> {
         let length_so_far = 0;
         let deviceid_bytes = self.deviceid.serialize();
         let mode_bytes = u8::from(self.mode).serialize();
-        let format = u8::from(self.items.switch_expr());
+        let format: u8 = self.items.switch_expr();
         let format_bytes = format.serialize();
         let property_bytes = self.property.serialize();
         let type_bytes = self.type_.serialize();

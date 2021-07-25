@@ -852,7 +852,7 @@ impl<'input> SetAttributesRequest<'input> {
         let class_bytes = (u16::from(self.class) as u8).serialize();
         let depth_bytes = self.depth.serialize();
         let visual_bytes = self.visual.serialize();
-        let value_mask = self.value_list.switch_expr();
+        let value_mask: u32 = self.value_list.switch_expr();
         let value_mask_bytes = value_mask.serialize();
         let mut request0 = vec![
             major_opcode,

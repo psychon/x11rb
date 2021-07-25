@@ -5751,7 +5751,7 @@ impl<'input> CreateWindowRequest<'input> {
         let border_width_bytes = self.border_width.serialize();
         let class_bytes = u16::from(self.class).serialize();
         let visual_bytes = self.visual.serialize();
-        let value_mask = self.value_list.switch_expr();
+        let value_mask: u32 = self.value_list.switch_expr();
         let value_mask_bytes = value_mask.serialize();
         let mut request0 = vec![
             CREATE_WINDOW_REQUEST,
@@ -6306,7 +6306,7 @@ impl<'input> ChangeWindowAttributesRequest<'input> {
     fn serialize(self) -> BufWithFds<PiecewiseBuf<'input>> {
         let length_so_far = 0;
         let window_bytes = self.window.serialize();
-        let value_mask = self.value_list.switch_expr();
+        let value_mask: u32 = self.value_list.switch_expr();
         let value_mask_bytes = value_mask.serialize();
         let mut request0 = vec![
             CHANGE_WINDOW_ATTRIBUTES_REQUEST,
@@ -7867,7 +7867,7 @@ impl<'input> ConfigureWindowRequest<'input> {
     fn serialize(self) -> BufWithFds<PiecewiseBuf<'input>> {
         let length_so_far = 0;
         let window_bytes = self.window.serialize();
-        let value_mask = u16::from(self.value_list.switch_expr());
+        let value_mask: u16 = self.value_list.switch_expr();
         let value_mask_bytes = value_mask.serialize();
         let mut request0 = vec![
             CONFIGURE_WINDOW_REQUEST,
@@ -16267,7 +16267,7 @@ impl<'input> CreateGCRequest<'input> {
         let length_so_far = 0;
         let cid_bytes = self.cid.serialize();
         let drawable_bytes = self.drawable.serialize();
-        let value_mask = self.value_list.switch_expr();
+        let value_mask: u32 = self.value_list.switch_expr();
         let value_mask_bytes = value_mask.serialize();
         let mut request0 = vec![
             CREATE_GC_REQUEST,
@@ -16932,7 +16932,7 @@ impl<'input> ChangeGCRequest<'input> {
     fn serialize(self) -> BufWithFds<PiecewiseBuf<'input>> {
         let length_so_far = 0;
         let gc_bytes = self.gc.serialize();
-        let value_mask = self.value_list.switch_expr();
+        let value_mask: u32 = self.value_list.switch_expr();
         let value_mask_bytes = value_mask.serialize();
         let mut request0 = vec![
             CHANGE_GC_REQUEST,
@@ -23308,7 +23308,7 @@ impl<'input> ChangeKeyboardControlRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     fn serialize(self) -> BufWithFds<PiecewiseBuf<'input>> {
         let length_so_far = 0;
-        let value_mask = self.value_list.switch_expr();
+        let value_mask: u32 = self.value_list.switch_expr();
         let value_mask_bytes = value_mask.serialize();
         let mut request0 = vec![
             CHANGE_KEYBOARD_CONTROL_REQUEST,

@@ -6442,7 +6442,7 @@ impl<'input> SelectEventsRequest<'input> {
     fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'input>> {
         let length_so_far = 0;
         let device_spec_bytes = self.device_spec.serialize();
-        let affect_which = u16::from(self.details.switch_expr() | (self.clear | self.select_all));
+        let affect_which: u16 = self.details.switch_expr() | (self.clear | self.select_all);
         let affect_which_bytes = affect_which.serialize();
         let clear_bytes = self.clear.serialize();
         let select_all_bytes = self.select_all.serialize();
@@ -8020,7 +8020,7 @@ impl<'input> SetMapRequest<'input> {
     fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'input>> {
         let length_so_far = 0;
         let device_spec_bytes = self.device_spec.serialize();
-        let present = u16::from(self.values.switch_expr());
+        let present: u16 = self.values.switch_expr();
         let present_bytes = present.serialize();
         let flags_bytes = self.flags.serialize();
         let min_key_code_bytes = self.min_key_code.serialize();
@@ -9748,7 +9748,7 @@ impl<'input> SetNamesRequest<'input> {
         let length_so_far = 0;
         let device_spec_bytes = self.device_spec.serialize();
         let virtual_mods_bytes = self.virtual_mods.serialize();
-        let which = self.values.switch_expr();
+        let which: u32 = self.values.switch_expr();
         let which_bytes = which.serialize();
         let first_type_bytes = self.first_type.serialize();
         let n_types_bytes = self.n_types.serialize();
