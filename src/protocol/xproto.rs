@@ -7609,7 +7609,7 @@ pub struct ConfigureWindowAux {
 }
 impl ConfigureWindowAux {
     fn try_parse(value: &[u8], value_mask: u16) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = u16::from(value_mask);
+        let switch_expr = value_mask;
         let mut outer_remaining = value;
         let x = if switch_expr & u16::from(ConfigWindow::X) != 0 {
             let remaining = outer_remaining;
@@ -7680,7 +7680,7 @@ impl ConfigureWindowAux {
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, value_mask: u16) {
-        assert_eq!(self.switch_expr(), u16::from(value_mask), "switch `value_list` has an inconsistent discriminant");
+        assert_eq!(self.switch_expr(), value_mask, "switch `value_list` has an inconsistent discriminant");
         if let Some(x) = self.x {
             x.serialize_into(bytes);
         }

@@ -20,7 +20,7 @@ mod serialize;
 mod struct_type;
 mod switch;
 
-use expr_to_str::expr_to_str;
+use expr_to_str::{expr_to_str, expr_type};
 
 use helpers::{
     ename_to_camel_case, ename_to_rust, gather_deducible_fields, postfix_var_name, prefix_var_name,

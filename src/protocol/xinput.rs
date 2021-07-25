@@ -745,7 +745,7 @@ pub enum InputInfoInfo {
 }
 impl InputInfoInfo {
     fn try_parse(value: &[u8], class_id: u8) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = u8::from(class_id);
+        let switch_expr = class_id;
         let mut outer_remaining = value;
         let mut parse_result = None;
         if switch_expr == u8::from(InputClass::KEY) {
@@ -800,7 +800,7 @@ impl InputInfoInfo {
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, class_id: u8) {
-        assert_eq!(self.switch_expr(), u8::from(class_id), "switch `info` has an inconsistent discriminant");
+        assert_eq!(self.switch_expr(), class_id, "switch `info` has an inconsistent discriminant");
         match self {
             InputInfoInfo::Key(key) => key.serialize_into(bytes),
             InputInfoInfo::Button(button) => button.serialize_into(bytes),
@@ -3971,7 +3971,7 @@ pub enum FeedbackStateData {
 }
 impl FeedbackStateData {
     fn try_parse(value: &[u8], class_id: u8) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = u8::from(class_id);
+        let switch_expr = class_id;
         let mut outer_remaining = value;
         let mut parse_result = None;
         if switch_expr == u8::from(FeedbackClass::KEYBOARD) {
@@ -4062,7 +4062,7 @@ impl FeedbackStateData {
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, class_id: u8) {
-        assert_eq!(self.switch_expr(), u8::from(class_id), "switch `data` has an inconsistent discriminant");
+        assert_eq!(self.switch_expr(), class_id, "switch `data` has an inconsistent discriminant");
         match self {
             FeedbackStateData::Keyboard(keyboard) => keyboard.serialize_into(bytes),
             FeedbackStateData::Pointer(pointer) => pointer.serialize_into(bytes),
@@ -4854,7 +4854,7 @@ pub enum FeedbackCtlData {
 }
 impl FeedbackCtlData {
     fn try_parse(value: &[u8], class_id: u8) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = u8::from(class_id);
+        let switch_expr = class_id;
         let mut outer_remaining = value;
         let mut parse_result = None;
         if switch_expr == u8::from(FeedbackClass::KEYBOARD) {
@@ -4945,7 +4945,7 @@ impl FeedbackCtlData {
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, class_id: u8) {
-        assert_eq!(self.switch_expr(), u8::from(class_id), "switch `data` has an inconsistent discriminant");
+        assert_eq!(self.switch_expr(), class_id, "switch `data` has an inconsistent discriminant");
         match self {
             FeedbackCtlData::Keyboard(keyboard) => keyboard.serialize_into(bytes),
             FeedbackCtlData::Pointer(pointer) => pointer.serialize_into(bytes),
@@ -6255,7 +6255,7 @@ pub enum InputStateData {
 }
 impl InputStateData {
     fn try_parse(value: &[u8], class_id: u8) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = u8::from(class_id);
+        let switch_expr = class_id;
         let mut outer_remaining = value;
         let mut parse_result = None;
         if switch_expr == u8::from(InputClass::KEY) {
@@ -6310,7 +6310,7 @@ impl InputStateData {
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, class_id: u8) {
-        assert_eq!(self.switch_expr(), u8::from(class_id), "switch `data` has an inconsistent discriminant");
+        assert_eq!(self.switch_expr(), class_id, "switch `data` has an inconsistent discriminant");
         match self {
             InputStateData::Key(key) => key.serialize_into(bytes),
             InputStateData::Button(button) => button.serialize_into(bytes),
@@ -7285,7 +7285,7 @@ pub enum DeviceStateData {
 }
 impl DeviceStateData {
     fn try_parse(value: &[u8], control_id: u16) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = u16::from(control_id);
+        let switch_expr = control_id;
         let mut outer_remaining = value;
         let mut parse_result = None;
         if switch_expr == u16::from(DeviceControl::RESOLUTION) {
@@ -7366,7 +7366,7 @@ impl DeviceStateData {
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, control_id: u16) {
-        assert_eq!(self.switch_expr(), u16::from(control_id), "switch `data` has an inconsistent discriminant");
+        assert_eq!(self.switch_expr(), control_id, "switch `data` has an inconsistent discriminant");
         match self {
             DeviceStateData::Resolution(resolution) => resolution.serialize_into(bytes),
             DeviceStateData::AbsCalib(abs_calib) => abs_calib.serialize_into(bytes),
@@ -8082,7 +8082,7 @@ pub enum DeviceCtlData {
 }
 impl DeviceCtlData {
     fn try_parse(value: &[u8], control_id: u16) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = u16::from(control_id);
+        let switch_expr = control_id;
         let mut outer_remaining = value;
         let mut parse_result = None;
         if switch_expr == u16::from(DeviceControl::RESOLUTION) {
@@ -8163,7 +8163,7 @@ impl DeviceCtlData {
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, control_id: u16) {
-        assert_eq!(self.switch_expr(), u16::from(control_id), "switch `data` has an inconsistent discriminant");
+        assert_eq!(self.switch_expr(), control_id, "switch `data` has an inconsistent discriminant");
         match self {
             DeviceCtlData::Resolution(resolution) => resolution.serialize_into(bytes),
             DeviceCtlData::AbsCalib(abs_calib) => abs_calib.serialize_into(bytes),
@@ -8504,7 +8504,7 @@ pub enum ChangeDevicePropertyAux {
 }
 impl ChangeDevicePropertyAux {
     fn try_parse(value: &[u8], format: u8, num_items: u32) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = u8::from(format);
+        let switch_expr = format;
         let mut outer_remaining = value;
         let mut parse_result = None;
         if switch_expr == u8::from(PropertyFormat::M8_BITS) {
@@ -8573,7 +8573,7 @@ impl ChangeDevicePropertyAux {
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, format: u8, num_items: u32) {
-        assert_eq!(self.switch_expr(), u8::from(format), "switch `items` has an inconsistent discriminant");
+        assert_eq!(self.switch_expr(), format, "switch `items` has an inconsistent discriminant");
         match self {
             ChangeDevicePropertyAux::Data8(data8) => {
                 assert_eq!(data8.len(), usize::try_from(num_items).unwrap(), "`data8` has an incorrect length");
@@ -8909,7 +8909,7 @@ pub enum GetDevicePropertyItems {
 }
 impl GetDevicePropertyItems {
     fn try_parse(value: &[u8], format: u8, num_items: u32) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = u8::from(format);
+        let switch_expr = format;
         let mut outer_remaining = value;
         let mut parse_result = None;
         if switch_expr == u8::from(PropertyFormat::M8_BITS) {
@@ -10015,7 +10015,7 @@ pub enum HierarchyChangeData {
 }
 impl HierarchyChangeData {
     fn try_parse(value: &[u8], type_: u16) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = u16::from(type_);
+        let switch_expr = type_;
         let mut outer_remaining = value;
         let mut parse_result = None;
         if switch_expr == u16::from(HierarchyChangeType::ADD_MASTER) {
@@ -10082,7 +10082,7 @@ impl HierarchyChangeData {
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, type_: u16) {
-        assert_eq!(self.switch_expr(), u16::from(type_), "switch `data` has an inconsistent discriminant");
+        assert_eq!(self.switch_expr(), type_, "switch `data` has an inconsistent discriminant");
         match self {
             HierarchyChangeData::AddMaster(add_master) => add_master.serialize_into(bytes),
             HierarchyChangeData::RemoveMaster(remove_master) => remove_master.serialize_into(bytes),
@@ -11588,7 +11588,7 @@ pub enum DeviceClassData {
 }
 impl DeviceClassData {
     fn try_parse(value: &[u8], type_: u16) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = u16::from(type_);
+        let switch_expr = type_;
         let mut outer_remaining = value;
         let mut parse_result = None;
         if switch_expr == u16::from(DeviceClassType::KEY) {
@@ -11667,7 +11667,7 @@ impl DeviceClassData {
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, type_: u16) {
-        assert_eq!(self.switch_expr(), u16::from(type_), "switch `data` has an inconsistent discriminant");
+        assert_eq!(self.switch_expr(), type_, "switch `data` has an inconsistent discriminant");
         match self {
             DeviceClassData::Key(key) => key.serialize_into(bytes),
             DeviceClassData::Button(button) => button.serialize_into(bytes),
@@ -13214,7 +13214,7 @@ pub enum XIChangePropertyAux {
 }
 impl XIChangePropertyAux {
     fn try_parse(value: &[u8], format: u8, num_items: u32) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = u8::from(format);
+        let switch_expr = format;
         let mut outer_remaining = value;
         let mut parse_result = None;
         if switch_expr == u8::from(PropertyFormat::M8_BITS) {
@@ -13283,7 +13283,7 @@ impl XIChangePropertyAux {
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, format: u8, num_items: u32) {
-        assert_eq!(self.switch_expr(), u8::from(format), "switch `items` has an inconsistent discriminant");
+        assert_eq!(self.switch_expr(), format, "switch `items` has an inconsistent discriminant");
         match self {
             XIChangePropertyAux::Data8(data8) => {
                 assert_eq!(data8.len(), usize::try_from(num_items).unwrap(), "`data8` has an incorrect length");
@@ -13624,7 +13624,7 @@ pub enum XIGetPropertyItems {
 }
 impl XIGetPropertyItems {
     fn try_parse(value: &[u8], format: u8, num_items: u32) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = u8::from(format);
+        let switch_expr = format;
         let mut outer_remaining = value;
         let mut parse_result = None;
         if switch_expr == u8::from(PropertyFormat::M8_BITS) {

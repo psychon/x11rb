@@ -194,11 +194,8 @@ fn expr_to_str_impl(
                     format!("x.{}", to_rust_variable_name(&field_ref_expr.field_name))
                 }
             };
-            let field_is_card32 = match resolved_field_ref.field_type {
-                xcbdefs::TypeRef::BuiltIn(xcbdefs::BuiltInType::Card32) => true,
-                _ => false,
-            };
-            if field_is_card32 && cast_to_type == Some("u32") {
+            if cast_to_type == Some(expr_type(expr, "unknown")) {
+                // Field already has the expected type, so no cast needed
                 value
             } else if let Some(t) = cast_to_type {
                 format!("{}::from({})", t, value)
@@ -319,5 +316,32 @@ pub(super) fn format_literal_integer(value: u32) -> String {
         result
     } else {
         value
+    }
+}
+
+pub(super) fn expr_type<'a>(expr: &xcbdefs::Expression, fallback: &'a str) -> &'a str {
+    match expr {
+        xcbdefs::Expression::FieldRef(field) => match field.resolved.get().unwrap().field_type {
+            xcbdefs::TypeRef::BuiltIn(xcbdefs::BuiltInType::Card8) => "u8",
+            xcbdefs::TypeRef::BuiltIn(xcbdefs::BuiltInType::Card16) => "u16",
+            xcbdefs::TypeRef::BuiltIn(xcbdefs::BuiltInType::Card32) => "u32",
+            xcbdefs::TypeRef::BuiltIn(xcbdefs::BuiltInType::Card64) => "u64",
+            xcbdefs::TypeRef::BuiltIn(xcbdefs::BuiltInType::Int8) => "i8",
+            xcbdefs::TypeRef::BuiltIn(xcbdefs::BuiltInType::Int16) => "i16",
+            xcbdefs::TypeRef::BuiltIn(xcbdefs::BuiltInType::Int32) => "i32",
+            xcbdefs::TypeRef::BuiltIn(xcbdefs::BuiltInType::Int64) => "i64",
+            _ => fallback,
+        },
+        xcbdefs::Expression::UnaryOp(op) => expr_type(&op.rhs, fallback),
+        xcbdefs::Expression::BinaryOp(op) => {
+            let lhs = expr_type(&op.lhs, fallback);
+            let rhs = expr_type(&op.rhs, fallback);
+            if lhs == rhs {
+                lhs
+            } else {
+                fallback
+            }
+        }
+        _ => fallback,
     }
 }
