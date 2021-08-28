@@ -124,6 +124,8 @@ impl XCBConnection {
     /// Create a connection wrapper for a raw libxcb `xcb_connection_t`.
     ///
     /// `xcb_disconnect` is called on drop only if `should_drop` is `true`.
+    /// If this function returns an `Err()` and `should_drop` was true, then
+    /// `xcb_disconnect` was already called.
     ///
     /// # Safety
     ///
@@ -135,9 +137,10 @@ impl XCBConnection {
         should_drop: bool,
     ) -> Result<XCBConnection, ConnectError> {
         let ptr = ptr as *mut raw_ffi::xcb_connection_t;
+        let conn = raw_ffi::XcbConnectionWrapper::new(ptr, should_drop);
         let setup = raw_ffi::xcb_get_setup(ptr);
         Ok(XCBConnection {
-            conn: raw_ffi::XcbConnectionWrapper::new(ptr, should_drop),
+            conn,
             setup: Self::parse_setup(setup)?,
             ext_mgr: Default::default(),
             errors: Default::default(),
