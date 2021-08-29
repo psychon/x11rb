@@ -35,9 +35,13 @@ use crate::utils::{RawFdContainer, pretty_print_bitmask, pretty_print_enum};
 use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse, TryParseFd, TryIntoUSize};
 use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
 #[allow(unused_imports)]
+use crate::connection::Connection as X11Connection;
+#[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
 use crate::cookie::ListFontsWithInfoCookie;
 use crate::errors::{ConnectionError, ParseError};
+#[allow(unused_imports)]
+use crate::errors::ReplyOrIdError;
 ```
 
 ## XID types
@@ -678,11 +682,7 @@ pub const NO_OPERATION_REQUEST: u8 = 127;
 pub struct NoOperationRequest;
 impl NoOperationRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
-    where
-        Conn: RequestConnection + ?Sized,
-    {
-        let _ = conn;
+    fn serialize(self) -> BufWithFds<PiecewiseBuf<'static>> {
         let length_so_far = 0;
         let mut request0 = vec![
             NO_OPERATION_REQUEST,
@@ -700,7 +700,7 @@ impl NoOperationRequest {
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn);
+        let (bytes, fds) = self.serialize();
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         conn.send_request_without_reply(&slices, fds)
     }
@@ -761,11 +761,7 @@ pub const GET_INPUT_FOCUS_REQUEST: u8 = 43;
 pub struct GetInputFocusRequest;
 impl GetInputFocusRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<'input, Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
-    where
-        Conn: RequestConnection + ?Sized,
-    {
-        let _ = conn;
+    fn serialize(self) -> BufWithFds<PiecewiseBuf<'static>> {
         let length_so_far = 0;
         let mut request0 = vec![
             GET_INPUT_FOCUS_REQUEST,
@@ -783,7 +779,7 @@ impl GetInputFocusRequest {
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn);
+        let (bytes, fds) = self.serialize();
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         conn.send_request_with_reply(&slices, fds)
     }
@@ -861,127 +857,111 @@ Some requests have optional fields. A bit in the request then indicates the
 presence of this extra field. For this kind of requests, a helper structure is
 generated.
 ```xml
-<request name="ConfigureWindow" opcode="12">
-  <pad bytes="1" />
-  <field type="WINDOW" name="window" />
-  <field type="CARD16" name="value_mask" mask="ConfigWindow" />
-  <pad bytes="2" />
+<request name="CreateWindow" opcode="1">
+  <field type="CARD8" name="depth" />
+  <field type="WINDOW" name="wid" />
+  <field type="WINDOW" name="parent" />
+  <field type="INT16" name="x" />
+  <field type="INT16" name="y" />
+  <field type="CARD16" name="width" />
+  <field type="CARD16" name="height" />
+  <field type="CARD16" name="border_width" />
+  <field type="CARD16" name="class" enum="WindowClass" />
+  <field type="VISUALID" name="visual" />
+  <field type="CARD32" name="value_mask" mask="CW" />
   <switch name="value_list">
       <fieldref>value_mask</fieldref>
       <bitcase>
-        <enumref ref="ConfigWindow">X</enumref>
-        <field type="INT32" name="x" />
+        <enumref ref="CW">BackPixmap</enumref>
+        <field type="PIXMAP" name="background_pixmap" altenum="BackPixmap"/>
       </bitcase>
       <bitcase>
-        <enumref ref="ConfigWindow">Y</enumref>
-        <field type="INT32" name="y" />
+        <enumref ref="CW">BackPixel</enumref>
+        <field type="CARD32" name="background_pixel" />
       </bitcase>
-      <bitcase>
-        <enumref ref="ConfigWindow">Width</enumref>
-        <field type="CARD32" name="width" />
-      </bitcase>
-      <bitcase>
-        <enumref ref="ConfigWindow">Height</enumref>
-        <field type="CARD32" name="height" />
-      </bitcase>
-      <bitcase>
-        <enumref ref="ConfigWindow">BorderWidth</enumref>
-        <field type="CARD32" name="border_width" />
-      </bitcase>
-      <bitcase>
-        <enumref ref="ConfigWindow">Sibling</enumref>
-        <field type="WINDOW" name="sibling" altenum="Window"/>
-      </bitcase>
-      <bitcase>
-        <enumref ref="ConfigWindow">StackMode</enumref>
-        <field type="CARD32" name="stack_mode" enum="StackMode"/>
-      </bitcase>
+      [SNIP - you get the idea]
   </switch>
   <doc>[SNIP]</doc>
 </request>
 ```
 The switch is represented via a helper struct:
 ```rust
-/// Auxiliary and optional information for the `configure_window` function
+/// Auxiliary and optional information for the `create_window` function
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
-pub struct ConfigureWindowAux {
-    pub x: Option<i32>,
-    pub y: Option<i32>,
-    pub width: Option<u32>,
-    pub height: Option<u32>,
-    pub border_width: Option<u32>,
-    pub sibling: Option<Window>,
-    pub stack_mode: Option<StackMode>,
+pub struct CreateWindowAux {
+    pub background_pixmap: Option<Pixmap>,
+    pub background_pixel: Option<u32>,
+    [SNIP - you get the idea]
 }
-impl ConfigureWindowAux {
-    fn try_parse(value: &[u8], value_mask: u16) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = u32::from(value_mask);
+impl CreateWindowAux {
+    fn try_parse(value: &[u8], value_mask: u32) -> Result<(Self, &[u8]), ParseError> {
+        let switch_expr = value_mask;
         let mut outer_remaining = value;
-        let x = if switch_expr & u32::from(ConfigWindow::X) != 0 {
+        let background_pixmap = if switch_expr & u32::from(CW::BACK_PIXMAP) != 0 {
             let remaining = outer_remaining;
-            let (x, remaining) = i32::try_parse(remaining)?;
+            let (background_pixmap, remaining) = Pixmap::try_parse(remaining)?;
             outer_remaining = remaining;
-            Some(x)
+            Some(background_pixmap)
         } else {
             None
         };
-        let y = if switch_expr & u32::from(ConfigWindow::Y) != 0 {
+        let background_pixel = if switch_expr & u32::from(CW::BACK_PIXEL) != 0 {
             let remaining = outer_remaining;
-            let (y, remaining) = i32::try_parse(remaining)?;
+            let (background_pixel, remaining) = u32::try_parse(remaining)?;
             outer_remaining = remaining;
-            Some(y)
+            Some(background_pixel)
         } else {
             None
         };
         [SNIP - you get the idea]
-        let result = ConfigureWindowAux { x, y, width, height, border_width, sibling, stack_mode };
+        let result = CreateWindowAux { background_pixmap, background_pixel, border_pixmap, border_pixel, bit_gravity, win_gravity, backing_store, backing_planes, backing_pixel, override_redirect, save_under, event_mask, do_not_propogate_mask, colormap, cursor };
         Ok((result, outer_remaining))
     }
 }
-impl ConfigureWindowAux {
+impl CreateWindowAux {
     #[allow(dead_code)]
-    fn serialize(&self, value_mask: u16) -> Vec<u8> {
+    fn serialize(&self, value_mask: u32) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result, value_mask);
         result
     }
-    fn serialize_into(&self, bytes: &mut Vec<u8>, value_mask: u16) {
-        assert_eq!(self.switch_expr(), u32::from(value_mask), "switch `value_list` has an inconsistent discriminant");
-        if let Some(x) = self.x {
-            x.serialize_into(bytes);
+    fn serialize_into(&self, bytes: &mut Vec<u8>, value_mask: u32) {
+        assert_eq!(self.switch_expr(), value_mask, "switch `value_list` has an inconsistent discriminant");
+        if let Some(background_pixmap) = self.background_pixmap {
+            background_pixmap.serialize_into(bytes);
         }
-        if let Some(y) = self.y {
-            y.serialize_into(bytes);
+        if let Some(background_pixel) = self.background_pixel {
+            background_pixel.serialize_into(bytes);
         }
         [SNIP - you get the idea]
     }
 }
-impl ConfigureWindowAux {
+impl CreateWindowAux {
     fn switch_expr(&self) -> u32 {
         let mut expr_value = 0;
-        if self.x.is_some() {
-            expr_value |= u32::from(ConfigWindow::X);
+        if self.background_pixmap.is_some() {
+            expr_value |= u32::from(CW::BACK_PIXMAP);
         }
-        if self.y.is_some() {
-            expr_value |= u32::from(ConfigWindow::Y);
+        if self.background_pixel.is_some() {
+            expr_value |= u32::from(CW::BACK_PIXEL);
         }
         [SNIP - you get the idea]
         expr_value
     }
 }
-impl ConfigureWindowAux {
+impl CreateWindowAux {
     /// Create a new instance with all fields unset / not present.
     pub fn new() -> Self {
         Default::default()
     }
-    /// Set the `x` field of this structure.
-    pub fn x<I>(mut self, value: I) -> Self where I: Into<Option<i32>> {
-        self.x = value.into();
+    /// Set the `background_pixmap` field of this structure.
+    pub fn background_pixmap<I>(mut self, value: I) -> Self where I: Into<Option<Pixmap>> {
+        self.background_pixmap = value.into();
         self
     }
-    /// Set the `y` field of this structure.
-    pub fn y<I>(mut self, value: I) -> Self where I: Into<Option<i32>> {
-        self.y = value.into();
+    /// Set the `background_pixel` field of this structure.
+    pub fn background_pixel<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+        self.background_pixel = value.into();
         self
     }
     [SNIP - you get the idea]
@@ -989,38 +969,72 @@ impl ConfigureWindowAux {
 ```
 This code is generated for the actual request:
 ```rust
-/// Opcode for the ConfigureWindow request
-pub const CONFIGURE_WINDOW_REQUEST: u8 = 12;
+/// Opcode for the CreateWindow request
+pub const CREATE_WINDOW_REQUEST: u8 = 1;
 /// [SNIP]
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct ConfigureWindowRequest<'input> {
-    pub window: Window,
-    pub value_list: Cow<'input, ConfigureWindowAux>,
+pub struct CreateWindowRequest<'input> {
+    pub depth: u8,
+    pub wid: Window,
+    pub parent: Window,
+    pub x: i16,
+    pub y: i16,
+    pub width: u16,
+    pub height: u16,
+    pub border_width: u16,
+    pub class: WindowClass,
+    pub visual: Visualid,
+    pub value_list: Cow<'input, CreateWindowAux>,
 }
-impl<'input> ConfigureWindowRequest<'input> {
+impl<'input> CreateWindowRequest<'input> {
     /// Serialize this request into bytes for the provided connection
-    fn serialize<Conn>(self, conn: &Conn) -> BufWithFds<PiecewiseBuf<'input>>
-    where
-        Conn: RequestConnection + ?Sized,
-    {
-        let _ = conn;
+    fn serialize(self) -> BufWithFds<PiecewiseBuf<'input>> {
         let length_so_far = 0;
-        let window_bytes = self.window.serialize();
-        let value_mask = u16::try_from(self.value_list.switch_expr()).unwrap();
+        let depth_bytes = self.depth.serialize();
+        let wid_bytes = self.wid.serialize();
+        let parent_bytes = self.parent.serialize();
+        let x_bytes = self.x.serialize();
+        let y_bytes = self.y.serialize();
+        let width_bytes = self.width.serialize();
+        let height_bytes = self.height.serialize();
+        let border_width_bytes = self.border_width.serialize();
+        let class_bytes = u16::from(self.class).serialize();
+        let visual_bytes = self.visual.serialize();
+        let value_mask: u32 = self.value_list.switch_expr();
         let value_mask_bytes = value_mask.serialize();
         let mut request0 = vec![
-            CONFIGURE_WINDOW_REQUEST,
+            CREATE_WINDOW_REQUEST,
+            depth_bytes[0],
             0,
             0,
-            0,
-            window_bytes[0],
-            window_bytes[1],
-            window_bytes[2],
-            window_bytes[3],
+            wid_bytes[0],
+            wid_bytes[1],
+            wid_bytes[2],
+            wid_bytes[3],
+            parent_bytes[0],
+            parent_bytes[1],
+            parent_bytes[2],
+            parent_bytes[3],
+            x_bytes[0],
+            x_bytes[1],
+            y_bytes[0],
+            y_bytes[1],
+            width_bytes[0],
+            width_bytes[1],
+            height_bytes[0],
+            height_bytes[1],
+            border_width_bytes[0],
+            border_width_bytes[1],
+            class_bytes[0],
+            class_bytes[1],
+            visual_bytes[0],
+            visual_bytes[1],
+            visual_bytes[2],
+            visual_bytes[3],
             value_mask_bytes[0],
             value_mask_bytes[1],
-            0,
-            0,
+            value_mask_bytes[2],
+            value_mask_bytes[3],
         ];
         let length_so_far = length_so_far + request0.len();
         let value_list_bytes = self.value_list.serialize(value_mask);
@@ -1036,46 +1050,81 @@ impl<'input> ConfigureWindowRequest<'input> {
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(conn);
+        let (bytes, fds) = self.serialize();
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         conn.send_request_without_reply(&slices, fds)
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
-        if header.major_opcode != CONFIGURE_WINDOW_REQUEST {
+        if header.major_opcode != CREATE_WINDOW_REQUEST {
             return Err(ParseError::InvalidValue);
         }
         let remaining = &[header.minor_opcode];
-        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
+        let (depth, remaining) = u8::try_parse(remaining)?;
         let _ = remaining;
-        let (window, remaining) = Window::try_parse(value)?;
-        let (value_mask, remaining) = u16::try_parse(remaining)?;
-        let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
-        let (value_list, remaining) = ConfigureWindowAux::try_parse(remaining, value_mask)?;
+        let (wid, remaining) = Window::try_parse(value)?;
+        let (parent, remaining) = Window::try_parse(remaining)?;
+        let (x, remaining) = i16::try_parse(remaining)?;
+        let (y, remaining) = i16::try_parse(remaining)?;
+        let (width, remaining) = u16::try_parse(remaining)?;
+        let (height, remaining) = u16::try_parse(remaining)?;
+        let (border_width, remaining) = u16::try_parse(remaining)?;
+        let (class, remaining) = u16::try_parse(remaining)?;
+        let class = class.into();
+        let (visual, remaining) = Visualid::try_parse(remaining)?;
+        let (value_mask, remaining) = u32::try_parse(remaining)?;
+        let (value_list, remaining) = CreateWindowAux::try_parse(remaining, value_mask)?;
         let _ = remaining;
-        Ok(ConfigureWindowRequest {
-            window,
+        Ok(CreateWindowRequest {
+            depth,
+            wid,
+            parent,
+            x,
+            y,
+            width,
+            height,
+            border_width,
+            class,
+            visual,
             value_list: Cow::Owned(value_list),
         })
     }
-    /// Clone all borrowed data in this ConfigureWindowRequest.
-    pub fn into_owned(self) -> ConfigureWindowRequest<'static> {
-        ConfigureWindowRequest {
-            window: self.window,
+    /// Clone all borrowed data in this CreateWindowRequest.
+    pub fn into_owned(self) -> CreateWindowRequest<'static> {
+        CreateWindowRequest {
+            depth: self.depth,
+            wid: self.wid,
+            parent: self.parent,
+            x: self.x,
+            y: self.y,
+            width: self.width,
+            height: self.height,
+            border_width: self.border_width,
+            class: self.class,
+            visual: self.visual,
             value_list: Cow::Owned(self.value_list.into_owned()),
         }
     }
 }
-impl<'input> Request for ConfigureWindowRequest<'input> {
+impl<'input> Request for CreateWindowRequest<'input> {
     type Reply = ();
 }
 /// [SNIP]
-pub fn configure_window<'c, 'input, Conn>(conn: &'c Conn, window: Window, value_list: &'input ConfigureWindowAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn create_window<'c, 'input, Conn>(conn: &'c Conn, depth: u8, wid: Window, parent: Window, x: i16, y: i16, width: u16, height: u16, border_width: u16, class: WindowClass, visual: Visualid, value_list: &'input CreateWindowAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let request0 = ConfigureWindowRequest {
-        window,
+    let request0 = CreateWindowRequest {
+        depth,
+        wid,
+        parent,
+        x,
+        y,
+        width,
+        height,
+        border_width,
+        class,
+        visual,
         value_list: Cow::Borrowed(value_list),
     };
     request0.send(conn)
@@ -1084,9 +1133,9 @@ where
 And this code is in the extension trait:
 ```rust
     /// [SNIP]
-    fn configure_window<'c, 'input>(&'c self, window: Window, value_list: &'input ConfigureWindowAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    pub fn create_window(conn: &'c C, depth: u8, parent: Window, x: i16, y: i16, width: u16, height: u16, border_width: u16, class: WindowClass, visual: Visualid, value_list: &CreateWindowAux) -> Result<Self, ReplyOrIdError>
     {
-        configure_window(self, window, value_list)
+        Ok(Self::create_window_and_get_cookie(conn, depth, parent, x, y, width, height, border_width, class, visual, value_list)?.0)
     }
 ```
 
