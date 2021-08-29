@@ -1,4 +1,4 @@
-# Version 0.9.0 (2021-XX-XX)
+# Version 0.9.0 (2021-08-29)
 
 New features:
 * Add `protocol::xproto::ClientMessageEvent::new()`.
