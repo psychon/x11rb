@@ -1,3 +1,33 @@
+# Version 0.9.0 (2021-XX-XX)
+
+New features:
+* Add `protocol::xproto::ClientMessageEvent::new()`.
+* Add human readable information about the request causing the error to
+  `x11_utils::X11Error`.
+* Add RAII wrappers for many resources. For example,
+  `protocol::xproto::PixmapWrapper` calls `free_pixmap()` in its `Drop`
+  implementation.
+* Add `wrapper::GrabServer` that calls `ungrab_server()` in its `Drop`
+  implementation.
+
+Breaking changes:
+* Fix some `clippy::upper_case_acronyms` warnings:
+  * Variants in `errors::ConnectError`:
+    * `IOError` becomes `IoError`
+    * `ZeroIDMask` becomes `ZeroIdMask`
+    * `FDPassingFailed` becomes `FdPassingFailed`
+  * Variants in `image::ImageOrder`:
+    * `LSBFirst` becomes `LsbFirst`
+    * `MSBFirst` becomes `MsbFirst`
+
+Minor changes:
+* `x11rb::connect()` now always returns a `RustConnection`. Previously, it
+  returned `impl Connection` and used `XCBConnection` if that was enabled.
+* Deal with warnings from newest clippy.
+* Split up some large modules in the code generator.
+* Update to latest version of crate dependencies that still support our MSRV.
+* Bump our MSRV from Rust 1.40 to Rust 1.41.
+
 # Version 0.8.1 (2021-03-10)
 
 Minor changes:
