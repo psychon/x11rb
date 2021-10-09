@@ -108,6 +108,11 @@ mod unsafe_code {
 pub use unsafe_code::CSlice;
 
 #[cfg(unix)]
+pub(crate) fn nix_error_to_io(e: nix::Error) -> std::io::Error {
+    std::io::Error::from_raw_os_error(e as i32)
+}
+
+#[cfg(unix)]
 mod raw_fd_container {
     use std::mem::forget;
     #[cfg(unix)]

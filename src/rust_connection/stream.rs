@@ -8,7 +8,7 @@ use std::os::unix::net::UnixStream;
 use std::os::windows::io::{AsRawSocket, IntoRawSocket, RawSocket};
 
 use super::xauth::Family;
-use crate::utils::RawFdContainer;
+use crate::utils::{nix_error_to_io, RawFdContainer};
 
 /// The kind of operation that one want to poll for.
 #[derive(Debug, Clone, Copy)]
@@ -354,7 +354,7 @@ fn do_write(
                 Ok(n) => return Ok(n),
                 // try again
                 Err(nix::Error::EINTR) => {}
-                Err(e) => return Err(e.into()),
+                Err(e) => return Err(nix_error_to_io(e)),
             }
         }
     }
@@ -394,7 +394,7 @@ impl Stream for DefaultStream {
                 match poll(&mut poll_fds, -1) {
                     Ok(_) => break,
                     Err(nix::Error::EINTR) => {}
-                    Err(e) => return Err(e.into()),
+                    Err(e) => return Err(nix_error_to_io(e)),
                 }
             }
             // Let the errors (POLLERR) be handled when trying to read or write.
@@ -443,7 +443,7 @@ impl Stream for DefaultStream {
                     Ok(msg) => break msg,
                     // try again
                     Err(nix::Error::EINTR) => {}
-                    Err(e) => return Err(e.into()),
+                    Err(e) => return Err(nix_error_to_io(e)),
                 }
             };
 
