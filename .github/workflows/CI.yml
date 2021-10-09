@@ -20,6 +20,8 @@ jobs:
       with:
         profile: minimal
         toolchain: stable
+    - name: Clear src/protocol directory
+      run: rm src/protocol/*
     - name: Run code generator
       run: make
     - name: Check for changes
