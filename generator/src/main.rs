@@ -9,17 +9,12 @@
 )]
 #![forbid(unsafe_code)]
 
-use std::io::{Read as _, Write as _};
 use std::path::{Path, PathBuf};
 
 mod generator;
 
 #[derive(Debug)]
 enum Error {
-    FileOpenFailed {
-        path: PathBuf,
-        error: std::io::Error,
-    },
     FileReadFailed {
         path: PathBuf,
         error: std::io::Error,
@@ -53,25 +48,6 @@ enum Error {
     },
 }
 
-fn read_file(path: &Path) -> Result<Vec<u8>, Error> {
-    let mut file = std::fs::OpenOptions::new()
-        .read(true)
-        .write(false)
-        .open(path)
-        .map_err(|e| Error::FileOpenFailed {
-            path: path.to_path_buf(),
-            error: e,
-        })?;
-
-    let mut buf = Vec::new();
-    file.read_to_end(&mut buf)
-        .map_err(|e| Error::FileReadFailed {
-            path: path.to_path_buf(),
-            error: e,
-        })?;
-    Ok(buf)
-}
-
 fn list_xmls(dir_path: &Path) -> Result<Vec<PathBuf>, Error> {
     let mut files = Vec::new();
     let dir_reader = std::fs::read_dir(dir_path).map_err(|e| Error::DirOpenFailed {
@@ -93,7 +69,10 @@ fn list_xmls(dir_path: &Path) -> Result<Vec<PathBuf>, Error> {
 }
 
 fn load_namespace(path: &Path, parser: &mut xcbgen::Parser) -> Result<(), Error> {
-    let file_bytes = read_file(path)?;
+    let file_bytes = std::fs::read(path).map_err(|e| Error::FileReadFailed {
+        path: path.to_path_buf(),
+        error: e,
+    })?;
     let file_string = String::from_utf8(file_bytes).map_err(|e| Error::FileIsNotUtf8 {
         path: path.to_path_buf(),
         error: e.utf8_error(),
@@ -116,28 +95,16 @@ fn load_namespace(path: &Path, parser: &mut xcbgen::Parser) -> Result<(), Error>
 /// if the contents have not changed.
 fn replace_file_if_different(file_path: &Path, data: &[u8]) -> Result<(), Error> {
     if file_path.exists() {
-        let existing_data = read_file(file_path)?;
+        let existing_data = std::fs::read(file_path).map_err(|e| Error::FileReadFailed {
+            path: file_path.to_path_buf(),
+            error: e,
+        })?;
         if existing_data == data {
             return Ok(());
         }
     }
 
-    let mut file = std::fs::OpenOptions::new()
-        .read(false)
-        .write(true)
-        .truncate(true)
-        .create(true)
-        .open(file_path)
-        .map_err(|e| Error::FileOpenFailed {
-            path: file_path.to_path_buf(),
-            error: e,
-        })?;
-
-    file.write_all(data).map_err(|e| Error::FileWriteFailed {
-        path: file_path.to_path_buf(),
-        error: e,
-    })?;
-    file.flush().map_err(|e| Error::FileWriteFailed {
+    std::fs::write(file_path, data).map_err(|e| Error::FileWriteFailed {
         path: file_path.to_path_buf(),
         error: e,
     })?;
