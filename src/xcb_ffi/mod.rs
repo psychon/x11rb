@@ -294,6 +294,22 @@ impl XCBConnection {
         }
     }
 
+    /// Parse file descriptors from reply data
+    fn parse_fds(buffer: Buffer) -> BufWithFds {
+        // Get a pointer to the array of integers where libxcb saved the FD numbers.
+        // libxcb saves the list of FDs after the data of the reply. Since the reply's
+        // length is encoded in "number of 4 bytes block", the following pointer is aligned
+        // correctly (if malloc() returned an aligned chunk, which it does).
+        #[allow(clippy::cast_ptr_alignment)]
+        let fd_ptr = (unsafe { buffer.as_ptr().add(buffer.len()) }) as *const RawFd;
+
+        // The number of FDs is in the second byte (= buffer[1]) in all replies.
+        let fd_slice = unsafe { std::slice::from_raw_parts(fd_ptr, usize::from(buffer[1])) };
+        let fd_vec = fd_slice.iter().map(|&fd| RawFdContainer::new(fd)).collect();
+
+        (buffer, fd_vec)
+    }
+
     unsafe fn wrap_reply(&self, reply: *const u8, sequence: SequenceNumber) -> CSlice {
         // Update our "max sequence number received" field
         atomic_u64_max(&self.maximum_sequence_received, sequence);
@@ -424,6 +440,51 @@ impl RequestConnection for XCBConnection {
             .extension_information(self, extension_name)
     }
 
+    fn poll_for_reply_or_raw_error(
+        &self,
+        sequence: SequenceNumber,
+    ) -> Result<Option<ReplyOrError<CSlice>>, ConnectionError> {
+        match self.poll_for_reply(sequence) {
+            Err(()) | Ok(None) => {
+                let error = unsafe { raw_ffi::xcb_connection_has_error(self.conn.as_ptr()) };
+                if error == 0 {
+                    Ok(None)
+                } else {
+                    Err(Self::connection_error_from_c_error(error))
+                }
+            }
+            Ok(Some(reply)) => {
+                if reply[0] == 0 {
+                    Ok(Some(ReplyOrError::Error(reply)))
+                } else {
+                    Ok(Some(ReplyOrError::Reply(reply)))
+                }
+            }
+        }
+    }
+
+    #[cfg(unix)]
+    fn poll_for_reply_with_fds_raw(
+        &self,
+        sequence: SequenceNumber,
+    ) -> Result<Option<ReplyOrError<BufWithFds, Buffer>>, ConnectionError> {
+        let buffer = match self.poll_for_reply_or_raw_error(sequence)? {
+            Some(ReplyOrError::Reply(reply)) => reply,
+            Some(ReplyOrError::Error(error)) => return Ok(Some(ReplyOrError::Error(error))),
+            None => return Ok(None),
+        };
+
+        Ok(Some(ReplyOrError::Reply(Self::parse_fds(buffer))))
+    }
+
+    #[cfg(not(unix))]
+    fn poll_for_reply_with_fds_raw(
+        &self,
+        sequence: SequenceNumber,
+    ) -> Result<Option<ReplyOrError<BufWithFds, Buffer>>, ConnectionError> {
+        unimplemented!("FD passing is currently only implemented on Unix-like systems")
+    }
+
     fn wait_for_reply_or_raw_error(
         &self,
         sequence: SequenceNumber,
@@ -461,18 +522,7 @@ impl RequestConnection for XCBConnection {
             ReplyOrError::Error(error) => return Ok(ReplyOrError::Error(error)),
         };
 
-        // Get a pointer to the array of integers where libxcb saved the FD numbers.
-        // libxcb saves the list of FDs after the data of the reply. Since the reply's
-        // length is encoded in "number of 4 bytes block", the following pointer is aligned
-        // correctly (if malloc() returned an aligned chunk, which it does).
-        #[allow(clippy::cast_ptr_alignment)]
-        let fd_ptr = (unsafe { buffer.as_ptr().add(buffer.len()) }) as *const RawFd;
-
-        // The number of FDs is in the second byte (= buffer[1]) in all replies.
-        let fd_slice = unsafe { std::slice::from_raw_parts(fd_ptr, usize::from(buffer[1])) };
-        let fd_vec = fd_slice.iter().map(|&fd| RawFdContainer::new(fd)).collect();
-
-        Ok(ReplyOrError::Reply((buffer, fd_vec)))
+        Ok(ReplyOrError::Reply(Self::parse_fds(buffer)))
     }
 
     #[cfg(not(unix))]
@@ -519,7 +569,7 @@ impl RequestConnection for XCBConnection {
 
 impl Connection for XCBConnection {
     fn wait_for_raw_event_with_sequence(&self) -> Result<RawEventAndSeqNumber, ConnectionError> {
-        if let Some(error) = self.errors.get(self) {
+        if let Some(error) = self.errors.get(self, false) {
             return Ok((error.1, error.0));
         }
         unsafe {
@@ -531,10 +581,25 @@ impl Connection for XCBConnection {
         }
     }
 
+    fn poll_for_queued_raw_event_with_sequence(
+        &self,
+    ) -> Result<Option<RawEventAndSeqNumber>, ConnectionError> {
+        if let Some(error) = self.errors.get(self, true) {
+            return Ok(Some((error.1, error.0)));
+        }
+        unsafe {
+            let event = raw_ffi::xcb_poll_for_queued_event(self.conn.as_ptr());
+            if event.is_null() {
+                return Ok(None);
+            }
+            Ok(Some(self.wrap_event(event as _)?))
+        }
+    }
+
     fn poll_for_raw_event_with_sequence(
         &self,
     ) -> Result<Option<RawEventAndSeqNumber>, ConnectionError> {
-        if let Some(error) = self.errors.get(self) {
+        if let Some(error) = self.errors.get(self, false) {
             return Ok(Some((error.1, error.0)));
         }
         unsafe {

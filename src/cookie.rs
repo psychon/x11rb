@@ -229,6 +229,26 @@ where
         Ok(R::try_parse(self.raw_reply()?.as_ref())?.0)
     }
 
+    /// Poll for a raw reply that the server sent.
+    pub fn poll_raw_reply(me: &mut Option<Self>) -> Result<Option<C::Buf>, ReplyError> {
+        if let Some(cookie) = me {
+            let conn = cookie.raw_cookie.connection;
+            if let Some(reply) = conn.poll_for_reply_or_error(cookie.sequence_number())? {
+                std::mem::forget(me.take());
+                return Ok(Some(reply));
+            }
+        }
+        Ok(None)
+    }
+
+    /// Poll for a reply that the server sent.
+    pub fn poll_reply(me: &mut Option<Self>) -> Result<Option<R>, ReplyError> {
+        match Self::poll_raw_reply(me)? {
+            Some(reply) => Ok(Some(R::try_parse(reply.as_ref())?.0)),
+            None => Ok(None),
+        }
+    }
+
     /// Get the reply that the server sent, but have errors handled as events.
     pub fn reply_unchecked(self) -> Result<Option<R>, ConnectionError> {
         self.raw_reply_unchecked()?
@@ -304,6 +324,26 @@ where
     pub fn reply(self) -> Result<R, ReplyError> {
         let (buffer, mut fds) = self.raw_reply()?;
         Ok(R::try_parse_fd(buffer.as_ref(), &mut fds)?.0)
+    }
+
+    /// Poll for a raw reply that the server sent.
+    pub fn poll_raw_reply(me: &mut Option<Self>) -> Result<Option<BufWithFds<C::Buf>>, ReplyError> {
+        if let Some(cookie) = me {
+            let conn = cookie.raw_cookie.connection;
+            if let Some(reply) = conn.poll_for_reply_with_fds(cookie.sequence_number())? {
+                std::mem::forget(me.take());
+                return Ok(Some(reply));
+            }
+        }
+        Ok(None)
+    }
+
+    /// Poll for a reply that the server sent.
+    pub fn poll_reply(me: &mut Option<Self>) -> Result<Option<R>, ReplyError> {
+        match Self::poll_raw_reply(me)? {
+            Some((buffer, mut fds)) => Ok(Some(R::try_parse_fd(buffer.as_ref(), &mut fds)?.0)),
+            None => Ok(None),
+        }
     }
 }
 

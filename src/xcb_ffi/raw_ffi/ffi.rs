@@ -136,6 +136,7 @@ make_ffi_fn_defs! {
     fn xcb_prefetch_maximum_request_length(c: *mut xcb_connection_t);
     fn xcb_wait_for_event(c: *mut xcb_connection_t) -> *mut xcb_generic_event_t;
     fn xcb_poll_for_event(c: *mut xcb_connection_t) -> *mut xcb_generic_event_t;
+    fn xcb_poll_for_queued_event(c: *mut xcb_connection_t) -> *mut xcb_generic_event_t;
     fn xcb_request_check(
         c: *mut xcb_connection_t,
         void_cookie: xcb_void_cookie_t

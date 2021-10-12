@@ -32,12 +32,16 @@ impl PendingErrors {
         self.inner.lock().unwrap().in_flight.push(Reverse(sequence));
     }
 
-    pub(crate) fn get(&self, conn: &XCBConnection) -> Option<(SequenceNumber, Buffer)> {
+    pub(crate) fn get(
+        &self,
+        conn: &XCBConnection,
+        queued: bool,
+    ) -> Option<(SequenceNumber, Buffer)> {
         let mut inner = self.inner.lock().unwrap();
 
         // Check if we already have an element at hand
         let err = inner.pending.pop_front();
-        if err.is_some() {
+        if err.is_some() || queued {
             return err;
         }
 

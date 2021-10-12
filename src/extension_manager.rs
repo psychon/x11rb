@@ -214,6 +214,21 @@ mod test {
             unimplemented!()
         }
 
+        fn poll_for_reply_or_raw_error(
+            &self,
+            _sequence: SequenceNumber,
+        ) -> Result<Option<ReplyOrError<Self::Buf>>, ConnectionError> {
+            unimplemented!();
+        }
+
+        fn poll_for_reply_with_fds_raw(
+            &self,
+            _sequence: SequenceNumber,
+        ) -> Result<Option<ReplyOrError<BufWithFds<Self::Buf>, Self::Buf>>, ConnectionError>
+        {
+            unimplemented!();
+        }
+
         fn wait_for_reply_or_raw_error(
             &self,
             sequence: SequenceNumber,

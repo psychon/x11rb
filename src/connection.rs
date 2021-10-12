@@ -171,6 +171,66 @@ pub trait RequestConnection {
         extension_name: &'static str,
     ) -> Result<Option<ExtensionInformation>, ConnectionError>;
 
+    /// Poll for a reply to a request.
+    ///
+    /// The given sequence number identifies the request for which replies are expected. If the X11
+    /// server answered the request with an error, that error is returned as an `Err`.
+    ///
+    /// Users of this library will most likely not want to use this function directly.
+    fn poll_for_reply_or_error(
+        &self,
+        sequence: SequenceNumber,
+    ) -> Result<Option<Self::Buf>, ReplyError> {
+        match self.poll_for_reply_or_raw_error(sequence)? {
+            Some(ReplyOrError::Reply(reply)) => Ok(Some(reply)),
+            Some(ReplyOrError::Error(error)) => {
+                Err(ReplyError::X11Error(self.parse_error(error.as_ref())?))
+            }
+            None => Ok(None),
+        }
+    }
+
+    /// Poll for a reply to a request.
+    ///
+    /// The given sequence number identifies the request for which replies are expected. If the X11
+    /// server answered the request with an error, that error is returned as an `Err`.
+    ///
+    /// Users of this library will most likely not want to use this function directly.
+    fn poll_for_reply_or_raw_error(
+        &self,
+        sequence: SequenceNumber,
+    ) -> Result<Option<ReplyOrError<Self::Buf>>, ConnectionError>;
+
+    /// Poll for a reply to a request that has FDs.
+    ///
+    /// The given sequence number identifies the request for which replies are expected. If the X11
+    /// server answered the request with an error, that error is returned as an `Err`.
+    ///
+    /// Users of this library will most likely not want to use this function directly.
+    fn poll_for_reply_with_fds(
+        &self,
+        sequence: SequenceNumber,
+    ) -> Result<Option<BufWithFds<Self::Buf>>, ReplyError> {
+        match self.poll_for_reply_with_fds_raw(sequence)? {
+            Some(ReplyOrError::Reply(reply)) => Ok(Some(reply)),
+            Some(ReplyOrError::Error(error)) => {
+                Err(ReplyError::X11Error(self.parse_error(error.as_ref())?))
+            }
+            None => Ok(None),
+        }
+    }
+
+    /// Poll for a queued reply to a request that has FDs.
+    ///
+    /// The given sequence number identifies the request for which replies are expected. If the X11
+    /// server answered the request with an error, that error is returned as an `Err`.
+    ///
+    /// Users of this library will most likely not want to use this function directly.
+    fn poll_for_reply_with_fds_raw(
+        &self,
+        sequence: SequenceNumber,
+    ) -> Result<Option<ReplyOrError<BufWithFds<Self::Buf>, Self::Buf>>, ConnectionError>;
+
     /// Wait for the reply to a request.
     ///
     /// The given sequence number identifies the request for which replies are expected. If the X11
@@ -325,8 +385,18 @@ pub trait Connection: RequestConnection {
     }
 
     /// Poll for a new raw/unparsed event from the X11 server.
+    fn poll_for_queued_event(&self) -> Result<Option<Event>, ConnectionError> {
+        Ok(self.poll_for_queued_event_with_sequence()?.map(|r| r.0))
+    }
+
+    /// Poll for a new raw/unparsed event from the X11 server.
     fn poll_for_raw_event(&self) -> Result<Option<Self::Buf>, ConnectionError> {
         Ok(self.poll_for_raw_event_with_sequence()?.map(|r| r.0))
+    }
+
+    /// Poll for a new raw/unparsed event from the X11 server.
+    fn poll_for_queued_raw_event(&self) -> Result<Option<Self::Buf>, ConnectionError> {
+        Ok(self.poll_for_queued_raw_event_with_sequence()?.map(|r| r.0))
     }
 
     /// Poll for a new event from the X11 server.
@@ -337,8 +407,23 @@ pub trait Connection: RequestConnection {
         })
     }
 
+    /// Poll for a new event from the X11 server.
+    fn poll_for_queued_event_with_sequence(
+        &self,
+    ) -> Result<Option<EventAndSeqNumber>, ConnectionError> {
+        Ok(match self.poll_for_queued_raw_event_with_sequence()? {
+            Some((event, seq)) => Some((self.parse_event(event.as_ref())?, seq)),
+            None => None,
+        })
+    }
+
     /// Poll for a new unparsed/raw event from the X11 server.
     fn poll_for_raw_event_with_sequence(
+        &self,
+    ) -> Result<Option<RawEventAndSeqNumber<Self::Buf>>, ConnectionError>;
+
+    /// Poll for a queued unparsed/raw event from the X11 server.
+    fn poll_for_queued_raw_event_with_sequence(
         &self,
     ) -> Result<Option<RawEventAndSeqNumber<Self::Buf>>, ConnectionError>;
 
@@ -425,6 +510,18 @@ pub enum DiscardMode {
 ///     # }
 ///     # fn extension_information(&self, ext: &'static str)
 ///     # -> Result<Option<ExtensionInformation>, ConnectionError> {
+///     #    unimplemented!()
+///     # }
+///     # fn poll_for_reply_or_raw_error(
+///     #   &self,
+///     #   sequence: SequenceNumber,
+///     # ) -> Result<Option<ReplyOrError<Self::Buf>>, ConnectionError> {
+///     #    unimplemented!()
+///     # }
+///     # fn poll_for_reply_with_fds_raw(
+///     #     &self,
+///     #     sequence: SequenceNumber,
+///     # ) -> Result<Option<ReplyOrError<BufWithFds<Self::Buf>, Self::Buf>>, ConnectionError> {
 ///     #    unimplemented!()
 ///     # }
 ///     # fn wait_for_reply_or_raw_error(&self, sequence: SequenceNumber)

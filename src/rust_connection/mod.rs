@@ -508,6 +508,32 @@ impl<S: Stream> RequestConnection for RustConnection<S> {
             .extension_information(self, extension_name)
     }
 
+    fn poll_for_reply_or_raw_error(
+        &self,
+        sequence: SequenceNumber,
+    ) -> Result<Option<ReplyOrError<Buffer>>, ConnectionError> {
+        Ok(self
+            .poll_for_reply_with_fds_raw(sequence)?
+            .map(|result| match result {
+                ReplyOrError::Reply((reply, _fds)) => ReplyOrError::Reply(reply),
+                ReplyOrError::Error(e) => ReplyOrError::Error(e),
+            }))
+    }
+
+    fn poll_for_reply_with_fds_raw(
+        &self,
+        sequence: SequenceNumber,
+    ) -> Result<Option<ReplyOrError<BufWithFds, Buffer>>, ConnectionError> {
+        let mut inner = self.inner.lock().unwrap();
+        Ok(inner.poll_for_reply_or_error(sequence).map(|reply| {
+            if reply.0[0] == 0 {
+                ReplyOrError::Error(reply.0)
+            } else {
+                ReplyOrError::Reply(reply)
+            }
+        }))
+    }
+
     fn wait_for_reply_or_raw_error(
         &self,
         sequence: SequenceNumber,
@@ -637,6 +663,13 @@ impl<S: Stream> Connection for RustConnection<S> {
             inner = self.read_packet_and_enqueue(inner, BlockingMode::NonBlocking)?;
             Ok(inner.poll_for_event_with_sequence())
         }
+    }
+
+    fn poll_for_queued_raw_event_with_sequence(
+        &self,
+    ) -> Result<Option<RawEventAndSeqNumber>, ConnectionError> {
+        let mut inner = self.inner.lock().unwrap();
+        Ok(inner.poll_for_event_with_sequence())
     }
 
     fn flush(&self) -> Result<(), ConnectionError> {

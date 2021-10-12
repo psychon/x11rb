@@ -38,6 +38,12 @@ pub(crate) unsafe fn xcb_poll_for_event(_c: *mut xcb_connection_t) -> *mut xcb_g
     unimplemented!();
 }
 
+pub(crate) unsafe fn xcb_poll_for_queued_event(
+    _c: *mut xcb_connection_t,
+) -> *mut xcb_generic_event_t {
+    unimplemented!();
+}
+
 pub(crate) unsafe fn xcb_request_check(
     _c: *mut xcb_connection_t,
     _void_cookie: xcb_void_cookie_t,
