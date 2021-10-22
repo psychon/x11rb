@@ -226,6 +226,20 @@ mod test {
             unimplemented!()
         }
 
+        fn poll_for_reply_or_raw_error(
+            &self,
+            _sequence: SequenceNumber,
+        ) -> Result<Option<ReplyOrError<Self::Buf>>, ConnectionError> {
+            unimplemented!()
+        }
+
+        fn poll_for_reply_with_fds_raw(
+            &self,
+            _sequence: SequenceNumber,
+        ) -> Result<Option<ReplyOrError<BufWithFds<Self::Buf>, Self::Buf>>, ConnectionError> {
+            unimplemented!()
+        }
+
         fn check_for_raw_error(
             &self,
             _: SequenceNumber,
@@ -258,6 +272,12 @@ mod test {
         }
 
         fn poll_for_raw_event_with_sequence(
+            &self,
+        ) -> Result<Option<RawEventAndSeqNumber<Self::Buf>>, ConnectionError> {
+            unimplemented!()
+        }
+
+        fn poll_for_queued_raw_event_with_sequence(
             &self,
         ) -> Result<Option<RawEventAndSeqNumber<Self::Buf>>, ConnectionError> {
             unimplemented!()
