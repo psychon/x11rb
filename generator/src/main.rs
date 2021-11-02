@@ -16,31 +16,31 @@ mod generator;
 #[derive(Debug)]
 enum Error {
     FileReadFailed {
-        path: PathBuf,
+        _path: PathBuf,
         _error: std::io::Error,
     },
     FileWriteFailed {
-        path: PathBuf,
+        _path: PathBuf,
         _error: std::io::Error,
     },
     DirOpenFailed {
-        path: PathBuf,
+        _path: PathBuf,
         _error: std::io::Error,
     },
     DirReadFailed {
-        path: PathBuf,
+        _path: PathBuf,
         _error: std::io::Error,
     },
     FileIsNotUtf8 {
-        path: PathBuf,
+        _path: PathBuf,
         _error: std::str::Utf8Error,
     },
     XmlParseFailed {
-        path: PathBuf,
+        _path: PathBuf,
         _error: roxmltree::Error,
     },
     XcbParseFailed {
-        path: PathBuf,
+        _path: PathBuf,
         _error: xcbgen::ParseError,
     },
     XcbResolveFailed {
@@ -51,12 +51,12 @@ enum Error {
 fn list_xmls(dir_path: &Path) -> Result<Vec<PathBuf>, Error> {
     let mut files = Vec::new();
     let dir_reader = std::fs::read_dir(dir_path).map_err(|e| Error::DirOpenFailed {
-        path: dir_path.to_path_buf(),
+        _path: dir_path.to_path_buf(),
         _error: e,
     })?;
     for entry in dir_reader {
         let entry = entry.map_err(|e| Error::DirReadFailed {
-            path: dir_path.to_path_buf(),
+            _path: dir_path.to_path_buf(),
             _error: e,
         })?;
         let file_path = entry.path();
@@ -70,21 +70,21 @@ fn list_xmls(dir_path: &Path) -> Result<Vec<PathBuf>, Error> {
 
 fn load_namespace(path: &Path, parser: &mut xcbgen::Parser) -> Result<(), Error> {
     let file_bytes = std::fs::read(path).map_err(|e| Error::FileReadFailed {
-        path: path.to_path_buf(),
+        _path: path.to_path_buf(),
         _error: e,
     })?;
     let file_string = String::from_utf8(file_bytes).map_err(|e| Error::FileIsNotUtf8 {
-        path: path.to_path_buf(),
+        _path: path.to_path_buf(),
         _error: e.utf8_error(),
     })?;
     let xml_doc = roxmltree::Document::parse(&file_string).map_err(|e| Error::XmlParseFailed {
-        path: path.to_path_buf(),
+        _path: path.to_path_buf(),
         _error: e,
     })?;
     parser
         .parse_namespace(xml_doc.root().first_element_child().unwrap())
         .map_err(|e| Error::XcbParseFailed {
-            path: path.to_path_buf(),
+            _path: path.to_path_buf(),
             _error: e,
         })?;
     Ok(())
@@ -96,7 +96,7 @@ fn load_namespace(path: &Path, parser: &mut xcbgen::Parser) -> Result<(), Error>
 fn replace_file_if_different(file_path: &Path, data: &[u8]) -> Result<(), Error> {
     if file_path.exists() {
         let existing_data = std::fs::read(file_path).map_err(|e| Error::FileReadFailed {
-            path: file_path.to_path_buf(),
+            _path: file_path.to_path_buf(),
             _error: e,
         })?;
         if existing_data == data {
@@ -105,7 +105,7 @@ fn replace_file_if_different(file_path: &Path, data: &[u8]) -> Result<(), Error>
     }
 
     std::fs::write(file_path, data).map_err(|e| Error::FileWriteFailed {
-        path: file_path.to_path_buf(),
+        _path: file_path.to_path_buf(),
         _error: e,
     })?;
 
