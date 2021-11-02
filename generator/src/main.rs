@@ -17,34 +17,34 @@ mod generator;
 enum Error {
     FileReadFailed {
         path: PathBuf,
-        error: std::io::Error,
+        _error: std::io::Error,
     },
     FileWriteFailed {
         path: PathBuf,
-        error: std::io::Error,
+        _error: std::io::Error,
     },
     DirOpenFailed {
         path: PathBuf,
-        error: std::io::Error,
+        _error: std::io::Error,
     },
     DirReadFailed {
         path: PathBuf,
-        error: std::io::Error,
+        _error: std::io::Error,
     },
     FileIsNotUtf8 {
         path: PathBuf,
-        error: std::str::Utf8Error,
+        _error: std::str::Utf8Error,
     },
     XmlParseFailed {
         path: PathBuf,
-        error: roxmltree::Error,
+        _error: roxmltree::Error,
     },
     XcbParseFailed {
         path: PathBuf,
-        error: xcbgen::ParseError,
+        _error: xcbgen::ParseError,
     },
     XcbResolveFailed {
-        error: xcbgen::ResolveError,
+        _error: xcbgen::ResolveError,
     },
 }
 
@@ -52,12 +52,12 @@ fn list_xmls(dir_path: &Path) -> Result<Vec<PathBuf>, Error> {
     let mut files = Vec::new();
     let dir_reader = std::fs::read_dir(dir_path).map_err(|e| Error::DirOpenFailed {
         path: dir_path.to_path_buf(),
-        error: e,
+        _error: e,
     })?;
     for entry in dir_reader {
         let entry = entry.map_err(|e| Error::DirReadFailed {
             path: dir_path.to_path_buf(),
-            error: e,
+            _error: e,
         })?;
         let file_path = entry.path();
         if file_path.extension() == Some(std::ffi::OsStr::new("xml")) {
@@ -71,21 +71,21 @@ fn list_xmls(dir_path: &Path) -> Result<Vec<PathBuf>, Error> {
 fn load_namespace(path: &Path, parser: &mut xcbgen::Parser) -> Result<(), Error> {
     let file_bytes = std::fs::read(path).map_err(|e| Error::FileReadFailed {
         path: path.to_path_buf(),
-        error: e,
+        _error: e,
     })?;
     let file_string = String::from_utf8(file_bytes).map_err(|e| Error::FileIsNotUtf8 {
         path: path.to_path_buf(),
-        error: e.utf8_error(),
+        _error: e.utf8_error(),
     })?;
     let xml_doc = roxmltree::Document::parse(&file_string).map_err(|e| Error::XmlParseFailed {
         path: path.to_path_buf(),
-        error: e,
+        _error: e,
     })?;
     parser
         .parse_namespace(xml_doc.root().first_element_child().unwrap())
         .map_err(|e| Error::XcbParseFailed {
             path: path.to_path_buf(),
-            error: e,
+            _error: e,
         })?;
     Ok(())
 }
@@ -97,7 +97,7 @@ fn replace_file_if_different(file_path: &Path, data: &[u8]) -> Result<(), Error>
     if file_path.exists() {
         let existing_data = std::fs::read(file_path).map_err(|e| Error::FileReadFailed {
             path: file_path.to_path_buf(),
-            error: e,
+            _error: e,
         })?;
         if existing_data == data {
             return Ok(());
@@ -106,7 +106,7 @@ fn replace_file_if_different(file_path: &Path, data: &[u8]) -> Result<(), Error>
 
     std::fs::write(file_path, data).map_err(|e| Error::FileWriteFailed {
         path: file_path.to_path_buf(),
-        error: e,
+        _error: e,
     })?;
 
     Ok(())
@@ -133,7 +133,7 @@ fn main2() -> Result<u8, Error> {
     //eprintln!("{:#?}", module);
     println!("{} XMLs loaded", module.namespaces.borrow().len());
 
-    xcbgen::resolve(&module).map_err(|e| Error::XcbResolveFailed { error: e })?;
+    xcbgen::resolve(&module).map_err(|e| Error::XcbResolveFailed { _error: e })?;
     println!("Resolved successfully");
 
     let generated = generator::generate(&module);
