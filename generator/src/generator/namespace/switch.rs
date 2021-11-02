@@ -666,7 +666,7 @@ fn emit_fixed_size_switch_serialize(
                                         generator,
                                         field,
                                         &deducible_fields,
-                                        |field| to_rust_variable_name(field),
+                                        to_rust_variable_name,
                                         &mut result_bytes,
                                         out,
                                     );
@@ -729,7 +729,7 @@ fn emit_fixed_size_switch_serialize(
                                     generator,
                                     field,
                                     &deducible_fields,
-                                    |field| to_rust_variable_name(field),
+                                    to_rust_variable_name,
                                     "bytes",
                                     out,
                                 );
@@ -847,7 +847,7 @@ fn emit_variable_size_switch_serialize(
                                         generator,
                                         field,
                                         &deducible_fields,
-                                        |field| to_rust_variable_name(field),
+                                        to_rust_variable_name,
                                         "bytes",
                                         out,
                                     );
@@ -920,7 +920,7 @@ fn emit_variable_size_switch_serialize(
                                             generator,
                                             field,
                                             &deducible_fields,
-                                            |field| to_rust_variable_name(field),
+                                            to_rust_variable_name,
                                             "bytes",
                                             out,
                                         );
