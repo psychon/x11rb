@@ -308,9 +308,12 @@ mod test {
         ];
         for data in tests.iter() {
             let result = parse_query(*data);
-            if result.is_some() {
-                panic!("Unexpected success parsing '{:?}': {:?}", data, result);
-            }
+            assert!(
+                result.is_none(),
+                "Unexpected success parsing '{:?}': {:?}",
+                data,
+                result,
+            );
         }
     }
 
