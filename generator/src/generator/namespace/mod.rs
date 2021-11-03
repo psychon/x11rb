@@ -493,7 +493,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                         self,
                         field,
                         &HashMap::new(),
-                        |field| to_rust_variable_name(field),
+                        to_rust_variable_name,
                         &mut result_bytes,
                         out,
                     );

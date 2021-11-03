@@ -77,9 +77,11 @@ pub(crate) unsafe fn xcb_connect(
     screenp: *mut c_int,
 ) -> *mut xcb_connection_t {
     // Test that the provided displayname is correct
-    if CStr::from_ptr(displayname).to_str().unwrap() != "display name" {
-        panic!("Did not get the expected displayname");
-    }
+    assert_eq!(
+        CStr::from_ptr(displayname).to_str().unwrap(),
+        "display name",
+        "Did not get the expected displayname",
+    );
     std::ptr::write(screenp, 0);
 
     let length_field = 10;

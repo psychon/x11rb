@@ -66,9 +66,7 @@ mod test {
                 errors += 1;
             }
         }
-        if errors != 0 {
-            panic!("Had {} errors", errors);
-        }
+        assert_eq!(errors, 0, "Had {} errors", errors);
     }
 
     #[test]

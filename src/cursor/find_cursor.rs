@@ -223,7 +223,6 @@ pub(crate) fn find_cursor(theme: &str, name: &str) -> Result<Cursor<File>, Error
         "~/.icons:/usr/share/icons:/usr/share/pixmaps:/usr/X11R6/lib/X11/icons".into()
     });
     let open_cursor = |file: &Path| File::open(file);
-    let parse_inherits = |file: &Path| parse_inherits(file);
     find_cursor_impl(
         &home,
         &cursor_path,

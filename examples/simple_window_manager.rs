@@ -24,7 +24,6 @@ struct WindowState {
     x: i16,
     y: i16,
     width: u16,
-    height: u16,
 }
 
 impl WindowState {
@@ -35,7 +34,6 @@ impl WindowState {
             x: geom.x,
             y: geom.y,
             width: geom.width,
-            height: geom.height,
         }
     }
 
