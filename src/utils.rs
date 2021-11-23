@@ -127,7 +127,8 @@ mod raw_fd_container {
 
     impl Drop for RawFdContainer {
         fn drop(&mut self) {
-            let _ = nix::unistd::close(self.0);
+            // We don't actually have these fds.
+            //let _ = nix::unistd::close(self.0);
         }
     }
 
@@ -144,7 +145,8 @@ mod raw_fd_container {
         /// of the `dup`ed version, whereas the original `RawFdContainer`
         /// will keep the ownership of its FD.
         pub fn try_clone(&self) -> Result<Self, std::io::Error> {
-            Ok(Self::new(nix::unistd::dup(self.0)?))
+            Ok(Self::new(self.0))
+            //Ok(Self::new(nix::unistd::dup(self.0)?))
         }
 
         /// Get the `RawFd` out of this `RawFdContainer`.
@@ -163,8 +165,9 @@ mod raw_fd_container {
         /// This is similar to dropping the `RawFdContainer`, but it allows
         /// the caller to handle errors.
         pub fn close(self) -> Result<(), std::io::Error> {
-            let fd = self.into_raw_fd();
-            nix::unistd::close(fd).map_err(|e| e.into())
+            Ok(())
+            //let fd = self.into_raw_fd();
+            //nix::unistd::close(fd).map_err(|e| e.into())
         }
     }
 
