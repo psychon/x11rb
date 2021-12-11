@@ -667,7 +667,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             };
 
         if let Some(ref doc) = enum_def.doc {
-            self.emit_doc(doc, out);
+            self.emit_doc(doc, out, None);
         }
 
         outln!(out, "#[derive(Clone, Copy, PartialEq, Eq)]");
@@ -996,7 +996,12 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         }
     }
 
-    fn emit_doc(&self, doc: &xcbdefs::Doc, out: &mut Output) {
+    fn emit_doc(
+        &self,
+        doc: &xcbdefs::Doc,
+        out: &mut Output,
+        deducible_fields: Option<&HashMap<String, DeducibleField>>,
+    ) {
         let mut has_doc = false;
         if let Some(ref brief) = doc.brief {
             outln!(out, "/// {}.", brief);
@@ -1023,6 +1028,12 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             outln!(out, "/// # Fields");
             outln!(out, "///");
             for field in doc.fields.iter() {
+                if deducible_fields
+                    .map(|deducible_fields| deducible_fields.contains_key(&field.name))
+                    .unwrap_or(false)
+                {
+                    continue;
+                }
                 let text = format!(
                     " * `{}` - {}",
                     field.name,

@@ -386,7 +386,7 @@ fn emit_request_struct(
     let is_send_event = is_xproto && request_def.name == "SendEvent";
 
     if let Some(ref doc) = request_def.doc {
-        generator.emit_doc(doc, out);
+        generator.emit_doc(doc, out, Some(deducible_fields));
     }
 
     let mut derives = Derives::all();
@@ -1160,7 +1160,7 @@ fn emit_request_function(
     }
 
     if let Some(ref doc) = request_def.doc {
-        generator.emit_doc(doc, out);
+        generator.emit_doc(doc, out, None);
     }
     outln!(
         out,
@@ -1271,7 +1271,7 @@ fn emit_request_trait_function(
     };
 
     if let Some(ref doc) = request_def.doc {
-        generator.emit_doc(doc, out);
+        generator.emit_doc(doc, out, Default::default());
     }
     outln!(
         out,
