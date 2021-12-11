@@ -6282,7 +6282,6 @@ pub const CHANGE_WINDOW_ATTRIBUTES_REQUEST: u8 = 2;
 /// # Fields
 ///
 /// * `window` - The window to change.
-/// * `value_mask` -
 /// * `value_list` - Values for each of the attributes specified in the bitmask `value_mask`. The
 /// order has to correspond to the order of possible `value_mask` bits. See the
 /// example.
@@ -7814,7 +7813,6 @@ pub const CONFIGURE_WINDOW_REQUEST: u8 = 12;
 /// # Fields
 ///
 /// * `window` - The window to configure.
-/// * `value_mask` - Bitmask of attributes to change.
 /// * `value_list` - New values, corresponding to the attributes in value_mask. The order has to
 /// correspond to the order of possible `value_mask` bits. See the example.
 ///
@@ -8477,7 +8475,6 @@ where
 ///
 /// * `root` - The root window of `window`.
 /// * `parent` - The parent window of `window`.
-/// * `children_len` - The number of child windows.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryTreeReply {
     pub sequence: u16,
@@ -8538,7 +8535,6 @@ pub const INTERN_ATOM_REQUEST: u8 = 16;
 ///
 /// # Fields
 ///
-/// * `name_len` - The length of the following `name`.
 /// * `name` - The name of the atom.
 /// * `only_if_exists` - Return a valid atom id only if the atom already exists.
 ///
@@ -13637,7 +13633,6 @@ pub const OPEN_FONT_REQUEST: u8 = 45;
 /// # Fields
 ///
 /// * `fid` - The ID with which you will refer to the font, created by `xcb_generate_id`.
-/// * `name_len` - Length (in bytes) of `name`.
 /// * `name` - A pattern describing an X core font.
 ///
 /// # Errors
@@ -14047,7 +14042,6 @@ where
 /// * `min_char_or_byte2` - first character
 /// * `max_char_or_byte2` - last character
 /// * `default_char` - char to print for undefined character
-/// * `properties_len` - how many properties there are
 /// * `all_chars_exist` - flag if all characters have nonzero size
 /// * `font_ascent` - baseline to top edge of raster
 /// * `font_descent` - baseline to bottom edge of raster
@@ -14385,7 +14379,6 @@ pub const LIST_FONTS_REQUEST: u8 = 49;
 ///
 /// # Fields
 ///
-/// * `pattern_len` - The length (in bytes) of `pattern`.
 /// * `pattern` - A font pattern, for example "-misc-fixed-*".
 ///
 /// The asterisk (*) is a wildcard for any number of characters. The question mark
@@ -14485,7 +14478,6 @@ where
 
 /// # Fields
 ///
-/// * `names_len` - The number of font names.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ListFontsReply {
     pub sequence: u16,
@@ -14536,7 +14528,6 @@ pub const LIST_FONTS_WITH_INFO_REQUEST: u8 = 50;
 ///
 /// # Fields
 ///
-/// * `pattern_len` - The length (in bytes) of `pattern`.
 /// * `pattern` - A font pattern, for example "-misc-fixed-*".
 ///
 /// The asterisk (*) is a wildcard for any number of characters. The question mark
@@ -14636,13 +14627,11 @@ where
 
 /// # Fields
 ///
-/// * `name_len` - The number of matched font names.
 /// * `min_bounds` - minimum bounds over all existing char
 /// * `max_bounds` - maximum bounds over all existing char
 /// * `min_char_or_byte2` - first character
 /// * `max_char_or_byte2` - last character
 /// * `default_char` - char to print for undefined character
-/// * `properties_len` - how many properties there are
 /// * `all_chars_exist` - flag if all characters have nonzero size
 /// * `font_ascent` - baseline to top edge of raster
 /// * `font_descent` - baseline to bottom edge of raster
@@ -16884,7 +16873,6 @@ pub const CHANGE_GC_REQUEST: u8 = 56;
 /// # Fields
 ///
 /// * `gc` - The graphics context to change.
-/// * `value_mask` -
 /// * `value_list` - Values for each of the components specified in the bitmask `value_mask`. The
 /// order has to correspond to the order of possible `value_mask` bits. See the
 /// example.
@@ -19580,8 +19568,6 @@ pub const IMAGE_TEXT8_REQUEST: u8 = 76;
 /// # Fields
 ///
 /// * `drawable` - The drawable (Window or Pixmap) to draw text on.
-/// * `string_len` - The length of the `string`. Note that this parameter limited by 255 due to
-/// using 8 bits!
 /// * `string` - The string to draw. Only the first 255 characters are relevant due to the data
 /// type of `string_len`.
 /// * `x` - The x coordinate of the first character, relative to the origin of `drawable`.
@@ -19753,8 +19739,6 @@ pub const IMAGE_TEXT16_REQUEST: u8 = 77;
 /// # Fields
 ///
 /// * `drawable` - The drawable (Window or Pixmap) to draw text on.
-/// * `string_len` - The length of the `string` in characters. Note that this parameter limited by
-/// 255 due to using 8 bits!
 /// * `string` - The string to draw. Only the first 255 characters are relevant due to the data
 /// type of `string_len`. Every character uses 2 bytes (hence the 16 in this
 /// request's name).
@@ -22502,7 +22486,6 @@ pub const QUERY_EXTENSION_REQUEST: u8 = 98;
 ///
 /// # Fields
 ///
-/// * `name_len` - The length of `name` in bytes.
 /// * `name` - The name of the extension to query, for example "RANDR". This is case
 /// sensitive!
 ///
@@ -27238,6 +27221,8 @@ pub trait ConnectionExt: RequestConnection {
     /// # Fields
     ///
     /// * `drawable` - The drawable (Window or Pixmap) to draw text on.
+    /// * `string_len` - The length of the `string`. Note that this parameter limited by 255 due to
+    /// using 8 bits!
     /// * `string` - The string to draw. Only the first 255 characters are relevant due to the data
     /// type of `string_len`.
     /// * `x` - The x coordinate of the first character, relative to the origin of `drawable`.

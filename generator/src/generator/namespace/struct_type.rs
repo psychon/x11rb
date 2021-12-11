@@ -39,7 +39,7 @@ pub(super) fn emit_struct_type(
     );
 
     if let Some(doc) = doc {
-        generator.emit_doc(doc, out);
+        generator.emit_doc(doc, out, Some(&deducible_fields));
     }
     let derives = derives.to_list();
     if !derives.is_empty() {
