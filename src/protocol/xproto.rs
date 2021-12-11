@@ -27238,8 +27238,6 @@ pub trait ConnectionExt: RequestConnection {
     /// # Fields
     ///
     /// * `drawable` - The drawable (Window or Pixmap) to draw text on.
-    /// * `string_len` - The length of the `string`. Note that this parameter limited by 255 due to
-    /// using 8 bits!
     /// * `string` - The string to draw. Only the first 255 characters are relevant due to the data
     /// type of `string_len`.
     /// * `x` - The x coordinate of the first character, relative to the origin of `drawable`.
