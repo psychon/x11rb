@@ -53,6 +53,18 @@ dereference](https://github.com/rtbo/rust-xcb/issues/64) and re-discovered an
 already known [leak](https://github.com/rtbo/rust-xcb/issues/57).
 
 
+## xcb-dl
+
+The [xcb-dl](https://github.com/mahkoh/xcb-dl) project seems to be similar to
+rust-xcb: It provides FFI bindings to the libxcb C library. It uses the XML
+description to generate this binding and the necessary types. It thus also has
+many instances of `unsafe` and requires `unsafe` for using it.
+
+The big difference to rust-xcb is that this library uses the libloading crate to
+dynamically load function pointers at runtime instead of linking at compile
+time.
+
+
 ## rust-xcbalt
 
 The [alternative Rust wrappers for
