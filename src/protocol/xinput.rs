@@ -729,6 +729,7 @@ impl InputInfoInfoValuator {
     }
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
+#[must_use]
 pub enum InputInfoInfo {
     Key(InputInfoInfoKey),
     Button(InputInfoInfoButton),
@@ -3952,6 +3953,7 @@ impl Serialize for FeedbackStateDataBell {
     }
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
+#[must_use]
 pub enum FeedbackStateData {
     Keyboard(FeedbackStateDataKeyboard),
     Pointer(FeedbackStateDataPointer),
@@ -4835,6 +4837,7 @@ impl Serialize for FeedbackCtlDataBell {
     }
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
+#[must_use]
 pub enum FeedbackCtlData {
     Keyboard(FeedbackCtlDataKeyboard),
     Pointer(FeedbackCtlDataPointer),
@@ -6239,6 +6242,7 @@ impl InputStateDataValuator {
     }
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
+#[must_use]
 pub enum InputStateData {
     Key(InputStateDataKey),
     Button(InputStateDataButton),
@@ -7267,6 +7271,7 @@ impl Serialize for DeviceStateDataAbsArea {
     }
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
+#[must_use]
 pub enum DeviceStateData {
     Resolution(DeviceStateDataResolution),
     AbsCalib(DeviceStateDataAbsCalib),
@@ -8064,6 +8069,7 @@ impl Serialize for DeviceCtlDataAbsArea {
     }
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
+#[must_use]
 pub enum DeviceCtlData {
     Resolution(DeviceCtlDataResolution),
     AbsCalib(DeviceCtlDataAbsCalib),
@@ -8488,6 +8494,7 @@ impl std::fmt::Debug for PropertyFormat  {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+#[must_use]
 pub enum ChangeDevicePropertyAux {
     Data8(Vec<u8>),
     Data16(Vec<u16>),
@@ -8893,6 +8900,7 @@ where
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+#[must_use]
 pub enum GetDevicePropertyItems {
     Data8(Vec<u8>),
     Data16(Vec<u16>),
@@ -9998,6 +10006,7 @@ impl Serialize for HierarchyChangeDataDetachSlave {
     }
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
+#[must_use]
 pub enum HierarchyChangeData {
     AddMaster(HierarchyChangeDataAddMaster),
     RemoveMaster(HierarchyChangeDataRemoveMaster),
@@ -11570,6 +11579,7 @@ impl Serialize for DeviceClassDataTouch {
     }
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
+#[must_use]
 pub enum DeviceClassData {
     Key(DeviceClassDataKey),
     Button(DeviceClassDataButton),
@@ -13198,6 +13208,7 @@ impl XIListPropertiesReply {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+#[must_use]
 pub enum XIChangePropertyAux {
     Data8(Vec<u8>),
     Data16(Vec<u16>),
@@ -13608,6 +13619,7 @@ where
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+#[must_use]
 pub enum XIGetPropertyItems {
     Data8(Vec<u8>),
     Data16(Vec<u16>),

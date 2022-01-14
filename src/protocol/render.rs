@@ -1582,6 +1582,7 @@ impl QueryPictIndexValuesReply {
 
 /// Auxiliary and optional information for the `create_picture` function
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+#[must_use]
 pub struct CreatePictureAux {
     pub repeat: Option<Repeat>,
     pub alphamap: Option<Picture>,
@@ -1984,6 +1985,7 @@ where
 
 /// Auxiliary and optional information for the `change_picture` function
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+#[must_use]
 pub struct ChangePictureAux {
     pub repeat: Option<Repeat>,
     pub alphamap: Option<Picture>,

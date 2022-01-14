@@ -6183,6 +6183,7 @@ impl Serialize for SelectEventsAuxBitcase11 {
 }
 /// Auxiliary and optional information for the `select_events` function
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+#[must_use]
 pub struct SelectEventsAux {
     pub bitcase1: Option<SelectEventsAuxBitcase1>,
     pub bitcase2: Option<SelectEventsAuxBitcase2>,
@@ -7566,6 +7567,7 @@ impl GetMapMapBitcase3 {
     }
 }
 #[derive(Debug, Clone, Default)]
+#[must_use]
 pub struct GetMapMap {
     pub types_rtrn: Option<Vec<KeyType>>,
     pub syms_rtrn: Option<Vec<KeySymMap>>,
@@ -7777,6 +7779,7 @@ impl SetMapAuxBitcase3 {
 }
 /// Auxiliary and optional information for the `set_map` function
 #[derive(Debug, Clone, Default)]
+#[must_use]
 pub struct SetMapAux {
     pub types: Option<Vec<SetKeyType>>,
     pub syms: Option<Vec<KeySymMap>>,
@@ -9181,6 +9184,7 @@ impl GetNamesValueListBitcase8 {
     }
 }
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
+#[must_use]
 pub struct GetNamesValueList {
     pub keycodes_name: Option<xproto::Atom>,
     pub geometry_name: Option<xproto::Atom>,
@@ -9403,6 +9407,7 @@ impl SetNamesAuxBitcase8 {
 }
 /// Auxiliary and optional information for the `set_names` function
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
+#[must_use]
 pub struct SetNamesAux {
     pub keycodes_name: Option<xproto::Atom>,
     pub geometry_name: Option<xproto::Atom>,
@@ -10341,6 +10346,7 @@ impl GetKbdByNameRepliesTypesMapBitcase3 {
     }
 }
 #[derive(Debug, Clone, Default)]
+#[must_use]
 pub struct GetKbdByNameRepliesTypesMap {
     pub types_rtrn: Option<Vec<KeyType>>,
     pub syms_rtrn: Option<Vec<KeySymMap>>,
@@ -10614,6 +10620,7 @@ impl GetKbdByNameRepliesKeyNamesValueListBitcase8 {
     }
 }
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
+#[must_use]
 pub struct GetKbdByNameRepliesKeyNamesValueList {
     pub keycodes_name: Option<xproto::Atom>,
     pub geometry_name: Option<xproto::Atom>,
@@ -10838,6 +10845,7 @@ impl TryParse for GetKbdByNameRepliesGeometry {
     }
 }
 #[derive(Debug, Clone, Default)]
+#[must_use]
 pub struct GetKbdByNameReplies {
     pub types: Option<GetKbdByNameRepliesTypes>,
     pub compat_map: Option<GetKbdByNameRepliesCompatMap>,

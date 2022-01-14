@@ -1105,6 +1105,7 @@ where
 
 /// Auxiliary and optional information for the `create_alarm` function
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+#[must_use]
 pub struct CreateAlarmAux {
     pub counter: Option<Counter>,
     pub value_type: Option<VALUETYPE>,
@@ -1345,6 +1346,7 @@ where
 
 /// Auxiliary and optional information for the `change_alarm` function
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+#[must_use]
 pub struct ChangeAlarmAux {
     pub counter: Option<Counter>,
     pub value_type: Option<VALUETYPE>,

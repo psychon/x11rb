@@ -5330,6 +5330,7 @@ impl std::fmt::Debug for Gravity  {
 
 /// Auxiliary and optional information for the `create_window` function
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+#[must_use]
 pub struct CreateWindowAux {
     pub background_pixmap: Option<Pixmap>,
     pub background_pixel: Option<u32>,
@@ -5936,6 +5937,7 @@ where
 
 /// Auxiliary and optional information for the `change_window_attributes` function
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+#[must_use]
 pub struct ChangeWindowAttributesAux {
     pub background_pixmap: Option<Pixmap>,
     pub background_pixel: Option<u32>,
@@ -7597,6 +7599,7 @@ impl std::fmt::Debug for StackMode  {
 
 /// Auxiliary and optional information for the `configure_window` function
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+#[must_use]
 pub struct ConfigureWindowAux {
     pub x: Option<i32>,
     pub y: Option<i32>,
@@ -15717,6 +15720,7 @@ impl std::fmt::Debug for ArcMode  {
 
 /// Auxiliary and optional information for the `create_gc` function
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+#[must_use]
 pub struct CreateGCAux {
     pub function: Option<GX>,
     pub plane_mask: Option<u32>,
@@ -16362,6 +16366,7 @@ where
 
 /// Auxiliary and optional information for the `change_gc` function
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+#[must_use]
 pub struct ChangeGCAux {
     pub function: Option<GX>,
     pub plane_mask: Option<u32>,
@@ -23085,6 +23090,7 @@ impl std::fmt::Debug for AutoRepeatMode  {
 
 /// Auxiliary and optional information for the `change_keyboard_control` function
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+#[must_use]
 pub struct ChangeKeyboardControlAux {
     pub key_click_percent: Option<i32>,
     pub bell_percent: Option<i32>,

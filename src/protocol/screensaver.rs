@@ -487,6 +487,7 @@ where
 
 /// Auxiliary and optional information for the `set_attributes` function
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+#[must_use]
 pub struct SetAttributesAux {
     pub background_pixmap: Option<xproto::Pixmap>,
     pub background_pixel: Option<u32>,
