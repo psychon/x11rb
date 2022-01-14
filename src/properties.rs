@@ -120,7 +120,7 @@ impl WmClass {
             .value
             .iter()
             .position(|&v| v == 0)
-            .unwrap_or_else(|| reply.value.len());
+            .unwrap_or(reply.value.len());
         Ok(WmClass(reply, offset))
     }
 
