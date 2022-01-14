@@ -24,7 +24,7 @@ pub(super) fn emit_struct_type(
     doc: Option<&xcbdefs::Doc>,
     out: &mut Output,
 ) {
-    assert!(!(generate_serialize && !fields_need_serialize));
+    assert!(!generate_serialize || fields_need_serialize);
     assert!(parse_size_constraint == StructSizeConstraint::None || generate_try_parse);
 
     let deducible_fields = gather_deducible_fields(fields);
