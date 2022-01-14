@@ -6370,56 +6370,67 @@ impl SelectEventsAux {
         Default::default()
     }
     /// Set the `bitcase1` field of this structure.
+    #[must_use]
     pub fn bitcase1<I>(mut self, value: I) -> Self where I: Into<Option<SelectEventsAuxBitcase1>> {
         self.bitcase1 = value.into();
         self
     }
     /// Set the `bitcase2` field of this structure.
+    #[must_use]
     pub fn bitcase2<I>(mut self, value: I) -> Self where I: Into<Option<SelectEventsAuxBitcase2>> {
         self.bitcase2 = value.into();
         self
     }
     /// Set the `bitcase3` field of this structure.
+    #[must_use]
     pub fn bitcase3<I>(mut self, value: I) -> Self where I: Into<Option<SelectEventsAuxBitcase3>> {
         self.bitcase3 = value.into();
         self
     }
     /// Set the `bitcase4` field of this structure.
+    #[must_use]
     pub fn bitcase4<I>(mut self, value: I) -> Self where I: Into<Option<SelectEventsAuxBitcase4>> {
         self.bitcase4 = value.into();
         self
     }
     /// Set the `bitcase5` field of this structure.
+    #[must_use]
     pub fn bitcase5<I>(mut self, value: I) -> Self where I: Into<Option<SelectEventsAuxBitcase5>> {
         self.bitcase5 = value.into();
         self
     }
     /// Set the `bitcase6` field of this structure.
+    #[must_use]
     pub fn bitcase6<I>(mut self, value: I) -> Self where I: Into<Option<SelectEventsAuxBitcase6>> {
         self.bitcase6 = value.into();
         self
     }
     /// Set the `bitcase7` field of this structure.
+    #[must_use]
     pub fn bitcase7<I>(mut self, value: I) -> Self where I: Into<Option<SelectEventsAuxBitcase7>> {
         self.bitcase7 = value.into();
         self
     }
     /// Set the `bitcase8` field of this structure.
+    #[must_use]
     pub fn bitcase8<I>(mut self, value: I) -> Self where I: Into<Option<SelectEventsAuxBitcase8>> {
         self.bitcase8 = value.into();
         self
     }
     /// Set the `bitcase9` field of this structure.
+    #[must_use]
     pub fn bitcase9<I>(mut self, value: I) -> Self where I: Into<Option<SelectEventsAuxBitcase9>> {
         self.bitcase9 = value.into();
         self
     }
     /// Set the `bitcase10` field of this structure.
+    #[must_use]
     pub fn bitcase10<I>(mut self, value: I) -> Self where I: Into<Option<SelectEventsAuxBitcase10>> {
         self.bitcase10 = value.into();
         self
     }
     /// Set the `bitcase11` field of this structure.
+    #[must_use]
     pub fn bitcase11<I>(mut self, value: I) -> Self where I: Into<Option<SelectEventsAuxBitcase11>> {
         self.bitcase11 = value.into();
         self
@@ -7943,41 +7954,49 @@ impl SetMapAux {
         Default::default()
     }
     /// Set the `types` field of this structure.
+    #[must_use]
     pub fn types<I>(mut self, value: I) -> Self where I: Into<Option<Vec<SetKeyType>>> {
         self.types = value.into();
         self
     }
     /// Set the `syms` field of this structure.
+    #[must_use]
     pub fn syms<I>(mut self, value: I) -> Self where I: Into<Option<Vec<KeySymMap>>> {
         self.syms = value.into();
         self
     }
     /// Set the `bitcase3` field of this structure.
+    #[must_use]
     pub fn bitcase3<I>(mut self, value: I) -> Self where I: Into<Option<SetMapAuxBitcase3>> {
         self.bitcase3 = value.into();
         self
     }
     /// Set the `behaviors` field of this structure.
+    #[must_use]
     pub fn behaviors<I>(mut self, value: I) -> Self where I: Into<Option<Vec<SetBehavior>>> {
         self.behaviors = value.into();
         self
     }
     /// Set the `vmods` field of this structure.
+    #[must_use]
     pub fn vmods<I>(mut self, value: I) -> Self where I: Into<Option<Vec<u8>>> {
         self.vmods = value.into();
         self
     }
     /// Set the `explicit` field of this structure.
+    #[must_use]
     pub fn explicit<I>(mut self, value: I) -> Self where I: Into<Option<Vec<SetExplicit>>> {
         self.explicit = value.into();
         self
     }
     /// Set the `modmap` field of this structure.
+    #[must_use]
     pub fn modmap<I>(mut self, value: I) -> Self where I: Into<Option<Vec<KeyModMap>>> {
         self.modmap = value.into();
         self
     }
     /// Set the `vmodmap` field of this structure.
+    #[must_use]
     pub fn vmodmap<I>(mut self, value: I) -> Self where I: Into<Option<Vec<KeyVModMap>>> {
         self.vmodmap = value.into();
         self
@@ -9652,71 +9671,85 @@ impl SetNamesAux {
         Default::default()
     }
     /// Set the `keycodes_name` field of this structure.
+    #[must_use]
     pub fn keycodes_name<I>(mut self, value: I) -> Self where I: Into<Option<xproto::Atom>> {
         self.keycodes_name = value.into();
         self
     }
     /// Set the `geometry_name` field of this structure.
+    #[must_use]
     pub fn geometry_name<I>(mut self, value: I) -> Self where I: Into<Option<xproto::Atom>> {
         self.geometry_name = value.into();
         self
     }
     /// Set the `symbols_name` field of this structure.
+    #[must_use]
     pub fn symbols_name<I>(mut self, value: I) -> Self where I: Into<Option<xproto::Atom>> {
         self.symbols_name = value.into();
         self
     }
     /// Set the `phys_symbols_name` field of this structure.
+    #[must_use]
     pub fn phys_symbols_name<I>(mut self, value: I) -> Self where I: Into<Option<xproto::Atom>> {
         self.phys_symbols_name = value.into();
         self
     }
     /// Set the `types_name` field of this structure.
+    #[must_use]
     pub fn types_name<I>(mut self, value: I) -> Self where I: Into<Option<xproto::Atom>> {
         self.types_name = value.into();
         self
     }
     /// Set the `compat_name` field of this structure.
+    #[must_use]
     pub fn compat_name<I>(mut self, value: I) -> Self where I: Into<Option<xproto::Atom>> {
         self.compat_name = value.into();
         self
     }
     /// Set the `type_names` field of this structure.
+    #[must_use]
     pub fn type_names<I>(mut self, value: I) -> Self where I: Into<Option<Vec<xproto::Atom>>> {
         self.type_names = value.into();
         self
     }
     /// Set the `bitcase8` field of this structure.
+    #[must_use]
     pub fn bitcase8<I>(mut self, value: I) -> Self where I: Into<Option<SetNamesAuxBitcase8>> {
         self.bitcase8 = value.into();
         self
     }
     /// Set the `indicator_names` field of this structure.
+    #[must_use]
     pub fn indicator_names<I>(mut self, value: I) -> Self where I: Into<Option<Vec<xproto::Atom>>> {
         self.indicator_names = value.into();
         self
     }
     /// Set the `virtual_mod_names` field of this structure.
+    #[must_use]
     pub fn virtual_mod_names<I>(mut self, value: I) -> Self where I: Into<Option<Vec<xproto::Atom>>> {
         self.virtual_mod_names = value.into();
         self
     }
     /// Set the `groups` field of this structure.
+    #[must_use]
     pub fn groups<I>(mut self, value: I) -> Self where I: Into<Option<Vec<xproto::Atom>>> {
         self.groups = value.into();
         self
     }
     /// Set the `key_names` field of this structure.
+    #[must_use]
     pub fn key_names<I>(mut self, value: I) -> Self where I: Into<Option<Vec<KeyName>>> {
         self.key_names = value.into();
         self
     }
     /// Set the `key_aliases` field of this structure.
+    #[must_use]
     pub fn key_aliases<I>(mut self, value: I) -> Self where I: Into<Option<Vec<KeyAlias>>> {
         self.key_aliases = value.into();
         self
     }
     /// Set the `radio_group_names` field of this structure.
+    #[must_use]
     pub fn radio_group_names<I>(mut self, value: I) -> Self where I: Into<Option<Vec<xproto::Atom>>> {
         self.radio_group_names = value.into();
         self

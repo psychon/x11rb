@@ -5591,76 +5591,91 @@ impl CreateWindowAux {
         Default::default()
     }
     /// Set the `background_pixmap` field of this structure.
+    #[must_use]
     pub fn background_pixmap<I>(mut self, value: I) -> Self where I: Into<Option<Pixmap>> {
         self.background_pixmap = value.into();
         self
     }
     /// Set the `background_pixel` field of this structure.
+    #[must_use]
     pub fn background_pixel<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.background_pixel = value.into();
         self
     }
     /// Set the `border_pixmap` field of this structure.
+    #[must_use]
     pub fn border_pixmap<I>(mut self, value: I) -> Self where I: Into<Option<Pixmap>> {
         self.border_pixmap = value.into();
         self
     }
     /// Set the `border_pixel` field of this structure.
+    #[must_use]
     pub fn border_pixel<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.border_pixel = value.into();
         self
     }
     /// Set the `bit_gravity` field of this structure.
+    #[must_use]
     pub fn bit_gravity<I>(mut self, value: I) -> Self where I: Into<Option<Gravity>> {
         self.bit_gravity = value.into();
         self
     }
     /// Set the `win_gravity` field of this structure.
+    #[must_use]
     pub fn win_gravity<I>(mut self, value: I) -> Self where I: Into<Option<Gravity>> {
         self.win_gravity = value.into();
         self
     }
     /// Set the `backing_store` field of this structure.
+    #[must_use]
     pub fn backing_store<I>(mut self, value: I) -> Self where I: Into<Option<BackingStore>> {
         self.backing_store = value.into();
         self
     }
     /// Set the `backing_planes` field of this structure.
+    #[must_use]
     pub fn backing_planes<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.backing_planes = value.into();
         self
     }
     /// Set the `backing_pixel` field of this structure.
+    #[must_use]
     pub fn backing_pixel<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.backing_pixel = value.into();
         self
     }
     /// Set the `override_redirect` field of this structure.
+    #[must_use]
     pub fn override_redirect<I>(mut self, value: I) -> Self where I: Into<Option<Bool32>> {
         self.override_redirect = value.into();
         self
     }
     /// Set the `save_under` field of this structure.
+    #[must_use]
     pub fn save_under<I>(mut self, value: I) -> Self where I: Into<Option<Bool32>> {
         self.save_under = value.into();
         self
     }
     /// Set the `event_mask` field of this structure.
+    #[must_use]
     pub fn event_mask<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.event_mask = value.into();
         self
     }
     /// Set the `do_not_propogate_mask` field of this structure.
+    #[must_use]
     pub fn do_not_propogate_mask<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.do_not_propogate_mask = value.into();
         self
     }
     /// Set the `colormap` field of this structure.
+    #[must_use]
     pub fn colormap<I>(mut self, value: I) -> Self where I: Into<Option<Colormap>> {
         self.colormap = value.into();
         self
     }
     /// Set the `cursor` field of this structure.
+    #[must_use]
     pub fn cursor<I>(mut self, value: I) -> Self where I: Into<Option<Cursor>> {
         self.cursor = value.into();
         self
@@ -6197,76 +6212,91 @@ impl ChangeWindowAttributesAux {
         Default::default()
     }
     /// Set the `background_pixmap` field of this structure.
+    #[must_use]
     pub fn background_pixmap<I>(mut self, value: I) -> Self where I: Into<Option<Pixmap>> {
         self.background_pixmap = value.into();
         self
     }
     /// Set the `background_pixel` field of this structure.
+    #[must_use]
     pub fn background_pixel<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.background_pixel = value.into();
         self
     }
     /// Set the `border_pixmap` field of this structure.
+    #[must_use]
     pub fn border_pixmap<I>(mut self, value: I) -> Self where I: Into<Option<Pixmap>> {
         self.border_pixmap = value.into();
         self
     }
     /// Set the `border_pixel` field of this structure.
+    #[must_use]
     pub fn border_pixel<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.border_pixel = value.into();
         self
     }
     /// Set the `bit_gravity` field of this structure.
+    #[must_use]
     pub fn bit_gravity<I>(mut self, value: I) -> Self where I: Into<Option<Gravity>> {
         self.bit_gravity = value.into();
         self
     }
     /// Set the `win_gravity` field of this structure.
+    #[must_use]
     pub fn win_gravity<I>(mut self, value: I) -> Self where I: Into<Option<Gravity>> {
         self.win_gravity = value.into();
         self
     }
     /// Set the `backing_store` field of this structure.
+    #[must_use]
     pub fn backing_store<I>(mut self, value: I) -> Self where I: Into<Option<BackingStore>> {
         self.backing_store = value.into();
         self
     }
     /// Set the `backing_planes` field of this structure.
+    #[must_use]
     pub fn backing_planes<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.backing_planes = value.into();
         self
     }
     /// Set the `backing_pixel` field of this structure.
+    #[must_use]
     pub fn backing_pixel<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.backing_pixel = value.into();
         self
     }
     /// Set the `override_redirect` field of this structure.
+    #[must_use]
     pub fn override_redirect<I>(mut self, value: I) -> Self where I: Into<Option<Bool32>> {
         self.override_redirect = value.into();
         self
     }
     /// Set the `save_under` field of this structure.
+    #[must_use]
     pub fn save_under<I>(mut self, value: I) -> Self where I: Into<Option<Bool32>> {
         self.save_under = value.into();
         self
     }
     /// Set the `event_mask` field of this structure.
+    #[must_use]
     pub fn event_mask<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.event_mask = value.into();
         self
     }
     /// Set the `do_not_propogate_mask` field of this structure.
+    #[must_use]
     pub fn do_not_propogate_mask<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.do_not_propogate_mask = value.into();
         self
     }
     /// Set the `colormap` field of this structure.
+    #[must_use]
     pub fn colormap<I>(mut self, value: I) -> Self where I: Into<Option<Colormap>> {
         self.colormap = value.into();
         self
     }
     /// Set the `cursor` field of this structure.
+    #[must_use]
     pub fn cursor<I>(mut self, value: I) -> Self where I: Into<Option<Cursor>> {
         self.cursor = value.into();
         self
@@ -7736,36 +7766,43 @@ impl ConfigureWindowAux {
         Default::default()
     }
     /// Set the `x` field of this structure.
+    #[must_use]
     pub fn x<I>(mut self, value: I) -> Self where I: Into<Option<i32>> {
         self.x = value.into();
         self
     }
     /// Set the `y` field of this structure.
+    #[must_use]
     pub fn y<I>(mut self, value: I) -> Self where I: Into<Option<i32>> {
         self.y = value.into();
         self
     }
     /// Set the `width` field of this structure.
+    #[must_use]
     pub fn width<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.width = value.into();
         self
     }
     /// Set the `height` field of this structure.
+    #[must_use]
     pub fn height<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.height = value.into();
         self
     }
     /// Set the `border_width` field of this structure.
+    #[must_use]
     pub fn border_width<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.border_width = value.into();
         self
     }
     /// Set the `sibling` field of this structure.
+    #[must_use]
     pub fn sibling<I>(mut self, value: I) -> Self where I: Into<Option<Window>> {
         self.sibling = value.into();
         self
     }
     /// Set the `stack_mode` field of this structure.
+    #[must_use]
     pub fn stack_mode<I>(mut self, value: I) -> Self where I: Into<Option<StackMode>> {
         self.stack_mode = value.into();
         self
@@ -16103,116 +16140,139 @@ impl CreateGCAux {
         Default::default()
     }
     /// Set the `function` field of this structure.
+    #[must_use]
     pub fn function<I>(mut self, value: I) -> Self where I: Into<Option<GX>> {
         self.function = value.into();
         self
     }
     /// Set the `plane_mask` field of this structure.
+    #[must_use]
     pub fn plane_mask<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.plane_mask = value.into();
         self
     }
     /// Set the `foreground` field of this structure.
+    #[must_use]
     pub fn foreground<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.foreground = value.into();
         self
     }
     /// Set the `background` field of this structure.
+    #[must_use]
     pub fn background<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.background = value.into();
         self
     }
     /// Set the `line_width` field of this structure.
+    #[must_use]
     pub fn line_width<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.line_width = value.into();
         self
     }
     /// Set the `line_style` field of this structure.
+    #[must_use]
     pub fn line_style<I>(mut self, value: I) -> Self where I: Into<Option<LineStyle>> {
         self.line_style = value.into();
         self
     }
     /// Set the `cap_style` field of this structure.
+    #[must_use]
     pub fn cap_style<I>(mut self, value: I) -> Self where I: Into<Option<CapStyle>> {
         self.cap_style = value.into();
         self
     }
     /// Set the `join_style` field of this structure.
+    #[must_use]
     pub fn join_style<I>(mut self, value: I) -> Self where I: Into<Option<JoinStyle>> {
         self.join_style = value.into();
         self
     }
     /// Set the `fill_style` field of this structure.
+    #[must_use]
     pub fn fill_style<I>(mut self, value: I) -> Self where I: Into<Option<FillStyle>> {
         self.fill_style = value.into();
         self
     }
     /// Set the `fill_rule` field of this structure.
+    #[must_use]
     pub fn fill_rule<I>(mut self, value: I) -> Self where I: Into<Option<FillRule>> {
         self.fill_rule = value.into();
         self
     }
     /// Set the `tile` field of this structure.
+    #[must_use]
     pub fn tile<I>(mut self, value: I) -> Self where I: Into<Option<Pixmap>> {
         self.tile = value.into();
         self
     }
     /// Set the `stipple` field of this structure.
+    #[must_use]
     pub fn stipple<I>(mut self, value: I) -> Self where I: Into<Option<Pixmap>> {
         self.stipple = value.into();
         self
     }
     /// Set the `tile_stipple_x_origin` field of this structure.
+    #[must_use]
     pub fn tile_stipple_x_origin<I>(mut self, value: I) -> Self where I: Into<Option<i32>> {
         self.tile_stipple_x_origin = value.into();
         self
     }
     /// Set the `tile_stipple_y_origin` field of this structure.
+    #[must_use]
     pub fn tile_stipple_y_origin<I>(mut self, value: I) -> Self where I: Into<Option<i32>> {
         self.tile_stipple_y_origin = value.into();
         self
     }
     /// Set the `font` field of this structure.
+    #[must_use]
     pub fn font<I>(mut self, value: I) -> Self where I: Into<Option<Font>> {
         self.font = value.into();
         self
     }
     /// Set the `subwindow_mode` field of this structure.
+    #[must_use]
     pub fn subwindow_mode<I>(mut self, value: I) -> Self where I: Into<Option<SubwindowMode>> {
         self.subwindow_mode = value.into();
         self
     }
     /// Set the `graphics_exposures` field of this structure.
+    #[must_use]
     pub fn graphics_exposures<I>(mut self, value: I) -> Self where I: Into<Option<Bool32>> {
         self.graphics_exposures = value.into();
         self
     }
     /// Set the `clip_x_origin` field of this structure.
+    #[must_use]
     pub fn clip_x_origin<I>(mut self, value: I) -> Self where I: Into<Option<i32>> {
         self.clip_x_origin = value.into();
         self
     }
     /// Set the `clip_y_origin` field of this structure.
+    #[must_use]
     pub fn clip_y_origin<I>(mut self, value: I) -> Self where I: Into<Option<i32>> {
         self.clip_y_origin = value.into();
         self
     }
     /// Set the `clip_mask` field of this structure.
+    #[must_use]
     pub fn clip_mask<I>(mut self, value: I) -> Self where I: Into<Option<Pixmap>> {
         self.clip_mask = value.into();
         self
     }
     /// Set the `dash_offset` field of this structure.
+    #[must_use]
     pub fn dash_offset<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.dash_offset = value.into();
         self
     }
     /// Set the `dashes` field of this structure.
+    #[must_use]
     pub fn dashes<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.dashes = value.into();
         self
     }
     /// Set the `arc_mode` field of this structure.
+    #[must_use]
     pub fn arc_mode<I>(mut self, value: I) -> Self where I: Into<Option<ArcMode>> {
         self.arc_mode = value.into();
         self
@@ -16748,116 +16808,139 @@ impl ChangeGCAux {
         Default::default()
     }
     /// Set the `function` field of this structure.
+    #[must_use]
     pub fn function<I>(mut self, value: I) -> Self where I: Into<Option<GX>> {
         self.function = value.into();
         self
     }
     /// Set the `plane_mask` field of this structure.
+    #[must_use]
     pub fn plane_mask<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.plane_mask = value.into();
         self
     }
     /// Set the `foreground` field of this structure.
+    #[must_use]
     pub fn foreground<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.foreground = value.into();
         self
     }
     /// Set the `background` field of this structure.
+    #[must_use]
     pub fn background<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.background = value.into();
         self
     }
     /// Set the `line_width` field of this structure.
+    #[must_use]
     pub fn line_width<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.line_width = value.into();
         self
     }
     /// Set the `line_style` field of this structure.
+    #[must_use]
     pub fn line_style<I>(mut self, value: I) -> Self where I: Into<Option<LineStyle>> {
         self.line_style = value.into();
         self
     }
     /// Set the `cap_style` field of this structure.
+    #[must_use]
     pub fn cap_style<I>(mut self, value: I) -> Self where I: Into<Option<CapStyle>> {
         self.cap_style = value.into();
         self
     }
     /// Set the `join_style` field of this structure.
+    #[must_use]
     pub fn join_style<I>(mut self, value: I) -> Self where I: Into<Option<JoinStyle>> {
         self.join_style = value.into();
         self
     }
     /// Set the `fill_style` field of this structure.
+    #[must_use]
     pub fn fill_style<I>(mut self, value: I) -> Self where I: Into<Option<FillStyle>> {
         self.fill_style = value.into();
         self
     }
     /// Set the `fill_rule` field of this structure.
+    #[must_use]
     pub fn fill_rule<I>(mut self, value: I) -> Self where I: Into<Option<FillRule>> {
         self.fill_rule = value.into();
         self
     }
     /// Set the `tile` field of this structure.
+    #[must_use]
     pub fn tile<I>(mut self, value: I) -> Self where I: Into<Option<Pixmap>> {
         self.tile = value.into();
         self
     }
     /// Set the `stipple` field of this structure.
+    #[must_use]
     pub fn stipple<I>(mut self, value: I) -> Self where I: Into<Option<Pixmap>> {
         self.stipple = value.into();
         self
     }
     /// Set the `tile_stipple_x_origin` field of this structure.
+    #[must_use]
     pub fn tile_stipple_x_origin<I>(mut self, value: I) -> Self where I: Into<Option<i32>> {
         self.tile_stipple_x_origin = value.into();
         self
     }
     /// Set the `tile_stipple_y_origin` field of this structure.
+    #[must_use]
     pub fn tile_stipple_y_origin<I>(mut self, value: I) -> Self where I: Into<Option<i32>> {
         self.tile_stipple_y_origin = value.into();
         self
     }
     /// Set the `font` field of this structure.
+    #[must_use]
     pub fn font<I>(mut self, value: I) -> Self where I: Into<Option<Font>> {
         self.font = value.into();
         self
     }
     /// Set the `subwindow_mode` field of this structure.
+    #[must_use]
     pub fn subwindow_mode<I>(mut self, value: I) -> Self where I: Into<Option<SubwindowMode>> {
         self.subwindow_mode = value.into();
         self
     }
     /// Set the `graphics_exposures` field of this structure.
+    #[must_use]
     pub fn graphics_exposures<I>(mut self, value: I) -> Self where I: Into<Option<Bool32>> {
         self.graphics_exposures = value.into();
         self
     }
     /// Set the `clip_x_origin` field of this structure.
+    #[must_use]
     pub fn clip_x_origin<I>(mut self, value: I) -> Self where I: Into<Option<i32>> {
         self.clip_x_origin = value.into();
         self
     }
     /// Set the `clip_y_origin` field of this structure.
+    #[must_use]
     pub fn clip_y_origin<I>(mut self, value: I) -> Self where I: Into<Option<i32>> {
         self.clip_y_origin = value.into();
         self
     }
     /// Set the `clip_mask` field of this structure.
+    #[must_use]
     pub fn clip_mask<I>(mut self, value: I) -> Self where I: Into<Option<Pixmap>> {
         self.clip_mask = value.into();
         self
     }
     /// Set the `dash_offset` field of this structure.
+    #[must_use]
     pub fn dash_offset<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.dash_offset = value.into();
         self
     }
     /// Set the `dashes` field of this structure.
+    #[must_use]
     pub fn dashes<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.dashes = value.into();
         self
     }
     /// Set the `arc_mode` field of this structure.
+    #[must_use]
     pub fn arc_mode<I>(mut self, value: I) -> Self where I: Into<Option<ArcMode>> {
         self.arc_mode = value.into();
         self
@@ -23240,41 +23323,49 @@ impl ChangeKeyboardControlAux {
         Default::default()
     }
     /// Set the `key_click_percent` field of this structure.
+    #[must_use]
     pub fn key_click_percent<I>(mut self, value: I) -> Self where I: Into<Option<i32>> {
         self.key_click_percent = value.into();
         self
     }
     /// Set the `bell_percent` field of this structure.
+    #[must_use]
     pub fn bell_percent<I>(mut self, value: I) -> Self where I: Into<Option<i32>> {
         self.bell_percent = value.into();
         self
     }
     /// Set the `bell_pitch` field of this structure.
+    #[must_use]
     pub fn bell_pitch<I>(mut self, value: I) -> Self where I: Into<Option<i32>> {
         self.bell_pitch = value.into();
         self
     }
     /// Set the `bell_duration` field of this structure.
+    #[must_use]
     pub fn bell_duration<I>(mut self, value: I) -> Self where I: Into<Option<i32>> {
         self.bell_duration = value.into();
         self
     }
     /// Set the `led` field of this structure.
+    #[must_use]
     pub fn led<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.led = value.into();
         self
     }
     /// Set the `led_mode` field of this structure.
+    #[must_use]
     pub fn led_mode<I>(mut self, value: I) -> Self where I: Into<Option<LedMode>> {
         self.led_mode = value.into();
         self
     }
     /// Set the `key` field of this structure.
+    #[must_use]
     pub fn key<I>(mut self, value: I) -> Self where I: Into<Option<Keycode32>> {
         self.key = value.into();
         self
     }
     /// Set the `auto_repeat_mode` field of this structure.
+    #[must_use]
     pub fn auto_repeat_mode<I>(mut self, value: I) -> Self where I: Into<Option<AutoRepeatMode>> {
         self.auto_repeat_mode = value.into();
         self

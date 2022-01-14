@@ -354,6 +354,7 @@ fn generate_aux(
                     "/// Set the `{}` field of this structure.",
                     rust_case_name,
                 );
+                outln!(out, "#[must_use]");
                 outln!(
                     out,
                     "pub fn {}<I>(mut self, value: I) -> Self where I: Into<Option<{}>> {{",

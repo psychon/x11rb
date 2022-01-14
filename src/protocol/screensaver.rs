@@ -748,76 +748,91 @@ impl SetAttributesAux {
         Default::default()
     }
     /// Set the `background_pixmap` field of this structure.
+    #[must_use]
     pub fn background_pixmap<I>(mut self, value: I) -> Self where I: Into<Option<xproto::Pixmap>> {
         self.background_pixmap = value.into();
         self
     }
     /// Set the `background_pixel` field of this structure.
+    #[must_use]
     pub fn background_pixel<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.background_pixel = value.into();
         self
     }
     /// Set the `border_pixmap` field of this structure.
+    #[must_use]
     pub fn border_pixmap<I>(mut self, value: I) -> Self where I: Into<Option<xproto::Pixmap>> {
         self.border_pixmap = value.into();
         self
     }
     /// Set the `border_pixel` field of this structure.
+    #[must_use]
     pub fn border_pixel<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.border_pixel = value.into();
         self
     }
     /// Set the `bit_gravity` field of this structure.
+    #[must_use]
     pub fn bit_gravity<I>(mut self, value: I) -> Self where I: Into<Option<xproto::Gravity>> {
         self.bit_gravity = value.into();
         self
     }
     /// Set the `win_gravity` field of this structure.
+    #[must_use]
     pub fn win_gravity<I>(mut self, value: I) -> Self where I: Into<Option<xproto::Gravity>> {
         self.win_gravity = value.into();
         self
     }
     /// Set the `backing_store` field of this structure.
+    #[must_use]
     pub fn backing_store<I>(mut self, value: I) -> Self where I: Into<Option<xproto::BackingStore>> {
         self.backing_store = value.into();
         self
     }
     /// Set the `backing_planes` field of this structure.
+    #[must_use]
     pub fn backing_planes<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.backing_planes = value.into();
         self
     }
     /// Set the `backing_pixel` field of this structure.
+    #[must_use]
     pub fn backing_pixel<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.backing_pixel = value.into();
         self
     }
     /// Set the `override_redirect` field of this structure.
+    #[must_use]
     pub fn override_redirect<I>(mut self, value: I) -> Self where I: Into<Option<xproto::Bool32>> {
         self.override_redirect = value.into();
         self
     }
     /// Set the `save_under` field of this structure.
+    #[must_use]
     pub fn save_under<I>(mut self, value: I) -> Self where I: Into<Option<xproto::Bool32>> {
         self.save_under = value.into();
         self
     }
     /// Set the `event_mask` field of this structure.
+    #[must_use]
     pub fn event_mask<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.event_mask = value.into();
         self
     }
     /// Set the `do_not_propogate_mask` field of this structure.
+    #[must_use]
     pub fn do_not_propogate_mask<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.do_not_propogate_mask = value.into();
         self
     }
     /// Set the `colormap` field of this structure.
+    #[must_use]
     pub fn colormap<I>(mut self, value: I) -> Self where I: Into<Option<xproto::Colormap>> {
         self.colormap = value.into();
         self
     }
     /// Set the `cursor` field of this structure.
+    #[must_use]
     pub fn cursor<I>(mut self, value: I) -> Self where I: Into<Option<xproto::Cursor>> {
         self.cursor = value.into();
         self

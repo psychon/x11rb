@@ -1230,31 +1230,37 @@ impl CreateAlarmAux {
         Default::default()
     }
     /// Set the `counter` field of this structure.
+    #[must_use]
     pub fn counter<I>(mut self, value: I) -> Self where I: Into<Option<Counter>> {
         self.counter = value.into();
         self
     }
     /// Set the `value_type` field of this structure.
+    #[must_use]
     pub fn value_type<I>(mut self, value: I) -> Self where I: Into<Option<VALUETYPE>> {
         self.value_type = value.into();
         self
     }
     /// Set the `value` field of this structure.
+    #[must_use]
     pub fn value<I>(mut self, value: I) -> Self where I: Into<Option<Int64>> {
         self.value = value.into();
         self
     }
     /// Set the `test_type` field of this structure.
+    #[must_use]
     pub fn test_type<I>(mut self, value: I) -> Self where I: Into<Option<TESTTYPE>> {
         self.test_type = value.into();
         self
     }
     /// Set the `delta` field of this structure.
+    #[must_use]
     pub fn delta<I>(mut self, value: I) -> Self where I: Into<Option<Int64>> {
         self.delta = value.into();
         self
     }
     /// Set the `events` field of this structure.
+    #[must_use]
     pub fn events<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.events = value.into();
         self
@@ -1470,31 +1476,37 @@ impl ChangeAlarmAux {
         Default::default()
     }
     /// Set the `counter` field of this structure.
+    #[must_use]
     pub fn counter<I>(mut self, value: I) -> Self where I: Into<Option<Counter>> {
         self.counter = value.into();
         self
     }
     /// Set the `value_type` field of this structure.
+    #[must_use]
     pub fn value_type<I>(mut self, value: I) -> Self where I: Into<Option<VALUETYPE>> {
         self.value_type = value.into();
         self
     }
     /// Set the `value` field of this structure.
+    #[must_use]
     pub fn value<I>(mut self, value: I) -> Self where I: Into<Option<Int64>> {
         self.value = value.into();
         self
     }
     /// Set the `test_type` field of this structure.
+    #[must_use]
     pub fn test_type<I>(mut self, value: I) -> Self where I: Into<Option<TESTTYPE>> {
         self.test_type = value.into();
         self
     }
     /// Set the `delta` field of this structure.
+    #[must_use]
     pub fn delta<I>(mut self, value: I) -> Self where I: Into<Option<Int64>> {
         self.delta = value.into();
         self
     }
     /// Set the `events` field of this structure.
+    #[must_use]
     pub fn events<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.events = value.into();
         self
