@@ -898,6 +898,7 @@ impl TypeRef {
     /// Get the original type.
     ///
     /// This function resolves type aliases by calling [`TypeAliasDef::get_original_type`].
+    #[must_use]
     pub fn get_original_type(&self) -> Self {
         match self {
             Self::Alias(type_alias_def) => {
