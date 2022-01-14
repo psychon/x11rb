@@ -38,6 +38,7 @@ impl Alignment {
     ///
     /// The resulting value describes the alignment at the end of the variably sized object if it
     /// is aligned by `self` at its beginning.
+    #[must_use]
     pub fn advance_variable_size(self, size: VariableSize) -> Self {
         let align = if size.incr == 0 {
             self.align
@@ -76,6 +77,7 @@ impl Alignment {
     }
 
     /// Returns an alignment that is met by `self` and `other`.
+    #[must_use]
     pub fn intersection(self, other: Self) -> Self {
         let align = self.align.min(other.align);
         let offset1 = self.offset % align;
@@ -174,6 +176,7 @@ impl VariableSize {
     /// by such a concatenation are described by the returned object. However, not all sizes that
     /// are described by the returned object can necessarily be constructed by such a
     /// concatenation.
+    #[must_use]
     pub fn append(self, other: Self) -> Self {
         Self {
             // FIXME: check overflow
@@ -184,6 +187,7 @@ impl VariableSize {
 
     /// Returns an `VariableSize` that can represent all the sizes
     /// represented by `self` and `other`.
+    #[must_use]
     pub fn union(self, other: Self) -> Self {
         let incr_union = Self::incr_union(self.incr, other.incr);
         if self.base == other.base {
@@ -228,6 +232,7 @@ impl VariableSize {
     }
 
     /// Describe the size of an arbitrary number of elements.
+    #[must_use]
     pub fn zero_one_or_many(self) -> Self {
         // Self represents sizes `base + incr * n`, where `n >= 0`.
         // The returned value must represent sizes `(base + incr * n) * m`
@@ -245,6 +250,7 @@ impl VariableSize {
     }
 
     /// Describe the size of `n` elements of this type.
+    #[must_use]
     pub fn repeat_n(self, n: u32) -> Self {
         if n == 0 {
             Self::zero()
