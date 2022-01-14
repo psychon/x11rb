@@ -27,8 +27,7 @@ impl std::fmt::Display for LibxcbLoadError {
                 "failed to get symbol \"{}\": {}",
                 symbol
                     .iter()
-                    .map(|&c| std::ascii::escape_default(c))
-                    .flatten()
+                    .flat_map(|&c| std::ascii::escape_default(c))
                     .map(char::from)
                     .collect::<String>(),
                 e,
