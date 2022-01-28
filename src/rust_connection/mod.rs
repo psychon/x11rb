@@ -317,7 +317,7 @@ impl<S: Stream> RustConnection<S> {
                     inner = self.read_packet_and_enqueue(
                         inner,
                         BlockingMode::NonBlocking,
-                        Deadline::Infinity,
+                        &Deadline::Infinity,
                     )?;
                 }
                 Err(e) => return Err(e),
@@ -342,7 +342,7 @@ impl<S: Stream> RustConnection<S> {
                     inner = self.read_packet_and_enqueue(
                         inner,
                         BlockingMode::NonBlocking,
-                        Deadline::Infinity,
+                        &Deadline::Infinity,
                     )?;
                 }
                 Err(e) => return Err(e),
@@ -366,7 +366,7 @@ impl<S: Stream> RustConnection<S> {
         &'a self,
         mut inner: MutexGuardInner<'a>,
         mode: BlockingMode,
-        deadline: Deadline,
+        deadline: &Deadline,
     ) -> Result<MutexGuardInner<'a>, std::io::Error> {
         // 0.1. Try to lock the `packet_reader` mutex.
         match self.packet_reader.try_lock() {
@@ -389,7 +389,7 @@ impl<S: Stream> RustConnection<S> {
                     Deadline::Infinity => Ok(self.reader_condition.wait(inner).unwrap()),
                     Deadline::Timeboxed(deadline) => Ok(self
                         .reader_condition
-                        .wait_timeout(inner, Duration::from_millis(deadline as u64))
+                        .wait_timeout(inner, Duration::from_millis(*deadline as u64))
                         .unwrap()
                         .0),
                 }
@@ -409,7 +409,7 @@ impl<S: Stream> RustConnection<S> {
                     match deadline {
                         Deadline::Infinity => self.stream.poll_deadline(PollMode::Readable, -1)?,
                         Deadline::Timeboxed(deadline) => {
-                            self.stream.poll_deadline(PollMode::Readable, deadline)?
+                            self.stream.poll_deadline(PollMode::Readable, *deadline)?
                         }
                     }
                     // 2.1.3. Relock inner
@@ -461,6 +461,38 @@ impl<S: Stream> RustConnection<S> {
     /// Returns a reference to the contained stream.
     pub fn stream(&self) -> &S {
         &self.stream
+    }
+    /// Wait for an event with a deadline in milliseconds, any values below 0 are treated as
+    /// an infinite wait
+    pub fn wait_for_event_with_deadline(
+        &self,
+        deadline: i32,
+    ) -> Result<Option<crate::protocol::Event>, ConnectionError> {
+        if let Some((raw_event, _)) = self.wait_for_raw_event_with_sequence_deadline(deadline)? {
+            return Ok(Some(self.parse_event(raw_event.as_ref())?));
+        }
+        Ok(None)
+    }
+
+    fn wait_for_raw_event_with_sequence_deadline(
+        &self,
+        deadline: i32,
+    ) -> Result<Option<crate::connection::RawEventAndSeqNumber<Vec<u8>>>, ConnectionError> {
+        let mut inner = self.inner.lock().unwrap();
+        if let Some(event) = inner.poll_for_event_with_sequence() {
+            return Ok(Some(event));
+        }
+        let deadline = if deadline < 0 {
+            Deadline::Infinity
+        } else {
+            Deadline::Timeboxed(deadline)
+        };
+        inner = self.read_packet_and_enqueue(inner, BlockingMode::Blocking, &deadline)?;
+        if let Some(event) = inner.poll_for_event_with_sequence() {
+            Ok(Some(event))
+        } else {
+            Ok(None)
+        }
     }
 }
 
@@ -550,7 +582,7 @@ impl<S: Stream> RequestConnection for RustConnection<S> {
                 PollReply::Reply(buffer) => return Ok(Some(buffer)),
             }
             inner =
-                self.read_packet_and_enqueue(inner, BlockingMode::Blocking, Deadline::Infinity)?;
+                self.read_packet_and_enqueue(inner, BlockingMode::Blocking, &Deadline::Infinity)?;
         }
     }
 
@@ -572,7 +604,7 @@ impl<S: Stream> RequestConnection for RustConnection<S> {
                 PollReply::Reply(buffer) => return Ok(Some(buffer)),
             }
             inner =
-                self.read_packet_and_enqueue(inner, BlockingMode::Blocking, Deadline::Infinity)?;
+                self.read_packet_and_enqueue(inner, BlockingMode::Blocking, &Deadline::Infinity)?;
         }
     }
 
@@ -592,7 +624,7 @@ impl<S: Stream> RequestConnection for RustConnection<S> {
                 }
             }
             inner =
-                self.read_packet_and_enqueue(inner, BlockingMode::Blocking, Deadline::Infinity)?;
+                self.read_packet_and_enqueue(inner, BlockingMode::Blocking, &Deadline::Infinity)?;
         }
     }
 
@@ -649,7 +681,7 @@ impl<S: Stream> Connection for RustConnection<S> {
                 return Ok(event);
             }
             inner =
-                self.read_packet_and_enqueue(inner, BlockingMode::Blocking, Deadline::Infinity)?;
+                self.read_packet_and_enqueue(inner, BlockingMode::Blocking, &Deadline::Infinity)?;
         }
     }
 
@@ -660,8 +692,11 @@ impl<S: Stream> Connection for RustConnection<S> {
         if let Some(event) = inner.poll_for_event_with_sequence() {
             Ok(Some(event))
         } else {
-            inner =
-                self.read_packet_and_enqueue(inner, BlockingMode::NonBlocking, Deadline::Infinity)?;
+            inner = self.read_packet_and_enqueue(
+                inner,
+                BlockingMode::NonBlocking,
+                &Deadline::Infinity,
+            )?;
             Ok(inner.poll_for_event_with_sequence())
         }
     }
@@ -678,27 +713,6 @@ impl<S: Stream> Connection for RustConnection<S> {
 
     fn generate_id(&self) -> Result<u32, ReplyOrIdError> {
         self.id_allocator.lock().unwrap().generate_id(self)
-    }
-
-    fn wait_for_raw_event_with_sequence_deadline(
-        &self,
-        deadline: i32,
-    ) -> Result<Option<crate::connection::RawEventAndSeqNumber<Self::Buf>>, ConnectionError> {
-        let mut inner = self.inner.lock().unwrap();
-        if let Some(event) = inner.poll_for_event_with_sequence() {
-            return Ok(Some(event));
-        }
-        let deadline = if deadline < 0 {
-            Deadline::Infinity
-        } else {
-            Deadline::Timeboxed(deadline)
-        };
-        inner = self.read_packet_and_enqueue(inner, BlockingMode::Blocking, deadline)?;
-        if let Some(event) = inner.poll_for_event_with_sequence() {
-            Ok(Some(event))
-        } else {
-            Ok(None)
-        }
     }
 }
 
