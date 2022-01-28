@@ -249,12 +249,6 @@ mod test {
     }
 
     impl Connection for MockConnection {
-        fn wait_for_raw_event_with_sequence_deadline(
-            &self,
-            deadline: i32,
-        ) -> Result<RawEventAndSeqNumber<Self::Buf>, ConnectionError> {
-            unimplemented!()
-        }
         fn wait_for_raw_event_with_sequence(
             &self,
         ) -> Result<RawEventAndSeqNumber<Self::Buf>, ConnectionError> {
