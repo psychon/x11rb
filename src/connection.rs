@@ -297,10 +297,11 @@ pub trait RequestConnection {
 
 /// A connection to an X11 server.
 pub trait Connection: RequestConnection {
-    /// Wait for an event with a deadline in milliseconds
+    /// Wait for an event with a deadline in milliseconds, any values below 0 are treated as
+    /// an infinite wait
     fn wait_for_event_with_deadline(
         &self,
-        deadline: u64,
+        deadline: i32,
     ) -> Result<Option<Event>, ConnectionError> {
         if let Some((raw_event, _)) = self.wait_for_raw_event_with_sequence_deadline(deadline)? {
             return Ok(Some(self.parse_event(raw_event.as_ref())?));
@@ -332,7 +333,7 @@ pub trait Connection: RequestConnection {
     /// Wait for a new raw/unparsed event from the X11 server with a deadline.
     fn wait_for_raw_event_with_sequence_deadline(
         &self,
-        deadline: u64,
+        deadline: i32,
     ) -> Result<Option<RawEventAndSeqNumber<Self::Buf>>, ConnectionError>;
 
     /// Poll for a new event from the X11 server.

@@ -389,7 +389,7 @@ impl<S: Stream> RustConnection<S> {
                     Deadline::Infinity => Ok(self.reader_condition.wait(inner).unwrap()),
                     Deadline::Timeboxed(deadline) => Ok(self
                         .reader_condition
-                        .wait_timeout(inner, Duration::from_millis(deadline))
+                        .wait_timeout(inner, Duration::from_millis(deadline as u64))
                         .unwrap()
                         .0),
                 }
@@ -408,9 +408,9 @@ impl<S: Stream> RustConnection<S> {
                     // 2.1.2. Do the actual poll
                     match deadline {
                         Deadline::Infinity => self.stream.poll_deadline(PollMode::Readable, -1)?,
-                        Deadline::Timeboxed(deadline) => self
-                            .stream
-                            .poll_deadline(PollMode::Readable, deadline as i32)?,
+                        Deadline::Timeboxed(deadline) => {
+                            self.stream.poll_deadline(PollMode::Readable, deadline)?
+                        }
                     }
                     // 2.1.3. Relock inner
                     inner = self.inner.lock().unwrap();
@@ -682,17 +682,18 @@ impl<S: Stream> Connection for RustConnection<S> {
 
     fn wait_for_raw_event_with_sequence_deadline(
         &self,
-        deadline: u64,
+        deadline: i32,
     ) -> Result<Option<crate::connection::RawEventAndSeqNumber<Self::Buf>>, ConnectionError> {
         let mut inner = self.inner.lock().unwrap();
         if let Some(event) = inner.poll_for_event_with_sequence() {
             return Ok(Some(event));
         }
-        inner = self.read_packet_and_enqueue(
-            inner,
-            BlockingMode::Blocking,
-            Deadline::Timeboxed(deadline),
-        )?;
+        let deadline = if deadline < 0 {
+            Deadline::Infinity
+        } else {
+            Deadline::Timeboxed(deadline)
+        };
+        inner = self.read_packet_and_enqueue(inner, BlockingMode::Blocking, deadline)?;
         if let Some(event) = inner.poll_for_event_with_sequence() {
             Ok(Some(event))
         } else {
@@ -795,7 +796,7 @@ impl Drop for NotifyOnDrop<'_> {
 
 enum Deadline {
     Infinity,
-    Timeboxed(u64),
+    Timeboxed(i32),
 }
 
 #[cfg(test)]

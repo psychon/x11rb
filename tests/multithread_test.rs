@@ -157,27 +157,7 @@ mod fake_stream {
 
     impl Stream for FakeStream {
         fn poll(&self, mode: PollMode) -> std::io::Result<()> {
-            if mode.writable() {
-                Ok(())
-            } else {
-                let mut inner = self.inner.lock().unwrap();
-                loop {
-                    if inner.read.pending.is_empty() {
-                        match inner.read.recv.try_recv() {
-                            Ok(packet) => {
-                                inner.read.pending.extend(packet.to_raw());
-                                return Ok(());
-                            }
-                            Err(std::sync::mpsc::TryRecvError::Empty) => {
-                                inner = self.condvar.wait(inner).unwrap();
-                            }
-                            Err(std::sync::mpsc::TryRecvError::Disconnected) => unreachable!(),
-                        }
-                    } else {
-                        return Ok(());
-                    }
-                }
-            }
+            self.poll_deadline(mode, 0)
         }
 
         fn poll_deadline(&self, mode: PollMode, _deadline: i32) -> std::io::Result<()> {
