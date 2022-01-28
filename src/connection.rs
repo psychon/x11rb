@@ -297,6 +297,16 @@ pub trait RequestConnection {
 
 /// A connection to an X11 server.
 pub trait Connection: RequestConnection {
+    /// Wait for an event with a deadline
+    fn wait_for_event_with_deadline(
+        &self,
+        deadline: i32,
+    ) -> Result<Option<Event>, ConnectionError> {
+        if let Some((raw_event, _)) = self.wait_for_raw_event_with_sequence_deadline(deadline)? {
+            return Ok(Some(self.parse_event(raw_event.as_ref())?));
+        }
+        Ok(None)
+    }
     /// Wait for a new event from the X11 server.
     fn wait_for_event(&self) -> Result<Event, ConnectionError> {
         Ok(self.wait_for_event_with_sequence()?.0)
@@ -309,6 +319,7 @@ pub trait Connection: RequestConnection {
 
     /// Wait for a new event from the X11 server.
     fn wait_for_event_with_sequence(&self) -> Result<EventAndSeqNumber, ConnectionError> {
+        //let evt = self.wait_for_raw_event_with_sequence(deadline)?.0;
         let (event, seq) = self.wait_for_raw_event_with_sequence()?;
         let event = self.parse_event(event.as_ref())?;
         Ok((event, seq))
@@ -318,6 +329,12 @@ pub trait Connection: RequestConnection {
     fn wait_for_raw_event_with_sequence(
         &self,
     ) -> Result<RawEventAndSeqNumber<Self::Buf>, ConnectionError>;
+
+    /// Wait for a new raw/unparsed event from the X11 server.
+    fn wait_for_raw_event_with_sequence_deadline(
+        &self,
+        deadline: i32,
+    ) -> Result<Option<RawEventAndSeqNumber<Self::Buf>>, ConnectionError>;
 
     /// Poll for a new event from the X11 server.
     fn poll_for_event(&self) -> Result<Option<Event>, ConnectionError> {

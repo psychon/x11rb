@@ -3,6 +3,7 @@
 use std::convert::TryInto;
 use std::io::IoSlice;
 use std::sync::{Condvar, Mutex, MutexGuard, TryLockError};
+use std::time::Duration;
 
 use crate::connection::{
     compute_length_field, Connection, DiscardMode, ReplyOrError, RequestConnection, RequestKind,
@@ -313,7 +314,7 @@ impl<S: Stream> RustConnection<S> {
                     // Writing would block, try to read instead because the
                     // server might not accept new requests after its
                     // buffered replies have been read.
-                    inner = self.read_packet_and_enqueue(inner, BlockingMode::NonBlocking)?;
+                    inner = self.read_packet_and_enqueue(inner, BlockingMode::NonBlocking, -1)?;
                 }
                 Err(e) => return Err(e),
             }
@@ -334,7 +335,7 @@ impl<S: Stream> RustConnection<S> {
                     // Writing would block, try to read instead because the
                     // server might not accept new requests after its
                     // buffered replies have been read.
-                    inner = self.read_packet_and_enqueue(inner, BlockingMode::NonBlocking)?;
+                    inner = self.read_packet_and_enqueue(inner, BlockingMode::NonBlocking, -1)?;
                 }
                 Err(e) => return Err(e),
             }
@@ -357,6 +358,7 @@ impl<S: Stream> RustConnection<S> {
         &'a self,
         mut inner: MutexGuardInner<'a>,
         mode: BlockingMode,
+        deadline: i32,
     ) -> Result<MutexGuardInner<'a>, std::io::Error> {
         // 0.1. Try to lock the `packet_reader` mutex.
         match self.packet_reader.try_lock() {
@@ -375,7 +377,11 @@ impl<S: Stream> RustConnection<S> {
                 // When `wait` finishes, other thread has enqueued a packet,
                 // so the purpose of this function has been fulfilled. `wait`
                 // will relock `inner` when it returns.
-                Ok(self.reader_condition.wait(inner).unwrap())
+                Ok(self
+                    .reader_condition
+                    .wait_timeout(inner, Duration::from_millis(deadline as u64))
+                    .unwrap()
+                    .0)
             }
             Err(TryLockError::Poisoned(e)) => panic!("{}", e),
             Ok(mut packet_reader) => {
@@ -389,7 +395,7 @@ impl<S: Stream> RustConnection<S> {
                     // during the poll.
                     drop(inner);
                     // 2.1.2. Do the actual poll
-                    self.stream.poll(PollMode::Readable)?;
+                    self.stream.poll_deadline(PollMode::Readable, deadline)?;
                     // 2.1.3. Relock inner
                     inner = self.inner.lock().unwrap();
                 }
@@ -527,7 +533,7 @@ impl<S: Stream> RequestConnection for RustConnection<S> {
                 PollReply::NoReply => return Ok(None),
                 PollReply::Reply(buffer) => return Ok(Some(buffer)),
             }
-            inner = self.read_packet_and_enqueue(inner, BlockingMode::Blocking)?;
+            inner = self.read_packet_and_enqueue(inner, BlockingMode::Blocking, -1)?;
         }
     }
 
@@ -548,7 +554,7 @@ impl<S: Stream> RequestConnection for RustConnection<S> {
                 PollReply::NoReply => return Ok(None),
                 PollReply::Reply(buffer) => return Ok(Some(buffer)),
             }
-            inner = self.read_packet_and_enqueue(inner, BlockingMode::Blocking)?;
+            inner = self.read_packet_and_enqueue(inner, BlockingMode::Blocking, -1)?;
         }
     }
 
@@ -567,7 +573,7 @@ impl<S: Stream> RequestConnection for RustConnection<S> {
                     return Ok(ReplyOrError::Reply(reply));
                 }
             }
-            inner = self.read_packet_and_enqueue(inner, BlockingMode::Blocking)?;
+            inner = self.read_packet_and_enqueue(inner, BlockingMode::Blocking, -1)?;
         }
     }
 
@@ -623,7 +629,7 @@ impl<S: Stream> Connection for RustConnection<S> {
             if let Some(event) = inner.poll_for_event_with_sequence() {
                 return Ok(event);
             }
-            inner = self.read_packet_and_enqueue(inner, BlockingMode::Blocking)?;
+            inner = self.read_packet_and_enqueue(inner, BlockingMode::Blocking, -1)?;
         }
     }
 
@@ -634,7 +640,7 @@ impl<S: Stream> Connection for RustConnection<S> {
         if let Some(event) = inner.poll_for_event_with_sequence() {
             Ok(Some(event))
         } else {
-            inner = self.read_packet_and_enqueue(inner, BlockingMode::NonBlocking)?;
+            inner = self.read_packet_and_enqueue(inner, BlockingMode::NonBlocking, -1)?;
             Ok(inner.poll_for_event_with_sequence())
         }
     }
@@ -651,6 +657,22 @@ impl<S: Stream> Connection for RustConnection<S> {
 
     fn generate_id(&self) -> Result<u32, ReplyOrIdError> {
         self.id_allocator.lock().unwrap().generate_id(self)
+    }
+
+    fn wait_for_raw_event_with_sequence_deadline(
+        &self,
+        deadline: i32,
+    ) -> Result<Option<crate::connection::RawEventAndSeqNumber<Self::Buf>>, ConnectionError> {
+        let mut inner = self.inner.lock().unwrap();
+        if let Some(event) = inner.poll_for_event_with_sequence() {
+            return Ok(Some(event));
+        }
+        inner = self.read_packet_and_enqueue(inner, BlockingMode::Blocking, deadline)?;
+        if let Some(event) = inner.poll_for_event_with_sequence() {
+            Ok(Some(event))
+        } else {
+            Ok(None)
+        }
     }
 }
 
@@ -774,6 +796,10 @@ mod test {
         fn write(&self, buf: &[u8], fds: &mut Vec<RawFdContainer>) -> Result<usize> {
             assert!(fds.is_empty());
             self.write_slice.borrow_mut().write(buf)
+        }
+
+        fn poll_deadline(&self, _mode: PollMode, _timeout_millis: i32) -> Result<()> {
+            Ok(())
         }
     }
 

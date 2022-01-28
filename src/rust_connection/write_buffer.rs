@@ -179,6 +179,10 @@ mod test {
         fn write(&self, _buf: &[u8], _fds: &mut Vec<RawFdContainer>) -> Result<usize> {
             Err(Error::new(ErrorKind::WouldBlock, "would block"))
         }
+
+        fn poll_deadline(&self, _mode: PollMode, _timeout_millis: i32) -> Result<()> {
+            unimplemented!();
+        }
     }
 
     // Once upon a time, this paniced because it did bufs[0]

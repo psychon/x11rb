@@ -63,6 +63,9 @@ pub trait Stream {
     /// `read` is `true`) or writable (when `write` is `true`).
     fn poll(&self, mode: PollMode) -> Result<()>;
 
+    /// Function as above with a specified timeout in milliseconds, -1 meaning wait forever.
+    fn poll_deadline(&self, mode: PollMode, timeout_millis: i32) -> Result<()>;
+
     /// Read some bytes and FDs from this reader without blocking, returning how many bytes
     /// were read.
     ///
@@ -377,52 +380,57 @@ fn do_write(
 
 impl Stream for DefaultStream {
     fn poll(&self, mode: PollMode) -> Result<()> {
-        #[cfg(unix)]
-        {
-            use nix::poll::{poll, PollFd, PollFlags};
-
-            let mut poll_flags = PollFlags::empty();
-            if mode.readable() {
-                poll_flags |= PollFlags::POLLIN;
-            }
-            if mode.writable() {
-                poll_flags |= PollFlags::POLLOUT;
-            }
-            let fd = self.as_raw_fd();
-            let mut poll_fds = [PollFd::new(fd, poll_flags)];
-            loop {
-                match poll(&mut poll_fds, -1) {
-                    Ok(_) => break,
-                    Err(nix::Error::EINTR) => {}
-                    Err(e) => return Err(e.into()),
-                }
-            }
-            // Let the errors (POLLERR) be handled when trying to read or write.
-            Ok(())
-        }
-        #[cfg(windows)]
-        {
-            use winapi::um::winsock2::{POLLRDNORM, POLLWRNORM, SOCKET, WSAPOLLFD};
-            use winapi_wsapoll::wsa_poll;
-
-            let raw_socket = self.as_raw_socket();
-            let mut events = 0;
-            if mode.readable() {
-                events |= POLLRDNORM;
-            }
-            if mode.writable() {
-                events |= POLLWRNORM;
-            }
-            let mut poll_fds = [WSAPOLLFD {
-                fd: raw_socket as SOCKET,
-                events,
-                revents: 0,
-            }];
-            let _ = wsa_poll(&mut poll_fds, -1)?;
-            // Let the errors (POLLERR) be handled when trying to read or write.
-            Ok(())
-        }
+        self.poll_deadline(mode, -1)
     }
+
+    fn poll_deadline(&self, mode: PollMode, timeout_millis: i32) -> Result<()> {
+        #[cfg(unix)]
+            {
+                use nix::poll::{poll, PollFd, PollFlags};
+
+                let mut poll_flags = PollFlags::empty();
+                if mode.readable() {
+                    poll_flags |= PollFlags::POLLIN;
+                }
+                if mode.writable() {
+                    poll_flags |= PollFlags::POLLOUT;
+                }
+                let fd = self.as_raw_fd();
+                let mut poll_fds = [PollFd::new(fd, poll_flags)];
+                loop {
+                    match poll(&mut poll_fds, timeout_millis) {
+                        Ok(_) => break,
+                        Err(nix::Error::EINTR) => {}
+                        Err(e) => return Err(e.into()),
+                    }
+                }
+                // Let the errors (POLLERR) be handled when trying to read or write.
+                Ok(())
+            }
+        #[cfg(windows)]
+            {
+                use winapi::um::winsock2::{POLLRDNORM, POLLWRNORM, SOCKET, WSAPOLLFD};
+                use winapi_wsapoll::wsa_poll;
+
+                let raw_socket = self.as_raw_socket();
+                let mut events = 0;
+                if mode.readable() {
+                    events |= POLLRDNORM;
+                }
+                if mode.writable() {
+                    events |= POLLWRNORM;
+                }
+                let mut poll_fds = [WSAPOLLFD {
+                    fd: raw_socket as SOCKET,
+                    events,
+                    revents: 0,
+                }];
+                let _ = wsa_poll(&mut poll_fds, timeout_millis)?;
+                // Let the errors (POLLERR) be handled when trying to read or write.
+                Ok(())
+            }
+    }
+
 
     fn read(&self, buf: &mut [u8], fd_storage: &mut Vec<RawFdContainer>) -> Result<usize> {
         #[cfg(unix)]
