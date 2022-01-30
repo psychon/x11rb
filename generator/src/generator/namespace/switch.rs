@@ -996,12 +996,12 @@ fn case_has_single_visible_field(
 fn needs_match_by_value(field: &xcbdefs::FieldDef) -> bool {
     match field {
         xcbdefs::FieldDef::Normal(normal_field) => {
-            match normal_field.type_.type_.get_resolved().get_original_type() {
-                xcbdefs::TypeRef::BuiltIn(_) => true,
-                xcbdefs::TypeRef::Xid(_) => true,
-                xcbdefs::TypeRef::XidUnion(_) => true,
-                _ => false,
-            }
+            matches!(
+                normal_field.type_.type_.get_resolved().get_original_type(),
+                xcbdefs::TypeRef::BuiltIn(_)
+                    | xcbdefs::TypeRef::Xid(_)
+                    | xcbdefs::TypeRef::XidUnion(_)
+            )
         }
         _ => false,
     }

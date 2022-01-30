@@ -81,7 +81,7 @@ jobs:
     strategy:
       matrix:
         include:
-          - rust: 1.41.0
+          - rust: 1.46.0
           - rust: stable
           - rust: beta
           - rust: nightly

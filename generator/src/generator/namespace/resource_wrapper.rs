@@ -234,10 +234,7 @@ fn generate_creator(
                     .use_enum_type_in_field(&normal_field.type_)
                     .is_none()
                 {
-                    match normal_field.type_.value_set {
-                        xcbdefs::FieldValueSet::None => false,
-                        _ => true,
-                    }
+                    !matches!(normal_field.type_.value_set, xcbdefs::FieldValueSet::None)
                 } else {
                     false
                 };

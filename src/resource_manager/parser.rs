@@ -8,10 +8,7 @@ use super::{Binding, Component, Entry};
 
 /// Check if a character (well, u8) is an octal digit
 fn is_octal_digit(c: u8) -> bool {
-    match c {
-        b'0' | b'1' | b'2' | b'3' | b'4' | b'5' | b'6' | b'7' => true,
-        _ => false,
-    }
+    matches!(c, b'0' | b'1' | b'2' | b'3' | b'4' | b'5' | b'6' | b'7')
 }
 
 /// Find the longest prefix of the given data where the given callback returns true

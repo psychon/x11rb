@@ -168,10 +168,7 @@ fn parse_inherits_impl(input: &mut impl BufRead) -> Result<Vec<String>, IOError>
                 to_parse = &to_parse[1..];
 
                 fn should_skip(c: u8) -> bool {
-                    match c {
-                        b' ' | b'\t' | b'\n' | b';' | b',' => true,
-                        _ => false,
-                    }
+                    matches!(c, b' ' | b'\t' | b'\n' | b';' | b',')
                 }
 
                 // Iterate over the pieces
@@ -261,9 +258,8 @@ where
                 // Calculate the path to the theme's directory
                 let mut theme_dir = PathBuf::new();
                 // Does the path begin with '~'?
-                if path.starts_with('~') {
+                if let Some(mut path) = path.strip_prefix('~') {
                     theme_dir.push(&home);
-                    let mut path = &path[1..];
                     // Skip a path separator if there is one
                     if path.chars().next().map(std::path::is_separator) == Some(true) {
                         path = &path[1..];
