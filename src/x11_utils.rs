@@ -6,6 +6,7 @@
 
 use std::convert::TryInto;
 
+use crate::connection::BufWithFds;
 use crate::errors::ParseError;
 use crate::protocol::{request_name, ErrorKind};
 use crate::utils::RawFdContainer;
@@ -235,6 +236,15 @@ pub trait Request {
     /// The kind of reply that this request generates.
     type Reply: Into<crate::protocol::Reply> + TryParseFd;
 
+    /// The protocol name of the extension that this request belongs to, or None for core requests
+    const EXTENSION_NAME: Option<&'static str>;
+
+    /// Serialize this request into its X11 protocol wire representation.
+    ///
+    /// The argument is the major opcode of the extension that this request belongs to. For core
+    /// requests, the argument may not have any influence
+    fn serialize(self, extension_opcode: u8) -> BufWithFds<Vec<u8>>;
+
     /// Parse a reply to this request.
     ///
     /// The default implementation of this function uses `Self::Reply::try_parse_fd`. There should
@@ -254,6 +264,15 @@ pub type ReplyParsingFunction =
         &'a [u8],
         &mut Vec<RawFdContainer>,
     ) -> Result<(crate::protocol::Reply, &'a [u8]), ParseError>;
+
+/// A X11 request that does not have a reply
+pub trait VoidRequest: Request {}
+
+/// A X11 request that has a reply without FDs
+pub trait ReplyRequest: Request {}
+
+/// A X11 request that has a reply with FDs
+pub trait ReplyFDsRequest: Request {}
 
 /// A type implementing this trait can be serialized into X11 raw bytes.
 pub trait Serialize {
