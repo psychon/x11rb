@@ -296,7 +296,9 @@ impl XCBConnection {
 
     unsafe fn wrap_reply(&self, reply: *const u8, sequence: SequenceNumber) -> CSlice {
         // Update our "max sequence number received" field
-        atomic_u64_max(&self.maximum_sequence_received, sequence);
+        let _ = self
+            .maximum_sequence_received
+            .fetch_max(sequence, Ordering::Relaxed);
 
         let header = CSlice::new(reply, 32);
 
@@ -311,7 +313,9 @@ impl XCBConnection {
 
     unsafe fn wrap_error(&self, error: *const u8, sequence: SequenceNumber) -> CSlice {
         // Update our "max sequence number received" field
-        atomic_u64_max(&self.maximum_sequence_received, sequence);
+        let _ = self
+            .maximum_sequence_received
+            .fetch_max(sequence, Ordering::Relaxed);
 
         CSlice::new(error, 32)
     }
@@ -587,21 +591,6 @@ impl AsRawFd for XCBConnection {
     }
 }
 
-/// Atomically sets `value` to the maximum of `value` and `new`.
-fn atomic_u64_max(value: &AtomicU64, new: u64) {
-    // If only AtomicU64::fetch_max were stable...
-    let mut old = value.load(Ordering::Relaxed);
-    loop {
-        if old >= new {
-            return;
-        }
-        match value.compare_exchange_weak(old, new, Ordering::Relaxed, Ordering::Relaxed) {
-            Ok(_) => return,
-            Err(val) => old = val,
-        }
-    }
-}
-
 /// Reconstruct a partial sequence number based on a recently received 'full' sequence number.
 ///
 /// The new sequence number may be before or after the `recent` sequence number.
@@ -644,7 +633,7 @@ fn reconstruct_full_sequence_impl(recent: SequenceNumber, value: u32) -> Sequenc
 
 #[cfg(test)]
 mod test {
-    use super::{atomic_u64_max, XCBConnection};
+    use super::XCBConnection;
     use std::ffi::CString;
 
     #[test]
@@ -655,27 +644,6 @@ mod test {
         let str = CString::new("display name").unwrap();
         let (_conn, screen) = XCBConnection::connect(Some(&str)).expect("Failed to 'connect'");
         assert_eq!(screen, 0);
-    }
-
-    #[test]
-    fn u64_max() {
-        use std::sync::atomic::{AtomicU64, Ordering};
-        let value = AtomicU64::new(0);
-
-        atomic_u64_max(&value, 3);
-        assert_eq!(value.load(Ordering::Relaxed), 3);
-
-        atomic_u64_max(&value, 7);
-        assert_eq!(value.load(Ordering::Relaxed), 7);
-
-        atomic_u64_max(&value, 5);
-        assert_eq!(value.load(Ordering::Relaxed), 7);
-
-        atomic_u64_max(&value, 7);
-        assert_eq!(value.load(Ordering::Relaxed), 7);
-
-        atomic_u64_max(&value, 9);
-        assert_eq!(value.load(Ordering::Relaxed), 9);
     }
 
     #[test]
