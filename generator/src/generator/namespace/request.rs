@@ -449,13 +449,9 @@ fn emit_request_struct(
         out.indented(|out| {
             let fields = request_def.fields.borrow();
 
-            let has_expr_fields = fields.iter().any(|field| {
-                if let xcbdefs::FieldDef::Expr(_) = field {
-                    true
-                } else {
-                    false
-                }
-            });
+            let has_expr_fields = fields
+                .iter()
+                .any(|field| matches!(field, xcbdefs::FieldDef::Expr(_)));
             // Calculate `VirtualLen` field values because they
             // may be used by <exprfield>s.
             if has_expr_fields {
@@ -1356,10 +1352,7 @@ fn gather_request_fields(
                     .use_enum_type_in_field(&normal_field.type_)
                     .is_none()
                 {
-                    match normal_field.type_.value_set {
-                        xcbdefs::FieldValueSet::None => false,
-                        _ => true,
-                    }
+                    !matches!(normal_field.type_.value_set, xcbdefs::FieldValueSet::None)
                 } else {
                     false
                 };
@@ -1460,10 +1453,11 @@ fn gather_request_fields(
         .reply
         .as_ref()
         .map(|reply_def| {
-            reply_def.fields.borrow().iter().any(|field| match field {
-                xcbdefs::FieldDef::Fd(_) => true,
-                xcbdefs::FieldDef::FdList(_) => true,
-                _ => false,
+            reply_def.fields.borrow().iter().any(|field| {
+                matches!(
+                    field,
+                    xcbdefs::FieldDef::Fd(_) | xcbdefs::FieldDef::FdList(_)
+                )
             })
         })
         .unwrap_or(false);

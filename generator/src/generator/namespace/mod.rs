@@ -781,20 +781,18 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
 
         // An enum is ok for bitmask if all its values are <bit>
         // or have value zero (but not if all values are zero)
-        let ok_for_bitmask = enum_def
+        let ok_for_bitmask = enum_def.items.iter().all(|enum_item| {
+            matches!(
+                enum_item.value,
+                xcbdefs::EnumValue::Value(0) | xcbdefs::EnumValue::Bit(_)
+            )
+        }) && enum_def
             .items
             .iter()
-            .all(|enum_item| match enum_item.value {
-                xcbdefs::EnumValue::Value(0) | xcbdefs::EnumValue::Bit(_) => true,
-                _ => false,
-            })
-            && enum_def
-                .items
-                .iter()
-                .any(|enum_item| match enum_item.value {
-                    xcbdefs::EnumValue::Value(_) => false,
-                    xcbdefs::EnumValue::Bit(_) => true,
-                });
+            .any(|enum_item| match enum_item.value {
+                xcbdefs::EnumValue::Value(_) => false,
+                xcbdefs::EnumValue::Bit(_) => true,
+            });
 
         outln!(out, "impl std::fmt::Debug for {}  {{", rust_name);
         out.indented(|out| {
@@ -971,13 +969,13 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 }
                 type_ => type_.clone(),
             };
-            match original_type {
+            matches!(
+                original_type,
                 xcbdefs::TypeRef::BuiltIn(xcbdefs::BuiltInType::Card8)
-                | xcbdefs::TypeRef::BuiltIn(xcbdefs::BuiltInType::Byte)
-                | xcbdefs::TypeRef::BuiltIn(xcbdefs::BuiltInType::Char)
-                | xcbdefs::TypeRef::BuiltIn(xcbdefs::BuiltInType::Void) => true,
-                _ => false,
-            }
+                    | xcbdefs::TypeRef::BuiltIn(xcbdefs::BuiltInType::Byte)
+                    | xcbdefs::TypeRef::BuiltIn(xcbdefs::BuiltInType::Char)
+                    | xcbdefs::TypeRef::BuiltIn(xcbdefs::BuiltInType::Void)
+            )
         }
     }
 

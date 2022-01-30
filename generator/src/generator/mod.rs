@@ -81,10 +81,7 @@ pub(crate) fn generate(module: &xcbgen::defs::Module) -> HashMap<PathBuf, String
 }
 
 fn ext_has_feature(name: &str) -> bool {
-    match name {
-        "bigreq" | "ge" | "xc_misc" | "xproto" => false,
-        _ => true,
-    }
+    !matches!(name, "bigreq" | "ge" | "xc_misc" | "xproto")
 }
 
 /// Add a Rust-header to the output saying that this file is generated.

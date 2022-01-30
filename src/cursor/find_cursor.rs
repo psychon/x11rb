@@ -168,10 +168,7 @@ fn parse_inherits_impl(input: &mut impl BufRead) -> Result<Vec<String>, IOError>
                 to_parse = &to_parse[1..];
 
                 fn should_skip(c: u8) -> bool {
-                    match c {
-                        b' ' | b'\t' | b'\n' | b';' | b',' => true,
-                        _ => false,
-                    }
+                    matches!(c, b' ' | b'\t' | b'\n' | b';' | b',')
                 }
 
                 // Iterate over the pieces

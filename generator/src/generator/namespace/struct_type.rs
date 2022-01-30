@@ -62,9 +62,11 @@ pub(super) fn emit_struct_type(
     }
     outln!(out, "}}");
 
-    let has_fds = fields.iter().any(|field| match field {
-        xcbdefs::FieldDef::Fd(_) | xcbdefs::FieldDef::FdList(_) => true,
-        _ => false,
+    let has_fds = fields.iter().any(|field| {
+        matches!(
+            field,
+            xcbdefs::FieldDef::Fd(_) | xcbdefs::FieldDef::FdList(_)
+        )
     });
 
     if generate_try_parse {

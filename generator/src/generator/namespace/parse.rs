@@ -317,11 +317,7 @@ fn emit_value_post_parse(type_: &xcbdefs::FieldValueType, var_name: &str, out: &
 }
 
 fn needs_post_parse(type_: &xcbdefs::FieldValueType) -> bool {
-    if let xcbdefs::FieldValueSet::Enum(_) = type_.value_set {
-        true
-    } else {
-        false
-    }
+    matches!(type_.value_set, xcbdefs::FieldValueSet::Enum(_))
 }
 
 pub(super) fn can_use_simple_list_parsing(
