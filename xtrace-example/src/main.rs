@@ -49,7 +49,7 @@
     unused_qualifications,
 )]
 
-use smol::{Async, Task};
+use smol::Async;
 use std::io::Result as IOResult;
 use std::net::{TcpListener, TcpStream};
 use std::os::unix::net::UnixStream;
@@ -125,14 +125,16 @@ fn spawn_command_line(display: &str) {
 }
 
 fn main() -> IOResult<()> {
-    smol::run(async {
+    // Use single thread executor.
+    let ex = smol::LocalExecutor::new();
+    smol::future::block_on(ex.run(async {
         // Port 6004 is DISPLAY=:4 (as TCP)
         let addr: std::net::SocketAddr = "127.0.0.1:6004".parse().unwrap();
         let listener = Async::<TcpListener>::bind(addr)?;
         spawn_command_line(":4");
         loop {
             let (socket, _addr) = listener.accept().await?;
-            Task::local(handle_client(socket)).detach();
+            ex.spawn(handle_client(socket)).detach();
         }
-    })
+    }))
 }
