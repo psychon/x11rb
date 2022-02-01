@@ -1,9 +1,5 @@
 use std::collections::hash_map::{Entry as HashMapEntry, HashMap};
-use x11rb::errors::ReplyError;
-use x11rb::protocol::xproto::QueryExtensionRequest;
 use x11rb::x11_utils::{ExtInfoProvider, ExtensionInformation};
-
-use crate::connection::Connection;
 
 #[derive(Debug, Clone, Copy)]
 pub(crate) enum ExtState {

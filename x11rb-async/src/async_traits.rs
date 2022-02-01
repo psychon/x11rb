@@ -1,41 +1,48 @@
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[non_exhaustive]
-pub enum Runtime {
-    Tokio,
-    AsyncStd,
+use std::future::Future;
+use std::io::Result as IoResult;
+use std::ops::DerefMut;
+use std::pin::Pin;
+
+pub trait ReadStream {
+    fn read_exact<'a>(
+        &'a mut self,
+        buf: &'a mut [u8],
+    ) -> Pin<Box<dyn Future<Output = IoResult<()>> + 'a>>;
 }
 
-#[derive(Debug)]
-enum Sender<T> {
-    ToDo(T),
+pub trait WriteStream {
+    fn write_all<'a>(
+        &'a mut self,
+        buf: &'a [u8],
+    ) -> Pin<Box<dyn Future<Output = IoResult<()>> + 'a>>;
+
+    fn flush(&mut self) -> Pin<Box<dyn Future<Output = IoResult<()>> + '_>>;
 }
 
-#[derive(Debug)]
-enum Receiver<T> {
-    ToDo(T),
+pub trait TcpStream {
+    type Read: ReadStream;
+    type Write: WriteStream;
+
+    fn connect(
+        host: &str,
+        port: u16,
+    ) -> Pin<Box<dyn Future<Output = IoResult<(Self::Read, Self::Write)>> + '_>>;
 }
 
-impl Runtime {
-    fn new_unbounded_channel<T>(&self) -> (Sender<T>, Receiver<T>) {
-        todo!()
-    }
+pub trait Mutex<T> {
+    fn new(t: T) -> Self;
+
+    fn lock(&self) -> Pin<Box<dyn Future<Output = Box<dyn DerefMut<Target = T> + '_>> + '_>>;
 }
-
-/*
-pub trait ReadStream {}
-
-pub trait WriteStream {}
-
-pub trait Mutex {}
 
 pub struct SendError;
 
 pub trait ChannelSender<T> {
-    async fn send(&self) -> Result<(), SendError>;
+    fn send(&self, message: T) -> Result<(), SendError>;
 }
 
 pub trait ChannelReceiver<T> {
-    async fn recv(&mut self) -> Option<T>;
+    fn recv(&mut self) -> Pin<Box<dyn Future<Output = Option<T>> + '_>>;
 }
 
 pub trait Channel<T> {
@@ -44,4 +51,3 @@ pub trait Channel<T> {
 
     fn new_unbounded() -> (Self::Sender, Self::Receiver);
 }
-*/
