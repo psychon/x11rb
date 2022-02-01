@@ -4,6 +4,8 @@ pub mod reexports {
 
 mod async_std;
 mod async_traits;
+mod asyncchannel;
+mod asyncmutex;
 mod connection;
 mod connection_state;
 mod cookie;
