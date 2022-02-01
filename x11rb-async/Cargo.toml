@@ -16,3 +16,4 @@ keywords = ["xcb", "X11"]
 x11rb = { path = "..", version = "0.9" }
 # TODO: Strip down features
 tokio = { version = "1", features = ["full"] }
+async-std = "1.10"

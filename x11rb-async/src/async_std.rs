@@ -87,6 +87,20 @@ impl<T> async_traits::ChannelSender<T> for Sender<T> {
     }
 }
 
+impl<T: 'static> async_traits::OneshotSender<T> for Sender<T> {
+    fn send(
+        self,
+        message: T,
+    ) -> Pin<Box<dyn Future<Output = Result<(), async_traits::SendError>>>> {
+        Box::pin(async move {
+            self.0
+                .send(message)
+                .await
+                .map_err(|_| async_traits::SendError)
+        })
+    }
+}
+
 pub struct Receiver<T>(channel::Receiver<T>);
 
 impl<T> async_traits::ChannelReceiver<T> for Receiver<T> {
@@ -95,13 +109,27 @@ impl<T> async_traits::ChannelReceiver<T> for Receiver<T> {
     }
 }
 
+impl<T: 'static> async_traits::OneshotReceiver<T> for Receiver<T> {
+    fn recv(self) -> Pin<Box<dyn Future<Output = Option<T>>>> {
+        Box::pin(async move { self.0.recv().await.ok() })
+    }
+}
+
 pub struct Channel<T>(PhantomData<T>);
 
-impl<T> async_traits::Channel<T> for Channel<T> {
-    type Sender = Sender<T>;
-    type Receiver = Receiver<T>;
+impl<T: 'static> async_traits::Channel<T> for Channel<T> {
+    type OneshotSender = Sender<T>;
+    type OneshotReceiver = Receiver<T>;
 
-    fn new_unbounded() -> (Self::Sender, Self::Receiver) {
+    type UnboundedSender = Sender<T>;
+    type UnboundedReceiver = Receiver<T>;
+
+    fn new_oneshot() -> (Self::OneshotSender, Self::OneshotReceiver) {
+        let (send, recv) = channel::bounded(1);
+        (Sender(send), Receiver(recv))
+    }
+
+    fn new_unbounded() -> (Self::UnboundedSender, Self::UnboundedReceiver) {
         let (send, recv) = channel::unbounded();
         (Sender(send), Receiver(recv))
     }

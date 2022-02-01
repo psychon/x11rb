@@ -70,9 +70,26 @@ impl<T> async_traits::Mutex<T> for Mutex<T> {
     }
 }
 
-pub struct Sender<T>(mpsc::UnboundedSender<T>);
+pub struct OneshotSender<T>(sync::oneshot::Sender<T>);
 
-impl<T> async_traits::ChannelSender<T> for Sender<T> {
+impl<T> async_traits::OneshotSender<T> for OneshotSender<T> {
+    fn send(self, message: T) -> Pin<Box<Future<Output = Result<(), async_traits::SendError>>>> {
+        let result = self.0.send(message).map_err(|_| async_traits::SendError);
+        Box::pin(async move { result })
+    }
+}
+
+pub struct OneshotReceiver<T>(sync::oneshot::Receiver<T>);
+
+impl<T: 'static> async_traits::OneshotReceiver<T> for OneshotReceiver<T> {
+    fn recv(self) -> Pin<Box<dyn Future<Output = Option<T>>>> {
+        Box::pin(async move { self.0.await.ok() })
+    }
+}
+
+pub struct UnboundedSender<T>(mpsc::UnboundedSender<T>);
+
+impl<T> async_traits::ChannelSender<T> for UnboundedSender<T> {
     fn send(
         &self,
         message: T,
@@ -82,9 +99,9 @@ impl<T> async_traits::ChannelSender<T> for Sender<T> {
     }
 }
 
-pub struct Receiver<T>(mpsc::UnboundedReceiver<T>);
+pub struct UnboundedReceiver<T>(mpsc::UnboundedReceiver<T>);
 
-impl<T> async_traits::ChannelReceiver<T> for Receiver<T> {
+impl<T> async_traits::ChannelReceiver<T> for UnboundedReceiver<T> {
     fn recv(&mut self) -> Pin<Box<dyn Future<Output = Option<T>> + '_>> {
         Box::pin(self.0.recv())
     }
@@ -92,12 +109,20 @@ impl<T> async_traits::ChannelReceiver<T> for Receiver<T> {
 
 pub struct Channel<T>(PhantomData<T>);
 
-impl<T> async_traits::Channel<T> for Channel<T> {
-    type Sender = Sender<T>;
-    type Receiver = Receiver<T>;
+impl<T: 'static> async_traits::Channel<T> for Channel<T> {
+    type OneshotSender = OneshotSender<T>;
+    type OneshotReceiver = OneshotReceiver<T>;
 
-    fn new_unbounded() -> (Self::Sender, Self::Receiver) {
+    type UnboundedSender = UnboundedSender<T>;
+    type UnboundedReceiver = UnboundedReceiver<T>;
+
+    fn new_oneshot() -> (Self::OneshotSender, Self::OneshotReceiver) {
+        let (send, recv) = sync::oneshot::channel();
+        (OneshotSender(send), OneshotReceiver(recv))
+    }
+
+    fn new_unbounded() -> (Self::UnboundedSender, Self::UnboundedReceiver) {
         let (send, recv) = mpsc::unbounded_channel();
-        (Sender(send), Receiver(recv))
+        (UnboundedSender(send), UnboundedReceiver(recv))
     }
 }

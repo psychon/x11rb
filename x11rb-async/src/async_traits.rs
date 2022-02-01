@@ -45,9 +45,21 @@ pub trait ChannelReceiver<T> {
     fn recv(&mut self) -> Pin<Box<dyn Future<Output = Option<T>> + '_>>;
 }
 
-pub trait Channel<T> {
-    type Sender: ChannelSender<T>;
-    type Receiver: ChannelReceiver<T>;
+pub trait OneshotSender<T> {
+    fn send(self, message: T) -> Pin<Box<dyn Future<Output = Result<(), SendError>>>>;
+}
 
-    fn new_unbounded() -> (Self::Sender, Self::Receiver);
+pub trait OneshotReceiver<T: 'static> {
+    fn recv(self) -> Pin<Box<dyn Future<Output = Option<T>>>>;
+}
+
+pub trait Channel<T: 'static> {
+    type OneshotSender: OneshotSender<T>;
+    type OneshotReceiver: OneshotReceiver<T>;
+
+    type UnboundedSender: ChannelSender<T>;
+    type UnboundedReceiver: ChannelReceiver<T>;
+
+    fn new_oneshot() -> (Self::OneshotSender, Self::OneshotReceiver);
+    fn new_unbounded() -> (Self::UnboundedSender, Self::UnboundedReceiver);
 }
