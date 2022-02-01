@@ -146,4 +146,4 @@ name = "record"
 required-features = ["record"]
 
 [workspace]
-members = ["generator", "xcbgen-rs", "cairo-example", "xtrace-example"]
+members = ["generator", "xcbgen-rs", "cairo-example", "xtrace-example", "x11rb-async"]

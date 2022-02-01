@@ -38,7 +38,7 @@ pub trait Mutex<T> {
 pub struct SendError;
 
 pub trait ChannelSender<T> {
-    fn send(&self, message: T) -> Result<(), SendError>;
+    fn send(&self, message: T) -> Pin<Box<dyn Future<Output = Result<(), SendError>> + '_>>;
 }
 
 pub trait ChannelReceiver<T> {

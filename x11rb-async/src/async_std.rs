@@ -1,14 +1,15 @@
 use crate::async_traits;
+use async_std::channel;
+use async_std::io::{ReadExt as _, WriteExt as _};
+use async_std::net;
+use async_std::sync;
 use std::future::Future;
 use std::io::Result as IoResult;
 use std::marker::PhantomData;
 use std::ops::DerefMut;
 use std::pin::Pin;
-use tokio::io::{AsyncReadExt as _, AsyncWriteExt as _};
-use tokio::net;
-use tokio::sync::{self, mpsc};
 
-pub struct TcpRead(net::tcp::OwnedReadHalf);
+pub struct TcpRead(net::TcpStream);
 
 impl async_traits::ReadStream for TcpRead {
     fn read_exact<'a>(
@@ -22,7 +23,7 @@ impl async_traits::ReadStream for TcpRead {
     }
 }
 
-pub struct TcpWrite(net::tcp::OwnedWriteHalf);
+pub struct TcpWrite(net::TcpStream);
 
 impl async_traits::WriteStream for TcpWrite {
     fn write_all<'a>(
@@ -49,8 +50,8 @@ impl async_traits::TcpStream for TcpStream {
     ) -> Pin<Box<dyn Future<Output = IoResult<(Self::Read, Self::Write)>> + '_>> {
         Box::pin(async move {
             let stream = net::TcpStream::connect((host, port)).await?;
-            let (read, write) = stream.into_split();
-            Ok((TcpRead(read), TcpWrite(write)))
+            let stream2 = stream.clone();
+            Ok((TcpRead(stream), TcpWrite(stream2)))
         })
     }
 }
@@ -70,23 +71,27 @@ impl<T> async_traits::Mutex<T> for Mutex<T> {
     }
 }
 
-pub struct Sender<T>(mpsc::UnboundedSender<T>);
+pub struct Sender<T>(channel::Sender<T>);
 
 impl<T> async_traits::ChannelSender<T> for Sender<T> {
     fn send(
         &self,
         message: T,
-    ) -> Pin<Box<Future<Output = Result<(), async_traits::SendError>> + '_>> {
-        let result = self.0.send(message).map_err(|_| async_traits::SendError);
-        Box::pin(async move { result })
+    ) -> Pin<Box<dyn Future<Output = Result<(), async_traits::SendError>> + '_>> {
+        Box::pin(async move {
+            self.0
+                .send(message)
+                .await
+                .map_err(|_| async_traits::SendError)
+        })
     }
 }
 
-pub struct Receiver<T>(mpsc::UnboundedReceiver<T>);
+pub struct Receiver<T>(channel::Receiver<T>);
 
 impl<T> async_traits::ChannelReceiver<T> for Receiver<T> {
     fn recv(&mut self) -> Pin<Box<dyn Future<Output = Option<T>> + '_>> {
-        Box::pin(self.0.recv())
+        Box::pin(async move { self.0.recv().await.ok() })
     }
 }
 
@@ -97,7 +102,7 @@ impl<T> async_traits::Channel<T> for Channel<T> {
     type Receiver = Receiver<T>;
 
     fn new_unbounded() -> (Self::Sender, Self::Receiver) {
-        let (send, recv) = mpsc::unbounded_channel();
+        let (send, recv) = channel::unbounded();
         (Sender(send), Receiver(recv))
     }
 }
