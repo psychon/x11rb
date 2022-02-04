@@ -1,4 +1,4 @@
-use crate::asyncchannel::{oneshot, UnboundedReceiver};
+use crate::asyncchannel::{oneshot, unbounded, UnboundedReceiver};
 use crate::asyncmutex::AsyncMutex;
 use crate::asynctraits::{ReadStream, StreamFactory, WriteStream};
 use crate::connection_state::ConnectionState;
@@ -6,14 +6,16 @@ use crate::cookie::Cookie;
 use crate::extension_manager::{ExtState, ExtensionManager};
 use std::convert::TryInto;
 use std::io::Result as IoResult;
-use std::marker::Unpin;
 use std::sync::Arc;
 use x11rb::connection::SequenceNumber;
 use x11rb::errors::ConnectionError;
 use x11rb::protocol::xproto::{
-    GetInputFocusRequest, QueryExtensionReply, QueryExtensionRequest, Setup, GE_GENERIC_EVENT,
+    GetInputFocusRequest, QueryExtensionReply, QueryExtensionRequest, Setup, SetupRequest,
+    GE_GENERIC_EVENT,
 };
-use x11rb::x11_utils::{ExtensionInformation, ReplyRequest, Request, TryParse, VoidRequest};
+use x11rb::x11_utils::{
+    ExtensionInformation, ReplyRequest, Request, Serialize, TryParse, VoidRequest,
+};
 
 pub struct Connection<Stream: StreamFactory<(String, u16)>> {
     writer: AsyncMutex<Stream::Write>,
@@ -26,6 +28,36 @@ pub struct Connection<Stream: StreamFactory<(String, u16)>> {
 }
 
 impl<Stream: StreamFactory<(String, u16)>> Connection<Stream> {
+    pub async fn connect(
+        display_number: u16,
+    ) -> Result<(Self, impl std::future::Future<Output = ()> + Send), ConnectionError> {
+        let (mut read, mut write) =
+            Stream::connect(("127.0.0.1".to_string(), 6000 + display_number)).await?;
+
+        send_setup(&mut write).await?;
+        let setup = read_setup(&mut read).await?;
+
+        let (write_events, read_events) = unbounded();
+
+        let inner = Arc::new(AsyncMutex::new(ConnectionState::new(write_events)));
+        let inner2 = Arc::clone(&inner);
+        let reader = read_packets(read, inner2);
+
+        let connection = Self {
+            writer: AsyncMutex::new(write),
+            reader: AsyncMutex::new(read_events),
+            inner,
+            extensions: Default::default(),
+            setup,
+        };
+
+        Ok((connection, reader))
+    }
+
+    pub fn setup(&self) -> &Setup {
+        &self.setup
+    }
+
     async fn request_ext_state(
         &self,
         extension_name: &str,
@@ -181,10 +213,34 @@ impl<Stream: StreamFactory<(String, u16)>> Connection<Stream> {
     }
 }
 
-async fn read_packets(
-    mut reader: impl ReadStream + Unpin,
-    state: Arc<AsyncMutex<ConnectionState>>,
-) {
+async fn send_setup(write: &mut impl WriteStream) -> IoResult<()> {
+    let setup = SetupRequest {
+        byte_order: 0x6c, // TODO: Proper value
+        protocol_major_version: 11,
+        protocol_minor_version: 0,
+        authorization_protocol_name: vec![],
+        authorization_protocol_data: vec![],
+    }
+    .serialize();
+    write.write_all(&setup[..]).await?;
+    write.flush().await?;
+    Ok(())
+}
+
+async fn read_setup(read: &mut impl ReadStream) -> Result<Setup, ConnectionError> {
+    let mut setup = vec![0; 8];
+    read.read_exact(&mut setup).await?;
+    let extra_length = usize::from(u16::from_ne_bytes([setup[6], setup[7]])) * 4;
+    setup.reserve_exact(extra_length);
+    setup.resize(8 + extra_length, 0);
+    read.read_exact(&mut setup[8..]).await?;
+
+    // TODO: Handle failures
+    assert_eq!(1, setup[0]);
+    Ok(Setup::try_parse(&setup[..])?.0)
+}
+
+async fn read_packets(mut reader: impl ReadStream, state: Arc<AsyncMutex<ConnectionState>>) {
     loop {
         const MIN_PACKET_LENGTH: usize = 32;
         let mut packet = vec![0; 32];

@@ -90,3 +90,9 @@ impl<T> AsyncMutex<T> {
         LockFuture(self)
     }
 }
+
+impl<T: Default> Default for AsyncMutex<T> {
+    fn default() -> Self {
+        Self::new(Default::default())
+    }
+}

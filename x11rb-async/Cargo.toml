@@ -14,6 +14,7 @@ keywords = ["xcb", "X11"]
 
 [dependencies]
 x11rb = { path = "..", version = "0.9" }
+
+[dev-dependencies]
 # TODO: Strip down features
 tokio = { version = "1", features = ["full"] }
-async-std = "1.10"

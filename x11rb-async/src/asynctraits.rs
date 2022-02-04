@@ -6,7 +6,7 @@ pub trait ReadStream {
     fn read_exact<'a>(
         &'a mut self,
         buf: &'a mut [u8],
-    ) -> Pin<Box<dyn Future<Output = IoResult<()>> + 'a>>;
+    ) -> Pin<Box<dyn Future<Output = IoResult<()>> + 'a + Send>>;
 }
 
 pub trait WriteStream {
@@ -19,8 +19,8 @@ pub trait WriteStream {
 }
 
 pub trait StreamFactory<ConnectArgument> {
-    type Read: ReadStream;
-    type Write: WriteStream;
+    type Read: ReadStream + Send;
+    type Write: WriteStream + Send;
 
     fn connect(
         target: ConnectArgument,

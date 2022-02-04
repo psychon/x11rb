@@ -4,7 +4,7 @@ pub mod reexports {
 
 mod asyncchannel;
 mod asyncmutex;
-mod asynctraits;
+pub mod asynctraits;
 mod connection;
 mod connection_state;
 mod cookie;
