@@ -1,11 +1,11 @@
+use crate::asyncchannel::{OneshotSender, UnboundedSender};
 use std::collections::HashMap;
-use tokio::sync::mpsc::{OwnedPermit, UnboundedSender};
 use x11rb::connection::SequenceNumber;
 use x11rb::protocol::xproto::KEYMAP_NOTIFY_EVENT;
 
 #[derive(Debug)]
 pub(crate) struct ConnectionState {
-    replies: HashMap<SequenceNumber, OwnedPermit<Vec<u8>>>,
+    replies: HashMap<SequenceNumber, OneshotSender<Vec<u8>>>,
     default_read_packets: UnboundedSender<Vec<u8>>,
 
     pub(crate) last_sequence_send: SequenceNumber,
@@ -28,7 +28,7 @@ impl ConnectionState {
         self.next_reply_expected + SequenceNumber::from(u16::max_value()) <= self.last_sequence_send
     }
 
-    pub(crate) fn sending_reply_request(&mut self, sender: OwnedPermit<Vec<u8>>) {
+    pub(crate) fn sending_reply_request(&mut self, sender: OneshotSender<Vec<u8>>) {
         self.last_sequence_send += 1;
         self.next_reply_expected = self.last_sequence_send;
         self.replies.insert(self.last_sequence_send, sender);
@@ -59,6 +59,6 @@ impl ConnectionState {
         }
 
         // We have no special target for this packet, so use the generic one
-        self.default_read_packets.send(packet).unwrap();
+        self.default_read_packets.send(packet);
     }
 }

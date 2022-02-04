@@ -4,12 +4,14 @@ use std::pin::Pin;
 use std::sync::{Arc, Mutex};
 use std::task::{Context, Poll, Waker};
 
+#[derive(Debug)]
 enum OneshotState<T> {
     Idle,
     Data(T),
     Waker(Waker),
 }
 
+#[derive(Debug)]
 pub struct OneshotSender<T>(Arc<Mutex<OneshotState<T>>>);
 
 impl<T> OneshotSender<T> {
@@ -24,6 +26,7 @@ impl<T> OneshotSender<T> {
     }
 }
 
+#[derive(Debug)]
 pub struct OneshotReceiver<T>(Arc<Mutex<OneshotState<T>>>);
 
 impl<T> Future for OneshotReceiver<T> {
@@ -46,11 +49,13 @@ pub fn oneshot<T>() -> (OneshotSender<T>, OneshotReceiver<T>) {
     (OneshotSender(inner), OneshotReceiver(inner2))
 }
 
+#[derive(Debug)]
 enum UnboundedState<T> {
     Data(VecDeque<T>),
     Waker(Waker),
 }
 
+#[derive(Debug)]
 pub struct UnboundedSender<T>(Arc<Mutex<UnboundedState<T>>>);
 
 impl<T> UnboundedSender<T> {
@@ -72,6 +77,7 @@ impl<T> UnboundedSender<T> {
     }
 }
 
+#[derive(Debug)]
 pub struct UnboundedReceiver<T>(Arc<Mutex<UnboundedState<T>>>);
 
 impl<T> Future for UnboundedReceiver<T> {

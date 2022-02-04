@@ -1,18 +1,18 @@
+use crate::asyncchannel::OneshotReceiver;
 use std::marker::PhantomData;
-use tokio::sync::mpsc::Receiver;
 use x11rb::errors::ReplyError;
 use x11rb::x11_utils::{TryParse, X11Error};
 
 #[derive(Debug)]
-pub struct Cookie<Reply: TryParse>(Receiver<Vec<u8>>, PhantomData<Reply>);
+pub struct Cookie<Reply: TryParse>(OneshotReceiver<Vec<u8>>, PhantomData<Reply>);
 
 impl<Reply: TryParse> Cookie<Reply> {
-    pub(crate) fn new(recv: Receiver<Vec<u8>>) -> Self {
+    pub(crate) fn new(recv: OneshotReceiver<Vec<u8>>) -> Self {
         Self(recv, PhantomData)
     }
 
-    pub async fn raw_reply(mut self) -> Vec<u8> {
-        self.0.recv().await.expect("The reading task broke?!")
+    pub async fn raw_reply(self) -> Vec<u8> {
+        self.0.await
     }
 
     pub async fn reply(self) -> Result<Reply, ReplyError> {

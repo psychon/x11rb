@@ -9,6 +9,7 @@ enum MutexState<T> {
     Poison,
 }
 
+#[derive(Debug)]
 pub struct PoisonError {
     _priv: (),
 }
@@ -43,7 +44,7 @@ impl<'a, T> std::ops::DerefMut for MutexGuard<'a, T> {
     }
 }
 
-struct LockFuture<'a, T>(&'a AsyncMutex<T>);
+pub struct LockFuture<'a, T>(&'a AsyncMutex<T>);
 
 impl<'a, T> Future for LockFuture<'a, T> {
     type Output = Result<MutexGuard<'a, T>, PoisonError>;
@@ -72,7 +73,7 @@ impl<'a, T> Future for LockFuture<'a, T> {
     }
 }
 
-struct AsyncMutex<T> {
+pub struct AsyncMutex<T> {
     data: Mutex<MutexState<T>>,
     waiters: Mutex<VecDeque<Waker>>,
 }
