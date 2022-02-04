@@ -72,11 +72,9 @@ impl<Stream: StreamFactory<(String, u16)>> Connection<Stream> {
         let (sender, receiver) = oneshot();
         {
             // Lock the inner state, but unlock it before trying to send anything
-            self.inner
-                .lock()
-                .await
-                .expect("TODO pass error to caller")
-                .sending_reply_request(sender);
+            let mut guard = self.inner.lock().await.expect("TODO pass error to caller");
+            guard.sending_reply_request(sender);
+            guard.unlock();
         }
 
         writer.write_all(&buf).await?;
@@ -120,10 +118,15 @@ impl<Stream: StreamFactory<(String, u16)>> Connection<Stream> {
                         state
                     }
                 };
-                match state {
-                    ExtState::Missing => return Err(ConnectionError::UnsupportedExtension.into()),
+                let opcode = match state {
+                    ExtState::Missing => {
+                        extensions.unlock();
+                        return Err(ConnectionError::UnsupportedExtension.into());
+                    }
                     ExtState::Present(info) => info.major_opcode,
-                }
+                };
+                extensions.unlock();
+                opcode
             }
         };
         let (buf, fds) = request.serialize(opcode);
@@ -133,7 +136,9 @@ impl<Stream: StreamFactory<(String, u16)>> Connection<Stream> {
             // Lock the inner state, but unlock it before trying to send anything
             let mut inner = self.inner.lock().await.expect("TODO pass error to caller");
             inner.last_sequence_send += 1;
-            inner.last_sequence_send
+            let seqno = inner.last_sequence_send;
+            inner.unlock();
+            seqno
         };
         writer.write_all(&buf).await?;
 
@@ -164,6 +169,8 @@ impl<Stream: StreamFactory<(String, u16)>> Connection<Stream> {
             .last_sequence_send += 1;
         self.send_request_impl(request, &mut writer).await?;
 
+        writer.unlock();
+
         Ok(())
     }
 
@@ -176,8 +183,16 @@ impl<Stream: StreamFactory<(String, u16)>> Connection<Stream> {
         Req::Reply: TryParse,
     {
         let mut writer = self.writer.lock().await.expect("TODO pass error to caller");
-        self.send_request_with_reply_impl(request, &mut *writer)
-            .await
+        let cookie = self
+            .send_request_with_reply_impl(request, &mut *writer)
+            .await?;
+
+        // FIXME Figure out a better way when to flush
+        writer.flush().await?;
+
+        writer.unlock();
+
+        Ok(cookie)
     }
 
     async fn send_request_with_reply_impl<Req>(
@@ -189,27 +204,21 @@ impl<Stream: StreamFactory<(String, u16)>> Connection<Stream> {
         Req: ReplyRequest,
         Req::Reply: TryParse,
     {
-        let mut writer = self.writer.lock().await.expect("TODO pass error to caller");
-
         let (sender, receiver) = oneshot();
-        self.inner
-            .lock()
-            .await
-            .expect("TODO pass error to caller")
-            .sending_reply_request(sender);
+        let mut inner = self.inner.lock().await.expect("TODO pass error to caller");
+        inner.sending_reply_request(sender);
+        inner.unlock();
 
-        let seqno = self.send_request_impl(request, &mut writer).await?;
+        let seqno = self.send_request_impl(request, writer).await?;
 
         Ok(Cookie::new(receiver))
     }
 
     pub async fn flush(&self) -> IoResult<()> {
-        self.writer
-            .lock()
-            .await
-            .expect("TODO pass error to caller")
-            .flush()
-            .await
+        let mut writer = self.writer.lock().await.expect("TODO pass error to caller");
+        writer.flush().await?;
+        writer.unlock();
+        Ok(())
     }
 }
 
@@ -250,11 +259,9 @@ async fn read_packets(mut reader: impl ReadStream, state: Arc<AsyncMutex<Connect
         packet.resize(packet.len() + extra_length, 0);
         reader.read_exact(&mut packet[32..]).await.unwrap();
 
-        state
-            .lock()
-            .await
-            .expect("TODO pass error to caller")
-            .received_packet(packet);
+        let mut inner = state.lock().await.expect("TODO pass error to caller");
+        inner.received_packet(packet);
+        inner.unlock();
     }
 }
 
