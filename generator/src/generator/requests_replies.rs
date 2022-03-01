@@ -68,7 +68,7 @@ pub(super) fn generate(out: &mut Output, module: &xcbdefs::Module, mut enum_case
                 out,
                 "// Might not be used if none of the extensions that use FD passing is enabled",
             );
-            outln!(out, "#[allow(unused_variables)]");
+            outln!(out, "#[allow(unused_variables, clippy::ptr_arg)]");
             outln!(out, "fds: &mut Vec<RawFdContainer>,");
             outln!(out, "ext_info_provider: &dyn ExtInfoProvider,");
         });
