@@ -1271,7 +1271,7 @@ impl<'input> Request<'input> {
         header: RequestHeader,
         body: &'input [u8],
         // Might not be used if none of the extensions that use FD passing is enabled
-        #[allow(unused_variables)]
+        #[allow(unused_variables, clippy::ptr_arg)]
         fds: &mut Vec<RawFdContainer>,
         ext_info_provider: &dyn ExtInfoProvider,
     ) -> Result<Self, ParseError> {
