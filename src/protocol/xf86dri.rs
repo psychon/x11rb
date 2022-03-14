@@ -92,7 +92,7 @@ pub const QUERY_VERSION_REQUEST: u8 = 0;
 pub struct QueryVersionRequest;
 impl QueryVersionRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    fn serialize_impl(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
         let length_so_far = 0;
         let mut request0 = vec![
             major_opcode,
@@ -110,7 +110,7 @@ impl QueryVersionRequest {
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(major_opcode(conn)?);
+        let (bytes, fds) = self.serialize_impl(major_opcode(conn)?);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         conn.send_request_with_reply(&slices, fds)
     }
@@ -126,7 +126,17 @@ impl QueryVersionRequest {
 }
 impl Request for QueryVersionRequest {
     type Reply = QueryVersionReply;
+
+    const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
+
+    fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
+        let (bufs, fds) = self.serialize_impl(major_opcode);
+        // Flatten the buffers into a single vector
+        let buf = bufs.iter().flat_map(|buf| buf.iter().copied()).collect();
+        (buf, fds)
+    }
 }
+impl crate::x11_utils::ReplyRequest for QueryVersionRequest {}
 pub fn query_version<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, QueryVersionReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -172,7 +182,7 @@ pub struct QueryDirectRenderingCapableRequest {
 }
 impl QueryDirectRenderingCapableRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    fn serialize_impl(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
         let length_so_far = 0;
         let screen_bytes = self.screen.serialize();
         let mut request0 = vec![
@@ -195,7 +205,7 @@ impl QueryDirectRenderingCapableRequest {
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(major_opcode(conn)?);
+        let (bytes, fds) = self.serialize_impl(major_opcode(conn)?);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         conn.send_request_with_reply(&slices, fds)
     }
@@ -213,7 +223,17 @@ impl QueryDirectRenderingCapableRequest {
 }
 impl Request for QueryDirectRenderingCapableRequest {
     type Reply = QueryDirectRenderingCapableReply;
+
+    const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
+
+    fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
+        let (bufs, fds) = self.serialize_impl(major_opcode);
+        // Flatten the buffers into a single vector
+        let buf = bufs.iter().flat_map(|buf| buf.iter().copied()).collect();
+        (buf, fds)
+    }
 }
+impl crate::x11_utils::ReplyRequest for QueryDirectRenderingCapableRequest {}
 pub fn query_direct_rendering_capable<Conn>(conn: &Conn, screen: u32) -> Result<Cookie<'_, Conn, QueryDirectRenderingCapableReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -257,7 +277,7 @@ pub struct OpenConnectionRequest {
 }
 impl OpenConnectionRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    fn serialize_impl(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
         let length_so_far = 0;
         let screen_bytes = self.screen.serialize();
         let mut request0 = vec![
@@ -280,7 +300,7 @@ impl OpenConnectionRequest {
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(major_opcode(conn)?);
+        let (bytes, fds) = self.serialize_impl(major_opcode(conn)?);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         conn.send_request_with_reply(&slices, fds)
     }
@@ -298,7 +318,17 @@ impl OpenConnectionRequest {
 }
 impl Request for OpenConnectionRequest {
     type Reply = OpenConnectionReply;
+
+    const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
+
+    fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
+        let (bufs, fds) = self.serialize_impl(major_opcode);
+        // Flatten the buffers into a single vector
+        let buf = bufs.iter().flat_map(|buf| buf.iter().copied()).collect();
+        (buf, fds)
+    }
 }
+impl crate::x11_utils::ReplyRequest for OpenConnectionRequest {}
 pub fn open_connection<Conn>(conn: &Conn, screen: u32) -> Result<Cookie<'_, Conn, OpenConnectionReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -364,7 +394,7 @@ pub struct CloseConnectionRequest {
 }
 impl CloseConnectionRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    fn serialize_impl(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
         let length_so_far = 0;
         let screen_bytes = self.screen.serialize();
         let mut request0 = vec![
@@ -387,7 +417,7 @@ impl CloseConnectionRequest {
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(major_opcode(conn)?);
+        let (bytes, fds) = self.serialize_impl(major_opcode(conn)?);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         conn.send_request_without_reply(&slices, fds)
     }
@@ -405,7 +435,17 @@ impl CloseConnectionRequest {
 }
 impl Request for CloseConnectionRequest {
     type Reply = ();
+
+    const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
+
+    fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
+        let (bufs, fds) = self.serialize_impl(major_opcode);
+        // Flatten the buffers into a single vector
+        let buf = bufs.iter().flat_map(|buf| buf.iter().copied()).collect();
+        (buf, fds)
+    }
 }
+impl crate::x11_utils::VoidRequest for CloseConnectionRequest {}
 pub fn close_connection<Conn>(conn: &Conn, screen: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -424,7 +464,7 @@ pub struct GetClientDriverNameRequest {
 }
 impl GetClientDriverNameRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    fn serialize_impl(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
         let length_so_far = 0;
         let screen_bytes = self.screen.serialize();
         let mut request0 = vec![
@@ -447,7 +487,7 @@ impl GetClientDriverNameRequest {
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(major_opcode(conn)?);
+        let (bytes, fds) = self.serialize_impl(major_opcode(conn)?);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         conn.send_request_with_reply(&slices, fds)
     }
@@ -465,7 +505,17 @@ impl GetClientDriverNameRequest {
 }
 impl Request for GetClientDriverNameRequest {
     type Reply = GetClientDriverNameReply;
+
+    const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
+
+    fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
+        let (bufs, fds) = self.serialize_impl(major_opcode);
+        // Flatten the buffers into a single vector
+        let buf = bufs.iter().flat_map(|buf| buf.iter().copied()).collect();
+        (buf, fds)
+    }
 }
+impl crate::x11_utils::ReplyRequest for GetClientDriverNameRequest {}
 pub fn get_client_driver_name<Conn>(conn: &Conn, screen: u32) -> Result<Cookie<'_, Conn, GetClientDriverNameReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -535,7 +585,7 @@ pub struct CreateContextRequest {
 }
 impl CreateContextRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    fn serialize_impl(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
         let length_so_far = 0;
         let screen_bytes = self.screen.serialize();
         let visual_bytes = self.visual.serialize();
@@ -568,7 +618,7 @@ impl CreateContextRequest {
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(major_opcode(conn)?);
+        let (bytes, fds) = self.serialize_impl(major_opcode(conn)?);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         conn.send_request_with_reply(&slices, fds)
     }
@@ -590,7 +640,17 @@ impl CreateContextRequest {
 }
 impl Request for CreateContextRequest {
     type Reply = CreateContextReply;
+
+    const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
+
+    fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
+        let (bufs, fds) = self.serialize_impl(major_opcode);
+        // Flatten the buffers into a single vector
+        let buf = bufs.iter().flat_map(|buf| buf.iter().copied()).collect();
+        (buf, fds)
+    }
 }
+impl crate::x11_utils::ReplyRequest for CreateContextRequest {}
 pub fn create_context<Conn>(conn: &Conn, screen: u32, visual: u32, context: u32) -> Result<Cookie<'_, Conn, CreateContextReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -637,7 +697,7 @@ pub struct DestroyContextRequest {
 }
 impl DestroyContextRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    fn serialize_impl(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
         let length_so_far = 0;
         let screen_bytes = self.screen.serialize();
         let context_bytes = self.context.serialize();
@@ -665,7 +725,7 @@ impl DestroyContextRequest {
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(major_opcode(conn)?);
+        let (bytes, fds) = self.serialize_impl(major_opcode(conn)?);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         conn.send_request_without_reply(&slices, fds)
     }
@@ -685,7 +745,17 @@ impl DestroyContextRequest {
 }
 impl Request for DestroyContextRequest {
     type Reply = ();
+
+    const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
+
+    fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
+        let (bufs, fds) = self.serialize_impl(major_opcode);
+        // Flatten the buffers into a single vector
+        let buf = bufs.iter().flat_map(|buf| buf.iter().copied()).collect();
+        (buf, fds)
+    }
 }
+impl crate::x11_utils::VoidRequest for DestroyContextRequest {}
 pub fn destroy_context<Conn>(conn: &Conn, screen: u32, context: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -706,7 +776,7 @@ pub struct CreateDrawableRequest {
 }
 impl CreateDrawableRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    fn serialize_impl(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
         let length_so_far = 0;
         let screen_bytes = self.screen.serialize();
         let drawable_bytes = self.drawable.serialize();
@@ -734,7 +804,7 @@ impl CreateDrawableRequest {
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(major_opcode(conn)?);
+        let (bytes, fds) = self.serialize_impl(major_opcode(conn)?);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         conn.send_request_with_reply(&slices, fds)
     }
@@ -754,7 +824,17 @@ impl CreateDrawableRequest {
 }
 impl Request for CreateDrawableRequest {
     type Reply = CreateDrawableReply;
+
+    const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
+
+    fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
+        let (bufs, fds) = self.serialize_impl(major_opcode);
+        // Flatten the buffers into a single vector
+        let buf = bufs.iter().flat_map(|buf| buf.iter().copied()).collect();
+        (buf, fds)
+    }
 }
+impl crate::x11_utils::ReplyRequest for CreateDrawableRequest {}
 pub fn create_drawable<Conn>(conn: &Conn, screen: u32, drawable: u32) -> Result<Cookie<'_, Conn, CreateDrawableReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -800,7 +880,7 @@ pub struct DestroyDrawableRequest {
 }
 impl DestroyDrawableRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    fn serialize_impl(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
         let length_so_far = 0;
         let screen_bytes = self.screen.serialize();
         let drawable_bytes = self.drawable.serialize();
@@ -828,7 +908,7 @@ impl DestroyDrawableRequest {
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(major_opcode(conn)?);
+        let (bytes, fds) = self.serialize_impl(major_opcode(conn)?);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         conn.send_request_without_reply(&slices, fds)
     }
@@ -848,7 +928,17 @@ impl DestroyDrawableRequest {
 }
 impl Request for DestroyDrawableRequest {
     type Reply = ();
+
+    const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
+
+    fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
+        let (bufs, fds) = self.serialize_impl(major_opcode);
+        // Flatten the buffers into a single vector
+        let buf = bufs.iter().flat_map(|buf| buf.iter().copied()).collect();
+        (buf, fds)
+    }
 }
+impl crate::x11_utils::VoidRequest for DestroyDrawableRequest {}
 pub fn destroy_drawable<Conn>(conn: &Conn, screen: u32, drawable: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -869,7 +959,7 @@ pub struct GetDrawableInfoRequest {
 }
 impl GetDrawableInfoRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    fn serialize_impl(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
         let length_so_far = 0;
         let screen_bytes = self.screen.serialize();
         let drawable_bytes = self.drawable.serialize();
@@ -897,7 +987,7 @@ impl GetDrawableInfoRequest {
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(major_opcode(conn)?);
+        let (bytes, fds) = self.serialize_impl(major_opcode(conn)?);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         conn.send_request_with_reply(&slices, fds)
     }
@@ -917,7 +1007,17 @@ impl GetDrawableInfoRequest {
 }
 impl Request for GetDrawableInfoRequest {
     type Reply = GetDrawableInfoReply;
+
+    const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
+
+    fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
+        let (bufs, fds) = self.serialize_impl(major_opcode);
+        // Flatten the buffers into a single vector
+        let buf = bufs.iter().flat_map(|buf| buf.iter().copied()).collect();
+        (buf, fds)
+    }
 }
+impl crate::x11_utils::ReplyRequest for GetDrawableInfoRequest {}
 pub fn get_drawable_info<Conn>(conn: &Conn, screen: u32, drawable: u32) -> Result<Cookie<'_, Conn, GetDrawableInfoReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -1010,7 +1110,7 @@ pub struct GetDeviceInfoRequest {
 }
 impl GetDeviceInfoRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    fn serialize_impl(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
         let length_so_far = 0;
         let screen_bytes = self.screen.serialize();
         let mut request0 = vec![
@@ -1033,7 +1133,7 @@ impl GetDeviceInfoRequest {
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(major_opcode(conn)?);
+        let (bytes, fds) = self.serialize_impl(major_opcode(conn)?);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         conn.send_request_with_reply(&slices, fds)
     }
@@ -1051,7 +1151,17 @@ impl GetDeviceInfoRequest {
 }
 impl Request for GetDeviceInfoRequest {
     type Reply = GetDeviceInfoReply;
+
+    const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
+
+    fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
+        let (bufs, fds) = self.serialize_impl(major_opcode);
+        // Flatten the buffers into a single vector
+        let buf = bufs.iter().flat_map(|buf| buf.iter().copied()).collect();
+        (buf, fds)
+    }
 }
+impl crate::x11_utils::ReplyRequest for GetDeviceInfoRequest {}
 pub fn get_device_info<Conn>(conn: &Conn, screen: u32) -> Result<Cookie<'_, Conn, GetDeviceInfoReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -1122,7 +1232,7 @@ pub struct AuthConnectionRequest {
 }
 impl AuthConnectionRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    fn serialize_impl(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
         let length_so_far = 0;
         let screen_bytes = self.screen.serialize();
         let magic_bytes = self.magic.serialize();
@@ -1150,7 +1260,7 @@ impl AuthConnectionRequest {
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(major_opcode(conn)?);
+        let (bytes, fds) = self.serialize_impl(major_opcode(conn)?);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         conn.send_request_with_reply(&slices, fds)
     }
@@ -1170,7 +1280,17 @@ impl AuthConnectionRequest {
 }
 impl Request for AuthConnectionRequest {
     type Reply = AuthConnectionReply;
+
+    const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
+
+    fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
+        let (bufs, fds) = self.serialize_impl(major_opcode);
+        // Flatten the buffers into a single vector
+        let buf = bufs.iter().flat_map(|buf| buf.iter().copied()).collect();
+        (buf, fds)
+    }
 }
+impl crate::x11_utils::ReplyRequest for AuthConnectionRequest {}
 pub fn auth_connection<Conn>(conn: &Conn, screen: u32, magic: u32) -> Result<Cookie<'_, Conn, AuthConnectionReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,

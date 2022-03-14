@@ -51,7 +51,7 @@ pub struct GetVersionRequest {
 }
 impl GetVersionRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    fn serialize_impl(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
         let length_so_far = 0;
         let client_major_version_bytes = self.client_major_version.serialize();
         let client_minor_version_bytes = self.client_minor_version.serialize();
@@ -75,7 +75,7 @@ impl GetVersionRequest {
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(major_opcode(conn)?);
+        let (bytes, fds) = self.serialize_impl(major_opcode(conn)?);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         conn.send_request_with_reply(&slices, fds)
     }
@@ -95,7 +95,17 @@ impl GetVersionRequest {
 }
 impl Request for GetVersionRequest {
     type Reply = GetVersionReply;
+
+    const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
+
+    fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
+        let (bufs, fds) = self.serialize_impl(major_opcode);
+        // Flatten the buffers into a single vector
+        let buf = bufs.iter().flat_map(|buf| buf.iter().copied()).collect();
+        (buf, fds)
+    }
 }
+impl crate::x11_utils::ReplyRequest for GetVersionRequest {}
 pub fn get_version<Conn>(conn: &Conn, client_major_version: u16, client_minor_version: u16) -> Result<Cookie<'_, Conn, GetVersionReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -140,7 +150,7 @@ pub const CAPABLE_REQUEST: u8 = 1;
 pub struct CapableRequest;
 impl CapableRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    fn serialize_impl(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
         let length_so_far = 0;
         let mut request0 = vec![
             major_opcode,
@@ -158,7 +168,7 @@ impl CapableRequest {
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(major_opcode(conn)?);
+        let (bytes, fds) = self.serialize_impl(major_opcode(conn)?);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         conn.send_request_with_reply(&slices, fds)
     }
@@ -174,7 +184,17 @@ impl CapableRequest {
 }
 impl Request for CapableRequest {
     type Reply = CapableReply;
+
+    const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
+
+    fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
+        let (bufs, fds) = self.serialize_impl(major_opcode);
+        // Flatten the buffers into a single vector
+        let buf = bufs.iter().flat_map(|buf| buf.iter().copied()).collect();
+        (buf, fds)
+    }
 }
+impl crate::x11_utils::ReplyRequest for CapableRequest {}
 pub fn capable<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, CapableReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -215,7 +235,7 @@ pub const GET_TIMEOUTS_REQUEST: u8 = 2;
 pub struct GetTimeoutsRequest;
 impl GetTimeoutsRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    fn serialize_impl(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
         let length_so_far = 0;
         let mut request0 = vec![
             major_opcode,
@@ -233,7 +253,7 @@ impl GetTimeoutsRequest {
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(major_opcode(conn)?);
+        let (bytes, fds) = self.serialize_impl(major_opcode(conn)?);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         conn.send_request_with_reply(&slices, fds)
     }
@@ -249,7 +269,17 @@ impl GetTimeoutsRequest {
 }
 impl Request for GetTimeoutsRequest {
     type Reply = GetTimeoutsReply;
+
+    const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
+
+    fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
+        let (bufs, fds) = self.serialize_impl(major_opcode);
+        // Flatten the buffers into a single vector
+        let buf = bufs.iter().flat_map(|buf| buf.iter().copied()).collect();
+        (buf, fds)
+    }
 }
+impl crate::x11_utils::ReplyRequest for GetTimeoutsRequest {}
 pub fn get_timeouts<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetTimeoutsReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -298,7 +328,7 @@ pub struct SetTimeoutsRequest {
 }
 impl SetTimeoutsRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    fn serialize_impl(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
         let length_so_far = 0;
         let standby_timeout_bytes = self.standby_timeout.serialize();
         let suspend_timeout_bytes = self.suspend_timeout.serialize();
@@ -327,7 +357,7 @@ impl SetTimeoutsRequest {
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(major_opcode(conn)?);
+        let (bytes, fds) = self.serialize_impl(major_opcode(conn)?);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         conn.send_request_without_reply(&slices, fds)
     }
@@ -349,7 +379,17 @@ impl SetTimeoutsRequest {
 }
 impl Request for SetTimeoutsRequest {
     type Reply = ();
+
+    const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
+
+    fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
+        let (bufs, fds) = self.serialize_impl(major_opcode);
+        // Flatten the buffers into a single vector
+        let buf = bufs.iter().flat_map(|buf| buf.iter().copied()).collect();
+        (buf, fds)
+    }
 }
+impl crate::x11_utils::VoidRequest for SetTimeoutsRequest {}
 pub fn set_timeouts<Conn>(conn: &Conn, standby_timeout: u16, suspend_timeout: u16, off_timeout: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -368,7 +408,7 @@ pub const ENABLE_REQUEST: u8 = 4;
 pub struct EnableRequest;
 impl EnableRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    fn serialize_impl(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
         let length_so_far = 0;
         let mut request0 = vec![
             major_opcode,
@@ -386,7 +426,7 @@ impl EnableRequest {
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(major_opcode(conn)?);
+        let (bytes, fds) = self.serialize_impl(major_opcode(conn)?);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         conn.send_request_without_reply(&slices, fds)
     }
@@ -402,7 +442,17 @@ impl EnableRequest {
 }
 impl Request for EnableRequest {
     type Reply = ();
+
+    const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
+
+    fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
+        let (bufs, fds) = self.serialize_impl(major_opcode);
+        // Flatten the buffers into a single vector
+        let buf = bufs.iter().flat_map(|buf| buf.iter().copied()).collect();
+        (buf, fds)
+    }
 }
+impl crate::x11_utils::VoidRequest for EnableRequest {}
 pub fn enable<Conn>(conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -417,7 +467,7 @@ pub const DISABLE_REQUEST: u8 = 5;
 pub struct DisableRequest;
 impl DisableRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    fn serialize_impl(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
         let length_so_far = 0;
         let mut request0 = vec![
             major_opcode,
@@ -435,7 +485,7 @@ impl DisableRequest {
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(major_opcode(conn)?);
+        let (bytes, fds) = self.serialize_impl(major_opcode(conn)?);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         conn.send_request_without_reply(&slices, fds)
     }
@@ -451,7 +501,17 @@ impl DisableRequest {
 }
 impl Request for DisableRequest {
     type Reply = ();
+
+    const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
+
+    fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
+        let (bufs, fds) = self.serialize_impl(major_opcode);
+        // Flatten the buffers into a single vector
+        let buf = bufs.iter().flat_map(|buf| buf.iter().copied()).collect();
+        (buf, fds)
+    }
 }
+impl crate::x11_utils::VoidRequest for DisableRequest {}
 pub fn disable<Conn>(conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -524,7 +584,7 @@ pub struct ForceLevelRequest {
 }
 impl ForceLevelRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    fn serialize_impl(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
         let length_so_far = 0;
         let power_level_bytes = u16::from(self.power_level).serialize();
         let mut request0 = vec![
@@ -547,7 +607,7 @@ impl ForceLevelRequest {
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(major_opcode(conn)?);
+        let (bytes, fds) = self.serialize_impl(major_opcode(conn)?);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         conn.send_request_without_reply(&slices, fds)
     }
@@ -566,7 +626,17 @@ impl ForceLevelRequest {
 }
 impl Request for ForceLevelRequest {
     type Reply = ();
+
+    const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
+
+    fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
+        let (bufs, fds) = self.serialize_impl(major_opcode);
+        // Flatten the buffers into a single vector
+        let buf = bufs.iter().flat_map(|buf| buf.iter().copied()).collect();
+        (buf, fds)
+    }
 }
+impl crate::x11_utils::VoidRequest for ForceLevelRequest {}
 pub fn force_level<Conn>(conn: &Conn, power_level: DPMSMode) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -583,7 +653,7 @@ pub const INFO_REQUEST: u8 = 7;
 pub struct InfoRequest;
 impl InfoRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    fn serialize_impl(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
         let length_so_far = 0;
         let mut request0 = vec![
             major_opcode,
@@ -601,7 +671,7 @@ impl InfoRequest {
     where
         Conn: RequestConnection + ?Sized,
     {
-        let (bytes, fds) = self.serialize(major_opcode(conn)?);
+        let (bytes, fds) = self.serialize_impl(major_opcode(conn)?);
         let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
         conn.send_request_with_reply(&slices, fds)
     }
@@ -617,7 +687,17 @@ impl InfoRequest {
 }
 impl Request for InfoRequest {
     type Reply = InfoReply;
+
+    const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
+
+    fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
+        let (bufs, fds) = self.serialize_impl(major_opcode);
+        // Flatten the buffers into a single vector
+        let buf = bufs.iter().flat_map(|buf| buf.iter().copied()).collect();
+        (buf, fds)
+    }
 }
+impl crate::x11_utils::ReplyRequest for InfoRequest {}
 pub fn info<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, InfoReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,

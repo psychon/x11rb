@@ -442,7 +442,7 @@ fn emit_request_struct(
         );
         outln!(
             out,
-            "fn serialize(self{opcode}) -> BufWithFds<PiecewiseBuf<{lifetime}>> {{",
+            "fn serialize_impl(self{opcode}) -> BufWithFds<PiecewiseBuf<{lifetime}>> {{",
             opcode = if is_xproto { "" } else { ", major_opcode: u8" },
             lifetime = serialize_lifetime_return,
         );
@@ -893,7 +893,7 @@ fn emit_request_struct(
         out.indented(|out| {
             outln!(
                 out,
-                "let (bytes, fds) = self.serialize({});",
+                "let (bytes, fds) = self.serialize_impl({});",
                 if is_xproto { "" } else { "major_opcode(conn)?" }
             );
             outln!(
@@ -1092,12 +1092,66 @@ fn emit_request_struct(
         lifetime = struct_lifetime_block,
         name = name
     );
-    if request_def.reply.is_some() {
-        outln!(out.indent(), "type Reply = {}Reply;", name);
-    } else {
-        outln!(out.indent(), "type Reply = ();");
-    }
+    out.indented(|out| {
+        if request_def.reply.is_some() {
+            outln!(out, "type Reply = {}Reply;", name);
+        } else {
+            outln!(out, "type Reply = ();");
+        }
+
+        outln!(out, "");
+        if is_xproto {
+            outln!(out, "const EXTENSION_NAME: Option<&'static str> = None;");
+        } else {
+            outln!(
+                out,
+                "const EXTENSION_NAME: {option}<&'static str> = Some(X11_EXTENSION_NAME);",
+                option = generator.option_name,
+            );
+        }
+
+        outln!(out, "");
+        let arg_name = if is_xproto {
+            "_major_opcode"
+        } else {
+            "major_opcode"
+        };
+        outln!(
+            out,
+            "fn serialize(self, {opcode}: u8) -> BufWithFds<Vec<u8>> {{",
+            opcode = arg_name
+        );
+        out.indented(|out| {
+            if is_xproto {
+                outln!(out, "let (bufs, fds) = self.serialize_impl();");
+            } else {
+                outln!(out, "let (bufs, fds) = self.serialize_impl(major_opcode);");
+            }
+            outln!(out, "// Flatten the buffers into a single vector");
+            outln!(
+                out,
+                "let buf = bufs.iter().flat_map(|buf| buf.iter().copied()).collect();"
+            );
+            outln!(out, "(buf, fds)");
+        });
+        outln!(out, "}}");
+    });
     outln!(out, "}}");
+
+    let request_trait = if request_def.reply.is_none() {
+        "crate::x11_utils::VoidRequest"
+    } else if gathered.reply_has_fds {
+        "crate::x11_utils::ReplyFDsRequest"
+    } else {
+        "crate::x11_utils::ReplyRequest"
+    };
+    outln!(
+        out,
+        "impl{lifetime} {request_trait} for {name}Request{lifetime} {{}}",
+        name = name,
+        request_trait = request_trait,
+        lifetime = struct_lifetime_block,
+    );
 }
 
 fn emit_request_function(
