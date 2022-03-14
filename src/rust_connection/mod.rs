@@ -650,7 +650,25 @@ impl<S: Stream> Connection for RustConnection<S> {
     }
 
     fn generate_id(&self) -> Result<u32, ReplyOrIdError> {
-        self.id_allocator.lock().unwrap().generate_id(self)
+        let mut id_allocator = self.id_allocator.lock().unwrap();
+        if let Some(id) = id_allocator.generate_id() {
+            Ok(id)
+        } else {
+            use crate::protocol::xc_misc::{self, ConnectionExt as _};
+
+            if self
+                .extension_information(xc_misc::X11_EXTENSION_NAME)?
+                .is_none()
+            {
+                // IDs are exhausted and XC-MISC is not available
+                Err(ReplyOrIdError::IdsExhausted)
+            } else {
+                id_allocator.update_xid_range(&self.xc_misc_get_xid_range()?.reply()?)?;
+                id_allocator
+                    .generate_id()
+                    .ok_or(ReplyOrIdError::IdsExhausted)
+            }
+        }
     }
 }
 
