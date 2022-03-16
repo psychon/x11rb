@@ -12,71 +12,104 @@ mod special_cases;
 
 use output::Output;
 
-pub(crate) fn generate(module: &xcbgen::defs::Module) -> HashMap<PathBuf, String> {
-    let mut out_map = HashMap::new();
+pub(crate) struct Generated {
+    pub(crate) file_name: PathBuf,
+    pub(crate) proto: String,
+    pub(crate) x11rb: String,
+}
 
-    let mut main_out = Output::new();
-    write_code_header(&mut main_out);
-    outln!(main_out, "//! Bindings to the X11 protocol.");
-    outln!(main_out, "//!");
+pub(crate) fn generate(module: &xcbgen::defs::Module) -> Vec<Generated> {
+    let mut out_map = Vec::new();
+
+    let mut main_proto_out = Output::new();
+    let mut main_x11rb_out = Output::new();
+    for out in [&mut main_proto_out, &mut main_x11rb_out] {
+        write_code_header(out);
+        outln!(out, "//! Bindings to the X11 protocol.");
+        outln!(out, "//!");
+        outln!(
+            out,
+            "//! Each sub-module of this module corresponds to one X11 extension. It contains all the"
+        );
+        outln!(
+            out,
+            "//! definitions from that extension. The core X11 protocol is in \
+             [`xproto`](xproto/index.html).",
+        );
+        outln!(out, "");
+        outln!(out, "// Clippy does not like some names from the XML.");
+        outln!(out, "#![allow(clippy::upper_case_acronyms)]");
+        outln!(out, "// This is not easy to fix, so ignore it.");
+        outln!(
+            out,
+            "#![allow(clippy::needless_borrow, clippy::needless_lifetimes)]"
+        );
+    }
+    outln!(main_proto_out, "");
+    outln!(main_proto_out, "use std::borrow::Cow;");
+    outln!(main_proto_out, "use std::convert::TryInto;");
+    outln!(main_proto_out, "use crate::errors::ParseError;");
+    outln!(main_proto_out, "use crate::utils::RawFdContainer;");
     outln!(
-        main_out,
-        "//! Each sub-module of this module corresponds to one X11 extension. It contains all the"
+        main_proto_out,
+        "use crate::x11_utils::{{TryParse, X11Error}};"
     );
     outln!(
-        main_out,
-        "//! definitions from that extension. The core X11 protocol is in \
-         [`xproto`](xproto/index.html).",
-    );
-    outln!(main_out, "");
-    outln!(main_out, "// Clippy does not like some names from the XML.");
-    outln!(main_out, "#![allow(clippy::upper_case_acronyms)]");
-    outln!(main_out, "// This is not easy to fix, so ignore it.");
-    outln!(main_out, "#![allow(clippy::needless_borrow)]");
-    outln!(main_out, "");
-    outln!(main_out, "use std::borrow::Cow;");
-    outln!(main_out, "use std::convert::TryInto;");
-    outln!(main_out, "use crate::errors::ParseError;");
-    outln!(main_out, "use crate::utils::RawFdContainer;");
-    outln!(main_out, "use crate::x11_utils::{{TryParse, X11Error}};");
-    outln!(
-        main_out,
+        main_proto_out,
         "use crate::x11_utils::{{ExtInfoProvider, ReplyParsingFunction, Request as RequestTrait, \
          RequestHeader}};"
     );
-    outln!(main_out, "");
+    outln!(main_proto_out, "");
 
     let caches = RefCell::new(namespace::helpers::Caches::default());
     caches.borrow_mut().gather_enum_infos(module);
 
     let mut enum_cases = HashMap::new();
     for ns in module.sorted_namespaces() {
-        let mut ns_out = Output::new();
+        let mut ns_proto_out = Output::new();
+        let mut ns_x11rb_out = Output::new();
         let wrapper_info = resources::for_extension(&ns.header);
         namespace::generate(
             module,
             &ns,
             &caches,
-            &mut ns_out,
+            &mut ns_proto_out,
+            &mut ns_x11rb_out,
             &mut enum_cases,
             wrapper_info,
         );
-        out_map.insert(
-            PathBuf::from(format!("{}.rs", ns.header)),
-            ns_out.into_data(),
-        );
+        out_map.push(Generated {
+            file_name: PathBuf::from(format!("{}.rs", ns.header)),
+            proto: ns_proto_out.into_data(),
+            x11rb: ns_x11rb_out.into_data(),
+        });
 
-        if ext_has_feature(&ns.header) {
-            outln!(main_out, "#[cfg(feature = \"{}\")]", ns.header);
+        for out in [&mut main_proto_out, &mut main_x11rb_out] {
+            if ext_has_feature(&ns.header) {
+                outln!(out, "#[cfg(feature = \"{}\")]", ns.header);
+            }
+            outln!(out, "pub mod {};", ns.header);
         }
-        outln!(main_out, "pub mod {};", ns.header);
     }
-    outln!(main_out, "");
+    outln!(main_proto_out, "");
 
-    requests_replies::generate(&mut main_out, module, enum_cases);
-    error_events::generate(&mut main_out, module);
+    requests_replies::generate(&mut main_proto_out, module, enum_cases);
+    error_events::generate(&mut main_proto_out, module);
 
-    out_map.insert(PathBuf::from("mod.rs"), main_out.into_data());
+    outln!(main_x11rb_out, "");
+    outln!(main_x11rb_out, "pub use x11rb_protocol::protocol::Request;");
+    outln!(main_x11rb_out, "pub use x11rb_protocol::protocol::Reply;");
+    outln!(
+        main_x11rb_out,
+        "pub use x11rb_protocol::protocol::ErrorKind;"
+    );
+    outln!(main_x11rb_out, "pub use x11rb_protocol::protocol::Event;");
+
+    out_map.push(Generated {
+        file_name: PathBuf::from("mod.rs"),
+        proto: main_proto_out.into_data(),
+        x11rb: main_x11rb_out.into_data(),
+    });
     out_map
 }
 

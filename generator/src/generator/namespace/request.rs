@@ -116,7 +116,8 @@ impl GatheredRequestFields {
 pub(super) fn generate_request(
     generator: &NamespaceGenerator<'_, '_>,
     request_def: &xcbdefs::RequestDef,
-    out: &mut Output,
+    proto_out: &mut Output,
+    x11rb_out: &mut Output,
     trait_out: &mut Output,
     enum_cases: &mut PerModuleEnumCases,
 ) {
@@ -154,13 +155,13 @@ pub(super) fn generate_request(
             request_def,
             switch_fields[0],
             &function_name,
-            out,
+            proto_out,
         );
     }
 
-    outln!(out, "/// Opcode for the {} request", name);
+    outln!(proto_out, "/// Opcode for the {} request", name);
     outln!(
-        out,
+        proto_out,
         "pub const {}_REQUEST: u8 = {};",
         super::super::camel_case_to_upper_snake(&name),
         request_def.opcode,
@@ -174,7 +175,8 @@ pub(super) fn generate_request(
         &name,
         &deducible_fields,
         &gathered,
-        out,
+        proto_out,
+        x11rb_out,
     );
     let ns_prefix = get_ns_name_prefix(generator.ns);
     let lifetime_block = if gathered.needs_lifetime {
@@ -216,7 +218,7 @@ pub(super) fn generate_request(
         &name,
         &function_name,
         &gathered,
-        out,
+        x11rb_out,
     );
     emit_request_trait_function(
         generator,
@@ -227,9 +229,10 @@ pub(super) fn generate_request(
         trait_out,
     );
 
-    super::special_cases::handle_request(request_def, out);
+    super::special_cases::handle_request(request_def, proto_out);
 
-    outln!(out, "");
+    outln!(proto_out, "");
+    outln!(x11rb_out, "");
 
     if let Some(ref reply) = request_def.reply {
         let reply_struct_name = format!("{}Reply", name);
@@ -271,10 +274,10 @@ pub(super) fn generate_request(
             false,
             false,
             reply.doc.as_ref(),
-            out,
+            proto_out,
         );
 
-        outln!(out, "");
+        outln!(proto_out, "");
     } else {
         enum_cases.reply_parse_cases.push(format!(
             "Request::{ns_prefix}{name}(_) => None,",
@@ -381,6 +384,7 @@ fn emit_request_struct(
     deducible_fields: &HashMap<String, DeducibleField>,
     gathered: &GatheredRequestFields,
     out: &mut Output,
+    x11rb_out: &mut Output,
 ) {
     let ns = request_def.namespace.upgrade().unwrap();
     let is_xproto = ns.header == "xproto";
@@ -442,7 +446,7 @@ fn emit_request_struct(
         );
         outln!(
             out,
-            "fn serialize_impl(self{opcode}) -> BufWithFds<PiecewiseBuf<{lifetime}>> {{",
+            "pub fn serialize(self{opcode}) -> BufWithFds<PiecewiseBuf<{lifetime}>> {{",
             opcode = if is_xproto { "" } else { ", major_opcode: u8" },
             lifetime = serialize_lifetime_return,
         );
@@ -871,33 +875,36 @@ fn emit_request_struct(
         let ret_type = if is_list_fonts_with_info || is_record_enable_context {
             assert!(request_def.reply.is_some());
             match (is_list_fonts_with_info, is_record_enable_context) {
-                (true, _) => "ListFontsWithInfoCookie<'_, Conn>".to_string(),
-                (_, true) => "RecordEnableContextCookie<'_, Conn>".to_string(),
+                (true, _) => "ListFontsWithInfoCookie<'c, Conn>".to_string(),
+                (_, true) => "RecordEnableContextCookie<'c, Conn>".to_string(),
                 _ => unreachable!(),
             }
         } else {
             match (request_def.reply.is_some(), gathered.reply_has_fds) {
-                (false, _) => "VoidCookie<'_, Conn>".to_string(),
-                (true, false) => format!("Cookie<'_, Conn, {}Reply>", name),
-                (true, true) => format!("CookieWithFds<'_, Conn, {}Reply>", name),
+                (false, _) => "VoidCookie<'c, Conn>".to_string(),
+                (true, false) => format!("Cookie<'c, Conn, {}Reply>", name),
+                (true, true) => format!("CookieWithFds<'c, Conn, {}Reply>", name),
             }
         };
         outln!(
-            out,
-            "pub fn send<Conn>(self, conn: &Conn) -> Result<{}, ConnectionError>",
-            ret_type,
+            x11rb_out,
+            "fn send_{lower_name}<'c, Conn>(req: {name}Request{lifetime}, conn: &'c Conn) -> Result<{ret_type}, ConnectionError>",
+            ret_type=ret_type,
+            name=name,
+            lower_name=super::super::camel_case_to_lower_snake(name),
+            lifetime=if gathered.needs_lifetime { "<'_>" } else { "" },
         );
-        outln!(out, "where");
-        outln!(out.indent(), "Conn: RequestConnection + ?Sized,");
-        outln!(out, "{{");
-        out.indented(|out| {
+        outln!(x11rb_out, "where");
+        outln!(x11rb_out.indent(), "Conn: RequestConnection + ?Sized,");
+        outln!(x11rb_out, "{{");
+        x11rb_out.indented(|x11rb_out| {
             outln!(
-                out,
-                "let (bytes, fds) = self.serialize_impl({});",
+                x11rb_out,
+                "let (bytes, fds) = req.serialize({});",
                 if is_xproto { "" } else { "major_opcode(conn)?" }
             );
             outln!(
-                out,
+                x11rb_out,
                 "let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();"
             );
 
@@ -908,21 +915,21 @@ fn emit_request_struct(
                     _ => unreachable!(),
                 };
                 outln!(
-                    out,
+                    x11rb_out,
                     "Ok({}::new(conn.send_request_with_reply(&slices, fds)?))",
                     cookie,
                 )
             } else if request_def.reply.is_some() {
                 if gathered.reply_has_fds {
-                    outln!(out, "conn.send_request_with_reply_with_fds(&slices, fds)");
+                    outln!(x11rb_out, "conn.send_request_with_reply_with_fds(&slices, fds)");
                 } else {
-                    outln!(out, "conn.send_request_with_reply(&slices, fds)",);
+                    outln!(x11rb_out, "conn.send_request_with_reply(&slices, fds)",);
                 }
             } else {
-                outln!(out, "conn.send_request_without_reply(&slices, fds)",);
+                outln!(x11rb_out, "conn.send_request_without_reply(&slices, fds)",);
             }
         });
-        outln!(out, "}}");
+        outln!(x11rb_out, "}}");
 
         // Parsing implementation.
         outln!(
@@ -1123,9 +1130,9 @@ fn emit_request_struct(
         );
         out.indented(|out| {
             if is_xproto {
-                outln!(out, "let (bufs, fds) = self.serialize_impl();");
+                outln!(out, "let (bufs, fds) = self.serialize();");
             } else {
-                outln!(out, "let (bufs, fds) = self.serialize_impl(major_opcode);");
+                outln!(out, "let (bufs, fds) = self.serialize(major_opcode);");
             }
             outln!(out, "// Flatten the buffers into a single vector");
             outln!(
@@ -1251,7 +1258,11 @@ fn emit_request_function(
             outln!(out, "}};");
         }
 
-        outln!(out, "request0.send(conn)")
+        outln!(
+            out,
+            "send_{}(request0, conn)",
+            super::super::camel_case_to_lower_snake(name)
+        )
     });
     outln!(out, "}}");
 }

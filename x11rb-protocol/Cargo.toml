@@ -1,0 +1,48 @@
+[package]
+name = "x11rb-protocol"
+version = "0.9.0"
+description = "Rust bindings to X11"
+authors = [
+    "Uli Schlachter <psychon@znc.in>",
+    "Eduardo Sánchez Muñoz <esm@eduardosm.net>",
+]
+repository = "https://github.com/psychon/x11rb"
+readme = "../README.md"
+edition = "2018"
+license = "MIT OR Apache-2.0"
+keywords = ["xcb", "X11"]
+
+[dependencies]
+
+[target.'cfg(unix)'.dependencies]
+nix = "0.23"
+
+[features]
+# Features to enable individual X11 extensions
+composite = ["xfixes"]
+damage = ["xfixes"]
+dpms = []
+dri2 = []
+dri3 = []
+glx = []
+present = ["randr", "xfixes", "sync"]
+randr = ["render"]
+record = []
+render = []
+res = []
+screensaver = []
+shape = []
+shm = []
+sync = []
+xevie = []
+xf86dri = []
+xf86vidmode = []
+xfixes = ["render", "shape"]
+xinerama = []
+xinput = ["xfixes"]
+xkb = []
+xprint = []
+xselinux = []
+xtest = []
+xv = ["shm"]
+xvmc = ["xv"]

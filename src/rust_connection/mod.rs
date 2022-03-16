@@ -174,7 +174,7 @@ impl<S: Stream> RustConnection<S> {
 
     /// Establish a new connection for an already connected stream.
     ///
-    /// `read` is used for reading data from the X11 server and `write` is used for writing.
+    /// The given `stream` is used for communicating with the X11 server.
     /// It is assumed that `setup` was just received from the server. Thus, the first reply to a
     /// request that is sent will have sequence number one.
     pub fn for_connected_stream(stream: S, setup: Setup) -> Result<Self, ConnectError> {

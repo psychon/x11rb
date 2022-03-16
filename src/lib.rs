@@ -141,6 +141,11 @@
 // Only contains documentation, but no "actual rust"
 pub mod event_loop_integration;
 
+/// Reexports of dependencies
+pub mod reexports {
+    pub use x11rb_protocol;
+}
+
 pub mod utils;
 #[cfg(feature = "allow-unsafe-code")]
 pub mod xcb_ffi;
