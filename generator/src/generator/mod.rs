@@ -23,7 +23,7 @@ pub(crate) fn generate(module: &xcbgen::defs::Module) -> Vec<Generated> {
 
     let mut main_proto_out = Output::new();
     let mut main_x11rb_out = Output::new();
-    for out in [&mut main_proto_out, &mut main_x11rb_out] {
+    for out in vec![&mut main_proto_out, &mut main_x11rb_out].into_iter() {
         write_code_header(out);
         outln!(out, "//! Bindings to the X11 protocol.");
         outln!(out, "//!");
@@ -84,7 +84,7 @@ pub(crate) fn generate(module: &xcbgen::defs::Module) -> Vec<Generated> {
             x11rb: ns_x11rb_out.into_data(),
         });
 
-        for out in [&mut main_proto_out, &mut main_x11rb_out] {
+        for out in vec![&mut main_proto_out, &mut main_x11rb_out].into_iter() {
             if ext_has_feature(&ns.header) {
                 outln!(out, "#[cfg(feature = \"{}\")]", ns.header);
             }
