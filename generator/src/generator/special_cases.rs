@@ -29,7 +29,7 @@ pub(super) fn handle_request(request_def: &xcbdefs::RequestDef, out: &mut Output
 /// Successfully iterate over the value:
 /// ```
 /// // First, we have to 'invent' a GetPropertyReply.
-/// let reply = x11rb::protocol::xproto::GetPropertyReply {{
+/// let reply = x11rb_protocol::protocol::xproto::GetPropertyReply {{
 ///     format: {},
 ///     sequence: 0,
 ///     length: 0, // This value is incorrect
@@ -56,7 +56,7 @@ pub(super) fn handle_request(request_def: &xcbdefs::RequestDef, out: &mut Output
 /// The following example shows this.
 /// ```
 /// // First, we have to 'invent' a GetPropertyReply.
-/// let reply = x11rb::protocol::xproto::GetPropertyReply {{
+/// let reply = x11rb_protocol::protocol::xproto::GetPropertyReply {{
 ///     format: 42, // Not allowed in X11, but used for the example
 ///     sequence: 0,
 ///     length: 0, // This value is incorrect

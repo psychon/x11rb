@@ -8834,7 +8834,7 @@ impl GetPropertyReply {
     /// Successfully iterate over the value:
     /// ```
     /// // First, we have to 'invent' a GetPropertyReply.
-    /// let reply = x11rb::protocol::xproto::GetPropertyReply {
+    /// let reply = x11rb_protocol::protocol::xproto::GetPropertyReply {
     ///     format: 8,
     ///     sequence: 0,
     ///     length: 0, // This value is incorrect
@@ -8857,7 +8857,7 @@ impl GetPropertyReply {
     /// The following example shows this.
     /// ```
     /// // First, we have to 'invent' a GetPropertyReply.
-    /// let reply = x11rb::protocol::xproto::GetPropertyReply {
+    /// let reply = x11rb_protocol::protocol::xproto::GetPropertyReply {
     ///     format: 42, // Not allowed in X11, but used for the example
     ///     sequence: 0,
     ///     length: 0, // This value is incorrect
@@ -8887,7 +8887,7 @@ impl GetPropertyReply {
     /// Successfully iterate over the value:
     /// ```
     /// // First, we have to 'invent' a GetPropertyReply.
-    /// let reply = x11rb::protocol::xproto::GetPropertyReply {
+    /// let reply = x11rb_protocol::protocol::xproto::GetPropertyReply {
     ///     format: 16,
     ///     sequence: 0,
     ///     length: 0, // This value is incorrect
@@ -8908,7 +8908,7 @@ impl GetPropertyReply {
     /// The following example shows this.
     /// ```
     /// // First, we have to 'invent' a GetPropertyReply.
-    /// let reply = x11rb::protocol::xproto::GetPropertyReply {
+    /// let reply = x11rb_protocol::protocol::xproto::GetPropertyReply {
     ///     format: 42, // Not allowed in X11, but used for the example
     ///     sequence: 0,
     ///     length: 0, // This value is incorrect
@@ -8938,7 +8938,7 @@ impl GetPropertyReply {
     /// Successfully iterate over the value:
     /// ```
     /// // First, we have to 'invent' a GetPropertyReply.
-    /// let reply = x11rb::protocol::xproto::GetPropertyReply {
+    /// let reply = x11rb_protocol::protocol::xproto::GetPropertyReply {
     ///     format: 32,
     ///     sequence: 0,
     ///     length: 0, // This value is incorrect
@@ -8958,7 +8958,7 @@ impl GetPropertyReply {
     /// The following example shows this.
     /// ```
     /// // First, we have to 'invent' a GetPropertyReply.
-    /// let reply = x11rb::protocol::xproto::GetPropertyReply {
+    /// let reply = x11rb_protocol::protocol::xproto::GetPropertyReply {
     ///     format: 42, // Not allowed in X11, but used for the example
     ///     sequence: 0,
     ///     length: 0, // This value is incorrect
