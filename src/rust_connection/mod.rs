@@ -72,6 +72,8 @@ pub struct RustConnection<S: Stream = DefaultStream> {
     // This mutex is only locked with `try_lock` (never blocks), so a simpler
     // lock based only on a atomic variable would be more efficient.
     packet_reader: Mutex<PacketReader>,
+    // n.b. notgull: same here
+    write_buffer: Mutex<WriteBuffer>,
     reader_condition: Condvar,
     id_allocator: Mutex<id_allocator::IdAllocator>,
     setup: Setup,
@@ -102,6 +104,8 @@ pub struct RustConnection<S: Stream = DefaultStream> {
 // lock on `inner` is released so that other threads can make progress. If more threads want to
 // read while `read` is already locked, they sleep on `reader_condition`. The actual reader will
 // then notify this condition variable once it is done reading.
+// 
+// n.b. notgull: write_buffer follows the same rules
 //
 // The condition variable is necessary since one thread may read packets that another thread waits
 // for. Thus, after reading something from the connection, all threads that wait for something have
@@ -192,6 +196,7 @@ impl<S: Stream> RustConnection<S> {
             inner: Mutex::new(inner),
             stream,
             packet_reader: Mutex::new(PacketReader::new()),
+            write_buffer: Mutex::new(WriteBuffer::new()),
             reader_condition: Condvar::new(),
             id_allocator: Mutex::new(allocator),
             setup,
@@ -271,12 +276,14 @@ impl<S: Stream> RustConnection<S> {
         while !partial_buf.is_empty() || !bufs.is_empty() || !fds.is_empty() {
             self.stream.poll(PollMode::ReadAndWritable)?;
             let write_result = if !partial_buf.is_empty() {
-                inner
-                    .write_buffer
+                // "inner" is held, passed into this function, so this should never be held
+                let mut write_buffer = self.write_buffer.try_lock().expect("inner is held");
+                write_buffer
                     .write(&self.stream, partial_buf, &mut fds)
-            } else {
-                inner
-                    .write_buffer
+            } else {                
+                // same as above
+                let mut write_buffer = self.write_buffer.try_lock().expect("inner is held");
+                write_buffer
                     .write_vectored(&self.stream, bufs, &mut fds)
             };
             match write_result {
