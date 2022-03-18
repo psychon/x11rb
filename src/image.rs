@@ -31,8 +31,8 @@ use crate::connection::Connection;
 use crate::cookie::VoidCookie;
 use crate::errors::{ConnectionError, ParseError, ReplyError};
 use crate::protocol::xproto::{
-    Drawable, Format, Gcontext, GetImageReply, GetImageRequest, ImageFormat,
-    ImageOrder as XprotoImageOrder, PutImageRequest, Setup, VisualClass, Visualtype,
+    get_image, put_image, Drawable, Format, Gcontext, GetImageReply, ImageFormat,
+    ImageOrder as XprotoImageOrder, Setup, VisualClass, Visualtype,
 };
 
 /// The description of a single color component.
@@ -691,16 +691,16 @@ impl<'a> Image<'a> {
         width: u16,
         height: u16,
     ) -> Result<Self, ReplyError> {
-        let reply = GetImageRequest {
+        let reply = get_image(
+            conn,
+            ImageFormat::Z_PIXMAP,
             drawable,
             x,
             y,
             width,
             height,
-            format: ImageFormat::Z_PIXMAP,
-            plane_mask: !0,
-        }
-        .send(conn)?
+            !0,
+        )?
         .reply()?;
         Ok(Self::get_from_reply(conn.setup(), width, height, reply)?)
     }
@@ -760,19 +760,19 @@ impl<'a> Image<'a> {
             let next_lines = lines_per_request.min(self.height - y_offset);
             let next_byte_offset = byte_offset + usize::from(next_lines) * stride;
             let data = &self.data[byte_offset..next_byte_offset];
-            let request = PutImageRequest {
-                format: ImageFormat::Z_PIXMAP,
+            result.push(put_image(
+                conn,
+                ImageFormat::Z_PIXMAP,
                 drawable,
                 gc,
-                width: self.width,
-                height: next_lines,
+                self.width,
+                next_lines,
                 dst_x,
-                dst_y: dst_y + i16::try_from(y_offset).unwrap(),
-                left_pad: 0, // Must always be 0 for ZPixmap
-                depth: self.depth,
-                data: Cow::Borrowed(data),
-            };
-            result.push(request.send(conn)?);
+                dst_y + i16::try_from(y_offset).unwrap(),
+                0, // left_pad must always be 0 for ZPixmap
+                self.depth,
+                data,
+            )?);
 
             y_offset += next_lines;
             byte_offset = next_byte_offset;

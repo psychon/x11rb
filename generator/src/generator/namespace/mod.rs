@@ -34,11 +34,17 @@ pub(super) fn generate(
     module: &xcbgen::defs::Module,
     ns: &xcbdefs::Namespace,
     caches: &RefCell<Caches>,
-    out: &mut Output,
+    proto_out: &mut Output,
+    x11rb_out: &mut Output,
     enum_cases: &mut EnumCases,
     resource_info: &[super::ResourceInfo<'_>],
 ) {
-    NamespaceGenerator::new(module, ns, caches).generate(out, enum_cases, resource_info);
+    NamespaceGenerator::new(module, ns, caches).generate(
+        proto_out,
+        x11rb_out,
+        enum_cases,
+        resource_info,
+    );
 }
 
 struct NamespaceGenerator<'ns, 'c> {
@@ -72,12 +78,15 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
 
     fn generate(
         &self,
-        out: &mut Output,
+        proto_out: &mut Output,
+        x11rb_out: &mut Output,
         enum_cases: &mut EnumCases,
         resource_info: &[super::ResourceInfo<'_>],
     ) {
-        super::write_code_header(out);
-        header::write_header(out, self.ns);
+        super::write_code_header(proto_out);
+        super::write_code_header(x11rb_out);
+        header::write_header(proto_out, self.ns, header::Mode::Protocol);
+        header::write_header(x11rb_out, self.ns, header::Mode::X11rb);
 
         let mut trait_out = Output::new();
 
@@ -85,41 +94,50 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             match def {
                 xcbdefs::Def::Request(request_def) => {
                     let cases_entry = enum_cases.entry(self.ns.header.clone()).or_default();
-                    request::generate_request(self, request_def, out, &mut trait_out, cases_entry)
+                    request::generate_request(
+                        self,
+                        request_def,
+                        proto_out,
+                        x11rb_out,
+                        &mut trait_out,
+                        cases_entry,
+                    )
                 }
                 xcbdefs::Def::Event(event_def) => match event_def {
                     xcbdefs::EventDef::Full(event_full_def) => {
-                        self.generate_event_full_def(event_full_def, out);
+                        self.generate_event_full_def(event_full_def, proto_out);
                     }
                     xcbdefs::EventDef::Copy(event_copy_def) => {
-                        self.generate_event_copy_def(event_copy_def, out);
+                        self.generate_event_copy_def(event_copy_def, proto_out);
                     }
                 },
                 xcbdefs::Def::Error(error_def) => match error_def {
                     xcbdefs::ErrorDef::Full(error_full_def) => {
-                        self.generate_error_full_def(error_full_def, out);
+                        self.generate_error_full_def(error_full_def, proto_out);
                     }
                     xcbdefs::ErrorDef::Copy(error_copy_def) => {
-                        self.generate_error_copy_def(error_copy_def, out);
+                        self.generate_error_copy_def(error_copy_def, proto_out);
                     }
                 },
                 xcbdefs::Def::Type(type_def) => match type_def {
                     xcbdefs::TypeDef::Struct(struct_def) => {
-                        self.generate_struct_def(struct_def, out)
+                        self.generate_struct_def(struct_def, proto_out)
                     }
-                    xcbdefs::TypeDef::Union(union_def) => self.generate_union_def(union_def, out),
+                    xcbdefs::TypeDef::Union(union_def) => {
+                        self.generate_union_def(union_def, proto_out)
+                    }
                     xcbdefs::TypeDef::EventStruct(event_struct_def) => {
-                        self.generate_event_struct_def(event_struct_def, out);
+                        self.generate_event_struct_def(event_struct_def, proto_out);
                     }
                     xcbdefs::TypeDef::Xid(xid_type_def) => {
-                        self.generate_xid_type_def(xid_type_def, out)
+                        self.generate_xid_type_def(xid_type_def, proto_out)
                     }
                     xcbdefs::TypeDef::XidUnion(xid_union_def) => {
-                        self.generate_xid_union_def(xid_union_def, out)
+                        self.generate_xid_union_def(xid_union_def, proto_out)
                     }
-                    xcbdefs::TypeDef::Enum(enum_def) => self.generate_enum_def(enum_def, out),
+                    xcbdefs::TypeDef::Enum(enum_def) => self.generate_enum_def(enum_def, proto_out),
                     xcbdefs::TypeDef::Alias(type_alias_def) => {
-                        self.generate_type_alias_def(type_alias_def, out)
+                        self.generate_type_alias_def(type_alias_def, proto_out)
                     }
                 },
             }
@@ -128,20 +146,20 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         let trait_out = trait_out.into_data();
 
         outln!(
-            out,
+            x11rb_out,
             "/// Extension trait defining the requests of this extension.",
         );
-        outln!(out, "pub trait ConnectionExt: RequestConnection {{");
-        out!(out.indent(), "{}", trait_out);
-        outln!(out, "}}");
-        outln!(out, "");
+        outln!(x11rb_out, "pub trait ConnectionExt: RequestConnection {{");
+        out!(x11rb_out.indent(), "{}", trait_out);
+        outln!(x11rb_out, "}}");
+        outln!(x11rb_out, "");
         outln!(
-            out,
+            x11rb_out,
             "impl<C: RequestConnection + ?Sized> ConnectionExt for C {{}}",
         );
 
         for info in resource_info {
-            resource_wrapper::generate(self, out, info);
+            resource_wrapper::generate(self, x11rb_out, info);
         }
     }
 

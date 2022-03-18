@@ -114,13 +114,17 @@ fn replace_file_if_different(file_path: &Path, data: &[u8]) -> Result<(), Error>
 
 fn main2() -> Result<u8, Error> {
     let args: Vec<_> = std::env::args_os().collect();
-    if args.len() != 3 {
+    if args.len() != 4 {
         eprintln!("USAGE:");
-        eprintln!("    {} <INPUT_DIR> <OUTPUT_DIR>", args[0].to_string_lossy());
+        eprintln!(
+            "    {} <INPUT_DIR> <PROTO_OUTPUT_DIR> <X11RB_OUTPUT_DIR>",
+            args[0].to_string_lossy()
+        );
         return Ok(1);
     }
     let input_dir_path = Path::new(&args[1]);
-    let output_dir_path = Path::new(&args[2]);
+    let proto_output_dir_path = Path::new(&args[2]);
+    let x11rb_output_dir_path = Path::new(&args[3]);
 
     let xml_files = list_xmls(input_dir_path)?;
     let module = xcbgen::defs::Module::new();
@@ -137,10 +141,13 @@ fn main2() -> Result<u8, Error> {
     println!("Resolved successfully");
 
     let generated = generator::generate(&module);
-    for (file_name, file_data) in generated.iter() {
-        let mut file_path = PathBuf::from(output_dir_path);
-        file_path.push(file_name);
-        replace_file_if_different(&file_path, file_data.as_bytes())?;
+    for generated in generated.iter() {
+        let mut proto_file_path = PathBuf::from(proto_output_dir_path);
+        let mut x11rb_file_path = PathBuf::from(x11rb_output_dir_path);
+        proto_file_path.push(&generated.file_name);
+        x11rb_file_path.push(&generated.file_name);
+        replace_file_if_different(&proto_file_path, generated.proto.as_bytes())?;
+        replace_file_if_different(&x11rb_file_path, generated.x11rb.as_bytes())?;
     }
     println!("Code generated successfully");
 
