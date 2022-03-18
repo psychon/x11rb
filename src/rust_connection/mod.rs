@@ -14,7 +14,7 @@ use crate::protocol::bigreq::{ConnectionExt as _, EnableReply};
 use crate::protocol::xproto::{Setup, SetupRequest, GET_INPUT_FOCUS_REQUEST};
 use crate::utils::RawFdContainer;
 use crate::x11_utils::{ExtensionInformation, Serialize, TryParse, TryParseFd};
-use x11rb_protocol::connection::{Connection as ConnectionInner, PollReply, ReplyFdKind};
+use x11rb_protocol::connection::{Connection as ProtoConnection, PollReply, ReplyFdKind};
 use x11rb_protocol::{DiscardMode, RawEventAndSeqNumber, SequenceNumber};
 
 mod id_allocator;
@@ -37,6 +37,12 @@ enum MaxRequestBytes {
     Unknown,
     Requested(Option<SequenceNumber>),
     Known(usize),
+}
+
+#[derive(Debug)]
+struct ConnectionInner {
+    inner: ProtoConnection,
+    write_buffer: WriteBuffer,
 }
 
 type MutexGuardInner<'a> = MutexGuard<'a, ConnectionInner>;
@@ -62,8 +68,6 @@ pub struct RustConnection<S: Stream = DefaultStream> {
     // This mutex is only locked with `try_lock` (never blocks), so a simpler
     // lock based only on a atomic variable would be more efficient.
     packet_reader: Mutex<PacketReader>,
-    // n.b. notgull: same here
-    write_buffer: Mutex<WriteBuffer>,
     reader_condition: Condvar,
     id_allocator: Mutex<id_allocator::IdAllocator>,
     setup: Setup,
@@ -172,17 +176,19 @@ impl<S: Stream> RustConnection<S> {
     /// It is assumed that `setup` was just received from the server. Thus, the first reply to a
     /// request that is sent will have sequence number one.
     pub fn for_connected_stream(stream: S, setup: Setup) -> Result<Self, ConnectError> {
-        Self::for_inner(stream, ConnectionInner::new(), setup)
+        Self::for_inner(stream, ProtoConnection::new(), setup)
     }
 
-    fn for_inner(stream: S, inner: ConnectionInner, setup: Setup) -> Result<Self, ConnectError> {
+    fn for_inner(stream: S, inner: ProtoConnection, setup: Setup) -> Result<Self, ConnectError> {
         let allocator =
             id_allocator::IdAllocator::new(setup.resource_id_base, setup.resource_id_mask)?;
         Ok(RustConnection {
-            inner: Mutex::new(inner),
+            inner: Mutex::new(ConnectionInner {
+                inner,
+                write_buffer: WriteBuffer::new(),
+            }),
             stream,
             packet_reader: Mutex::new(PacketReader::new()),
-            write_buffer: Mutex::new(WriteBuffer::new()),
             reader_condition: Condvar::new(),
             id_allocator: Mutex::new(allocator),
             setup,
@@ -211,7 +217,7 @@ impl<S: Stream> RustConnection<S> {
         let mut inner = self.inner.lock().unwrap();
 
         loop {
-            match inner.send_request(kind) {
+            match inner.inner.send_request(kind) {
                 Some(seqno) => {
                     // Now actually send the buffers
                     let _inner = self.write_all_vectored(inner, bufs, fds)?;
@@ -241,10 +247,10 @@ impl<S: Stream> RustConnection<S> {
             length[1],
         ];
 
-        let seqno = inner
+        let seqno = inner.inner
             .send_request(ReplyFdKind::ReplyWithoutFDs)
             .expect("Sending a HasResponse request should not be blocked by syncs");
-        inner.discard_reply(seqno, DiscardMode::DiscardReplyAndError);
+        inner.inner.discard_reply(seqno, DiscardMode::DiscardReplyAndError);
         let inner = self.write_all_vectored(inner, &[IoSlice::new(&request)], Vec::new())?;
 
         Ok(inner)
@@ -263,12 +269,10 @@ impl<S: Stream> RustConnection<S> {
             self.stream.poll(PollMode::ReadAndWritable)?;
             let write_result = if !partial_buf.is_empty() {
                 // "inner" is held, passed into this function, so this should never be held
-                let mut write_buffer = self.write_buffer.try_lock().expect("inner is held");
-                write_buffer.write(&self.stream, partial_buf, &mut fds)
+                inner.write_buffer.write(&self.stream, partial_buf, &mut fds)
             } else {
                 // same as above
-                let mut write_buffer = self.write_buffer.try_lock().expect("inner is held");
-                write_buffer.write_vectored(&self.stream, bufs, &mut fds)
+                inner.write_buffer.write_vectored(&self.stream, bufs, &mut fds)
             };
             match write_result {
                 Ok(0) => {
@@ -317,10 +321,9 @@ impl<S: Stream> RustConnection<S> {
         mut inner: MutexGuardInner<'a>,
     ) -> std::io::Result<MutexGuardInner<'a>> {
         // n.b. notgull: inner guard is held
-        let mut write_buffer = self.write_buffer.try_lock().expect("inner is held");
-        while write_buffer.needs_flush() {
+        while inner.write_buffer.needs_flush() {
             self.stream.poll(PollMode::ReadAndWritable)?;
-            match write_buffer.flush(&self.stream) {
+            match inner.write_buffer.flush(&self.stream) {
                 // Flush completed
                 Ok(()) => break,
                 Err(ref e) if e.kind() == std::io::ErrorKind::WouldBlock => {
@@ -402,10 +405,10 @@ impl<S: Stream> RustConnection<S> {
                 drop(packet_reader);
 
                 // 2.4. Actually enqueue the read packets.
-                inner.enqueue_fds(fds);
+                inner.inner.enqueue_fds(fds);
                 packets
                     .into_iter()
-                    .for_each(|packet| inner.enqueue_packet(packet));
+                    .for_each(|packet| inner.inner.enqueue_packet(packet));
 
                 // 2.5. Notify the condvar by dropping the `notify_on_drop` object.
                 // The object would have been dropped when the function returns, so
@@ -478,7 +481,7 @@ impl<S: Stream> RequestConnection for RustConnection<S> {
     }
 
     fn discard_reply(&self, sequence: SequenceNumber, _kind: RequestKind, mode: DiscardMode) {
-        self.inner.lock().unwrap().discard_reply(sequence, mode);
+        self.inner.lock().unwrap().inner.discard_reply(sequence, mode);
     }
 
     fn prefetch_extension_information(
@@ -515,7 +518,7 @@ impl<S: Stream> RequestConnection for RustConnection<S> {
         let mut inner = self.inner.lock().unwrap();
         inner = self.flush_impl(inner)?;
         loop {
-            match inner.poll_for_reply(sequence) {
+            match inner.inner.poll_for_reply(sequence) {
                 PollReply::TryAgain => {}
                 PollReply::NoReply => return Ok(None),
                 PollReply::Reply(buffer) => return Ok(Some(buffer)),
@@ -529,14 +532,14 @@ impl<S: Stream> RequestConnection for RustConnection<S> {
         sequence: SequenceNumber,
     ) -> Result<Option<Buffer>, ConnectionError> {
         let mut inner = self.inner.lock().unwrap();
-        if inner.prepare_check_for_reply_or_error(sequence) {
+        if inner.inner.prepare_check_for_reply_or_error(sequence) {
             inner = self.send_sync(inner)?;
-            assert!(!inner.prepare_check_for_reply_or_error(sequence));
+            assert!(!inner.inner.prepare_check_for_reply_or_error(sequence));
         }
         // Ensure the request is sent
         inner = self.flush_impl(inner)?;
         loop {
-            match inner.poll_check_for_reply_or_error(sequence) {
+            match inner.inner.poll_check_for_reply_or_error(sequence) {
                 PollReply::TryAgain => {}
                 PollReply::NoReply => return Ok(None),
                 PollReply::Reply(buffer) => return Ok(Some(buffer)),
@@ -553,7 +556,7 @@ impl<S: Stream> RequestConnection for RustConnection<S> {
         // Ensure the request is sent
         inner = self.flush_impl(inner)?;
         loop {
-            if let Some(reply) = inner.poll_for_reply_or_error(sequence) {
+            if let Some(reply) = inner.inner.poll_for_reply_or_error(sequence) {
                 if reply.0[0] == 0 {
                     return Ok(ReplyOrError::Error(reply.0));
                 } else {
@@ -615,7 +618,7 @@ impl<S: Stream> Connection for RustConnection<S> {
     ) -> Result<RawEventAndSeqNumber<Vec<u8>>, ConnectionError> {
         let mut inner = self.inner.lock().unwrap();
         loop {
-            if let Some(event) = inner.poll_for_event_with_sequence() {
+            if let Some(event) = inner.inner.poll_for_event_with_sequence() {
                 return Ok(event);
             }
             inner = self.read_packet_and_enqueue(inner, BlockingMode::Blocking)?;
@@ -626,11 +629,11 @@ impl<S: Stream> Connection for RustConnection<S> {
         &self,
     ) -> Result<Option<RawEventAndSeqNumber<Vec<u8>>>, ConnectionError> {
         let mut inner = self.inner.lock().unwrap();
-        if let Some(event) = inner.poll_for_event_with_sequence() {
+        if let Some(event) = inner.inner.poll_for_event_with_sequence() {
             Ok(Some(event))
         } else {
             inner = self.read_packet_and_enqueue(inner, BlockingMode::NonBlocking)?;
-            Ok(inner.poll_for_event_with_sequence())
+            Ok(inner.inner.poll_for_event_with_sequence())
         }
     }
 
