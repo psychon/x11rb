@@ -17,8 +17,7 @@ use std::sync::{
 use libc::c_void;
 
 use crate::connection::{
-    compute_length_field, Connection, DiscardMode, ReplyOrError, RequestConnection, RequestKind,
-    SequenceNumber,
+    compute_length_field, Connection, ReplyOrError, RequestConnection, RequestKind,
 };
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
 pub use crate::errors::{ConnectError, ConnectionError, ParseError, ReplyError, ReplyOrIdError};
@@ -26,6 +25,8 @@ use crate::extension_manager::ExtensionManager;
 use crate::protocol::xproto::Setup;
 use crate::utils::{CSlice, RawFdContainer};
 use crate::x11_utils::{ExtensionInformation, TryParse, TryParseFd};
+
+use x11rb_protocol::{DiscardMode, SequenceNumber};
 
 mod pending_errors;
 mod raw_ffi;
@@ -35,7 +36,7 @@ pub use raw_ffi::libxcb_library::load_libxcb;
 
 type Buffer = <XCBConnection as RequestConnection>::Buf;
 /// The raw bytes of an event received by [`XCBConnection`] and its sequence number.
-pub type RawEventAndSeqNumber = crate::connection::RawEventAndSeqNumber<Buffer>;
+pub type RawEventAndSeqNumber = x11rb_protocol::RawEventAndSeqNumber<Buffer>;
 /// A combination of a buffer and a list of file descriptors for use by [`XCBConnection`].
 pub type BufWithFds = crate::connection::BufWithFds<Buffer>;
 

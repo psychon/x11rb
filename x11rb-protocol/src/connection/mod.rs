@@ -2,11 +2,20 @@
 
 use std::collections::VecDeque;
 
-use super::{BufWithFds, RawEventAndSeqNumber, ReplyFdKind};
-use crate::connection::{DiscardMode, SequenceNumber};
 use crate::utils::RawFdContainer;
+use crate::{DiscardMode, SequenceNumber};
 
 pub type BufWithFds = crate::BufWithFds<Vec<u8>>;
+
+/// The raw bytes of an event received by [`RustConnection`] and its sequence number.
+pub type RawEventAndSeqNumber = crate::RawEventAndSeqNumber<Vec<u8>>;
+
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+pub enum ReplyFdKind {
+    NoReply,
+    ReplyWithoutFDs,
+    ReplyWithFDs,
+}
 
 #[derive(Debug, Clone)]
 pub enum PollReply {
@@ -26,7 +35,7 @@ struct SentRequest {
 }
 
 /// A pure-rust, sans-I/O implementation of the X11 protocol.
-/// 
+///
 /// This object is designed to be used in combination with an I/O backend, in
 /// order to keep state for the X11 protocol.
 #[derive(Debug)]
@@ -236,10 +245,7 @@ impl Connection {
     ///
     /// This function is meant to be used for requests that have a reply. Such requests always
     /// cause a reply or an error to be sent.
-    pub fn poll_for_reply_or_error(
-        &mut self,
-        sequence: SequenceNumber,
-    ) -> Option<BufWithFds> {
+    pub fn poll_for_reply_or_error(&mut self, sequence: SequenceNumber) -> Option<BufWithFds> {
         for (index, (seqno, _packet)) in self.pending_replies.iter().enumerate() {
             if *seqno == sequence {
                 return Some(self.pending_replies.remove(index).unwrap().1);

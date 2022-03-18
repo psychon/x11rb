@@ -14,22 +14,13 @@ use crate::protocol::Event;
 use crate::utils::RawFdContainer;
 use crate::x11_utils::{ExtensionInformation, TryParse, TryParseFd, X11Error};
 
-/// Number type used for referring to things that were sent to the server in responses from the
-/// server.
-///
-/// Each request sent to the X11 server is implicitly assigned a monotonically increasing sequence
-/// number. Replies, events, and errors contain the sequence number of the last request that the
-/// server received. This allows to map replies to their requests and to figure out which request
-/// caused an error.
-pub type SequenceNumber = u64;
+use x11rb_protocol::{DiscardMode, RawEventAndSeqNumber, SequenceNumber};
 
 // Used to avoid too-complex types.
 /// A combination of a buffer and a list of file descriptors.
 pub type BufWithFds<B> = (B, Vec<RawFdContainer>);
 /// An event and its sequence number.
 pub type EventAndSeqNumber = (Event, SequenceNumber);
-/// The raw bytes of an event and its sequence number.
-pub type RawEventAndSeqNumber<B> = (B, SequenceNumber);
 /// A buffer that is logically continuous, but presented in a number of pieces.
 pub type PiecewiseBuf<'a> = Vec<Cow<'a, [u8]>>;
 
@@ -373,15 +364,6 @@ pub enum RequestKind {
     HasResponse,
 }
 
-/// Variants describing which responses to a request should be discarded.
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
-pub enum DiscardMode {
-    /// Only discard the actual reply. Errors go to the main loop.
-    DiscardReply,
-    /// Ignore any kind of response that this request generates.
-    DiscardReplyAndError,
-}
-
 /// Check the request length and use BIG-REQUESTS if necessary.
 ///
 /// Users of this library will most likely not want to use this function directly.
@@ -399,11 +381,12 @@ pub enum DiscardMode {
 /// Example usage:
 /// ```
 /// use std::io::IoSlice;
-/// use x11rb::connection::{BufWithFds, RequestConnection, SequenceNumber, compute_length_field};
+/// use x11rb::connection::{BufWithFds, RequestConnection, compute_length_field};
 /// use x11rb::cookie::{Cookie, CookieWithFds, VoidCookie};
 /// use x11rb::errors::{ParseError, ConnectionError};
 /// use x11rb::utils::RawFdContainer;
 /// use x11rb::x11_utils::{ExtensionInformation, TryParse, TryParseFd};
+/// use x11rb_protocol::SequenceNumber;
 /// # use x11rb::connection::ReplyOrError;
 ///
 /// struct MyConnection();
@@ -414,7 +397,7 @@ pub enum DiscardMode {
 ///     // [snip, other functions here]
 ///     # fn discard_reply(&self, sequence: SequenceNumber,
 ///     #                  kind: x11rb::connection::RequestKind,
-///     #                  mode: x11rb::connection::DiscardMode) {
+///     #                  mode: x11rb_protocol::DiscardMode) {
 ///     #    unimplemented!()
 ///     # }
 ///     # fn prefetch_extension_information(
