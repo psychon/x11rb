@@ -6,7 +6,7 @@ mod test {
 
     use x11rb::connection::{
         BufWithFds, Connection, DiscardMode, RawEventAndSeqNumber, ReplyOrError, RequestConnection,
-        RequestKind, SequenceNumber,
+        RequestKind,
     };
     use x11rb::cookie::{Cookie, CookieWithFds, VoidCookie};
     use x11rb::errors::{ConnectionError, ParseError, ReplyOrIdError};
@@ -15,6 +15,7 @@ mod test {
     use x11rb::resource_manager::Database;
     use x11rb::utils::RawFdContainer;
     use x11rb::x11_utils::{ExtensionInformation, Serialize, TryParse, TryParseFd, X11Error};
+    use x11rb_protocol::SequenceNumber;
 
     // Most tests in here are based on [1], which is: Copyright © 2016 Ingo Bürk
     // [1]: https://github.com/Airblader/xcb-util-xrm/blob/master/tests/tests_database.c
