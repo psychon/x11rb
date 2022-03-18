@@ -247,10 +247,13 @@ impl<S: Stream> RustConnection<S> {
             length[1],
         ];
 
-        let seqno = inner.inner
+        let seqno = inner
+            .inner
             .send_request(ReplyFdKind::ReplyWithoutFDs)
             .expect("Sending a HasResponse request should not be blocked by syncs");
-        inner.inner.discard_reply(seqno, DiscardMode::DiscardReplyAndError);
+        inner
+            .inner
+            .discard_reply(seqno, DiscardMode::DiscardReplyAndError);
         let inner = self.write_all_vectored(inner, &[IoSlice::new(&request)], Vec::new())?;
 
         Ok(inner)
@@ -269,10 +272,14 @@ impl<S: Stream> RustConnection<S> {
             self.stream.poll(PollMode::ReadAndWritable)?;
             let write_result = if !partial_buf.is_empty() {
                 // "inner" is held, passed into this function, so this should never be held
-                inner.write_buffer.write(&self.stream, partial_buf, &mut fds)
+                inner
+                    .write_buffer
+                    .write(&self.stream, partial_buf, &mut fds)
             } else {
                 // same as above
-                inner.write_buffer.write_vectored(&self.stream, bufs, &mut fds)
+                inner
+                    .write_buffer
+                    .write_vectored(&self.stream, bufs, &mut fds)
             };
             match write_result {
                 Ok(0) => {
@@ -481,7 +488,11 @@ impl<S: Stream> RequestConnection for RustConnection<S> {
     }
 
     fn discard_reply(&self, sequence: SequenceNumber, _kind: RequestKind, mode: DiscardMode) {
-        self.inner.lock().unwrap().inner.discard_reply(sequence, mode);
+        self.inner
+            .lock()
+            .unwrap()
+            .inner
+            .discard_reply(sequence, mode);
     }
 
     fn prefetch_extension_information(
