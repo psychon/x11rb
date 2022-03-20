@@ -66,6 +66,7 @@ pub(crate) fn generate(module: &xcbgen::defs::Module) -> Vec<Generated> {
         outln!(out, "Ok((reply.into(), remaining))");
     });
     outln!(main_proto_out, "}}");
+    outln!(main_proto_out, "#[allow(dead_code)]");
     outln!(main_proto_out, "fn parse_reply_fds<'a, R: ReplyFDsRequest>(bytes: &'a [u8], fds: &mut Vec<RawFdContainer>) -> Result<(Reply, &'a [u8]), ParseError> {{");
     main_proto_out.indented(|out| {
         outln!(

@@ -22,6 +22,7 @@ fn parse_reply<'a, R: ReplyRequest>(bytes: &'a [u8], _: &mut Vec<RawFdContainer>
     let (reply, remaining) = R::Reply::try_parse(bytes)?;
     Ok((reply.into(), remaining))
 }
+#[allow(dead_code)]
 fn parse_reply_fds<'a, R: ReplyFDsRequest>(bytes: &'a [u8], fds: &mut Vec<RawFdContainer>) -> Result<(Reply, &'a [u8]), ParseError> {
     let (reply, remaining) = R::Reply::try_parse_fd(bytes, fds)?;
     Ok((reply.into(), remaining))
