@@ -1263,8 +1263,6 @@ impl QueryExtensionRequest {
     }
 }
 impl Request for QueryExtensionRequest {
-    type Reply = QueryExtensionReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -1274,7 +1272,9 @@ impl Request for QueryExtensionRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for QueryExtensionRequest {}
+impl crate::x11_utils::ReplyRequest for QueryExtensionRequest {
+    type Reply = QueryExtensionReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryExtensionReply {
@@ -1343,8 +1343,6 @@ impl QueryAdaptorsRequest {
     }
 }
 impl Request for QueryAdaptorsRequest {
-    type Reply = QueryAdaptorsReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -1354,7 +1352,9 @@ impl Request for QueryAdaptorsRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for QueryAdaptorsRequest {}
+impl crate::x11_utils::ReplyRequest for QueryAdaptorsRequest {
+    type Reply = QueryAdaptorsReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryAdaptorsReply {
@@ -1438,8 +1438,6 @@ impl QueryEncodingsRequest {
     }
 }
 impl Request for QueryEncodingsRequest {
-    type Reply = QueryEncodingsReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -1449,7 +1447,9 @@ impl Request for QueryEncodingsRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for QueryEncodingsRequest {}
+impl crate::x11_utils::ReplyRequest for QueryEncodingsRequest {
+    type Reply = QueryEncodingsReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryEncodingsReply {
@@ -1541,8 +1541,6 @@ impl GrabPortRequest {
     }
 }
 impl Request for GrabPortRequest {
-    type Reply = GrabPortReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -1552,7 +1550,9 @@ impl Request for GrabPortRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GrabPortRequest {}
+impl crate::x11_utils::ReplyRequest for GrabPortRequest {
+    type Reply = GrabPortReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GrabPortReply {
@@ -1627,8 +1627,6 @@ impl UngrabPortRequest {
     }
 }
 impl Request for UngrabPortRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -1638,7 +1636,8 @@ impl Request for UngrabPortRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for UngrabPortRequest {}
+impl crate::x11_utils::VoidRequest for UngrabPortRequest {
+}
 
 /// Opcode for the PutVideo request
 pub const PUT_VIDEO_REQUEST: u8 = 5;
@@ -1744,8 +1743,6 @@ impl PutVideoRequest {
     }
 }
 impl Request for PutVideoRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -1755,7 +1752,8 @@ impl Request for PutVideoRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for PutVideoRequest {}
+impl crate::x11_utils::VoidRequest for PutVideoRequest {
+}
 
 /// Opcode for the PutStill request
 pub const PUT_STILL_REQUEST: u8 = 6;
@@ -1861,8 +1859,6 @@ impl PutStillRequest {
     }
 }
 impl Request for PutStillRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -1872,7 +1868,8 @@ impl Request for PutStillRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for PutStillRequest {}
+impl crate::x11_utils::VoidRequest for PutStillRequest {
+}
 
 /// Opcode for the GetVideo request
 pub const GET_VIDEO_REQUEST: u8 = 7;
@@ -1978,8 +1975,6 @@ impl GetVideoRequest {
     }
 }
 impl Request for GetVideoRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -1989,7 +1984,8 @@ impl Request for GetVideoRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for GetVideoRequest {}
+impl crate::x11_utils::VoidRequest for GetVideoRequest {
+}
 
 /// Opcode for the GetStill request
 pub const GET_STILL_REQUEST: u8 = 8;
@@ -2095,8 +2091,6 @@ impl GetStillRequest {
     }
 }
 impl Request for GetStillRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -2106,7 +2100,8 @@ impl Request for GetStillRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for GetStillRequest {}
+impl crate::x11_utils::VoidRequest for GetStillRequest {
+}
 
 /// Opcode for the StopVideo request
 pub const STOP_VIDEO_REQUEST: u8 = 9;
@@ -2156,8 +2151,6 @@ impl StopVideoRequest {
     }
 }
 impl Request for StopVideoRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -2167,7 +2160,8 @@ impl Request for StopVideoRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for StopVideoRequest {}
+impl crate::x11_utils::VoidRequest for StopVideoRequest {
+}
 
 /// Opcode for the SelectVideoNotify request
 pub const SELECT_VIDEO_NOTIFY_REQUEST: u8 = 10;
@@ -2218,8 +2212,6 @@ impl SelectVideoNotifyRequest {
     }
 }
 impl Request for SelectVideoNotifyRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -2229,7 +2221,8 @@ impl Request for SelectVideoNotifyRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for SelectVideoNotifyRequest {}
+impl crate::x11_utils::VoidRequest for SelectVideoNotifyRequest {
+}
 
 /// Opcode for the SelectPortNotify request
 pub const SELECT_PORT_NOTIFY_REQUEST: u8 = 11;
@@ -2280,8 +2273,6 @@ impl SelectPortNotifyRequest {
     }
 }
 impl Request for SelectPortNotifyRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -2291,7 +2282,8 @@ impl Request for SelectPortNotifyRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for SelectPortNotifyRequest {}
+impl crate::x11_utils::VoidRequest for SelectPortNotifyRequest {
+}
 
 /// Opcode for the QueryBestSize request
 pub const QUERY_BEST_SIZE_REQUEST: u8 = 12;
@@ -2366,8 +2358,6 @@ impl QueryBestSizeRequest {
     }
 }
 impl Request for QueryBestSizeRequest {
-    type Reply = QueryBestSizeReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -2377,7 +2367,9 @@ impl Request for QueryBestSizeRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for QueryBestSizeRequest {}
+impl crate::x11_utils::ReplyRequest for QueryBestSizeRequest {
+    type Reply = QueryBestSizeReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryBestSizeReply {
@@ -2462,8 +2454,6 @@ impl SetPortAttributeRequest {
     }
 }
 impl Request for SetPortAttributeRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -2473,7 +2463,8 @@ impl Request for SetPortAttributeRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for SetPortAttributeRequest {}
+impl crate::x11_utils::VoidRequest for SetPortAttributeRequest {
+}
 
 /// Opcode for the GetPortAttribute request
 pub const GET_PORT_ATTRIBUTE_REQUEST: u8 = 14;
@@ -2523,8 +2514,6 @@ impl GetPortAttributeRequest {
     }
 }
 impl Request for GetPortAttributeRequest {
-    type Reply = GetPortAttributeReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -2534,7 +2523,9 @@ impl Request for GetPortAttributeRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetPortAttributeRequest {}
+impl crate::x11_utils::ReplyRequest for GetPortAttributeRequest {
+    type Reply = GetPortAttributeReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetPortAttributeReply {
@@ -2601,8 +2592,6 @@ impl QueryPortAttributesRequest {
     }
 }
 impl Request for QueryPortAttributesRequest {
-    type Reply = QueryPortAttributesReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -2612,7 +2601,9 @@ impl Request for QueryPortAttributesRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for QueryPortAttributesRequest {}
+impl crate::x11_utils::ReplyRequest for QueryPortAttributesRequest {
+    type Reply = QueryPortAttributesReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryPortAttributesReply {
@@ -2698,8 +2689,6 @@ impl ListImageFormatsRequest {
     }
 }
 impl Request for ListImageFormatsRequest {
-    type Reply = ListImageFormatsReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -2709,7 +2698,9 @@ impl Request for ListImageFormatsRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for ListImageFormatsRequest {}
+impl crate::x11_utils::ReplyRequest for ListImageFormatsRequest {
+    type Reply = ListImageFormatsReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ListImageFormatsReply {
@@ -2813,8 +2804,6 @@ impl QueryImageAttributesRequest {
     }
 }
 impl Request for QueryImageAttributesRequest {
-    type Reply = QueryImageAttributesReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -2824,7 +2813,9 @@ impl Request for QueryImageAttributesRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for QueryImageAttributesRequest {}
+impl crate::x11_utils::ReplyRequest for QueryImageAttributesRequest {
+    type Reply = QueryImageAttributesReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryImageAttributesReply {
@@ -3026,8 +3017,6 @@ impl<'input> PutImageRequest<'input> {
     }
 }
 impl<'input> Request for PutImageRequest<'input> {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -3037,7 +3026,8 @@ impl<'input> Request for PutImageRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::VoidRequest for PutImageRequest<'input> {}
+impl<'input> crate::x11_utils::VoidRequest for PutImageRequest<'input> {
+}
 
 /// Opcode for the ShmPutImage request
 pub const SHM_PUT_IMAGE_REQUEST: u8 = 19;
@@ -3188,8 +3178,6 @@ impl ShmPutImageRequest {
     }
 }
 impl Request for ShmPutImageRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -3199,5 +3187,6 @@ impl Request for ShmPutImageRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for ShmPutImageRequest {}
+impl crate::x11_utils::VoidRequest for ShmPutImageRequest {
+}
 

@@ -34,14 +34,6 @@ fn major_opcode<Conn: RequestConnection + ?Sized>(conn: &Conn) -> Result<u8, Con
     Ok(info.major_opcode)
 }
 
-fn send_use_extension<'c, Conn>(req: UseExtensionRequest, conn: &'c Conn) -> Result<Cookie<'c, Conn, UseExtensionReply>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize(major_opcode(conn)?);
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    conn.send_request_with_reply(&slices, fds)
-}
 pub fn use_extension<Conn>(conn: &Conn, wanted_major: u16, wanted_minor: u16) -> Result<Cookie<'_, Conn, UseExtensionReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -50,17 +42,11 @@ where
         wanted_major,
         wanted_minor,
     };
-    send_use_extension(request0, conn)
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    conn.send_request_with_reply(&slices, fds)
 }
 
-fn send_select_events<'c, Conn>(req: SelectEventsRequest<'_>, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize(major_opcode(conn)?);
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    conn.send_request_without_reply(&slices, fds)
-}
 pub fn select_events<'c, 'input, Conn, A, B, C, D>(conn: &'c Conn, device_spec: DeviceSpec, clear: A, select_all: B, affect_map: C, map: D, details: &'input SelectEventsAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -81,17 +67,11 @@ where
         map,
         details: Cow::Borrowed(details),
     };
-    send_select_events(request0, conn)
-}
-
-fn send_bell<'c, Conn>(req: BellRequest, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize(major_opcode(conn)?);
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
+
 pub fn bell<Conn>(conn: &Conn, device_spec: DeviceSpec, bell_class: BellClassSpec, bell_id: IDSpec, percent: i8, force_sound: bool, event_only: bool, pitch: i16, duration: i16, name: xproto::Atom, window: xproto::Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -108,17 +88,11 @@ where
         name,
         window,
     };
-    send_bell(request0, conn)
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    conn.send_request_without_reply(&slices, fds)
 }
 
-fn send_get_state<'c, Conn>(req: GetStateRequest, conn: &'c Conn) -> Result<Cookie<'c, Conn, GetStateReply>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize(major_opcode(conn)?);
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    conn.send_request_with_reply(&slices, fds)
-}
 pub fn get_state<Conn>(conn: &Conn, device_spec: DeviceSpec) -> Result<Cookie<'_, Conn, GetStateReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -126,17 +100,11 @@ where
     let request0 = GetStateRequest {
         device_spec,
     };
-    send_get_state(request0, conn)
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    conn.send_request_with_reply(&slices, fds)
 }
 
-fn send_latch_lock_state<'c, Conn>(req: LatchLockStateRequest, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize(major_opcode(conn)?);
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    conn.send_request_without_reply(&slices, fds)
-}
 pub fn latch_lock_state<Conn, A, B, C>(conn: &Conn, device_spec: DeviceSpec, affect_mod_locks: A, mod_locks: B, lock_group: bool, group_lock: Group, affect_mod_latches: C, latch_group: bool, group_latch: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -157,17 +125,11 @@ where
         latch_group,
         group_latch,
     };
-    send_latch_lock_state(request0, conn)
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    conn.send_request_without_reply(&slices, fds)
 }
 
-fn send_get_controls<'c, Conn>(req: GetControlsRequest, conn: &'c Conn) -> Result<Cookie<'c, Conn, GetControlsReply>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize(major_opcode(conn)?);
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    conn.send_request_with_reply(&slices, fds)
-}
 pub fn get_controls<Conn>(conn: &Conn, device_spec: DeviceSpec) -> Result<Cookie<'_, Conn, GetControlsReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -175,17 +137,11 @@ where
     let request0 = GetControlsRequest {
         device_spec,
     };
-    send_get_controls(request0, conn)
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    conn.send_request_with_reply(&slices, fds)
 }
 
-fn send_set_controls<'c, Conn>(req: SetControlsRequest<'_>, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize(major_opcode(conn)?);
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    conn.send_request_without_reply(&slices, fds)
-}
 pub fn set_controls<'c, 'input, Conn, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P>(conn: &'c Conn, device_spec: DeviceSpec, affect_internal_real_mods: A, internal_real_mods: B, affect_ignore_lock_real_mods: C, ignore_lock_real_mods: D, affect_internal_virtual_mods: E, internal_virtual_mods: F, affect_ignore_lock_virtual_mods: G, ignore_lock_virtual_mods: H, mouse_keys_dflt_btn: u8, groups_wrap: u8, access_x_options: I, affect_enabled_controls: J, enabled_controls: K, change_controls: L, repeat_delay: u16, repeat_interval: u16, slow_keys_delay: u16, debounce_delay: u16, mouse_keys_delay: u16, mouse_keys_interval: u16, mouse_keys_time_to_max: u16, mouse_keys_max_speed: u16, mouse_keys_curve: i16, access_x_timeout: u16, access_x_timeout_mask: M, access_x_timeout_values: N, access_x_timeout_options_mask: O, access_x_timeout_options_values: P, per_key_repeat: &'input [u8; 32]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -254,17 +210,11 @@ where
         access_x_timeout_options_values,
         per_key_repeat: Cow::Borrowed(per_key_repeat),
     };
-    send_set_controls(request0, conn)
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    conn.send_request_without_reply(&slices, fds)
 }
 
-fn send_get_map<'c, Conn>(req: GetMapRequest, conn: &'c Conn) -> Result<Cookie<'c, Conn, GetMapReply>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize(major_opcode(conn)?);
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    conn.send_request_with_reply(&slices, fds)
-}
 pub fn get_map<Conn, A, B, C>(conn: &Conn, device_spec: DeviceSpec, full: A, partial: B, first_type: u8, n_types: u8, first_key_sym: xproto::Keycode, n_key_syms: u8, first_key_action: xproto::Keycode, n_key_actions: u8, first_key_behavior: xproto::Keycode, n_key_behaviors: u8, virtual_mods: C, first_key_explicit: xproto::Keycode, n_key_explicit: u8, first_mod_map_key: xproto::Keycode, n_mod_map_keys: u8, first_v_mod_map_key: xproto::Keycode, n_v_mod_map_keys: u8) -> Result<Cookie<'_, Conn, GetMapReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -295,17 +245,11 @@ where
         first_v_mod_map_key,
         n_v_mod_map_keys,
     };
-    send_get_map(request0, conn)
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    conn.send_request_with_reply(&slices, fds)
 }
 
-fn send_set_map<'c, Conn>(req: SetMapRequest<'_>, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize(major_opcode(conn)?);
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    conn.send_request_without_reply(&slices, fds)
-}
 pub fn set_map<'c, 'input, Conn, A, B>(conn: &'c Conn, device_spec: DeviceSpec, flags: A, min_key_code: xproto::Keycode, max_key_code: xproto::Keycode, first_type: u8, n_types: u8, first_key_sym: xproto::Keycode, n_key_syms: u8, total_syms: u16, first_key_action: xproto::Keycode, n_key_actions: u8, total_actions: u16, first_key_behavior: xproto::Keycode, n_key_behaviors: u8, total_key_behaviors: u8, first_key_explicit: xproto::Keycode, n_key_explicit: u8, total_key_explicit: u8, first_mod_map_key: xproto::Keycode, n_mod_map_keys: u8, total_mod_map_keys: u8, first_v_mod_map_key: xproto::Keycode, n_v_mod_map_keys: u8, total_v_mod_map_keys: u8, virtual_mods: B, values: &'input SetMapAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -342,17 +286,11 @@ where
         virtual_mods,
         values: Cow::Borrowed(values),
     };
-    send_set_map(request0, conn)
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    conn.send_request_without_reply(&slices, fds)
 }
 
-fn send_get_compat_map<'c, Conn>(req: GetCompatMapRequest, conn: &'c Conn) -> Result<Cookie<'c, Conn, GetCompatMapReply>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize(major_opcode(conn)?);
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    conn.send_request_with_reply(&slices, fds)
-}
 pub fn get_compat_map<Conn, A>(conn: &Conn, device_spec: DeviceSpec, groups: A, get_all_si: bool, first_si: u16, n_si: u16) -> Result<Cookie<'_, Conn, GetCompatMapReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -366,17 +304,11 @@ where
         first_si,
         n_si,
     };
-    send_get_compat_map(request0, conn)
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    conn.send_request_with_reply(&slices, fds)
 }
 
-fn send_set_compat_map<'c, Conn>(req: SetCompatMapRequest<'_>, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize(major_opcode(conn)?);
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    conn.send_request_without_reply(&slices, fds)
-}
 pub fn set_compat_map<'c, 'input, Conn, A>(conn: &'c Conn, device_spec: DeviceSpec, recompute_actions: bool, truncate_si: bool, groups: A, first_si: u16, si: &'input [SymInterpret], group_maps: &'input [ModDef]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -392,17 +324,11 @@ where
         si: Cow::Borrowed(si),
         group_maps: Cow::Borrowed(group_maps),
     };
-    send_set_compat_map(request0, conn)
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    conn.send_request_without_reply(&slices, fds)
 }
 
-fn send_get_indicator_state<'c, Conn>(req: GetIndicatorStateRequest, conn: &'c Conn) -> Result<Cookie<'c, Conn, GetIndicatorStateReply>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize(major_opcode(conn)?);
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    conn.send_request_with_reply(&slices, fds)
-}
 pub fn get_indicator_state<Conn>(conn: &Conn, device_spec: DeviceSpec) -> Result<Cookie<'_, Conn, GetIndicatorStateReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -410,17 +336,11 @@ where
     let request0 = GetIndicatorStateRequest {
         device_spec,
     };
-    send_get_indicator_state(request0, conn)
-}
-
-fn send_get_indicator_map<'c, Conn>(req: GetIndicatorMapRequest, conn: &'c Conn) -> Result<Cookie<'c, Conn, GetIndicatorMapReply>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize(major_opcode(conn)?);
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_with_reply(&slices, fds)
 }
+
 pub fn get_indicator_map<Conn>(conn: &Conn, device_spec: DeviceSpec, which: u32) -> Result<Cookie<'_, Conn, GetIndicatorMapReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -429,17 +349,11 @@ where
         device_spec,
         which,
     };
-    send_get_indicator_map(request0, conn)
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    conn.send_request_with_reply(&slices, fds)
 }
 
-fn send_set_indicator_map<'c, Conn>(req: SetIndicatorMapRequest<'_>, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize(major_opcode(conn)?);
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    conn.send_request_without_reply(&slices, fds)
-}
 pub fn set_indicator_map<'c, 'input, Conn>(conn: &'c Conn, device_spec: DeviceSpec, which: u32, maps: &'input [IndicatorMap]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -449,17 +363,11 @@ where
         which,
         maps: Cow::Borrowed(maps),
     };
-    send_set_indicator_map(request0, conn)
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    conn.send_request_without_reply(&slices, fds)
 }
 
-fn send_get_named_indicator<'c, Conn>(req: GetNamedIndicatorRequest, conn: &'c Conn) -> Result<Cookie<'c, Conn, GetNamedIndicatorReply>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize(major_opcode(conn)?);
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    conn.send_request_with_reply(&slices, fds)
-}
 pub fn get_named_indicator<Conn, A>(conn: &Conn, device_spec: DeviceSpec, led_class: LedClass, led_id: A, indicator: xproto::Atom) -> Result<Cookie<'_, Conn, GetNamedIndicatorReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -472,17 +380,11 @@ where
         led_id,
         indicator,
     };
-    send_get_named_indicator(request0, conn)
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    conn.send_request_with_reply(&slices, fds)
 }
 
-fn send_set_named_indicator<'c, Conn>(req: SetNamedIndicatorRequest, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize(major_opcode(conn)?);
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    conn.send_request_without_reply(&slices, fds)
-}
 pub fn set_named_indicator<Conn, A, B, C, D, E, F, G, H>(conn: &Conn, device_spec: DeviceSpec, led_class: LedClass, led_id: A, indicator: xproto::Atom, set_state: bool, on: bool, set_map: bool, create_map: bool, map_flags: B, map_which_groups: C, map_groups: D, map_which_mods: E, map_real_mods: F, map_vmods: G, map_ctrls: H) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -520,17 +422,11 @@ where
         map_vmods,
         map_ctrls,
     };
-    send_set_named_indicator(request0, conn)
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    conn.send_request_without_reply(&slices, fds)
 }
 
-fn send_get_names<'c, Conn>(req: GetNamesRequest, conn: &'c Conn) -> Result<Cookie<'c, Conn, GetNamesReply>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize(major_opcode(conn)?);
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    conn.send_request_with_reply(&slices, fds)
-}
 pub fn get_names<Conn, A>(conn: &Conn, device_spec: DeviceSpec, which: A) -> Result<Cookie<'_, Conn, GetNamesReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -541,17 +437,11 @@ where
         device_spec,
         which,
     };
-    send_get_names(request0, conn)
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    conn.send_request_with_reply(&slices, fds)
 }
 
-fn send_set_names<'c, Conn>(req: SetNamesRequest<'_>, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize(major_opcode(conn)?);
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    conn.send_request_without_reply(&slices, fds)
-}
 pub fn set_names<'c, 'input, Conn, A, B>(conn: &'c Conn, device_spec: DeviceSpec, virtual_mods: A, first_type: u8, n_types: u8, first_kt_levelt: u8, n_kt_levels: u8, indicators: u32, group_names: B, n_radio_groups: u8, first_key: xproto::Keycode, n_keys: u8, n_key_aliases: u8, total_kt_level_names: u16, values: &'input SetNamesAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -576,17 +466,11 @@ where
         total_kt_level_names,
         values: Cow::Borrowed(values),
     };
-    send_set_names(request0, conn)
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    conn.send_request_without_reply(&slices, fds)
 }
 
-fn send_per_client_flags<'c, Conn>(req: PerClientFlagsRequest, conn: &'c Conn) -> Result<Cookie<'c, Conn, PerClientFlagsReply>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize(major_opcode(conn)?);
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    conn.send_request_with_reply(&slices, fds)
-}
 pub fn per_client_flags<Conn, A, B, C, D, E>(conn: &Conn, device_spec: DeviceSpec, change: A, value: B, ctrls_to_change: C, auto_ctrls: D, auto_ctrls_values: E) -> Result<Cookie<'_, Conn, PerClientFlagsReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -609,17 +493,11 @@ where
         auto_ctrls,
         auto_ctrls_values,
     };
-    send_per_client_flags(request0, conn)
-}
-
-fn send_list_components<'c, Conn>(req: ListComponentsRequest, conn: &'c Conn) -> Result<Cookie<'c, Conn, ListComponentsReply>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize(major_opcode(conn)?);
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_with_reply(&slices, fds)
 }
+
 pub fn list_components<Conn>(conn: &Conn, device_spec: DeviceSpec, max_names: u16) -> Result<Cookie<'_, Conn, ListComponentsReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -628,17 +506,11 @@ where
         device_spec,
         max_names,
     };
-    send_list_components(request0, conn)
-}
-
-fn send_get_kbd_by_name<'c, Conn>(req: GetKbdByNameRequest, conn: &'c Conn) -> Result<Cookie<'c, Conn, GetKbdByNameReply>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize(major_opcode(conn)?);
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_with_reply(&slices, fds)
 }
+
 pub fn get_kbd_by_name<Conn, A, B>(conn: &Conn, device_spec: DeviceSpec, need: A, want: B, load: bool) -> Result<Cookie<'_, Conn, GetKbdByNameReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -653,17 +525,11 @@ where
         want,
         load,
     };
-    send_get_kbd_by_name(request0, conn)
-}
-
-fn send_get_device_info<'c, Conn>(req: GetDeviceInfoRequest, conn: &'c Conn) -> Result<Cookie<'c, Conn, GetDeviceInfoReply>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize(major_opcode(conn)?);
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_with_reply(&slices, fds)
 }
+
 pub fn get_device_info<Conn, A, B>(conn: &Conn, device_spec: DeviceSpec, wanted: A, all_buttons: bool, first_button: u8, n_buttons: u8, led_class: LedClass, led_id: B) -> Result<Cookie<'_, Conn, GetDeviceInfoReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -681,17 +547,11 @@ where
         led_class,
         led_id,
     };
-    send_get_device_info(request0, conn)
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    conn.send_request_with_reply(&slices, fds)
 }
 
-fn send_set_device_info<'c, Conn>(req: SetDeviceInfoRequest<'_>, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize(major_opcode(conn)?);
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    conn.send_request_without_reply(&slices, fds)
-}
 pub fn set_device_info<'c, 'input, Conn, A>(conn: &'c Conn, device_spec: DeviceSpec, first_btn: u8, change: A, btn_actions: &'input [Action], leds: &'input [DeviceLedInfo]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -705,17 +565,11 @@ where
         btn_actions: Cow::Borrowed(btn_actions),
         leds: Cow::Borrowed(leds),
     };
-    send_set_device_info(request0, conn)
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    conn.send_request_without_reply(&slices, fds)
 }
 
-fn send_set_debugging_flags<'c, Conn>(req: SetDebuggingFlagsRequest<'_>, conn: &'c Conn) -> Result<Cookie<'c, Conn, SetDebuggingFlagsReply>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize(major_opcode(conn)?);
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    conn.send_request_with_reply(&slices, fds)
-}
 pub fn set_debugging_flags<'c, 'input, Conn>(conn: &'c Conn, affect_flags: u32, flags: u32, affect_ctrls: u32, ctrls: u32, message: &'input [String8]) -> Result<Cookie<'c, Conn, SetDebuggingFlagsReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -727,7 +581,9 @@ where
         ctrls,
         message: Cow::Borrowed(message),
     };
-    send_set_debugging_flags(request0, conn)
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    conn.send_request_with_reply(&slices, fds)
 }
 
 /// Extension trait defining the requests of this extension.

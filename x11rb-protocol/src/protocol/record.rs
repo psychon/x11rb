@@ -425,8 +425,6 @@ impl QueryVersionRequest {
     }
 }
 impl Request for QueryVersionRequest {
-    type Reply = QueryVersionReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -436,7 +434,9 @@ impl Request for QueryVersionRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for QueryVersionRequest {}
+impl crate::x11_utils::ReplyRequest for QueryVersionRequest {
+    type Reply = QueryVersionReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionReply {
@@ -549,8 +549,6 @@ impl<'input> CreateContextRequest<'input> {
     }
 }
 impl<'input> Request for CreateContextRequest<'input> {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -560,7 +558,8 @@ impl<'input> Request for CreateContextRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::VoidRequest for CreateContextRequest<'input> {}
+impl<'input> crate::x11_utils::VoidRequest for CreateContextRequest<'input> {
+}
 
 /// Opcode for the RegisterClients request
 pub const REGISTER_CLIENTS_REQUEST: u8 = 2;
@@ -646,8 +645,6 @@ impl<'input> RegisterClientsRequest<'input> {
     }
 }
 impl<'input> Request for RegisterClientsRequest<'input> {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -657,7 +654,8 @@ impl<'input> Request for RegisterClientsRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::VoidRequest for RegisterClientsRequest<'input> {}
+impl<'input> crate::x11_utils::VoidRequest for RegisterClientsRequest<'input> {
+}
 
 /// Opcode for the UnregisterClients request
 pub const UNREGISTER_CLIENTS_REQUEST: u8 = 3;
@@ -720,8 +718,6 @@ impl<'input> UnregisterClientsRequest<'input> {
     }
 }
 impl<'input> Request for UnregisterClientsRequest<'input> {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -731,7 +727,8 @@ impl<'input> Request for UnregisterClientsRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::VoidRequest for UnregisterClientsRequest<'input> {}
+impl<'input> crate::x11_utils::VoidRequest for UnregisterClientsRequest<'input> {
+}
 
 /// Opcode for the GetContext request
 pub const GET_CONTEXT_REQUEST: u8 = 4;
@@ -773,8 +770,6 @@ impl GetContextRequest {
     }
 }
 impl Request for GetContextRequest {
-    type Reply = GetContextReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -784,7 +779,9 @@ impl Request for GetContextRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetContextRequest {}
+impl crate::x11_utils::ReplyRequest for GetContextRequest {
+    type Reply = GetContextReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetContextReply {
@@ -872,8 +869,6 @@ impl EnableContextRequest {
     }
 }
 impl Request for EnableContextRequest {
-    type Reply = EnableContextReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -883,7 +878,9 @@ impl Request for EnableContextRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for EnableContextRequest {}
+impl crate::x11_utils::ReplyRequest for EnableContextRequest {
+    type Reply = EnableContextReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct EnableContextReply {
@@ -979,8 +976,6 @@ impl DisableContextRequest {
     }
 }
 impl Request for DisableContextRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -990,7 +985,8 @@ impl Request for DisableContextRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for DisableContextRequest {}
+impl crate::x11_utils::VoidRequest for DisableContextRequest {
+}
 
 /// Opcode for the FreeContext request
 pub const FREE_CONTEXT_REQUEST: u8 = 7;
@@ -1032,8 +1028,6 @@ impl FreeContextRequest {
     }
 }
 impl Request for FreeContextRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -1043,5 +1037,6 @@ impl Request for FreeContextRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for FreeContextRequest {}
+impl crate::x11_utils::VoidRequest for FreeContextRequest {
+}
 

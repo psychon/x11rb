@@ -176,7 +176,6 @@ pub(super) fn generate_request(
         &deducible_fields,
         &gathered,
         proto_out,
-        x11rb_out,
     );
     let ns_prefix = get_ns_name_prefix(generator.ns);
     let lifetime_block = if gathered.needs_lifetime {
@@ -243,10 +242,15 @@ pub(super) fn generate_request(
             header = generator.ns.header,
         ));
         enum_cases.reply_parse_cases.push(format!(
-            "Request::{ns_prefix}{name}(_) => Some({header}::{name}Request::parse_reply),",
+            "Request::{ns_prefix}{name}(_) => Some({func}::<{header}::{name}Request>),",
             ns_prefix = ns_prefix,
             name = name,
             header = generator.ns.header,
+            func = if gathered.reply_has_fds {
+                "parse_reply_fds"
+            } else {
+                "parse_reply"
+            },
         ));
         enum_cases.reply_from_cases.push(format!(
             r#"impl From<{header}::{name}Reply> for Reply {{
@@ -384,7 +388,6 @@ fn emit_request_struct(
     deducible_fields: &HashMap<String, DeducibleField>,
     gathered: &GatheredRequestFields,
     out: &mut Output,
-    x11rb_out: &mut Output,
 ) {
     let ns = request_def.namespace.upgrade().unwrap();
     let is_xproto = ns.header == "xproto";
@@ -868,69 +871,6 @@ fn emit_request_struct(
         });
         outln!(out, "}}");
 
-        // Sending method
-        let is_xproto = ns.header == "xproto";
-        let is_list_fonts_with_info = request_def.name == "ListFontsWithInfo" && is_xproto;
-        let is_record_enable_context = request_def.name == "EnableContext" && ns.header == "record";
-        let ret_type = if is_list_fonts_with_info || is_record_enable_context {
-            assert!(request_def.reply.is_some());
-            match (is_list_fonts_with_info, is_record_enable_context) {
-                (true, _) => "ListFontsWithInfoCookie<'c, Conn>".to_string(),
-                (_, true) => "RecordEnableContextCookie<'c, Conn>".to_string(),
-                _ => unreachable!(),
-            }
-        } else {
-            match (request_def.reply.is_some(), gathered.reply_has_fds) {
-                (false, _) => "VoidCookie<'c, Conn>".to_string(),
-                (true, false) => format!("Cookie<'c, Conn, {}Reply>", name),
-                (true, true) => format!("CookieWithFds<'c, Conn, {}Reply>", name),
-            }
-        };
-        outln!(
-            x11rb_out,
-            "fn send_{lower_name}<'c, Conn>(req: {name}Request{lifetime}, conn: &'c Conn) -> Result<{ret_type}, ConnectionError>",
-            ret_type=ret_type,
-            name=name,
-            lower_name=super::super::camel_case_to_lower_snake(name),
-            lifetime=if gathered.needs_lifetime { "<'_>" } else { "" },
-        );
-        outln!(x11rb_out, "where");
-        outln!(x11rb_out.indent(), "Conn: RequestConnection + ?Sized,");
-        outln!(x11rb_out, "{{");
-        x11rb_out.indented(|x11rb_out| {
-            outln!(
-                x11rb_out,
-                "let (bytes, fds) = req.serialize({});",
-                if is_xproto { "" } else { "major_opcode(conn)?" }
-            );
-            outln!(
-                x11rb_out,
-                "let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();"
-            );
-
-            if is_list_fonts_with_info || is_record_enable_context {
-                let cookie = match (is_list_fonts_with_info, is_record_enable_context) {
-                    (true, _) => "ListFontsWithInfoCookie",
-                    (_, true) => "RecordEnableContextCookie",
-                    _ => unreachable!(),
-                };
-                outln!(
-                    x11rb_out,
-                    "Ok({}::new(conn.send_request_with_reply(&slices, fds)?))",
-                    cookie,
-                )
-            } else if request_def.reply.is_some() {
-                if gathered.reply_has_fds {
-                    outln!(x11rb_out, "conn.send_request_with_reply_with_fds(&slices, fds)");
-                } else {
-                    outln!(x11rb_out, "conn.send_request_with_reply(&slices, fds)",);
-                }
-            } else {
-                outln!(x11rb_out, "conn.send_request_without_reply(&slices, fds)",);
-            }
-        });
-        outln!(x11rb_out, "}}");
-
         // Parsing implementation.
         outln!(
             out,
@@ -1100,13 +1040,6 @@ fn emit_request_struct(
         name = name
     );
     out.indented(|out| {
-        if request_def.reply.is_some() {
-            outln!(out, "type Reply = {}Reply;", name);
-        } else {
-            outln!(out, "type Reply = ();");
-        }
-
-        outln!(out, "");
         if is_xproto {
             outln!(out, "const EXTENSION_NAME: Option<&'static str> = None;");
         } else {
@@ -1154,11 +1087,15 @@ fn emit_request_struct(
     };
     outln!(
         out,
-        "impl{lifetime} {request_trait} for {name}Request{lifetime} {{}}",
+        "impl{lifetime} {request_trait} for {name}Request{lifetime} {{",
         name = name,
         request_trait = request_trait,
         lifetime = struct_lifetime_block,
     );
+    if request_def.reply.is_some() {
+        outln!(out.indent(), "type Reply = {}Reply;", name);
+    };
+    outln!(out, "}}");
 }
 
 fn emit_request_function(
@@ -1170,8 +1107,9 @@ fn emit_request_function(
     out: &mut Output,
 ) {
     let ns = request_def.namespace.upgrade().unwrap();
-    let is_list_fonts_with_info = request_def.name == "ListFontsWithInfo" && ns.header == "xproto";
-    let is_send_event = request_def.name == "SendEvent" && ns.header == "xproto";
+    let is_xproto = ns.header == "xproto";
+    let is_list_fonts_with_info = request_def.name == "ListFontsWithInfo" && is_xproto;
+    let is_send_event = request_def.name == "SendEvent" && is_xproto;
     let is_record_enable_context = request_def.name == "EnableContext" && ns.header == "record";
 
     let needs_lifetime = gathered.needs_lifetime && !is_send_event;
@@ -1188,20 +1126,22 @@ fn emit_request_function(
     }
 
     let ret_lifetime = if needs_lifetime { "'c" } else { "'_" };
-    let ret_type = if is_list_fonts_with_info || is_record_enable_context {
+    let (ret_type, special_cookie) = if is_list_fonts_with_info || is_record_enable_context {
         assert!(request_def.reply.is_some());
         assert!(!gathered.reply_has_fds);
-        if is_list_fonts_with_info {
-            format!("ListFontsWithInfoCookie<{}, Conn>", ret_lifetime)
+        let cookie = if is_list_fonts_with_info {
+            "ListFontsWithInfoCookie"
         } else {
-            format!("RecordEnableContextCookie<{}, Conn>", ret_lifetime)
-        }
+            "RecordEnableContextCookie"
+        };
+        (format!("{}<{}, Conn>", cookie, ret_lifetime), Some(cookie))
     } else {
-        match (request_def.reply.is_some(), gathered.reply_has_fds) {
+        let ret_type = match (request_def.reply.is_some(), gathered.reply_has_fds) {
             (false, _) => format!("VoidCookie<{}, Conn>", ret_lifetime),
             (true, false) => format!("Cookie<{}, Conn, {}Reply>", ret_lifetime, name),
             (true, true) => format!("CookieWithFds<{}, Conn, {}Reply>", ret_lifetime, name),
-        }
+        };
+        (ret_type, None)
     };
 
     let mut args = String::new();
@@ -1260,9 +1200,29 @@ fn emit_request_function(
 
         outln!(
             out,
-            "send_{}(request0, conn)",
-            super::super::camel_case_to_lower_snake(name)
-        )
+            "let (bytes, fds) = request0.serialize({});",
+            if is_xproto { "" } else { "major_opcode(conn)?" }
+        );
+        outln!(
+            out,
+            "let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();"
+        );
+
+        if let Some(cookie) = special_cookie {
+            outln!(
+                out,
+                "Ok({}::new(conn.send_request_with_reply(&slices, fds)?))",
+                cookie,
+            )
+        } else if request_def.reply.is_some() {
+            if gathered.reply_has_fds {
+                outln!(out, "conn.send_request_with_reply_with_fds(&slices, fds)");
+            } else {
+                outln!(out, "conn.send_request_with_reply(&slices, fds)",);
+            }
+        } else {
+            outln!(out, "conn.send_request_without_reply(&slices, fds)",);
+        }
     });
     outln!(out, "}}");
 }

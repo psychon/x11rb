@@ -516,8 +516,6 @@ impl InitializeRequest {
     }
 }
 impl Request for InitializeRequest {
-    type Reply = InitializeReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -527,7 +525,9 @@ impl Request for InitializeRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for InitializeRequest {}
+impl crate::x11_utils::ReplyRequest for InitializeRequest {
+    type Reply = InitializeReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct InitializeReply {
@@ -588,8 +588,6 @@ impl ListSystemCountersRequest {
     }
 }
 impl Request for ListSystemCountersRequest {
-    type Reply = ListSystemCountersReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -599,7 +597,9 @@ impl Request for ListSystemCountersRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for ListSystemCountersRequest {}
+impl crate::x11_utils::ReplyRequest for ListSystemCountersRequest {
+    type Reply = ListSystemCountersReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ListSystemCountersReply {
@@ -695,8 +695,6 @@ impl CreateCounterRequest {
     }
 }
 impl Request for CreateCounterRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -706,7 +704,8 @@ impl Request for CreateCounterRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for CreateCounterRequest {}
+impl crate::x11_utils::VoidRequest for CreateCounterRequest {
+}
 
 /// Opcode for the DestroyCounter request
 pub const DESTROY_COUNTER_REQUEST: u8 = 6;
@@ -748,8 +747,6 @@ impl DestroyCounterRequest {
     }
 }
 impl Request for DestroyCounterRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -759,7 +756,8 @@ impl Request for DestroyCounterRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for DestroyCounterRequest {}
+impl crate::x11_utils::VoidRequest for DestroyCounterRequest {
+}
 
 /// Opcode for the QueryCounter request
 pub const QUERY_COUNTER_REQUEST: u8 = 5;
@@ -801,8 +799,6 @@ impl QueryCounterRequest {
     }
 }
 impl Request for QueryCounterRequest {
-    type Reply = QueryCounterReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -812,7 +808,9 @@ impl Request for QueryCounterRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for QueryCounterRequest {}
+impl crate::x11_utils::ReplyRequest for QueryCounterRequest {
+    type Reply = QueryCounterReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryCounterReply {
@@ -891,8 +889,6 @@ impl<'input> AwaitRequest<'input> {
     }
 }
 impl<'input> Request for AwaitRequest<'input> {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -902,7 +898,8 @@ impl<'input> Request for AwaitRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::VoidRequest for AwaitRequest<'input> {}
+impl<'input> crate::x11_utils::VoidRequest for AwaitRequest<'input> {
+}
 
 /// Opcode for the ChangeCounter request
 pub const CHANGE_COUNTER_REQUEST: u8 = 4;
@@ -956,8 +953,6 @@ impl ChangeCounterRequest {
     }
 }
 impl Request for ChangeCounterRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -967,7 +962,8 @@ impl Request for ChangeCounterRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for ChangeCounterRequest {}
+impl crate::x11_utils::VoidRequest for ChangeCounterRequest {
+}
 
 /// Opcode for the SetCounter request
 pub const SET_COUNTER_REQUEST: u8 = 3;
@@ -1021,8 +1017,6 @@ impl SetCounterRequest {
     }
 }
 impl Request for SetCounterRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -1032,7 +1026,8 @@ impl Request for SetCounterRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for SetCounterRequest {}
+impl crate::x11_utils::VoidRequest for SetCounterRequest {
+}
 
 /// Auxiliary and optional information for the `create_alarm` function
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -1259,8 +1254,6 @@ impl<'input> CreateAlarmRequest<'input> {
     }
 }
 impl<'input> Request for CreateAlarmRequest<'input> {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -1270,7 +1263,8 @@ impl<'input> Request for CreateAlarmRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::VoidRequest for CreateAlarmRequest<'input> {}
+impl<'input> crate::x11_utils::VoidRequest for CreateAlarmRequest<'input> {
+}
 
 /// Auxiliary and optional information for the `change_alarm` function
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -1497,8 +1491,6 @@ impl<'input> ChangeAlarmRequest<'input> {
     }
 }
 impl<'input> Request for ChangeAlarmRequest<'input> {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -1508,7 +1500,8 @@ impl<'input> Request for ChangeAlarmRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::VoidRequest for ChangeAlarmRequest<'input> {}
+impl<'input> crate::x11_utils::VoidRequest for ChangeAlarmRequest<'input> {
+}
 
 /// Opcode for the DestroyAlarm request
 pub const DESTROY_ALARM_REQUEST: u8 = 11;
@@ -1550,8 +1543,6 @@ impl DestroyAlarmRequest {
     }
 }
 impl Request for DestroyAlarmRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -1561,7 +1552,8 @@ impl Request for DestroyAlarmRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for DestroyAlarmRequest {}
+impl crate::x11_utils::VoidRequest for DestroyAlarmRequest {
+}
 
 /// Opcode for the QueryAlarm request
 pub const QUERY_ALARM_REQUEST: u8 = 10;
@@ -1603,8 +1595,6 @@ impl QueryAlarmRequest {
     }
 }
 impl Request for QueryAlarmRequest {
-    type Reply = QueryAlarmReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -1614,7 +1604,9 @@ impl Request for QueryAlarmRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for QueryAlarmRequest {}
+impl crate::x11_utils::ReplyRequest for QueryAlarmRequest {
+    type Reply = QueryAlarmReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryAlarmReply {
@@ -1697,8 +1689,6 @@ impl SetPriorityRequest {
     }
 }
 impl Request for SetPriorityRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -1708,7 +1698,8 @@ impl Request for SetPriorityRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for SetPriorityRequest {}
+impl crate::x11_utils::VoidRequest for SetPriorityRequest {
+}
 
 /// Opcode for the GetPriority request
 pub const GET_PRIORITY_REQUEST: u8 = 13;
@@ -1750,8 +1741,6 @@ impl GetPriorityRequest {
     }
 }
 impl Request for GetPriorityRequest {
-    type Reply = GetPriorityReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -1761,7 +1750,9 @@ impl Request for GetPriorityRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetPriorityRequest {}
+impl crate::x11_utils::ReplyRequest for GetPriorityRequest {
+    type Reply = GetPriorityReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetPriorityReply {
@@ -1844,8 +1835,6 @@ impl CreateFenceRequest {
     }
 }
 impl Request for CreateFenceRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -1855,7 +1844,8 @@ impl Request for CreateFenceRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for CreateFenceRequest {}
+impl crate::x11_utils::VoidRequest for CreateFenceRequest {
+}
 
 /// Opcode for the TriggerFence request
 pub const TRIGGER_FENCE_REQUEST: u8 = 15;
@@ -1897,8 +1887,6 @@ impl TriggerFenceRequest {
     }
 }
 impl Request for TriggerFenceRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -1908,7 +1896,8 @@ impl Request for TriggerFenceRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for TriggerFenceRequest {}
+impl crate::x11_utils::VoidRequest for TriggerFenceRequest {
+}
 
 /// Opcode for the ResetFence request
 pub const RESET_FENCE_REQUEST: u8 = 16;
@@ -1950,8 +1939,6 @@ impl ResetFenceRequest {
     }
 }
 impl Request for ResetFenceRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -1961,7 +1948,8 @@ impl Request for ResetFenceRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for ResetFenceRequest {}
+impl crate::x11_utils::VoidRequest for ResetFenceRequest {
+}
 
 /// Opcode for the DestroyFence request
 pub const DESTROY_FENCE_REQUEST: u8 = 17;
@@ -2003,8 +1991,6 @@ impl DestroyFenceRequest {
     }
 }
 impl Request for DestroyFenceRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -2014,7 +2000,8 @@ impl Request for DestroyFenceRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for DestroyFenceRequest {}
+impl crate::x11_utils::VoidRequest for DestroyFenceRequest {
+}
 
 /// Opcode for the QueryFence request
 pub const QUERY_FENCE_REQUEST: u8 = 18;
@@ -2056,8 +2043,6 @@ impl QueryFenceRequest {
     }
 }
 impl Request for QueryFenceRequest {
-    type Reply = QueryFenceReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -2067,7 +2052,9 @@ impl Request for QueryFenceRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for QueryFenceRequest {}
+impl crate::x11_utils::ReplyRequest for QueryFenceRequest {
+    type Reply = QueryFenceReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryFenceReply {
@@ -2147,8 +2134,6 @@ impl<'input> AwaitFenceRequest<'input> {
     }
 }
 impl<'input> Request for AwaitFenceRequest<'input> {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -2158,7 +2143,8 @@ impl<'input> Request for AwaitFenceRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::VoidRequest for AwaitFenceRequest<'input> {}
+impl<'input> crate::x11_utils::VoidRequest for AwaitFenceRequest<'input> {
+}
 
 /// Opcode for the CounterNotify event
 pub const COUNTER_NOTIFY_EVENT: u8 = 0;

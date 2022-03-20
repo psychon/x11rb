@@ -34,14 +34,6 @@ fn major_opcode<Conn: RequestConnection + ?Sized>(conn: &Conn) -> Result<u8, Con
     Ok(info.major_opcode)
 }
 
-fn send_query_version<'c, Conn>(req: QueryVersionRequest, conn: &'c Conn) -> Result<Cookie<'c, Conn, QueryVersionReply>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize(major_opcode(conn)?);
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    conn.send_request_with_reply(&slices, fds)
-}
 pub fn query_version<Conn>(conn: &Conn, major_version: u32, minor_version: u32) -> Result<Cookie<'_, Conn, QueryVersionReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -50,17 +42,11 @@ where
         major_version,
         minor_version,
     };
-    send_query_version(request0, conn)
-}
-
-fn send_connect<'c, Conn>(req: ConnectRequest, conn: &'c Conn) -> Result<Cookie<'c, Conn, ConnectReply>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize(major_opcode(conn)?);
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_with_reply(&slices, fds)
 }
+
 pub fn connect<Conn>(conn: &Conn, window: xproto::Window, driver_type: DriverType) -> Result<Cookie<'_, Conn, ConnectReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -69,17 +55,11 @@ where
         window,
         driver_type,
     };
-    send_connect(request0, conn)
-}
-
-fn send_authenticate<'c, Conn>(req: AuthenticateRequest, conn: &'c Conn) -> Result<Cookie<'c, Conn, AuthenticateReply>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize(major_opcode(conn)?);
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_with_reply(&slices, fds)
 }
+
 pub fn authenticate<Conn>(conn: &Conn, window: xproto::Window, magic: u32) -> Result<Cookie<'_, Conn, AuthenticateReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -88,17 +68,11 @@ where
         window,
         magic,
     };
-    send_authenticate(request0, conn)
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    conn.send_request_with_reply(&slices, fds)
 }
 
-fn send_create_drawable<'c, Conn>(req: CreateDrawableRequest, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize(major_opcode(conn)?);
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    conn.send_request_without_reply(&slices, fds)
-}
 pub fn create_drawable<Conn>(conn: &Conn, drawable: xproto::Drawable) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -106,17 +80,11 @@ where
     let request0 = CreateDrawableRequest {
         drawable,
     };
-    send_create_drawable(request0, conn)
-}
-
-fn send_destroy_drawable<'c, Conn>(req: DestroyDrawableRequest, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize(major_opcode(conn)?);
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
+
 pub fn destroy_drawable<Conn>(conn: &Conn, drawable: xproto::Drawable) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -124,17 +92,11 @@ where
     let request0 = DestroyDrawableRequest {
         drawable,
     };
-    send_destroy_drawable(request0, conn)
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    conn.send_request_without_reply(&slices, fds)
 }
 
-fn send_get_buffers<'c, Conn>(req: GetBuffersRequest<'_>, conn: &'c Conn) -> Result<Cookie<'c, Conn, GetBuffersReply>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize(major_opcode(conn)?);
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    conn.send_request_with_reply(&slices, fds)
-}
 pub fn get_buffers<'c, 'input, Conn>(conn: &'c Conn, drawable: xproto::Drawable, count: u32, attachments: &'input [u32]) -> Result<Cookie<'c, Conn, GetBuffersReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -144,17 +106,11 @@ where
         count,
         attachments: Cow::Borrowed(attachments),
     };
-    send_get_buffers(request0, conn)
-}
-
-fn send_copy_region<'c, Conn>(req: CopyRegionRequest, conn: &'c Conn) -> Result<Cookie<'c, Conn, CopyRegionReply>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize(major_opcode(conn)?);
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_with_reply(&slices, fds)
 }
+
 pub fn copy_region<Conn>(conn: &Conn, drawable: xproto::Drawable, region: u32, dest: u32, src: u32) -> Result<Cookie<'_, Conn, CopyRegionReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -165,17 +121,11 @@ where
         dest,
         src,
     };
-    send_copy_region(request0, conn)
-}
-
-fn send_get_buffers_with_format<'c, Conn>(req: GetBuffersWithFormatRequest<'_>, conn: &'c Conn) -> Result<Cookie<'c, Conn, GetBuffersWithFormatReply>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize(major_opcode(conn)?);
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_with_reply(&slices, fds)
 }
+
 pub fn get_buffers_with_format<'c, 'input, Conn>(conn: &'c Conn, drawable: xproto::Drawable, count: u32, attachments: &'input [AttachFormat]) -> Result<Cookie<'c, Conn, GetBuffersWithFormatReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -185,17 +135,11 @@ where
         count,
         attachments: Cow::Borrowed(attachments),
     };
-    send_get_buffers_with_format(request0, conn)
-}
-
-fn send_swap_buffers<'c, Conn>(req: SwapBuffersRequest, conn: &'c Conn) -> Result<Cookie<'c, Conn, SwapBuffersReply>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize(major_opcode(conn)?);
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_with_reply(&slices, fds)
 }
+
 pub fn swap_buffers<Conn>(conn: &Conn, drawable: xproto::Drawable, target_msc_hi: u32, target_msc_lo: u32, divisor_hi: u32, divisor_lo: u32, remainder_hi: u32, remainder_lo: u32) -> Result<Cookie<'_, Conn, SwapBuffersReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -209,17 +153,11 @@ where
         remainder_hi,
         remainder_lo,
     };
-    send_swap_buffers(request0, conn)
-}
-
-fn send_get_msc<'c, Conn>(req: GetMSCRequest, conn: &'c Conn) -> Result<Cookie<'c, Conn, GetMSCReply>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize(major_opcode(conn)?);
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_with_reply(&slices, fds)
 }
+
 pub fn get_msc<Conn>(conn: &Conn, drawable: xproto::Drawable) -> Result<Cookie<'_, Conn, GetMSCReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -227,17 +165,11 @@ where
     let request0 = GetMSCRequest {
         drawable,
     };
-    send_get_msc(request0, conn)
-}
-
-fn send_wait_msc<'c, Conn>(req: WaitMSCRequest, conn: &'c Conn) -> Result<Cookie<'c, Conn, WaitMSCReply>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize(major_opcode(conn)?);
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_with_reply(&slices, fds)
 }
+
 pub fn wait_msc<Conn>(conn: &Conn, drawable: xproto::Drawable, target_msc_hi: u32, target_msc_lo: u32, divisor_hi: u32, divisor_lo: u32, remainder_hi: u32, remainder_lo: u32) -> Result<Cookie<'_, Conn, WaitMSCReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -251,17 +183,11 @@ where
         remainder_hi,
         remainder_lo,
     };
-    send_wait_msc(request0, conn)
-}
-
-fn send_wait_sbc<'c, Conn>(req: WaitSBCRequest, conn: &'c Conn) -> Result<Cookie<'c, Conn, WaitSBCReply>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize(major_opcode(conn)?);
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_with_reply(&slices, fds)
 }
+
 pub fn wait_sbc<Conn>(conn: &Conn, drawable: xproto::Drawable, target_sbc_hi: u32, target_sbc_lo: u32) -> Result<Cookie<'_, Conn, WaitSBCReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -271,17 +197,11 @@ where
         target_sbc_hi,
         target_sbc_lo,
     };
-    send_wait_sbc(request0, conn)
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    conn.send_request_with_reply(&slices, fds)
 }
 
-fn send_swap_interval<'c, Conn>(req: SwapIntervalRequest, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize(major_opcode(conn)?);
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    conn.send_request_without_reply(&slices, fds)
-}
 pub fn swap_interval<Conn>(conn: &Conn, drawable: xproto::Drawable, interval: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -290,17 +210,11 @@ where
         drawable,
         interval,
     };
-    send_swap_interval(request0, conn)
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    conn.send_request_without_reply(&slices, fds)
 }
 
-fn send_get_param<'c, Conn>(req: GetParamRequest, conn: &'c Conn) -> Result<Cookie<'c, Conn, GetParamReply>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize(major_opcode(conn)?);
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    conn.send_request_with_reply(&slices, fds)
-}
 pub fn get_param<Conn>(conn: &Conn, drawable: xproto::Drawable, param: u32) -> Result<Cookie<'_, Conn, GetParamReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -309,7 +223,9 @@ where
         drawable,
         param,
     };
-    send_get_param(request0, conn)
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    conn.send_request_with_reply(&slices, fds)
 }
 
 /// Extension trait defining the requests of this extension.

@@ -105,8 +105,6 @@ impl QueryVersionRequest {
     }
 }
 impl Request for QueryVersionRequest {
-    type Reply = QueryVersionReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -116,7 +114,9 @@ impl Request for QueryVersionRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for QueryVersionRequest {}
+impl crate::x11_utils::ReplyRequest for QueryVersionRequest {
+    type Reply = QueryVersionReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionReply {
@@ -187,8 +187,6 @@ impl QueryDirectRenderingCapableRequest {
     }
 }
 impl Request for QueryDirectRenderingCapableRequest {
-    type Reply = QueryDirectRenderingCapableReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -198,7 +196,9 @@ impl Request for QueryDirectRenderingCapableRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for QueryDirectRenderingCapableRequest {}
+impl crate::x11_utils::ReplyRequest for QueryDirectRenderingCapableRequest {
+    type Reply = QueryDirectRenderingCapableReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryDirectRenderingCapableReply {
@@ -265,8 +265,6 @@ impl OpenConnectionRequest {
     }
 }
 impl Request for OpenConnectionRequest {
-    type Reply = OpenConnectionReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -276,7 +274,9 @@ impl Request for OpenConnectionRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for OpenConnectionRequest {}
+impl crate::x11_utils::ReplyRequest for OpenConnectionRequest {
+    type Reply = OpenConnectionReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct OpenConnectionReply {
@@ -365,8 +365,6 @@ impl CloseConnectionRequest {
     }
 }
 impl Request for CloseConnectionRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -376,7 +374,8 @@ impl Request for CloseConnectionRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for CloseConnectionRequest {}
+impl crate::x11_utils::VoidRequest for CloseConnectionRequest {
+}
 
 /// Opcode for the GetClientDriverName request
 pub const GET_CLIENT_DRIVER_NAME_REQUEST: u8 = 4;
@@ -418,8 +417,6 @@ impl GetClientDriverNameRequest {
     }
 }
 impl Request for GetClientDriverNameRequest {
-    type Reply = GetClientDriverNameReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -429,7 +426,9 @@ impl Request for GetClientDriverNameRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetClientDriverNameRequest {}
+impl crate::x11_utils::ReplyRequest for GetClientDriverNameRequest {
+    type Reply = GetClientDriverNameReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetClientDriverNameReply {
@@ -536,8 +535,6 @@ impl CreateContextRequest {
     }
 }
 impl Request for CreateContextRequest {
-    type Reply = CreateContextReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -547,7 +544,9 @@ impl Request for CreateContextRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for CreateContextRequest {}
+impl crate::x11_utils::ReplyRequest for CreateContextRequest {
+    type Reply = CreateContextReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CreateContextReply {
@@ -622,8 +621,6 @@ impl DestroyContextRequest {
     }
 }
 impl Request for DestroyContextRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -633,7 +630,8 @@ impl Request for DestroyContextRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for DestroyContextRequest {}
+impl crate::x11_utils::VoidRequest for DestroyContextRequest {
+}
 
 /// Opcode for the CreateDrawable request
 pub const CREATE_DRAWABLE_REQUEST: u8 = 7;
@@ -683,8 +681,6 @@ impl CreateDrawableRequest {
     }
 }
 impl Request for CreateDrawableRequest {
-    type Reply = CreateDrawableReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -694,7 +690,9 @@ impl Request for CreateDrawableRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for CreateDrawableRequest {}
+impl crate::x11_utils::ReplyRequest for CreateDrawableRequest {
+    type Reply = CreateDrawableReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CreateDrawableReply {
@@ -769,8 +767,6 @@ impl DestroyDrawableRequest {
     }
 }
 impl Request for DestroyDrawableRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -780,7 +776,8 @@ impl Request for DestroyDrawableRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for DestroyDrawableRequest {}
+impl crate::x11_utils::VoidRequest for DestroyDrawableRequest {
+}
 
 /// Opcode for the GetDrawableInfo request
 pub const GET_DRAWABLE_INFO_REQUEST: u8 = 9;
@@ -830,8 +827,6 @@ impl GetDrawableInfoRequest {
     }
 }
 impl Request for GetDrawableInfoRequest {
-    type Reply = GetDrawableInfoReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -841,7 +836,9 @@ impl Request for GetDrawableInfoRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetDrawableInfoRequest {}
+impl crate::x11_utils::ReplyRequest for GetDrawableInfoRequest {
+    type Reply = GetDrawableInfoReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetDrawableInfoReply {
@@ -956,8 +953,6 @@ impl GetDeviceInfoRequest {
     }
 }
 impl Request for GetDeviceInfoRequest {
-    type Reply = GetDeviceInfoReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -967,7 +962,9 @@ impl Request for GetDeviceInfoRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetDeviceInfoRequest {}
+impl crate::x11_utils::ReplyRequest for GetDeviceInfoRequest {
+    type Reply = GetDeviceInfoReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetDeviceInfoReply {
@@ -1068,8 +1065,6 @@ impl AuthConnectionRequest {
     }
 }
 impl Request for AuthConnectionRequest {
-    type Reply = AuthConnectionReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -1079,7 +1074,9 @@ impl Request for AuthConnectionRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for AuthConnectionRequest {}
+impl crate::x11_utils::ReplyRequest for AuthConnectionRequest {
+    type Reply = AuthConnectionReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct AuthConnectionReply {

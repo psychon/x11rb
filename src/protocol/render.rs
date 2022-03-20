@@ -34,14 +34,6 @@ fn major_opcode<Conn: RequestConnection + ?Sized>(conn: &Conn) -> Result<u8, Con
     Ok(info.major_opcode)
 }
 
-fn send_query_version<'c, Conn>(req: QueryVersionRequest, conn: &'c Conn) -> Result<Cookie<'c, Conn, QueryVersionReply>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize(major_opcode(conn)?);
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    conn.send_request_with_reply(&slices, fds)
-}
 pub fn query_version<Conn>(conn: &Conn, client_major_version: u32, client_minor_version: u32) -> Result<Cookie<'_, Conn, QueryVersionReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -50,33 +42,21 @@ where
         client_major_version,
         client_minor_version,
     };
-    send_query_version(request0, conn)
-}
-
-fn send_query_pict_formats<'c, Conn>(req: QueryPictFormatsRequest, conn: &'c Conn) -> Result<Cookie<'c, Conn, QueryPictFormatsReply>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize(major_opcode(conn)?);
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_with_reply(&slices, fds)
 }
+
 pub fn query_pict_formats<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, QueryPictFormatsReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = QueryPictFormatsRequest;
-    send_query_pict_formats(request0, conn)
-}
-
-fn send_query_pict_index_values<'c, Conn>(req: QueryPictIndexValuesRequest, conn: &'c Conn) -> Result<Cookie<'c, Conn, QueryPictIndexValuesReply>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize(major_opcode(conn)?);
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_with_reply(&slices, fds)
 }
+
 pub fn query_pict_index_values<Conn>(conn: &Conn, format: Pictformat) -> Result<Cookie<'_, Conn, QueryPictIndexValuesReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -84,17 +64,11 @@ where
     let request0 = QueryPictIndexValuesRequest {
         format,
     };
-    send_query_pict_index_values(request0, conn)
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    conn.send_request_with_reply(&slices, fds)
 }
 
-fn send_create_picture<'c, Conn>(req: CreatePictureRequest<'_>, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize(major_opcode(conn)?);
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    conn.send_request_without_reply(&slices, fds)
-}
 pub fn create_picture<'c, 'input, Conn>(conn: &'c Conn, pid: Picture, drawable: xproto::Drawable, format: Pictformat, value_list: &'input CreatePictureAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -105,17 +79,11 @@ where
         format,
         value_list: Cow::Borrowed(value_list),
     };
-    send_create_picture(request0, conn)
-}
-
-fn send_change_picture<'c, Conn>(req: ChangePictureRequest<'_>, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize(major_opcode(conn)?);
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
+
 pub fn change_picture<'c, 'input, Conn>(conn: &'c Conn, picture: Picture, value_list: &'input ChangePictureAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -124,17 +92,11 @@ where
         picture,
         value_list: Cow::Borrowed(value_list),
     };
-    send_change_picture(request0, conn)
-}
-
-fn send_set_picture_clip_rectangles<'c, Conn>(req: SetPictureClipRectanglesRequest<'_>, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize(major_opcode(conn)?);
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
+
 pub fn set_picture_clip_rectangles<'c, 'input, Conn>(conn: &'c Conn, picture: Picture, clip_x_origin: i16, clip_y_origin: i16, rectangles: &'input [xproto::Rectangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -145,17 +107,11 @@ where
         clip_y_origin,
         rectangles: Cow::Borrowed(rectangles),
     };
-    send_set_picture_clip_rectangles(request0, conn)
-}
-
-fn send_free_picture<'c, Conn>(req: FreePictureRequest, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize(major_opcode(conn)?);
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
+
 pub fn free_picture<Conn>(conn: &Conn, picture: Picture) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -163,17 +119,11 @@ where
     let request0 = FreePictureRequest {
         picture,
     };
-    send_free_picture(request0, conn)
-}
-
-fn send_composite<'c, Conn>(req: CompositeRequest, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize(major_opcode(conn)?);
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
+
 pub fn composite<Conn, A>(conn: &Conn, op: PictOp, src: Picture, mask: A, dst: Picture, src_x: i16, src_y: i16, mask_x: i16, mask_y: i16, dst_x: i16, dst_y: i16, width: u16, height: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -194,17 +144,11 @@ where
         width,
         height,
     };
-    send_composite(request0, conn)
-}
-
-fn send_trapezoids<'c, Conn>(req: TrapezoidsRequest<'_>, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize(major_opcode(conn)?);
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
+
 pub fn trapezoids<'c, 'input, Conn>(conn: &'c Conn, op: PictOp, src: Picture, dst: Picture, mask_format: Pictformat, src_x: i16, src_y: i16, traps: &'input [Trapezoid]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -218,17 +162,11 @@ where
         src_y,
         traps: Cow::Borrowed(traps),
     };
-    send_trapezoids(request0, conn)
-}
-
-fn send_triangles<'c, Conn>(req: TrianglesRequest<'_>, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize(major_opcode(conn)?);
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
+
 pub fn triangles<'c, 'input, Conn>(conn: &'c Conn, op: PictOp, src: Picture, dst: Picture, mask_format: Pictformat, src_x: i16, src_y: i16, triangles: &'input [Triangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -242,17 +180,11 @@ where
         src_y,
         triangles: Cow::Borrowed(triangles),
     };
-    send_triangles(request0, conn)
-}
-
-fn send_tri_strip<'c, Conn>(req: TriStripRequest<'_>, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize(major_opcode(conn)?);
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
+
 pub fn tri_strip<'c, 'input, Conn>(conn: &'c Conn, op: PictOp, src: Picture, dst: Picture, mask_format: Pictformat, src_x: i16, src_y: i16, points: &'input [Pointfix]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -266,17 +198,11 @@ where
         src_y,
         points: Cow::Borrowed(points),
     };
-    send_tri_strip(request0, conn)
-}
-
-fn send_tri_fan<'c, Conn>(req: TriFanRequest<'_>, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize(major_opcode(conn)?);
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
+
 pub fn tri_fan<'c, 'input, Conn>(conn: &'c Conn, op: PictOp, src: Picture, dst: Picture, mask_format: Pictformat, src_x: i16, src_y: i16, points: &'input [Pointfix]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -290,17 +216,11 @@ where
         src_y,
         points: Cow::Borrowed(points),
     };
-    send_tri_fan(request0, conn)
-}
-
-fn send_create_glyph_set<'c, Conn>(req: CreateGlyphSetRequest, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize(major_opcode(conn)?);
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
+
 pub fn create_glyph_set<Conn>(conn: &Conn, gsid: Glyphset, format: Pictformat) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -309,17 +229,11 @@ where
         gsid,
         format,
     };
-    send_create_glyph_set(request0, conn)
-}
-
-fn send_reference_glyph_set<'c, Conn>(req: ReferenceGlyphSetRequest, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize(major_opcode(conn)?);
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
+
 pub fn reference_glyph_set<Conn>(conn: &Conn, gsid: Glyphset, existing: Glyphset) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -328,17 +242,11 @@ where
         gsid,
         existing,
     };
-    send_reference_glyph_set(request0, conn)
-}
-
-fn send_free_glyph_set<'c, Conn>(req: FreeGlyphSetRequest, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize(major_opcode(conn)?);
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
+
 pub fn free_glyph_set<Conn>(conn: &Conn, glyphset: Glyphset) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -346,17 +254,11 @@ where
     let request0 = FreeGlyphSetRequest {
         glyphset,
     };
-    send_free_glyph_set(request0, conn)
-}
-
-fn send_add_glyphs<'c, Conn>(req: AddGlyphsRequest<'_>, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize(major_opcode(conn)?);
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
+
 pub fn add_glyphs<'c, 'input, Conn>(conn: &'c Conn, glyphset: Glyphset, glyphids: &'input [u32], glyphs: &'input [Glyphinfo], data: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -367,17 +269,11 @@ where
         glyphs: Cow::Borrowed(glyphs),
         data: Cow::Borrowed(data),
     };
-    send_add_glyphs(request0, conn)
-}
-
-fn send_free_glyphs<'c, Conn>(req: FreeGlyphsRequest<'_>, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize(major_opcode(conn)?);
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
+
 pub fn free_glyphs<'c, 'input, Conn>(conn: &'c Conn, glyphset: Glyphset, glyphs: &'input [Glyph]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -386,17 +282,11 @@ where
         glyphset,
         glyphs: Cow::Borrowed(glyphs),
     };
-    send_free_glyphs(request0, conn)
-}
-
-fn send_composite_glyphs8<'c, Conn>(req: CompositeGlyphs8Request<'_>, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize(major_opcode(conn)?);
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
+
 pub fn composite_glyphs8<'c, 'input, Conn>(conn: &'c Conn, op: PictOp, src: Picture, dst: Picture, mask_format: Pictformat, glyphset: Glyphset, src_x: i16, src_y: i16, glyphcmds: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -411,17 +301,11 @@ where
         src_y,
         glyphcmds: Cow::Borrowed(glyphcmds),
     };
-    send_composite_glyphs8(request0, conn)
-}
-
-fn send_composite_glyphs16<'c, Conn>(req: CompositeGlyphs16Request<'_>, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize(major_opcode(conn)?);
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
+
 pub fn composite_glyphs16<'c, 'input, Conn>(conn: &'c Conn, op: PictOp, src: Picture, dst: Picture, mask_format: Pictformat, glyphset: Glyphset, src_x: i16, src_y: i16, glyphcmds: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -436,17 +320,11 @@ where
         src_y,
         glyphcmds: Cow::Borrowed(glyphcmds),
     };
-    send_composite_glyphs16(request0, conn)
-}
-
-fn send_composite_glyphs32<'c, Conn>(req: CompositeGlyphs32Request<'_>, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize(major_opcode(conn)?);
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
+
 pub fn composite_glyphs32<'c, 'input, Conn>(conn: &'c Conn, op: PictOp, src: Picture, dst: Picture, mask_format: Pictformat, glyphset: Glyphset, src_x: i16, src_y: i16, glyphcmds: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -461,17 +339,11 @@ where
         src_y,
         glyphcmds: Cow::Borrowed(glyphcmds),
     };
-    send_composite_glyphs32(request0, conn)
-}
-
-fn send_fill_rectangles<'c, Conn>(req: FillRectanglesRequest<'_>, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize(major_opcode(conn)?);
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
+
 pub fn fill_rectangles<'c, 'input, Conn>(conn: &'c Conn, op: PictOp, dst: Picture, color: Color, rects: &'input [xproto::Rectangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -482,17 +354,11 @@ where
         color,
         rects: Cow::Borrowed(rects),
     };
-    send_fill_rectangles(request0, conn)
-}
-
-fn send_create_cursor<'c, Conn>(req: CreateCursorRequest, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize(major_opcode(conn)?);
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
+
 pub fn create_cursor<Conn>(conn: &Conn, cid: xproto::Cursor, source: Picture, x: u16, y: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -503,17 +369,11 @@ where
         x,
         y,
     };
-    send_create_cursor(request0, conn)
-}
-
-fn send_set_picture_transform<'c, Conn>(req: SetPictureTransformRequest, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize(major_opcode(conn)?);
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
+
 pub fn set_picture_transform<Conn>(conn: &Conn, picture: Picture, transform: Transform) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -522,17 +382,11 @@ where
         picture,
         transform,
     };
-    send_set_picture_transform(request0, conn)
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    conn.send_request_without_reply(&slices, fds)
 }
 
-fn send_query_filters<'c, Conn>(req: QueryFiltersRequest, conn: &'c Conn) -> Result<Cookie<'c, Conn, QueryFiltersReply>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize(major_opcode(conn)?);
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    conn.send_request_with_reply(&slices, fds)
-}
 pub fn query_filters<Conn>(conn: &Conn, drawable: xproto::Drawable) -> Result<Cookie<'_, Conn, QueryFiltersReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -540,17 +394,11 @@ where
     let request0 = QueryFiltersRequest {
         drawable,
     };
-    send_query_filters(request0, conn)
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    conn.send_request_with_reply(&slices, fds)
 }
 
-fn send_set_picture_filter<'c, Conn>(req: SetPictureFilterRequest<'_>, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize(major_opcode(conn)?);
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    conn.send_request_without_reply(&slices, fds)
-}
 pub fn set_picture_filter<'c, 'input, Conn>(conn: &'c Conn, picture: Picture, filter: &'input [u8], values: &'input [Fixed]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -560,17 +408,11 @@ where
         filter: Cow::Borrowed(filter),
         values: Cow::Borrowed(values),
     };
-    send_set_picture_filter(request0, conn)
-}
-
-fn send_create_anim_cursor<'c, Conn>(req: CreateAnimCursorRequest<'_>, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize(major_opcode(conn)?);
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
+
 pub fn create_anim_cursor<'c, 'input, Conn>(conn: &'c Conn, cid: xproto::Cursor, cursors: &'input [Animcursorelt]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -579,17 +421,11 @@ where
         cid,
         cursors: Cow::Borrowed(cursors),
     };
-    send_create_anim_cursor(request0, conn)
-}
-
-fn send_add_traps<'c, Conn>(req: AddTrapsRequest<'_>, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize(major_opcode(conn)?);
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
+
 pub fn add_traps<'c, 'input, Conn>(conn: &'c Conn, picture: Picture, x_off: i16, y_off: i16, traps: &'input [Trap]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -600,17 +436,11 @@ where
         y_off,
         traps: Cow::Borrowed(traps),
     };
-    send_add_traps(request0, conn)
-}
-
-fn send_create_solid_fill<'c, Conn>(req: CreateSolidFillRequest, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize(major_opcode(conn)?);
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
+
 pub fn create_solid_fill<Conn>(conn: &Conn, picture: Picture, color: Color) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -619,17 +449,11 @@ where
         picture,
         color,
     };
-    send_create_solid_fill(request0, conn)
-}
-
-fn send_create_linear_gradient<'c, Conn>(req: CreateLinearGradientRequest<'_>, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize(major_opcode(conn)?);
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
+
 pub fn create_linear_gradient<'c, 'input, Conn>(conn: &'c Conn, picture: Picture, p1: Pointfix, p2: Pointfix, stops: &'input [Fixed], colors: &'input [Color]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -641,17 +465,11 @@ where
         stops: Cow::Borrowed(stops),
         colors: Cow::Borrowed(colors),
     };
-    send_create_linear_gradient(request0, conn)
-}
-
-fn send_create_radial_gradient<'c, Conn>(req: CreateRadialGradientRequest<'_>, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize(major_opcode(conn)?);
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
+
 pub fn create_radial_gradient<'c, 'input, Conn>(conn: &'c Conn, picture: Picture, inner: Pointfix, outer: Pointfix, inner_radius: Fixed, outer_radius: Fixed, stops: &'input [Fixed], colors: &'input [Color]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -665,17 +483,11 @@ where
         stops: Cow::Borrowed(stops),
         colors: Cow::Borrowed(colors),
     };
-    send_create_radial_gradient(request0, conn)
-}
-
-fn send_create_conical_gradient<'c, Conn>(req: CreateConicalGradientRequest<'_>, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize(major_opcode(conn)?);
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
+
 pub fn create_conical_gradient<'c, 'input, Conn>(conn: &'c Conn, picture: Picture, center: Pointfix, angle: Fixed, stops: &'input [Fixed], colors: &'input [Color]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -687,7 +499,9 @@ where
         stops: Cow::Borrowed(stops),
         colors: Cow::Borrowed(colors),
     };
-    send_create_conical_gradient(request0, conn)
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    conn.send_request_without_reply(&slices, fds)
 }
 
 /// Extension trait defining the requests of this extension.

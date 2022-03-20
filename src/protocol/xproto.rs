@@ -31,14 +31,6 @@ use crate::errors::ReplyOrIdError;
 
 pub use x11rb_protocol::protocol::xproto::*;
 
-fn send_create_window<'c, Conn>(req: CreateWindowRequest<'_>, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    conn.send_request_without_reply(&slices, fds)
-}
 /// Creates a window.
 ///
 /// Creates an unmapped window as child of the specified `parent` window. A
@@ -110,17 +102,11 @@ where
         visual,
         value_list: Cow::Borrowed(value_list),
     };
-    send_create_window(request0, conn)
-}
-
-fn send_change_window_attributes<'c, Conn>(req: ChangeWindowAttributesRequest<'_>, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
+    let (bytes, fds) = request0.serialize();
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
+
 /// change window attributes.
 ///
 /// Changes the attributes specified by `value_mask` for the specified `window`.
@@ -150,17 +136,11 @@ where
         window,
         value_list: Cow::Borrowed(value_list),
     };
-    send_change_window_attributes(request0, conn)
+    let (bytes, fds) = request0.serialize();
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    conn.send_request_without_reply(&slices, fds)
 }
 
-fn send_get_window_attributes<'c, Conn>(req: GetWindowAttributesRequest, conn: &'c Conn) -> Result<Cookie<'c, Conn, GetWindowAttributesReply>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    conn.send_request_with_reply(&slices, fds)
-}
 /// Gets window attributes.
 ///
 /// Gets the current attributes for the specified `window`.
@@ -180,17 +160,11 @@ where
     let request0 = GetWindowAttributesRequest {
         window,
     };
-    send_get_window_attributes(request0, conn)
+    let (bytes, fds) = request0.serialize();
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    conn.send_request_with_reply(&slices, fds)
 }
 
-fn send_destroy_window<'c, Conn>(req: DestroyWindowRequest, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    conn.send_request_without_reply(&slices, fds)
-}
 /// Destroys a window.
 ///
 /// Destroys the specified window and all of its subwindows. A DestroyNotify event
@@ -220,17 +194,11 @@ where
     let request0 = DestroyWindowRequest {
         window,
     };
-    send_destroy_window(request0, conn)
-}
-
-fn send_destroy_subwindows<'c, Conn>(req: DestroySubwindowsRequest, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
+    let (bytes, fds) = request0.serialize();
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
+
 pub fn destroy_subwindows<Conn>(conn: &Conn, window: Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -238,17 +206,11 @@ where
     let request0 = DestroySubwindowsRequest {
         window,
     };
-    send_destroy_subwindows(request0, conn)
-}
-
-fn send_change_save_set<'c, Conn>(req: ChangeSaveSetRequest, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
+    let (bytes, fds) = request0.serialize();
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
+
 /// Changes a client's save set.
 ///
 /// TODO: explain what the save set is for.
@@ -279,17 +241,11 @@ where
         mode,
         window,
     };
-    send_change_save_set(request0, conn)
-}
-
-fn send_reparent_window<'c, Conn>(req: ReparentWindowRequest, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
+    let (bytes, fds) = request0.serialize();
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
+
 /// Reparents a window.
 ///
 /// Makes the specified window a child of the specified parent window. If the
@@ -332,17 +288,11 @@ where
         x,
         y,
     };
-    send_reparent_window(request0, conn)
-}
-
-fn send_map_window<'c, Conn>(req: MapWindowRequest, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
+    let (bytes, fds) = request0.serialize();
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
+
 /// Makes a window visible.
 ///
 /// Maps the specified window. This means making the window visible (as long as its
@@ -385,17 +335,11 @@ where
     let request0 = MapWindowRequest {
         window,
     };
-    send_map_window(request0, conn)
-}
-
-fn send_map_subwindows<'c, Conn>(req: MapSubwindowsRequest, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
+    let (bytes, fds) = request0.serialize();
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
+
 pub fn map_subwindows<Conn>(conn: &Conn, window: Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -403,17 +347,11 @@ where
     let request0 = MapSubwindowsRequest {
         window,
     };
-    send_map_subwindows(request0, conn)
-}
-
-fn send_unmap_window<'c, Conn>(req: UnmapWindowRequest, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
+    let (bytes, fds) = request0.serialize();
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
+
 /// Makes a window invisible.
 ///
 /// Unmaps the specified window. This means making the window invisible (and all
@@ -442,17 +380,11 @@ where
     let request0 = UnmapWindowRequest {
         window,
     };
-    send_unmap_window(request0, conn)
-}
-
-fn send_unmap_subwindows<'c, Conn>(req: UnmapSubwindowsRequest, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
+    let (bytes, fds) = request0.serialize();
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
+
 pub fn unmap_subwindows<Conn>(conn: &Conn, window: Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -460,17 +392,11 @@ where
     let request0 = UnmapSubwindowsRequest {
         window,
     };
-    send_unmap_subwindows(request0, conn)
-}
-
-fn send_configure_window<'c, Conn>(req: ConfigureWindowRequest<'_>, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
+    let (bytes, fds) = request0.serialize();
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
+
 /// Configures window attributes.
 ///
 /// Configures a window's size, position, border width and stacking order.
@@ -529,17 +455,11 @@ where
         window,
         value_list: Cow::Borrowed(value_list),
     };
-    send_configure_window(request0, conn)
-}
-
-fn send_circulate_window<'c, Conn>(req: CirculateWindowRequest, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
+    let (bytes, fds) = request0.serialize();
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
+
 /// Change window stacking order.
 ///
 /// If `direction` is `XCB_CIRCULATE_RAISE_LOWEST`, the lowest mapped child (if
@@ -565,17 +485,11 @@ where
         direction,
         window,
     };
-    send_circulate_window(request0, conn)
+    let (bytes, fds) = request0.serialize();
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    conn.send_request_without_reply(&slices, fds)
 }
 
-fn send_get_geometry<'c, Conn>(req: GetGeometryRequest, conn: &'c Conn) -> Result<Cookie<'c, Conn, GetGeometryReply>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    conn.send_request_with_reply(&slices, fds)
-}
 /// Get current window geometry.
 ///
 /// Gets the current geometry of the specified drawable (either `Window` or `Pixmap`).
@@ -619,17 +533,11 @@ where
     let request0 = GetGeometryRequest {
         drawable,
     };
-    send_get_geometry(request0, conn)
-}
-
-fn send_query_tree<'c, Conn>(req: QueryTreeRequest, conn: &'c Conn) -> Result<Cookie<'c, Conn, QueryTreeReply>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
+    let (bytes, fds) = request0.serialize();
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_with_reply(&slices, fds)
 }
+
 /// query the window tree.
 ///
 /// Gets the root window ID, parent window ID and list of children windows for the
@@ -674,17 +582,11 @@ where
     let request0 = QueryTreeRequest {
         window,
     };
-    send_query_tree(request0, conn)
-}
-
-fn send_intern_atom<'c, Conn>(req: InternAtomRequest<'_>, conn: &'c Conn) -> Result<Cookie<'c, Conn, InternAtomReply>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
+    let (bytes, fds) = request0.serialize();
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_with_reply(&slices, fds)
 }
+
 /// Get atom identifier by name.
 ///
 /// Retrieves the identifier (xcb_atom_t TODO) for the atom with the specified
@@ -738,17 +640,11 @@ where
         only_if_exists,
         name: Cow::Borrowed(name),
     };
-    send_intern_atom(request0, conn)
-}
-
-fn send_get_atom_name<'c, Conn>(req: GetAtomNameRequest, conn: &'c Conn) -> Result<Cookie<'c, Conn, GetAtomNameReply>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
+    let (bytes, fds) = request0.serialize();
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_with_reply(&slices, fds)
 }
+
 pub fn get_atom_name<Conn>(conn: &Conn, atom: Atom) -> Result<Cookie<'_, Conn, GetAtomNameReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -756,17 +652,11 @@ where
     let request0 = GetAtomNameRequest {
         atom,
     };
-    send_get_atom_name(request0, conn)
+    let (bytes, fds) = request0.serialize();
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    conn.send_request_with_reply(&slices, fds)
 }
 
-fn send_change_property<'c, Conn>(req: ChangePropertyRequest<'_>, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    conn.send_request_without_reply(&slices, fds)
-}
 /// Changes a window property.
 ///
 /// Sets or updates a property on the specified `window`. Properties are for
@@ -835,17 +725,11 @@ where
         data_len,
         data: Cow::Borrowed(data),
     };
-    send_change_property(request0, conn)
-}
-
-fn send_delete_property<'c, Conn>(req: DeletePropertyRequest, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
+    let (bytes, fds) = request0.serialize();
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
+
 pub fn delete_property<Conn>(conn: &Conn, window: Window, property: Atom) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -854,17 +738,11 @@ where
         window,
         property,
     };
-    send_delete_property(request0, conn)
+    let (bytes, fds) = request0.serialize();
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    conn.send_request_without_reply(&slices, fds)
 }
 
-fn send_get_property<'c, Conn>(req: GetPropertyRequest, conn: &'c Conn) -> Result<Cookie<'c, Conn, GetPropertyReply>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    conn.send_request_with_reply(&slices, fds)
-}
 /// Gets a window property.
 ///
 /// Gets the specified `property` from the specified `window`. Properties are for
@@ -949,17 +827,11 @@ where
         long_offset,
         long_length,
     };
-    send_get_property(request0, conn)
-}
-
-fn send_list_properties<'c, Conn>(req: ListPropertiesRequest, conn: &'c Conn) -> Result<Cookie<'c, Conn, ListPropertiesReply>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
+    let (bytes, fds) = request0.serialize();
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_with_reply(&slices, fds)
 }
+
 pub fn list_properties<Conn>(conn: &Conn, window: Window) -> Result<Cookie<'_, Conn, ListPropertiesReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -967,17 +839,11 @@ where
     let request0 = ListPropertiesRequest {
         window,
     };
-    send_list_properties(request0, conn)
+    let (bytes, fds) = request0.serialize();
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    conn.send_request_with_reply(&slices, fds)
 }
 
-fn send_set_selection_owner<'c, Conn>(req: SetSelectionOwnerRequest, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    conn.send_request_without_reply(&slices, fds)
-}
 /// Sets the owner of a selection.
 ///
 /// Makes `window` the owner of the selection `selection` and updates the
@@ -1020,17 +886,11 @@ where
         selection,
         time,
     };
-    send_set_selection_owner(request0, conn)
+    let (bytes, fds) = request0.serialize();
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    conn.send_request_without_reply(&slices, fds)
 }
 
-fn send_get_selection_owner<'c, Conn>(req: GetSelectionOwnerRequest, conn: &'c Conn) -> Result<Cookie<'c, Conn, GetSelectionOwnerReply>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    conn.send_request_with_reply(&slices, fds)
-}
 /// Gets the owner of a selection.
 ///
 /// Gets the owner of the specified selection.
@@ -1055,17 +915,11 @@ where
     let request0 = GetSelectionOwnerRequest {
         selection,
     };
-    send_get_selection_owner(request0, conn)
+    let (bytes, fds) = request0.serialize();
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    conn.send_request_with_reply(&slices, fds)
 }
 
-fn send_convert_selection<'c, Conn>(req: ConvertSelectionRequest, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    conn.send_request_without_reply(&slices, fds)
-}
 pub fn convert_selection<Conn, A, B>(conn: &Conn, requestor: Window, selection: Atom, target: Atom, property: A, time: B) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -1081,17 +935,11 @@ where
         property,
         time,
     };
-    send_convert_selection(request0, conn)
-}
-
-fn send_send_event<'c, Conn>(req: SendEventRequest<'_>, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
+    let (bytes, fds) = request0.serialize();
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
+
 /// send an event.
 ///
 /// Identifies the `destination` window, determines which clients should receive
@@ -1181,17 +1029,11 @@ where
         event_mask,
         event,
     };
-    send_send_event(request0, conn)
+    let (bytes, fds) = request0.serialize();
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    conn.send_request_without_reply(&slices, fds)
 }
 
-fn send_grab_pointer<'c, Conn>(req: GrabPointerRequest, conn: &'c Conn) -> Result<Cookie<'c, Conn, GrabPointerReply>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    conn.send_request_with_reply(&slices, fds)
-}
 /// Grab the pointer.
 ///
 /// Actively grabs control of the pointer. Further pointer events are reported only to the grabbing client. Overrides any active pointer grab by this client.
@@ -1285,17 +1127,11 @@ where
         cursor,
         time,
     };
-    send_grab_pointer(request0, conn)
+    let (bytes, fds) = request0.serialize();
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    conn.send_request_with_reply(&slices, fds)
 }
 
-fn send_ungrab_pointer<'c, Conn>(req: UngrabPointerRequest, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    conn.send_request_without_reply(&slices, fds)
-}
 /// release the pointer.
 ///
 /// Releases the pointer and any queued events if you actively grabbed the pointer
@@ -1328,17 +1164,11 @@ where
     let request0 = UngrabPointerRequest {
         time,
     };
-    send_ungrab_pointer(request0, conn)
-}
-
-fn send_grab_button<'c, Conn>(req: GrabButtonRequest, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
+    let (bytes, fds) = request0.serialize();
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
+
 /// Grab pointer button(s).
 ///
 /// This request establishes a passive grab. The pointer is actively grabbed as
@@ -1429,17 +1259,11 @@ where
         button,
         modifiers,
     };
-    send_grab_button(request0, conn)
-}
-
-fn send_ungrab_button<'c, Conn>(req: UngrabButtonRequest, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
+    let (bytes, fds) = request0.serialize();
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
+
 pub fn ungrab_button<Conn, A>(conn: &Conn, button: ButtonIndex, grab_window: Window, modifiers: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -1451,17 +1275,11 @@ where
         grab_window,
         modifiers,
     };
-    send_ungrab_button(request0, conn)
-}
-
-fn send_change_active_pointer_grab<'c, Conn>(req: ChangeActivePointerGrabRequest, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
+    let (bytes, fds) = request0.serialize();
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
+
 pub fn change_active_pointer_grab<Conn, A, B, C>(conn: &Conn, cursor: A, time: B, event_mask: C) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -1477,17 +1295,11 @@ where
         time,
         event_mask,
     };
-    send_change_active_pointer_grab(request0, conn)
+    let (bytes, fds) = request0.serialize();
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    conn.send_request_without_reply(&slices, fds)
 }
 
-fn send_grab_keyboard<'c, Conn>(req: GrabKeyboardRequest, conn: &'c Conn) -> Result<Cookie<'c, Conn, GrabKeyboardReply>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    conn.send_request_with_reply(&slices, fds)
-}
 /// Grab the keyboard.
 ///
 /// Actively grabs control of the keyboard and generates FocusIn and FocusOut
@@ -1563,17 +1375,11 @@ where
         pointer_mode,
         keyboard_mode,
     };
-    send_grab_keyboard(request0, conn)
+    let (bytes, fds) = request0.serialize();
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    conn.send_request_with_reply(&slices, fds)
 }
 
-fn send_ungrab_keyboard<'c, Conn>(req: UngrabKeyboardRequest, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    conn.send_request_without_reply(&slices, fds)
-}
 pub fn ungrab_keyboard<Conn, A>(conn: &Conn, time: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -1583,17 +1389,11 @@ where
     let request0 = UngrabKeyboardRequest {
         time,
     };
-    send_ungrab_keyboard(request0, conn)
-}
-
-fn send_grab_key<'c, Conn>(req: GrabKeyRequest, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
+    let (bytes, fds) = request0.serialize();
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
+
 /// Grab keyboard key(s).
 ///
 /// Establishes a passive grab on the keyboard. In the future, the keyboard is
@@ -1670,17 +1470,11 @@ where
         pointer_mode,
         keyboard_mode,
     };
-    send_grab_key(request0, conn)
-}
-
-fn send_ungrab_key<'c, Conn>(req: UngrabKeyRequest, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
+    let (bytes, fds) = request0.serialize();
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
+
 /// release a key combination.
 ///
 /// Releases the key combination on `grab_window` if you grabbed it using
@@ -1719,17 +1513,11 @@ where
         grab_window,
         modifiers,
     };
-    send_ungrab_key(request0, conn)
-}
-
-fn send_allow_events<'c, Conn>(req: AllowEventsRequest, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
+    let (bytes, fds) = request0.serialize();
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
+
 /// release queued events.
 ///
 /// Releases queued events if the client has caused a device (pointer/keyboard) to
@@ -1758,49 +1546,31 @@ where
         mode,
         time,
     };
-    send_allow_events(request0, conn)
-}
-
-fn send_grab_server<'c, Conn>(req: GrabServerRequest, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
+    let (bytes, fds) = request0.serialize();
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
+
 pub fn grab_server<Conn>(conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GrabServerRequest;
-    send_grab_server(request0, conn)
-}
-
-fn send_ungrab_server<'c, Conn>(req: UngrabServerRequest, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
+    let (bytes, fds) = request0.serialize();
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
+
 pub fn ungrab_server<Conn>(conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = UngrabServerRequest;
-    send_ungrab_server(request0, conn)
+    let (bytes, fds) = request0.serialize();
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    conn.send_request_without_reply(&slices, fds)
 }
 
-fn send_query_pointer<'c, Conn>(req: QueryPointerRequest, conn: &'c Conn) -> Result<Cookie<'c, Conn, QueryPointerReply>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    conn.send_request_with_reply(&slices, fds)
-}
 /// get pointer coordinates.
 ///
 /// Gets the root window the pointer is logically on and the pointer coordinates
@@ -1821,17 +1591,11 @@ where
     let request0 = QueryPointerRequest {
         window,
     };
-    send_query_pointer(request0, conn)
-}
-
-fn send_get_motion_events<'c, Conn>(req: GetMotionEventsRequest, conn: &'c Conn) -> Result<Cookie<'c, Conn, GetMotionEventsReply>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
+    let (bytes, fds) = request0.serialize();
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_with_reply(&slices, fds)
 }
+
 pub fn get_motion_events<Conn, A, B>(conn: &Conn, window: Window, start: A, stop: B) -> Result<Cookie<'_, Conn, GetMotionEventsReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -1845,17 +1609,11 @@ where
         start,
         stop,
     };
-    send_get_motion_events(request0, conn)
-}
-
-fn send_translate_coordinates<'c, Conn>(req: TranslateCoordinatesRequest, conn: &'c Conn) -> Result<Cookie<'c, Conn, TranslateCoordinatesReply>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
+    let (bytes, fds) = request0.serialize();
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_with_reply(&slices, fds)
 }
+
 pub fn translate_coordinates<Conn>(conn: &Conn, src_window: Window, dst_window: Window, src_x: i16, src_y: i16) -> Result<Cookie<'_, Conn, TranslateCoordinatesReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -1866,17 +1624,11 @@ where
         src_x,
         src_y,
     };
-    send_translate_coordinates(request0, conn)
+    let (bytes, fds) = request0.serialize();
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    conn.send_request_with_reply(&slices, fds)
 }
 
-fn send_warp_pointer<'c, Conn>(req: WarpPointerRequest, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    conn.send_request_without_reply(&slices, fds)
-}
 /// move mouse pointer.
 ///
 /// Moves the mouse pointer to the specified position.
@@ -1927,17 +1679,11 @@ where
         dst_x,
         dst_y,
     };
-    send_warp_pointer(request0, conn)
-}
-
-fn send_set_input_focus<'c, Conn>(req: SetInputFocusRequest, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
+    let (bytes, fds) = request0.serialize();
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
+
 /// Sets input focus.
 ///
 /// Changes the input focus and the last-focus-change time. If the specified `time`
@@ -1986,49 +1732,31 @@ where
         focus,
         time,
     };
-    send_set_input_focus(request0, conn)
+    let (bytes, fds) = request0.serialize();
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    conn.send_request_without_reply(&slices, fds)
 }
 
-fn send_get_input_focus<'c, Conn>(req: GetInputFocusRequest, conn: &'c Conn) -> Result<Cookie<'c, Conn, GetInputFocusReply>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    conn.send_request_with_reply(&slices, fds)
-}
 pub fn get_input_focus<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetInputFocusReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetInputFocusRequest;
-    send_get_input_focus(request0, conn)
-}
-
-fn send_query_keymap<'c, Conn>(req: QueryKeymapRequest, conn: &'c Conn) -> Result<Cookie<'c, Conn, QueryKeymapReply>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
+    let (bytes, fds) = request0.serialize();
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_with_reply(&slices, fds)
 }
+
 pub fn query_keymap<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, QueryKeymapReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = QueryKeymapRequest;
-    send_query_keymap(request0, conn)
+    let (bytes, fds) = request0.serialize();
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    conn.send_request_with_reply(&slices, fds)
 }
 
-fn send_open_font<'c, Conn>(req: OpenFontRequest<'_>, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    conn.send_request_without_reply(&slices, fds)
-}
 /// opens a font.
 ///
 /// Opens any X core font matching the given `name` (for example "-misc-fixed-*").
@@ -2057,17 +1785,11 @@ where
         fid,
         name: Cow::Borrowed(name),
     };
-    send_open_font(request0, conn)
-}
-
-fn send_close_font<'c, Conn>(req: CloseFontRequest, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
+    let (bytes, fds) = request0.serialize();
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
+
 pub fn close_font<Conn>(conn: &Conn, font: Font) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -2075,17 +1797,11 @@ where
     let request0 = CloseFontRequest {
         font,
     };
-    send_close_font(request0, conn)
+    let (bytes, fds) = request0.serialize();
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    conn.send_request_without_reply(&slices, fds)
 }
 
-fn send_query_font<'c, Conn>(req: QueryFontRequest, conn: &'c Conn) -> Result<Cookie<'c, Conn, QueryFontReply>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    conn.send_request_with_reply(&slices, fds)
-}
 /// query font metrics.
 ///
 /// Queries information associated with the font.
@@ -2100,17 +1816,11 @@ where
     let request0 = QueryFontRequest {
         font,
     };
-    send_query_font(request0, conn)
-}
-
-fn send_query_text_extents<'c, Conn>(req: QueryTextExtentsRequest<'_>, conn: &'c Conn) -> Result<Cookie<'c, Conn, QueryTextExtentsReply>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
+    let (bytes, fds) = request0.serialize();
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_with_reply(&slices, fds)
 }
+
 /// get text extents.
 ///
 /// Query text extents from the X11 server. This request returns the bounding box
@@ -2153,17 +1863,11 @@ where
         font,
         string: Cow::Borrowed(string),
     };
-    send_query_text_extents(request0, conn)
-}
-
-fn send_list_fonts<'c, Conn>(req: ListFontsRequest<'_>, conn: &'c Conn) -> Result<Cookie<'c, Conn, ListFontsReply>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
+    let (bytes, fds) = request0.serialize();
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_with_reply(&slices, fds)
 }
+
 /// get matching font names.
 ///
 /// Gets a list of available font names which match the given `pattern`.
@@ -2185,17 +1889,11 @@ where
         max_names,
         pattern: Cow::Borrowed(pattern),
     };
-    send_list_fonts(request0, conn)
+    let (bytes, fds) = request0.serialize();
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    conn.send_request_with_reply(&slices, fds)
 }
 
-fn send_list_fonts_with_info<'c, Conn>(req: ListFontsWithInfoRequest<'_>, conn: &'c Conn) -> Result<ListFontsWithInfoCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    Ok(ListFontsWithInfoCookie::new(conn.send_request_with_reply(&slices, fds)?))
-}
 /// get matching font names and information.
 ///
 /// Gets a list of available font names which match the given `pattern`.
@@ -2217,17 +1915,11 @@ where
         max_names,
         pattern: Cow::Borrowed(pattern),
     };
-    send_list_fonts_with_info(request0, conn)
+    let (bytes, fds) = request0.serialize();
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    Ok(ListFontsWithInfoCookie::new(conn.send_request_with_reply(&slices, fds)?))
 }
 
-fn send_set_font_path<'c, Conn>(req: SetFontPathRequest<'_>, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    conn.send_request_without_reply(&slices, fds)
-}
 pub fn set_font_path<'c, 'input, Conn>(conn: &'c Conn, font: &'input [Str]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -2235,33 +1927,21 @@ where
     let request0 = SetFontPathRequest {
         font: Cow::Borrowed(font),
     };
-    send_set_font_path(request0, conn)
+    let (bytes, fds) = request0.serialize();
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    conn.send_request_without_reply(&slices, fds)
 }
 
-fn send_get_font_path<'c, Conn>(req: GetFontPathRequest, conn: &'c Conn) -> Result<Cookie<'c, Conn, GetFontPathReply>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    conn.send_request_with_reply(&slices, fds)
-}
 pub fn get_font_path<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetFontPathReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetFontPathRequest;
-    send_get_font_path(request0, conn)
+    let (bytes, fds) = request0.serialize();
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    conn.send_request_with_reply(&slices, fds)
 }
 
-fn send_create_pixmap<'c, Conn>(req: CreatePixmapRequest, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    conn.send_request_without_reply(&slices, fds)
-}
 /// Creates a pixmap.
 ///
 /// Creates a pixmap. The pixmap can only be used on the same screen as `drawable`
@@ -2296,17 +1976,11 @@ where
         width,
         height,
     };
-    send_create_pixmap(request0, conn)
-}
-
-fn send_free_pixmap<'c, Conn>(req: FreePixmapRequest, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
+    let (bytes, fds) = request0.serialize();
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
+
 /// Destroys a pixmap.
 ///
 /// Deletes the association between the pixmap ID and the pixmap. The pixmap
@@ -2326,17 +2000,11 @@ where
     let request0 = FreePixmapRequest {
         pixmap,
     };
-    send_free_pixmap(request0, conn)
-}
-
-fn send_create_gc<'c, Conn>(req: CreateGCRequest<'_>, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
+    let (bytes, fds) = request0.serialize();
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
+
 /// Creates a graphics context.
 ///
 /// Creates a graphics context. The graphics context can be used with any drawable
@@ -2369,17 +2037,11 @@ where
         drawable,
         value_list: Cow::Borrowed(value_list),
     };
-    send_create_gc(request0, conn)
-}
-
-fn send_change_gc<'c, Conn>(req: ChangeGCRequest<'_>, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
+    let (bytes, fds) = request0.serialize();
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
+
 /// change graphics context components.
 ///
 /// Changes the components specified by `value_mask` for the specified graphics context.
@@ -2433,17 +2095,11 @@ where
         gc,
         value_list: Cow::Borrowed(value_list),
     };
-    send_change_gc(request0, conn)
-}
-
-fn send_copy_gc<'c, Conn>(req: CopyGCRequest, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
+    let (bytes, fds) = request0.serialize();
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
+
 pub fn copy_gc<Conn, A>(conn: &Conn, src_gc: Gcontext, dst_gc: Gcontext, value_mask: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -2455,17 +2111,11 @@ where
         dst_gc,
         value_mask,
     };
-    send_copy_gc(request0, conn)
-}
-
-fn send_set_dashes<'c, Conn>(req: SetDashesRequest<'_>, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
+    let (bytes, fds) = request0.serialize();
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
+
 pub fn set_dashes<'c, 'input, Conn>(conn: &'c Conn, gc: Gcontext, dash_offset: u16, dashes: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -2475,17 +2125,11 @@ where
         dash_offset,
         dashes: Cow::Borrowed(dashes),
     };
-    send_set_dashes(request0, conn)
-}
-
-fn send_set_clip_rectangles<'c, Conn>(req: SetClipRectanglesRequest<'_>, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
+    let (bytes, fds) = request0.serialize();
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
+
 pub fn set_clip_rectangles<'c, 'input, Conn>(conn: &'c Conn, ordering: ClipOrdering, gc: Gcontext, clip_x_origin: i16, clip_y_origin: i16, rectangles: &'input [Rectangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -2497,17 +2141,11 @@ where
         clip_y_origin,
         rectangles: Cow::Borrowed(rectangles),
     };
-    send_set_clip_rectangles(request0, conn)
-}
-
-fn send_free_gc<'c, Conn>(req: FreeGCRequest, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
+    let (bytes, fds) = request0.serialize();
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
+
 /// Destroys a graphics context.
 ///
 /// Destroys the specified `gc` and all associated storage.
@@ -2526,17 +2164,11 @@ where
     let request0 = FreeGCRequest {
         gc,
     };
-    send_free_gc(request0, conn)
-}
-
-fn send_clear_area<'c, Conn>(req: ClearAreaRequest, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
+    let (bytes, fds) = request0.serialize();
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
+
 pub fn clear_area<Conn>(conn: &Conn, exposures: bool, window: Window, x: i16, y: i16, width: u16, height: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -2549,17 +2181,11 @@ where
         width,
         height,
     };
-    send_clear_area(request0, conn)
-}
-
-fn send_copy_area<'c, Conn>(req: CopyAreaRequest, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
+    let (bytes, fds) = request0.serialize();
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
+
 /// copy areas.
 ///
 /// Copies the specified rectangle from `src_drawable` to `dst_drawable`.
@@ -2596,17 +2222,11 @@ where
         width,
         height,
     };
-    send_copy_area(request0, conn)
-}
-
-fn send_copy_plane<'c, Conn>(req: CopyPlaneRequest, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
+    let (bytes, fds) = request0.serialize();
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
+
 pub fn copy_plane<Conn>(conn: &Conn, src_drawable: Drawable, dst_drawable: Drawable, gc: Gcontext, src_x: i16, src_y: i16, dst_x: i16, dst_y: i16, width: u16, height: u16, bit_plane: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -2623,17 +2243,11 @@ where
         height,
         bit_plane,
     };
-    send_copy_plane(request0, conn)
-}
-
-fn send_poly_point<'c, Conn>(req: PolyPointRequest<'_>, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
+    let (bytes, fds) = request0.serialize();
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
+
 pub fn poly_point<'c, 'input, Conn>(conn: &'c Conn, coordinate_mode: CoordMode, drawable: Drawable, gc: Gcontext, points: &'input [Point]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -2644,17 +2258,11 @@ where
         gc,
         points: Cow::Borrowed(points),
     };
-    send_poly_point(request0, conn)
-}
-
-fn send_poly_line<'c, Conn>(req: PolyLineRequest<'_>, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
+    let (bytes, fds) = request0.serialize();
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
+
 /// draw lines.
 ///
 /// Draws `points_len`-1 lines between each pair of points (point[i], point[i+1])
@@ -2704,17 +2312,11 @@ where
         gc,
         points: Cow::Borrowed(points),
     };
-    send_poly_line(request0, conn)
-}
-
-fn send_poly_segment<'c, Conn>(req: PolySegmentRequest<'_>, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
+    let (bytes, fds) = request0.serialize();
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
+
 /// draw lines.
 ///
 /// Draws multiple, unconnected lines. For each segment, a line is drawn between
@@ -2750,17 +2352,11 @@ where
         gc,
         segments: Cow::Borrowed(segments),
     };
-    send_poly_segment(request0, conn)
-}
-
-fn send_poly_rectangle<'c, Conn>(req: PolyRectangleRequest<'_>, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
+    let (bytes, fds) = request0.serialize();
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
+
 pub fn poly_rectangle<'c, 'input, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, rectangles: &'input [Rectangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -2770,17 +2366,11 @@ where
         gc,
         rectangles: Cow::Borrowed(rectangles),
     };
-    send_poly_rectangle(request0, conn)
-}
-
-fn send_poly_arc<'c, Conn>(req: PolyArcRequest<'_>, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
+    let (bytes, fds) = request0.serialize();
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
+
 pub fn poly_arc<'c, 'input, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, arcs: &'input [Arc]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -2790,17 +2380,11 @@ where
         gc,
         arcs: Cow::Borrowed(arcs),
     };
-    send_poly_arc(request0, conn)
-}
-
-fn send_fill_poly<'c, Conn>(req: FillPolyRequest<'_>, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
+    let (bytes, fds) = request0.serialize();
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
+
 pub fn fill_poly<'c, 'input, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, shape: PolyShape, coordinate_mode: CoordMode, points: &'input [Point]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -2812,17 +2396,11 @@ where
         coordinate_mode,
         points: Cow::Borrowed(points),
     };
-    send_fill_poly(request0, conn)
-}
-
-fn send_poly_fill_rectangle<'c, Conn>(req: PolyFillRectangleRequest<'_>, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
+    let (bytes, fds) = request0.serialize();
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
+
 /// Fills rectangles.
 ///
 /// Fills the specified rectangle(s) in the order listed in the array. For any
@@ -2857,17 +2435,11 @@ where
         gc,
         rectangles: Cow::Borrowed(rectangles),
     };
-    send_poly_fill_rectangle(request0, conn)
-}
-
-fn send_poly_fill_arc<'c, Conn>(req: PolyFillArcRequest<'_>, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
+    let (bytes, fds) = request0.serialize();
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
+
 pub fn poly_fill_arc<'c, 'input, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, arcs: &'input [Arc]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -2877,17 +2449,11 @@ where
         gc,
         arcs: Cow::Borrowed(arcs),
     };
-    send_poly_fill_arc(request0, conn)
-}
-
-fn send_put_image<'c, Conn>(req: PutImageRequest<'_>, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
+    let (bytes, fds) = request0.serialize();
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
+
 pub fn put_image<'c, 'input, Conn>(conn: &'c Conn, format: ImageFormat, drawable: Drawable, gc: Gcontext, width: u16, height: u16, dst_x: i16, dst_y: i16, left_pad: u8, depth: u8, data: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -2904,17 +2470,11 @@ where
         depth,
         data: Cow::Borrowed(data),
     };
-    send_put_image(request0, conn)
+    let (bytes, fds) = request0.serialize();
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    conn.send_request_without_reply(&slices, fds)
 }
 
-fn send_get_image<'c, Conn>(req: GetImageRequest, conn: &'c Conn) -> Result<Cookie<'c, Conn, GetImageReply>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    conn.send_request_with_reply(&slices, fds)
-}
 pub fn get_image<Conn>(conn: &Conn, format: ImageFormat, drawable: Drawable, x: i16, y: i16, width: u16, height: u16, plane_mask: u32) -> Result<Cookie<'_, Conn, GetImageReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -2928,17 +2488,11 @@ where
         height,
         plane_mask,
     };
-    send_get_image(request0, conn)
+    let (bytes, fds) = request0.serialize();
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    conn.send_request_with_reply(&slices, fds)
 }
 
-fn send_poly_text8<'c, Conn>(req: PolyText8Request<'_>, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    conn.send_request_without_reply(&slices, fds)
-}
 pub fn poly_text8<'c, 'input, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, x: i16, y: i16, items: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -2950,17 +2504,11 @@ where
         y,
         items: Cow::Borrowed(items),
     };
-    send_poly_text8(request0, conn)
-}
-
-fn send_poly_text16<'c, Conn>(req: PolyText16Request<'_>, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
+    let (bytes, fds) = request0.serialize();
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
+
 pub fn poly_text16<'c, 'input, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, x: i16, y: i16, items: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -2972,17 +2520,11 @@ where
         y,
         items: Cow::Borrowed(items),
     };
-    send_poly_text16(request0, conn)
-}
-
-fn send_image_text8<'c, Conn>(req: ImageText8Request<'_>, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
+    let (bytes, fds) = request0.serialize();
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
+
 /// Draws text.
 ///
 /// Fills the destination rectangle with the background pixel from `gc`, then
@@ -3028,17 +2570,11 @@ where
         y,
         string: Cow::Borrowed(string),
     };
-    send_image_text8(request0, conn)
-}
-
-fn send_image_text16<'c, Conn>(req: ImageText16Request<'_>, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
+    let (bytes, fds) = request0.serialize();
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
+
 /// Draws text.
 ///
 /// Fills the destination rectangle with the background pixel from `gc`, then
@@ -3085,17 +2621,11 @@ where
         y,
         string: Cow::Borrowed(string),
     };
-    send_image_text16(request0, conn)
-}
-
-fn send_create_colormap<'c, Conn>(req: CreateColormapRequest, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
+    let (bytes, fds) = request0.serialize();
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
+
 pub fn create_colormap<Conn>(conn: &Conn, alloc: ColormapAlloc, mid: Colormap, window: Window, visual: Visualid) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -3106,17 +2636,11 @@ where
         window,
         visual,
     };
-    send_create_colormap(request0, conn)
-}
-
-fn send_free_colormap<'c, Conn>(req: FreeColormapRequest, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
+    let (bytes, fds) = request0.serialize();
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
+
 pub fn free_colormap<Conn>(conn: &Conn, cmap: Colormap) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -3124,17 +2648,11 @@ where
     let request0 = FreeColormapRequest {
         cmap,
     };
-    send_free_colormap(request0, conn)
-}
-
-fn send_copy_colormap_and_free<'c, Conn>(req: CopyColormapAndFreeRequest, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
+    let (bytes, fds) = request0.serialize();
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
+
 pub fn copy_colormap_and_free<Conn>(conn: &Conn, mid: Colormap, src_cmap: Colormap) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -3143,17 +2661,11 @@ where
         mid,
         src_cmap,
     };
-    send_copy_colormap_and_free(request0, conn)
-}
-
-fn send_install_colormap<'c, Conn>(req: InstallColormapRequest, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
+    let (bytes, fds) = request0.serialize();
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
+
 pub fn install_colormap<Conn>(conn: &Conn, cmap: Colormap) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -3161,17 +2673,11 @@ where
     let request0 = InstallColormapRequest {
         cmap,
     };
-    send_install_colormap(request0, conn)
-}
-
-fn send_uninstall_colormap<'c, Conn>(req: UninstallColormapRequest, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
+    let (bytes, fds) = request0.serialize();
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
+
 pub fn uninstall_colormap<Conn>(conn: &Conn, cmap: Colormap) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -3179,17 +2685,11 @@ where
     let request0 = UninstallColormapRequest {
         cmap,
     };
-    send_uninstall_colormap(request0, conn)
+    let (bytes, fds) = request0.serialize();
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    conn.send_request_without_reply(&slices, fds)
 }
 
-fn send_list_installed_colormaps<'c, Conn>(req: ListInstalledColormapsRequest, conn: &'c Conn) -> Result<Cookie<'c, Conn, ListInstalledColormapsReply>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    conn.send_request_with_reply(&slices, fds)
-}
 pub fn list_installed_colormaps<Conn>(conn: &Conn, window: Window) -> Result<Cookie<'_, Conn, ListInstalledColormapsReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -3197,17 +2697,11 @@ where
     let request0 = ListInstalledColormapsRequest {
         window,
     };
-    send_list_installed_colormaps(request0, conn)
-}
-
-fn send_alloc_color<'c, Conn>(req: AllocColorRequest, conn: &'c Conn) -> Result<Cookie<'c, Conn, AllocColorReply>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
+    let (bytes, fds) = request0.serialize();
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_with_reply(&slices, fds)
 }
+
 /// Allocate a color.
 ///
 /// Allocates a read-only colormap entry corresponding to the closest RGB value
@@ -3236,17 +2730,11 @@ where
         green,
         blue,
     };
-    send_alloc_color(request0, conn)
-}
-
-fn send_alloc_named_color<'c, Conn>(req: AllocNamedColorRequest<'_>, conn: &'c Conn) -> Result<Cookie<'c, Conn, AllocNamedColorReply>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
+    let (bytes, fds) = request0.serialize();
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_with_reply(&slices, fds)
 }
+
 pub fn alloc_named_color<'c, 'input, Conn>(conn: &'c Conn, cmap: Colormap, name: &'input [u8]) -> Result<Cookie<'c, Conn, AllocNamedColorReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -3255,17 +2743,11 @@ where
         cmap,
         name: Cow::Borrowed(name),
     };
-    send_alloc_named_color(request0, conn)
-}
-
-fn send_alloc_color_cells<'c, Conn>(req: AllocColorCellsRequest, conn: &'c Conn) -> Result<Cookie<'c, Conn, AllocColorCellsReply>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
+    let (bytes, fds) = request0.serialize();
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_with_reply(&slices, fds)
 }
+
 pub fn alloc_color_cells<Conn>(conn: &Conn, contiguous: bool, cmap: Colormap, colors: u16, planes: u16) -> Result<Cookie<'_, Conn, AllocColorCellsReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -3276,17 +2758,11 @@ where
         colors,
         planes,
     };
-    send_alloc_color_cells(request0, conn)
-}
-
-fn send_alloc_color_planes<'c, Conn>(req: AllocColorPlanesRequest, conn: &'c Conn) -> Result<Cookie<'c, Conn, AllocColorPlanesReply>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
+    let (bytes, fds) = request0.serialize();
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_with_reply(&slices, fds)
 }
+
 pub fn alloc_color_planes<Conn>(conn: &Conn, contiguous: bool, cmap: Colormap, colors: u16, reds: u16, greens: u16, blues: u16) -> Result<Cookie<'_, Conn, AllocColorPlanesReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -3299,17 +2775,11 @@ where
         greens,
         blues,
     };
-    send_alloc_color_planes(request0, conn)
+    let (bytes, fds) = request0.serialize();
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    conn.send_request_with_reply(&slices, fds)
 }
 
-fn send_free_colors<'c, Conn>(req: FreeColorsRequest<'_>, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    conn.send_request_without_reply(&slices, fds)
-}
 pub fn free_colors<'c, 'input, Conn>(conn: &'c Conn, cmap: Colormap, plane_mask: u32, pixels: &'input [u32]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -3319,17 +2789,11 @@ where
         plane_mask,
         pixels: Cow::Borrowed(pixels),
     };
-    send_free_colors(request0, conn)
-}
-
-fn send_store_colors<'c, Conn>(req: StoreColorsRequest<'_>, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
+    let (bytes, fds) = request0.serialize();
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
+
 pub fn store_colors<'c, 'input, Conn>(conn: &'c Conn, cmap: Colormap, items: &'input [Coloritem]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -3338,17 +2802,11 @@ where
         cmap,
         items: Cow::Borrowed(items),
     };
-    send_store_colors(request0, conn)
-}
-
-fn send_store_named_color<'c, Conn>(req: StoreNamedColorRequest<'_>, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
+    let (bytes, fds) = request0.serialize();
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
+
 pub fn store_named_color<'c, 'input, Conn, A>(conn: &'c Conn, flags: A, cmap: Colormap, pixel: u32, name: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -3361,17 +2819,11 @@ where
         pixel,
         name: Cow::Borrowed(name),
     };
-    send_store_named_color(request0, conn)
+    let (bytes, fds) = request0.serialize();
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    conn.send_request_without_reply(&slices, fds)
 }
 
-fn send_query_colors<'c, Conn>(req: QueryColorsRequest<'_>, conn: &'c Conn) -> Result<Cookie<'c, Conn, QueryColorsReply>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    conn.send_request_with_reply(&slices, fds)
-}
 pub fn query_colors<'c, 'input, Conn>(conn: &'c Conn, cmap: Colormap, pixels: &'input [u32]) -> Result<Cookie<'c, Conn, QueryColorsReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -3380,17 +2832,11 @@ where
         cmap,
         pixels: Cow::Borrowed(pixels),
     };
-    send_query_colors(request0, conn)
-}
-
-fn send_lookup_color<'c, Conn>(req: LookupColorRequest<'_>, conn: &'c Conn) -> Result<Cookie<'c, Conn, LookupColorReply>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
+    let (bytes, fds) = request0.serialize();
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_with_reply(&slices, fds)
 }
+
 pub fn lookup_color<'c, 'input, Conn>(conn: &'c Conn, cmap: Colormap, name: &'input [u8]) -> Result<Cookie<'c, Conn, LookupColorReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -3399,17 +2845,11 @@ where
         cmap,
         name: Cow::Borrowed(name),
     };
-    send_lookup_color(request0, conn)
+    let (bytes, fds) = request0.serialize();
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    conn.send_request_with_reply(&slices, fds)
 }
 
-fn send_create_cursor<'c, Conn>(req: CreateCursorRequest, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    conn.send_request_without_reply(&slices, fds)
-}
 pub fn create_cursor<Conn, A>(conn: &Conn, cid: Cursor, source: Pixmap, mask: A, fore_red: u16, fore_green: u16, fore_blue: u16, back_red: u16, back_green: u16, back_blue: u16, x: u16, y: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -3429,17 +2869,11 @@ where
         x,
         y,
     };
-    send_create_cursor(request0, conn)
-}
-
-fn send_create_glyph_cursor<'c, Conn>(req: CreateGlyphCursorRequest, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
+    let (bytes, fds) = request0.serialize();
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
+
 /// create cursor.
 ///
 /// Creates a cursor from a font glyph. X provides a set of standard cursor shapes
@@ -3492,17 +2926,11 @@ where
         back_green,
         back_blue,
     };
-    send_create_glyph_cursor(request0, conn)
-}
-
-fn send_free_cursor<'c, Conn>(req: FreeCursorRequest, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
+    let (bytes, fds) = request0.serialize();
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
+
 /// Deletes a cursor.
 ///
 /// Deletes the association between the cursor resource ID and the specified
@@ -3522,17 +2950,11 @@ where
     let request0 = FreeCursorRequest {
         cursor,
     };
-    send_free_cursor(request0, conn)
-}
-
-fn send_recolor_cursor<'c, Conn>(req: RecolorCursorRequest, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
+    let (bytes, fds) = request0.serialize();
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
+
 pub fn recolor_cursor<Conn>(conn: &Conn, cursor: Cursor, fore_red: u16, fore_green: u16, fore_blue: u16, back_red: u16, back_green: u16, back_blue: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -3546,17 +2968,11 @@ where
         back_green,
         back_blue,
     };
-    send_recolor_cursor(request0, conn)
+    let (bytes, fds) = request0.serialize();
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    conn.send_request_without_reply(&slices, fds)
 }
 
-fn send_query_best_size<'c, Conn>(req: QueryBestSizeRequest, conn: &'c Conn) -> Result<Cookie<'c, Conn, QueryBestSizeReply>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    conn.send_request_with_reply(&slices, fds)
-}
 pub fn query_best_size<Conn>(conn: &Conn, class: QueryShapeOf, drawable: Drawable, width: u16, height: u16) -> Result<Cookie<'_, Conn, QueryBestSizeReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -3567,17 +2983,11 @@ where
         width,
         height,
     };
-    send_query_best_size(request0, conn)
-}
-
-fn send_query_extension<'c, Conn>(req: QueryExtensionRequest<'_>, conn: &'c Conn) -> Result<Cookie<'c, Conn, QueryExtensionReply>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
+    let (bytes, fds) = request0.serialize();
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_with_reply(&slices, fds)
 }
+
 /// check if extension is present.
 ///
 /// Determines if the specified extension is present on this X11 server.
@@ -3607,33 +3017,21 @@ where
     let request0 = QueryExtensionRequest {
         name: Cow::Borrowed(name),
     };
-    send_query_extension(request0, conn)
-}
-
-fn send_list_extensions<'c, Conn>(req: ListExtensionsRequest, conn: &'c Conn) -> Result<Cookie<'c, Conn, ListExtensionsReply>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
+    let (bytes, fds) = request0.serialize();
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_with_reply(&slices, fds)
 }
+
 pub fn list_extensions<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, ListExtensionsReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = ListExtensionsRequest;
-    send_list_extensions(request0, conn)
+    let (bytes, fds) = request0.serialize();
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    conn.send_request_with_reply(&slices, fds)
 }
 
-fn send_change_keyboard_mapping<'c, Conn>(req: ChangeKeyboardMappingRequest<'_>, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    conn.send_request_without_reply(&slices, fds)
-}
 pub fn change_keyboard_mapping<'c, 'input, Conn>(conn: &'c Conn, keycode_count: u8, first_keycode: Keycode, keysyms_per_keycode: u8, keysyms: &'input [Keysym]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -3644,17 +3042,11 @@ where
         keysyms_per_keycode,
         keysyms: Cow::Borrowed(keysyms),
     };
-    send_change_keyboard_mapping(request0, conn)
+    let (bytes, fds) = request0.serialize();
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    conn.send_request_without_reply(&slices, fds)
 }
 
-fn send_get_keyboard_mapping<'c, Conn>(req: GetKeyboardMappingRequest, conn: &'c Conn) -> Result<Cookie<'c, Conn, GetKeyboardMappingReply>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    conn.send_request_with_reply(&slices, fds)
-}
 pub fn get_keyboard_mapping<Conn>(conn: &Conn, first_keycode: Keycode, count: u8) -> Result<Cookie<'_, Conn, GetKeyboardMappingReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -3663,17 +3055,11 @@ where
         first_keycode,
         count,
     };
-    send_get_keyboard_mapping(request0, conn)
+    let (bytes, fds) = request0.serialize();
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    conn.send_request_with_reply(&slices, fds)
 }
 
-fn send_change_keyboard_control<'c, Conn>(req: ChangeKeyboardControlRequest<'_>, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    conn.send_request_without_reply(&slices, fds)
-}
 pub fn change_keyboard_control<'c, 'input, Conn>(conn: &'c Conn, value_list: &'input ChangeKeyboardControlAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -3681,33 +3067,21 @@ where
     let request0 = ChangeKeyboardControlRequest {
         value_list: Cow::Borrowed(value_list),
     };
-    send_change_keyboard_control(request0, conn)
+    let (bytes, fds) = request0.serialize();
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    conn.send_request_without_reply(&slices, fds)
 }
 
-fn send_get_keyboard_control<'c, Conn>(req: GetKeyboardControlRequest, conn: &'c Conn) -> Result<Cookie<'c, Conn, GetKeyboardControlReply>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    conn.send_request_with_reply(&slices, fds)
-}
 pub fn get_keyboard_control<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetKeyboardControlReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetKeyboardControlRequest;
-    send_get_keyboard_control(request0, conn)
+    let (bytes, fds) = request0.serialize();
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    conn.send_request_with_reply(&slices, fds)
 }
 
-fn send_bell<'c, Conn>(req: BellRequest, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    conn.send_request_without_reply(&slices, fds)
-}
 pub fn bell<Conn>(conn: &Conn, percent: i8) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -3715,17 +3089,11 @@ where
     let request0 = BellRequest {
         percent,
     };
-    send_bell(request0, conn)
-}
-
-fn send_change_pointer_control<'c, Conn>(req: ChangePointerControlRequest, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
+    let (bytes, fds) = request0.serialize();
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
+
 pub fn change_pointer_control<Conn>(conn: &Conn, acceleration_numerator: i16, acceleration_denominator: i16, threshold: i16, do_acceleration: bool, do_threshold: bool) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -3737,33 +3105,21 @@ where
         do_acceleration,
         do_threshold,
     };
-    send_change_pointer_control(request0, conn)
+    let (bytes, fds) = request0.serialize();
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    conn.send_request_without_reply(&slices, fds)
 }
 
-fn send_get_pointer_control<'c, Conn>(req: GetPointerControlRequest, conn: &'c Conn) -> Result<Cookie<'c, Conn, GetPointerControlReply>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    conn.send_request_with_reply(&slices, fds)
-}
 pub fn get_pointer_control<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetPointerControlReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetPointerControlRequest;
-    send_get_pointer_control(request0, conn)
+    let (bytes, fds) = request0.serialize();
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    conn.send_request_with_reply(&slices, fds)
 }
 
-fn send_set_screen_saver<'c, Conn>(req: SetScreenSaverRequest, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    conn.send_request_without_reply(&slices, fds)
-}
 pub fn set_screen_saver<Conn>(conn: &Conn, timeout: i16, interval: i16, prefer_blanking: Blanking, allow_exposures: Exposures) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -3774,33 +3130,21 @@ where
         prefer_blanking,
         allow_exposures,
     };
-    send_set_screen_saver(request0, conn)
+    let (bytes, fds) = request0.serialize();
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    conn.send_request_without_reply(&slices, fds)
 }
 
-fn send_get_screen_saver<'c, Conn>(req: GetScreenSaverRequest, conn: &'c Conn) -> Result<Cookie<'c, Conn, GetScreenSaverReply>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    conn.send_request_with_reply(&slices, fds)
-}
 pub fn get_screen_saver<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetScreenSaverReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetScreenSaverRequest;
-    send_get_screen_saver(request0, conn)
+    let (bytes, fds) = request0.serialize();
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    conn.send_request_with_reply(&slices, fds)
 }
 
-fn send_change_hosts<'c, Conn>(req: ChangeHostsRequest<'_>, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    conn.send_request_without_reply(&slices, fds)
-}
 pub fn change_hosts<'c, 'input, Conn>(conn: &'c Conn, mode: HostMode, family: Family, address: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -3810,33 +3154,21 @@ where
         family,
         address: Cow::Borrowed(address),
     };
-    send_change_hosts(request0, conn)
+    let (bytes, fds) = request0.serialize();
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    conn.send_request_without_reply(&slices, fds)
 }
 
-fn send_list_hosts<'c, Conn>(req: ListHostsRequest, conn: &'c Conn) -> Result<Cookie<'c, Conn, ListHostsReply>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    conn.send_request_with_reply(&slices, fds)
-}
 pub fn list_hosts<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, ListHostsReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = ListHostsRequest;
-    send_list_hosts(request0, conn)
+    let (bytes, fds) = request0.serialize();
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    conn.send_request_with_reply(&slices, fds)
 }
 
-fn send_set_access_control<'c, Conn>(req: SetAccessControlRequest, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    conn.send_request_without_reply(&slices, fds)
-}
 pub fn set_access_control<Conn>(conn: &Conn, mode: AccessControl) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -3844,17 +3176,11 @@ where
     let request0 = SetAccessControlRequest {
         mode,
     };
-    send_set_access_control(request0, conn)
-}
-
-fn send_set_close_down_mode<'c, Conn>(req: SetCloseDownModeRequest, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
+    let (bytes, fds) = request0.serialize();
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
+
 pub fn set_close_down_mode<Conn>(conn: &Conn, mode: CloseDown) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -3862,17 +3188,11 @@ where
     let request0 = SetCloseDownModeRequest {
         mode,
     };
-    send_set_close_down_mode(request0, conn)
-}
-
-fn send_kill_client<'c, Conn>(req: KillClientRequest, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
+    let (bytes, fds) = request0.serialize();
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
+
 /// kills a client.
 ///
 /// Forces a close down of the client that created the specified `resource`.
@@ -3901,17 +3221,11 @@ where
     let request0 = KillClientRequest {
         resource,
     };
-    send_kill_client(request0, conn)
-}
-
-fn send_rotate_properties<'c, Conn>(req: RotatePropertiesRequest<'_>, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
+    let (bytes, fds) = request0.serialize();
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
+
 pub fn rotate_properties<'c, 'input, Conn>(conn: &'c Conn, window: Window, delta: i16, atoms: &'input [Atom]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -3921,17 +3235,11 @@ where
         delta,
         atoms: Cow::Borrowed(atoms),
     };
-    send_rotate_properties(request0, conn)
-}
-
-fn send_force_screen_saver<'c, Conn>(req: ForceScreenSaverRequest, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
+    let (bytes, fds) = request0.serialize();
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
+
 pub fn force_screen_saver<Conn>(conn: &Conn, mode: ScreenSaver) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -3939,17 +3247,11 @@ where
     let request0 = ForceScreenSaverRequest {
         mode,
     };
-    send_force_screen_saver(request0, conn)
+    let (bytes, fds) = request0.serialize();
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    conn.send_request_without_reply(&slices, fds)
 }
 
-fn send_set_pointer_mapping<'c, Conn>(req: SetPointerMappingRequest<'_>, conn: &'c Conn) -> Result<Cookie<'c, Conn, SetPointerMappingReply>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    conn.send_request_with_reply(&slices, fds)
-}
 pub fn set_pointer_mapping<'c, 'input, Conn>(conn: &'c Conn, map: &'input [u8]) -> Result<Cookie<'c, Conn, SetPointerMappingReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -3957,33 +3259,21 @@ where
     let request0 = SetPointerMappingRequest {
         map: Cow::Borrowed(map),
     };
-    send_set_pointer_mapping(request0, conn)
-}
-
-fn send_get_pointer_mapping<'c, Conn>(req: GetPointerMappingRequest, conn: &'c Conn) -> Result<Cookie<'c, Conn, GetPointerMappingReply>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
+    let (bytes, fds) = request0.serialize();
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_with_reply(&slices, fds)
 }
+
 pub fn get_pointer_mapping<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetPointerMappingReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetPointerMappingRequest;
-    send_get_pointer_mapping(request0, conn)
-}
-
-fn send_set_modifier_mapping<'c, Conn>(req: SetModifierMappingRequest<'_>, conn: &'c Conn) -> Result<Cookie<'c, Conn, SetModifierMappingReply>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
+    let (bytes, fds) = request0.serialize();
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_with_reply(&slices, fds)
 }
+
 pub fn set_modifier_mapping<'c, 'input, Conn>(conn: &'c Conn, keycodes: &'input [Keycode]) -> Result<Cookie<'c, Conn, SetModifierMappingReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -3991,39 +3281,29 @@ where
     let request0 = SetModifierMappingRequest {
         keycodes: Cow::Borrowed(keycodes),
     };
-    send_set_modifier_mapping(request0, conn)
-}
-
-fn send_get_modifier_mapping<'c, Conn>(req: GetModifierMappingRequest, conn: &'c Conn) -> Result<Cookie<'c, Conn, GetModifierMappingReply>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
+    let (bytes, fds) = request0.serialize();
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_with_reply(&slices, fds)
 }
+
 pub fn get_modifier_mapping<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetModifierMappingReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetModifierMappingRequest;
-    send_get_modifier_mapping(request0, conn)
+    let (bytes, fds) = request0.serialize();
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    conn.send_request_with_reply(&slices, fds)
 }
 
-fn send_no_operation<'c, Conn>(req: NoOperationRequest, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize();
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    conn.send_request_without_reply(&slices, fds)
-}
 pub fn no_operation<Conn>(conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = NoOperationRequest;
-    send_no_operation(request0, conn)
+    let (bytes, fds) = request0.serialize();
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    conn.send_request_without_reply(&slices, fds)
 }
 
 /// Extension trait defining the requests of this extension.

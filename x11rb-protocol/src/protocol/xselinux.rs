@@ -76,8 +76,6 @@ impl QueryVersionRequest {
     }
 }
 impl Request for QueryVersionRequest {
-    type Reply = QueryVersionReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -87,7 +85,9 @@ impl Request for QueryVersionRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for QueryVersionRequest {}
+impl crate::x11_utils::ReplyRequest for QueryVersionRequest {
+    type Reply = QueryVersionReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionReply {
@@ -167,8 +167,6 @@ impl<'input> SetDeviceCreateContextRequest<'input> {
     }
 }
 impl<'input> Request for SetDeviceCreateContextRequest<'input> {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -178,7 +176,8 @@ impl<'input> Request for SetDeviceCreateContextRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::VoidRequest for SetDeviceCreateContextRequest<'input> {}
+impl<'input> crate::x11_utils::VoidRequest for SetDeviceCreateContextRequest<'input> {
+}
 
 /// Opcode for the GetDeviceCreateContext request
 pub const GET_DEVICE_CREATE_CONTEXT_REQUEST: u8 = 2;
@@ -211,8 +210,6 @@ impl GetDeviceCreateContextRequest {
     }
 }
 impl Request for GetDeviceCreateContextRequest {
-    type Reply = GetDeviceCreateContextReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -222,7 +219,9 @@ impl Request for GetDeviceCreateContextRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetDeviceCreateContextRequest {}
+impl crate::x11_utils::ReplyRequest for GetDeviceCreateContextRequest {
+    type Reply = GetDeviceCreateContextReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetDeviceCreateContextReply {
@@ -327,8 +326,6 @@ impl<'input> SetDeviceContextRequest<'input> {
     }
 }
 impl<'input> Request for SetDeviceContextRequest<'input> {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -338,7 +335,8 @@ impl<'input> Request for SetDeviceContextRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::VoidRequest for SetDeviceContextRequest<'input> {}
+impl<'input> crate::x11_utils::VoidRequest for SetDeviceContextRequest<'input> {
+}
 
 /// Opcode for the GetDeviceContext request
 pub const GET_DEVICE_CONTEXT_REQUEST: u8 = 4;
@@ -380,8 +378,6 @@ impl GetDeviceContextRequest {
     }
 }
 impl Request for GetDeviceContextRequest {
-    type Reply = GetDeviceContextReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -391,7 +387,9 @@ impl Request for GetDeviceContextRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetDeviceContextRequest {}
+impl crate::x11_utils::ReplyRequest for GetDeviceContextRequest {
+    type Reply = GetDeviceContextReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetDeviceContextReply {
@@ -487,8 +485,6 @@ impl<'input> SetWindowCreateContextRequest<'input> {
     }
 }
 impl<'input> Request for SetWindowCreateContextRequest<'input> {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -498,7 +494,8 @@ impl<'input> Request for SetWindowCreateContextRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::VoidRequest for SetWindowCreateContextRequest<'input> {}
+impl<'input> crate::x11_utils::VoidRequest for SetWindowCreateContextRequest<'input> {
+}
 
 /// Opcode for the GetWindowCreateContext request
 pub const GET_WINDOW_CREATE_CONTEXT_REQUEST: u8 = 6;
@@ -531,8 +528,6 @@ impl GetWindowCreateContextRequest {
     }
 }
 impl Request for GetWindowCreateContextRequest {
-    type Reply = GetWindowCreateContextReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -542,7 +537,9 @@ impl Request for GetWindowCreateContextRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetWindowCreateContextRequest {}
+impl crate::x11_utils::ReplyRequest for GetWindowCreateContextRequest {
+    type Reply = GetWindowCreateContextReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetWindowCreateContextReply {
@@ -627,8 +624,6 @@ impl GetWindowContextRequest {
     }
 }
 impl Request for GetWindowContextRequest {
-    type Reply = GetWindowContextReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -638,7 +633,9 @@ impl Request for GetWindowContextRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetWindowContextRequest {}
+impl crate::x11_utils::ReplyRequest for GetWindowContextRequest {
+    type Reply = GetWindowContextReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetWindowContextReply {
@@ -811,8 +808,6 @@ impl<'input> SetPropertyCreateContextRequest<'input> {
     }
 }
 impl<'input> Request for SetPropertyCreateContextRequest<'input> {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -822,7 +817,8 @@ impl<'input> Request for SetPropertyCreateContextRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::VoidRequest for SetPropertyCreateContextRequest<'input> {}
+impl<'input> crate::x11_utils::VoidRequest for SetPropertyCreateContextRequest<'input> {
+}
 
 /// Opcode for the GetPropertyCreateContext request
 pub const GET_PROPERTY_CREATE_CONTEXT_REQUEST: u8 = 9;
@@ -855,8 +851,6 @@ impl GetPropertyCreateContextRequest {
     }
 }
 impl Request for GetPropertyCreateContextRequest {
-    type Reply = GetPropertyCreateContextReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -866,7 +860,9 @@ impl Request for GetPropertyCreateContextRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetPropertyCreateContextRequest {}
+impl crate::x11_utils::ReplyRequest for GetPropertyCreateContextRequest {
+    type Reply = GetPropertyCreateContextReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetPropertyCreateContextReply {
@@ -962,8 +958,6 @@ impl<'input> SetPropertyUseContextRequest<'input> {
     }
 }
 impl<'input> Request for SetPropertyUseContextRequest<'input> {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -973,7 +967,8 @@ impl<'input> Request for SetPropertyUseContextRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::VoidRequest for SetPropertyUseContextRequest<'input> {}
+impl<'input> crate::x11_utils::VoidRequest for SetPropertyUseContextRequest<'input> {
+}
 
 /// Opcode for the GetPropertyUseContext request
 pub const GET_PROPERTY_USE_CONTEXT_REQUEST: u8 = 11;
@@ -1006,8 +1001,6 @@ impl GetPropertyUseContextRequest {
     }
 }
 impl Request for GetPropertyUseContextRequest {
-    type Reply = GetPropertyUseContextReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -1017,7 +1010,9 @@ impl Request for GetPropertyUseContextRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetPropertyUseContextRequest {}
+impl crate::x11_utils::ReplyRequest for GetPropertyUseContextRequest {
+    type Reply = GetPropertyUseContextReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetPropertyUseContextReply {
@@ -1110,8 +1105,6 @@ impl GetPropertyContextRequest {
     }
 }
 impl Request for GetPropertyContextRequest {
-    type Reply = GetPropertyContextReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -1121,7 +1114,9 @@ impl Request for GetPropertyContextRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetPropertyContextRequest {}
+impl crate::x11_utils::ReplyRequest for GetPropertyContextRequest {
+    type Reply = GetPropertyContextReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetPropertyContextReply {
@@ -1214,8 +1209,6 @@ impl GetPropertyDataContextRequest {
     }
 }
 impl Request for GetPropertyDataContextRequest {
-    type Reply = GetPropertyDataContextReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -1225,7 +1218,9 @@ impl Request for GetPropertyDataContextRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetPropertyDataContextRequest {}
+impl crate::x11_utils::ReplyRequest for GetPropertyDataContextRequest {
+    type Reply = GetPropertyDataContextReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetPropertyDataContextReply {
@@ -1310,8 +1305,6 @@ impl ListPropertiesRequest {
     }
 }
 impl Request for ListPropertiesRequest {
-    type Reply = ListPropertiesReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -1321,7 +1314,9 @@ impl Request for ListPropertiesRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for ListPropertiesRequest {}
+impl crate::x11_utils::ReplyRequest for ListPropertiesRequest {
+    type Reply = ListPropertiesReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ListPropertiesReply {
@@ -1416,8 +1411,6 @@ impl<'input> SetSelectionCreateContextRequest<'input> {
     }
 }
 impl<'input> Request for SetSelectionCreateContextRequest<'input> {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -1427,7 +1420,8 @@ impl<'input> Request for SetSelectionCreateContextRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::VoidRequest for SetSelectionCreateContextRequest<'input> {}
+impl<'input> crate::x11_utils::VoidRequest for SetSelectionCreateContextRequest<'input> {
+}
 
 /// Opcode for the GetSelectionCreateContext request
 pub const GET_SELECTION_CREATE_CONTEXT_REQUEST: u8 = 16;
@@ -1460,8 +1454,6 @@ impl GetSelectionCreateContextRequest {
     }
 }
 impl Request for GetSelectionCreateContextRequest {
-    type Reply = GetSelectionCreateContextReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -1471,7 +1463,9 @@ impl Request for GetSelectionCreateContextRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetSelectionCreateContextRequest {}
+impl crate::x11_utils::ReplyRequest for GetSelectionCreateContextRequest {
+    type Reply = GetSelectionCreateContextReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetSelectionCreateContextReply {
@@ -1567,8 +1561,6 @@ impl<'input> SetSelectionUseContextRequest<'input> {
     }
 }
 impl<'input> Request for SetSelectionUseContextRequest<'input> {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -1578,7 +1570,8 @@ impl<'input> Request for SetSelectionUseContextRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::VoidRequest for SetSelectionUseContextRequest<'input> {}
+impl<'input> crate::x11_utils::VoidRequest for SetSelectionUseContextRequest<'input> {
+}
 
 /// Opcode for the GetSelectionUseContext request
 pub const GET_SELECTION_USE_CONTEXT_REQUEST: u8 = 18;
@@ -1611,8 +1604,6 @@ impl GetSelectionUseContextRequest {
     }
 }
 impl Request for GetSelectionUseContextRequest {
-    type Reply = GetSelectionUseContextReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -1622,7 +1613,9 @@ impl Request for GetSelectionUseContextRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetSelectionUseContextRequest {}
+impl crate::x11_utils::ReplyRequest for GetSelectionUseContextRequest {
+    type Reply = GetSelectionUseContextReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetSelectionUseContextReply {
@@ -1707,8 +1700,6 @@ impl GetSelectionContextRequest {
     }
 }
 impl Request for GetSelectionContextRequest {
-    type Reply = GetSelectionContextReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -1718,7 +1709,9 @@ impl Request for GetSelectionContextRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetSelectionContextRequest {}
+impl crate::x11_utils::ReplyRequest for GetSelectionContextRequest {
+    type Reply = GetSelectionContextReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetSelectionContextReply {
@@ -1803,8 +1796,6 @@ impl GetSelectionDataContextRequest {
     }
 }
 impl Request for GetSelectionDataContextRequest {
-    type Reply = GetSelectionDataContextReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -1814,7 +1805,9 @@ impl Request for GetSelectionDataContextRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetSelectionDataContextRequest {}
+impl crate::x11_utils::ReplyRequest for GetSelectionDataContextRequest {
+    type Reply = GetSelectionDataContextReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetSelectionDataContextReply {
@@ -1890,8 +1883,6 @@ impl ListSelectionsRequest {
     }
 }
 impl Request for ListSelectionsRequest {
-    type Reply = ListSelectionsReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -1901,7 +1892,9 @@ impl Request for ListSelectionsRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for ListSelectionsRequest {}
+impl crate::x11_utils::ReplyRequest for ListSelectionsRequest {
+    type Reply = ListSelectionsReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ListSelectionsReply {
@@ -1985,8 +1978,6 @@ impl GetClientContextRequest {
     }
 }
 impl Request for GetClientContextRequest {
-    type Reply = GetClientContextReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -1996,7 +1987,9 @@ impl Request for GetClientContextRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetClientContextRequest {}
+impl crate::x11_utils::ReplyRequest for GetClientContextRequest {
+    type Reply = GetClientContextReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetClientContextReply {

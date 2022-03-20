@@ -34,14 +34,6 @@ fn major_opcode<Conn: RequestConnection + ?Sized>(conn: &Conn) -> Result<u8, Con
     Ok(info.major_opcode)
 }
 
-fn send_query_version<'c, Conn>(req: QueryVersionRequest, conn: &'c Conn) -> Result<Cookie<'c, Conn, QueryVersionReply>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize(major_opcode(conn)?);
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    conn.send_request_with_reply(&slices, fds)
-}
 pub fn query_version<Conn>(conn: &Conn, major_version: u32, minor_version: u32) -> Result<Cookie<'_, Conn, QueryVersionReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -50,17 +42,11 @@ where
         major_version,
         minor_version,
     };
-    send_query_version(request0, conn)
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    conn.send_request_with_reply(&slices, fds)
 }
 
-fn send_open<'c, Conn>(req: OpenRequest, conn: &'c Conn) -> Result<CookieWithFds<'c, Conn, OpenReply>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize(major_opcode(conn)?);
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    conn.send_request_with_reply_with_fds(&slices, fds)
-}
 pub fn open<Conn>(conn: &Conn, drawable: xproto::Drawable, provider: u32) -> Result<CookieWithFds<'_, Conn, OpenReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -69,17 +55,11 @@ where
         drawable,
         provider,
     };
-    send_open(request0, conn)
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    conn.send_request_with_reply_with_fds(&slices, fds)
 }
 
-fn send_pixmap_from_buffer<'c, Conn>(req: PixmapFromBufferRequest, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize(major_opcode(conn)?);
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    conn.send_request_without_reply(&slices, fds)
-}
 pub fn pixmap_from_buffer<Conn, A>(conn: &Conn, pixmap: xproto::Pixmap, drawable: xproto::Drawable, size: u32, width: u16, height: u16, stride: u16, depth: u8, bpp: u8, pixmap_fd: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -97,17 +77,11 @@ where
         bpp,
         pixmap_fd,
     };
-    send_pixmap_from_buffer(request0, conn)
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    conn.send_request_without_reply(&slices, fds)
 }
 
-fn send_buffer_from_pixmap<'c, Conn>(req: BufferFromPixmapRequest, conn: &'c Conn) -> Result<CookieWithFds<'c, Conn, BufferFromPixmapReply>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize(major_opcode(conn)?);
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    conn.send_request_with_reply_with_fds(&slices, fds)
-}
 pub fn buffer_from_pixmap<Conn>(conn: &Conn, pixmap: xproto::Pixmap) -> Result<CookieWithFds<'_, Conn, BufferFromPixmapReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -115,17 +89,11 @@ where
     let request0 = BufferFromPixmapRequest {
         pixmap,
     };
-    send_buffer_from_pixmap(request0, conn)
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    conn.send_request_with_reply_with_fds(&slices, fds)
 }
 
-fn send_fence_from_fd<'c, Conn>(req: FenceFromFDRequest, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize(major_opcode(conn)?);
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    conn.send_request_without_reply(&slices, fds)
-}
 pub fn fence_from_fd<Conn, A>(conn: &Conn, drawable: xproto::Drawable, fence: u32, initially_triggered: bool, fence_fd: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -138,17 +106,11 @@ where
         initially_triggered,
         fence_fd,
     };
-    send_fence_from_fd(request0, conn)
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    conn.send_request_without_reply(&slices, fds)
 }
 
-fn send_fd_from_fence<'c, Conn>(req: FDFromFenceRequest, conn: &'c Conn) -> Result<CookieWithFds<'c, Conn, FDFromFenceReply>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize(major_opcode(conn)?);
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    conn.send_request_with_reply_with_fds(&slices, fds)
-}
 pub fn fd_from_fence<Conn>(conn: &Conn, drawable: xproto::Drawable, fence: u32) -> Result<CookieWithFds<'_, Conn, FDFromFenceReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -157,17 +119,11 @@ where
         drawable,
         fence,
     };
-    send_fd_from_fence(request0, conn)
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    conn.send_request_with_reply_with_fds(&slices, fds)
 }
 
-fn send_get_supported_modifiers<'c, Conn>(req: GetSupportedModifiersRequest, conn: &'c Conn) -> Result<Cookie<'c, Conn, GetSupportedModifiersReply>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize(major_opcode(conn)?);
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    conn.send_request_with_reply(&slices, fds)
-}
 pub fn get_supported_modifiers<Conn>(conn: &Conn, window: u32, depth: u8, bpp: u8) -> Result<Cookie<'_, Conn, GetSupportedModifiersReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -177,17 +133,11 @@ where
         depth,
         bpp,
     };
-    send_get_supported_modifiers(request0, conn)
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    conn.send_request_with_reply(&slices, fds)
 }
 
-fn send_pixmap_from_buffers<'c, Conn>(req: PixmapFromBuffersRequest, conn: &'c Conn) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize(major_opcode(conn)?);
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    conn.send_request_without_reply(&slices, fds)
-}
 pub fn pixmap_from_buffers<Conn>(conn: &Conn, pixmap: xproto::Pixmap, window: xproto::Window, width: u16, height: u16, stride0: u32, offset0: u32, stride1: u32, offset1: u32, stride2: u32, offset2: u32, stride3: u32, offset3: u32, depth: u8, bpp: u8, modifier: u64, buffers: Vec<RawFdContainer>) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -210,17 +160,11 @@ where
         modifier,
         buffers,
     };
-    send_pixmap_from_buffers(request0, conn)
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    conn.send_request_without_reply(&slices, fds)
 }
 
-fn send_buffers_from_pixmap<'c, Conn>(req: BuffersFromPixmapRequest, conn: &'c Conn) -> Result<CookieWithFds<'c, Conn, BuffersFromPixmapReply>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize(major_opcode(conn)?);
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    conn.send_request_with_reply_with_fds(&slices, fds)
-}
 pub fn buffers_from_pixmap<Conn>(conn: &Conn, pixmap: xproto::Pixmap) -> Result<CookieWithFds<'_, Conn, BuffersFromPixmapReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -228,7 +172,9 @@ where
     let request0 = BuffersFromPixmapRequest {
         pixmap,
     };
-    send_buffers_from_pixmap(request0, conn)
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    conn.send_request_with_reply_with_fds(&slices, fds)
 }
 
 /// Extension trait defining the requests of this extension.

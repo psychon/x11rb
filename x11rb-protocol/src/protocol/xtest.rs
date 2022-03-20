@@ -77,8 +77,6 @@ impl GetVersionRequest {
     }
 }
 impl Request for GetVersionRequest {
-    type Reply = GetVersionReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -88,7 +86,9 @@ impl Request for GetVersionRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetVersionRequest {}
+impl crate::x11_utils::ReplyRequest for GetVersionRequest {
+    type Reply = GetVersionReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetVersionReply {
@@ -234,8 +234,6 @@ impl CompareCursorRequest {
     }
 }
 impl Request for CompareCursorRequest {
-    type Reply = CompareCursorReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -245,7 +243,9 @@ impl Request for CompareCursorRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for CompareCursorRequest {}
+impl crate::x11_utils::ReplyRequest for CompareCursorRequest {
+    type Reply = CompareCursorReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CompareCursorReply {
@@ -366,8 +366,6 @@ impl FakeInputRequest {
     }
 }
 impl Request for FakeInputRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -377,7 +375,8 @@ impl Request for FakeInputRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for FakeInputRequest {}
+impl crate::x11_utils::VoidRequest for FakeInputRequest {
+}
 
 /// Opcode for the GrabControl request
 pub const GRAB_CONTROL_REQUEST: u8 = 3;
@@ -420,8 +419,6 @@ impl GrabControlRequest {
     }
 }
 impl Request for GrabControlRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -431,5 +428,6 @@ impl Request for GrabControlRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for GrabControlRequest {}
+impl crate::x11_utils::VoidRequest for GrabControlRequest {
+}
 

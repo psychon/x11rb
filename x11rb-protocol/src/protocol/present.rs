@@ -497,8 +497,6 @@ impl QueryVersionRequest {
     }
 }
 impl Request for QueryVersionRequest {
-    type Reply = QueryVersionReply;
-
     const EXTENSION_NAME: std::option::Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -508,7 +506,9 @@ impl Request for QueryVersionRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for QueryVersionRequest {}
+impl crate::x11_utils::ReplyRequest for QueryVersionRequest {
+    type Reply = QueryVersionReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionReply {
@@ -728,8 +728,6 @@ impl<'input> PixmapRequest<'input> {
     }
 }
 impl<'input> Request for PixmapRequest<'input> {
-    type Reply = ();
-
     const EXTENSION_NAME: std::option::Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -739,7 +737,8 @@ impl<'input> Request for PixmapRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::VoidRequest for PixmapRequest<'input> {}
+impl<'input> crate::x11_utils::VoidRequest for PixmapRequest<'input> {
+}
 
 /// Opcode for the NotifyMSC request
 pub const NOTIFY_MSC_REQUEST: u8 = 2;
@@ -830,8 +829,6 @@ impl NotifyMSCRequest {
     }
 }
 impl Request for NotifyMSCRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: std::option::Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -841,7 +838,8 @@ impl Request for NotifyMSCRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for NotifyMSCRequest {}
+impl crate::x11_utils::VoidRequest for NotifyMSCRequest {
+}
 
 pub type Event = u32;
 
@@ -901,8 +899,6 @@ impl SelectInputRequest {
     }
 }
 impl Request for SelectInputRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: std::option::Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -912,7 +908,8 @@ impl Request for SelectInputRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for SelectInputRequest {}
+impl crate::x11_utils::VoidRequest for SelectInputRequest {
+}
 
 /// Opcode for the QueryCapabilities request
 pub const QUERY_CAPABILITIES_REQUEST: u8 = 4;
@@ -954,8 +951,6 @@ impl QueryCapabilitiesRequest {
     }
 }
 impl Request for QueryCapabilitiesRequest {
-    type Reply = QueryCapabilitiesReply;
-
     const EXTENSION_NAME: std::option::Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -965,7 +960,9 @@ impl Request for QueryCapabilitiesRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for QueryCapabilitiesRequest {}
+impl crate::x11_utils::ReplyRequest for QueryCapabilitiesRequest {
+    type Reply = QueryCapabilitiesReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryCapabilitiesReply {
