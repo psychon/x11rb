@@ -5,21 +5,27 @@ use std::collections::VecDeque;
 use crate::utils::RawFdContainer;
 use crate::{DiscardMode, SequenceNumber};
 
+/// A combination of a buffer and a list of file descriptors.
 pub type BufWithFds = crate::BufWithFds<Vec<u8>>;
 
 /// The raw bytes of an event received by [`RustConnection`] and its sequence number.
 pub type RawEventAndSeqNumber = crate::RawEventAndSeqNumber<Vec<u8>>;
 
+/// Information about the reply to an X11 request.
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum ReplyFdKind {
+    /// The request does not have a reply.
     NoReply,
+    /// The request has a reply and that reply does *not* contain any file descriptors.
     ReplyWithoutFDs,
+    /// The request has a reply and that reply *does* contain file descriptor(s).
     ReplyWithFDs,
 }
 
+/// Information about the result of polling for a reply packet.
 #[derive(Debug, Clone)]
 pub enum PollReply {
-    /// It is not clear yet what the result will be; try again.
+    /// It is not clear yet what the result will be; try again later.
     TryAgain,
     /// There will be no reply; polling is done.
     NoReply,
