@@ -242,7 +242,7 @@ pub(super) fn generate_request(
             header = generator.ns.header,
         ));
         enum_cases.reply_parse_cases.push(format!(
-            "Request::{ns_prefix}{name}(_) => Some({func}::<{header}::{name}Request>),",
+            "Request::{ns_prefix}{name}(_) => Some({func}::<{header}::{name}Request{lifetime}>),",
             ns_prefix = ns_prefix,
             name = name,
             header = generator.ns.header,
@@ -251,6 +251,7 @@ pub(super) fn generate_request(
             } else {
                 "parse_reply"
             },
+            lifetime = if gathered.needs_lifetime { "<'_>" } else { "" }
         ));
         enum_cases.reply_from_cases.push(format!(
             r#"impl From<{header}::{name}Reply> for Reply {{
