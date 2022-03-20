@@ -1,8 +1,11 @@
 //! A pure-rust implementation of a connection to an X11 server.
 
-use std::collections::VecDeque;
+use std::collections::{HashMap, VecDeque};
+use std::error::Error as StdError;
+use std::fmt;
 
 use crate::utils::RawFdContainer;
+use crate::protocol::xproto::GE_GENERIC_EVENT;
 use crate::{DiscardMode, SequenceNumber};
 
 pub type BufWithFds = crate::BufWithFds<Vec<u8>>;
@@ -52,6 +55,8 @@ pub struct Connection {
     last_sequence_read: SequenceNumber,
     // Events that were read, but not yet returned to the API user
     pending_events: VecDeque<(SequenceNumber, Vec<u8>)>,
+    // Hash map mapping XIDs to special event queues.
+    pending_special_events: HashMap<u32, VecDeque<(SequenceNumber, Vec<u8>)>>,
     // Replies that were read, but not yet returned to the API user
     pending_replies: VecDeque<(SequenceNumber, BufWithFds)>,
 
@@ -72,6 +77,7 @@ impl Connection {
             last_sequence_read: 0,
             sent_requests: VecDeque::new(),
             pending_events: VecDeque::new(),
+            pending_special_events: HashMap::new(),
             pending_replies: VecDeque::new(),
             pending_fds: VecDeque::new(),
         }
@@ -238,8 +244,27 @@ impl Connection {
             }
         } else {
             // It is an event
-            self.pending_events.push_back((seqno, packet));
+            self.enqueue_event(seqno, packet);
         }
+    }
+
+    /// Determine whether an event should be enqueued in the special event queue
+    /// or the normal event queue.
+    fn enqueue_event(&mut self, seqno: u64, packet: Vec<u8>) {
+        // all special events are XGE events
+        if packet[0] & 0x7F == GE_GENERIC_EVENT {
+            // the EID will be between bytes 12 and 16
+            let eid = u32::from_ne_bytes([packet[12], packet[13], packet[14], packet[15]]);
+
+            // push it into a special event queue if the EID matches a queue
+            if let Some(queue) = self.pending_special_events.get_mut(&eid) {
+                queue.push_back((seqno, packet));
+                return;
+            }
+        }
+
+        // fall-through: push into normal queue
+        self.pending_events.push_back((seqno, packet));
     }
 
     /// Check if the server already sent an answer to the request with the given sequence number.
@@ -312,7 +337,46 @@ impl Connection {
             .pop_front()
             .map(|(seqno, event)| (event, seqno))
     }
+
+    /// Initialize a special event queue.
+    /// 
+    /// # Errors
+    /// 
+    /// If a special event queue with the same EID was initialized earlier, this
+    /// function returns [`QueueAlreadyInitialized`].
+    pub fn initialize_special_event_queue(&mut self, queue_id: u32) -> Result<(), QueueAlreadyInitialized> {
+        if self.pending_special_events.insert(queue_id, VecDeque::new()).is_some() {
+           Err(QueueAlreadyInitialized(queue_id))
+        } else {
+            Ok(())
+        }
+    }
+
+    /// Pop an event from a special event queue.
+    pub fn poll_for_special_event_with_sequence(&mut self, queue_id: u32) -> Option<RawEventAndSeqNumber> {
+        self.pending_special_events
+            .get_mut(&queue_id)
+            .and_then(|queue| queue.pop_front())
+            .map(|(seqno, event)| (event, seqno))
+    }
+
+    /// Destroy a special event queue.
+    pub fn destroy_special_event_queue(&mut self, queue_id: u32) {
+        self.pending_special_events.remove(&queue_id);
+    }
 }
+
+/// The queue was already initialized with the given ID.
+#[derive(Debug, Copy, Clone)]
+pub struct QueueAlreadyInitialized(pub u32);
+
+impl fmt::Display for QueueAlreadyInitialized {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "Queue {} already initialized", self.0)
+    }
+}
+
+impl StdError for QueueAlreadyInitialized {}
 
 #[cfg(test)]
 mod test {
