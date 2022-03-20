@@ -4,8 +4,8 @@ use std::collections::{HashMap, VecDeque};
 use std::error::Error as StdError;
 use std::fmt;
 
-use crate::utils::RawFdContainer;
 use crate::protocol::xproto::GE_GENERIC_EVENT;
+use crate::utils::RawFdContainer;
 use crate::{DiscardMode, SequenceNumber};
 
 pub type BufWithFds = crate::BufWithFds<Vec<u8>>;
@@ -339,21 +339,31 @@ impl Connection {
     }
 
     /// Initialize a special event queue.
-    /// 
+    ///
     /// # Errors
-    /// 
+    ///
     /// If a special event queue with the same EID was initialized earlier, this
     /// function returns [`QueueAlreadyInitialized`].
-    pub fn initialize_special_event_queue(&mut self, queue_id: u32) -> Result<(), QueueAlreadyInitialized> {
-        if self.pending_special_events.insert(queue_id, VecDeque::new()).is_some() {
-           Err(QueueAlreadyInitialized(queue_id))
+    pub fn initialize_special_event_queue(
+        &mut self,
+        queue_id: u32,
+    ) -> Result<(), QueueAlreadyInitialized> {
+        if self
+            .pending_special_events
+            .insert(queue_id, VecDeque::new())
+            .is_some()
+        {
+            Err(QueueAlreadyInitialized(queue_id))
         } else {
             Ok(())
         }
     }
 
     /// Pop an event from a special event queue.
-    pub fn poll_for_special_event_with_sequence(&mut self, queue_id: u32) -> Option<RawEventAndSeqNumber> {
+    pub fn poll_for_special_event_with_sequence(
+        &mut self,
+        queue_id: u32,
+    ) -> Option<RawEventAndSeqNumber> {
         self.pending_special_events
             .get_mut(&queue_id)
             .and_then(|queue| queue.pop_front())
