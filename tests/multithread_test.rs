@@ -53,13 +53,14 @@ mod fake_stream {
     use std::sync::mpsc::{channel, Receiver, Sender};
     use std::sync::{Condvar, Mutex};
 
-    use x11rb::connection::SequenceNumber;
     use x11rb::errors::ConnectError;
     use x11rb::protocol::xproto::{
         ImageOrder, Setup, CLIENT_MESSAGE_EVENT, GET_INPUT_FOCUS_REQUEST, SEND_EVENT_REQUEST,
     };
     use x11rb::rust_connection::{PollMode, RustConnection, Stream};
     use x11rb::utils::RawFdContainer;
+
+    use x11rb_protocol::SequenceNumber;
 
     /// Create a new `RustConnection` connected to a fake stream
     pub(crate) fn connect() -> Result<RustConnection<FakeStream>, ConnectError> {

@@ -46,12 +46,14 @@
 
 use std::marker::PhantomData;
 
-use crate::connection::{BufWithFds, DiscardMode, RequestConnection, RequestKind, SequenceNumber};
+use crate::connection::{BufWithFds, RequestConnection, RequestKind};
 use crate::errors::{ConnectionError, ReplyError};
 #[cfg(feature = "record")]
 use crate::protocol::record::EnableContextReply;
 use crate::protocol::xproto::ListFontsWithInfoReply;
 use crate::x11_utils::{TryParse, TryParseFd};
+
+use x11rb_protocol::{DiscardMode, SequenceNumber};
 
 /// A handle to a possible error from the X11 server.
 ///

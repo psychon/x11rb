@@ -3,8 +3,7 @@ use std::io::IoSlice;
 use std::ops::Deref;
 
 use x11rb::connection::{
-    compute_length_field, BufWithFds, DiscardMode, ReplyOrError, RequestConnection, RequestKind,
-    SequenceNumber,
+    compute_length_field, BufWithFds, ReplyOrError, RequestConnection, RequestKind,
 };
 use x11rb::cookie::{Cookie, CookieWithFds, VoidCookie};
 use x11rb::errors::{ConnectionError, ParseError, ReplyError};
@@ -13,6 +12,8 @@ use x11rb::protocol::xproto::{
 };
 use x11rb::utils::RawFdContainer;
 use x11rb::x11_utils::{ExtensionInformation, Serialize, TryParse, TryParseFd};
+
+use x11rb_protocol::{DiscardMode, SequenceNumber};
 
 #[derive(Debug)]
 struct SavedRequest {

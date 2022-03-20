@@ -21,12 +21,13 @@ extern crate x11rb;
 
 use std::error::Error;
 
-use x11rb::connection::{Connection, SequenceNumber};
+use x11rb::connection::Connection;
 use x11rb::errors::{ConnectionError, ReplyError, ReplyOrIdError};
 use x11rb::protocol::xproto::*;
 use x11rb::protocol::Event;
 use x11rb::wrapper::ConnectionExt as _;
 use x11rb::COPY_DEPTH_FROM_PARENT;
+use x11rb_protocol::SequenceNumber;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 //

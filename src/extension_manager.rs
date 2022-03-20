@@ -2,11 +2,13 @@
 
 use std::collections::{hash_map::Entry as HashMapEntry, HashMap};
 
-use crate::connection::{RequestConnection, SequenceNumber};
+use crate::connection::RequestConnection;
 use crate::cookie::Cookie;
 use crate::errors::{ConnectionError, ReplyError};
 use crate::protocol::xproto::{ConnectionExt, QueryExtensionReply};
 use crate::x11_utils::{ExtInfoProvider, ExtensionInformation};
+
+use x11rb_protocol::SequenceNumber;
 
 /// Helper for implementing `RequestConnection::extension_information()`.
 ///
@@ -151,13 +153,12 @@ mod test {
     use std::cell::RefCell;
     use std::io::IoSlice;
 
-    use crate::connection::{
-        BufWithFds, DiscardMode, ReplyOrError, RequestConnection, RequestKind, SequenceNumber,
-    };
+    use crate::connection::{BufWithFds, ReplyOrError, RequestConnection, RequestKind};
     use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
     use crate::errors::{ConnectionError, ParseError};
     use crate::utils::RawFdContainer;
     use crate::x11_utils::{ExtInfoProvider, ExtensionInformation, TryParse, TryParseFd};
+    use x11rb_protocol::{DiscardMode, SequenceNumber};
 
     use super::{CheckState, ExtensionManager};
 

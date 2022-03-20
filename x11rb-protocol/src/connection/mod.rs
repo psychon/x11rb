@@ -2,12 +2,23 @@
 
 use std::collections::VecDeque;
 
-use super::{BufWithFds, RawEventAndSeqNumber, ReplyFdKind, WriteBuffer};
-use crate::connection::{DiscardMode, SequenceNumber};
 use crate::utils::RawFdContainer;
+use crate::{DiscardMode, SequenceNumber};
+
+pub type BufWithFds = crate::BufWithFds<Vec<u8>>;
+
+/// The raw bytes of an event received by [`RustConnection`] and its sequence number.
+pub type RawEventAndSeqNumber = crate::RawEventAndSeqNumber<Vec<u8>>;
+
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+pub enum ReplyFdKind {
+    NoReply,
+    ReplyWithoutFDs,
+    ReplyWithFDs,
+}
 
 #[derive(Debug, Clone)]
-pub(crate) enum PollReply {
+pub enum PollReply {
     /// It is not clear yet what the result will be; try again.
     TryAgain,
     /// There will be no reply; polling is done.
@@ -23,8 +34,12 @@ struct SentRequest {
     has_fds: bool,
 }
 
+/// A pure-rust, sans-I/O implementation of the X11 protocol.
+///
+/// This object is designed to be used in combination with an I/O backend, in
+/// order to keep state for the X11 protocol.
 #[derive(Debug)]
-pub(crate) struct ConnectionInner {
+pub struct Connection {
     // The sequence number of the last request that was written
     last_sequence_written: SequenceNumber,
     // Sorted(!) list with information on requests that were written, but no answer received yet.
@@ -42,18 +57,16 @@ pub(crate) struct ConnectionInner {
 
     // FDs that were read, but not yet assigned to any reply
     pending_fds: VecDeque<RawFdContainer>,
-
-    // Buffer used for writing into the stream.
-    pub(super) write_buffer: WriteBuffer,
 }
 
-impl ConnectionInner {
-    /// Crate a new `ConnectionInner`.
+impl Connection {
+    /// Crate a new `Connection`.
     ///
     /// It is assumed that the connection was just established. This means that the next request
     /// that is sent will have sequence number one.
-    pub(crate) fn new() -> Self {
-        ConnectionInner {
+    #[allow(clippy::new_without_default)]
+    pub fn new() -> Self {
+        Connection {
             last_sequence_written: 0,
             next_reply_expected: 0,
             last_sequence_read: 0,
@@ -61,7 +74,6 @@ impl ConnectionInner {
             pending_events: VecDeque::new(),
             pending_replies: VecDeque::new(),
             pending_fds: VecDeque::new(),
-            write_buffer: WriteBuffer::new(),
         }
     }
 
@@ -69,7 +81,7 @@ impl ConnectionInner {
     ///
     /// When this returns `None`, a sync with the server is necessary. Afterwards, the caller
     /// should try again.
-    pub(crate) fn send_request(&mut self, kind: ReplyFdKind) -> Option<SequenceNumber> {
+    pub fn send_request(&mut self, kind: ReplyFdKind) -> Option<SequenceNumber> {
         let has_response = match kind {
             ReplyFdKind::NoReply => false,
             ReplyFdKind::ReplyWithoutFDs => true,
@@ -102,7 +114,7 @@ impl ConnectionInner {
     }
 
     /// Ignore the reply for a request that was previously sent.
-    pub(crate) fn discard_reply(&mut self, seqno: SequenceNumber, mode: DiscardMode) {
+    pub fn discard_reply(&mut self, seqno: SequenceNumber, mode: DiscardMode) {
         if let Some(entry) = self.sent_requests.iter_mut().find(|r| r.seqno == seqno) {
             entry.discard_mode = Some(mode);
         }
@@ -159,14 +171,14 @@ impl ConnectionInner {
     /// Add FDs that were received to the internal state.
     ///
     /// This must be called before the corresponding packets are enqueued.
-    pub(crate) fn enqueue_fds(&mut self, fds: Vec<RawFdContainer>) {
+    pub fn enqueue_fds(&mut self, fds: Vec<RawFdContainer>) {
         self.pending_fds.extend(fds);
     }
 
     /// An X11 packet was received from the connection and is now enqueued into our state.
     ///
     /// Any FDs that were received must already be enqueued before this can be called.
-    pub(crate) fn enqueue_packet(&mut self, packet: Vec<u8>) {
+    pub fn enqueue_packet(&mut self, packet: Vec<u8>) {
         let kind = packet[0];
 
         // extract_sequence_number() updates our state and is thus important to call even when we
@@ -234,10 +246,7 @@ impl ConnectionInner {
     ///
     /// This function is meant to be used for requests that have a reply. Such requests always
     /// cause a reply or an error to be sent.
-    pub(crate) fn poll_for_reply_or_error(
-        &mut self,
-        sequence: SequenceNumber,
-    ) -> Option<BufWithFds> {
+    pub fn poll_for_reply_or_error(&mut self, sequence: SequenceNumber) -> Option<BufWithFds> {
         for (index, (seqno, _packet)) in self.pending_replies.iter().enumerate() {
             if *seqno == sequence {
                 return Some(self.pending_replies.remove(index).unwrap().1);
@@ -256,7 +265,7 @@ impl ConnectionInner {
     /// higher sequence number will be received. Since the X11 server handles requests in-order,
     /// if the reply to a later request is received, this means that the earlier request did not
     /// fail.
-    pub(crate) fn prepare_check_for_reply_or_error(&mut self, sequence: SequenceNumber) -> bool {
+    pub fn prepare_check_for_reply_or_error(&mut self, sequence: SequenceNumber) -> bool {
         self.next_reply_expected < sequence
     }
 
@@ -266,7 +275,7 @@ impl ConnectionInner {
     /// sequence number.
     ///
     /// This function can be used for requests with and without a reply.
-    pub(crate) fn poll_check_for_reply_or_error(&mut self, sequence: SequenceNumber) -> PollReply {
+    pub fn poll_check_for_reply_or_error(&mut self, sequence: SequenceNumber) -> PollReply {
         if let Some(result) = self.poll_for_reply_or_error(sequence) {
             return PollReply::Reply(result.0);
         }
@@ -284,7 +293,7 @@ impl ConnectionInner {
     ///
     /// If the request caused an error, that error will be handled as an event. This means that a
     /// latter call to `poll_for_event()` will return it.
-    pub(crate) fn poll_for_reply(&mut self, sequence: SequenceNumber) -> PollReply {
+    pub fn poll_for_reply(&mut self, sequence: SequenceNumber) -> PollReply {
         if let Some(reply) = self.poll_for_reply_or_error(sequence) {
             if reply.0[0] == 0 {
                 self.pending_events.push_back((sequence, reply.0));
@@ -298,7 +307,7 @@ impl ConnectionInner {
     }
 
     /// Get a pending event.
-    pub(crate) fn poll_for_event_with_sequence(&mut self) -> Option<RawEventAndSeqNumber> {
+    pub fn poll_for_event_with_sequence(&mut self) -> Option<RawEventAndSeqNumber> {
         self.pending_events
             .pop_front()
             .map(|(seqno, event)| (event, seqno))
@@ -307,14 +316,14 @@ impl ConnectionInner {
 
 #[cfg(test)]
 mod test {
-    use super::{ConnectionInner, ReplyFdKind};
+    use super::{Connection, ReplyFdKind};
 
     #[test]
     fn insert_sync_no_reply() {
         // The connection must send a sync (GetInputFocus) request every 2^16 requests (that do not
         // have a reply). Thus, this test sends more than that and tests for the sync to appear.
 
-        let mut connection = ConnectionInner::new();
+        let mut connection = Connection::new();
 
         for num in 1..0x10000 {
             let seqno = connection.send_request(ReplyFdKind::NoReply);
@@ -336,7 +345,7 @@ mod test {
         // Compared to the previous test, this uses ReplyFdKind::ReplyWithoutFDs, so no sync needs to
         // be inserted.
 
-        let mut connection = ConnectionInner::new();
+        let mut connection = Connection::new();
 
         for num in 1..=0x10001 {
             let seqno = connection.send_request(ReplyFdKind::ReplyWithoutFDs);
@@ -350,7 +359,7 @@ mod test {
         // the next request. Then it sends a ReplyFdKind::ReplyWithoutFDs request so that no sync is
         // necessary. This is a regression test: Once upon a time, an unnecessary sync was done.
 
-        let mut connection = ConnectionInner::new();
+        let mut connection = Connection::new();
 
         for num in 1..0x10000 {
             let seqno = connection.send_request(ReplyFdKind::NoReply);

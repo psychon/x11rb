@@ -9,7 +9,7 @@ use std::collections::{BinaryHeap, VecDeque};
 use std::sync::Mutex;
 
 use super::{Buffer, XCBConnection};
-use crate::connection::SequenceNumber;
+use x11rb_protocol::SequenceNumber;
 
 #[derive(Debug, Default)]
 struct PendingErrorsInner {
