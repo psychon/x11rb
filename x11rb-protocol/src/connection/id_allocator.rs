@@ -1,5 +1,8 @@
-use crate::errors::{ConnectError, ReplyOrIdError};
+use crate::errors::ConnectError;
 use crate::protocol::xc_misc::GetXIDRangeReply;
+
+use std::error::Error;
+use std::fmt;
 
 /// An allocator for X11 IDs.
 ///
@@ -39,12 +42,12 @@ impl IdAllocator {
     pub(crate) fn update_xid_range(
         &mut self,
         xidrange: &GetXIDRangeReply,
-    ) -> Result<(), ReplyOrIdError> {
+    ) -> Result<(), IdsExhausted> {
         let (start, count) = (xidrange.start_id, xidrange.count);
         // Apparently (0, 1) is how the server signals "I am out of IDs".
         // The second case avoids an underflow below and should never happen.
         if (start, count) == (0, 1) || count == 0 {
-            return Err(ReplyOrIdError::IdsExhausted);
+            return Err(IdsExhausted);
         }
         self.next_id = start;
         self.max_id = start + (count - 1) * self.increment;
@@ -63,9 +66,20 @@ impl IdAllocator {
     }
 }
 
+#[derive(Debug, Copy, Clone)]
+pub struct IdsExhausted;
+
+impl fmt::Display for IdsExhausted {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "XID range has been exhausted")
+    }
+}
+
+impl Error for IdsExhausted {}
+
 #[cfg(test)]
 mod test {
-    use super::{GetXIDRangeReply, IdAllocator, ReplyOrIdError};
+    use super::{GetXIDRangeReply, IdAllocator, IdsExhausted};
 
     #[test]
     fn exhaustive() {
@@ -118,8 +132,8 @@ mod test {
 
     #[test]
     fn invalid_update_arg() {
-        fn check_ids_exhausted(arg: &Result<(), ReplyOrIdError>) {
-            if let Err(ReplyOrIdError::IdsExhausted) = arg {
+        fn check_ids_exhausted(arg: &Result<(), IdsExhausted>) {
+            if let Err(IdsExhausted) = arg {
             } else {
                 panic!("Expected IdsExhausted, got {:?}", arg);
             }

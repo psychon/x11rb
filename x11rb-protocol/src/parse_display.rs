@@ -1,12 +1,12 @@
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub(crate) struct ParsedDisplay {
-    pub(crate) host: String,
-    pub(crate) protocol: Option<String>,
-    pub(crate) display: u16,
-    pub(crate) screen: u16,
+pub struct ParsedDisplay {
+    pub host: String,
+    pub protocol: Option<String>,
+    pub display: u16,
+    pub screen: u16,
 }
 
-pub(crate) fn parse_display(dpy_name: Option<&str>) -> Option<ParsedDisplay> {
+pub fn parse_display(dpy_name: Option<&str>) -> Option<ParsedDisplay> {
     // If no dpy name was provided, use the env var. If no env var exists, return None.
     match dpy_name {
         Some(dpy_name) => parse_display_impl(dpy_name),

@@ -1,5 +1,9 @@
 //! This module contains the current mess that is error handling.
 
+use crate::protocol::xproto::{SetupAuthenticate, SetupFailed};
+
+pub use crate::connection::IdsExhausted;
+
 /// An error occurred while parsing some data
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 #[non_exhaustive]
@@ -63,5 +67,91 @@ impl std::fmt::Display for ParseError {
             }
             ParseError::MissingFileDescriptors => write!(f, "Missing file descriptors"),
         }
+    }
+}
+
+/// An error that occurred while connecting to an X11 server
+#[derive(Debug)]
+#[non_exhaustive]
+pub enum ConnectError {
+    /// An unknown error occurred.
+    ///
+    /// One situation were this error is used when libxcb indicates an error that does not match
+    /// any of the defined error conditions. Thus, libxcb is violating its own API (or new error
+    /// cases were defined, but are not yet handled by x11rb).
+    UnknownError,
+
+    /// Error while parsing some data, see `ParseError`.
+    ParseError(ParseError),
+
+    /// Out of memory.
+    ///
+    /// This is `XCB_CONN_CLOSED_MEM_INSUFFICIENT`.
+    InsufficientMemory,
+
+    /// Error during parsing of display string.
+    ///
+    /// This is `XCB_CONN_CLOSED_PARSE_ERR`.
+    DisplayParsingError,
+
+    /// Server does not have a screen matching the display.
+    ///
+    /// This is `XCB_CONN_CLOSED_INVALID_SCREEN`.
+    InvalidScreen,
+
+    /// An I/O error occurred on the connection.
+    IoError(std::io::Error),
+
+    /// Invalid ID mask provided by the server.
+    ///
+    /// The value of `resource_id_mask` in the `Setup` provided by the server was zero.
+    ZeroIdMask,
+
+    /// The server rejected the connection with a `SetupAuthenticate` message.
+    SetupAuthenticate(SetupAuthenticate),
+
+    /// The server rejected the connection with a `SetupFailed` message.
+    SetupFailed(SetupFailed),
+}
+
+impl std::error::Error for ConnectError {}
+
+impl std::fmt::Display for ConnectError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        fn display(
+            f: &mut std::fmt::Formatter<'_>,
+            prefix: &str,
+            value: &[u8],
+        ) -> std::fmt::Result {
+            match std::str::from_utf8(value).ok() {
+                Some(value) => write!(f, "{}: '{}'", prefix, value),
+                None => write!(f, "{}: {:?} [message is not utf8]", prefix, value),
+            }
+        }
+        match self {
+            ConnectError::UnknownError => write!(f, "Unknown connection error"),
+            ConnectError::InsufficientMemory => write!(f, "Insufficient memory"),
+            ConnectError::DisplayParsingError => write!(f, "Display parsing error"),
+            ConnectError::InvalidScreen => write!(f, "Invalid screen"),
+            ConnectError::ParseError(err) => err.fmt(f),
+            ConnectError::IoError(err) => err.fmt(f),
+            ConnectError::ZeroIdMask => write!(f, "XID mask was zero"),
+            ConnectError::SetupFailed(err) => display(f, "X11 setup failed", &err.reason),
+            ConnectError::SetupAuthenticate(err) => {
+                display(f, "X11 authentication failed", &err.reason)
+            }
+        }
+    }
+}
+
+impl From<ParseError> for ConnectError {
+    fn from(err: ParseError) -> Self {
+        ConnectError::ParseError(err)
+    }
+}
+
+impl From<std::io::Error> for ConnectError {
+    fn from(err: std::io::Error) -> Self {
+        ConnectError::IoError(err)
     }
 }

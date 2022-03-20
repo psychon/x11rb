@@ -8,6 +8,7 @@ pub mod connection;
 #[macro_use]
 pub mod x11_utils;
 pub mod errors;
+pub mod parse_display;
 #[rustfmt::skip]
 pub mod protocol;
 pub mod utils;

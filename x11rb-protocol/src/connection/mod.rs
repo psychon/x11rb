@@ -1,9 +1,17 @@
 //! A pure-rust implementation of a connection to an X11 server.
 
 use std::collections::VecDeque;
+use std::sync::Arc;
 
+use crate::errors::ConnectError;
+use crate::protocol::xc_misc::GetXIDRangeReply;
+use crate::protocol::xproto::Setup;
 use crate::utils::RawFdContainer;
 use crate::{DiscardMode, SequenceNumber};
+
+mod id_allocator;
+
+pub use id_allocator::IdsExhausted;
 
 pub type BufWithFds = crate::BufWithFds<Vec<u8>>;
 
@@ -40,6 +48,9 @@ struct SentRequest {
 /// order to keep state for the X11 protocol.
 #[derive(Debug)]
 pub struct Connection {
+    // The setup associated with this connection.
+    setup: Arc<Setup>,
+
     // The sequence number of the last request that was written
     last_sequence_written: SequenceNumber,
     // Sorted(!) list with information on requests that were written, but no answer received yet.
@@ -57,6 +68,9 @@ pub struct Connection {
 
     // FDs that were read, but not yet assigned to any reply
     pending_fds: VecDeque<RawFdContainer>,
+
+    // Allocates XIDs for new resources
+    id_allocator: id_allocator::IdAllocator,
 }
 
 impl Connection {
@@ -64,9 +78,12 @@ impl Connection {
     ///
     /// It is assumed that the connection was just established. This means that the next request
     /// that is sent will have sequence number one.
-    #[allow(clippy::new_without_default)]
-    pub fn new() -> Self {
-        Connection {
+    pub fn from_setup(setup: Arc<Setup>) -> Result<Self, ConnectError> {
+        let id_allocator =
+            id_allocator::IdAllocator::new(setup.resource_id_base, setup.resource_id_mask)?;
+
+        Ok(Connection {
+            setup,
             last_sequence_written: 0,
             next_reply_expected: 0,
             last_sequence_read: 0,
@@ -74,7 +91,13 @@ impl Connection {
             pending_events: VecDeque::new(),
             pending_replies: VecDeque::new(),
             pending_fds: VecDeque::new(),
-        }
+            id_allocator,
+        })
+    }
+
+    /// Return the setup used in this connection.
+    pub fn setup(&self) -> &Arc<Setup> {
+        &self.setup
     }
 
     /// Send a request to the X11 server.
@@ -312,18 +335,55 @@ impl Connection {
             .pop_front()
             .map(|(seqno, event)| (event, seqno))
     }
+
+    /// Generate a new XID.
+    ///
+    /// Returns `None` if the XID space is exhausted.
+    pub fn generate_id(&mut self) -> Option<u32> {
+        self.id_allocator.generate_id()
+    }
+
+    /// Update the XID range.
+    pub fn update_xid_range(&mut self, xidrange: &GetXIDRangeReply) -> Result<(), IdsExhausted> {
+        self.id_allocator.update_xid_range(xidrange)
+    }
 }
 
 #[cfg(test)]
 mod test {
     use super::{Connection, ReplyFdKind};
+    use crate::protocol::xproto::{ImageOrder, Setup};
+    use std::sync::Arc;
+
+    fn default_setup() -> Arc<Setup> {
+        Arc::new(Setup {
+            status: 1,
+            protocol_major_version: 11,
+            protocol_minor_version: 0,
+            length: 0,
+            release_number: 0,
+            resource_id_base: 0,
+            resource_id_mask: 0,
+            motion_buffer_size: 0,
+            maximum_request_length: 0,
+            image_byte_order: ImageOrder::LSB_FIRST,
+            bitmap_format_bit_order: ImageOrder::LSB_FIRST,
+            bitmap_format_scanline_unit: 0,
+            bitmap_format_scanline_pad: 0,
+            min_keycode: 0,
+            max_keycode: 0,
+            vendor: vec![],
+            pixmap_formats: vec![],
+            roots: vec![],
+        })
+    }
 
     #[test]
     fn insert_sync_no_reply() {
         // The connection must send a sync (GetInputFocus) request every 2^16 requests (that do not
         // have a reply). Thus, this test sends more than that and tests for the sync to appear.
 
-        let mut connection = Connection::new();
+        let mut connection = Connection::from_setup(default_setup()).unwrap();
 
         for num in 1..0x10000 {
             let seqno = connection.send_request(ReplyFdKind::NoReply);
@@ -345,7 +405,7 @@ mod test {
         // Compared to the previous test, this uses ReplyFdKind::ReplyWithoutFDs, so no sync needs to
         // be inserted.
 
-        let mut connection = Connection::new();
+        let mut connection = Connection::from_setup(default_setup()).unwrap();
 
         for num in 1..=0x10001 {
             let seqno = connection.send_request(ReplyFdKind::ReplyWithoutFDs);
@@ -359,7 +419,7 @@ mod test {
         // the next request. Then it sends a ReplyFdKind::ReplyWithoutFDs request so that no sync is
         // necessary. This is a regression test: Once upon a time, an unnecessary sync was done.
 
-        let mut connection = Connection::new();
+        let mut connection = Connection::from_setup(default_setup()).unwrap();
 
         for num in 1..0x10000 {
             let seqno = connection.send_request(ReplyFdKind::NoReply);
