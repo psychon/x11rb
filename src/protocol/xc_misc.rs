@@ -32,14 +32,6 @@ fn major_opcode<Conn: RequestConnection + ?Sized>(conn: &Conn) -> Result<u8, Con
     Ok(info.major_opcode)
 }
 
-fn send_get_version<'c, Conn>(req: GetVersionRequest, conn: &'c Conn) -> Result<Cookie<'c, Conn, GetVersionReply>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize(major_opcode(conn)?);
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    conn.send_request_with_reply(&slices, fds)
-}
 pub fn get_version<Conn>(conn: &Conn, client_major_version: u16, client_minor_version: u16) -> Result<Cookie<'_, Conn, GetVersionReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -48,33 +40,21 @@ where
         client_major_version,
         client_minor_version,
     };
-    send_get_version(request0, conn)
-}
-
-fn send_get_xid_range<'c, Conn>(req: GetXIDRangeRequest, conn: &'c Conn) -> Result<Cookie<'c, Conn, GetXIDRangeReply>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize(major_opcode(conn)?);
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_with_reply(&slices, fds)
 }
+
 pub fn get_xid_range<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetXIDRangeReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = GetXIDRangeRequest;
-    send_get_xid_range(request0, conn)
-}
-
-fn send_get_xid_list<'c, Conn>(req: GetXIDListRequest, conn: &'c Conn) -> Result<Cookie<'c, Conn, GetXIDListReply>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize(major_opcode(conn)?);
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_with_reply(&slices, fds)
 }
+
 pub fn get_xid_list<Conn>(conn: &Conn, count: u32) -> Result<Cookie<'_, Conn, GetXIDListReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -82,7 +62,9 @@ where
     let request0 = GetXIDListRequest {
         count,
     };
-    send_get_xid_list(request0, conn)
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    conn.send_request_with_reply(&slices, fds)
 }
 
 /// Extension trait defining the requests of this extension.
