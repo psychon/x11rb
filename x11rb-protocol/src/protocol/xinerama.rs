@@ -131,7 +131,7 @@ impl Request for QueryVersionRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for QueryVersionRequest {}
+impl crate::x11_utils::ReplyRequest for QueryVersionRequest {type Reply = QueryVersionReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionReply {
@@ -211,7 +211,7 @@ impl Request for GetStateRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetStateRequest {}
+impl crate::x11_utils::ReplyRequest for GetStateRequest {type Reply = GetStateReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetStateReply {
@@ -290,7 +290,7 @@ impl Request for GetScreenCountRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetScreenCountRequest {}
+impl crate::x11_utils::ReplyRequest for GetScreenCountRequest {type Reply = GetScreenCountReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetScreenCountReply {
@@ -377,7 +377,7 @@ impl Request for GetScreenSizeRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetScreenSizeRequest {}
+impl crate::x11_utils::ReplyRequest for GetScreenSizeRequest {type Reply = GetScreenSizeReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetScreenSizeReply {
@@ -452,7 +452,7 @@ impl Request for IsActiveRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for IsActiveRequest {}
+impl crate::x11_utils::ReplyRequest for IsActiveRequest {type Reply = IsActiveReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct IsActiveReply {
@@ -521,7 +521,7 @@ impl Request for QueryScreensRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for QueryScreensRequest {}
+impl crate::x11_utils::ReplyRequest for QueryScreensRequest {type Reply = QueryScreensReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryScreensReply {

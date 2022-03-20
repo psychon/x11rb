@@ -1145,19 +1145,23 @@ fn emit_request_struct(
     });
     outln!(out, "}}");
 
-    let request_trait = if request_def.reply.is_none() {
-        "crate::x11_utils::VoidRequest"
+    let (request_trait, contents) = if request_def.reply.is_none() {
+        ("crate::x11_utils::VoidRequest", None)
     } else if gathered.reply_has_fds {
-        "crate::x11_utils::ReplyFDsRequest"
+        ("crate::x11_utils::ReplyFDsRequest", None)
     } else {
-        "crate::x11_utils::ReplyRequest"
+        (
+            "crate::x11_utils::ReplyRequest",
+            Some(format!("type Reply = {}Reply;", name)),
+        )
     };
     outln!(
         out,
-        "impl{lifetime} {request_trait} for {name}Request{lifetime} {{}}",
+        "impl{lifetime} {request_trait} for {name}Request{lifetime} {{{contents}}}",
         name = name,
         request_trait = request_trait,
         lifetime = struct_lifetime_block,
+        contents = contents.as_deref().unwrap_or(""),
     );
 }
 

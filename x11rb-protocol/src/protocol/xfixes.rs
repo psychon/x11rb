@@ -95,7 +95,7 @@ impl Request for QueryVersionRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for QueryVersionRequest {}
+impl crate::x11_utils::ReplyRequest for QueryVersionRequest {type Reply = QueryVersionReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionReply {
@@ -945,7 +945,7 @@ impl Request for GetCursorImageRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetCursorImageRequest {}
+impl crate::x11_utils::ReplyRequest for GetCursorImageRequest {type Reply = GetCursorImageReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetCursorImageReply {
@@ -2021,7 +2021,7 @@ impl Request for FetchRegionRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for FetchRegionRequest {}
+impl crate::x11_utils::ReplyRequest for FetchRegionRequest {type Reply = FetchRegionReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct FetchRegionReply {
@@ -2420,7 +2420,7 @@ impl Request for GetCursorNameRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetCursorNameRequest {}
+impl crate::x11_utils::ReplyRequest for GetCursorNameRequest {type Reply = GetCursorNameReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetCursorNameReply {
@@ -2509,7 +2509,7 @@ impl Request for GetCursorImageAndNameRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetCursorImageAndNameRequest {}
+impl crate::x11_utils::ReplyRequest for GetCursorImageAndNameRequest {type Reply = GetCursorImageAndNameReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetCursorImageAndNameReply {

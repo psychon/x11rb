@@ -267,7 +267,7 @@ impl Request for QueryVersionRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for QueryVersionRequest {}
+impl crate::x11_utils::ReplyRequest for QueryVersionRequest {type Reply = QueryVersionReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionReply {
@@ -447,7 +447,7 @@ impl Request for SetScreenConfigRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for SetScreenConfigRequest {}
+impl crate::x11_utils::ReplyRequest for SetScreenConfigRequest {type Reply = SetScreenConfigReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SetScreenConfigReply {
@@ -668,7 +668,7 @@ impl Request for GetScreenInfoRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetScreenInfoRequest {}
+impl crate::x11_utils::ReplyRequest for GetScreenInfoRequest {type Reply = GetScreenInfoReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetScreenInfoReply {
@@ -780,7 +780,7 @@ impl Request for GetScreenSizeRangeRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetScreenSizeRangeRequest {}
+impl crate::x11_utils::ReplyRequest for GetScreenSizeRangeRequest {type Reply = GetScreenSizeRangeReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetScreenSizeRangeReply {
@@ -1127,7 +1127,7 @@ impl Request for GetScreenResourcesRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetScreenResourcesRequest {}
+impl crate::x11_utils::ReplyRequest for GetScreenResourcesRequest {type Reply = GetScreenResourcesReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetScreenResourcesReply {
@@ -1343,7 +1343,7 @@ impl Request for GetOutputInfoRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetOutputInfoRequest {}
+impl crate::x11_utils::ReplyRequest for GetOutputInfoRequest {type Reply = GetOutputInfoReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetOutputInfoReply {
@@ -1504,7 +1504,7 @@ impl Request for ListOutputPropertiesRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for ListOutputPropertiesRequest {}
+impl crate::x11_utils::ReplyRequest for ListOutputPropertiesRequest {type Reply = ListOutputPropertiesReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ListOutputPropertiesReply {
@@ -1607,7 +1607,7 @@ impl Request for QueryOutputPropertyRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for QueryOutputPropertyRequest {}
+impl crate::x11_utils::ReplyRequest for QueryOutputPropertyRequest {type Reply = QueryOutputPropertyReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryOutputPropertyReply {
@@ -2020,7 +2020,7 @@ impl Request for GetOutputPropertyRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetOutputPropertyRequest {}
+impl crate::x11_utils::ReplyRequest for GetOutputPropertyRequest {type Reply = GetOutputPropertyReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetOutputPropertyReply {
@@ -2157,7 +2157,7 @@ impl<'input> Request for CreateModeRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::ReplyRequest for CreateModeRequest<'input> {}
+impl<'input> crate::x11_utils::ReplyRequest for CreateModeRequest<'input> {type Reply = CreateModeReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CreateModeReply {
@@ -2419,7 +2419,7 @@ impl Request for GetCrtcInfoRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetCrtcInfoRequest {}
+impl crate::x11_utils::ReplyRequest for GetCrtcInfoRequest {type Reply = GetCrtcInfoReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetCrtcInfoReply {
@@ -2619,7 +2619,7 @@ impl<'input> Request for SetCrtcConfigRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::ReplyRequest for SetCrtcConfigRequest<'input> {}
+impl<'input> crate::x11_utils::ReplyRequest for SetCrtcConfigRequest<'input> {type Reply = SetCrtcConfigReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SetCrtcConfigReply {
@@ -2700,7 +2700,7 @@ impl Request for GetCrtcGammaSizeRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetCrtcGammaSizeRequest {}
+impl crate::x11_utils::ReplyRequest for GetCrtcGammaSizeRequest {type Reply = GetCrtcGammaSizeReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetCrtcGammaSizeReply {
@@ -2779,7 +2779,7 @@ impl Request for GetCrtcGammaRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetCrtcGammaRequest {}
+impl crate::x11_utils::ReplyRequest for GetCrtcGammaRequest {type Reply = GetCrtcGammaReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetCrtcGammaReply {
@@ -2967,7 +2967,7 @@ impl Request for GetScreenResourcesCurrentRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetScreenResourcesCurrentRequest {}
+impl crate::x11_utils::ReplyRequest for GetScreenResourcesCurrentRequest {type Reply = GetScreenResourcesCurrentReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetScreenResourcesCurrentReply {
@@ -3312,7 +3312,7 @@ impl Request for GetCrtcTransformRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetCrtcTransformRequest {}
+impl crate::x11_utils::ReplyRequest for GetCrtcTransformRequest {type Reply = GetCrtcTransformReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetCrtcTransformReply {
@@ -3473,7 +3473,7 @@ impl Request for GetPanningRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetPanningRequest {}
+impl crate::x11_utils::ReplyRequest for GetPanningRequest {type Reply = GetPanningReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetPanningReply {
@@ -3657,7 +3657,7 @@ impl Request for SetPanningRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for SetPanningRequest {}
+impl crate::x11_utils::ReplyRequest for SetPanningRequest {type Reply = SetPanningReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SetPanningReply {
@@ -3798,7 +3798,7 @@ impl Request for GetOutputPrimaryRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetOutputPrimaryRequest {}
+impl crate::x11_utils::ReplyRequest for GetOutputPrimaryRequest {type Reply = GetOutputPrimaryReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetOutputPrimaryReply {
@@ -3876,7 +3876,7 @@ impl Request for GetProvidersRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetProvidersRequest {}
+impl crate::x11_utils::ReplyRequest for GetProvidersRequest {type Reply = GetProvidersReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetProvidersReply {
@@ -4044,7 +4044,7 @@ impl Request for GetProviderInfoRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetProviderInfoRequest {}
+impl crate::x11_utils::ReplyRequest for GetProviderInfoRequest {type Reply = GetProviderInfoReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetProviderInfoReply {
@@ -4333,7 +4333,7 @@ impl Request for ListProviderPropertiesRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for ListProviderPropertiesRequest {}
+impl crate::x11_utils::ReplyRequest for ListProviderPropertiesRequest {type Reply = ListProviderPropertiesReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ListProviderPropertiesReply {
@@ -4436,7 +4436,7 @@ impl Request for QueryProviderPropertyRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for QueryProviderPropertyRequest {}
+impl crate::x11_utils::ReplyRequest for QueryProviderPropertyRequest {type Reply = QueryProviderPropertyReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryProviderPropertyReply {
@@ -4848,7 +4848,7 @@ impl Request for GetProviderPropertyRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetProviderPropertyRequest {}
+impl crate::x11_utils::ReplyRequest for GetProviderPropertyRequest {type Reply = GetProviderPropertyReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetProviderPropertyReply {
@@ -5612,7 +5612,7 @@ impl Request for GetMonitorsRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetMonitorsRequest {}
+impl crate::x11_utils::ReplyRequest for GetMonitorsRequest {type Reply = GetMonitorsReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetMonitorsReply {

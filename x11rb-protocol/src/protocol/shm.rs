@@ -162,7 +162,7 @@ impl Request for QueryVersionRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for QueryVersionRequest {}
+impl crate::x11_utils::ReplyRequest for QueryVersionRequest {type Reply = QueryVersionReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionReply {
@@ -572,7 +572,7 @@ impl Request for GetImageRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetImageRequest {}
+impl crate::x11_utils::ReplyRequest for GetImageRequest {type Reply = GetImageReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetImageReply {

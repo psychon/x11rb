@@ -87,7 +87,7 @@ impl Request for QueryVersionRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for QueryVersionRequest {}
+impl crate::x11_utils::ReplyRequest for QueryVersionRequest {type Reply = QueryVersionReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionReply {
@@ -222,7 +222,7 @@ impl Request for GetDeviceCreateContextRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetDeviceCreateContextRequest {}
+impl crate::x11_utils::ReplyRequest for GetDeviceCreateContextRequest {type Reply = GetDeviceCreateContextReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetDeviceCreateContextReply {
@@ -391,7 +391,7 @@ impl Request for GetDeviceContextRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetDeviceContextRequest {}
+impl crate::x11_utils::ReplyRequest for GetDeviceContextRequest {type Reply = GetDeviceContextReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetDeviceContextReply {
@@ -542,7 +542,7 @@ impl Request for GetWindowCreateContextRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetWindowCreateContextRequest {}
+impl crate::x11_utils::ReplyRequest for GetWindowCreateContextRequest {type Reply = GetWindowCreateContextReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetWindowCreateContextReply {
@@ -638,7 +638,7 @@ impl Request for GetWindowContextRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetWindowContextRequest {}
+impl crate::x11_utils::ReplyRequest for GetWindowContextRequest {type Reply = GetWindowContextReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetWindowContextReply {
@@ -866,7 +866,7 @@ impl Request for GetPropertyCreateContextRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetPropertyCreateContextRequest {}
+impl crate::x11_utils::ReplyRequest for GetPropertyCreateContextRequest {type Reply = GetPropertyCreateContextReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetPropertyCreateContextReply {
@@ -1017,7 +1017,7 @@ impl Request for GetPropertyUseContextRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetPropertyUseContextRequest {}
+impl crate::x11_utils::ReplyRequest for GetPropertyUseContextRequest {type Reply = GetPropertyUseContextReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetPropertyUseContextReply {
@@ -1121,7 +1121,7 @@ impl Request for GetPropertyContextRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetPropertyContextRequest {}
+impl crate::x11_utils::ReplyRequest for GetPropertyContextRequest {type Reply = GetPropertyContextReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetPropertyContextReply {
@@ -1225,7 +1225,7 @@ impl Request for GetPropertyDataContextRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetPropertyDataContextRequest {}
+impl crate::x11_utils::ReplyRequest for GetPropertyDataContextRequest {type Reply = GetPropertyDataContextReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetPropertyDataContextReply {
@@ -1321,7 +1321,7 @@ impl Request for ListPropertiesRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for ListPropertiesRequest {}
+impl crate::x11_utils::ReplyRequest for ListPropertiesRequest {type Reply = ListPropertiesReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ListPropertiesReply {
@@ -1471,7 +1471,7 @@ impl Request for GetSelectionCreateContextRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetSelectionCreateContextRequest {}
+impl crate::x11_utils::ReplyRequest for GetSelectionCreateContextRequest {type Reply = GetSelectionCreateContextReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetSelectionCreateContextReply {
@@ -1622,7 +1622,7 @@ impl Request for GetSelectionUseContextRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetSelectionUseContextRequest {}
+impl crate::x11_utils::ReplyRequest for GetSelectionUseContextRequest {type Reply = GetSelectionUseContextReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetSelectionUseContextReply {
@@ -1718,7 +1718,7 @@ impl Request for GetSelectionContextRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetSelectionContextRequest {}
+impl crate::x11_utils::ReplyRequest for GetSelectionContextRequest {type Reply = GetSelectionContextReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetSelectionContextReply {
@@ -1814,7 +1814,7 @@ impl Request for GetSelectionDataContextRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetSelectionDataContextRequest {}
+impl crate::x11_utils::ReplyRequest for GetSelectionDataContextRequest {type Reply = GetSelectionDataContextReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetSelectionDataContextReply {
@@ -1901,7 +1901,7 @@ impl Request for ListSelectionsRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for ListSelectionsRequest {}
+impl crate::x11_utils::ReplyRequest for ListSelectionsRequest {type Reply = ListSelectionsReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ListSelectionsReply {
@@ -1996,7 +1996,7 @@ impl Request for GetClientContextRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetClientContextRequest {}
+impl crate::x11_utils::ReplyRequest for GetClientContextRequest {type Reply = GetClientContextReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetClientContextReply {

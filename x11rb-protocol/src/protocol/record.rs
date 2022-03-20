@@ -436,7 +436,7 @@ impl Request for QueryVersionRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for QueryVersionRequest {}
+impl crate::x11_utils::ReplyRequest for QueryVersionRequest {type Reply = QueryVersionReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionReply {
@@ -784,7 +784,7 @@ impl Request for GetContextRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetContextRequest {}
+impl crate::x11_utils::ReplyRequest for GetContextRequest {type Reply = GetContextReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetContextReply {
@@ -883,7 +883,7 @@ impl Request for EnableContextRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for EnableContextRequest {}
+impl crate::x11_utils::ReplyRequest for EnableContextRequest {type Reply = EnableContextReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct EnableContextReply {

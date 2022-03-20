@@ -160,7 +160,7 @@ impl Request for QueryVersionRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for QueryVersionRequest {}
+impl crate::x11_utils::ReplyRequest for QueryVersionRequest {type Reply = QueryVersionReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionReply {
@@ -240,7 +240,7 @@ impl Request for ListSurfaceTypesRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for ListSurfaceTypesRequest {}
+impl crate::x11_utils::ReplyRequest for ListSurfaceTypesRequest {type Reply = ListSurfaceTypesReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ListSurfaceTypesReply {
@@ -371,7 +371,7 @@ impl Request for CreateContextRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for CreateContextRequest {}
+impl crate::x11_utils::ReplyRequest for CreateContextRequest {type Reply = CreateContextReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CreateContextReply {
@@ -531,7 +531,7 @@ impl Request for CreateSurfaceRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for CreateSurfaceRequest {}
+impl crate::x11_utils::ReplyRequest for CreateSurfaceRequest {type Reply = CreateSurfaceReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CreateSurfaceReply {
@@ -705,7 +705,7 @@ impl Request for CreateSubpictureRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for CreateSubpictureRequest {}
+impl crate::x11_utils::ReplyRequest for CreateSubpictureRequest {type Reply = CreateSubpictureReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CreateSubpictureReply {
@@ -870,7 +870,7 @@ impl Request for ListSubpictureTypesRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for ListSubpictureTypesRequest {}
+impl crate::x11_utils::ReplyRequest for ListSubpictureTypesRequest {type Reply = ListSubpictureTypesReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ListSubpictureTypesReply {

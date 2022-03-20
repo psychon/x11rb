@@ -437,7 +437,7 @@ impl Request for QueryVersionRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for QueryVersionRequest {}
+impl crate::x11_utils::ReplyRequest for QueryVersionRequest {type Reply = QueryVersionReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionReply {
@@ -508,7 +508,7 @@ impl Request for QueryClientsRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for QueryClientsRequest {}
+impl crate::x11_utils::ReplyRequest for QueryClientsRequest {type Reply = QueryClientsReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryClientsReply {
@@ -603,7 +603,7 @@ impl Request for QueryClientResourcesRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for QueryClientResourcesRequest {}
+impl crate::x11_utils::ReplyRequest for QueryClientResourcesRequest {type Reply = QueryClientResourcesReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryClientResourcesReply {
@@ -698,7 +698,7 @@ impl Request for QueryClientPixmapBytesRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for QueryClientPixmapBytesRequest {}
+impl crate::x11_utils::ReplyRequest for QueryClientPixmapBytesRequest {type Reply = QueryClientPixmapBytesReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryClientPixmapBytesReply {
@@ -790,7 +790,7 @@ impl<'input> Request for QueryClientIdsRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::ReplyRequest for QueryClientIdsRequest<'input> {}
+impl<'input> crate::x11_utils::ReplyRequest for QueryClientIdsRequest<'input> {type Reply = QueryClientIdsReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryClientIdsReply {
@@ -906,7 +906,7 @@ impl<'input> Request for QueryResourceBytesRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::ReplyRequest for QueryResourceBytesRequest<'input> {}
+impl<'input> crate::x11_utils::ReplyRequest for QueryResourceBytesRequest<'input> {type Reply = QueryResourceBytesReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryResourceBytesReply {

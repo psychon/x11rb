@@ -72,7 +72,7 @@ impl Request for EnableRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for EnableRequest {}
+impl crate::x11_utils::ReplyRequest for EnableRequest {type Reply = EnableReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct EnableReply {

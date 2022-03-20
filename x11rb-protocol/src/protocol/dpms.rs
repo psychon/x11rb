@@ -85,7 +85,7 @@ impl Request for GetVersionRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetVersionRequest {}
+impl crate::x11_utils::ReplyRequest for GetVersionRequest {type Reply = GetVersionReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetVersionReply {
@@ -156,7 +156,7 @@ impl Request for CapableRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for CapableRequest {}
+impl crate::x11_utils::ReplyRequest for CapableRequest {type Reply = CapableReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CapableReply {
@@ -226,7 +226,7 @@ impl Request for GetTimeoutsRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetTimeoutsRequest {}
+impl crate::x11_utils::ReplyRequest for GetTimeoutsRequest {type Reply = GetTimeoutsReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetTimeoutsReply {
@@ -563,7 +563,7 @@ impl Request for InfoRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for InfoRequest {}
+impl crate::x11_utils::ReplyRequest for InfoRequest {type Reply = InfoReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct InfoReply {

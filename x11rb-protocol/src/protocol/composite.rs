@@ -151,7 +151,7 @@ impl Request for QueryVersionRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for QueryVersionRequest {}
+impl crate::x11_utils::ReplyRequest for QueryVersionRequest {type Reply = QueryVersionReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionReply {
@@ -606,7 +606,7 @@ impl Request for GetOverlayWindowRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetOverlayWindowRequest {}
+impl crate::x11_utils::ReplyRequest for GetOverlayWindowRequest {type Reply = GetOverlayWindowReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetOverlayWindowReply {

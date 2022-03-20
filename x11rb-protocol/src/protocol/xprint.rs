@@ -416,7 +416,7 @@ impl Request for PrintQueryVersionRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for PrintQueryVersionRequest {}
+impl crate::x11_utils::ReplyRequest for PrintQueryVersionRequest {type Reply = PrintQueryVersionReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PrintQueryVersionReply {
@@ -519,7 +519,7 @@ impl<'input> Request for PrintGetPrinterListRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::ReplyRequest for PrintGetPrinterListRequest<'input> {}
+impl<'input> crate::x11_utils::ReplyRequest for PrintGetPrinterListRequest<'input> {type Reply = PrintGetPrinterListReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct PrintGetPrinterListReply {
@@ -787,7 +787,7 @@ impl Request for PrintGetContextRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for PrintGetContextRequest {}
+impl crate::x11_utils::ReplyRequest for PrintGetContextRequest {type Reply = PrintGetContextReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PrintGetContextReply {
@@ -909,7 +909,7 @@ impl Request for PrintGetScreenOfContextRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for PrintGetScreenOfContextRequest {}
+impl crate::x11_utils::ReplyRequest for PrintGetScreenOfContextRequest {type Reply = PrintGetScreenOfContextReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PrintGetScreenOfContextReply {
@@ -1300,7 +1300,7 @@ impl Request for PrintGetDocumentDataRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for PrintGetDocumentDataRequest {}
+impl crate::x11_utils::ReplyRequest for PrintGetDocumentDataRequest {type Reply = PrintGetDocumentDataReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct PrintGetDocumentDataReply {
@@ -1568,7 +1568,7 @@ impl Request for PrintInputSelectedRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for PrintInputSelectedRequest {}
+impl crate::x11_utils::ReplyRequest for PrintInputSelectedRequest {type Reply = PrintInputSelectedReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PrintInputSelectedReply {
@@ -1657,7 +1657,7 @@ impl Request for PrintGetAttributesRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for PrintGetAttributesRequest {}
+impl crate::x11_utils::ReplyRequest for PrintGetAttributesRequest {type Reply = PrintGetAttributesReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct PrintGetAttributesReply {
@@ -1783,7 +1783,7 @@ impl<'input> Request for PrintGetOneAttributesRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::ReplyRequest for PrintGetOneAttributesRequest<'input> {}
+impl<'input> crate::x11_utils::ReplyRequest for PrintGetOneAttributesRequest<'input> {type Reply = PrintGetOneAttributesReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct PrintGetOneAttributesReply {
@@ -1969,7 +1969,7 @@ impl Request for PrintGetPageDimensionsRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for PrintGetPageDimensionsRequest {}
+impl crate::x11_utils::ReplyRequest for PrintGetPageDimensionsRequest {type Reply = PrintGetPageDimensionsReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PrintGetPageDimensionsReply {
@@ -2048,7 +2048,7 @@ impl Request for PrintQueryScreensRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for PrintQueryScreensRequest {}
+impl crate::x11_utils::ReplyRequest for PrintQueryScreensRequest {type Reply = PrintQueryScreensReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct PrintQueryScreensReply {
@@ -2151,7 +2151,7 @@ impl Request for PrintSetImageResolutionRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for PrintSetImageResolutionRequest {}
+impl crate::x11_utils::ReplyRequest for PrintSetImageResolutionRequest {type Reply = PrintSetImageResolutionReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PrintSetImageResolutionReply {
@@ -2230,7 +2230,7 @@ impl Request for PrintGetImageResolutionRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for PrintGetImageResolutionRequest {}
+impl crate::x11_utils::ReplyRequest for PrintGetImageResolutionRequest {type Reply = PrintGetImageResolutionReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PrintGetImageResolutionReply {

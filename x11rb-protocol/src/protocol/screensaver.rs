@@ -269,7 +269,7 @@ impl Request for QueryVersionRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for QueryVersionRequest {}
+impl crate::x11_utils::ReplyRequest for QueryVersionRequest {type Reply = QueryVersionReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionReply {
@@ -350,7 +350,7 @@ impl Request for QueryInfoRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for QueryInfoRequest {}
+impl crate::x11_utils::ReplyRequest for QueryInfoRequest {type Reply = QueryInfoReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryInfoReply {

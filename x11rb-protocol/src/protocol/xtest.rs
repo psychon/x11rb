@@ -88,7 +88,7 @@ impl Request for GetVersionRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetVersionRequest {}
+impl crate::x11_utils::ReplyRequest for GetVersionRequest {type Reply = GetVersionReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetVersionReply {
@@ -245,7 +245,7 @@ impl Request for CompareCursorRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for CompareCursorRequest {}
+impl crate::x11_utils::ReplyRequest for CompareCursorRequest {type Reply = CompareCursorReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CompareCursorReply {

@@ -141,7 +141,7 @@ impl<'input> Request for GetExtensionVersionRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::ReplyRequest for GetExtensionVersionRequest<'input> {}
+impl<'input> crate::x11_utils::ReplyRequest for GetExtensionVersionRequest<'input> {type Reply = GetExtensionVersionReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetExtensionVersionReply {
@@ -918,7 +918,7 @@ impl Request for ListInputDevicesRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for ListInputDevicesRequest {}
+impl crate::x11_utils::ReplyRequest for ListInputDevicesRequest {type Reply = ListInputDevicesReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ListInputDevicesReply {
@@ -1057,7 +1057,7 @@ impl Request for OpenDeviceRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for OpenDeviceRequest {}
+impl crate::x11_utils::ReplyRequest for OpenDeviceRequest {type Reply = OpenDeviceReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct OpenDeviceReply {
@@ -1218,7 +1218,7 @@ impl Request for SetDeviceModeRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for SetDeviceModeRequest {}
+impl crate::x11_utils::ReplyRequest for SetDeviceModeRequest {type Reply = SetDeviceModeReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SetDeviceModeReply {
@@ -1374,7 +1374,7 @@ impl Request for GetSelectedExtensionEventsRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetSelectedExtensionEventsRequest {}
+impl crate::x11_utils::ReplyRequest for GetSelectedExtensionEventsRequest {type Reply = GetSelectedExtensionEventsReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetSelectedExtensionEventsReply {
@@ -1625,7 +1625,7 @@ impl Request for GetDeviceDontPropagateListRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetDeviceDontPropagateListRequest {}
+impl crate::x11_utils::ReplyRequest for GetDeviceDontPropagateListRequest {type Reply = GetDeviceDontPropagateListReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetDeviceDontPropagateListReply {
@@ -1765,7 +1765,7 @@ impl Request for GetDeviceMotionEventsRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetDeviceMotionEventsRequest {}
+impl crate::x11_utils::ReplyRequest for GetDeviceMotionEventsRequest {type Reply = GetDeviceMotionEventsReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetDeviceMotionEventsReply {
@@ -1874,7 +1874,7 @@ impl Request for ChangeKeyboardDeviceRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for ChangeKeyboardDeviceRequest {}
+impl crate::x11_utils::ReplyRequest for ChangeKeyboardDeviceRequest {type Reply = ChangeKeyboardDeviceReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ChangeKeyboardDeviceReply {
@@ -1964,7 +1964,7 @@ impl Request for ChangePointerDeviceRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for ChangePointerDeviceRequest {}
+impl crate::x11_utils::ReplyRequest for ChangePointerDeviceRequest {type Reply = ChangePointerDeviceReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ChangePointerDeviceReply {
@@ -2102,7 +2102,7 @@ impl<'input> Request for GrabDeviceRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::ReplyRequest for GrabDeviceRequest<'input> {}
+impl<'input> crate::x11_utils::ReplyRequest for GrabDeviceRequest<'input> {type Reply = GrabDeviceReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GrabDeviceReply {
@@ -2830,7 +2830,7 @@ impl Request for GetDeviceFocusRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetDeviceFocusRequest {}
+impl crate::x11_utils::ReplyRequest for GetDeviceFocusRequest {type Reply = GetDeviceFocusReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetDeviceFocusReply {
@@ -3938,7 +3938,7 @@ impl Request for GetFeedbackControlRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetFeedbackControlRequest {}
+impl crate::x11_utils::ReplyRequest for GetFeedbackControlRequest {type Reply = GetFeedbackControlReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetFeedbackControlReply {
@@ -4976,7 +4976,7 @@ impl Request for GetDeviceKeyMappingRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetDeviceKeyMappingRequest {}
+impl crate::x11_utils::ReplyRequest for GetDeviceKeyMappingRequest {type Reply = GetDeviceKeyMappingReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetDeviceKeyMappingReply {
@@ -5156,7 +5156,7 @@ impl Request for GetDeviceModifierMappingRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetDeviceModifierMappingRequest {}
+impl crate::x11_utils::ReplyRequest for GetDeviceModifierMappingRequest {type Reply = GetDeviceModifierMappingReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetDeviceModifierMappingReply {
@@ -5272,7 +5272,7 @@ impl<'input> Request for SetDeviceModifierMappingRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::ReplyRequest for SetDeviceModifierMappingRequest<'input> {}
+impl<'input> crate::x11_utils::ReplyRequest for SetDeviceModifierMappingRequest<'input> {type Reply = SetDeviceModifierMappingReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SetDeviceModifierMappingReply {
@@ -5354,7 +5354,7 @@ impl Request for GetDeviceButtonMappingRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetDeviceButtonMappingRequest {}
+impl crate::x11_utils::ReplyRequest for GetDeviceButtonMappingRequest {type Reply = GetDeviceButtonMappingReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetDeviceButtonMappingReply {
@@ -5473,7 +5473,7 @@ impl<'input> Request for SetDeviceButtonMappingRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::ReplyRequest for SetDeviceButtonMappingRequest<'input> {}
+impl<'input> crate::x11_utils::ReplyRequest for SetDeviceButtonMappingRequest<'input> {type Reply = SetDeviceButtonMappingReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SetDeviceButtonMappingReply {
@@ -6108,7 +6108,7 @@ impl Request for QueryDeviceStateRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for QueryDeviceStateRequest {}
+impl crate::x11_utils::ReplyRequest for QueryDeviceStateRequest {type Reply = QueryDeviceStateReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryDeviceStateReply {
@@ -6292,7 +6292,7 @@ impl<'input> Request for SetDeviceValuatorsRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::ReplyRequest for SetDeviceValuatorsRequest<'input> {}
+impl<'input> crate::x11_utils::ReplyRequest for SetDeviceValuatorsRequest<'input> {type Reply = SetDeviceValuatorsReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SetDeviceValuatorsReply {
@@ -7151,7 +7151,7 @@ impl Request for GetDeviceControlRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetDeviceControlRequest {}
+impl crate::x11_utils::ReplyRequest for GetDeviceControlRequest {type Reply = GetDeviceControlReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetDeviceControlReply {
@@ -7947,7 +7947,7 @@ impl Request for ChangeDeviceControlRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for ChangeDeviceControlRequest {}
+impl crate::x11_utils::ReplyRequest for ChangeDeviceControlRequest {type Reply = ChangeDeviceControlReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ChangeDeviceControlReply {
@@ -8028,7 +8028,7 @@ impl Request for ListDevicePropertiesRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for ListDevicePropertiesRequest {}
+impl crate::x11_utils::ReplyRequest for ListDevicePropertiesRequest {type Reply = ListDevicePropertiesReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ListDevicePropertiesReply {
@@ -8504,7 +8504,7 @@ impl Request for GetDevicePropertyRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetDevicePropertyRequest {}
+impl crate::x11_utils::ReplyRequest for GetDevicePropertyRequest {type Reply = GetDevicePropertyReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum GetDevicePropertyItems {
@@ -8843,7 +8843,7 @@ impl Request for XIQueryPointerRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for XIQueryPointerRequest {}
+impl crate::x11_utils::ReplyRequest for XIQueryPointerRequest {type Reply = XIQueryPointerReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct XIQueryPointerReply {
@@ -9889,7 +9889,7 @@ impl Request for XIGetClientPointerRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for XIGetClientPointerRequest {}
+impl crate::x11_utils::ReplyRequest for XIGetClientPointerRequest {type Reply = XIGetClientPointerReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct XIGetClientPointerReply {
@@ -10190,7 +10190,7 @@ impl Request for XIQueryVersionRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for XIQueryVersionRequest {}
+impl crate::x11_utils::ReplyRequest for XIQueryVersionRequest {type Reply = XIQueryVersionReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct XIQueryVersionReply {
@@ -11395,7 +11395,7 @@ impl Request for XIQueryDeviceRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for XIQueryDeviceRequest {}
+impl crate::x11_utils::ReplyRequest for XIQueryDeviceRequest {type Reply = XIQueryDeviceReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct XIQueryDeviceReply {
@@ -11561,7 +11561,7 @@ impl Request for XIGetFocusRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for XIGetFocusRequest {}
+impl crate::x11_utils::ReplyRequest for XIGetFocusRequest {type Reply = XIGetFocusReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct XIGetFocusReply {
@@ -11777,7 +11777,7 @@ impl<'input> Request for XIGrabDeviceRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::ReplyRequest for XIGrabDeviceRequest<'input> {}
+impl<'input> crate::x11_utils::ReplyRequest for XIGrabDeviceRequest<'input> {type Reply = XIGrabDeviceReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct XIGrabDeviceReply {
@@ -12375,7 +12375,7 @@ impl<'input> Request for XIPassiveGrabDeviceRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::ReplyRequest for XIPassiveGrabDeviceRequest<'input> {}
+impl<'input> crate::x11_utils::ReplyRequest for XIPassiveGrabDeviceRequest<'input> {type Reply = XIPassiveGrabDeviceReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct XIPassiveGrabDeviceReply {
@@ -12570,7 +12570,7 @@ impl Request for XIListPropertiesRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for XIListPropertiesRequest {}
+impl crate::x11_utils::ReplyRequest for XIListPropertiesRequest {type Reply = XIListPropertiesReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct XIListPropertiesReply {
@@ -12984,7 +12984,7 @@ impl Request for XIGetPropertyRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for XIGetPropertyRequest {}
+impl crate::x11_utils::ReplyRequest for XIGetPropertyRequest {type Reply = XIGetPropertyReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum XIGetPropertyItems {
@@ -13149,7 +13149,7 @@ impl Request for XIGetSelectedEventsRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for XIGetSelectedEventsRequest {}
+impl crate::x11_utils::ReplyRequest for XIGetSelectedEventsRequest {type Reply = XIGetSelectedEventsReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct XIGetSelectedEventsReply {

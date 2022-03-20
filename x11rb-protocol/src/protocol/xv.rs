@@ -1274,7 +1274,7 @@ impl Request for QueryExtensionRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for QueryExtensionRequest {}
+impl crate::x11_utils::ReplyRequest for QueryExtensionRequest {type Reply = QueryExtensionReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryExtensionReply {
@@ -1354,7 +1354,7 @@ impl Request for QueryAdaptorsRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for QueryAdaptorsRequest {}
+impl crate::x11_utils::ReplyRequest for QueryAdaptorsRequest {type Reply = QueryAdaptorsReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryAdaptorsReply {
@@ -1449,7 +1449,7 @@ impl Request for QueryEncodingsRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for QueryEncodingsRequest {}
+impl crate::x11_utils::ReplyRequest for QueryEncodingsRequest {type Reply = QueryEncodingsReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryEncodingsReply {
@@ -1552,7 +1552,7 @@ impl Request for GrabPortRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GrabPortRequest {}
+impl crate::x11_utils::ReplyRequest for GrabPortRequest {type Reply = GrabPortReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GrabPortReply {
@@ -2377,7 +2377,7 @@ impl Request for QueryBestSizeRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for QueryBestSizeRequest {}
+impl crate::x11_utils::ReplyRequest for QueryBestSizeRequest {type Reply = QueryBestSizeReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryBestSizeReply {
@@ -2534,7 +2534,7 @@ impl Request for GetPortAttributeRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetPortAttributeRequest {}
+impl crate::x11_utils::ReplyRequest for GetPortAttributeRequest {type Reply = GetPortAttributeReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetPortAttributeReply {
@@ -2612,7 +2612,7 @@ impl Request for QueryPortAttributesRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for QueryPortAttributesRequest {}
+impl crate::x11_utils::ReplyRequest for QueryPortAttributesRequest {type Reply = QueryPortAttributesReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryPortAttributesReply {
@@ -2709,7 +2709,7 @@ impl Request for ListImageFormatsRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for ListImageFormatsRequest {}
+impl crate::x11_utils::ReplyRequest for ListImageFormatsRequest {type Reply = ListImageFormatsReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ListImageFormatsReply {
@@ -2824,7 +2824,7 @@ impl Request for QueryImageAttributesRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for QueryImageAttributesRequest {}
+impl crate::x11_utils::ReplyRequest for QueryImageAttributesRequest {type Reply = QueryImageAttributesReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryImageAttributesReply {

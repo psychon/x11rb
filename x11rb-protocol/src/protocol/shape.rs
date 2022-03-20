@@ -293,7 +293,7 @@ impl Request for QueryVersionRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for QueryVersionRequest {}
+impl crate::x11_utils::ReplyRequest for QueryVersionRequest {type Reply = QueryVersionReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionReply {
@@ -740,7 +740,7 @@ impl Request for QueryExtentsRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for QueryExtentsRequest {}
+impl crate::x11_utils::ReplyRequest for QueryExtentsRequest {type Reply = QueryExtentsReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryExtentsReply {
@@ -899,7 +899,7 @@ impl Request for InputSelectedRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for InputSelectedRequest {}
+impl crate::x11_utils::ReplyRequest for InputSelectedRequest {type Reply = InputSelectedReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct InputSelectedReply {
@@ -986,7 +986,7 @@ impl Request for GetRectanglesRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetRectanglesRequest {}
+impl crate::x11_utils::ReplyRequest for GetRectanglesRequest {type Reply = GetRectanglesReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetRectanglesReply {

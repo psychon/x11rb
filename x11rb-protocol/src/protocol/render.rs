@@ -1294,7 +1294,7 @@ impl Request for QueryVersionRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for QueryVersionRequest {}
+impl crate::x11_utils::ReplyRequest for QueryVersionRequest {type Reply = QueryVersionReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionReply {
@@ -1366,7 +1366,7 @@ impl Request for QueryPictFormatsRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for QueryPictFormatsRequest {}
+impl crate::x11_utils::ReplyRequest for QueryPictFormatsRequest {type Reply = QueryPictFormatsReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryPictFormatsReply {
@@ -1505,7 +1505,7 @@ impl Request for QueryPictIndexValuesRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for QueryPictIndexValuesRequest {}
+impl crate::x11_utils::ReplyRequest for QueryPictIndexValuesRequest {type Reply = QueryPictIndexValuesReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryPictIndexValuesReply {
@@ -4173,7 +4173,7 @@ impl Request for QueryFiltersRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for QueryFiltersRequest {}
+impl crate::x11_utils::ReplyRequest for QueryFiltersRequest {type Reply = QueryFiltersReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryFiltersReply {

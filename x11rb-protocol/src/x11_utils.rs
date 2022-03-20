@@ -227,7 +227,10 @@ pub type ReplyParsingFunction =
 pub trait VoidRequest: Request {}
 
 /// A X11 request that has a reply without FDs
-pub trait ReplyRequest: Request {}
+pub trait ReplyRequest: Request {
+    /// The kind of reply that this request generates.
+    type Reply: Into<crate::protocol::Reply> + TryParse;
+}
 
 /// A X11 request that has a reply with FDs
 pub trait ReplyFDsRequest: Request {}

@@ -353,7 +353,7 @@ impl Request for QueryVersionRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for QueryVersionRequest {}
+impl crate::x11_utils::ReplyRequest for QueryVersionRequest {type Reply = QueryVersionReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionReply {
@@ -442,7 +442,7 @@ impl Request for ConnectRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for ConnectRequest {}
+impl crate::x11_utils::ReplyRequest for ConnectRequest {type Reply = ConnectReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ConnectReply {
@@ -566,7 +566,7 @@ impl Request for AuthenticateRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for AuthenticateRequest {}
+impl crate::x11_utils::ReplyRequest for AuthenticateRequest {type Reply = AuthenticateReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct AuthenticateReply {
@@ -780,7 +780,7 @@ impl<'input> Request for GetBuffersRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::ReplyRequest for GetBuffersRequest<'input> {}
+impl<'input> crate::x11_utils::ReplyRequest for GetBuffersRequest<'input> {type Reply = GetBuffersReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetBuffersReply {
@@ -903,7 +903,7 @@ impl Request for CopyRegionRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for CopyRegionRequest {}
+impl crate::x11_utils::ReplyRequest for CopyRegionRequest {type Reply = CopyRegionReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CopyRegionReply {
@@ -1009,7 +1009,7 @@ impl<'input> Request for GetBuffersWithFormatRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::ReplyRequest for GetBuffersWithFormatRequest<'input> {}
+impl<'input> crate::x11_utils::ReplyRequest for GetBuffersWithFormatRequest<'input> {type Reply = GetBuffersWithFormatReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetBuffersWithFormatReply {
@@ -1156,7 +1156,7 @@ impl Request for SwapBuffersRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for SwapBuffersRequest {}
+impl crate::x11_utils::ReplyRequest for SwapBuffersRequest {type Reply = SwapBuffersReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SwapBuffersReply {
@@ -1236,7 +1236,7 @@ impl Request for GetMSCRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetMSCRequest {}
+impl crate::x11_utils::ReplyRequest for GetMSCRequest {type Reply = GetMSCReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetMSCReply {
@@ -1372,7 +1372,7 @@ impl Request for WaitMSCRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for WaitMSCRequest {}
+impl crate::x11_utils::ReplyRequest for WaitMSCRequest {type Reply = WaitMSCReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct WaitMSCReply {
@@ -1476,7 +1476,7 @@ impl Request for WaitSBCRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for WaitSBCRequest {}
+impl crate::x11_utils::ReplyRequest for WaitSBCRequest {type Reply = WaitSBCReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct WaitSBCReply {
@@ -1633,7 +1633,7 @@ impl Request for GetParamRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetParamRequest {}
+impl crate::x11_utils::ReplyRequest for GetParamRequest {type Reply = GetParamReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetParamReply {

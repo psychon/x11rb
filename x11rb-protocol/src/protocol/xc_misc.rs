@@ -85,7 +85,7 @@ impl Request for GetVersionRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetVersionRequest {}
+impl crate::x11_utils::ReplyRequest for GetVersionRequest {type Reply = GetVersionReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetVersionReply {
@@ -156,7 +156,7 @@ impl Request for GetXIDRangeRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetXIDRangeRequest {}
+impl crate::x11_utils::ReplyRequest for GetXIDRangeRequest {type Reply = GetXIDRangeReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetXIDRangeReply {
@@ -236,7 +236,7 @@ impl Request for GetXIDListRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetXIDListRequest {}
+impl crate::x11_utils::ReplyRequest for GetXIDListRequest {type Reply = GetXIDListReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetXIDListReply {

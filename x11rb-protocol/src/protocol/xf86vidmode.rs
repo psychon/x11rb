@@ -387,7 +387,7 @@ impl Request for QueryVersionRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for QueryVersionRequest {}
+impl crate::x11_utils::ReplyRequest for QueryVersionRequest {type Reply = QueryVersionReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionReply {
@@ -468,7 +468,7 @@ impl Request for GetModeLineRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetModeLineRequest {}
+impl crate::x11_utils::ReplyRequest for GetModeLineRequest {type Reply = GetModeLineReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetModeLineReply {
@@ -806,7 +806,7 @@ impl Request for GetMonitorRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetMonitorRequest {}
+impl crate::x11_utils::ReplyRequest for GetMonitorRequest {type Reply = GetMonitorReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetMonitorReply {
@@ -1012,7 +1012,7 @@ impl Request for GetAllModeLinesRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetAllModeLinesRequest {}
+impl crate::x11_utils::ReplyRequest for GetAllModeLinesRequest {type Reply = GetAllModeLinesReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetAllModeLinesReply {
@@ -1661,7 +1661,7 @@ impl<'input> Request for ValidateModeLineRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::ReplyRequest for ValidateModeLineRequest<'input> {}
+impl<'input> crate::x11_utils::ReplyRequest for ValidateModeLineRequest<'input> {type Reply = ValidateModeLineReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ValidateModeLineReply {
@@ -1911,7 +1911,7 @@ impl Request for GetViewPortRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetViewPortRequest {}
+impl crate::x11_utils::ReplyRequest for GetViewPortRequest {type Reply = GetViewPortReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetViewPortReply {
@@ -2063,7 +2063,7 @@ impl Request for GetDotClocksRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetDotClocksRequest {}
+impl crate::x11_utils::ReplyRequest for GetDotClocksRequest {type Reply = GetDotClocksReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetDotClocksReply {
@@ -2321,7 +2321,7 @@ impl Request for GetGammaRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetGammaRequest {}
+impl crate::x11_utils::ReplyRequest for GetGammaRequest {type Reply = GetGammaReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetGammaReply {
@@ -2408,7 +2408,7 @@ impl Request for GetGammaRampRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetGammaRampRequest {}
+impl crate::x11_utils::ReplyRequest for GetGammaRampRequest {type Reply = GetGammaRampReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetGammaRampReply {
@@ -2581,7 +2581,7 @@ impl Request for GetGammaRampSizeRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetGammaRampSizeRequest {}
+impl crate::x11_utils::ReplyRequest for GetGammaRampSizeRequest {type Reply = GetGammaRampSizeReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetGammaRampSizeReply {
@@ -2661,7 +2661,7 @@ impl Request for GetPermissionsRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetPermissionsRequest {}
+impl crate::x11_utils::ReplyRequest for GetPermissionsRequest {type Reply = GetPermissionsReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetPermissionsReply {

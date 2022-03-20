@@ -85,7 +85,7 @@ impl Request for QueryVersionRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for QueryVersionRequest {}
+impl crate::x11_utils::ReplyRequest for QueryVersionRequest {type Reply = QueryVersionReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionReply {
@@ -166,7 +166,7 @@ impl Request for StartRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for StartRequest {}
+impl crate::x11_utils::ReplyRequest for StartRequest {type Reply = StartReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct StartReply {
@@ -243,7 +243,7 @@ impl Request for EndRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for EndRequest {}
+impl crate::x11_utils::ReplyRequest for EndRequest {type Reply = EndReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct EndReply {
@@ -545,7 +545,7 @@ impl Request for SendRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for SendRequest {}
+impl crate::x11_utils::ReplyRequest for SendRequest {type Reply = SendReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SendReply {
@@ -622,7 +622,7 @@ impl Request for SelectInputRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for SelectInputRequest {}
+impl crate::x11_utils::ReplyRequest for SelectInputRequest {type Reply = SelectInputReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SelectInputReply {

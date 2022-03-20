@@ -116,7 +116,7 @@ impl Request for QueryVersionRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for QueryVersionRequest {}
+impl crate::x11_utils::ReplyRequest for QueryVersionRequest {type Reply = QueryVersionReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionReply {
@@ -198,7 +198,7 @@ impl Request for QueryDirectRenderingCapableRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for QueryDirectRenderingCapableRequest {}
+impl crate::x11_utils::ReplyRequest for QueryDirectRenderingCapableRequest {type Reply = QueryDirectRenderingCapableReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryDirectRenderingCapableReply {
@@ -276,7 +276,7 @@ impl Request for OpenConnectionRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for OpenConnectionRequest {}
+impl crate::x11_utils::ReplyRequest for OpenConnectionRequest {type Reply = OpenConnectionReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct OpenConnectionReply {
@@ -429,7 +429,7 @@ impl Request for GetClientDriverNameRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetClientDriverNameRequest {}
+impl crate::x11_utils::ReplyRequest for GetClientDriverNameRequest {type Reply = GetClientDriverNameReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetClientDriverNameReply {
@@ -547,7 +547,7 @@ impl Request for CreateContextRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for CreateContextRequest {}
+impl crate::x11_utils::ReplyRequest for CreateContextRequest {type Reply = CreateContextReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CreateContextReply {
@@ -694,7 +694,7 @@ impl Request for CreateDrawableRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for CreateDrawableRequest {}
+impl crate::x11_utils::ReplyRequest for CreateDrawableRequest {type Reply = CreateDrawableReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CreateDrawableReply {
@@ -841,7 +841,7 @@ impl Request for GetDrawableInfoRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetDrawableInfoRequest {}
+impl crate::x11_utils::ReplyRequest for GetDrawableInfoRequest {type Reply = GetDrawableInfoReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetDrawableInfoReply {
@@ -967,7 +967,7 @@ impl Request for GetDeviceInfoRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetDeviceInfoRequest {}
+impl crate::x11_utils::ReplyRequest for GetDeviceInfoRequest {type Reply = GetDeviceInfoReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetDeviceInfoReply {
@@ -1079,7 +1079,7 @@ impl Request for AuthConnectionRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for AuthConnectionRequest {}
+impl crate::x11_utils::ReplyRequest for AuthConnectionRequest {type Reply = AuthConnectionReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct AuthConnectionReply {

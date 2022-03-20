@@ -6449,7 +6449,7 @@ impl Request for GetWindowAttributesRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetWindowAttributesRequest {}
+impl crate::x11_utils::ReplyRequest for GetWindowAttributesRequest {type Reply = GetWindowAttributesReply;}
 
 /// # Fields
 ///
@@ -7876,7 +7876,7 @@ impl Request for GetGeometryRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetGeometryRequest {}
+impl crate::x11_utils::ReplyRequest for GetGeometryRequest {type Reply = GetGeometryReply;}
 
 /// # Fields
 ///
@@ -8019,7 +8019,7 @@ impl Request for QueryTreeRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for QueryTreeRequest {}
+impl crate::x11_utils::ReplyRequest for QueryTreeRequest {type Reply = QueryTreeReply;}
 
 /// # Fields
 ///
@@ -8185,7 +8185,7 @@ impl<'input> Request for InternAtomRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::ReplyRequest for InternAtomRequest<'input> {}
+impl<'input> crate::x11_utils::ReplyRequest for InternAtomRequest<'input> {type Reply = InternAtomReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct InternAtomReply {
@@ -8266,7 +8266,7 @@ impl Request for GetAtomNameRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetAtomNameRequest {}
+impl crate::x11_utils::ReplyRequest for GetAtomNameRequest {type Reply = GetAtomNameReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetAtomNameReply {
@@ -8820,7 +8820,7 @@ impl Request for GetPropertyRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetPropertyRequest {}
+impl crate::x11_utils::ReplyRequest for GetPropertyRequest {type Reply = GetPropertyReply;}
 impl GetPropertyReply {
     /// Iterate over the contained value if its format is 8.
     ///
@@ -9077,7 +9077,7 @@ impl Request for ListPropertiesRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for ListPropertiesRequest {}
+impl crate::x11_utils::ReplyRequest for ListPropertiesRequest {type Reply = ListPropertiesReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ListPropertiesReply {
@@ -9293,7 +9293,7 @@ impl Request for GetSelectionOwnerRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetSelectionOwnerRequest {}
+impl crate::x11_utils::ReplyRequest for GetSelectionOwnerRequest {type Reply = GetSelectionOwnerReply;}
 
 /// # Fields
 ///
@@ -9989,7 +9989,7 @@ impl Request for GrabPointerRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GrabPointerRequest {}
+impl crate::x11_utils::ReplyRequest for GrabPointerRequest {type Reply = GrabPointerReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GrabPointerReply {
@@ -10627,7 +10627,7 @@ impl Request for GrabKeyboardRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GrabKeyboardRequest {}
+impl crate::x11_utils::ReplyRequest for GrabKeyboardRequest {type Reply = GrabKeyboardReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GrabKeyboardReply {
@@ -11373,7 +11373,7 @@ impl Request for QueryPointerRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for QueryPointerRequest {}
+impl crate::x11_utils::ReplyRequest for QueryPointerRequest {type Reply = QueryPointerReply;}
 
 /// # Fields
 ///
@@ -11543,7 +11543,7 @@ impl Request for GetMotionEventsRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetMotionEventsRequest {}
+impl crate::x11_utils::ReplyRequest for GetMotionEventsRequest {type Reply = GetMotionEventsReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetMotionEventsReply {
@@ -11661,7 +11661,7 @@ impl Request for TranslateCoordinatesRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for TranslateCoordinatesRequest {}
+impl crate::x11_utils::ReplyRequest for TranslateCoordinatesRequest {type Reply = TranslateCoordinatesReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct TranslateCoordinatesReply {
@@ -12044,7 +12044,7 @@ impl Request for GetInputFocusRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetInputFocusRequest {}
+impl crate::x11_utils::ReplyRequest for GetInputFocusRequest {type Reply = GetInputFocusReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetInputFocusReply {
@@ -12118,7 +12118,7 @@ impl Request for QueryKeymapRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for QueryKeymapRequest {}
+impl crate::x11_utils::ReplyRequest for QueryKeymapRequest {type Reply = QueryKeymapReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryKeymapReply {
@@ -12509,7 +12509,7 @@ impl Request for QueryFontRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for QueryFontRequest {}
+impl crate::x11_utils::ReplyRequest for QueryFontRequest {type Reply = QueryFontReply;}
 
 /// # Fields
 ///
@@ -12722,7 +12722,7 @@ impl<'input> Request for QueryTextExtentsRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::ReplyRequest for QueryTextExtentsRequest<'input> {}
+impl<'input> crate::x11_utils::ReplyRequest for QueryTextExtentsRequest<'input> {type Reply = QueryTextExtentsReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryTextExtentsReply {
@@ -12887,7 +12887,7 @@ impl<'input> Request for ListFontsRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::ReplyRequest for ListFontsRequest<'input> {}
+impl<'input> crate::x11_utils::ReplyRequest for ListFontsRequest<'input> {type Reply = ListFontsReply;}
 
 /// # Fields
 ///
@@ -13015,7 +13015,7 @@ impl<'input> Request for ListFontsWithInfoRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::ReplyRequest for ListFontsWithInfoRequest<'input> {}
+impl<'input> crate::x11_utils::ReplyRequest for ListFontsWithInfoRequest<'input> {type Reply = ListFontsWithInfoReply;}
 
 /// # Fields
 ///
@@ -13229,7 +13229,7 @@ impl Request for GetFontPathRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetFontPathRequest {}
+impl crate::x11_utils::ReplyRequest for GetFontPathRequest {type Reply = GetFontPathReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetFontPathReply {
@@ -17279,7 +17279,7 @@ impl Request for GetImageRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetImageRequest {}
+impl crate::x11_utils::ReplyRequest for GetImageRequest {type Reply = GetImageReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetImageReply {
@@ -18184,7 +18184,7 @@ impl Request for ListInstalledColormapsRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for ListInstalledColormapsRequest {}
+impl crate::x11_utils::ReplyRequest for ListInstalledColormapsRequest {type Reply = ListInstalledColormapsReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ListInstalledColormapsReply {
@@ -18321,7 +18321,7 @@ impl Request for AllocColorRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for AllocColorRequest {}
+impl crate::x11_utils::ReplyRequest for AllocColorRequest {type Reply = AllocColorReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct AllocColorReply {
@@ -18430,7 +18430,7 @@ impl<'input> Request for AllocNamedColorRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::ReplyRequest for AllocNamedColorRequest<'input> {}
+impl<'input> crate::x11_utils::ReplyRequest for AllocNamedColorRequest<'input> {type Reply = AllocNamedColorReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct AllocNamedColorReply {
@@ -18538,7 +18538,7 @@ impl Request for AllocColorCellsRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for AllocColorCellsRequest {}
+impl crate::x11_utils::ReplyRequest for AllocColorCellsRequest {type Reply = AllocColorCellsReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct AllocColorCellsReply {
@@ -18679,7 +18679,7 @@ impl Request for AllocColorPlanesRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for AllocColorPlanesRequest {}
+impl crate::x11_utils::ReplyRequest for AllocColorPlanesRequest {type Reply = AllocColorPlanesReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct AllocColorPlanesReply {
@@ -19215,7 +19215,7 @@ impl<'input> Request for QueryColorsRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::ReplyRequest for QueryColorsRequest<'input> {}
+impl<'input> crate::x11_utils::ReplyRequest for QueryColorsRequest<'input> {type Reply = QueryColorsReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryColorsReply {
@@ -19334,7 +19334,7 @@ impl<'input> Request for LookupColorRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::ReplyRequest for LookupColorRequest<'input> {}
+impl<'input> crate::x11_utils::ReplyRequest for LookupColorRequest<'input> {type Reply = LookupColorReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct LookupColorReply {
@@ -20046,7 +20046,7 @@ impl Request for QueryBestSizeRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for QueryBestSizeRequest {}
+impl crate::x11_utils::ReplyRequest for QueryBestSizeRequest {type Reply = QueryBestSizeReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryBestSizeReply {
@@ -20162,7 +20162,7 @@ impl<'input> Request for QueryExtensionRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::ReplyRequest for QueryExtensionRequest<'input> {}
+impl<'input> crate::x11_utils::ReplyRequest for QueryExtensionRequest<'input> {type Reply = QueryExtensionReply;}
 
 /// # Fields
 ///
@@ -20246,7 +20246,7 @@ impl Request for ListExtensionsRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for ListExtensionsRequest {}
+impl crate::x11_utils::ReplyRequest for ListExtensionsRequest {type Reply = ListExtensionsReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ListExtensionsReply {
@@ -20428,7 +20428,7 @@ impl Request for GetKeyboardMappingRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetKeyboardMappingRequest {}
+impl crate::x11_utils::ReplyRequest for GetKeyboardMappingRequest {type Reply = GetKeyboardMappingReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetKeyboardMappingReply {
@@ -20955,7 +20955,7 @@ impl Request for GetKeyboardControlRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetKeyboardControlRequest {}
+impl crate::x11_utils::ReplyRequest for GetKeyboardControlRequest {type Reply = GetKeyboardControlReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetKeyboardControlReply {
@@ -21168,7 +21168,7 @@ impl Request for GetPointerControlRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetPointerControlRequest {}
+impl crate::x11_utils::ReplyRequest for GetPointerControlRequest {type Reply = GetPointerControlReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetPointerControlReply {
@@ -21439,7 +21439,7 @@ impl Request for GetScreenSaverRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetScreenSaverRequest {}
+impl crate::x11_utils::ReplyRequest for GetScreenSaverRequest {type Reply = GetScreenSaverReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetScreenSaverReply {
@@ -21776,7 +21776,7 @@ impl Request for ListHostsRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for ListHostsRequest {}
+impl crate::x11_utils::ReplyRequest for ListHostsRequest {type Reply = ListHostsReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ListHostsReply {
@@ -22487,7 +22487,7 @@ impl<'input> Request for SetPointerMappingRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::ReplyRequest for SetPointerMappingRequest<'input> {}
+impl<'input> crate::x11_utils::ReplyRequest for SetPointerMappingRequest<'input> {type Reply = SetPointerMappingReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SetPointerMappingReply {
@@ -22559,7 +22559,7 @@ impl Request for GetPointerMappingRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetPointerMappingRequest {}
+impl crate::x11_utils::ReplyRequest for GetPointerMappingRequest {type Reply = GetPointerMappingReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetPointerMappingReply {
@@ -22734,7 +22734,7 @@ impl<'input> Request for SetModifierMappingRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::ReplyRequest for SetModifierMappingRequest<'input> {}
+impl<'input> crate::x11_utils::ReplyRequest for SetModifierMappingRequest<'input> {type Reply = SetModifierMappingReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SetModifierMappingReply {
@@ -22806,7 +22806,7 @@ impl Request for GetModifierMappingRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetModifierMappingRequest {}
+impl crate::x11_utils::ReplyRequest for GetModifierMappingRequest {type Reply = GetModifierMappingReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetModifierMappingReply {

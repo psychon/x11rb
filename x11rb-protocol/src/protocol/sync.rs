@@ -527,7 +527,7 @@ impl Request for InitializeRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for InitializeRequest {}
+impl crate::x11_utils::ReplyRequest for InitializeRequest {type Reply = InitializeReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct InitializeReply {
@@ -599,7 +599,7 @@ impl Request for ListSystemCountersRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for ListSystemCountersRequest {}
+impl crate::x11_utils::ReplyRequest for ListSystemCountersRequest {type Reply = ListSystemCountersReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ListSystemCountersReply {
@@ -812,7 +812,7 @@ impl Request for QueryCounterRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for QueryCounterRequest {}
+impl crate::x11_utils::ReplyRequest for QueryCounterRequest {type Reply = QueryCounterReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryCounterReply {
@@ -1614,7 +1614,7 @@ impl Request for QueryAlarmRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for QueryAlarmRequest {}
+impl crate::x11_utils::ReplyRequest for QueryAlarmRequest {type Reply = QueryAlarmReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryAlarmReply {
@@ -1761,7 +1761,7 @@ impl Request for GetPriorityRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetPriorityRequest {}
+impl crate::x11_utils::ReplyRequest for GetPriorityRequest {type Reply = GetPriorityReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetPriorityReply {
@@ -2067,7 +2067,7 @@ impl Request for QueryFenceRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for QueryFenceRequest {}
+impl crate::x11_utils::ReplyRequest for QueryFenceRequest {type Reply = QueryFenceReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryFenceReply {

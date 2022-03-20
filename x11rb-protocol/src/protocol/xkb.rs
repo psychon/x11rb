@@ -5784,7 +5784,7 @@ impl Request for UseExtensionRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for UseExtensionRequest {}
+impl crate::x11_utils::ReplyRequest for UseExtensionRequest {type Reply = UseExtensionReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct UseExtensionReply {
@@ -6679,7 +6679,7 @@ impl Request for GetStateRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetStateRequest {}
+impl crate::x11_utils::ReplyRequest for GetStateRequest {type Reply = GetStateReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetStateReply {
@@ -6881,7 +6881,7 @@ impl Request for GetControlsRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetControlsRequest {}
+impl crate::x11_utils::ReplyRequest for GetControlsRequest {type Reply = GetControlsReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetControlsReply {
@@ -7368,7 +7368,7 @@ impl Request for GetMapRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetMapRequest {}
+impl crate::x11_utils::ReplyRequest for GetMapRequest {type Reply = GetMapReply;}
 
 #[derive(Debug, Clone)]
 pub struct GetMapMapBitcase3 {
@@ -8105,7 +8105,7 @@ impl Request for GetCompatMapRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetCompatMapRequest {}
+impl crate::x11_utils::ReplyRequest for GetCompatMapRequest {type Reply = GetCompatMapReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetCompatMapReply {
@@ -8318,7 +8318,7 @@ impl Request for GetIndicatorStateRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetIndicatorStateRequest {}
+impl crate::x11_utils::ReplyRequest for GetIndicatorStateRequest {type Reply = GetIndicatorStateReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetIndicatorStateReply {
@@ -8407,7 +8407,7 @@ impl Request for GetIndicatorMapRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetIndicatorMapRequest {}
+impl crate::x11_utils::ReplyRequest for GetIndicatorMapRequest {type Reply = GetIndicatorMapReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetIndicatorMapReply {
@@ -8593,7 +8593,7 @@ impl Request for GetNamedIndicatorRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetNamedIndicatorRequest {}
+impl crate::x11_utils::ReplyRequest for GetNamedIndicatorRequest {type Reply = GetNamedIndicatorReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetNamedIndicatorReply {
@@ -8844,7 +8844,7 @@ impl Request for GetNamesRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetNamesRequest {}
+impl crate::x11_utils::ReplyRequest for GetNamesRequest {type Reply = GetNamesReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetNamesValueListBitcase8 {
@@ -9665,7 +9665,7 @@ impl Request for PerClientFlagsRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for PerClientFlagsRequest {}
+impl crate::x11_utils::ReplyRequest for PerClientFlagsRequest {type Reply = PerClientFlagsReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PerClientFlagsReply {
@@ -9755,7 +9755,7 @@ impl Request for ListComponentsRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for ListComponentsRequest {}
+impl crate::x11_utils::ReplyRequest for ListComponentsRequest {type Reply = ListComponentsReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ListComponentsReply {
@@ -9950,7 +9950,7 @@ impl Request for GetKbdByNameRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetKbdByNameRequest {}
+impl crate::x11_utils::ReplyRequest for GetKbdByNameRequest {type Reply = GetKbdByNameReply;}
 
 #[derive(Debug, Clone)]
 pub struct GetKbdByNameRepliesTypesMapBitcase3 {
@@ -10644,7 +10644,7 @@ impl Request for GetDeviceInfoRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetDeviceInfoRequest {}
+impl crate::x11_utils::ReplyRequest for GetDeviceInfoRequest {type Reply = GetDeviceInfoReply;}
 
 #[derive(Debug, Clone)]
 pub struct GetDeviceInfoReply {
@@ -10941,7 +10941,7 @@ impl<'input> Request for SetDebuggingFlagsRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::ReplyRequest for SetDebuggingFlagsRequest<'input> {}
+impl<'input> crate::x11_utils::ReplyRequest for SetDebuggingFlagsRequest<'input> {type Reply = SetDebuggingFlagsReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SetDebuggingFlagsReply {

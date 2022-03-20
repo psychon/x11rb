@@ -743,7 +743,7 @@ impl Request for MakeCurrentRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for MakeCurrentRequest {}
+impl crate::x11_utils::ReplyRequest for MakeCurrentRequest {type Reply = MakeCurrentReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct MakeCurrentReply {
@@ -822,7 +822,7 @@ impl Request for IsDirectRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for IsDirectRequest {}
+impl crate::x11_utils::ReplyRequest for IsDirectRequest {type Reply = IsDirectReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct IsDirectReply {
@@ -909,7 +909,7 @@ impl Request for QueryVersionRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for QueryVersionRequest {}
+impl crate::x11_utils::ReplyRequest for QueryVersionRequest {type Reply = QueryVersionReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionReply {
@@ -1480,7 +1480,7 @@ impl Request for GetVisualConfigsRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetVisualConfigsRequest {}
+impl crate::x11_utils::ReplyRequest for GetVisualConfigsRequest {type Reply = GetVisualConfigsReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetVisualConfigsReply {
@@ -1727,7 +1727,7 @@ impl<'input> Request for VendorPrivateWithReplyRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::ReplyRequest for VendorPrivateWithReplyRequest<'input> {}
+impl<'input> crate::x11_utils::ReplyRequest for VendorPrivateWithReplyRequest<'input> {type Reply = VendorPrivateWithReplyReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct VendorPrivateWithReplyReply {
@@ -1826,7 +1826,7 @@ impl Request for QueryExtensionsStringRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for QueryExtensionsStringRequest {}
+impl crate::x11_utils::ReplyRequest for QueryExtensionsStringRequest {type Reply = QueryExtensionsStringReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryExtensionsStringReply {
@@ -1914,7 +1914,7 @@ impl Request for QueryServerStringRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for QueryServerStringRequest {}
+impl crate::x11_utils::ReplyRequest for QueryServerStringRequest {type Reply = QueryServerStringReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryServerStringReply {
@@ -2093,7 +2093,7 @@ impl Request for GetFBConfigsRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetFBConfigsRequest {}
+impl crate::x11_utils::ReplyRequest for GetFBConfigsRequest {type Reply = GetFBConfigsReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetFBConfigsReply {
@@ -2439,7 +2439,7 @@ impl Request for QueryContextRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for QueryContextRequest {}
+impl crate::x11_utils::ReplyRequest for QueryContextRequest {type Reply = QueryContextReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryContextReply {
@@ -2559,7 +2559,7 @@ impl Request for MakeContextCurrentRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for MakeContextCurrentRequest {}
+impl crate::x11_utils::ReplyRequest for MakeContextCurrentRequest {type Reply = MakeContextCurrentReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct MakeContextCurrentReply {
@@ -2784,7 +2784,7 @@ impl Request for GetDrawableAttributesRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetDrawableAttributesRequest {}
+impl crate::x11_utils::ReplyRequest for GetDrawableAttributesRequest {type Reply = GetDrawableAttributesReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetDrawableAttributesReply {
@@ -3637,7 +3637,7 @@ impl Request for GenListsRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GenListsRequest {}
+impl crate::x11_utils::ReplyRequest for GenListsRequest {type Reply = GenListsReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GenListsReply {
@@ -3853,7 +3853,7 @@ impl Request for RenderModeRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for RenderModeRequest {}
+impl crate::x11_utils::ReplyRequest for RenderModeRequest {type Reply = RenderModeReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct RenderModeReply {
@@ -4006,7 +4006,7 @@ impl Request for FinishRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for FinishRequest {}
+impl crate::x11_utils::ReplyRequest for FinishRequest {type Reply = FinishReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct FinishReply {
@@ -4280,7 +4280,7 @@ impl Request for ReadPixelsRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for ReadPixelsRequest {}
+impl crate::x11_utils::ReplyRequest for ReadPixelsRequest {type Reply = ReadPixelsReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ReadPixelsReply {
@@ -4383,7 +4383,7 @@ impl Request for GetBooleanvRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetBooleanvRequest {}
+impl crate::x11_utils::ReplyRequest for GetBooleanvRequest {type Reply = GetBooleanvReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetBooleanvReply {
@@ -4489,7 +4489,7 @@ impl Request for GetClipPlaneRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetClipPlaneRequest {}
+impl crate::x11_utils::ReplyRequest for GetClipPlaneRequest {type Reply = GetClipPlaneReply;}
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct GetClipPlaneReply {
@@ -4591,7 +4591,7 @@ impl Request for GetDoublevRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetDoublevRequest {}
+impl crate::x11_utils::ReplyRequest for GetDoublevRequest {type Reply = GetDoublevReply;}
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct GetDoublevReply {
@@ -4689,7 +4689,7 @@ impl Request for GetErrorRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetErrorRequest {}
+impl crate::x11_utils::ReplyRequest for GetErrorRequest {type Reply = GetErrorReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetErrorReply {
@@ -4775,7 +4775,7 @@ impl Request for GetFloatvRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetFloatvRequest {}
+impl crate::x11_utils::ReplyRequest for GetFloatvRequest {type Reply = GetFloatvReply;}
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct GetFloatvReply {
@@ -4881,7 +4881,7 @@ impl Request for GetIntegervRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetIntegervRequest {}
+impl crate::x11_utils::ReplyRequest for GetIntegervRequest {type Reply = GetIntegervReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetIntegervReply {
@@ -4995,7 +4995,7 @@ impl Request for GetLightfvRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetLightfvRequest {}
+impl crate::x11_utils::ReplyRequest for GetLightfvRequest {type Reply = GetLightfvReply;}
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct GetLightfvReply {
@@ -5109,7 +5109,7 @@ impl Request for GetLightivRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetLightivRequest {}
+impl crate::x11_utils::ReplyRequest for GetLightivRequest {type Reply = GetLightivReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetLightivReply {
@@ -5223,7 +5223,7 @@ impl Request for GetMapdvRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetMapdvRequest {}
+impl crate::x11_utils::ReplyRequest for GetMapdvRequest {type Reply = GetMapdvReply;}
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct GetMapdvReply {
@@ -5337,7 +5337,7 @@ impl Request for GetMapfvRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetMapfvRequest {}
+impl crate::x11_utils::ReplyRequest for GetMapfvRequest {type Reply = GetMapfvReply;}
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct GetMapfvReply {
@@ -5451,7 +5451,7 @@ impl Request for GetMapivRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetMapivRequest {}
+impl crate::x11_utils::ReplyRequest for GetMapivRequest {type Reply = GetMapivReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetMapivReply {
@@ -5565,7 +5565,7 @@ impl Request for GetMaterialfvRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetMaterialfvRequest {}
+impl crate::x11_utils::ReplyRequest for GetMaterialfvRequest {type Reply = GetMaterialfvReply;}
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct GetMaterialfvReply {
@@ -5679,7 +5679,7 @@ impl Request for GetMaterialivRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetMaterialivRequest {}
+impl crate::x11_utils::ReplyRequest for GetMaterialivRequest {type Reply = GetMaterialivReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetMaterialivReply {
@@ -5785,7 +5785,7 @@ impl Request for GetPixelMapfvRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetPixelMapfvRequest {}
+impl crate::x11_utils::ReplyRequest for GetPixelMapfvRequest {type Reply = GetPixelMapfvReply;}
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct GetPixelMapfvReply {
@@ -5891,7 +5891,7 @@ impl Request for GetPixelMapuivRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetPixelMapuivRequest {}
+impl crate::x11_utils::ReplyRequest for GetPixelMapuivRequest {type Reply = GetPixelMapuivReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetPixelMapuivReply {
@@ -5997,7 +5997,7 @@ impl Request for GetPixelMapusvRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetPixelMapusvRequest {}
+impl crate::x11_utils::ReplyRequest for GetPixelMapusvRequest {type Reply = GetPixelMapusvReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetPixelMapusvReply {
@@ -6103,7 +6103,7 @@ impl Request for GetPolygonStippleRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetPolygonStippleRequest {}
+impl crate::x11_utils::ReplyRequest for GetPolygonStippleRequest {type Reply = GetPolygonStippleReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetPolygonStippleReply {
@@ -6206,7 +6206,7 @@ impl Request for GetStringRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetStringRequest {}
+impl crate::x11_utils::ReplyRequest for GetStringRequest {type Reply = GetStringReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetStringReply {
@@ -6319,7 +6319,7 @@ impl Request for GetTexEnvfvRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetTexEnvfvRequest {}
+impl crate::x11_utils::ReplyRequest for GetTexEnvfvRequest {type Reply = GetTexEnvfvReply;}
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct GetTexEnvfvReply {
@@ -6433,7 +6433,7 @@ impl Request for GetTexEnvivRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetTexEnvivRequest {}
+impl crate::x11_utils::ReplyRequest for GetTexEnvivRequest {type Reply = GetTexEnvivReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetTexEnvivReply {
@@ -6547,7 +6547,7 @@ impl Request for GetTexGendvRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetTexGendvRequest {}
+impl crate::x11_utils::ReplyRequest for GetTexGendvRequest {type Reply = GetTexGendvReply;}
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct GetTexGendvReply {
@@ -6661,7 +6661,7 @@ impl Request for GetTexGenfvRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetTexGenfvRequest {}
+impl crate::x11_utils::ReplyRequest for GetTexGenfvRequest {type Reply = GetTexGenfvReply;}
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct GetTexGenfvReply {
@@ -6775,7 +6775,7 @@ impl Request for GetTexGenivRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetTexGenivRequest {}
+impl crate::x11_utils::ReplyRequest for GetTexGenivRequest {type Reply = GetTexGenivReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetTexGenivReply {
@@ -6913,7 +6913,7 @@ impl Request for GetTexImageRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetTexImageRequest {}
+impl crate::x11_utils::ReplyRequest for GetTexImageRequest {type Reply = GetTexImageReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetTexImageReply {
@@ -7031,7 +7031,7 @@ impl Request for GetTexParameterfvRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetTexParameterfvRequest {}
+impl crate::x11_utils::ReplyRequest for GetTexParameterfvRequest {type Reply = GetTexParameterfvReply;}
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct GetTexParameterfvReply {
@@ -7145,7 +7145,7 @@ impl Request for GetTexParameterivRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetTexParameterivRequest {}
+impl crate::x11_utils::ReplyRequest for GetTexParameterivRequest {type Reply = GetTexParameterivReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetTexParameterivReply {
@@ -7267,7 +7267,7 @@ impl Request for GetTexLevelParameterfvRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetTexLevelParameterfvRequest {}
+impl crate::x11_utils::ReplyRequest for GetTexLevelParameterfvRequest {type Reply = GetTexLevelParameterfvReply;}
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct GetTexLevelParameterfvReply {
@@ -7389,7 +7389,7 @@ impl Request for GetTexLevelParameterivRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetTexLevelParameterivRequest {}
+impl crate::x11_utils::ReplyRequest for GetTexLevelParameterivRequest {type Reply = GetTexLevelParameterivReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetTexLevelParameterivReply {
@@ -7495,7 +7495,7 @@ impl Request for IsEnabledRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for IsEnabledRequest {}
+impl crate::x11_utils::ReplyRequest for IsEnabledRequest {type Reply = IsEnabledReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct IsEnabledReply {
@@ -7581,7 +7581,7 @@ impl Request for IsListRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for IsListRequest {}
+impl crate::x11_utils::ReplyRequest for IsListRequest {type Reply = IsListReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct IsListReply {
@@ -7733,7 +7733,7 @@ impl<'input> Request for AreTexturesResidentRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::ReplyRequest for AreTexturesResidentRequest<'input> {}
+impl<'input> crate::x11_utils::ReplyRequest for AreTexturesResidentRequest<'input> {type Reply = AreTexturesResidentReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct AreTexturesResidentReply {
@@ -7911,7 +7911,7 @@ impl Request for GenTexturesRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GenTexturesRequest {}
+impl crate::x11_utils::ReplyRequest for GenTexturesRequest {type Reply = GenTexturesReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GenTexturesReply {
@@ -8012,7 +8012,7 @@ impl Request for IsTextureRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for IsTextureRequest {}
+impl crate::x11_utils::ReplyRequest for IsTextureRequest {type Reply = IsTextureReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct IsTextureReply {
@@ -8122,7 +8122,7 @@ impl Request for GetColorTableRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetColorTableRequest {}
+impl crate::x11_utils::ReplyRequest for GetColorTableRequest {type Reply = GetColorTableReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetColorTableReply {
@@ -8236,7 +8236,7 @@ impl Request for GetColorTableParameterfvRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetColorTableParameterfvRequest {}
+impl crate::x11_utils::ReplyRequest for GetColorTableParameterfvRequest {type Reply = GetColorTableParameterfvReply;}
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct GetColorTableParameterfvReply {
@@ -8350,7 +8350,7 @@ impl Request for GetColorTableParameterivRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetColorTableParameterivRequest {}
+impl crate::x11_utils::ReplyRequest for GetColorTableParameterivRequest {type Reply = GetColorTableParameterivReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetColorTableParameterivReply {
@@ -8480,7 +8480,7 @@ impl Request for GetConvolutionFilterRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetConvolutionFilterRequest {}
+impl crate::x11_utils::ReplyRequest for GetConvolutionFilterRequest {type Reply = GetConvolutionFilterReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetConvolutionFilterReply {
@@ -8596,7 +8596,7 @@ impl Request for GetConvolutionParameterfvRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetConvolutionParameterfvRequest {}
+impl crate::x11_utils::ReplyRequest for GetConvolutionParameterfvRequest {type Reply = GetConvolutionParameterfvReply;}
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct GetConvolutionParameterfvReply {
@@ -8710,7 +8710,7 @@ impl Request for GetConvolutionParameterivRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetConvolutionParameterivRequest {}
+impl crate::x11_utils::ReplyRequest for GetConvolutionParameterivRequest {type Reply = GetConvolutionParameterivReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetConvolutionParameterivReply {
@@ -8840,7 +8840,7 @@ impl Request for GetSeparableFilterRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetSeparableFilterRequest {}
+impl crate::x11_utils::ReplyRequest for GetSeparableFilterRequest {type Reply = GetSeparableFilterReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetSeparableFilterReply {
@@ -8976,7 +8976,7 @@ impl Request for GetHistogramRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetHistogramRequest {}
+impl crate::x11_utils::ReplyRequest for GetHistogramRequest {type Reply = GetHistogramReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetHistogramReply {
@@ -9090,7 +9090,7 @@ impl Request for GetHistogramParameterfvRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetHistogramParameterfvRequest {}
+impl crate::x11_utils::ReplyRequest for GetHistogramParameterfvRequest {type Reply = GetHistogramParameterfvReply;}
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct GetHistogramParameterfvReply {
@@ -9204,7 +9204,7 @@ impl Request for GetHistogramParameterivRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetHistogramParameterivRequest {}
+impl crate::x11_utils::ReplyRequest for GetHistogramParameterivRequest {type Reply = GetHistogramParameterivReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetHistogramParameterivReply {
@@ -9338,7 +9338,7 @@ impl Request for GetMinmaxRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetMinmaxRequest {}
+impl crate::x11_utils::ReplyRequest for GetMinmaxRequest {type Reply = GetMinmaxReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetMinmaxReply {
@@ -9449,7 +9449,7 @@ impl Request for GetMinmaxParameterfvRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetMinmaxParameterfvRequest {}
+impl crate::x11_utils::ReplyRequest for GetMinmaxParameterfvRequest {type Reply = GetMinmaxParameterfvReply;}
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct GetMinmaxParameterfvReply {
@@ -9563,7 +9563,7 @@ impl Request for GetMinmaxParameterivRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetMinmaxParameterivRequest {}
+impl crate::x11_utils::ReplyRequest for GetMinmaxParameterivRequest {type Reply = GetMinmaxParameterivReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetMinmaxParameterivReply {
@@ -9677,7 +9677,7 @@ impl Request for GetCompressedTexImageARBRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetCompressedTexImageARBRequest {}
+impl crate::x11_utils::ReplyRequest for GetCompressedTexImageARBRequest {type Reply = GetCompressedTexImageARBReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetCompressedTexImageARBReply {
@@ -9857,7 +9857,7 @@ impl Request for GenQueriesARBRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GenQueriesARBRequest {}
+impl crate::x11_utils::ReplyRequest for GenQueriesARBRequest {type Reply = GenQueriesARBReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GenQueriesARBReply {
@@ -9958,7 +9958,7 @@ impl Request for IsQueryARBRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for IsQueryARBRequest {}
+impl crate::x11_utils::ReplyRequest for IsQueryARBRequest {type Reply = IsQueryARBReply;}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct IsQueryARBReply {
@@ -10052,7 +10052,7 @@ impl Request for GetQueryivARBRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetQueryivARBRequest {}
+impl crate::x11_utils::ReplyRequest for GetQueryivARBRequest {type Reply = GetQueryivARBReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetQueryivARBReply {
@@ -10166,7 +10166,7 @@ impl Request for GetQueryObjectivARBRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetQueryObjectivARBRequest {}
+impl crate::x11_utils::ReplyRequest for GetQueryObjectivARBRequest {type Reply = GetQueryObjectivARBReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetQueryObjectivARBReply {
@@ -10280,7 +10280,7 @@ impl Request for GetQueryObjectuivARBRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetQueryObjectuivARBRequest {}
+impl crate::x11_utils::ReplyRequest for GetQueryObjectuivARBRequest {type Reply = GetQueryObjectuivARBReply;}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetQueryObjectuivARBReply {
