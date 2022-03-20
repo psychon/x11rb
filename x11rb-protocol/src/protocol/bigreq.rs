@@ -61,8 +61,6 @@ impl EnableRequest {
     }
 }
 impl Request for EnableRequest {
-    type Reply = EnableReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -72,7 +70,9 @@ impl Request for EnableRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for EnableRequest {type Reply = EnableReply;}
+impl crate::x11_utils::ReplyRequest for EnableRequest {
+    type Reply = EnableReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct EnableReply {

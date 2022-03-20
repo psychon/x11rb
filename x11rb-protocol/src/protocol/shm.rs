@@ -151,8 +151,6 @@ impl QueryVersionRequest {
     }
 }
 impl Request for QueryVersionRequest {
-    type Reply = QueryVersionReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -162,7 +160,9 @@ impl Request for QueryVersionRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for QueryVersionRequest {type Reply = QueryVersionReply;}
+impl crate::x11_utils::ReplyRequest for QueryVersionRequest {
+    type Reply = QueryVersionReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionReply {
@@ -256,8 +256,6 @@ impl AttachRequest {
     }
 }
 impl Request for AttachRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -267,7 +265,8 @@ impl Request for AttachRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for AttachRequest {}
+impl crate::x11_utils::VoidRequest for AttachRequest {
+}
 
 /// Opcode for the Detach request
 pub const DETACH_REQUEST: u8 = 2;
@@ -309,8 +308,6 @@ impl DetachRequest {
     }
 }
 impl Request for DetachRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -320,7 +317,8 @@ impl Request for DetachRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for DetachRequest {}
+impl crate::x11_utils::VoidRequest for DetachRequest {
+}
 
 /// Opcode for the PutImage request
 pub const PUT_IMAGE_REQUEST: u8 = 3;
@@ -451,8 +449,6 @@ impl PutImageRequest {
     }
 }
 impl Request for PutImageRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -462,7 +458,8 @@ impl Request for PutImageRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for PutImageRequest {}
+impl crate::x11_utils::VoidRequest for PutImageRequest {
+}
 
 /// Opcode for the GetImage request
 pub const GET_IMAGE_REQUEST: u8 = 4;
@@ -561,8 +558,6 @@ impl GetImageRequest {
     }
 }
 impl Request for GetImageRequest {
-    type Reply = GetImageReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -572,7 +567,9 @@ impl Request for GetImageRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetImageRequest {type Reply = GetImageReply;}
+impl crate::x11_utils::ReplyRequest for GetImageRequest {
+    type Reply = GetImageReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetImageReply {
@@ -687,8 +684,6 @@ impl CreatePixmapRequest {
     }
 }
 impl Request for CreatePixmapRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -698,7 +693,8 @@ impl Request for CreatePixmapRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for CreatePixmapRequest {}
+impl crate::x11_utils::VoidRequest for CreatePixmapRequest {
+}
 
 /// Opcode for the AttachFd request
 pub const ATTACH_FD_REQUEST: u8 = 6;
@@ -753,8 +749,6 @@ impl AttachFdRequest {
     }
 }
 impl Request for AttachFdRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -764,7 +758,8 @@ impl Request for AttachFdRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for AttachFdRequest {}
+impl crate::x11_utils::VoidRequest for AttachFdRequest {
+}
 
 /// Opcode for the CreateSegment request
 pub const CREATE_SEGMENT_REQUEST: u8 = 7;
@@ -823,8 +818,6 @@ impl CreateSegmentRequest {
     }
 }
 impl Request for CreateSegmentRequest {
-    type Reply = CreateSegmentReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -834,7 +827,9 @@ impl Request for CreateSegmentRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyFDsRequest for CreateSegmentRequest {}
+impl crate::x11_utils::ReplyFDsRequest for CreateSegmentRequest {
+    type Reply = CreateSegmentReply;
+}
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct CreateSegmentReply {

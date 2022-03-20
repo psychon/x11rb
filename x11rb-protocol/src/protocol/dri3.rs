@@ -80,8 +80,6 @@ impl QueryVersionRequest {
     }
 }
 impl Request for QueryVersionRequest {
-    type Reply = QueryVersionReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -91,7 +89,9 @@ impl Request for QueryVersionRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for QueryVersionRequest {type Reply = QueryVersionReply;}
+impl crate::x11_utils::ReplyRequest for QueryVersionRequest {
+    type Reply = QueryVersionReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionReply {
@@ -168,8 +168,6 @@ impl OpenRequest {
     }
 }
 impl Request for OpenRequest {
-    type Reply = OpenReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -179,7 +177,9 @@ impl Request for OpenRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyFDsRequest for OpenRequest {}
+impl crate::x11_utils::ReplyFDsRequest for OpenRequest {
+    type Reply = OpenReply;
+}
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct OpenReply {
@@ -297,8 +297,6 @@ impl PixmapFromBufferRequest {
     }
 }
 impl Request for PixmapFromBufferRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -308,7 +306,8 @@ impl Request for PixmapFromBufferRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for PixmapFromBufferRequest {}
+impl crate::x11_utils::VoidRequest for PixmapFromBufferRequest {
+}
 
 /// Opcode for the BufferFromPixmap request
 pub const BUFFER_FROM_PIXMAP_REQUEST: u8 = 3;
@@ -350,8 +349,6 @@ impl BufferFromPixmapRequest {
     }
 }
 impl Request for BufferFromPixmapRequest {
-    type Reply = BufferFromPixmapReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -361,7 +358,9 @@ impl Request for BufferFromPixmapRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyFDsRequest for BufferFromPixmapRequest {}
+impl crate::x11_utils::ReplyFDsRequest for BufferFromPixmapRequest {
+    type Reply = BufferFromPixmapReply;
+}
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct BufferFromPixmapReply {
@@ -464,8 +463,6 @@ impl FenceFromFDRequest {
     }
 }
 impl Request for FenceFromFDRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -475,7 +472,8 @@ impl Request for FenceFromFDRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for FenceFromFDRequest {}
+impl crate::x11_utils::VoidRequest for FenceFromFDRequest {
+}
 
 /// Opcode for the FDFromFence request
 pub const FD_FROM_FENCE_REQUEST: u8 = 5;
@@ -525,8 +523,6 @@ impl FDFromFenceRequest {
     }
 }
 impl Request for FDFromFenceRequest {
-    type Reply = FDFromFenceReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -536,7 +532,9 @@ impl Request for FDFromFenceRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyFDsRequest for FDFromFenceRequest {}
+impl crate::x11_utils::ReplyFDsRequest for FDFromFenceRequest {
+    type Reply = FDFromFenceReply;
+}
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct FDFromFenceReply {
@@ -619,8 +617,6 @@ impl GetSupportedModifiersRequest {
     }
 }
 impl Request for GetSupportedModifiersRequest {
-    type Reply = GetSupportedModifiersReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -630,7 +626,9 @@ impl Request for GetSupportedModifiersRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetSupportedModifiersRequest {type Reply = GetSupportedModifiersReply;}
+impl crate::x11_utils::ReplyRequest for GetSupportedModifiersRequest {
+    type Reply = GetSupportedModifiersReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetSupportedModifiersReply {
@@ -853,8 +851,6 @@ impl PixmapFromBuffersRequest {
     }
 }
 impl Request for PixmapFromBuffersRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -864,7 +860,8 @@ impl Request for PixmapFromBuffersRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for PixmapFromBuffersRequest {}
+impl crate::x11_utils::VoidRequest for PixmapFromBuffersRequest {
+}
 
 /// Opcode for the BuffersFromPixmap request
 pub const BUFFERS_FROM_PIXMAP_REQUEST: u8 = 8;
@@ -906,8 +903,6 @@ impl BuffersFromPixmapRequest {
     }
 }
 impl Request for BuffersFromPixmapRequest {
-    type Reply = BuffersFromPixmapReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -917,7 +912,9 @@ impl Request for BuffersFromPixmapRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyFDsRequest for BuffersFromPixmapRequest {}
+impl crate::x11_utils::ReplyFDsRequest for BuffersFromPixmapRequest {
+    type Reply = BuffersFromPixmapReply;
+}
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct BuffersFromPixmapReply {

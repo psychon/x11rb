@@ -282,8 +282,6 @@ impl QueryVersionRequest {
     }
 }
 impl Request for QueryVersionRequest {
-    type Reply = QueryVersionReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -293,7 +291,9 @@ impl Request for QueryVersionRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for QueryVersionRequest {type Reply = QueryVersionReply;}
+impl crate::x11_utils::ReplyRequest for QueryVersionRequest {
+    type Reply = QueryVersionReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionReply {
@@ -420,8 +420,6 @@ impl<'input> RectanglesRequest<'input> {
     }
 }
 impl<'input> Request for RectanglesRequest<'input> {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -431,7 +429,8 @@ impl<'input> Request for RectanglesRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::VoidRequest for RectanglesRequest<'input> {}
+impl<'input> crate::x11_utils::VoidRequest for RectanglesRequest<'input> {
+}
 
 /// Opcode for the Mask request
 pub const MASK_REQUEST: u8 = 2;
@@ -508,8 +507,6 @@ impl MaskRequest {
     }
 }
 impl Request for MaskRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -519,7 +516,8 @@ impl Request for MaskRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for MaskRequest {}
+impl crate::x11_utils::VoidRequest for MaskRequest {
+}
 
 /// Opcode for the Combine request
 pub const COMBINE_REQUEST: u8 = 3;
@@ -601,8 +599,6 @@ impl CombineRequest {
     }
 }
 impl Request for CombineRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -612,7 +608,8 @@ impl Request for CombineRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for CombineRequest {}
+impl crate::x11_utils::VoidRequest for CombineRequest {
+}
 
 /// Opcode for the Offset request
 pub const OFFSET_REQUEST: u8 = 4;
@@ -676,8 +673,6 @@ impl OffsetRequest {
     }
 }
 impl Request for OffsetRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -687,7 +682,8 @@ impl Request for OffsetRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for OffsetRequest {}
+impl crate::x11_utils::VoidRequest for OffsetRequest {
+}
 
 /// Opcode for the QueryExtents request
 pub const QUERY_EXTENTS_REQUEST: u8 = 5;
@@ -729,8 +725,6 @@ impl QueryExtentsRequest {
     }
 }
 impl Request for QueryExtentsRequest {
-    type Reply = QueryExtentsReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -740,7 +734,9 @@ impl Request for QueryExtentsRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for QueryExtentsRequest {type Reply = QueryExtentsReply;}
+impl crate::x11_utils::ReplyRequest for QueryExtentsRequest {
+    type Reply = QueryExtentsReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryExtentsReply {
@@ -835,8 +831,6 @@ impl SelectInputRequest {
     }
 }
 impl Request for SelectInputRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -846,7 +840,8 @@ impl Request for SelectInputRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for SelectInputRequest {}
+impl crate::x11_utils::VoidRequest for SelectInputRequest {
+}
 
 /// Opcode for the InputSelected request
 pub const INPUT_SELECTED_REQUEST: u8 = 7;
@@ -888,8 +883,6 @@ impl InputSelectedRequest {
     }
 }
 impl Request for InputSelectedRequest {
-    type Reply = InputSelectedReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -899,7 +892,9 @@ impl Request for InputSelectedRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for InputSelectedRequest {type Reply = InputSelectedReply;}
+impl crate::x11_utils::ReplyRequest for InputSelectedRequest {
+    type Reply = InputSelectedReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct InputSelectedReply {
@@ -975,8 +970,6 @@ impl GetRectanglesRequest {
     }
 }
 impl Request for GetRectanglesRequest {
-    type Reply = GetRectanglesReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -986,7 +979,9 @@ impl Request for GetRectanglesRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetRectanglesRequest {type Reply = GetRectanglesReply;}
+impl crate::x11_utils::ReplyRequest for GetRectanglesRequest {
+    type Reply = GetRectanglesReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetRectanglesReply {

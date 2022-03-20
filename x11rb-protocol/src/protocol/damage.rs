@@ -149,8 +149,6 @@ impl QueryVersionRequest {
     }
 }
 impl Request for QueryVersionRequest {
-    type Reply = QueryVersionReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -160,7 +158,9 @@ impl Request for QueryVersionRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for QueryVersionRequest {type Reply = QueryVersionReply;}
+impl crate::x11_utils::ReplyRequest for QueryVersionRequest {
+    type Reply = QueryVersionReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionReply {
@@ -248,8 +248,6 @@ impl CreateRequest {
     }
 }
 impl Request for CreateRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -259,7 +257,8 @@ impl Request for CreateRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for CreateRequest {}
+impl crate::x11_utils::VoidRequest for CreateRequest {
+}
 
 /// Opcode for the Destroy request
 pub const DESTROY_REQUEST: u8 = 2;
@@ -301,8 +300,6 @@ impl DestroyRequest {
     }
 }
 impl Request for DestroyRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -312,7 +309,8 @@ impl Request for DestroyRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for DestroyRequest {}
+impl crate::x11_utils::VoidRequest for DestroyRequest {
+}
 
 /// Opcode for the Subtract request
 pub const SUBTRACT_REQUEST: u8 = 3;
@@ -370,8 +368,6 @@ impl SubtractRequest {
     }
 }
 impl Request for SubtractRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -381,7 +377,8 @@ impl Request for SubtractRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for SubtractRequest {}
+impl crate::x11_utils::VoidRequest for SubtractRequest {
+}
 
 /// Opcode for the Add request
 pub const ADD_REQUEST: u8 = 4;
@@ -431,8 +428,6 @@ impl AddRequest {
     }
 }
 impl Request for AddRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -442,7 +437,8 @@ impl Request for AddRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for AddRequest {}
+impl crate::x11_utils::VoidRequest for AddRequest {
+}
 
 /// Opcode for the Notify event
 pub const NOTIFY_EVENT: u8 = 0;

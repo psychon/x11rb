@@ -130,8 +130,6 @@ impl<'input> GetExtensionVersionRequest<'input> {
     }
 }
 impl<'input> Request for GetExtensionVersionRequest<'input> {
-    type Reply = GetExtensionVersionReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -141,7 +139,9 @@ impl<'input> Request for GetExtensionVersionRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::ReplyRequest for GetExtensionVersionRequest<'input> {type Reply = GetExtensionVersionReply;}
+impl<'input> crate::x11_utils::ReplyRequest for GetExtensionVersionRequest<'input> {
+    type Reply = GetExtensionVersionReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetExtensionVersionReply {
@@ -907,8 +907,6 @@ impl ListInputDevicesRequest {
     }
 }
 impl Request for ListInputDevicesRequest {
-    type Reply = ListInputDevicesReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -918,7 +916,9 @@ impl Request for ListInputDevicesRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for ListInputDevicesRequest {type Reply = ListInputDevicesReply;}
+impl crate::x11_utils::ReplyRequest for ListInputDevicesRequest {
+    type Reply = ListInputDevicesReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ListInputDevicesReply {
@@ -1046,8 +1046,6 @@ impl OpenDeviceRequest {
     }
 }
 impl Request for OpenDeviceRequest {
-    type Reply = OpenDeviceReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -1057,7 +1055,9 @@ impl Request for OpenDeviceRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for OpenDeviceRequest {type Reply = OpenDeviceReply;}
+impl crate::x11_utils::ReplyRequest for OpenDeviceRequest {
+    type Reply = OpenDeviceReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct OpenDeviceReply {
@@ -1148,8 +1148,6 @@ impl CloseDeviceRequest {
     }
 }
 impl Request for CloseDeviceRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -1159,7 +1157,8 @@ impl Request for CloseDeviceRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for CloseDeviceRequest {}
+impl crate::x11_utils::VoidRequest for CloseDeviceRequest {
+}
 
 /// Opcode for the SetDeviceMode request
 pub const SET_DEVICE_MODE_REQUEST: u8 = 5;
@@ -1207,8 +1206,6 @@ impl SetDeviceModeRequest {
     }
 }
 impl Request for SetDeviceModeRequest {
-    type Reply = SetDeviceModeReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -1218,7 +1215,9 @@ impl Request for SetDeviceModeRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for SetDeviceModeRequest {type Reply = SetDeviceModeReply;}
+impl crate::x11_utils::ReplyRequest for SetDeviceModeRequest {
+    type Reply = SetDeviceModeReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SetDeviceModeReply {
@@ -1310,8 +1309,6 @@ impl<'input> SelectExtensionEventRequest<'input> {
     }
 }
 impl<'input> Request for SelectExtensionEventRequest<'input> {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -1321,7 +1318,8 @@ impl<'input> Request for SelectExtensionEventRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::VoidRequest for SelectExtensionEventRequest<'input> {}
+impl<'input> crate::x11_utils::VoidRequest for SelectExtensionEventRequest<'input> {
+}
 
 /// Opcode for the GetSelectedExtensionEvents request
 pub const GET_SELECTED_EXTENSION_EVENTS_REQUEST: u8 = 7;
@@ -1363,8 +1361,6 @@ impl GetSelectedExtensionEventsRequest {
     }
 }
 impl Request for GetSelectedExtensionEventsRequest {
-    type Reply = GetSelectedExtensionEventsReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -1374,7 +1370,9 @@ impl Request for GetSelectedExtensionEventsRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetSelectedExtensionEventsRequest {type Reply = GetSelectedExtensionEventsReply;}
+impl crate::x11_utils::ReplyRequest for GetSelectedExtensionEventsRequest {
+    type Reply = GetSelectedExtensionEventsReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetSelectedExtensionEventsReply {
@@ -1561,8 +1559,6 @@ impl<'input> ChangeDeviceDontPropagateListRequest<'input> {
     }
 }
 impl<'input> Request for ChangeDeviceDontPropagateListRequest<'input> {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -1572,7 +1568,8 @@ impl<'input> Request for ChangeDeviceDontPropagateListRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::VoidRequest for ChangeDeviceDontPropagateListRequest<'input> {}
+impl<'input> crate::x11_utils::VoidRequest for ChangeDeviceDontPropagateListRequest<'input> {
+}
 
 /// Opcode for the GetDeviceDontPropagateList request
 pub const GET_DEVICE_DONT_PROPAGATE_LIST_REQUEST: u8 = 9;
@@ -1614,8 +1611,6 @@ impl GetDeviceDontPropagateListRequest {
     }
 }
 impl Request for GetDeviceDontPropagateListRequest {
-    type Reply = GetDeviceDontPropagateListReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -1625,7 +1620,9 @@ impl Request for GetDeviceDontPropagateListRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetDeviceDontPropagateListRequest {type Reply = GetDeviceDontPropagateListReply;}
+impl crate::x11_utils::ReplyRequest for GetDeviceDontPropagateListRequest {
+    type Reply = GetDeviceDontPropagateListReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetDeviceDontPropagateListReply {
@@ -1754,8 +1751,6 @@ impl GetDeviceMotionEventsRequest {
     }
 }
 impl Request for GetDeviceMotionEventsRequest {
-    type Reply = GetDeviceMotionEventsReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -1765,7 +1760,9 @@ impl Request for GetDeviceMotionEventsRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetDeviceMotionEventsRequest {type Reply = GetDeviceMotionEventsReply;}
+impl crate::x11_utils::ReplyRequest for GetDeviceMotionEventsRequest {
+    type Reply = GetDeviceMotionEventsReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetDeviceMotionEventsReply {
@@ -1863,8 +1860,6 @@ impl ChangeKeyboardDeviceRequest {
     }
 }
 impl Request for ChangeKeyboardDeviceRequest {
-    type Reply = ChangeKeyboardDeviceReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -1874,7 +1869,9 @@ impl Request for ChangeKeyboardDeviceRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for ChangeKeyboardDeviceRequest {type Reply = ChangeKeyboardDeviceReply;}
+impl crate::x11_utils::ReplyRequest for ChangeKeyboardDeviceRequest {
+    type Reply = ChangeKeyboardDeviceReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ChangeKeyboardDeviceReply {
@@ -1953,8 +1950,6 @@ impl ChangePointerDeviceRequest {
     }
 }
 impl Request for ChangePointerDeviceRequest {
-    type Reply = ChangePointerDeviceReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -1964,7 +1959,9 @@ impl Request for ChangePointerDeviceRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for ChangePointerDeviceRequest {type Reply = ChangePointerDeviceReply;}
+impl crate::x11_utils::ReplyRequest for ChangePointerDeviceRequest {
+    type Reply = ChangePointerDeviceReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ChangePointerDeviceReply {
@@ -2091,8 +2088,6 @@ impl<'input> GrabDeviceRequest<'input> {
     }
 }
 impl<'input> Request for GrabDeviceRequest<'input> {
-    type Reply = GrabDeviceReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -2102,7 +2097,9 @@ impl<'input> Request for GrabDeviceRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::ReplyRequest for GrabDeviceRequest<'input> {type Reply = GrabDeviceReply;}
+impl<'input> crate::x11_utils::ReplyRequest for GrabDeviceRequest<'input> {
+    type Reply = GrabDeviceReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GrabDeviceReply {
@@ -2181,8 +2178,6 @@ impl UngrabDeviceRequest {
     }
 }
 impl Request for UngrabDeviceRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -2192,7 +2187,8 @@ impl Request for UngrabDeviceRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for UngrabDeviceRequest {}
+impl crate::x11_utils::VoidRequest for UngrabDeviceRequest {
+}
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub struct ModifierDevice(u8);
@@ -2357,8 +2353,6 @@ impl<'input> GrabDeviceKeyRequest<'input> {
     }
 }
 impl<'input> Request for GrabDeviceKeyRequest<'input> {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -2368,7 +2362,8 @@ impl<'input> Request for GrabDeviceKeyRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::VoidRequest for GrabDeviceKeyRequest<'input> {}
+impl<'input> crate::x11_utils::VoidRequest for GrabDeviceKeyRequest<'input> {
+}
 
 /// Opcode for the UngrabDeviceKey request
 pub const UNGRAB_DEVICE_KEY_REQUEST: u8 = 16;
@@ -2434,8 +2429,6 @@ impl UngrabDeviceKeyRequest {
     }
 }
 impl Request for UngrabDeviceKeyRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -2445,7 +2438,8 @@ impl Request for UngrabDeviceKeyRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for UngrabDeviceKeyRequest {}
+impl crate::x11_utils::VoidRequest for UngrabDeviceKeyRequest {
+}
 
 /// Opcode for the GrabDeviceButton request
 pub const GRAB_DEVICE_BUTTON_REQUEST: u8 = 17;
@@ -2554,8 +2548,6 @@ impl<'input> GrabDeviceButtonRequest<'input> {
     }
 }
 impl<'input> Request for GrabDeviceButtonRequest<'input> {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -2565,7 +2557,8 @@ impl<'input> Request for GrabDeviceButtonRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::VoidRequest for GrabDeviceButtonRequest<'input> {}
+impl<'input> crate::x11_utils::VoidRequest for GrabDeviceButtonRequest<'input> {
+}
 
 /// Opcode for the UngrabDeviceButton request
 pub const UNGRAB_DEVICE_BUTTON_REQUEST: u8 = 18;
@@ -2632,8 +2625,6 @@ impl UngrabDeviceButtonRequest {
     }
 }
 impl Request for UngrabDeviceButtonRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -2643,7 +2634,8 @@ impl Request for UngrabDeviceButtonRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for UngrabDeviceButtonRequest {}
+impl crate::x11_utils::VoidRequest for UngrabDeviceButtonRequest {
+}
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub struct DeviceInputMode(u8);
@@ -2765,8 +2757,6 @@ impl AllowDeviceEventsRequest {
     }
 }
 impl Request for AllowDeviceEventsRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -2776,7 +2766,8 @@ impl Request for AllowDeviceEventsRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for AllowDeviceEventsRequest {}
+impl crate::x11_utils::VoidRequest for AllowDeviceEventsRequest {
+}
 
 /// Opcode for the GetDeviceFocus request
 pub const GET_DEVICE_FOCUS_REQUEST: u8 = 20;
@@ -2819,8 +2810,6 @@ impl GetDeviceFocusRequest {
     }
 }
 impl Request for GetDeviceFocusRequest {
-    type Reply = GetDeviceFocusReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -2830,7 +2819,9 @@ impl Request for GetDeviceFocusRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetDeviceFocusRequest {type Reply = GetDeviceFocusReply;}
+impl crate::x11_utils::ReplyRequest for GetDeviceFocusRequest {
+    type Reply = GetDeviceFocusReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetDeviceFocusReply {
@@ -2926,8 +2917,6 @@ impl SetDeviceFocusRequest {
     }
 }
 impl Request for SetDeviceFocusRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -2937,7 +2926,8 @@ impl Request for SetDeviceFocusRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for SetDeviceFocusRequest {}
+impl crate::x11_utils::VoidRequest for SetDeviceFocusRequest {
+}
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub struct FeedbackClass(u8);
@@ -3927,8 +3917,6 @@ impl GetFeedbackControlRequest {
     }
 }
 impl Request for GetFeedbackControlRequest {
-    type Reply = GetFeedbackControlReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -3938,7 +3926,9 @@ impl Request for GetFeedbackControlRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetFeedbackControlRequest {type Reply = GetFeedbackControlReply;}
+impl crate::x11_utils::ReplyRequest for GetFeedbackControlRequest {
+    type Reply = GetFeedbackControlReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetFeedbackControlReply {
@@ -4903,8 +4893,6 @@ impl ChangeFeedbackControlRequest {
     }
 }
 impl Request for ChangeFeedbackControlRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -4914,7 +4902,8 @@ impl Request for ChangeFeedbackControlRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for ChangeFeedbackControlRequest {}
+impl crate::x11_utils::VoidRequest for ChangeFeedbackControlRequest {
+}
 
 /// Opcode for the GetDeviceKeyMapping request
 pub const GET_DEVICE_KEY_MAPPING_REQUEST: u8 = 24;
@@ -4965,8 +4954,6 @@ impl GetDeviceKeyMappingRequest {
     }
 }
 impl Request for GetDeviceKeyMappingRequest {
-    type Reply = GetDeviceKeyMappingReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -4976,7 +4963,9 @@ impl Request for GetDeviceKeyMappingRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetDeviceKeyMappingRequest {type Reply = GetDeviceKeyMappingReply;}
+impl crate::x11_utils::ReplyRequest for GetDeviceKeyMappingRequest {
+    type Reply = GetDeviceKeyMappingReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetDeviceKeyMappingReply {
@@ -5091,8 +5080,6 @@ impl<'input> ChangeDeviceKeyMappingRequest<'input> {
     }
 }
 impl<'input> Request for ChangeDeviceKeyMappingRequest<'input> {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -5102,7 +5089,8 @@ impl<'input> Request for ChangeDeviceKeyMappingRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::VoidRequest for ChangeDeviceKeyMappingRequest<'input> {}
+impl<'input> crate::x11_utils::VoidRequest for ChangeDeviceKeyMappingRequest<'input> {
+}
 
 /// Opcode for the GetDeviceModifierMapping request
 pub const GET_DEVICE_MODIFIER_MAPPING_REQUEST: u8 = 26;
@@ -5145,8 +5133,6 @@ impl GetDeviceModifierMappingRequest {
     }
 }
 impl Request for GetDeviceModifierMappingRequest {
-    type Reply = GetDeviceModifierMappingReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -5156,7 +5142,9 @@ impl Request for GetDeviceModifierMappingRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetDeviceModifierMappingRequest {type Reply = GetDeviceModifierMappingReply;}
+impl crate::x11_utils::ReplyRequest for GetDeviceModifierMappingRequest {
+    type Reply = GetDeviceModifierMappingReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetDeviceModifierMappingReply {
@@ -5261,8 +5249,6 @@ impl<'input> SetDeviceModifierMappingRequest<'input> {
     }
 }
 impl<'input> Request for SetDeviceModifierMappingRequest<'input> {
-    type Reply = SetDeviceModifierMappingReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -5272,7 +5258,9 @@ impl<'input> Request for SetDeviceModifierMappingRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::ReplyRequest for SetDeviceModifierMappingRequest<'input> {type Reply = SetDeviceModifierMappingReply;}
+impl<'input> crate::x11_utils::ReplyRequest for SetDeviceModifierMappingRequest<'input> {
+    type Reply = SetDeviceModifierMappingReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SetDeviceModifierMappingReply {
@@ -5343,8 +5331,6 @@ impl GetDeviceButtonMappingRequest {
     }
 }
 impl Request for GetDeviceButtonMappingRequest {
-    type Reply = GetDeviceButtonMappingReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -5354,7 +5340,9 @@ impl Request for GetDeviceButtonMappingRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetDeviceButtonMappingRequest {type Reply = GetDeviceButtonMappingReply;}
+impl crate::x11_utils::ReplyRequest for GetDeviceButtonMappingRequest {
+    type Reply = GetDeviceButtonMappingReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetDeviceButtonMappingReply {
@@ -5462,8 +5450,6 @@ impl<'input> SetDeviceButtonMappingRequest<'input> {
     }
 }
 impl<'input> Request for SetDeviceButtonMappingRequest<'input> {
-    type Reply = SetDeviceButtonMappingReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -5473,7 +5459,9 @@ impl<'input> Request for SetDeviceButtonMappingRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::ReplyRequest for SetDeviceButtonMappingRequest<'input> {type Reply = SetDeviceButtonMappingReply;}
+impl<'input> crate::x11_utils::ReplyRequest for SetDeviceButtonMappingRequest<'input> {
+    type Reply = SetDeviceButtonMappingReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SetDeviceButtonMappingReply {
@@ -6097,8 +6085,6 @@ impl QueryDeviceStateRequest {
     }
 }
 impl Request for QueryDeviceStateRequest {
-    type Reply = QueryDeviceStateReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -6108,7 +6094,9 @@ impl Request for QueryDeviceStateRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for QueryDeviceStateRequest {type Reply = QueryDeviceStateReply;}
+impl crate::x11_utils::ReplyRequest for QueryDeviceStateRequest {
+    type Reply = QueryDeviceStateReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryDeviceStateReply {
@@ -6205,8 +6193,6 @@ impl DeviceBellRequest {
     }
 }
 impl Request for DeviceBellRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -6216,7 +6202,8 @@ impl Request for DeviceBellRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for DeviceBellRequest {}
+impl crate::x11_utils::VoidRequest for DeviceBellRequest {
+}
 
 /// Opcode for the SetDeviceValuators request
 pub const SET_DEVICE_VALUATORS_REQUEST: u8 = 33;
@@ -6281,8 +6268,6 @@ impl<'input> SetDeviceValuatorsRequest<'input> {
     }
 }
 impl<'input> Request for SetDeviceValuatorsRequest<'input> {
-    type Reply = SetDeviceValuatorsReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -6292,7 +6277,9 @@ impl<'input> Request for SetDeviceValuatorsRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::ReplyRequest for SetDeviceValuatorsRequest<'input> {type Reply = SetDeviceValuatorsReply;}
+impl<'input> crate::x11_utils::ReplyRequest for SetDeviceValuatorsRequest<'input> {
+    type Reply = SetDeviceValuatorsReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SetDeviceValuatorsReply {
@@ -7140,8 +7127,6 @@ impl GetDeviceControlRequest {
     }
 }
 impl Request for GetDeviceControlRequest {
-    type Reply = GetDeviceControlReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -7151,7 +7136,9 @@ impl Request for GetDeviceControlRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetDeviceControlRequest {type Reply = GetDeviceControlReply;}
+impl crate::x11_utils::ReplyRequest for GetDeviceControlRequest {
+    type Reply = GetDeviceControlReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetDeviceControlReply {
@@ -7936,8 +7923,6 @@ impl ChangeDeviceControlRequest {
     }
 }
 impl Request for ChangeDeviceControlRequest {
-    type Reply = ChangeDeviceControlReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -7947,7 +7932,9 @@ impl Request for ChangeDeviceControlRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for ChangeDeviceControlRequest {type Reply = ChangeDeviceControlReply;}
+impl crate::x11_utils::ReplyRequest for ChangeDeviceControlRequest {
+    type Reply = ChangeDeviceControlReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ChangeDeviceControlReply {
@@ -8017,8 +8004,6 @@ impl ListDevicePropertiesRequest {
     }
 }
 impl Request for ListDevicePropertiesRequest {
-    type Reply = ListDevicePropertiesReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -8028,7 +8013,9 @@ impl Request for ListDevicePropertiesRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for ListDevicePropertiesRequest {type Reply = ListDevicePropertiesReply;}
+impl crate::x11_utils::ReplyRequest for ListDevicePropertiesRequest {
+    type Reply = ListDevicePropertiesReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ListDevicePropertiesReply {
@@ -8341,8 +8328,6 @@ impl<'input> ChangeDevicePropertyRequest<'input> {
     }
 }
 impl<'input> Request for ChangeDevicePropertyRequest<'input> {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -8352,7 +8337,8 @@ impl<'input> Request for ChangeDevicePropertyRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::VoidRequest for ChangeDevicePropertyRequest<'input> {}
+impl<'input> crate::x11_utils::VoidRequest for ChangeDevicePropertyRequest<'input> {
+}
 
 /// Opcode for the DeleteDeviceProperty request
 pub const DELETE_DEVICE_PROPERTY_REQUEST: u8 = 38;
@@ -8403,8 +8389,6 @@ impl DeleteDevicePropertyRequest {
     }
 }
 impl Request for DeleteDevicePropertyRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -8414,7 +8398,8 @@ impl Request for DeleteDevicePropertyRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for DeleteDevicePropertyRequest {}
+impl crate::x11_utils::VoidRequest for DeleteDevicePropertyRequest {
+}
 
 /// Opcode for the GetDeviceProperty request
 pub const GET_DEVICE_PROPERTY_REQUEST: u8 = 39;
@@ -8493,8 +8478,6 @@ impl GetDevicePropertyRequest {
     }
 }
 impl Request for GetDevicePropertyRequest {
-    type Reply = GetDevicePropertyReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -8504,7 +8487,9 @@ impl Request for GetDevicePropertyRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetDevicePropertyRequest {type Reply = GetDevicePropertyReply;}
+impl crate::x11_utils::ReplyRequest for GetDevicePropertyRequest {
+    type Reply = GetDevicePropertyReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum GetDevicePropertyItems {
@@ -8832,8 +8817,6 @@ impl XIQueryPointerRequest {
     }
 }
 impl Request for XIQueryPointerRequest {
-    type Reply = XIQueryPointerReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -8843,7 +8826,9 @@ impl Request for XIQueryPointerRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for XIQueryPointerRequest {type Reply = XIQueryPointerReply;}
+impl crate::x11_utils::ReplyRequest for XIQueryPointerRequest {
+    type Reply = XIQueryPointerReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct XIQueryPointerReply {
@@ -9006,8 +8991,6 @@ impl XIWarpPointerRequest {
     }
 }
 impl Request for XIWarpPointerRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -9017,7 +9000,8 @@ impl Request for XIWarpPointerRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for XIWarpPointerRequest {}
+impl crate::x11_utils::VoidRequest for XIWarpPointerRequest {
+}
 
 /// Opcode for the XIChangeCursor request
 pub const XI_CHANGE_CURSOR_REQUEST: u8 = 42;
@@ -9076,8 +9060,6 @@ impl XIChangeCursorRequest {
     }
 }
 impl Request for XIChangeCursorRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -9087,7 +9069,8 @@ impl Request for XIChangeCursorRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for XIChangeCursorRequest {}
+impl crate::x11_utils::VoidRequest for XIChangeCursorRequest {
+}
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub struct HierarchyChangeType(u16);
@@ -9763,8 +9746,6 @@ impl<'input> XIChangeHierarchyRequest<'input> {
     }
 }
 impl<'input> Request for XIChangeHierarchyRequest<'input> {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -9774,7 +9755,8 @@ impl<'input> Request for XIChangeHierarchyRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::VoidRequest for XIChangeHierarchyRequest<'input> {}
+impl<'input> crate::x11_utils::VoidRequest for XIChangeHierarchyRequest<'input> {
+}
 
 /// Opcode for the XISetClientPointer request
 pub const XI_SET_CLIENT_POINTER_REQUEST: u8 = 44;
@@ -9825,8 +9807,6 @@ impl XISetClientPointerRequest {
     }
 }
 impl Request for XISetClientPointerRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -9836,7 +9816,8 @@ impl Request for XISetClientPointerRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for XISetClientPointerRequest {}
+impl crate::x11_utils::VoidRequest for XISetClientPointerRequest {
+}
 
 /// Opcode for the XIGetClientPointer request
 pub const XI_GET_CLIENT_POINTER_REQUEST: u8 = 45;
@@ -9878,8 +9859,6 @@ impl XIGetClientPointerRequest {
     }
 }
 impl Request for XIGetClientPointerRequest {
-    type Reply = XIGetClientPointerReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -9889,7 +9868,9 @@ impl Request for XIGetClientPointerRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for XIGetClientPointerRequest {type Reply = XIGetClientPointerReply;}
+impl crate::x11_utils::ReplyRequest for XIGetClientPointerRequest {
+    type Reply = XIGetClientPointerReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct XIGetClientPointerReply {
@@ -10122,8 +10103,6 @@ impl<'input> XISelectEventsRequest<'input> {
     }
 }
 impl<'input> Request for XISelectEventsRequest<'input> {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -10133,7 +10112,8 @@ impl<'input> Request for XISelectEventsRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::VoidRequest for XISelectEventsRequest<'input> {}
+impl<'input> crate::x11_utils::VoidRequest for XISelectEventsRequest<'input> {
+}
 
 /// Opcode for the XIQueryVersion request
 pub const XI_QUERY_VERSION_REQUEST: u8 = 47;
@@ -10179,8 +10159,6 @@ impl XIQueryVersionRequest {
     }
 }
 impl Request for XIQueryVersionRequest {
-    type Reply = XIQueryVersionReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -10190,7 +10168,9 @@ impl Request for XIQueryVersionRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for XIQueryVersionRequest {type Reply = XIQueryVersionReply;}
+impl crate::x11_utils::ReplyRequest for XIQueryVersionRequest {
+    type Reply = XIQueryVersionReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct XIQueryVersionReply {
@@ -11384,8 +11364,6 @@ impl XIQueryDeviceRequest {
     }
 }
 impl Request for XIQueryDeviceRequest {
-    type Reply = XIQueryDeviceReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -11395,7 +11373,9 @@ impl Request for XIQueryDeviceRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for XIQueryDeviceRequest {type Reply = XIQueryDeviceReply;}
+impl crate::x11_utils::ReplyRequest for XIQueryDeviceRequest {
+    type Reply = XIQueryDeviceReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct XIQueryDeviceReply {
@@ -11496,8 +11476,6 @@ impl XISetFocusRequest {
     }
 }
 impl Request for XISetFocusRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -11507,7 +11485,8 @@ impl Request for XISetFocusRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for XISetFocusRequest {}
+impl crate::x11_utils::VoidRequest for XISetFocusRequest {
+}
 
 /// Opcode for the XIGetFocus request
 pub const XI_GET_FOCUS_REQUEST: u8 = 50;
@@ -11550,8 +11529,6 @@ impl XIGetFocusRequest {
     }
 }
 impl Request for XIGetFocusRequest {
-    type Reply = XIGetFocusReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -11561,7 +11538,9 @@ impl Request for XIGetFocusRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for XIGetFocusRequest {type Reply = XIGetFocusReply;}
+impl crate::x11_utils::ReplyRequest for XIGetFocusRequest {
+    type Reply = XIGetFocusReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct XIGetFocusReply {
@@ -11766,8 +11745,6 @@ impl<'input> XIGrabDeviceRequest<'input> {
     }
 }
 impl<'input> Request for XIGrabDeviceRequest<'input> {
-    type Reply = XIGrabDeviceReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -11777,7 +11754,9 @@ impl<'input> Request for XIGrabDeviceRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::ReplyRequest for XIGrabDeviceRequest<'input> {type Reply = XIGrabDeviceReply;}
+impl<'input> crate::x11_utils::ReplyRequest for XIGrabDeviceRequest<'input> {
+    type Reply = XIGrabDeviceReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct XIGrabDeviceReply {
@@ -11855,8 +11834,6 @@ impl XIUngrabDeviceRequest {
     }
 }
 impl Request for XIUngrabDeviceRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -11866,7 +11843,8 @@ impl Request for XIUngrabDeviceRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for XIUngrabDeviceRequest {}
+impl crate::x11_utils::VoidRequest for XIUngrabDeviceRequest {
+}
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub struct EventMode(u8);
@@ -12008,8 +11986,6 @@ impl XIAllowEventsRequest {
     }
 }
 impl Request for XIAllowEventsRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -12019,7 +11995,8 @@ impl Request for XIAllowEventsRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for XIAllowEventsRequest {}
+impl crate::x11_utils::VoidRequest for XIAllowEventsRequest {
+}
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub struct GrabMode22(u8);
@@ -12364,8 +12341,6 @@ impl<'input> XIPassiveGrabDeviceRequest<'input> {
     }
 }
 impl<'input> Request for XIPassiveGrabDeviceRequest<'input> {
-    type Reply = XIPassiveGrabDeviceReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -12375,7 +12350,9 @@ impl<'input> Request for XIPassiveGrabDeviceRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::ReplyRequest for XIPassiveGrabDeviceRequest<'input> {type Reply = XIPassiveGrabDeviceReply;}
+impl<'input> crate::x11_utils::ReplyRequest for XIPassiveGrabDeviceRequest<'input> {
+    type Reply = XIPassiveGrabDeviceReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct XIPassiveGrabDeviceReply {
@@ -12505,8 +12482,6 @@ impl<'input> XIPassiveUngrabDeviceRequest<'input> {
     }
 }
 impl<'input> Request for XIPassiveUngrabDeviceRequest<'input> {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -12516,7 +12491,8 @@ impl<'input> Request for XIPassiveUngrabDeviceRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::VoidRequest for XIPassiveUngrabDeviceRequest<'input> {}
+impl<'input> crate::x11_utils::VoidRequest for XIPassiveUngrabDeviceRequest<'input> {
+}
 
 /// Opcode for the XIListProperties request
 pub const XI_LIST_PROPERTIES_REQUEST: u8 = 56;
@@ -12559,8 +12535,6 @@ impl XIListPropertiesRequest {
     }
 }
 impl Request for XIListPropertiesRequest {
-    type Reply = XIListPropertiesReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -12570,7 +12544,9 @@ impl Request for XIListPropertiesRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for XIListPropertiesRequest {type Reply = XIListPropertiesReply;}
+impl crate::x11_utils::ReplyRequest for XIListPropertiesRequest {
+    type Reply = XIListPropertiesReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct XIListPropertiesReply {
@@ -12821,8 +12797,6 @@ impl<'input> XIChangePropertyRequest<'input> {
     }
 }
 impl<'input> Request for XIChangePropertyRequest<'input> {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -12832,7 +12806,8 @@ impl<'input> Request for XIChangePropertyRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::VoidRequest for XIChangePropertyRequest<'input> {}
+impl<'input> crate::x11_utils::VoidRequest for XIChangePropertyRequest<'input> {
+}
 
 /// Opcode for the XIDeleteProperty request
 pub const XI_DELETE_PROPERTY_REQUEST: u8 = 58;
@@ -12883,8 +12858,6 @@ impl XIDeletePropertyRequest {
     }
 }
 impl Request for XIDeletePropertyRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -12894,7 +12867,8 @@ impl Request for XIDeletePropertyRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for XIDeletePropertyRequest {}
+impl crate::x11_utils::VoidRequest for XIDeletePropertyRequest {
+}
 
 /// Opcode for the XIGetProperty request
 pub const XI_GET_PROPERTY_REQUEST: u8 = 59;
@@ -12973,8 +12947,6 @@ impl XIGetPropertyRequest {
     }
 }
 impl Request for XIGetPropertyRequest {
-    type Reply = XIGetPropertyReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -12984,7 +12956,9 @@ impl Request for XIGetPropertyRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for XIGetPropertyRequest {type Reply = XIGetPropertyReply;}
+impl crate::x11_utils::ReplyRequest for XIGetPropertyRequest {
+    type Reply = XIGetPropertyReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum XIGetPropertyItems {
@@ -13138,8 +13112,6 @@ impl XIGetSelectedEventsRequest {
     }
 }
 impl Request for XIGetSelectedEventsRequest {
-    type Reply = XIGetSelectedEventsReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -13149,7 +13121,9 @@ impl Request for XIGetSelectedEventsRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for XIGetSelectedEventsRequest {type Reply = XIGetSelectedEventsReply;}
+impl crate::x11_utils::ReplyRequest for XIGetSelectedEventsRequest {
+    type Reply = XIGetSelectedEventsReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct XIGetSelectedEventsReply {
@@ -13291,8 +13265,6 @@ impl<'input> XIBarrierReleasePointerRequest<'input> {
     }
 }
 impl<'input> Request for XIBarrierReleasePointerRequest<'input> {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -13302,7 +13274,8 @@ impl<'input> Request for XIBarrierReleasePointerRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::VoidRequest for XIBarrierReleasePointerRequest<'input> {}
+impl<'input> crate::x11_utils::VoidRequest for XIBarrierReleasePointerRequest<'input> {
+}
 
 /// Opcode for the DeviceValuator event
 pub const DEVICE_VALUATOR_EVENT: u8 = 0;
@@ -16158,8 +16131,6 @@ impl<'input> SendExtensionEventRequest<'input> {
     }
 }
 impl<'input> Request for SendExtensionEventRequest<'input> {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -16169,7 +16140,8 @@ impl<'input> Request for SendExtensionEventRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::VoidRequest for SendExtensionEventRequest<'input> {}
+impl<'input> crate::x11_utils::VoidRequest for SendExtensionEventRequest<'input> {
+}
 
 /// Opcode for the Device error
 pub const DEVICE_ERROR: u8 = 0;

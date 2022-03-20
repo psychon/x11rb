@@ -120,8 +120,6 @@ impl QueryVersionRequest {
     }
 }
 impl Request for QueryVersionRequest {
-    type Reply = QueryVersionReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -131,7 +129,9 @@ impl Request for QueryVersionRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for QueryVersionRequest {type Reply = QueryVersionReply;}
+impl crate::x11_utils::ReplyRequest for QueryVersionRequest {
+    type Reply = QueryVersionReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionReply {
@@ -200,8 +200,6 @@ impl GetStateRequest {
     }
 }
 impl Request for GetStateRequest {
-    type Reply = GetStateReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -211,7 +209,9 @@ impl Request for GetStateRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetStateRequest {type Reply = GetStateReply;}
+impl crate::x11_utils::ReplyRequest for GetStateRequest {
+    type Reply = GetStateReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetStateReply {
@@ -279,8 +279,6 @@ impl GetScreenCountRequest {
     }
 }
 impl Request for GetScreenCountRequest {
-    type Reply = GetScreenCountReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -290,7 +288,9 @@ impl Request for GetScreenCountRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetScreenCountRequest {type Reply = GetScreenCountReply;}
+impl crate::x11_utils::ReplyRequest for GetScreenCountRequest {
+    type Reply = GetScreenCountReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetScreenCountReply {
@@ -366,8 +366,6 @@ impl GetScreenSizeRequest {
     }
 }
 impl Request for GetScreenSizeRequest {
-    type Reply = GetScreenSizeReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -377,7 +375,9 @@ impl Request for GetScreenSizeRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetScreenSizeRequest {type Reply = GetScreenSizeReply;}
+impl crate::x11_utils::ReplyRequest for GetScreenSizeRequest {
+    type Reply = GetScreenSizeReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetScreenSizeReply {
@@ -441,8 +441,6 @@ impl IsActiveRequest {
     }
 }
 impl Request for IsActiveRequest {
-    type Reply = IsActiveReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -452,7 +450,9 @@ impl Request for IsActiveRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for IsActiveRequest {type Reply = IsActiveReply;}
+impl crate::x11_utils::ReplyRequest for IsActiveRequest {
+    type Reply = IsActiveReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct IsActiveReply {
@@ -510,8 +510,6 @@ impl QueryScreensRequest {
     }
 }
 impl Request for QueryScreensRequest {
-    type Reply = QueryScreensReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -521,7 +519,9 @@ impl Request for QueryScreensRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for QueryScreensRequest {type Reply = QueryScreensReply;}
+impl crate::x11_utils::ReplyRequest for QueryScreensRequest {
+    type Reply = QueryScreensReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryScreensReply {

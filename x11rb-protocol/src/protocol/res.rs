@@ -426,8 +426,6 @@ impl QueryVersionRequest {
     }
 }
 impl Request for QueryVersionRequest {
-    type Reply = QueryVersionReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -437,7 +435,9 @@ impl Request for QueryVersionRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for QueryVersionRequest {type Reply = QueryVersionReply;}
+impl crate::x11_utils::ReplyRequest for QueryVersionRequest {
+    type Reply = QueryVersionReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionReply {
@@ -497,8 +497,6 @@ impl QueryClientsRequest {
     }
 }
 impl Request for QueryClientsRequest {
-    type Reply = QueryClientsReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -508,7 +506,9 @@ impl Request for QueryClientsRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for QueryClientsRequest {type Reply = QueryClientsReply;}
+impl crate::x11_utils::ReplyRequest for QueryClientsRequest {
+    type Reply = QueryClientsReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryClientsReply {
@@ -592,8 +592,6 @@ impl QueryClientResourcesRequest {
     }
 }
 impl Request for QueryClientResourcesRequest {
-    type Reply = QueryClientResourcesReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -603,7 +601,9 @@ impl Request for QueryClientResourcesRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for QueryClientResourcesRequest {type Reply = QueryClientResourcesReply;}
+impl crate::x11_utils::ReplyRequest for QueryClientResourcesRequest {
+    type Reply = QueryClientResourcesReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryClientResourcesReply {
@@ -687,8 +687,6 @@ impl QueryClientPixmapBytesRequest {
     }
 }
 impl Request for QueryClientPixmapBytesRequest {
-    type Reply = QueryClientPixmapBytesReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -698,7 +696,9 @@ impl Request for QueryClientPixmapBytesRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for QueryClientPixmapBytesRequest {type Reply = QueryClientPixmapBytesReply;}
+impl crate::x11_utils::ReplyRequest for QueryClientPixmapBytesRequest {
+    type Reply = QueryClientPixmapBytesReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryClientPixmapBytesReply {
@@ -779,8 +779,6 @@ impl<'input> QueryClientIdsRequest<'input> {
     }
 }
 impl<'input> Request for QueryClientIdsRequest<'input> {
-    type Reply = QueryClientIdsReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -790,7 +788,9 @@ impl<'input> Request for QueryClientIdsRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::ReplyRequest for QueryClientIdsRequest<'input> {type Reply = QueryClientIdsReply;}
+impl<'input> crate::x11_utils::ReplyRequest for QueryClientIdsRequest<'input> {
+    type Reply = QueryClientIdsReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryClientIdsReply {
@@ -895,8 +895,6 @@ impl<'input> QueryResourceBytesRequest<'input> {
     }
 }
 impl<'input> Request for QueryResourceBytesRequest<'input> {
-    type Reply = QueryResourceBytesReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -906,7 +904,9 @@ impl<'input> Request for QueryResourceBytesRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::ReplyRequest for QueryResourceBytesRequest<'input> {type Reply = QueryResourceBytesReply;}
+impl<'input> crate::x11_utils::ReplyRequest for QueryResourceBytesRequest<'input> {
+    type Reply = QueryResourceBytesReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryResourceBytesReply {

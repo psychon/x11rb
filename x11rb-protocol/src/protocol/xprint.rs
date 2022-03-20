@@ -405,8 +405,6 @@ impl PrintQueryVersionRequest {
     }
 }
 impl Request for PrintQueryVersionRequest {
-    type Reply = PrintQueryVersionReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -416,7 +414,9 @@ impl Request for PrintQueryVersionRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for PrintQueryVersionRequest {type Reply = PrintQueryVersionReply;}
+impl crate::x11_utils::ReplyRequest for PrintQueryVersionRequest {
+    type Reply = PrintQueryVersionReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PrintQueryVersionReply {
@@ -508,8 +508,6 @@ impl<'input> PrintGetPrinterListRequest<'input> {
     }
 }
 impl<'input> Request for PrintGetPrinterListRequest<'input> {
-    type Reply = PrintGetPrinterListReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -519,7 +517,9 @@ impl<'input> Request for PrintGetPrinterListRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::ReplyRequest for PrintGetPrinterListRequest<'input> {type Reply = PrintGetPrinterListReply;}
+impl<'input> crate::x11_utils::ReplyRequest for PrintGetPrinterListRequest<'input> {
+    type Reply = PrintGetPrinterListReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct PrintGetPrinterListReply {
@@ -594,8 +594,6 @@ impl PrintRehashPrinterListRequest {
     }
 }
 impl Request for PrintRehashPrinterListRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -605,7 +603,8 @@ impl Request for PrintRehashPrinterListRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for PrintRehashPrinterListRequest {}
+impl crate::x11_utils::VoidRequest for PrintRehashPrinterListRequest {
+}
 
 /// Opcode for the CreateContext request
 pub const CREATE_CONTEXT_REQUEST: u8 = 2;
@@ -679,8 +678,6 @@ impl<'input> CreateContextRequest<'input> {
     }
 }
 impl<'input> Request for CreateContextRequest<'input> {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -690,7 +687,8 @@ impl<'input> Request for CreateContextRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::VoidRequest for CreateContextRequest<'input> {}
+impl<'input> crate::x11_utils::VoidRequest for CreateContextRequest<'input> {
+}
 
 /// Opcode for the PrintSetContext request
 pub const PRINT_SET_CONTEXT_REQUEST: u8 = 3;
@@ -732,8 +730,6 @@ impl PrintSetContextRequest {
     }
 }
 impl Request for PrintSetContextRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -743,7 +739,8 @@ impl Request for PrintSetContextRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for PrintSetContextRequest {}
+impl crate::x11_utils::VoidRequest for PrintSetContextRequest {
+}
 
 /// Opcode for the PrintGetContext request
 pub const PRINT_GET_CONTEXT_REQUEST: u8 = 4;
@@ -776,8 +773,6 @@ impl PrintGetContextRequest {
     }
 }
 impl Request for PrintGetContextRequest {
-    type Reply = PrintGetContextReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -787,7 +782,9 @@ impl Request for PrintGetContextRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for PrintGetContextRequest {type Reply = PrintGetContextReply;}
+impl crate::x11_utils::ReplyRequest for PrintGetContextRequest {
+    type Reply = PrintGetContextReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PrintGetContextReply {
@@ -854,8 +851,6 @@ impl PrintDestroyContextRequest {
     }
 }
 impl Request for PrintDestroyContextRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -865,7 +860,8 @@ impl Request for PrintDestroyContextRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for PrintDestroyContextRequest {}
+impl crate::x11_utils::VoidRequest for PrintDestroyContextRequest {
+}
 
 /// Opcode for the PrintGetScreenOfContext request
 pub const PRINT_GET_SCREEN_OF_CONTEXT_REQUEST: u8 = 6;
@@ -898,8 +894,6 @@ impl PrintGetScreenOfContextRequest {
     }
 }
 impl Request for PrintGetScreenOfContextRequest {
-    type Reply = PrintGetScreenOfContextReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -909,7 +903,9 @@ impl Request for PrintGetScreenOfContextRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for PrintGetScreenOfContextRequest {type Reply = PrintGetScreenOfContextReply;}
+impl crate::x11_utils::ReplyRequest for PrintGetScreenOfContextRequest {
+    type Reply = PrintGetScreenOfContextReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PrintGetScreenOfContextReply {
@@ -976,8 +972,6 @@ impl PrintStartJobRequest {
     }
 }
 impl Request for PrintStartJobRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -987,7 +981,8 @@ impl Request for PrintStartJobRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for PrintStartJobRequest {}
+impl crate::x11_utils::VoidRequest for PrintStartJobRequest {
+}
 
 /// Opcode for the PrintEndJob request
 pub const PRINT_END_JOB_REQUEST: u8 = 8;
@@ -1029,8 +1024,6 @@ impl PrintEndJobRequest {
     }
 }
 impl Request for PrintEndJobRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -1040,7 +1033,8 @@ impl Request for PrintEndJobRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for PrintEndJobRequest {}
+impl crate::x11_utils::VoidRequest for PrintEndJobRequest {
+}
 
 /// Opcode for the PrintStartDoc request
 pub const PRINT_START_DOC_REQUEST: u8 = 9;
@@ -1082,8 +1076,6 @@ impl PrintStartDocRequest {
     }
 }
 impl Request for PrintStartDocRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -1093,7 +1085,8 @@ impl Request for PrintStartDocRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for PrintStartDocRequest {}
+impl crate::x11_utils::VoidRequest for PrintStartDocRequest {
+}
 
 /// Opcode for the PrintEndDoc request
 pub const PRINT_END_DOC_REQUEST: u8 = 10;
@@ -1135,8 +1128,6 @@ impl PrintEndDocRequest {
     }
 }
 impl Request for PrintEndDocRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -1146,7 +1137,8 @@ impl Request for PrintEndDocRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for PrintEndDocRequest {}
+impl crate::x11_utils::VoidRequest for PrintEndDocRequest {
+}
 
 /// Opcode for the PrintPutDocumentData request
 pub const PRINT_PUT_DOCUMENT_DATA_REQUEST: u8 = 11;
@@ -1228,8 +1220,6 @@ impl<'input> PrintPutDocumentDataRequest<'input> {
     }
 }
 impl<'input> Request for PrintPutDocumentDataRequest<'input> {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -1239,7 +1229,8 @@ impl<'input> Request for PrintPutDocumentDataRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::VoidRequest for PrintPutDocumentDataRequest<'input> {}
+impl<'input> crate::x11_utils::VoidRequest for PrintPutDocumentDataRequest<'input> {
+}
 
 /// Opcode for the PrintGetDocumentData request
 pub const PRINT_GET_DOCUMENT_DATA_REQUEST: u8 = 12;
@@ -1289,8 +1280,6 @@ impl PrintGetDocumentDataRequest {
     }
 }
 impl Request for PrintGetDocumentDataRequest {
-    type Reply = PrintGetDocumentDataReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -1300,7 +1289,9 @@ impl Request for PrintGetDocumentDataRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for PrintGetDocumentDataRequest {type Reply = PrintGetDocumentDataReply;}
+impl crate::x11_utils::ReplyRequest for PrintGetDocumentDataRequest {
+    type Reply = PrintGetDocumentDataReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct PrintGetDocumentDataReply {
@@ -1389,8 +1380,6 @@ impl PrintStartPageRequest {
     }
 }
 impl Request for PrintStartPageRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -1400,7 +1389,8 @@ impl Request for PrintStartPageRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for PrintStartPageRequest {}
+impl crate::x11_utils::VoidRequest for PrintStartPageRequest {
+}
 
 /// Opcode for the PrintEndPage request
 pub const PRINT_END_PAGE_REQUEST: u8 = 14;
@@ -1443,8 +1433,6 @@ impl PrintEndPageRequest {
     }
 }
 impl Request for PrintEndPageRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -1454,7 +1442,8 @@ impl Request for PrintEndPageRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for PrintEndPageRequest {}
+impl crate::x11_utils::VoidRequest for PrintEndPageRequest {
+}
 
 /// Opcode for the PrintSelectInput request
 pub const PRINT_SELECT_INPUT_REQUEST: u8 = 15;
@@ -1504,8 +1493,6 @@ impl PrintSelectInputRequest {
     }
 }
 impl Request for PrintSelectInputRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -1515,7 +1502,8 @@ impl Request for PrintSelectInputRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for PrintSelectInputRequest {}
+impl crate::x11_utils::VoidRequest for PrintSelectInputRequest {
+}
 
 /// Opcode for the PrintInputSelected request
 pub const PRINT_INPUT_SELECTED_REQUEST: u8 = 16;
@@ -1557,8 +1545,6 @@ impl PrintInputSelectedRequest {
     }
 }
 impl Request for PrintInputSelectedRequest {
-    type Reply = PrintInputSelectedReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -1568,7 +1554,9 @@ impl Request for PrintInputSelectedRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for PrintInputSelectedRequest {type Reply = PrintInputSelectedReply;}
+impl crate::x11_utils::ReplyRequest for PrintInputSelectedRequest {
+    type Reply = PrintInputSelectedReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PrintInputSelectedReply {
@@ -1646,8 +1634,6 @@ impl PrintGetAttributesRequest {
     }
 }
 impl Request for PrintGetAttributesRequest {
-    type Reply = PrintGetAttributesReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -1657,7 +1643,9 @@ impl Request for PrintGetAttributesRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for PrintGetAttributesRequest {type Reply = PrintGetAttributesReply;}
+impl crate::x11_utils::ReplyRequest for PrintGetAttributesRequest {
+    type Reply = PrintGetAttributesReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct PrintGetAttributesReply {
@@ -1772,8 +1760,6 @@ impl<'input> PrintGetOneAttributesRequest<'input> {
     }
 }
 impl<'input> Request for PrintGetOneAttributesRequest<'input> {
-    type Reply = PrintGetOneAttributesReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -1783,7 +1769,9 @@ impl<'input> Request for PrintGetOneAttributesRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::ReplyRequest for PrintGetOneAttributesRequest<'input> {type Reply = PrintGetOneAttributesReply;}
+impl<'input> crate::x11_utils::ReplyRequest for PrintGetOneAttributesRequest<'input> {
+    type Reply = PrintGetOneAttributesReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct PrintGetOneAttributesReply {
@@ -1905,8 +1893,6 @@ impl<'input> PrintSetAttributesRequest<'input> {
     }
 }
 impl<'input> Request for PrintSetAttributesRequest<'input> {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -1916,7 +1902,8 @@ impl<'input> Request for PrintSetAttributesRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::VoidRequest for PrintSetAttributesRequest<'input> {}
+impl<'input> crate::x11_utils::VoidRequest for PrintSetAttributesRequest<'input> {
+}
 
 /// Opcode for the PrintGetPageDimensions request
 pub const PRINT_GET_PAGE_DIMENSIONS_REQUEST: u8 = 21;
@@ -1958,8 +1945,6 @@ impl PrintGetPageDimensionsRequest {
     }
 }
 impl Request for PrintGetPageDimensionsRequest {
-    type Reply = PrintGetPageDimensionsReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -1969,7 +1954,9 @@ impl Request for PrintGetPageDimensionsRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for PrintGetPageDimensionsRequest {type Reply = PrintGetPageDimensionsReply;}
+impl crate::x11_utils::ReplyRequest for PrintGetPageDimensionsRequest {
+    type Reply = PrintGetPageDimensionsReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PrintGetPageDimensionsReply {
@@ -2037,8 +2024,6 @@ impl PrintQueryScreensRequest {
     }
 }
 impl Request for PrintQueryScreensRequest {
-    type Reply = PrintQueryScreensReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -2048,7 +2033,9 @@ impl Request for PrintQueryScreensRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for PrintQueryScreensRequest {type Reply = PrintQueryScreensReply;}
+impl crate::x11_utils::ReplyRequest for PrintQueryScreensRequest {
+    type Reply = PrintQueryScreensReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct PrintQueryScreensReply {
@@ -2140,8 +2127,6 @@ impl PrintSetImageResolutionRequest {
     }
 }
 impl Request for PrintSetImageResolutionRequest {
-    type Reply = PrintSetImageResolutionReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -2151,7 +2136,9 @@ impl Request for PrintSetImageResolutionRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for PrintSetImageResolutionRequest {type Reply = PrintSetImageResolutionReply;}
+impl crate::x11_utils::ReplyRequest for PrintSetImageResolutionRequest {
+    type Reply = PrintSetImageResolutionReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PrintSetImageResolutionReply {
@@ -2219,8 +2206,6 @@ impl PrintGetImageResolutionRequest {
     }
 }
 impl Request for PrintGetImageResolutionRequest {
-    type Reply = PrintGetImageResolutionReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -2230,7 +2215,9 @@ impl Request for PrintGetImageResolutionRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for PrintGetImageResolutionRequest {type Reply = PrintGetImageResolutionReply;}
+impl crate::x11_utils::ReplyRequest for PrintGetImageResolutionRequest {
+    type Reply = PrintGetImageResolutionReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PrintGetImageResolutionReply {

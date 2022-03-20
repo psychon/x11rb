@@ -74,8 +74,6 @@ impl QueryVersionRequest {
     }
 }
 impl Request for QueryVersionRequest {
-    type Reply = QueryVersionReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -85,7 +83,9 @@ impl Request for QueryVersionRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for QueryVersionRequest {type Reply = QueryVersionReply;}
+impl crate::x11_utils::ReplyRequest for QueryVersionRequest {
+    type Reply = QueryVersionReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionReply {
@@ -155,8 +155,6 @@ impl StartRequest {
     }
 }
 impl Request for StartRequest {
-    type Reply = StartReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -166,7 +164,9 @@ impl Request for StartRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for StartRequest {type Reply = StartReply;}
+impl crate::x11_utils::ReplyRequest for StartRequest {
+    type Reply = StartReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct StartReply {
@@ -232,8 +232,6 @@ impl EndRequest {
     }
 }
 impl Request for EndRequest {
-    type Reply = EndReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -243,7 +241,9 @@ impl Request for EndRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for EndRequest {type Reply = EndReply;}
+impl crate::x11_utils::ReplyRequest for EndRequest {
+    type Reply = EndReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct EndReply {
@@ -534,8 +534,6 @@ impl SendRequest {
     }
 }
 impl Request for SendRequest {
-    type Reply = SendReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -545,7 +543,9 @@ impl Request for SendRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for SendRequest {type Reply = SendReply;}
+impl crate::x11_utils::ReplyRequest for SendRequest {
+    type Reply = SendReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SendReply {
@@ -611,8 +611,6 @@ impl SelectInputRequest {
     }
 }
 impl Request for SelectInputRequest {
-    type Reply = SelectInputReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -622,7 +620,9 @@ impl Request for SelectInputRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for SelectInputRequest {type Reply = SelectInputReply;}
+impl crate::x11_utils::ReplyRequest for SelectInputRequest {
+    type Reply = SelectInputReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SelectInputReply {

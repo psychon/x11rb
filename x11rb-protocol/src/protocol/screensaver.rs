@@ -258,8 +258,6 @@ impl QueryVersionRequest {
     }
 }
 impl Request for QueryVersionRequest {
-    type Reply = QueryVersionReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -269,7 +267,9 @@ impl Request for QueryVersionRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for QueryVersionRequest {type Reply = QueryVersionReply;}
+impl crate::x11_utils::ReplyRequest for QueryVersionRequest {
+    type Reply = QueryVersionReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionReply {
@@ -339,8 +339,6 @@ impl QueryInfoRequest {
     }
 }
 impl Request for QueryInfoRequest {
-    type Reply = QueryInfoReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -350,7 +348,9 @@ impl Request for QueryInfoRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for QueryInfoRequest {type Reply = QueryInfoReply;}
+impl crate::x11_utils::ReplyRequest for QueryInfoRequest {
+    type Reply = QueryInfoReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryInfoReply {
@@ -436,8 +436,6 @@ impl SelectInputRequest {
     }
 }
 impl Request for SelectInputRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -447,7 +445,8 @@ impl Request for SelectInputRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for SelectInputRequest {}
+impl crate::x11_utils::VoidRequest for SelectInputRequest {
+}
 
 /// Auxiliary and optional information for the `set_attributes` function
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -921,8 +920,6 @@ impl<'input> SetAttributesRequest<'input> {
     }
 }
 impl<'input> Request for SetAttributesRequest<'input> {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -932,7 +929,8 @@ impl<'input> Request for SetAttributesRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::VoidRequest for SetAttributesRequest<'input> {}
+impl<'input> crate::x11_utils::VoidRequest for SetAttributesRequest<'input> {
+}
 
 /// Opcode for the UnsetAttributes request
 pub const UNSET_ATTRIBUTES_REQUEST: u8 = 4;
@@ -974,8 +972,6 @@ impl UnsetAttributesRequest {
     }
 }
 impl Request for UnsetAttributesRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -985,7 +981,8 @@ impl Request for UnsetAttributesRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for UnsetAttributesRequest {}
+impl crate::x11_utils::VoidRequest for UnsetAttributesRequest {
+}
 
 /// Opcode for the Suspend request
 pub const SUSPEND_REQUEST: u8 = 5;
@@ -1027,8 +1024,6 @@ impl SuspendRequest {
     }
 }
 impl Request for SuspendRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -1038,7 +1033,8 @@ impl Request for SuspendRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for SuspendRequest {}
+impl crate::x11_utils::VoidRequest for SuspendRequest {
+}
 
 /// Opcode for the Notify event
 pub const NOTIFY_EVENT: u8 = 0;

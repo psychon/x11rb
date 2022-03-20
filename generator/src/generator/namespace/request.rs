@@ -243,10 +243,15 @@ pub(super) fn generate_request(
             header = generator.ns.header,
         ));
         enum_cases.reply_parse_cases.push(format!(
-            "Request::{ns_prefix}{name}(_) => Some({header}::{name}Request::parse_reply),",
+            "Request::{ns_prefix}{name}(_) => Some({func}::<{header}::{name}Request>),",
             ns_prefix = ns_prefix,
             name = name,
             header = generator.ns.header,
+            func = if gathered.reply_has_fds {
+                "parse_reply_fds"
+            } else {
+                "parse_reply"
+            },
         ));
         enum_cases.reply_from_cases.push(format!(
             r#"impl From<{header}::{name}Reply> for Reply {{
@@ -1100,13 +1105,6 @@ fn emit_request_struct(
         name = name
     );
     out.indented(|out| {
-        if request_def.reply.is_some() {
-            outln!(out, "type Reply = {}Reply;", name);
-        } else {
-            outln!(out, "type Reply = ();");
-        }
-
-        outln!(out, "");
         if is_xproto {
             outln!(out, "const EXTENSION_NAME: Option<&'static str> = None;");
         } else {
@@ -1145,24 +1143,24 @@ fn emit_request_struct(
     });
     outln!(out, "}}");
 
-    let (request_trait, contents) = if request_def.reply.is_none() {
-        ("crate::x11_utils::VoidRequest", None)
+    let request_trait = if request_def.reply.is_none() {
+        "crate::x11_utils::VoidRequest"
     } else if gathered.reply_has_fds {
-        ("crate::x11_utils::ReplyFDsRequest", None)
+        "crate::x11_utils::ReplyFDsRequest"
     } else {
-        (
-            "crate::x11_utils::ReplyRequest",
-            Some(format!("type Reply = {}Reply;", name)),
-        )
+        "crate::x11_utils::ReplyRequest"
     };
     outln!(
         out,
-        "impl{lifetime} {request_trait} for {name}Request{lifetime} {{{contents}}}",
+        "impl{lifetime} {request_trait} for {name}Request{lifetime} {{",
         name = name,
         request_trait = request_trait,
         lifetime = struct_lifetime_block,
-        contents = contents.as_deref().unwrap_or(""),
     );
+    if request_def.reply.is_some() {
+        outln!(out.indent(), "type Reply = {}Reply;", name);
+    };
+    outln!(out, "}}");
 }
 
 fn emit_request_function(

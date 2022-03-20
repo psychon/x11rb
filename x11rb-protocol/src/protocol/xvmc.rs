@@ -149,8 +149,6 @@ impl QueryVersionRequest {
     }
 }
 impl Request for QueryVersionRequest {
-    type Reply = QueryVersionReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -160,7 +158,9 @@ impl Request for QueryVersionRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for QueryVersionRequest {type Reply = QueryVersionReply;}
+impl crate::x11_utils::ReplyRequest for QueryVersionRequest {
+    type Reply = QueryVersionReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionReply {
@@ -229,8 +229,6 @@ impl ListSurfaceTypesRequest {
     }
 }
 impl Request for ListSurfaceTypesRequest {
-    type Reply = ListSurfaceTypesReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -240,7 +238,9 @@ impl Request for ListSurfaceTypesRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for ListSurfaceTypesRequest {type Reply = ListSurfaceTypesReply;}
+impl crate::x11_utils::ReplyRequest for ListSurfaceTypesRequest {
+    type Reply = ListSurfaceTypesReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ListSurfaceTypesReply {
@@ -360,8 +360,6 @@ impl CreateContextRequest {
     }
 }
 impl Request for CreateContextRequest {
-    type Reply = CreateContextReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -371,7 +369,9 @@ impl Request for CreateContextRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for CreateContextRequest {type Reply = CreateContextReply;}
+impl crate::x11_utils::ReplyRequest for CreateContextRequest {
+    type Reply = CreateContextReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CreateContextReply {
@@ -459,8 +459,6 @@ impl DestroyContextRequest {
     }
 }
 impl Request for DestroyContextRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -470,7 +468,8 @@ impl Request for DestroyContextRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for DestroyContextRequest {}
+impl crate::x11_utils::VoidRequest for DestroyContextRequest {
+}
 
 /// Opcode for the CreateSurface request
 pub const CREATE_SURFACE_REQUEST: u8 = 4;
@@ -520,8 +519,6 @@ impl CreateSurfaceRequest {
     }
 }
 impl Request for CreateSurfaceRequest {
-    type Reply = CreateSurfaceReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -531,7 +528,9 @@ impl Request for CreateSurfaceRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for CreateSurfaceRequest {type Reply = CreateSurfaceReply;}
+impl crate::x11_utils::ReplyRequest for CreateSurfaceRequest {
+    type Reply = CreateSurfaceReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CreateSurfaceReply {
@@ -613,8 +612,6 @@ impl DestroySurfaceRequest {
     }
 }
 impl Request for DestroySurfaceRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -624,7 +621,8 @@ impl Request for DestroySurfaceRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for DestroySurfaceRequest {}
+impl crate::x11_utils::VoidRequest for DestroySurfaceRequest {
+}
 
 /// Opcode for the CreateSubpicture request
 pub const CREATE_SUBPICTURE_REQUEST: u8 = 6;
@@ -694,8 +692,6 @@ impl CreateSubpictureRequest {
     }
 }
 impl Request for CreateSubpictureRequest {
-    type Reply = CreateSubpictureReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -705,7 +701,9 @@ impl Request for CreateSubpictureRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for CreateSubpictureRequest {type Reply = CreateSubpictureReply;}
+impl crate::x11_utils::ReplyRequest for CreateSubpictureRequest {
+    type Reply = CreateSubpictureReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CreateSubpictureReply {
@@ -798,8 +796,6 @@ impl DestroySubpictureRequest {
     }
 }
 impl Request for DestroySubpictureRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -809,7 +805,8 @@ impl Request for DestroySubpictureRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for DestroySubpictureRequest {}
+impl crate::x11_utils::VoidRequest for DestroySubpictureRequest {
+}
 
 /// Opcode for the ListSubpictureTypes request
 pub const LIST_SUBPICTURE_TYPES_REQUEST: u8 = 8;
@@ -859,8 +856,6 @@ impl ListSubpictureTypesRequest {
     }
 }
 impl Request for ListSubpictureTypesRequest {
-    type Reply = ListSubpictureTypesReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -870,7 +865,9 @@ impl Request for ListSubpictureTypesRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for ListSubpictureTypesRequest {type Reply = ListSubpictureTypesReply;}
+impl crate::x11_utils::ReplyRequest for ListSubpictureTypesRequest {
+    type Reply = ListSubpictureTypesReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ListSubpictureTypesReply {
