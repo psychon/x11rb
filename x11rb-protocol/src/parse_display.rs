@@ -1,12 +1,29 @@
+//! Utilities for parsing X11 display strings.
+
+/// A parsed X11 display string.
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub(crate) struct ParsedDisplay {
-    pub(crate) host: String,
-    pub(crate) protocol: Option<String>,
-    pub(crate) display: u16,
-    pub(crate) screen: u16,
+pub struct ParsedDisplay {
+    /// The hostname of the computer we nned to connect to.
+    ///
+    /// This is an empty string if we are connecting to the
+    /// local host.
+    pub host: String,
+    /// The protocol we are communicating over.
+    ///
+    /// This is `None` if the protocol may be determined
+    /// automatically.
+    pub protocol: Option<String>,
+    /// The index of the display we are connecting to.
+    pub display: u16,
+    /// The index of the screen that we are using as the
+    /// default screen.
+    pub screen: u16,
 }
 
-pub(crate) fn parse_display(dpy_name: Option<&str>) -> Option<ParsedDisplay> {
+/// Parse an X11 display string.
+///
+/// If `dpy_name` is `None`, the display is parsed from the environment variable `DISPLAY`.
+pub fn parse_display(dpy_name: Option<&str>) -> Option<ParsedDisplay> {
     // If no dpy name was provided, use the env var. If no env var exists, return None.
     match dpy_name {
         Some(dpy_name) => parse_display_impl(dpy_name),
