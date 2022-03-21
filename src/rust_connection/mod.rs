@@ -3,7 +3,7 @@
 use std::convert::TryInto;
 use std::io::IoSlice;
 use std::mem::drop;
-use std::sync::{Arc, Condvar, Mutex, MutexGuard, TryLockError};
+use std::sync::{Condvar, Mutex, MutexGuard, TryLockError};
 
 use crate::connection::{
     compute_length_field, Connection, ReplyOrError, RequestConnection, RequestKind,
@@ -16,6 +16,7 @@ use crate::protocol::xproto::{Setup, SetupRequest, GET_INPUT_FOCUS_REQUEST};
 use crate::utils::RawFdContainer;
 use crate::x11_utils::{ExtensionInformation, Serialize, TryParse, TryParseFd};
 use x11rb_protocol::connection::{Connection as ProtoConnection, PollReply, ReplyFdKind};
+use x11rb_protocol::id_allocator::IdAllocator;
 use x11rb_protocol::{DiscardMode, RawEventAndSeqNumber, SequenceNumber};
 
 mod packet_reader;
@@ -68,9 +69,10 @@ pub struct RustConnection<S: Stream = DefaultStream> {
     // lock based only on a atomic variable would be more efficient.
     packet_reader: Mutex<PacketReader>,
     reader_condition: Condvar,
-    setup: Arc<Setup>,
+    setup: Setup,
     extension_manager: Mutex<ExtensionManager>,
     maximum_request_bytes: Mutex<MaxRequestBytes>,
+    id_allocator: Mutex<IdAllocator>,
 }
 
 // Locking rules
@@ -174,15 +176,12 @@ impl<S: Stream> RustConnection<S> {
     /// It is assumed that `setup` was just received from the server. Thus, the first reply to a
     /// request that is sent will have sequence number one.
     pub fn for_connected_stream(stream: S, setup: Setup) -> Result<Self, ConnectError> {
-        let setup = Arc::new(setup);
-        Self::for_inner(stream, ProtoConnection::from_setup(setup.clone())?, setup)
+        Self::for_inner(stream, ProtoConnection::new(), setup)
     }
 
-    fn for_inner(
-        stream: S,
-        inner: ProtoConnection,
-        setup: Arc<Setup>,
-    ) -> Result<Self, ConnectError> {
+    fn for_inner(stream: S, inner: ProtoConnection, setup: Setup) -> Result<Self, ConnectError> {
+        let id_allocator = IdAllocator::new(setup.resource_id_base, setup.resource_id_mask)?;
+
         Ok(RustConnection {
             inner: Mutex::new(ConnectionInner {
                 inner,
@@ -194,6 +193,7 @@ impl<S: Stream> RustConnection<S> {
             setup,
             extension_manager: Default::default(),
             maximum_request_bytes: Mutex::new(MaxRequestBytes::Unknown),
+            id_allocator: Mutex::new(id_allocator),
         })
     }
 
@@ -659,19 +659,11 @@ impl<S: Stream> Connection for RustConnection<S> {
     }
 
     fn generate_id(&self) -> Result<u32, ReplyOrIdError> {
-        let mut inner = self.inner.lock().unwrap();
-        if let Some(id) = inner.inner.generate_id() {
+        let mut id_allocator = self.id_allocator.lock().unwrap();
+        if let Some(id) = id_allocator.generate_id() {
             Ok(id)
         } else {
             use crate::protocol::xc_misc::{self, ConnectionExt as _};
-
-            // n.b. notgull: temporarily drop inner lock so that extension_information
-            // and xc_misc_get_xid_range can run without deadlocking
-            // could be improved by, e.g, passing the display lock to the
-            // extension_information() function and manually sending the GetXidRange
-            // request. Re-evaluate this part of the code once x11rb_protocol
-            // is in a good place
-            drop(inner);
 
             if self
                 .extension_information(xc_misc::X11_EXTENSION_NAME)?
@@ -680,12 +672,8 @@ impl<S: Stream> Connection for RustConnection<S> {
                 // IDs are exhausted and XC-MISC is not available
                 Err(ReplyOrIdError::IdsExhausted)
             } else {
-                let mut inner = self.inner.lock().unwrap();
-                inner
-                    .inner
-                    .update_xid_range(&self.xc_misc_get_xid_range()?.reply()?)?;
-                inner
-                    .inner
+                id_allocator.update_xid_range(&self.xc_misc_get_xid_range()?.reply()?)?;
+                id_allocator
                     .generate_id()
                     .ok_or(ReplyOrIdError::IdsExhausted)
             }

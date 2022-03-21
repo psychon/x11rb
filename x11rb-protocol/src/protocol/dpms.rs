@@ -74,8 +74,6 @@ impl GetVersionRequest {
     }
 }
 impl Request for GetVersionRequest {
-    type Reply = GetVersionReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -85,7 +83,9 @@ impl Request for GetVersionRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetVersionRequest {}
+impl crate::x11_utils::ReplyRequest for GetVersionRequest {
+    type Reply = GetVersionReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetVersionReply {
@@ -145,8 +145,6 @@ impl CapableRequest {
     }
 }
 impl Request for CapableRequest {
-    type Reply = CapableReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -156,7 +154,9 @@ impl Request for CapableRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for CapableRequest {}
+impl crate::x11_utils::ReplyRequest for CapableRequest {
+    type Reply = CapableReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CapableReply {
@@ -215,8 +215,6 @@ impl GetTimeoutsRequest {
     }
 }
 impl Request for GetTimeoutsRequest {
-    type Reply = GetTimeoutsReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -226,7 +224,9 @@ impl Request for GetTimeoutsRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetTimeoutsRequest {}
+impl crate::x11_utils::ReplyRequest for GetTimeoutsRequest {
+    type Reply = GetTimeoutsReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetTimeoutsReply {
@@ -310,8 +310,6 @@ impl SetTimeoutsRequest {
     }
 }
 impl Request for SetTimeoutsRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -321,7 +319,8 @@ impl Request for SetTimeoutsRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for SetTimeoutsRequest {}
+impl crate::x11_utils::VoidRequest for SetTimeoutsRequest {
+}
 
 /// Opcode for the Enable request
 pub const ENABLE_REQUEST: u8 = 4;
@@ -354,8 +353,6 @@ impl EnableRequest {
     }
 }
 impl Request for EnableRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -365,7 +362,8 @@ impl Request for EnableRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for EnableRequest {}
+impl crate::x11_utils::VoidRequest for EnableRequest {
+}
 
 /// Opcode for the Disable request
 pub const DISABLE_REQUEST: u8 = 5;
@@ -398,8 +396,6 @@ impl DisableRequest {
     }
 }
 impl Request for DisableRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -409,7 +405,8 @@ impl Request for DisableRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for DisableRequest {}
+impl crate::x11_utils::VoidRequest for DisableRequest {
+}
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub struct DPMSMode(u16);
@@ -508,8 +505,6 @@ impl ForceLevelRequest {
     }
 }
 impl Request for ForceLevelRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -519,7 +514,8 @@ impl Request for ForceLevelRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for ForceLevelRequest {}
+impl crate::x11_utils::VoidRequest for ForceLevelRequest {
+}
 
 /// Opcode for the Info request
 pub const INFO_REQUEST: u8 = 7;
@@ -552,8 +548,6 @@ impl InfoRequest {
     }
 }
 impl Request for InfoRequest {
-    type Reply = InfoReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -563,7 +557,9 @@ impl Request for InfoRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for InfoRequest {}
+impl crate::x11_utils::ReplyRequest for InfoRequest {
+    type Reply = InfoReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct InfoReply {

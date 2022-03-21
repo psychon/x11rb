@@ -52,13 +52,30 @@ pub(crate) fn generate(module: &xcbgen::defs::Module) -> Vec<Generated> {
     outln!(main_proto_out, "use crate::utils::RawFdContainer;");
     outln!(
         main_proto_out,
-        "use crate::x11_utils::{{TryParse, X11Error}};"
+        "use crate::x11_utils::{{TryParse, TryParseFd, X11Error, ReplyRequest, ReplyFDsRequest}};"
     );
     outln!(
         main_proto_out,
-        "use crate::x11_utils::{{ExtInfoProvider, ReplyParsingFunction, Request as RequestTrait, \
-         RequestHeader}};"
+        "use crate::x11_utils::{{ExtInfoProvider, ReplyParsingFunction, RequestHeader}};"
     );
+    outln!(main_proto_out, "");
+
+    outln!(main_proto_out, "fn parse_reply<'a, R: ReplyRequest>(bytes: &'a [u8], _: &mut Vec<RawFdContainer>) -> Result<(Reply, &'a [u8]), ParseError> {{");
+    main_proto_out.indented(|out| {
+        outln!(out, "let (reply, remaining) = R::Reply::try_parse(bytes)?;");
+        outln!(out, "Ok((reply.into(), remaining))");
+    });
+    outln!(main_proto_out, "}}");
+    outln!(main_proto_out, "#[allow(dead_code)]");
+    outln!(main_proto_out, "fn parse_reply_fds<'a, R: ReplyFDsRequest>(bytes: &'a [u8], fds: &mut Vec<RawFdContainer>) -> Result<(Reply, &'a [u8]), ParseError> {{");
+    main_proto_out.indented(|out| {
+        outln!(
+            out,
+            "let (reply, remaining) = R::Reply::try_parse_fd(bytes, fds)?;"
+        );
+        outln!(out, "Ok((reply.into(), remaining))");
+    });
+    outln!(main_proto_out, "}}");
     outln!(main_proto_out, "");
 
     let caches = RefCell::new(namespace::helpers::Caches::default());

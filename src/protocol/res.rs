@@ -34,14 +34,6 @@ fn major_opcode<Conn: RequestConnection + ?Sized>(conn: &Conn) -> Result<u8, Con
     Ok(info.major_opcode)
 }
 
-fn send_query_version<'c, Conn>(req: QueryVersionRequest, conn: &'c Conn) -> Result<Cookie<'c, Conn, QueryVersionReply>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize(major_opcode(conn)?);
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-    conn.send_request_with_reply(&slices, fds)
-}
 pub fn query_version<Conn>(conn: &Conn, client_major: u8, client_minor: u8) -> Result<Cookie<'_, Conn, QueryVersionReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -50,33 +42,21 @@ where
         client_major,
         client_minor,
     };
-    send_query_version(request0, conn)
-}
-
-fn send_query_clients<'c, Conn>(req: QueryClientsRequest, conn: &'c Conn) -> Result<Cookie<'c, Conn, QueryClientsReply>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize(major_opcode(conn)?);
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_with_reply(&slices, fds)
 }
+
 pub fn query_clients<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, QueryClientsReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = QueryClientsRequest;
-    send_query_clients(request0, conn)
-}
-
-fn send_query_client_resources<'c, Conn>(req: QueryClientResourcesRequest, conn: &'c Conn) -> Result<Cookie<'c, Conn, QueryClientResourcesReply>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize(major_opcode(conn)?);
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_with_reply(&slices, fds)
 }
+
 pub fn query_client_resources<Conn>(conn: &Conn, xid: u32) -> Result<Cookie<'_, Conn, QueryClientResourcesReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -84,17 +64,11 @@ where
     let request0 = QueryClientResourcesRequest {
         xid,
     };
-    send_query_client_resources(request0, conn)
-}
-
-fn send_query_client_pixmap_bytes<'c, Conn>(req: QueryClientPixmapBytesRequest, conn: &'c Conn) -> Result<Cookie<'c, Conn, QueryClientPixmapBytesReply>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize(major_opcode(conn)?);
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_with_reply(&slices, fds)
 }
+
 pub fn query_client_pixmap_bytes<Conn>(conn: &Conn, xid: u32) -> Result<Cookie<'_, Conn, QueryClientPixmapBytesReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -102,17 +76,11 @@ where
     let request0 = QueryClientPixmapBytesRequest {
         xid,
     };
-    send_query_client_pixmap_bytes(request0, conn)
-}
-
-fn send_query_client_ids<'c, Conn>(req: QueryClientIdsRequest<'_>, conn: &'c Conn) -> Result<Cookie<'c, Conn, QueryClientIdsReply>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize(major_opcode(conn)?);
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_with_reply(&slices, fds)
 }
+
 pub fn query_client_ids<'c, 'input, Conn>(conn: &'c Conn, specs: &'input [ClientIdSpec]) -> Result<Cookie<'c, Conn, QueryClientIdsReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -120,17 +88,11 @@ where
     let request0 = QueryClientIdsRequest {
         specs: Cow::Borrowed(specs),
     };
-    send_query_client_ids(request0, conn)
-}
-
-fn send_query_resource_bytes<'c, Conn>(req: QueryResourceBytesRequest<'_>, conn: &'c Conn) -> Result<Cookie<'c, Conn, QueryResourceBytesReply>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let (bytes, fds) = req.serialize(major_opcode(conn)?);
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
     let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
     conn.send_request_with_reply(&slices, fds)
 }
+
 pub fn query_resource_bytes<'c, 'input, Conn>(conn: &'c Conn, client: u32, specs: &'input [ResourceIdSpec]) -> Result<Cookie<'c, Conn, QueryResourceBytesReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -139,7 +101,9 @@ where
         client,
         specs: Cow::Borrowed(specs),
     };
-    send_query_resource_bytes(request0, conn)
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    conn.send_request_with_reply(&slices, fds)
 }
 
 /// Extension trait defining the requests of this extension.

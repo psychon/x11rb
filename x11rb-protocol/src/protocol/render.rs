@@ -1283,8 +1283,6 @@ impl QueryVersionRequest {
     }
 }
 impl Request for QueryVersionRequest {
-    type Reply = QueryVersionReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -1294,7 +1292,9 @@ impl Request for QueryVersionRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for QueryVersionRequest {}
+impl crate::x11_utils::ReplyRequest for QueryVersionRequest {
+    type Reply = QueryVersionReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionReply {
@@ -1355,8 +1355,6 @@ impl QueryPictFormatsRequest {
     }
 }
 impl Request for QueryPictFormatsRequest {
-    type Reply = QueryPictFormatsReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -1366,7 +1364,9 @@ impl Request for QueryPictFormatsRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for QueryPictFormatsRequest {}
+impl crate::x11_utils::ReplyRequest for QueryPictFormatsRequest {
+    type Reply = QueryPictFormatsReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryPictFormatsReply {
@@ -1494,8 +1494,6 @@ impl QueryPictIndexValuesRequest {
     }
 }
 impl Request for QueryPictIndexValuesRequest {
-    type Reply = QueryPictIndexValuesReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -1505,7 +1503,9 @@ impl Request for QueryPictIndexValuesRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for QueryPictIndexValuesRequest {}
+impl crate::x11_utils::ReplyRequest for QueryPictIndexValuesRequest {
+    type Reply = QueryPictIndexValuesReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryPictIndexValuesReply {
@@ -1941,8 +1941,6 @@ impl<'input> CreatePictureRequest<'input> {
     }
 }
 impl<'input> Request for CreatePictureRequest<'input> {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -1952,7 +1950,8 @@ impl<'input> Request for CreatePictureRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::VoidRequest for CreatePictureRequest<'input> {}
+impl<'input> crate::x11_utils::VoidRequest for CreatePictureRequest<'input> {
+}
 
 /// Auxiliary and optional information for the `change_picture` function
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -2328,8 +2327,6 @@ impl<'input> ChangePictureRequest<'input> {
     }
 }
 impl<'input> Request for ChangePictureRequest<'input> {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -2339,7 +2336,8 @@ impl<'input> Request for ChangePictureRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::VoidRequest for ChangePictureRequest<'input> {}
+impl<'input> crate::x11_utils::VoidRequest for ChangePictureRequest<'input> {
+}
 
 /// Opcode for the SetPictureClipRectangles request
 pub const SET_PICTURE_CLIP_RECTANGLES_REQUEST: u8 = 6;
@@ -2416,8 +2414,6 @@ impl<'input> SetPictureClipRectanglesRequest<'input> {
     }
 }
 impl<'input> Request for SetPictureClipRectanglesRequest<'input> {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -2427,7 +2423,8 @@ impl<'input> Request for SetPictureClipRectanglesRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::VoidRequest for SetPictureClipRectanglesRequest<'input> {}
+impl<'input> crate::x11_utils::VoidRequest for SetPictureClipRectanglesRequest<'input> {
+}
 
 /// Opcode for the FreePicture request
 pub const FREE_PICTURE_REQUEST: u8 = 7;
@@ -2469,8 +2466,6 @@ impl FreePictureRequest {
     }
 }
 impl Request for FreePictureRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -2480,7 +2475,8 @@ impl Request for FreePictureRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for FreePictureRequest {}
+impl crate::x11_utils::VoidRequest for FreePictureRequest {
+}
 
 /// Opcode for the Composite request
 pub const COMPOSITE_REQUEST: u8 = 8;
@@ -2596,8 +2592,6 @@ impl CompositeRequest {
     }
 }
 impl Request for CompositeRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -2607,7 +2601,8 @@ impl Request for CompositeRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for CompositeRequest {}
+impl crate::x11_utils::VoidRequest for CompositeRequest {
+}
 
 /// Opcode for the Trapezoids request
 pub const TRAPEZOIDS_REQUEST: u8 = 10;
@@ -2713,8 +2708,6 @@ impl<'input> TrapezoidsRequest<'input> {
     }
 }
 impl<'input> Request for TrapezoidsRequest<'input> {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -2724,7 +2717,8 @@ impl<'input> Request for TrapezoidsRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::VoidRequest for TrapezoidsRequest<'input> {}
+impl<'input> crate::x11_utils::VoidRequest for TrapezoidsRequest<'input> {
+}
 
 /// Opcode for the Triangles request
 pub const TRIANGLES_REQUEST: u8 = 11;
@@ -2830,8 +2824,6 @@ impl<'input> TrianglesRequest<'input> {
     }
 }
 impl<'input> Request for TrianglesRequest<'input> {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -2841,7 +2833,8 @@ impl<'input> Request for TrianglesRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::VoidRequest for TrianglesRequest<'input> {}
+impl<'input> crate::x11_utils::VoidRequest for TrianglesRequest<'input> {
+}
 
 /// Opcode for the TriStrip request
 pub const TRI_STRIP_REQUEST: u8 = 12;
@@ -2947,8 +2940,6 @@ impl<'input> TriStripRequest<'input> {
     }
 }
 impl<'input> Request for TriStripRequest<'input> {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -2958,7 +2949,8 @@ impl<'input> Request for TriStripRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::VoidRequest for TriStripRequest<'input> {}
+impl<'input> crate::x11_utils::VoidRequest for TriStripRequest<'input> {
+}
 
 /// Opcode for the TriFan request
 pub const TRI_FAN_REQUEST: u8 = 13;
@@ -3064,8 +3056,6 @@ impl<'input> TriFanRequest<'input> {
     }
 }
 impl<'input> Request for TriFanRequest<'input> {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -3075,7 +3065,8 @@ impl<'input> Request for TriFanRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::VoidRequest for TriFanRequest<'input> {}
+impl<'input> crate::x11_utils::VoidRequest for TriFanRequest<'input> {
+}
 
 /// Opcode for the CreateGlyphSet request
 pub const CREATE_GLYPH_SET_REQUEST: u8 = 17;
@@ -3125,8 +3116,6 @@ impl CreateGlyphSetRequest {
     }
 }
 impl Request for CreateGlyphSetRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -3136,7 +3125,8 @@ impl Request for CreateGlyphSetRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for CreateGlyphSetRequest {}
+impl crate::x11_utils::VoidRequest for CreateGlyphSetRequest {
+}
 
 /// Opcode for the ReferenceGlyphSet request
 pub const REFERENCE_GLYPH_SET_REQUEST: u8 = 18;
@@ -3186,8 +3176,6 @@ impl ReferenceGlyphSetRequest {
     }
 }
 impl Request for ReferenceGlyphSetRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -3197,7 +3185,8 @@ impl Request for ReferenceGlyphSetRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for ReferenceGlyphSetRequest {}
+impl crate::x11_utils::VoidRequest for ReferenceGlyphSetRequest {
+}
 
 /// Opcode for the FreeGlyphSet request
 pub const FREE_GLYPH_SET_REQUEST: u8 = 19;
@@ -3239,8 +3228,6 @@ impl FreeGlyphSetRequest {
     }
 }
 impl Request for FreeGlyphSetRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -3250,7 +3237,8 @@ impl Request for FreeGlyphSetRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for FreeGlyphSetRequest {}
+impl crate::x11_utils::VoidRequest for FreeGlyphSetRequest {
+}
 
 /// Opcode for the AddGlyphs request
 pub const ADD_GLYPHS_REQUEST: u8 = 20;
@@ -3325,8 +3313,6 @@ impl<'input> AddGlyphsRequest<'input> {
     }
 }
 impl<'input> Request for AddGlyphsRequest<'input> {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -3336,7 +3322,8 @@ impl<'input> Request for AddGlyphsRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::VoidRequest for AddGlyphsRequest<'input> {}
+impl<'input> crate::x11_utils::VoidRequest for AddGlyphsRequest<'input> {
+}
 
 /// Opcode for the FreeGlyphs request
 pub const FREE_GLYPHS_REQUEST: u8 = 22;
@@ -3399,8 +3386,6 @@ impl<'input> FreeGlyphsRequest<'input> {
     }
 }
 impl<'input> Request for FreeGlyphsRequest<'input> {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -3410,7 +3395,8 @@ impl<'input> Request for FreeGlyphsRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::VoidRequest for FreeGlyphsRequest<'input> {}
+impl<'input> crate::x11_utils::VoidRequest for FreeGlyphsRequest<'input> {
+}
 
 /// Opcode for the CompositeGlyphs8 request
 pub const COMPOSITE_GLYPHS8_REQUEST: u8 = 23;
@@ -3517,8 +3503,6 @@ impl<'input> CompositeGlyphs8Request<'input> {
     }
 }
 impl<'input> Request for CompositeGlyphs8Request<'input> {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -3528,7 +3512,8 @@ impl<'input> Request for CompositeGlyphs8Request<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::VoidRequest for CompositeGlyphs8Request<'input> {}
+impl<'input> crate::x11_utils::VoidRequest for CompositeGlyphs8Request<'input> {
+}
 
 /// Opcode for the CompositeGlyphs16 request
 pub const COMPOSITE_GLYPHS16_REQUEST: u8 = 24;
@@ -3635,8 +3620,6 @@ impl<'input> CompositeGlyphs16Request<'input> {
     }
 }
 impl<'input> Request for CompositeGlyphs16Request<'input> {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -3646,7 +3629,8 @@ impl<'input> Request for CompositeGlyphs16Request<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::VoidRequest for CompositeGlyphs16Request<'input> {}
+impl<'input> crate::x11_utils::VoidRequest for CompositeGlyphs16Request<'input> {
+}
 
 /// Opcode for the CompositeGlyphs32 request
 pub const COMPOSITE_GLYPHS32_REQUEST: u8 = 25;
@@ -3753,8 +3737,6 @@ impl<'input> CompositeGlyphs32Request<'input> {
     }
 }
 impl<'input> Request for CompositeGlyphs32Request<'input> {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -3764,7 +3746,8 @@ impl<'input> Request for CompositeGlyphs32Request<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::VoidRequest for CompositeGlyphs32Request<'input> {}
+impl<'input> crate::x11_utils::VoidRequest for CompositeGlyphs32Request<'input> {
+}
 
 /// Opcode for the FillRectangles request
 pub const FILL_RECTANGLES_REQUEST: u8 = 26;
@@ -3851,8 +3834,6 @@ impl<'input> FillRectanglesRequest<'input> {
     }
 }
 impl<'input> Request for FillRectanglesRequest<'input> {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -3862,7 +3843,8 @@ impl<'input> Request for FillRectanglesRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::VoidRequest for FillRectanglesRequest<'input> {}
+impl<'input> crate::x11_utils::VoidRequest for FillRectanglesRequest<'input> {
+}
 
 /// Opcode for the CreateCursor request
 pub const CREATE_CURSOR_REQUEST: u8 = 27;
@@ -3924,8 +3906,6 @@ impl CreateCursorRequest {
     }
 }
 impl Request for CreateCursorRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -3935,7 +3915,8 @@ impl Request for CreateCursorRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for CreateCursorRequest {}
+impl crate::x11_utils::VoidRequest for CreateCursorRequest {
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Transform {
@@ -4109,8 +4090,6 @@ impl SetPictureTransformRequest {
     }
 }
 impl Request for SetPictureTransformRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -4120,7 +4099,8 @@ impl Request for SetPictureTransformRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for SetPictureTransformRequest {}
+impl crate::x11_utils::VoidRequest for SetPictureTransformRequest {
+}
 
 /// Opcode for the QueryFilters request
 pub const QUERY_FILTERS_REQUEST: u8 = 29;
@@ -4162,8 +4142,6 @@ impl QueryFiltersRequest {
     }
 }
 impl Request for QueryFiltersRequest {
-    type Reply = QueryFiltersReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -4173,7 +4151,9 @@ impl Request for QueryFiltersRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for QueryFiltersRequest {}
+impl crate::x11_utils::ReplyRequest for QueryFiltersRequest {
+    type Reply = QueryFiltersReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryFiltersReply {
@@ -4313,8 +4293,6 @@ impl<'input> SetPictureFilterRequest<'input> {
     }
 }
 impl<'input> Request for SetPictureFilterRequest<'input> {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -4324,7 +4302,8 @@ impl<'input> Request for SetPictureFilterRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::VoidRequest for SetPictureFilterRequest<'input> {}
+impl<'input> crate::x11_utils::VoidRequest for SetPictureFilterRequest<'input> {
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Animcursorelt {
@@ -4423,8 +4402,6 @@ impl<'input> CreateAnimCursorRequest<'input> {
     }
 }
 impl<'input> Request for CreateAnimCursorRequest<'input> {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -4434,7 +4411,8 @@ impl<'input> Request for CreateAnimCursorRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::VoidRequest for CreateAnimCursorRequest<'input> {}
+impl<'input> crate::x11_utils::VoidRequest for CreateAnimCursorRequest<'input> {
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Spanfix {
@@ -4607,8 +4585,6 @@ impl<'input> AddTrapsRequest<'input> {
     }
 }
 impl<'input> Request for AddTrapsRequest<'input> {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -4618,7 +4594,8 @@ impl<'input> Request for AddTrapsRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::VoidRequest for AddTrapsRequest<'input> {}
+impl<'input> crate::x11_utils::VoidRequest for AddTrapsRequest<'input> {
+}
 
 /// Opcode for the CreateSolidFill request
 pub const CREATE_SOLID_FILL_REQUEST: u8 = 33;
@@ -4672,8 +4649,6 @@ impl CreateSolidFillRequest {
     }
 }
 impl Request for CreateSolidFillRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -4683,7 +4658,8 @@ impl Request for CreateSolidFillRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for CreateSolidFillRequest {}
+impl crate::x11_utils::VoidRequest for CreateSolidFillRequest {
+}
 
 /// Opcode for the CreateLinearGradient request
 pub const CREATE_LINEAR_GRADIENT_REQUEST: u8 = 34;
@@ -4779,8 +4755,6 @@ impl<'input> CreateLinearGradientRequest<'input> {
     }
 }
 impl<'input> Request for CreateLinearGradientRequest<'input> {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -4790,7 +4764,8 @@ impl<'input> Request for CreateLinearGradientRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::VoidRequest for CreateLinearGradientRequest<'input> {}
+impl<'input> crate::x11_utils::VoidRequest for CreateLinearGradientRequest<'input> {
+}
 
 /// Opcode for the CreateRadialGradient request
 pub const CREATE_RADIAL_GRADIENT_REQUEST: u8 = 35;
@@ -4904,8 +4879,6 @@ impl<'input> CreateRadialGradientRequest<'input> {
     }
 }
 impl<'input> Request for CreateRadialGradientRequest<'input> {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -4915,7 +4888,8 @@ impl<'input> Request for CreateRadialGradientRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::VoidRequest for CreateRadialGradientRequest<'input> {}
+impl<'input> crate::x11_utils::VoidRequest for CreateRadialGradientRequest<'input> {
+}
 
 /// Opcode for the CreateConicalGradient request
 pub const CREATE_CONICAL_GRADIENT_REQUEST: u8 = 36;
@@ -5007,8 +4981,6 @@ impl<'input> CreateConicalGradientRequest<'input> {
     }
 }
 impl<'input> Request for CreateConicalGradientRequest<'input> {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -5018,5 +4990,6 @@ impl<'input> Request for CreateConicalGradientRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::VoidRequest for CreateConicalGradientRequest<'input> {}
+impl<'input> crate::x11_utils::VoidRequest for CreateConicalGradientRequest<'input> {
+}
 

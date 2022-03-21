@@ -74,8 +74,6 @@ impl GetVersionRequest {
     }
 }
 impl Request for GetVersionRequest {
-    type Reply = GetVersionReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -85,7 +83,9 @@ impl Request for GetVersionRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetVersionRequest {}
+impl crate::x11_utils::ReplyRequest for GetVersionRequest {
+    type Reply = GetVersionReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetVersionReply {
@@ -145,8 +145,6 @@ impl GetXIDRangeRequest {
     }
 }
 impl Request for GetXIDRangeRequest {
-    type Reply = GetXIDRangeReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -156,7 +154,9 @@ impl Request for GetXIDRangeRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetXIDRangeRequest {}
+impl crate::x11_utils::ReplyRequest for GetXIDRangeRequest {
+    type Reply = GetXIDRangeReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetXIDRangeReply {
@@ -225,8 +225,6 @@ impl GetXIDListRequest {
     }
 }
 impl Request for GetXIDListRequest {
-    type Reply = GetXIDListReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -236,7 +234,9 @@ impl Request for GetXIDListRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetXIDListRequest {}
+impl crate::x11_utils::ReplyRequest for GetXIDListRequest {
+    type Reply = GetXIDListReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetXIDListReply {

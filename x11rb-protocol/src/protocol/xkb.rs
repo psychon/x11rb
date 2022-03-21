@@ -5773,8 +5773,6 @@ impl UseExtensionRequest {
     }
 }
 impl Request for UseExtensionRequest {
-    type Reply = UseExtensionReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -5784,7 +5782,9 @@ impl Request for UseExtensionRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for UseExtensionRequest {}
+impl crate::x11_utils::ReplyRequest for UseExtensionRequest {
+    type Reply = UseExtensionReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct UseExtensionReply {
@@ -6503,8 +6503,6 @@ impl<'input> SelectEventsRequest<'input> {
     }
 }
 impl<'input> Request for SelectEventsRequest<'input> {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -6514,7 +6512,8 @@ impl<'input> Request for SelectEventsRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::VoidRequest for SelectEventsRequest<'input> {}
+impl<'input> crate::x11_utils::VoidRequest for SelectEventsRequest<'input> {
+}
 
 /// Opcode for the Bell request
 pub const BELL_REQUEST: u8 = 3;
@@ -6614,8 +6613,6 @@ impl BellRequest {
     }
 }
 impl Request for BellRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -6625,7 +6622,8 @@ impl Request for BellRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for BellRequest {}
+impl crate::x11_utils::VoidRequest for BellRequest {
+}
 
 /// Opcode for the GetState request
 pub const GET_STATE_REQUEST: u8 = 4;
@@ -6668,8 +6666,6 @@ impl GetStateRequest {
     }
 }
 impl Request for GetStateRequest {
-    type Reply = GetStateReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -6679,7 +6675,9 @@ impl Request for GetStateRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetStateRequest {}
+impl crate::x11_utils::ReplyRequest for GetStateRequest {
+    type Reply = GetStateReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetStateReply {
@@ -6816,8 +6814,6 @@ impl LatchLockStateRequest {
     }
 }
 impl Request for LatchLockStateRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -6827,7 +6823,8 @@ impl Request for LatchLockStateRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for LatchLockStateRequest {}
+impl crate::x11_utils::VoidRequest for LatchLockStateRequest {
+}
 
 /// Opcode for the GetControls request
 pub const GET_CONTROLS_REQUEST: u8 = 6;
@@ -6870,8 +6867,6 @@ impl GetControlsRequest {
     }
 }
 impl Request for GetControlsRequest {
-    type Reply = GetControlsReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -6881,7 +6876,9 @@ impl Request for GetControlsRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetControlsRequest {}
+impl crate::x11_utils::ReplyRequest for GetControlsRequest {
+    type Reply = GetControlsReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetControlsReply {
@@ -7215,8 +7212,6 @@ impl<'input> SetControlsRequest<'input> {
     }
 }
 impl<'input> Request for SetControlsRequest<'input> {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -7226,7 +7221,8 @@ impl<'input> Request for SetControlsRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::VoidRequest for SetControlsRequest<'input> {}
+impl<'input> crate::x11_utils::VoidRequest for SetControlsRequest<'input> {
+}
 
 /// Opcode for the GetMap request
 pub const GET_MAP_REQUEST: u8 = 8;
@@ -7357,8 +7353,6 @@ impl GetMapRequest {
     }
 }
 impl Request for GetMapRequest {
-    type Reply = GetMapReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -7368,7 +7362,9 @@ impl Request for GetMapRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetMapRequest {}
+impl crate::x11_utils::ReplyRequest for GetMapRequest {
+    type Reply = GetMapReply;
+}
 
 #[derive(Debug, Clone)]
 pub struct GetMapMapBitcase3 {
@@ -8021,8 +8017,6 @@ impl<'input> SetMapRequest<'input> {
     }
 }
 impl<'input> Request for SetMapRequest<'input> {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -8032,7 +8026,8 @@ impl<'input> Request for SetMapRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::VoidRequest for SetMapRequest<'input> {}
+impl<'input> crate::x11_utils::VoidRequest for SetMapRequest<'input> {
+}
 
 /// Opcode for the GetCompatMap request
 pub const GET_COMPAT_MAP_REQUEST: u8 = 10;
@@ -8094,8 +8089,6 @@ impl GetCompatMapRequest {
     }
 }
 impl Request for GetCompatMapRequest {
-    type Reply = GetCompatMapReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -8105,7 +8098,9 @@ impl Request for GetCompatMapRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetCompatMapRequest {}
+impl crate::x11_utils::ReplyRequest for GetCompatMapRequest {
+    type Reply = GetCompatMapReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetCompatMapReply {
@@ -8253,8 +8248,6 @@ impl<'input> SetCompatMapRequest<'input> {
     }
 }
 impl<'input> Request for SetCompatMapRequest<'input> {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -8264,7 +8257,8 @@ impl<'input> Request for SetCompatMapRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::VoidRequest for SetCompatMapRequest<'input> {}
+impl<'input> crate::x11_utils::VoidRequest for SetCompatMapRequest<'input> {
+}
 
 /// Opcode for the GetIndicatorState request
 pub const GET_INDICATOR_STATE_REQUEST: u8 = 12;
@@ -8307,8 +8301,6 @@ impl GetIndicatorStateRequest {
     }
 }
 impl Request for GetIndicatorStateRequest {
-    type Reply = GetIndicatorStateReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -8318,7 +8310,9 @@ impl Request for GetIndicatorStateRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetIndicatorStateRequest {}
+impl crate::x11_utils::ReplyRequest for GetIndicatorStateRequest {
+    type Reply = GetIndicatorStateReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetIndicatorStateReply {
@@ -8396,8 +8390,6 @@ impl GetIndicatorMapRequest {
     }
 }
 impl Request for GetIndicatorMapRequest {
-    type Reply = GetIndicatorMapReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -8407,7 +8399,9 @@ impl Request for GetIndicatorMapRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetIndicatorMapRequest {}
+impl crate::x11_utils::ReplyRequest for GetIndicatorMapRequest {
+    type Reply = GetIndicatorMapReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetIndicatorMapReply {
@@ -8507,8 +8501,6 @@ impl<'input> SetIndicatorMapRequest<'input> {
     }
 }
 impl<'input> Request for SetIndicatorMapRequest<'input> {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -8518,7 +8510,8 @@ impl<'input> Request for SetIndicatorMapRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::VoidRequest for SetIndicatorMapRequest<'input> {}
+impl<'input> crate::x11_utils::VoidRequest for SetIndicatorMapRequest<'input> {
+}
 
 /// Opcode for the GetNamedIndicator request
 pub const GET_NAMED_INDICATOR_REQUEST: u8 = 15;
@@ -8582,8 +8575,6 @@ impl GetNamedIndicatorRequest {
     }
 }
 impl Request for GetNamedIndicatorRequest {
-    type Reply = GetNamedIndicatorReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -8593,7 +8584,9 @@ impl Request for GetNamedIndicatorRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetNamedIndicatorRequest {}
+impl crate::x11_utils::ReplyRequest for GetNamedIndicatorRequest {
+    type Reply = GetNamedIndicatorReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetNamedIndicatorReply {
@@ -8771,8 +8764,6 @@ impl SetNamedIndicatorRequest {
     }
 }
 impl Request for SetNamedIndicatorRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -8782,7 +8773,8 @@ impl Request for SetNamedIndicatorRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for SetNamedIndicatorRequest {}
+impl crate::x11_utils::VoidRequest for SetNamedIndicatorRequest {
+}
 
 /// Opcode for the GetNames request
 pub const GET_NAMES_REQUEST: u8 = 17;
@@ -8833,8 +8825,6 @@ impl GetNamesRequest {
     }
 }
 impl Request for GetNamesRequest {
-    type Reply = GetNamesReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -8844,7 +8834,9 @@ impl Request for GetNamesRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetNamesRequest {}
+impl crate::x11_utils::ReplyRequest for GetNamesRequest {
+    type Reply = GetNamesReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetNamesValueListBitcase8 {
@@ -9560,8 +9552,6 @@ impl<'input> SetNamesRequest<'input> {
     }
 }
 impl<'input> Request for SetNamesRequest<'input> {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -9571,7 +9561,8 @@ impl<'input> Request for SetNamesRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::VoidRequest for SetNamesRequest<'input> {}
+impl<'input> crate::x11_utils::VoidRequest for SetNamesRequest<'input> {
+}
 
 /// Opcode for the PerClientFlags request
 pub const PER_CLIENT_FLAGS_REQUEST: u8 = 21;
@@ -9654,8 +9645,6 @@ impl PerClientFlagsRequest {
     }
 }
 impl Request for PerClientFlagsRequest {
-    type Reply = PerClientFlagsReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -9665,7 +9654,9 @@ impl Request for PerClientFlagsRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for PerClientFlagsRequest {}
+impl crate::x11_utils::ReplyRequest for PerClientFlagsRequest {
+    type Reply = PerClientFlagsReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PerClientFlagsReply {
@@ -9744,8 +9735,6 @@ impl ListComponentsRequest {
     }
 }
 impl Request for ListComponentsRequest {
-    type Reply = ListComponentsReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -9755,7 +9744,9 @@ impl Request for ListComponentsRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for ListComponentsRequest {}
+impl crate::x11_utils::ReplyRequest for ListComponentsRequest {
+    type Reply = ListComponentsReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ListComponentsReply {
@@ -9939,8 +9930,6 @@ impl GetKbdByNameRequest {
     }
 }
 impl Request for GetKbdByNameRequest {
-    type Reply = GetKbdByNameReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -9950,7 +9939,9 @@ impl Request for GetKbdByNameRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetKbdByNameRequest {}
+impl crate::x11_utils::ReplyRequest for GetKbdByNameRequest {
+    type Reply = GetKbdByNameReply;
+}
 
 #[derive(Debug, Clone)]
 pub struct GetKbdByNameRepliesTypesMapBitcase3 {
@@ -10633,8 +10624,6 @@ impl GetDeviceInfoRequest {
     }
 }
 impl Request for GetDeviceInfoRequest {
-    type Reply = GetDeviceInfoReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -10644,7 +10633,9 @@ impl Request for GetDeviceInfoRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetDeviceInfoRequest {}
+impl crate::x11_utils::ReplyRequest for GetDeviceInfoRequest {
+    type Reply = GetDeviceInfoReply;
+}
 
 #[derive(Debug, Clone)]
 pub struct GetDeviceInfoReply {
@@ -10829,8 +10820,6 @@ impl<'input> SetDeviceInfoRequest<'input> {
     }
 }
 impl<'input> Request for SetDeviceInfoRequest<'input> {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -10840,7 +10829,8 @@ impl<'input> Request for SetDeviceInfoRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::VoidRequest for SetDeviceInfoRequest<'input> {}
+impl<'input> crate::x11_utils::VoidRequest for SetDeviceInfoRequest<'input> {
+}
 
 /// Opcode for the SetDebuggingFlags request
 pub const SET_DEBUGGING_FLAGS_REQUEST: u8 = 101;
@@ -10930,8 +10920,6 @@ impl<'input> SetDebuggingFlagsRequest<'input> {
     }
 }
 impl<'input> Request for SetDebuggingFlagsRequest<'input> {
-    type Reply = SetDebuggingFlagsReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -10941,7 +10929,9 @@ impl<'input> Request for SetDebuggingFlagsRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::ReplyRequest for SetDebuggingFlagsRequest<'input> {}
+impl<'input> crate::x11_utils::ReplyRequest for SetDebuggingFlagsRequest<'input> {
+    type Reply = SetDebuggingFlagsReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SetDebuggingFlagsReply {

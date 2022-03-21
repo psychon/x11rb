@@ -191,9 +191,6 @@ pub struct RequestHeader {
 
 /// A type implementing this trait is an X11 request.
 pub trait Request {
-    /// The kind of reply that this request generates.
-    type Reply: Into<crate::protocol::Reply> + TryParseFd;
-
     /// The protocol name of the extension that this request belongs to, or None for core requests
     const EXTENSION_NAME: Option<&'static str>;
 
@@ -202,18 +199,6 @@ pub trait Request {
     /// The argument is the major opcode of the extension that this request belongs to. For core
     /// requests, the argument may not have any influence
     fn serialize(self, extension_opcode: u8) -> BufWithFds<Vec<u8>>;
-
-    /// Parse a reply to this request.
-    ///
-    /// The default implementation of this function uses `Self::Reply::try_parse_fd`. There should
-    /// not be a reason why you need different behaviour.
-    fn parse_reply<'a>(
-        bytes: &'a [u8],
-        fds: &mut Vec<RawFdContainer>,
-    ) -> Result<(crate::protocol::Reply, &'a [u8]), ParseError> {
-        let (reply, remaining) = Self::Reply::try_parse_fd(bytes, fds)?;
-        Ok((reply.into(), remaining))
-    }
 }
 
 /// A type alias for reply parsers (matches the signature of TryParseFd).
@@ -227,10 +212,16 @@ pub type ReplyParsingFunction =
 pub trait VoidRequest: Request {}
 
 /// A X11 request that has a reply without FDs
-pub trait ReplyRequest: Request {}
+pub trait ReplyRequest: Request {
+    /// The kind of reply that this request generates.
+    type Reply: Into<crate::protocol::Reply> + TryParse;
+}
 
 /// A X11 request that has a reply with FDs
-pub trait ReplyFDsRequest: Request {}
+pub trait ReplyFDsRequest: Request {
+    /// The kind of reply that this request generates.
+    type Reply: Into<crate::protocol::Reply> + TryParseFd;
+}
 
 /// A type implementing this trait can be serialized into X11 raw bytes.
 pub trait Serialize {

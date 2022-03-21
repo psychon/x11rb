@@ -7,6 +7,8 @@ use std::borrow::Cow;
 use std::convert::{TryFrom, TryInto};
 use std::io::IoSlice;
 
+use x11rb_protocol::x11_utils::{ReplyFDsRequest, ReplyRequest, VoidRequest};
+
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
 use crate::errors::{ConnectionError, ParseError, ReplyError, ReplyOrIdError};
 use crate::protocol::xproto::Setup;
@@ -75,6 +77,29 @@ pub trait RequestConnection {
     where
         R: TryParse;
 
+    /// Send a request with a reply to the server.
+    ///
+    /// This function is a wrapper around [`send_request_with_reply`]. This function gets a
+    /// [`ReplyRequest`] as its argument to specify the request to send.
+    fn send_trait_request_with_reply<R>(
+        &self,
+        request: R,
+    ) -> Result<Cookie<'_, Self, <R as ReplyRequest>::Reply>, ConnectionError>
+    where
+        R: ReplyRequest,
+    {
+        let opcode = match R::EXTENSION_NAME {
+            None => 0,
+            Some(extension) => {
+                self.extension_information(extension)?
+                    .ok_or(ConnectionError::UnsupportedExtension)?
+                    .major_opcode
+            }
+        };
+        let (buf, fds) = request.serialize(opcode);
+        self.send_request_with_reply(&[IoSlice::new(&*buf)], fds)
+    }
+
     /// Send a request with a reply containing file descriptors to the server.
     ///
     /// The `bufs` parameter describes the raw bytes that should be sent. The returned cookie
@@ -102,6 +127,29 @@ pub trait RequestConnection {
     where
         R: TryParseFd;
 
+    /// Send a request with a reply containing file descriptors to the server.
+    ///
+    /// This function is a wrapper around [`send_request_with_reply_with_fds`]. This function gets
+    /// a [`ReplyFDsRequest`] as its argument to specify the request to send.
+    fn send_trait_request_with_reply_with_fds<R>(
+        &self,
+        request: R,
+    ) -> Result<CookieWithFds<'_, Self, R::Reply>, ConnectionError>
+    where
+        R: ReplyFDsRequest,
+    {
+        let opcode = match R::EXTENSION_NAME {
+            None => 0,
+            Some(extension) => {
+                self.extension_information(extension)?
+                    .ok_or(ConnectionError::UnsupportedExtension)?
+                    .major_opcode
+            }
+        };
+        let (buf, fds) = request.serialize(opcode);
+        self.send_request_with_reply_with_fds(&[IoSlice::new(&*buf)], fds)
+    }
+
     /// Send a request without a reply to the server.
     ///
     /// The `bufs` parameter describes the raw bytes that should be sent. The sequence number of
@@ -126,6 +174,29 @@ pub trait RequestConnection {
         bufs: &[IoSlice<'_>],
         fds: Vec<RawFdContainer>,
     ) -> Result<VoidCookie<'_, Self>, ConnectionError>;
+
+    /// Send a request without a reply to the server.
+    ///
+    /// This function is a wrapper around [`send_request_without_reply`]. This function gets a
+    /// [`VoidRequest`] as its argument to specify the request to send.
+    fn send_trait_request_without_reply<R>(
+        &self,
+        request: R,
+    ) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    where
+        R: VoidRequest,
+    {
+        let opcode = match R::EXTENSION_NAME {
+            None => 0,
+            Some(extension) => {
+                self.extension_information(extension)?
+                    .ok_or(ConnectionError::UnsupportedExtension)?
+                    .major_opcode
+            }
+        };
+        let (buf, fds) = request.serialize(opcode);
+        self.send_request_without_reply(&[IoSlice::new(&*buf)], fds)
+    }
 
     /// A reply to an error should be discarded.
     ///

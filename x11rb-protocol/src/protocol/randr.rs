@@ -256,8 +256,6 @@ impl QueryVersionRequest {
     }
 }
 impl Request for QueryVersionRequest {
-    type Reply = QueryVersionReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -267,7 +265,9 @@ impl Request for QueryVersionRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for QueryVersionRequest {}
+impl crate::x11_utils::ReplyRequest for QueryVersionRequest {
+    type Reply = QueryVersionReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionReply {
@@ -436,8 +436,6 @@ impl SetScreenConfigRequest {
     }
 }
 impl Request for SetScreenConfigRequest {
-    type Reply = SetScreenConfigReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -447,7 +445,9 @@ impl Request for SetScreenConfigRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for SetScreenConfigRequest {}
+impl crate::x11_utils::ReplyRequest for SetScreenConfigRequest {
+    type Reply = SetScreenConfigReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SetScreenConfigReply {
@@ -604,8 +604,6 @@ impl SelectInputRequest {
     }
 }
 impl Request for SelectInputRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -615,7 +613,8 @@ impl Request for SelectInputRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for SelectInputRequest {}
+impl crate::x11_utils::VoidRequest for SelectInputRequest {
+}
 
 /// Opcode for the GetScreenInfo request
 pub const GET_SCREEN_INFO_REQUEST: u8 = 5;
@@ -657,8 +656,6 @@ impl GetScreenInfoRequest {
     }
 }
 impl Request for GetScreenInfoRequest {
-    type Reply = GetScreenInfoReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -668,7 +665,9 @@ impl Request for GetScreenInfoRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetScreenInfoRequest {}
+impl crate::x11_utils::ReplyRequest for GetScreenInfoRequest {
+    type Reply = GetScreenInfoReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetScreenInfoReply {
@@ -769,8 +768,6 @@ impl GetScreenSizeRangeRequest {
     }
 }
 impl Request for GetScreenSizeRangeRequest {
-    type Reply = GetScreenSizeRangeReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -780,7 +777,9 @@ impl Request for GetScreenSizeRangeRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetScreenSizeRangeRequest {}
+impl crate::x11_utils::ReplyRequest for GetScreenSizeRangeRequest {
+    type Reply = GetScreenSizeRangeReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetScreenSizeRangeReply {
@@ -882,8 +881,6 @@ impl SetScreenSizeRequest {
     }
 }
 impl Request for SetScreenSizeRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -893,7 +890,8 @@ impl Request for SetScreenSizeRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for SetScreenSizeRequest {}
+impl crate::x11_utils::VoidRequest for SetScreenSizeRequest {
+}
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub struct ModeFlag(u16);
@@ -1116,8 +1114,6 @@ impl GetScreenResourcesRequest {
     }
 }
 impl Request for GetScreenResourcesRequest {
-    type Reply = GetScreenResourcesReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -1127,7 +1123,9 @@ impl Request for GetScreenResourcesRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetScreenResourcesRequest {}
+impl crate::x11_utils::ReplyRequest for GetScreenResourcesRequest {
+    type Reply = GetScreenResourcesReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetScreenResourcesReply {
@@ -1332,8 +1330,6 @@ impl GetOutputInfoRequest {
     }
 }
 impl Request for GetOutputInfoRequest {
-    type Reply = GetOutputInfoReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -1343,7 +1339,9 @@ impl Request for GetOutputInfoRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetOutputInfoRequest {}
+impl crate::x11_utils::ReplyRequest for GetOutputInfoRequest {
+    type Reply = GetOutputInfoReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetOutputInfoReply {
@@ -1493,8 +1491,6 @@ impl ListOutputPropertiesRequest {
     }
 }
 impl Request for ListOutputPropertiesRequest {
-    type Reply = ListOutputPropertiesReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -1504,7 +1500,9 @@ impl Request for ListOutputPropertiesRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for ListOutputPropertiesRequest {}
+impl crate::x11_utils::ReplyRequest for ListOutputPropertiesRequest {
+    type Reply = ListOutputPropertiesReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ListOutputPropertiesReply {
@@ -1596,8 +1594,6 @@ impl QueryOutputPropertyRequest {
     }
 }
 impl Request for QueryOutputPropertyRequest {
-    type Reply = QueryOutputPropertyReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -1607,7 +1603,9 @@ impl Request for QueryOutputPropertyRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for QueryOutputPropertyRequest {}
+impl crate::x11_utils::ReplyRequest for QueryOutputPropertyRequest {
+    type Reply = QueryOutputPropertyReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryOutputPropertyReply {
@@ -1740,8 +1738,6 @@ impl<'input> ConfigureOutputPropertyRequest<'input> {
     }
 }
 impl<'input> Request for ConfigureOutputPropertyRequest<'input> {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -1751,7 +1747,8 @@ impl<'input> Request for ConfigureOutputPropertyRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::VoidRequest for ConfigureOutputPropertyRequest<'input> {}
+impl<'input> crate::x11_utils::VoidRequest for ConfigureOutputPropertyRequest<'input> {
+}
 
 /// Opcode for the ChangeOutputProperty request
 pub const CHANGE_OUTPUT_PROPERTY_REQUEST: u8 = 13;
@@ -1850,8 +1847,6 @@ impl<'input> ChangeOutputPropertyRequest<'input> {
     }
 }
 impl<'input> Request for ChangeOutputPropertyRequest<'input> {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -1861,7 +1856,8 @@ impl<'input> Request for ChangeOutputPropertyRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::VoidRequest for ChangeOutputPropertyRequest<'input> {}
+impl<'input> crate::x11_utils::VoidRequest for ChangeOutputPropertyRequest<'input> {
+}
 
 /// Opcode for the DeleteOutputProperty request
 pub const DELETE_OUTPUT_PROPERTY_REQUEST: u8 = 14;
@@ -1911,8 +1907,6 @@ impl DeleteOutputPropertyRequest {
     }
 }
 impl Request for DeleteOutputPropertyRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -1922,7 +1916,8 @@ impl Request for DeleteOutputPropertyRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for DeleteOutputPropertyRequest {}
+impl crate::x11_utils::VoidRequest for DeleteOutputPropertyRequest {
+}
 
 /// Opcode for the GetOutputProperty request
 pub const GET_OUTPUT_PROPERTY_REQUEST: u8 = 15;
@@ -2009,8 +2004,6 @@ impl GetOutputPropertyRequest {
     }
 }
 impl Request for GetOutputPropertyRequest {
-    type Reply = GetOutputPropertyReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -2020,7 +2013,9 @@ impl Request for GetOutputPropertyRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetOutputPropertyRequest {}
+impl crate::x11_utils::ReplyRequest for GetOutputPropertyRequest {
+    type Reply = GetOutputPropertyReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetOutputPropertyReply {
@@ -2146,8 +2141,6 @@ impl<'input> CreateModeRequest<'input> {
     }
 }
 impl<'input> Request for CreateModeRequest<'input> {
-    type Reply = CreateModeReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -2157,7 +2150,9 @@ impl<'input> Request for CreateModeRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::ReplyRequest for CreateModeRequest<'input> {}
+impl<'input> crate::x11_utils::ReplyRequest for CreateModeRequest<'input> {
+    type Reply = CreateModeReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CreateModeReply {
@@ -2225,8 +2220,6 @@ impl DestroyModeRequest {
     }
 }
 impl Request for DestroyModeRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -2236,7 +2229,8 @@ impl Request for DestroyModeRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for DestroyModeRequest {}
+impl crate::x11_utils::VoidRequest for DestroyModeRequest {
+}
 
 /// Opcode for the AddOutputMode request
 pub const ADD_OUTPUT_MODE_REQUEST: u8 = 18;
@@ -2286,8 +2280,6 @@ impl AddOutputModeRequest {
     }
 }
 impl Request for AddOutputModeRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -2297,7 +2289,8 @@ impl Request for AddOutputModeRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for AddOutputModeRequest {}
+impl crate::x11_utils::VoidRequest for AddOutputModeRequest {
+}
 
 /// Opcode for the DeleteOutputMode request
 pub const DELETE_OUTPUT_MODE_REQUEST: u8 = 19;
@@ -2347,8 +2340,6 @@ impl DeleteOutputModeRequest {
     }
 }
 impl Request for DeleteOutputModeRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -2358,7 +2349,8 @@ impl Request for DeleteOutputModeRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for DeleteOutputModeRequest {}
+impl crate::x11_utils::VoidRequest for DeleteOutputModeRequest {
+}
 
 /// Opcode for the GetCrtcInfo request
 pub const GET_CRTC_INFO_REQUEST: u8 = 20;
@@ -2408,8 +2400,6 @@ impl GetCrtcInfoRequest {
     }
 }
 impl Request for GetCrtcInfoRequest {
-    type Reply = GetCrtcInfoReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -2419,7 +2409,9 @@ impl Request for GetCrtcInfoRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetCrtcInfoRequest {}
+impl crate::x11_utils::ReplyRequest for GetCrtcInfoRequest {
+    type Reply = GetCrtcInfoReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetCrtcInfoReply {
@@ -2608,8 +2600,6 @@ impl<'input> SetCrtcConfigRequest<'input> {
     }
 }
 impl<'input> Request for SetCrtcConfigRequest<'input> {
-    type Reply = SetCrtcConfigReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -2619,7 +2609,9 @@ impl<'input> Request for SetCrtcConfigRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::ReplyRequest for SetCrtcConfigRequest<'input> {}
+impl<'input> crate::x11_utils::ReplyRequest for SetCrtcConfigRequest<'input> {
+    type Reply = SetCrtcConfigReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SetCrtcConfigReply {
@@ -2689,8 +2681,6 @@ impl GetCrtcGammaSizeRequest {
     }
 }
 impl Request for GetCrtcGammaSizeRequest {
-    type Reply = GetCrtcGammaSizeReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -2700,7 +2690,9 @@ impl Request for GetCrtcGammaSizeRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetCrtcGammaSizeRequest {}
+impl crate::x11_utils::ReplyRequest for GetCrtcGammaSizeRequest {
+    type Reply = GetCrtcGammaSizeReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetCrtcGammaSizeReply {
@@ -2768,8 +2760,6 @@ impl GetCrtcGammaRequest {
     }
 }
 impl Request for GetCrtcGammaRequest {
-    type Reply = GetCrtcGammaReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -2779,7 +2769,9 @@ impl Request for GetCrtcGammaRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetCrtcGammaRequest {}
+impl crate::x11_utils::ReplyRequest for GetCrtcGammaRequest {
+    type Reply = GetCrtcGammaReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetCrtcGammaReply {
@@ -2903,8 +2895,6 @@ impl<'input> SetCrtcGammaRequest<'input> {
     }
 }
 impl<'input> Request for SetCrtcGammaRequest<'input> {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -2914,7 +2904,8 @@ impl<'input> Request for SetCrtcGammaRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::VoidRequest for SetCrtcGammaRequest<'input> {}
+impl<'input> crate::x11_utils::VoidRequest for SetCrtcGammaRequest<'input> {
+}
 
 /// Opcode for the GetScreenResourcesCurrent request
 pub const GET_SCREEN_RESOURCES_CURRENT_REQUEST: u8 = 25;
@@ -2956,8 +2947,6 @@ impl GetScreenResourcesCurrentRequest {
     }
 }
 impl Request for GetScreenResourcesCurrentRequest {
-    type Reply = GetScreenResourcesCurrentReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -2967,7 +2956,9 @@ impl Request for GetScreenResourcesCurrentRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetScreenResourcesCurrentRequest {}
+impl crate::x11_utils::ReplyRequest for GetScreenResourcesCurrentRequest {
+    type Reply = GetScreenResourcesCurrentReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetScreenResourcesCurrentReply {
@@ -3248,8 +3239,6 @@ impl<'input> SetCrtcTransformRequest<'input> {
     }
 }
 impl<'input> Request for SetCrtcTransformRequest<'input> {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -3259,7 +3248,8 @@ impl<'input> Request for SetCrtcTransformRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::VoidRequest for SetCrtcTransformRequest<'input> {}
+impl<'input> crate::x11_utils::VoidRequest for SetCrtcTransformRequest<'input> {
+}
 
 /// Opcode for the GetCrtcTransform request
 pub const GET_CRTC_TRANSFORM_REQUEST: u8 = 27;
@@ -3301,8 +3291,6 @@ impl GetCrtcTransformRequest {
     }
 }
 impl Request for GetCrtcTransformRequest {
-    type Reply = GetCrtcTransformReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -3312,7 +3300,9 @@ impl Request for GetCrtcTransformRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetCrtcTransformRequest {}
+impl crate::x11_utils::ReplyRequest for GetCrtcTransformRequest {
+    type Reply = GetCrtcTransformReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetCrtcTransformReply {
@@ -3462,8 +3452,6 @@ impl GetPanningRequest {
     }
 }
 impl Request for GetPanningRequest {
-    type Reply = GetPanningReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -3473,7 +3461,9 @@ impl Request for GetPanningRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetPanningRequest {}
+impl crate::x11_utils::ReplyRequest for GetPanningRequest {
+    type Reply = GetPanningReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetPanningReply {
@@ -3646,8 +3636,6 @@ impl SetPanningRequest {
     }
 }
 impl Request for SetPanningRequest {
-    type Reply = SetPanningReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -3657,7 +3645,9 @@ impl Request for SetPanningRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for SetPanningRequest {}
+impl crate::x11_utils::ReplyRequest for SetPanningRequest {
+    type Reply = SetPanningReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SetPanningReply {
@@ -3734,8 +3724,6 @@ impl SetOutputPrimaryRequest {
     }
 }
 impl Request for SetOutputPrimaryRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -3745,7 +3733,8 @@ impl Request for SetOutputPrimaryRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for SetOutputPrimaryRequest {}
+impl crate::x11_utils::VoidRequest for SetOutputPrimaryRequest {
+}
 
 /// Opcode for the GetOutputPrimary request
 pub const GET_OUTPUT_PRIMARY_REQUEST: u8 = 31;
@@ -3787,8 +3776,6 @@ impl GetOutputPrimaryRequest {
     }
 }
 impl Request for GetOutputPrimaryRequest {
-    type Reply = GetOutputPrimaryReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -3798,7 +3785,9 @@ impl Request for GetOutputPrimaryRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetOutputPrimaryRequest {}
+impl crate::x11_utils::ReplyRequest for GetOutputPrimaryRequest {
+    type Reply = GetOutputPrimaryReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetOutputPrimaryReply {
@@ -3865,8 +3854,6 @@ impl GetProvidersRequest {
     }
 }
 impl Request for GetProvidersRequest {
-    type Reply = GetProvidersReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -3876,7 +3863,9 @@ impl Request for GetProvidersRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetProvidersRequest {}
+impl crate::x11_utils::ReplyRequest for GetProvidersRequest {
+    type Reply = GetProvidersReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetProvidersReply {
@@ -4033,8 +4022,6 @@ impl GetProviderInfoRequest {
     }
 }
 impl Request for GetProviderInfoRequest {
-    type Reply = GetProviderInfoReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -4044,7 +4031,9 @@ impl Request for GetProviderInfoRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetProviderInfoRequest {}
+impl crate::x11_utils::ReplyRequest for GetProviderInfoRequest {
+    type Reply = GetProviderInfoReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetProviderInfoReply {
@@ -4200,8 +4189,6 @@ impl SetProviderOffloadSinkRequest {
     }
 }
 impl Request for SetProviderOffloadSinkRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -4211,7 +4198,8 @@ impl Request for SetProviderOffloadSinkRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for SetProviderOffloadSinkRequest {}
+impl crate::x11_utils::VoidRequest for SetProviderOffloadSinkRequest {
+}
 
 /// Opcode for the SetProviderOutputSource request
 pub const SET_PROVIDER_OUTPUT_SOURCE_REQUEST: u8 = 35;
@@ -4269,8 +4257,6 @@ impl SetProviderOutputSourceRequest {
     }
 }
 impl Request for SetProviderOutputSourceRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -4280,7 +4266,8 @@ impl Request for SetProviderOutputSourceRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for SetProviderOutputSourceRequest {}
+impl crate::x11_utils::VoidRequest for SetProviderOutputSourceRequest {
+}
 
 /// Opcode for the ListProviderProperties request
 pub const LIST_PROVIDER_PROPERTIES_REQUEST: u8 = 36;
@@ -4322,8 +4309,6 @@ impl ListProviderPropertiesRequest {
     }
 }
 impl Request for ListProviderPropertiesRequest {
-    type Reply = ListProviderPropertiesReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -4333,7 +4318,9 @@ impl Request for ListProviderPropertiesRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for ListProviderPropertiesRequest {}
+impl crate::x11_utils::ReplyRequest for ListProviderPropertiesRequest {
+    type Reply = ListProviderPropertiesReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ListProviderPropertiesReply {
@@ -4425,8 +4412,6 @@ impl QueryProviderPropertyRequest {
     }
 }
 impl Request for QueryProviderPropertyRequest {
-    type Reply = QueryProviderPropertyReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -4436,7 +4421,9 @@ impl Request for QueryProviderPropertyRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for QueryProviderPropertyRequest {}
+impl crate::x11_utils::ReplyRequest for QueryProviderPropertyRequest {
+    type Reply = QueryProviderPropertyReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryProviderPropertyReply {
@@ -4569,8 +4556,6 @@ impl<'input> ConfigureProviderPropertyRequest<'input> {
     }
 }
 impl<'input> Request for ConfigureProviderPropertyRequest<'input> {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -4580,7 +4565,8 @@ impl<'input> Request for ConfigureProviderPropertyRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::VoidRequest for ConfigureProviderPropertyRequest<'input> {}
+impl<'input> crate::x11_utils::VoidRequest for ConfigureProviderPropertyRequest<'input> {
+}
 
 /// Opcode for the ChangeProviderProperty request
 pub const CHANGE_PROVIDER_PROPERTY_REQUEST: u8 = 39;
@@ -4678,8 +4664,6 @@ impl<'input> ChangeProviderPropertyRequest<'input> {
     }
 }
 impl<'input> Request for ChangeProviderPropertyRequest<'input> {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -4689,7 +4673,8 @@ impl<'input> Request for ChangeProviderPropertyRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::VoidRequest for ChangeProviderPropertyRequest<'input> {}
+impl<'input> crate::x11_utils::VoidRequest for ChangeProviderPropertyRequest<'input> {
+}
 
 /// Opcode for the DeleteProviderProperty request
 pub const DELETE_PROVIDER_PROPERTY_REQUEST: u8 = 40;
@@ -4739,8 +4724,6 @@ impl DeleteProviderPropertyRequest {
     }
 }
 impl Request for DeleteProviderPropertyRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -4750,7 +4733,8 @@ impl Request for DeleteProviderPropertyRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for DeleteProviderPropertyRequest {}
+impl crate::x11_utils::VoidRequest for DeleteProviderPropertyRequest {
+}
 
 /// Opcode for the GetProviderProperty request
 pub const GET_PROVIDER_PROPERTY_REQUEST: u8 = 41;
@@ -4837,8 +4821,6 @@ impl GetProviderPropertyRequest {
     }
 }
 impl Request for GetProviderPropertyRequest {
-    type Reply = GetProviderPropertyReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -4848,7 +4830,9 @@ impl Request for GetProviderPropertyRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetProviderPropertyRequest {}
+impl crate::x11_utils::ReplyRequest for GetProviderPropertyRequest {
+    type Reply = GetProviderPropertyReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetProviderPropertyReply {
@@ -5601,8 +5585,6 @@ impl GetMonitorsRequest {
     }
 }
 impl Request for GetMonitorsRequest {
-    type Reply = GetMonitorsReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -5612,7 +5594,9 @@ impl Request for GetMonitorsRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetMonitorsRequest {}
+impl crate::x11_utils::ReplyRequest for GetMonitorsRequest {
+    type Reply = GetMonitorsReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetMonitorsReply {
@@ -5707,8 +5691,6 @@ impl SetMonitorRequest {
     }
 }
 impl Request for SetMonitorRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -5718,7 +5700,8 @@ impl Request for SetMonitorRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for SetMonitorRequest {}
+impl crate::x11_utils::VoidRequest for SetMonitorRequest {
+}
 
 /// Opcode for the DeleteMonitor request
 pub const DELETE_MONITOR_REQUEST: u8 = 44;
@@ -5768,8 +5751,6 @@ impl DeleteMonitorRequest {
     }
 }
 impl Request for DeleteMonitorRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -5779,7 +5760,8 @@ impl Request for DeleteMonitorRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for DeleteMonitorRequest {}
+impl crate::x11_utils::VoidRequest for DeleteMonitorRequest {
+}
 
 /// Opcode for the CreateLease request
 pub const CREATE_LEASE_REQUEST: u8 = 45;
@@ -5860,8 +5842,6 @@ impl<'input> CreateLeaseRequest<'input> {
     }
 }
 impl<'input> Request for CreateLeaseRequest<'input> {
-    type Reply = CreateLeaseReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -5871,7 +5851,9 @@ impl<'input> Request for CreateLeaseRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::ReplyFDsRequest for CreateLeaseRequest<'input> {}
+impl<'input> crate::x11_utils::ReplyFDsRequest for CreateLeaseRequest<'input> {
+    type Reply = CreateLeaseReply;
+}
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct CreateLeaseReply {
@@ -5949,8 +5931,6 @@ impl FreeLeaseRequest {
     }
 }
 impl Request for FreeLeaseRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -5960,7 +5940,8 @@ impl Request for FreeLeaseRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for FreeLeaseRequest {}
+impl crate::x11_utils::VoidRequest for FreeLeaseRequest {
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct LeaseNotify {

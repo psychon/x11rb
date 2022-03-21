@@ -140,8 +140,6 @@ impl QueryVersionRequest {
     }
 }
 impl Request for QueryVersionRequest {
-    type Reply = QueryVersionReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -151,7 +149,9 @@ impl Request for QueryVersionRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for QueryVersionRequest {}
+impl crate::x11_utils::ReplyRequest for QueryVersionRequest {
+    type Reply = QueryVersionReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionReply {
@@ -231,8 +231,6 @@ impl RedirectWindowRequest {
     }
 }
 impl Request for RedirectWindowRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -242,7 +240,8 @@ impl Request for RedirectWindowRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for RedirectWindowRequest {}
+impl crate::x11_utils::VoidRequest for RedirectWindowRequest {
+}
 
 /// Opcode for the RedirectSubwindows request
 pub const REDIRECT_SUBWINDOWS_REQUEST: u8 = 2;
@@ -294,8 +293,6 @@ impl RedirectSubwindowsRequest {
     }
 }
 impl Request for RedirectSubwindowsRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -305,7 +302,8 @@ impl Request for RedirectSubwindowsRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for RedirectSubwindowsRequest {}
+impl crate::x11_utils::VoidRequest for RedirectSubwindowsRequest {
+}
 
 /// Opcode for the UnredirectWindow request
 pub const UNREDIRECT_WINDOW_REQUEST: u8 = 3;
@@ -357,8 +355,6 @@ impl UnredirectWindowRequest {
     }
 }
 impl Request for UnredirectWindowRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -368,7 +364,8 @@ impl Request for UnredirectWindowRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for UnredirectWindowRequest {}
+impl crate::x11_utils::VoidRequest for UnredirectWindowRequest {
+}
 
 /// Opcode for the UnredirectSubwindows request
 pub const UNREDIRECT_SUBWINDOWS_REQUEST: u8 = 4;
@@ -420,8 +417,6 @@ impl UnredirectSubwindowsRequest {
     }
 }
 impl Request for UnredirectSubwindowsRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -431,7 +426,8 @@ impl Request for UnredirectSubwindowsRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for UnredirectSubwindowsRequest {}
+impl crate::x11_utils::VoidRequest for UnredirectSubwindowsRequest {
+}
 
 /// Opcode for the CreateRegionFromBorderClip request
 pub const CREATE_REGION_FROM_BORDER_CLIP_REQUEST: u8 = 5;
@@ -481,8 +477,6 @@ impl CreateRegionFromBorderClipRequest {
     }
 }
 impl Request for CreateRegionFromBorderClipRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -492,7 +486,8 @@ impl Request for CreateRegionFromBorderClipRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for CreateRegionFromBorderClipRequest {}
+impl crate::x11_utils::VoidRequest for CreateRegionFromBorderClipRequest {
+}
 
 /// Opcode for the NameWindowPixmap request
 pub const NAME_WINDOW_PIXMAP_REQUEST: u8 = 6;
@@ -542,8 +537,6 @@ impl NameWindowPixmapRequest {
     }
 }
 impl Request for NameWindowPixmapRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -553,7 +546,8 @@ impl Request for NameWindowPixmapRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for NameWindowPixmapRequest {}
+impl crate::x11_utils::VoidRequest for NameWindowPixmapRequest {
+}
 
 /// Opcode for the GetOverlayWindow request
 pub const GET_OVERLAY_WINDOW_REQUEST: u8 = 7;
@@ -595,8 +589,6 @@ impl GetOverlayWindowRequest {
     }
 }
 impl Request for GetOverlayWindowRequest {
-    type Reply = GetOverlayWindowReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -606,7 +598,9 @@ impl Request for GetOverlayWindowRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetOverlayWindowRequest {}
+impl crate::x11_utils::ReplyRequest for GetOverlayWindowRequest {
+    type Reply = GetOverlayWindowReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetOverlayWindowReply {
@@ -674,8 +668,6 @@ impl ReleaseOverlayWindowRequest {
     }
 }
 impl Request for ReleaseOverlayWindowRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -685,5 +677,6 @@ impl Request for ReleaseOverlayWindowRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for ReleaseOverlayWindowRequest {}
+impl crate::x11_utils::VoidRequest for ReleaseOverlayWindowRequest {
+}
 

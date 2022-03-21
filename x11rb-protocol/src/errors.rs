@@ -2,7 +2,7 @@
 
 use crate::protocol::xproto::{SetupAuthenticate, SetupFailed};
 
-pub use crate::connection::IdsExhausted;
+pub use crate::id_allocator::IdsExhausted;
 
 /// An error occurred while parsing some data
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]

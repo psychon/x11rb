@@ -84,8 +84,6 @@ impl QueryVersionRequest {
     }
 }
 impl Request for QueryVersionRequest {
-    type Reply = QueryVersionReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -95,7 +93,9 @@ impl Request for QueryVersionRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for QueryVersionRequest {}
+impl crate::x11_utils::ReplyRequest for QueryVersionRequest {
+    type Reply = QueryVersionReply;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionReply {
@@ -359,8 +359,6 @@ impl ChangeSaveSetRequest {
     }
 }
 impl Request for ChangeSaveSetRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -370,7 +368,8 @@ impl Request for ChangeSaveSetRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for ChangeSaveSetRequest {}
+impl crate::x11_utils::VoidRequest for ChangeSaveSetRequest {
+}
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub struct SelectionEvent(u8);
@@ -634,8 +633,6 @@ impl SelectSelectionInputRequest {
     }
 }
 impl Request for SelectSelectionInputRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -645,7 +642,8 @@ impl Request for SelectSelectionInputRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for SelectSelectionInputRequest {}
+impl crate::x11_utils::VoidRequest for SelectSelectionInputRequest {
+}
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub struct CursorNotify(u8);
@@ -890,8 +888,6 @@ impl SelectCursorInputRequest {
     }
 }
 impl Request for SelectCursorInputRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -901,7 +897,8 @@ impl Request for SelectCursorInputRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for SelectCursorInputRequest {}
+impl crate::x11_utils::VoidRequest for SelectCursorInputRequest {
+}
 
 /// Opcode for the GetCursorImage request
 pub const GET_CURSOR_IMAGE_REQUEST: u8 = 4;
@@ -934,8 +931,6 @@ impl GetCursorImageRequest {
     }
 }
 impl Request for GetCursorImageRequest {
-    type Reply = GetCursorImageReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -945,7 +940,9 @@ impl Request for GetCursorImageRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetCursorImageRequest {}
+impl crate::x11_utils::ReplyRequest for GetCursorImageRequest {
+    type Reply = GetCursorImageReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetCursorImageReply {
@@ -1109,8 +1106,6 @@ impl<'input> CreateRegionRequest<'input> {
     }
 }
 impl<'input> Request for CreateRegionRequest<'input> {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -1120,7 +1115,8 @@ impl<'input> Request for CreateRegionRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::VoidRequest for CreateRegionRequest<'input> {}
+impl<'input> crate::x11_utils::VoidRequest for CreateRegionRequest<'input> {
+}
 
 /// Opcode for the CreateRegionFromBitmap request
 pub const CREATE_REGION_FROM_BITMAP_REQUEST: u8 = 6;
@@ -1170,8 +1166,6 @@ impl CreateRegionFromBitmapRequest {
     }
 }
 impl Request for CreateRegionFromBitmapRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -1181,7 +1175,8 @@ impl Request for CreateRegionFromBitmapRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for CreateRegionFromBitmapRequest {}
+impl crate::x11_utils::VoidRequest for CreateRegionFromBitmapRequest {
+}
 
 /// Opcode for the CreateRegionFromWindow request
 pub const CREATE_REGION_FROM_WINDOW_REQUEST: u8 = 7;
@@ -1241,8 +1236,6 @@ impl CreateRegionFromWindowRequest {
     }
 }
 impl Request for CreateRegionFromWindowRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -1252,7 +1245,8 @@ impl Request for CreateRegionFromWindowRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for CreateRegionFromWindowRequest {}
+impl crate::x11_utils::VoidRequest for CreateRegionFromWindowRequest {
+}
 
 /// Opcode for the CreateRegionFromGC request
 pub const CREATE_REGION_FROM_GC_REQUEST: u8 = 8;
@@ -1302,8 +1296,6 @@ impl CreateRegionFromGCRequest {
     }
 }
 impl Request for CreateRegionFromGCRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -1313,7 +1305,8 @@ impl Request for CreateRegionFromGCRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for CreateRegionFromGCRequest {}
+impl crate::x11_utils::VoidRequest for CreateRegionFromGCRequest {
+}
 
 /// Opcode for the CreateRegionFromPicture request
 pub const CREATE_REGION_FROM_PICTURE_REQUEST: u8 = 9;
@@ -1363,8 +1356,6 @@ impl CreateRegionFromPictureRequest {
     }
 }
 impl Request for CreateRegionFromPictureRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -1374,7 +1365,8 @@ impl Request for CreateRegionFromPictureRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for CreateRegionFromPictureRequest {}
+impl crate::x11_utils::VoidRequest for CreateRegionFromPictureRequest {
+}
 
 /// Opcode for the DestroyRegion request
 pub const DESTROY_REGION_REQUEST: u8 = 10;
@@ -1416,8 +1408,6 @@ impl DestroyRegionRequest {
     }
 }
 impl Request for DestroyRegionRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -1427,7 +1417,8 @@ impl Request for DestroyRegionRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for DestroyRegionRequest {}
+impl crate::x11_utils::VoidRequest for DestroyRegionRequest {
+}
 
 /// Opcode for the SetRegion request
 pub const SET_REGION_REQUEST: u8 = 11;
@@ -1490,8 +1481,6 @@ impl<'input> SetRegionRequest<'input> {
     }
 }
 impl<'input> Request for SetRegionRequest<'input> {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -1501,7 +1490,8 @@ impl<'input> Request for SetRegionRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::VoidRequest for SetRegionRequest<'input> {}
+impl<'input> crate::x11_utils::VoidRequest for SetRegionRequest<'input> {
+}
 
 /// Opcode for the CopyRegion request
 pub const COPY_REGION_REQUEST: u8 = 12;
@@ -1551,8 +1541,6 @@ impl CopyRegionRequest {
     }
 }
 impl Request for CopyRegionRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -1562,7 +1550,8 @@ impl Request for CopyRegionRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for CopyRegionRequest {}
+impl crate::x11_utils::VoidRequest for CopyRegionRequest {
+}
 
 /// Opcode for the UnionRegion request
 pub const UNION_REGION_REQUEST: u8 = 13;
@@ -1620,8 +1609,6 @@ impl UnionRegionRequest {
     }
 }
 impl Request for UnionRegionRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -1631,7 +1618,8 @@ impl Request for UnionRegionRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for UnionRegionRequest {}
+impl crate::x11_utils::VoidRequest for UnionRegionRequest {
+}
 
 /// Opcode for the IntersectRegion request
 pub const INTERSECT_REGION_REQUEST: u8 = 14;
@@ -1689,8 +1677,6 @@ impl IntersectRegionRequest {
     }
 }
 impl Request for IntersectRegionRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -1700,7 +1686,8 @@ impl Request for IntersectRegionRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for IntersectRegionRequest {}
+impl crate::x11_utils::VoidRequest for IntersectRegionRequest {
+}
 
 /// Opcode for the SubtractRegion request
 pub const SUBTRACT_REGION_REQUEST: u8 = 15;
@@ -1758,8 +1745,6 @@ impl SubtractRegionRequest {
     }
 }
 impl Request for SubtractRegionRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -1769,7 +1754,8 @@ impl Request for SubtractRegionRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for SubtractRegionRequest {}
+impl crate::x11_utils::VoidRequest for SubtractRegionRequest {
+}
 
 /// Opcode for the InvertRegion request
 pub const INVERT_REGION_REQUEST: u8 = 16;
@@ -1831,8 +1817,6 @@ impl InvertRegionRequest {
     }
 }
 impl Request for InvertRegionRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -1842,7 +1826,8 @@ impl Request for InvertRegionRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for InvertRegionRequest {}
+impl crate::x11_utils::VoidRequest for InvertRegionRequest {
+}
 
 /// Opcode for the TranslateRegion request
 pub const TRANSLATE_REGION_REQUEST: u8 = 17;
@@ -1896,8 +1881,6 @@ impl TranslateRegionRequest {
     }
 }
 impl Request for TranslateRegionRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -1907,7 +1890,8 @@ impl Request for TranslateRegionRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for TranslateRegionRequest {}
+impl crate::x11_utils::VoidRequest for TranslateRegionRequest {
+}
 
 /// Opcode for the RegionExtents request
 pub const REGION_EXTENTS_REQUEST: u8 = 18;
@@ -1957,8 +1941,6 @@ impl RegionExtentsRequest {
     }
 }
 impl Request for RegionExtentsRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -1968,7 +1950,8 @@ impl Request for RegionExtentsRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for RegionExtentsRequest {}
+impl crate::x11_utils::VoidRequest for RegionExtentsRequest {
+}
 
 /// Opcode for the FetchRegion request
 pub const FETCH_REGION_REQUEST: u8 = 19;
@@ -2010,8 +1993,6 @@ impl FetchRegionRequest {
     }
 }
 impl Request for FetchRegionRequest {
-    type Reply = FetchRegionReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -2021,7 +2002,9 @@ impl Request for FetchRegionRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for FetchRegionRequest {}
+impl crate::x11_utils::ReplyRequest for FetchRegionRequest {
+    type Reply = FetchRegionReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct FetchRegionReply {
@@ -2126,8 +2109,6 @@ impl SetGCClipRegionRequest {
     }
 }
 impl Request for SetGCClipRegionRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -2137,7 +2118,8 @@ impl Request for SetGCClipRegionRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for SetGCClipRegionRequest {}
+impl crate::x11_utils::VoidRequest for SetGCClipRegionRequest {
+}
 
 /// Opcode for the SetWindowShapeRegion request
 pub const SET_WINDOW_SHAPE_REGION_REQUEST: u8 = 21;
@@ -2209,8 +2191,6 @@ impl SetWindowShapeRegionRequest {
     }
 }
 impl Request for SetWindowShapeRegionRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -2220,7 +2200,8 @@ impl Request for SetWindowShapeRegionRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for SetWindowShapeRegionRequest {}
+impl crate::x11_utils::VoidRequest for SetWindowShapeRegionRequest {
+}
 
 /// Opcode for the SetPictureClipRegion request
 pub const SET_PICTURE_CLIP_REGION_REQUEST: u8 = 22;
@@ -2282,8 +2263,6 @@ impl SetPictureClipRegionRequest {
     }
 }
 impl Request for SetPictureClipRegionRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -2293,7 +2272,8 @@ impl Request for SetPictureClipRegionRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for SetPictureClipRegionRequest {}
+impl crate::x11_utils::VoidRequest for SetPictureClipRegionRequest {
+}
 
 /// Opcode for the SetCursorName request
 pub const SET_CURSOR_NAME_REQUEST: u8 = 23;
@@ -2356,8 +2336,6 @@ impl<'input> SetCursorNameRequest<'input> {
     }
 }
 impl<'input> Request for SetCursorNameRequest<'input> {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -2367,7 +2345,8 @@ impl<'input> Request for SetCursorNameRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::VoidRequest for SetCursorNameRequest<'input> {}
+impl<'input> crate::x11_utils::VoidRequest for SetCursorNameRequest<'input> {
+}
 
 /// Opcode for the GetCursorName request
 pub const GET_CURSOR_NAME_REQUEST: u8 = 24;
@@ -2409,8 +2388,6 @@ impl GetCursorNameRequest {
     }
 }
 impl Request for GetCursorNameRequest {
-    type Reply = GetCursorNameReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -2420,7 +2397,9 @@ impl Request for GetCursorNameRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetCursorNameRequest {}
+impl crate::x11_utils::ReplyRequest for GetCursorNameRequest {
+    type Reply = GetCursorNameReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetCursorNameReply {
@@ -2498,8 +2477,6 @@ impl GetCursorImageAndNameRequest {
     }
 }
 impl Request for GetCursorImageAndNameRequest {
-    type Reply = GetCursorImageAndNameReply;
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -2509,7 +2486,9 @@ impl Request for GetCursorImageAndNameRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::ReplyRequest for GetCursorImageAndNameRequest {}
+impl crate::x11_utils::ReplyRequest for GetCursorImageAndNameRequest {
+    type Reply = GetCursorImageAndNameReply;
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetCursorImageAndNameReply {
@@ -2620,8 +2599,6 @@ impl ChangeCursorRequest {
     }
 }
 impl Request for ChangeCursorRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -2631,7 +2608,8 @@ impl Request for ChangeCursorRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for ChangeCursorRequest {}
+impl crate::x11_utils::VoidRequest for ChangeCursorRequest {
+}
 
 /// Opcode for the ChangeCursorByName request
 pub const CHANGE_CURSOR_BY_NAME_REQUEST: u8 = 27;
@@ -2694,8 +2672,6 @@ impl<'input> ChangeCursorByNameRequest<'input> {
     }
 }
 impl<'input> Request for ChangeCursorByNameRequest<'input> {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -2705,7 +2681,8 @@ impl<'input> Request for ChangeCursorByNameRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::VoidRequest for ChangeCursorByNameRequest<'input> {}
+impl<'input> crate::x11_utils::VoidRequest for ChangeCursorByNameRequest<'input> {
+}
 
 /// Opcode for the ExpandRegion request
 pub const EXPAND_REGION_REQUEST: u8 = 28;
@@ -2779,8 +2756,6 @@ impl ExpandRegionRequest {
     }
 }
 impl Request for ExpandRegionRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -2790,7 +2765,8 @@ impl Request for ExpandRegionRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for ExpandRegionRequest {}
+impl crate::x11_utils::VoidRequest for ExpandRegionRequest {
+}
 
 /// Opcode for the HideCursor request
 pub const HIDE_CURSOR_REQUEST: u8 = 29;
@@ -2832,8 +2808,6 @@ impl HideCursorRequest {
     }
 }
 impl Request for HideCursorRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -2843,7 +2817,8 @@ impl Request for HideCursorRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for HideCursorRequest {}
+impl crate::x11_utils::VoidRequest for HideCursorRequest {
+}
 
 /// Opcode for the ShowCursor request
 pub const SHOW_CURSOR_REQUEST: u8 = 30;
@@ -2885,8 +2860,6 @@ impl ShowCursorRequest {
     }
 }
 impl Request for ShowCursorRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -2896,7 +2869,8 @@ impl Request for ShowCursorRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for ShowCursorRequest {}
+impl crate::x11_utils::VoidRequest for ShowCursorRequest {
+}
 
 pub type Barrier = u32;
 
@@ -3071,8 +3045,6 @@ impl<'input> CreatePointerBarrierRequest<'input> {
     }
 }
 impl<'input> Request for CreatePointerBarrierRequest<'input> {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -3082,7 +3054,8 @@ impl<'input> Request for CreatePointerBarrierRequest<'input> {
         (buf, fds)
     }
 }
-impl<'input> crate::x11_utils::VoidRequest for CreatePointerBarrierRequest<'input> {}
+impl<'input> crate::x11_utils::VoidRequest for CreatePointerBarrierRequest<'input> {
+}
 
 /// Opcode for the DeletePointerBarrier request
 pub const DELETE_POINTER_BARRIER_REQUEST: u8 = 32;
@@ -3124,8 +3097,6 @@ impl DeletePointerBarrierRequest {
     }
 }
 impl Request for DeletePointerBarrierRequest {
-    type Reply = ();
-
     const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
@@ -3135,5 +3106,6 @@ impl Request for DeletePointerBarrierRequest {
         (buf, fds)
     }
 }
-impl crate::x11_utils::VoidRequest for DeletePointerBarrierRequest {}
+impl crate::x11_utils::VoidRequest for DeletePointerBarrierRequest {
+}
 
