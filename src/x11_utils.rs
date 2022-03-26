@@ -1,4 +1,4 @@
-//! TODO: Docs
+//! Some utilities for working with X11.
 
 use x11rb_protocol::errors::ParseError;
 pub use x11rb_protocol::x11_utils::{
@@ -50,12 +50,28 @@ pub fn parse_request_header(
 
 /// A helper macro for managing atoms
 ///
-/// If we need to use multiple atoms, one would normally write code such as
+/// In X11, one often has to work with many different atoms that are already known at compile time.
+/// This macro can simplify managing such a list of atoms.
+///
+/// The following macro invocation:
+/// ```
+/// # use x11rb::atom_manager;
+/// atom_manager! {
+///     pub AtomCollection: AtomCollectionCookie {
+///         _NET_WM_NAME,
+///         _NET_WM_ICON,
+///         ATOM_WITH_SPACES: b"ATOM WITH SPACES",
+///         WHATEVER,
+///     }
+/// }
+/// ```
+/// ...expands to this:
 /// ```
 /// # use x11rb::protocol::xproto::{Atom, ConnectionExt, InternAtomReply};
 /// # use x11rb::errors::{ConnectionError, ReplyError};
 /// # use x11rb::cookie::Cookie;
 /// #[allow(non_snake_case)]
+/// #[derive(Debug, Clone, Copy)]
 /// pub struct AtomCollection {
 ///     pub _NET_WM_NAME: Atom,
 ///     pub _NET_WM_ICON: Atom,
@@ -64,7 +80,9 @@ pub fn parse_request_header(
 /// }
 ///
 /// #[allow(non_snake_case)]
+/// #[derive(Debug)]
 /// struct AtomCollectionCookie<'c, C: ConnectionExt> {
+///     phantom: std::marker::PhantomData<&'c C>,
 ///     _NET_WM_NAME: Cookie<'c, C, InternAtomReply>,
 ///     _NET_WM_ICON: Cookie<'c, C, InternAtomReply>,
 ///     ATOM_WITH_SPACES: Cookie<'c, C, InternAtomReply>,
@@ -76,6 +94,7 @@ pub fn parse_request_header(
 ///         conn: &C,
 ///     ) -> Result<AtomCollectionCookie<'_, C>, ConnectionError> {
 ///         Ok(AtomCollectionCookie {
+///             phantom: std::marker::PhantomData,
 ///             _NET_WM_NAME: conn.intern_atom(false, b"_NET_WM_NAME")?,
 ///             _NET_WM_ICON: conn.intern_atom(false, b"_NET_WM_ICON")?,
 ///             ATOM_WITH_SPACES: conn.intern_atom(false, b"ATOM WITH SPACES")?,
@@ -95,18 +114,6 @@ pub fn parse_request_header(
 ///             ATOM_WITH_SPACES: self.ATOM_WITH_SPACES.reply()?.atom,
 ///             WHATEVER: self.WHATEVER.reply()?.atom,
 ///         })
-///     }
-/// }
-/// ```
-/// This macro automatically produces this code with
-/// ```
-/// # use x11rb::atom_manager;
-/// atom_manager! {
-///     pub AtomCollection: AtomCollectionCookie {
-///         _NET_WM_NAME,
-///         _NET_WM_ICON,
-///         ATOM_WITH_SPACES: b"ATOM WITH SPACES",
-///         WHATEVER,
 ///     }
 /// }
 /// ```

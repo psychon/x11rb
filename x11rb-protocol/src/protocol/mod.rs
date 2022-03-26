@@ -14,7 +14,7 @@
 use std::borrow::Cow;
 use std::convert::TryInto;
 use crate::errors::ParseError;
-use crate::utils::RawFdContainer;
+use crate::RawFdContainer;
 use crate::x11_utils::{TryParse, TryParseFd, X11Error, ReplyRequest, ReplyFDsRequest};
 use crate::x11_utils::{ExtInfoProvider, ReplyParsingFunction, RequestHeader};
 

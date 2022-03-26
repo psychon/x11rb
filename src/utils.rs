@@ -8,7 +8,7 @@
 //!
 //! `CSlice` is only available when the `allow-unsafe-code` feature is enabled.
 
-pub use x11rb_protocol::utils::RawFdContainer;
+pub use x11rb_protocol::RawFdContainer;
 
 #[cfg(feature = "allow-unsafe-code")]
 mod unsafe_code {

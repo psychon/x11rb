@@ -79,8 +79,8 @@ pub trait RequestConnection {
 
     /// Send a request with a reply to the server.
     ///
-    /// This function is a wrapper around [`send_request_with_reply`]. This function gets a
-    /// [`ReplyRequest`] as its argument to specify the request to send.
+    /// This function is a wrapper around [`RequestConnection::send_request_with_reply`]. This
+    /// function gets a [`ReplyRequest`] as its argument to specify the request to send.
     fn send_trait_request_with_reply<R>(
         &self,
         request: R,
@@ -129,8 +129,8 @@ pub trait RequestConnection {
 
     /// Send a request with a reply containing file descriptors to the server.
     ///
-    /// This function is a wrapper around [`send_request_with_reply_with_fds`]. This function gets
-    /// a [`ReplyFDsRequest`] as its argument to specify the request to send.
+    /// This function is a wrapper around [`RequestConnection::send_request_with_reply_with_fds`].
+    /// This function gets a [`ReplyFDsRequest`] as its argument to specify the request to send.
     fn send_trait_request_with_reply_with_fds<R>(
         &self,
         request: R,
@@ -177,8 +177,8 @@ pub trait RequestConnection {
 
     /// Send a request without a reply to the server.
     ///
-    /// This function is a wrapper around [`send_request_without_reply`]. This function gets a
-    /// [`VoidRequest`] as its argument to specify the request to send.
+    /// This function is a wrapper around [`RequestConnection::send_request_without_reply`]. This
+    /// function gets a [`VoidRequest`] as its argument to specify the request to send.
     fn send_trait_request_without_reply<R>(
         &self,
         request: R,

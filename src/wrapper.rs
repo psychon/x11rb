@@ -103,10 +103,12 @@ pub trait ConnectionExt: XProtoConnectionExt {
 }
 impl<C: XProtoConnectionExt + ?Sized> ConnectionExt for C {}
 
-/// A RAII-like wrapper around [grab_server] and [ungrab_server].
+/// A RAII-like wrapper around [super::protocol::xproto::grab_server] and
+/// [super::protocol::xproto::ungrab_server].
 ///
-/// Instances of this struct represent that we sent a [grab_server] request. When this struct is
-/// dropped, an [ungrab_server] request is sent.
+/// Instances of this struct represent that we sent a [super::protocol::xproto::grab_server]
+/// request. When this struct is dropped, an [super::protocol::xproto::ungrab_server] request is
+/// sent.
 ///
 /// Any errors during `Drop` are silently ignored. Most likely an error here means that your
 /// X11 connection is broken and later requests will also fail.
@@ -114,9 +116,9 @@ impl<C: XProtoConnectionExt + ?Sized> ConnectionExt for C {}
 pub struct GrabServer<'c, C: XProtoConnectionExt>(&'c C);
 
 impl<'c, C: XProtoConnectionExt> GrabServer<'c, C> {
-    /// Grab the server by sending a [grab_server] request.
+    /// Grab the server by sending a [super::protocol::xproto::grab_server] request.
     ///
-    /// The returned type will call [ungrab_server] when it is dropped.
+    /// The returned type will call [super::protocol::xproto::ungrab_server] when it is dropped.
     pub fn grab(conn: &'c C) -> Result<Self, ConnectionError> {
         // Grab the server, return any errors, ignore the resulting VoidCookie
         drop(conn.grab_server()?);

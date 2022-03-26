@@ -1,4 +1,10 @@
-//! TODO: Docs
+//! X11 rust bindings.
+//!
+//! This crate provides a representation of the X11 protocol in Rust. With this protocol, raw X11
+//! bytes can be parsed into a structured representation or raw bytes can be produces.
+//!
+//! This protocol does not do any I/O. If you need an X11 client library, look at
+//! <https://docs.rs/x11rb/latest/x11rb/>.
 
 #![forbid(
     missing_copy_implementations,
@@ -35,12 +41,14 @@ pub mod parse_display;
 #[rustfmt::skip]
 #[allow(missing_docs)]
 pub mod protocol;
-pub mod utils;
+mod utils;
 pub mod wrapper;
+
+pub use utils::RawFdContainer;
 
 // Used to avoid too-complex types.
 /// A combination of a buffer and a list of file descriptors.
-pub type BufWithFds<B> = (B, Vec<utils::RawFdContainer>);
+pub type BufWithFds<B> = (B, Vec<RawFdContainer>);
 /// A buffer that is logically continuous, but presented in a number of pieces.
 pub type PiecewiseBuf<'a> = Vec<Cow<'a, [u8]>>;
 

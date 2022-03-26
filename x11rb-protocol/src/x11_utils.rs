@@ -414,7 +414,7 @@ tuple_impls!(A:0 B:1 C:2 D:3 E:4 F:5 G:6 H:7 I:8 J:9 K:10 L:11 M:12 N:13 O:14);
 ///
 /// This function parses a list of objects where the length of the list was specified externally.
 /// The wire format for `list_length` instances of `T` will be read from the given data.
-pub fn parse_list<T>(data: &[u8], list_length: usize) -> Result<(Vec<T>, &[u8]), ParseError>
+pub(crate) fn parse_list<T>(data: &[u8], list_length: usize) -> Result<(Vec<T>, &[u8]), ParseError>
 where
     T: TryParse,
 {
@@ -429,7 +429,7 @@ where
 }
 
 /// Parse a list of `u8` from the given data.
-pub fn parse_u8_list(data: &[u8], list_length: usize) -> Result<(&[u8], &[u8]), ParseError> {
+pub(crate) fn parse_u8_list(data: &[u8], list_length: usize) -> Result<(&[u8], &[u8]), ParseError> {
     if data.len() < list_length {
         Err(ParseError::InsufficientData)
     } else {
