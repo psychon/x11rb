@@ -49,7 +49,7 @@ pub(crate) fn generate(module: &xcbgen::defs::Module) -> Vec<Generated> {
     outln!(main_proto_out, "use std::borrow::Cow;");
     outln!(main_proto_out, "use std::convert::TryInto;");
     outln!(main_proto_out, "use crate::errors::ParseError;");
-    outln!(main_proto_out, "use crate::utils::RawFdContainer;");
+    outln!(main_proto_out, "use crate::RawFdContainer;");
     outln!(
         main_proto_out,
         "use crate::x11_utils::{{TryParse, TryParseFd, X11Error, ReplyRequest, ReplyFDsRequest}};"

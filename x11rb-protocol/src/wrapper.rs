@@ -3,10 +3,15 @@
 use super::x11_utils::TryParse;
 use std::marker::PhantomData;
 
-/// Iterator implementation used by `GetPropertyReply`.
+/// Iterator implementation used by [GetPropertyReply].
 ///
-/// This is the actual type returned by `GetPropertyReply::value8`, `GetPropertyReply::value16`,
-/// and `GetPropertyReply::value32`. This type needs to be public due to Rust's visibility rules.
+/// This is the actual type returned by [GetPropertyReply::value8], [GetPropertyReply::value16],
+/// and [GetPropertyReply::value32]. This type needs to be public due to Rust's visibility rules.
+///
+/// [GetPropertyReply]: crate::protocol::xproto::GetPropertyReply
+/// [GetPropertyReply::value8]: crate::protocol::xproto::GetPropertyReply::value8
+/// [GetPropertyReply::value16]: crate::protocol::xproto::GetPropertyReply::value16
+/// [GetPropertyReply::value32]: crate::protocol::xproto::GetPropertyReply::value32
 #[derive(Debug, Clone)]
 pub struct PropertyIterator<'a, T>(&'a [u8], PhantomData<T>);
 

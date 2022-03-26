@@ -621,7 +621,7 @@ impl EventRef {
 
     /// Upgrade this event reference to an event definition.
     ///
-    /// See [`Weak::Upgrade`] for more about what this really does.
+    /// See [`Weak::upgrade`] for more about what this really does.
     pub fn as_event_def(&self) -> EventDef {
         match self {
             Self::Full(event_full_def) => EventDef::Full(event_full_def.upgrade().unwrap()),
@@ -734,7 +734,7 @@ impl ErrorRef {
 
     /// Upgrade this error reference to an error definition.
     ///
-    /// See [`Weak::Upgrade`] for more about what this really does.
+    /// See [`Weak::upgrade`] for more about what this really does.
     pub fn as_error_def(&self) -> ErrorDef {
         match self {
             Self::Full(error_full_def) => ErrorDef::Full(error_full_def.upgrade().unwrap()),

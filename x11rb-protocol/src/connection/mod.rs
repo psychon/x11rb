@@ -1,4 +1,4 @@
-//! A pure-rust implementation of a connection to an X11 server.
+//! Helper types for implementing an X11 client.
 
 use std::collections::VecDeque;
 
@@ -8,7 +8,7 @@ use crate::{DiscardMode, SequenceNumber};
 /// A combination of a buffer and a list of file descriptors.
 pub type BufWithFds = crate::BufWithFds<Vec<u8>>;
 
-/// The raw bytes of an event received by [`RustConnection`] and its sequence number.
+/// The raw bytes of an X11 event and its sequence number.
 pub type RawEventAndSeqNumber = crate::RawEventAndSeqNumber<Vec<u8>>;
 
 /// Information about the reply to an X11 request.
