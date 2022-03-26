@@ -2,6 +2,7 @@
 
 use std::convert::TryInto;
 use std::io::IoSlice;
+use std::mem::drop;
 use std::sync::{Condvar, Mutex, MutexGuard, TryLockError};
 
 use crate::connection::{
@@ -15,11 +16,10 @@ use crate::protocol::xproto::{Setup, SetupRequest, GET_INPUT_FOCUS_REQUEST};
 use crate::utils::RawFdContainer;
 use crate::x11_utils::{ExtensionInformation, Serialize, TryParse, TryParseFd};
 use x11rb_protocol::connection::{Connection as ProtoConnection, PollReply, ReplyFdKind};
+use x11rb_protocol::id_allocator::IdAllocator;
 use x11rb_protocol::{DiscardMode, RawEventAndSeqNumber, SequenceNumber};
 
-mod id_allocator;
 mod packet_reader;
-mod parse_display;
 mod stream;
 mod write_buffer;
 mod xauth;
@@ -69,10 +69,10 @@ pub struct RustConnection<S: Stream = DefaultStream> {
     // lock based only on a atomic variable would be more efficient.
     packet_reader: Mutex<PacketReader>,
     reader_condition: Condvar,
-    id_allocator: Mutex<id_allocator::IdAllocator>,
     setup: Setup,
     extension_manager: Mutex<ExtensionManager>,
     maximum_request_bytes: Mutex<MaxRequestBytes>,
+    id_allocator: Mutex<IdAllocator>,
 }
 
 // Locking rules
@@ -111,8 +111,8 @@ impl RustConnection<DefaultStream> {
     /// If no `dpy_name` is provided, the value from `$DISPLAY` is used.
     pub fn connect(dpy_name: Option<&str>) -> Result<(Self, usize), ConnectError> {
         // Parse display information
-        let parsed_display =
-            parse_display::parse_display(dpy_name).ok_or(ConnectError::DisplayParsingError)?;
+        let parsed_display = x11rb_protocol::parse_display::parse_display(dpy_name)
+            .ok_or(ConnectError::DisplayParsingError)?;
 
         // Establish connection
         let protocol = parsed_display.protocol.as_deref();
@@ -180,8 +180,8 @@ impl<S: Stream> RustConnection<S> {
     }
 
     fn for_inner(stream: S, inner: ProtoConnection, setup: Setup) -> Result<Self, ConnectError> {
-        let allocator =
-            id_allocator::IdAllocator::new(setup.resource_id_base, setup.resource_id_mask)?;
+        let id_allocator = IdAllocator::new(setup.resource_id_base, setup.resource_id_mask)?;
+
         Ok(RustConnection {
             inner: Mutex::new(ConnectionInner {
                 inner,
@@ -190,10 +190,10 @@ impl<S: Stream> RustConnection<S> {
             stream,
             packet_reader: Mutex::new(PacketReader::new()),
             reader_condition: Condvar::new(),
-            id_allocator: Mutex::new(allocator),
             setup,
             extension_manager: Default::default(),
             maximum_request_bytes: Mutex::new(MaxRequestBytes::Unknown),
+            id_allocator: Mutex::new(id_allocator),
         })
     }
 

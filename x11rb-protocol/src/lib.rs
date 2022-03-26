@@ -30,6 +30,8 @@ pub mod connection;
 #[macro_use]
 pub mod x11_utils;
 pub mod errors;
+pub mod id_allocator;
+pub mod parse_display;
 #[rustfmt::skip]
 #[allow(missing_docs)]
 pub mod protocol;

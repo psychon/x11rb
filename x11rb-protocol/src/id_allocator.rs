@@ -1,5 +1,10 @@
-use crate::errors::{ConnectError, ReplyOrIdError};
+//! A mechanism for allocating XIDs.
+
+use crate::errors::ConnectError;
 use crate::protocol::xc_misc::GetXIDRangeReply;
+
+use std::error::Error;
+use std::fmt;
 
 /// An allocator for X11 IDs.
 ///
@@ -10,8 +15,8 @@ use crate::protocol::xc_misc::GetXIDRangeReply;
 /// > The resource-id-mask contains a single contiguous set of bits (at least 18). The client
 /// > allocates resource IDs [..] by choosing a value with only some subset of these bits set and
 /// > ORing it with resource-id-base.
-#[derive(Debug)]
-pub(crate) struct IdAllocator {
+#[derive(Debug, Clone, Copy)]
+pub struct IdAllocator {
     next_id: u32,
     max_id: u32,
     increment: u32,
@@ -22,7 +27,7 @@ impl IdAllocator {
     ///
     /// The arguments should be the `resource_id_base` and `resource_id_mask` values that the X11
     /// server sent in a `Setup` response.
-    pub(crate) fn new(id_base: u32, id_mask: u32) -> Result<Self, ConnectError> {
+    pub fn new(id_base: u32, id_mask: u32) -> Result<Self, ConnectError> {
         if id_mask == 0 {
             return Err(ConnectError::ZeroIdMask);
         }
@@ -36,15 +41,12 @@ impl IdAllocator {
     }
 
     /// Update the available range of IDs based on a GetXIDRangeReply
-    pub(crate) fn update_xid_range(
-        &mut self,
-        xidrange: &GetXIDRangeReply,
-    ) -> Result<(), ReplyOrIdError> {
+    pub fn update_xid_range(&mut self, xidrange: &GetXIDRangeReply) -> Result<(), IdsExhausted> {
         let (start, count) = (xidrange.start_id, xidrange.count);
         // Apparently (0, 1) is how the server signals "I am out of IDs".
         // The second case avoids an underflow below and should never happen.
         if (start, count) == (0, 1) || count == 0 {
-            return Err(ReplyOrIdError::IdsExhausted);
+            return Err(IdsExhausted);
         }
         self.next_id = start;
         self.max_id = start + (count - 1) * self.increment;
@@ -52,7 +54,7 @@ impl IdAllocator {
     }
 
     /// Generate the next ID.
-    pub(crate) fn generate_id(&mut self) -> Option<u32> {
+    pub fn generate_id(&mut self) -> Option<u32> {
         if self.next_id > self.max_id {
             None
         } else {
@@ -63,9 +65,21 @@ impl IdAllocator {
     }
 }
 
+/// The XID range has been exhausted.
+#[derive(Debug, Copy, Clone)]
+pub struct IdsExhausted;
+
+impl fmt::Display for IdsExhausted {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "XID range has been exhausted")
+    }
+}
+
+impl Error for IdsExhausted {}
+
 #[cfg(test)]
 mod test {
-    use super::{GetXIDRangeReply, IdAllocator, ReplyOrIdError};
+    use super::{GetXIDRangeReply, IdAllocator, IdsExhausted};
 
     #[test]
     fn exhaustive() {
@@ -118,8 +132,8 @@ mod test {
 
     #[test]
     fn invalid_update_arg() {
-        fn check_ids_exhausted(arg: &Result<(), ReplyOrIdError>) {
-            if let Err(ReplyOrIdError::IdsExhausted) = arg {
+        fn check_ids_exhausted(arg: &Result<(), IdsExhausted>) {
+            if let Err(IdsExhausted) = arg {
             } else {
                 panic!("Expected IdsExhausted, got {:?}", arg);
             }
