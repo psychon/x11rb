@@ -7,8 +7,8 @@ use std::os::unix::net::UnixStream;
 #[cfg(windows)]
 use std::os::windows::io::{AsRawSocket, IntoRawSocket, RawSocket};
 
-use super::xauth::Family;
 use crate::utils::RawFdContainer;
+use x11rb_protocol::xauth::Family;
 
 /// The kind of operation that one want to poll for.
 #[derive(Debug, Clone, Copy)]
