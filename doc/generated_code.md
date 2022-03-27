@@ -1,8 +1,14 @@
 # Examples of the generated code
 
-This crate uses a code generator to generate rust code for the X11 protocol. You
+This crate uses a code generator to generate Rust code for the X11 protocol. You
 might be curious what the generated code looks like. This document is there to
 answer this question.
+
+There are two crates involved:
+
+- x11rb-protocol will contain most of the resulting code and all examples below
+  are for this crate, unless explicitly mentioned
+- x11rb contains some helper functions to simplify request sending
 
 As you may know, the code generator uses an XML description of the X11 protocol
 from `xcb-proto`. This document will show some examples of the XML description
@@ -25,23 +31,17 @@ The following code is generated at the beginning of a module (example for
 
 #[allow(unused_imports)]
 use std::borrow::Cow;
-use std::convert::TryFrom;
 #[allow(unused_imports)]
 use std::convert::TryInto;
-use std::io::IoSlice;
+use std::convert::TryFrom;
+use crate::errors::ParseError;
+#[allow(unused_imports)]
+use crate::x11_utils::TryIntoUSize;
+use crate::{BufWithFds, PiecewiseBuf};
 #[allow(unused_imports)]
 use crate::utils::{RawFdContainer, pretty_print_bitmask, pretty_print_enum};
 #[allow(unused_imports)]
-use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse, TryParseFd, TryIntoUSize};
-use crate::connection::{BufWithFds, PiecewiseBuf, RequestConnection};
-#[allow(unused_imports)]
-use crate::connection::Connection as X11Connection;
-#[allow(unused_imports)]
-use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
-use crate::cookie::ListFontsWithInfoCookie;
-use crate::errors::{ConnectionError, ParseError};
-#[allow(unused_imports)]
-use crate::errors::ReplyOrIdError;
+use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse, TryParseFd};
 ```
 
 ## XID types
@@ -651,12 +651,13 @@ number represents this error.
 pub const REQUEST_ERROR: u8 = 1;
 ```
 The actual representation of an X11 error can be found in
-[`x11rb::x11_utils::X11Error`](../src/x11_utils.rs).
+[`x11rb::x11_utils::X11Error`](../x11rb-protocol/src/x11_utils.rs).
 
 ## Requests
 
-For requests, we generate an extension trait. Individual requests are available
-on this trait and as global functions. The generic structure looks like this:
+For requests, we generate an extension trait in x11rb. Individual requests are
+available on this trait and as global functions. The generic structure looks
+like this:
 ```rust
 /// Extension trait defining the requests of this extension.
 pub trait ConnectionExt: RequestConnection {
@@ -671,10 +672,10 @@ impl<C: RequestConnection + ?Sized> ConnectionExt for C {}
 <request name="NoOperation" opcode="127" />
 ```
 The request is represented by a structure that contains all of the request's
-fields. This `struct` can be constructed explicitly and then `.send()` to an X11
-server.
+fields. This `struct` can be constructed explicitly and then
+`conn.send_trait_request_without_reply()` to an X11 server.
 
-This code is generated in the module:
+This code is generated in the module in `x11rb-protocol`:
 ```rust
 /// Opcode for the NoOperation request
 pub const NO_OPERATION_REQUEST: u8 = 127;
@@ -682,7 +683,7 @@ pub const NO_OPERATION_REQUEST: u8 = 127;
 pub struct NoOperationRequest;
 impl NoOperationRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize(self) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self) -> BufWithFds<PiecewiseBuf<'static>> {
         let length_so_far = 0;
         let mut request0 = vec![
             NO_OPERATION_REQUEST,
@@ -695,14 +696,6 @@ impl NoOperationRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         (vec![request0.into()], vec![])
-    }
-    pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-    where
-        Conn: RequestConnection + ?Sized,
-    {
-        let (bytes, fds) = self.serialize();
-        let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-        conn.send_request_without_reply(&slices, fds)
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -717,22 +710,30 @@ impl NoOperationRequest {
         )
     }
 }
-```
-A trait is used to map between requests and their corresponding reply. For
-requests without a reply, this maps to the unit type:
-```rust
 impl Request for NoOperationRequest {
-    type Reply = ();
+    const EXTENSION_NAME: Option<&'static str> = None;
+
+    fn serialize(self, _major_opcode: u8) -> BufWithFds<Vec<u8>> {
+        let (bufs, fds) = self.serialize();
+        // Flatten the buffers into a single vector
+        let buf = bufs.iter().flat_map(|buf| buf.iter().copied()).collect();
+        (buf, fds)
+    }
+}
+impl crate::x11_utils::VoidRequest for NoOperationRequest {
 }
 ```
-There is also a helper function for sending the request with a function call.
+In the `x11rb`-crate, a function for sending the request via a function call is
+generated.
 ```rust
 pub fn no_operation<Conn>(conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
     let request0 = NoOperationRequest;
-    request0.send(conn)
+    let (bytes, fds) = request0.serialize();
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    conn.send_request_without_reply(&slices, fds)
 }
 ```
 The request sending function is also available on the extension trait:
@@ -753,7 +754,7 @@ The request sending function is also available on the extension trait:
   </reply>
 </request>
 ```
-There is again a structure generated in the code that represents the request:
+There is again a structure generated in `x11rb-protocol` that represents the request:
 ```rust
 /// Opcode for the GetInputFocus request
 pub const GET_INPUT_FOCUS_REQUEST: u8 = 43;
@@ -761,7 +762,7 @@ pub const GET_INPUT_FOCUS_REQUEST: u8 = 43;
 pub struct GetInputFocusRequest;
 impl GetInputFocusRequest {
     /// Serialize this request into bytes for the provided connection
-    fn serialize(self) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self) -> BufWithFds<PiecewiseBuf<'static>> {
         let length_so_far = 0;
         let mut request0 = vec![
             GET_INPUT_FOCUS_REQUEST,
@@ -774,14 +775,6 @@ impl GetInputFocusRequest {
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         (vec![request0.into()], vec![])
-    }
-    pub fn send<Conn>(self, conn: &Conn) -> Result<Cookie<'_, Conn, GetInputFocusReply>, ConnectionError>
-    where
-        Conn: RequestConnection + ?Sized,
-    {
-        let (bytes, fds) = self.serialize();
-        let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-        conn.send_request_with_reply(&slices, fds)
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -796,22 +789,18 @@ impl GetInputFocusRequest {
         )
     }
 }
-```
-Since this request has a reply, the implementation of the `Request` trait maps
-to that reply:
-```rust
 impl Request for GetInputFocusRequest {
-    type Reply = GetInputFocusReply;
+    const EXTENSION_NAME: Option<&'static str> = None;
+
+    fn serialize(self, _major_opcode: u8) -> BufWithFds<Vec<u8>> {
+        let (bufs, fds) = self.serialize();
+        // Flatten the buffers into a single vector
+        let buf = bufs.iter().flat_map(|buf| buf.iter().copied()).collect();
+        (buf, fds)
+    }
 }
-```
-Of course, there is a function to send the request:
-```rust
-pub fn get_input_focus<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetInputFocusReply>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let request0 = GetInputFocusRequest;
-    request0.send(conn)
+impl crate::x11_utils::ReplyRequest for GetInputFocusRequest {
+    type Reply = GetInputFocusReply;
 }
 ```
 The reply is handled similar to a `struct`:
@@ -841,6 +830,18 @@ impl TryParse for GetInputFocusReply {
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
+}
+```
+In `x11rb`, there is a function to send the request:
+```rust
+pub fn get_input_focus<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetInputFocusReply>, ConnectionError>
+where
+    Conn: RequestConnection + ?Sized,
+{
+    let request0 = GetInputFocusRequest;
+    let (bytes, fds) = request0.serialize();
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    conn.send_request_with_reply(&slices, fds)
 }
 ```
 There is also a function for sending the request in the extension trait:
@@ -988,7 +989,7 @@ pub struct CreateWindowRequest<'input> {
 }
 impl<'input> CreateWindowRequest<'input> {
     /// Serialize this request into bytes for the provided connection
-    fn serialize(self) -> BufWithFds<PiecewiseBuf<'input>> {
+    pub fn serialize(self) -> BufWithFds<PiecewiseBuf<'input>> {
         let length_so_far = 0;
         let depth_bytes = self.depth.serialize();
         let wid_bytes = self.wid.serialize();
@@ -1046,14 +1047,6 @@ impl<'input> CreateWindowRequest<'input> {
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
         (vec![request0.into(), value_list_bytes.into(), padding0.into()], vec![])
     }
-    pub fn send<Conn>(self, conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-    where
-        Conn: RequestConnection + ?Sized,
-    {
-        let (bytes, fds) = self.serialize();
-        let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
-        conn.send_request_without_reply(&slices, fds)
-    }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.major_opcode != CREATE_WINDOW_REQUEST {
@@ -1107,8 +1100,20 @@ impl<'input> CreateWindowRequest<'input> {
     }
 }
 impl<'input> Request for CreateWindowRequest<'input> {
-    type Reply = ();
+    const EXTENSION_NAME: Option<&'static str> = None;
+
+    fn serialize(self, _major_opcode: u8) -> BufWithFds<Vec<u8>> {
+        let (bufs, fds) = self.serialize();
+        // Flatten the buffers into a single vector
+        let buf = bufs.iter().flat_map(|buf| buf.iter().copied()).collect();
+        (buf, fds)
+    }
 }
+impl<'input> crate::x11_utils::VoidRequest for CreateWindowRequest<'input> {
+}
+```
+The code in `x11rb` looks like this:
+```rust
 /// [SNIP]
 pub fn create_window<'c, 'input, Conn>(conn: &'c Conn, depth: u8, wid: Window, parent: Window, x: i16, y: i16, width: u16, height: u16, border_width: u16, class: WindowClass, visual: Visualid, value_list: &'input CreateWindowAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
@@ -1127,7 +1132,9 @@ where
         visual,
         value_list: Cow::Borrowed(value_list),
     };
-    request0.send(conn)
+    let (bytes, fds) = request0.serialize();
+    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    conn.send_request_without_reply(&slices, fds)
 }
 ```
 And this code is in the extension trait:
@@ -1142,7 +1149,8 @@ And this code is in the extension trait:
 ## Common code
 
 The above showed examples for the code that is generated in a single module.
-There is also some common code in [`x11rb::protocol`](../src/protocol/mod.rs).
-This contains `enum`s over all possible requests, replies, errors, and events.
-Via these, you can e.g. get the `sequence_number` contained in an event without
+There is also some common code in
+[`x11rb_protocol::protocol`](../x11rb-protocol/src/protocol/mod.rs).  This
+contains `enum`s over all possible requests, replies, errors, and events.  Via
+these, you can e.g. get the `sequence_number` contained in an event without
 having to write a big `match` over all possible events.
