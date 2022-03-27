@@ -6,24 +6,24 @@ install:
   - cargo -V
   - C:\cygwin\setup-x86.exe --quiet-mode --no-shortcuts --no-startmenu --no-desktop --upgrade-also --root c:\cygwin --packages xorg-server-extra
   # This uses libc::mmap and thus is Unix-only
-  - del examples\shared_memory.rs
+  - del x11rb\examples\shared_memory.rs
   # HACK: Create a fake "shared_memory" because it is referenced in Cargo.toml
-  - copy /b examples\simple_window.rs examples\shared_memory.rs
+  - copy /b x11rb\examples\simple_window.rs x11rb\examples\shared_memory.rs
 
 build: false
 test_script:
   # Build once with the 'allow-unsafe-code' feature to
   # check that this works fine. Use 'check' instead of 'build' because
   # a full build requires the libxcb library
-  - cargo check --verbose --all-targets --features all-extensions,cursor,image
+  - cargo check --verbose --package x11rb --all-targets --features all-extensions,cursor,image
 
   # Also build once without any feature
-  - cargo check --verbose --all-targets
+  - cargo check --verbose --package x11rb --all-targets
 
   # We do not have libxcb and thus cannot build XCBConnection
-  - cargo build --verbose --all-targets --features all-extensions,cursor,image
-  - cargo test --verbose --features all-extensions,cursor,image
-  - cargo doc --verbose --features all-extensions,cursor,image
+  - cargo build --verbose --package x11rb --all-targets --features all-extensions,cursor,image
+  - cargo test --verbose --package x11rb --features all-extensions,cursor,image
+  - cargo doc --verbose --package x11rb --features all-extensions,cursor,image
 
   # Start an X11 server in the background
   - ps: $Server = Start-Process -PassThru -FilePath C:\cygwin\bin\Xvfb.exe -ArgumentList "-listen tcp :0"
@@ -35,8 +35,8 @@ test_script:
   # the first time I touched PowerShell and I hope not to touch it again any
   # time soon. Requirements include "must fail if the command fails".
   - ps: >-
-      Get-ChildItem examples | Where {$_.extension -eq ".rs"} | Where {$_.BaseName -ne "tutorial"} | Where {$_.BaseName -ne "shared_memory"} | Foreach-Object {
-        $cmd = "cargo run --verbose --features all-extensions,cursor,image --example $($_.BaseName) 2>&1"
+      Get-ChildItem x11rb\examples | Where {$_.extension -eq ".rs"} | Where {$_.BaseName -ne "tutorial"} | Where {$_.BaseName -ne "shared_memory"} | Foreach-Object {
+        $cmd = "cargo run --verbose --package x11rb --features all-extensions,cursor,image --example $($_.BaseName) 2>&1"
         Write-Host -ForegroundColor Yellow $cmd
         $backupErrorActionPreference = $script:ErrorActionPreference
         $script:ErrorActionPreference = "Continue"

@@ -7,7 +7,7 @@ publish = false
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies.x11rb]
-path = "../"
+path = "../x11rb"
 features = ["allow-unsafe-code", "render"]
 
 [dependencies.cairo-rs]

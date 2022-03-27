@@ -20,8 +20,8 @@ jobs:
       with:
         profile: minimal
         toolchain: stable
-    - name: Clear src/protocol directory
-      run: rm src/protocol/*
+    - name: Clear src/protocol directories in x11rb and x11rb-protocol
+      run: rm -rf x11rb/src/protocol/ x11rb-protocol/src/protocol/
     - name: Run code generator
       run: make
     - name: Check for changes
@@ -94,25 +94,23 @@ jobs:
         toolchain: ${{ matrix.rust }}
         override: true
 
-    - name: Set ALL_FEATURES
-      run: echo "ALL_FEATURES=$MOST_FEATURES allow-unsafe-code dl-libxcb" >> $GITHUB_ENV
-
     # build
     - name: cargo build with all features
-      run: cargo build --verbose --all-targets --features "$ALL_FEATURES"
+      run: cargo build --workspace --verbose --all-targets --all-features
 
     # test
     - name: cargo test with all features
-      run: cargo test --verbose --workspace --features "$ALL_FEATURES"
+      run: cargo test --workspace --verbose --all-features
 
     # doc
     - name: cargo doc with all features
-      run: cargo doc --verbose --features "$ALL_FEATURES"
+      run: cargo doc --workspace --verbose --all-features
 
     # run examples
     - name: Prepare run examples
       run: |
           echo '#!/bin/bash
+              cd x11rb || exit 1
               for example in examples/*.rs; do
                   example=${example/examples\//}
                   example=${example/.rs/}
@@ -145,4 +143,4 @@ jobs:
     - name: Install cross
       run: cargo install cross --force
     - name: cargo test
-      run: cross test --target "$CROSS_TARGET" --verbose --features "$MOST_FEATURES"
+      run: cross test --target "$CROSS_TARGET" --verbose --package x11rb --features "$MOST_FEATURES"
