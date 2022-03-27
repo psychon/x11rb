@@ -8,22 +8,32 @@ const MIT_MAGIC_COOKIE_1: &[u8] = b"MIT-MAGIC-COOKIE-1";
 
 /// A family describes how to interpret some bytes as an address in an `AuthEntry`.
 ///
-/// Compared to [`x11rb_protocol::protocol::xproto::Family`], this is a `u16` and not an `u8`.
+/// Compared to [`x11rb_protocol::protocol::xproto::Family`], this is a `u16` and not an `u8` since
+/// that's what is used in `~/.Xauthority` files.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub(crate) struct Family(u16);
+pub struct Family(u16);
 
-#[allow(dead_code)] // Some of these constants are unused, but still serve as documentation
 impl Family {
-    pub(crate) const INTERNET: Self = Self(0);
-    pub(crate) const DEC_NET: Self = Self(1);
-    pub(crate) const CHAOS: Self = Self(2);
-    pub(crate) const SERVER_INTERPRETED: Self = Self(5);
-    pub(crate) const INTERNET6: Self = Self(6);
-    pub(crate) const WILD: Self = Self(65535);
-    pub(crate) const LOCAL: Self = Self(256);
-    pub(crate) const NETNAME: Self = Self(254);
-    pub(crate) const KRB5_PRINCIPAL: Self = Self(253);
-    pub(crate) const LOCAL_HOST: Self = Self(252);
+    /// IPv4 connection to the server
+    pub const INTERNET: Self = Self(0);
+    /// DECnet
+    pub const DEC_NET: Self = Self(1);
+    /// Chaosnet connection
+    pub const CHAOS: Self = Self(2);
+    /// Family without predefined meaning, but interpreted by the server, for example a user name
+    pub const SERVER_INTERPRETED: Self = Self(5);
+    /// IPv6 connection to the server
+    pub const INTERNET6: Self = Self(6);
+    /// Wildcard matching any protocol family
+    pub const WILD: Self = Self(65535);
+    /// For local non-net authentication
+    pub const LOCAL: Self = Self(256);
+    /// TODO: No idea what this means exactly
+    pub const NETNAME: Self = Self(254);
+    /// Kerberos 5 principal name
+    pub const KRB5_PRINCIPAL: Self = Self(253);
+    /// For local non-net authentication
+    pub const LOCAL_HOST: Self = Self(252);
 }
 
 impl From<X11Family> for Family {
@@ -41,10 +51,16 @@ impl From<u16> for Family {
 /// A single entry of an `.Xauthority` file.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub(crate) struct AuthEntry {
+    /// The protocol family to which the entry applies
     family: Family,
+    /// The address of the peer in a family-specific format
     address: Vec<u8>,
+    /// The display number
     number: Vec<u8>,
+    /// The name of the authentication method to use for the X11 server described by the previous
+    /// fields.
     name: Vec<u8>,
+    /// Extra data for the authentication method.
     data: Vec<u8>,
 }
 
@@ -223,18 +239,14 @@ pub(crate) type AuthInfo = (Vec<u8>, Vec<u8>);
 ///
 /// If successful, this function returns that can be written to the X11 server as authorization
 /// protocol name and data, respectively.
-pub(crate) fn get_auth(
-    family: Family,
-    address: &[u8],
-    display: u16,
-) -> Result<Option<AuthInfo>, Error> {
+pub fn get_auth(family: Family, address: &[u8], display: u16) -> Result<Option<AuthInfo>, Error> {
     match file::XAuthorityEntries::new()? {
         None => Ok(None),
         Some(entries) => get_auth_impl(entries, family, address, display),
     }
 }
 
-pub(crate) fn get_auth_impl(
+fn get_auth_impl(
     entries: impl Iterator<Item = Result<AuthEntry, Error>>,
     family: Family,
     address: &[u8],

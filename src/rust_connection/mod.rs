@@ -17,12 +17,11 @@ use crate::utils::RawFdContainer;
 use crate::x11_utils::{ExtensionInformation, Serialize, TryParse, TryParseFd};
 use x11rb_protocol::connection::{Connection as ProtoConnection, PollReply, ReplyFdKind};
 use x11rb_protocol::id_allocator::IdAllocator;
-use x11rb_protocol::{DiscardMode, RawEventAndSeqNumber, SequenceNumber};
+use x11rb_protocol::{xauth::get_auth, DiscardMode, RawEventAndSeqNumber, SequenceNumber};
 
 mod packet_reader;
 mod stream;
 mod write_buffer;
-mod xauth;
 
 use packet_reader::PacketReader;
 pub use stream::{DefaultStream, PollMode, Stream};
@@ -121,7 +120,7 @@ impl RustConnection<DefaultStream> {
         let screen = parsed_display.screen.into();
 
         let (family, address) = stream.peer_addr()?;
-        let (auth_name, auth_data) = xauth::get_auth(family, &address, parsed_display.display)
+        let (auth_name, auth_data) = get_auth(family, &address, parsed_display.display)
             // Ignore all errors while determining auth; instead we just try without auth info.
             .unwrap_or(None)
             .unwrap_or_else(|| (Vec::new(), Vec::new()));

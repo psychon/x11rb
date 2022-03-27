@@ -43,6 +43,7 @@ pub mod parse_display;
 pub mod protocol;
 mod utils;
 pub mod wrapper;
+pub mod xauth;
 
 pub use utils::RawFdContainer;
 
