@@ -32,6 +32,7 @@
 
 use std::borrow::Cow;
 
+pub mod connect;
 pub mod connection;
 #[macro_use]
 pub mod x11_utils;
