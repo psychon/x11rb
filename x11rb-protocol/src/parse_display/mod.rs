@@ -1,5 +1,8 @@
 //! Utilities for parsing X11 display strings.
 
+mod connect_instruction;
+pub use connect_instruction::ConnectAddress;
+
 /// A parsed X11 display string.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ParsedDisplay {
@@ -18,6 +21,14 @@ pub struct ParsedDisplay {
     /// The index of the screen that we are using as the
     /// default screen.
     pub screen: u16,
+}
+
+impl ParsedDisplay {
+    /// Get an iterator over `ConnectAddress`es from this parsed display for connecting
+    /// to the server.
+    pub fn connect_instruction(&self) -> impl Iterator<Item = ConnectAddress<'_>> {
+        connect_instruction::connect_addresses(self)
+    }
 }
 
 /// Parse an X11 display string.

@@ -113,23 +113,41 @@ impl RustConnection<DefaultStream> {
         // Parse display information
         let parsed_display = x11rb_protocol::parse_display::parse_display(dpy_name)
             .ok_or(ConnectError::DisplayParsingError)?;
-
-        // Establish connection
-        let protocol = parsed_display.protocol.as_deref();
-        let stream =
-            DefaultStream::connect(&*parsed_display.host, protocol, parsed_display.display)?;
         let screen = parsed_display.screen.into();
 
-        let (family, address) = stream.peer_addr()?;
-        let (auth_name, auth_data) = get_auth(family, &address, parsed_display.display)
-            // Ignore all errors while determining auth; instead we just try without auth info.
-            .unwrap_or(None)
-            .unwrap_or_else(|| (Vec::new(), Vec::new()));
+        // Establish connection by iterating over ConnectAddresses until we find one that
+        // works.
+        let mut error = None;
+        for addr in parsed_display.connect_instruction() {
+            match DefaultStream::connect(addr) {
+                Ok(stream) => {
+                    // we found a stream, get auth information
+                    let (family, address) = stream.peer_addr()?;
+                    let (auth_name, auth_data) = get_auth(family, &address, parsed_display.display)
+                        // Ignore all errors while determining auth; instead we just try without auth info.
+                        .unwrap_or(None)
+                        .unwrap_or_else(|| (Vec::new(), Vec::new()));
 
-        Ok((
-            Self::connect_to_stream_with_auth_info(stream, screen, auth_name, auth_data)?,
-            screen,
-        ))
+                    // finish connecting to server
+                    return Ok((
+                        Self::connect_to_stream_with_auth_info(
+                            stream, screen, auth_name, auth_data,
+                        )?,
+                        screen,
+                    ));
+                }
+                Err(e) => {
+                    error = Some(e);
+                    continue;
+                }
+            }
+        }
+
+        // none of the addresses worked
+        Err(match error {
+            Some(e) => ConnectError::IoError(e),
+            None => ConnectError::DisplayParsingError,
+        })
     }
 }
 
