@@ -112,6 +112,15 @@ pub enum ConnectError {
 
     /// The server rejected the connection with a `SetupFailed` message.
     SetupFailed(SetupFailed),
+
+    /// The client did not receive enough data from the server to complete
+    /// the handshake.
+    Incomplete {
+        /// The number of bytes that were expected.
+        expected: usize,
+        /// The number of bytes that were received.
+        received: usize,
+    },
 }
 
 impl std::error::Error for ConnectError {}
@@ -140,6 +149,11 @@ impl std::fmt::Display for ConnectError {
             ConnectError::SetupAuthenticate(err) => {
                 display(f, "X11 authentication failed", &err.reason)
             }
+            ConnectError::Incomplete { expected, received } => write!(
+                f,
+                "Not enough data received to complete the handshake. Expected {}, received {}",
+                expected, received
+            ),
         }
     }
 }

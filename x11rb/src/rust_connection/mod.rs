@@ -12,9 +12,10 @@ use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
 pub use crate::errors::{ConnectError, ConnectionError, ParseError, ReplyError, ReplyOrIdError};
 use crate::extension_manager::ExtensionManager;
 use crate::protocol::bigreq::{ConnectionExt as _, EnableReply};
-use crate::protocol::xproto::{Setup, SetupRequest, GET_INPUT_FOCUS_REQUEST};
+use crate::protocol::xproto::{Setup, GET_INPUT_FOCUS_REQUEST};
 use crate::utils::RawFdContainer;
-use crate::x11_utils::{ExtensionInformation, Serialize, TryParse, TryParseFd};
+use crate::x11_utils::{ExtensionInformation, TryParse, TryParseFd};
+use x11rb_protocol::connect::Connect;
 use x11rb_protocol::connection::{Connection as ProtoConnection, PollReply, ReplyFdKind};
 use x11rb_protocol::id_allocator::IdAllocator;
 use x11rb_protocol::{xauth::get_auth, DiscardMode, RawEventAndSeqNumber, SequenceNumber};
@@ -157,8 +158,55 @@ impl<S: Stream> RustConnection<S> {
         auth_name: Vec<u8>,
         auth_data: Vec<u8>,
     ) -> Result<Self, ConnectError> {
-        write_setup(&stream, auth_name, auth_data)?;
-        let setup = read_setup(&stream)?;
+        let (mut connect, setup_request) = Connect::with_authorization(auth_name, auth_data);
+
+        // write the connect() setup request
+        let mut nwritten = 0;
+        let mut fds = vec![];
+
+        while nwritten != setup_request.len() {
+            stream.poll(PollMode::Writable)?;
+            // poll returned successfully, so the stream is writable.
+            match stream.write(&setup_request[nwritten..], &mut fds) {
+                Ok(0) => {
+                    return Err(std::io::Error::new(
+                        std::io::ErrorKind::WriteZero,
+                        "failed to write whole buffer",
+                    )
+                    .into())
+                }
+                Ok(n) => nwritten += n,
+                // Spurious wakeup from poll, try again
+                Err(ref e) if e.kind() == std::io::ErrorKind::WouldBlock => {}
+                Err(e) => return Err(e.into()),
+            }
+        }
+
+        // read in the setup
+        loop {
+            stream.poll(PollMode::Readable)?;
+            let adv = match stream.read(connect.buffer(), &mut fds) {
+                Ok(0) => {
+                    return Err(std::io::Error::new(
+                        std::io::ErrorKind::UnexpectedEof,
+                        "failed to read whole buffer",
+                    )
+                    .into())
+                }
+                Ok(n) => n,
+                // Spurious wakeup from poll, try again
+                Err(ref e) if e.kind() == std::io::ErrorKind::WouldBlock => continue,
+                Err(e) => return Err(e.into()),
+            };
+
+            // advance the internal buffer
+            if connect.advance(adv) {
+                break;
+            }
+        }
+
+        // resolve the setup
+        let setup = connect.into_setup()?;
 
         // Check that we got a valid screen number
         if screen >= setup.roots.len() {
@@ -680,88 +728,6 @@ impl<S: Stream> Connection for RustConnection<S> {
     }
 }
 
-#[cfg(target_endian = "little")]
-fn byte_order() -> u8 {
-    0x6c
-}
-
-#[cfg(target_endian = "big")]
-fn byte_order() -> u8 {
-    0x42
-}
-
-/// Send a `SetupRequest` to the X11 server.
-fn write_setup(
-    write: &impl Stream,
-    auth_name: Vec<u8>,
-    auth_data: Vec<u8>,
-) -> Result<(), std::io::Error> {
-    let request = SetupRequest {
-        byte_order: byte_order(),
-        protocol_major_version: 11,
-        protocol_minor_version: 0,
-        authorization_protocol_name: auth_name,
-        authorization_protocol_data: auth_data,
-    };
-    // Write the data
-    let data = request.serialize();
-    let mut nwritten = 0;
-    while nwritten != data.len() {
-        write.poll(PollMode::Writable)?;
-        // poll returned successfully, so the stream is writable.
-        match write.write(&data[nwritten..], &mut Vec::new()) {
-            Ok(0) => {
-                return Err(std::io::Error::new(
-                    std::io::ErrorKind::WriteZero,
-                    "failed to write whole buffer",
-                ))
-            }
-            Ok(n) => nwritten += n,
-            // Spurious wakeup from poll, try again
-            Err(ref e) if e.kind() == std::io::ErrorKind::WouldBlock => {}
-            Err(e) => return Err(e),
-        }
-    }
-    Ok(())
-}
-
-/// Read a `Setup` from the X11 server.
-///
-/// If the server sends a `SetupFailed` or `SetupAuthenticate` packet, these will be returned
-/// as errors.
-fn read_setup(stream: &impl Stream) -> Result<Setup, ConnectError> {
-    let mut fds = Vec::new();
-    let mut setup = vec![0; 8];
-    stream.read_exact(&mut setup, &mut fds)?;
-    let extra_length = usize::from(u16::from_ne_bytes([setup[6], setup[7]])) * 4;
-    // Use `Vec::reserve_exact` because this will be the final
-    // length of the vector.
-    setup.reserve_exact(extra_length);
-    setup.resize(8 + extra_length, 0);
-    stream.read_exact(&mut setup[8..], &mut fds)?;
-    if !fds.is_empty() {
-        return Err(std::io::Error::new(
-            std::io::ErrorKind::Other,
-            "unexpectedly received FDs in connection setup",
-        )
-        .into());
-    }
-    match setup[0] {
-        // 0 is SetupFailed
-        0 => Err(ConnectError::SetupFailed(
-            TryParse::try_parse(&setup[..])?.0,
-        )),
-        // Success
-        1 => Ok(Setup::try_parse(&setup[..])?.0),
-        // 2 is SetupAuthenticate
-        2 => Err(ConnectError::SetupAuthenticate(
-            TryParse::try_parse(&setup[..])?.0,
-        )),
-        // Uhm... no other cases are defined
-        _ => Err(ParseError::InvalidValue.into()),
-    }
-}
-
 /// Call `notify_all` on a condition variable when dropped.
 #[derive(Debug)]
 struct NotifyOnDrop<'a>(&'a Condvar);
@@ -769,110 +735,5 @@ struct NotifyOnDrop<'a>(&'a Condvar);
 impl Drop for NotifyOnDrop<'_> {
     fn drop(&mut self) {
         self.0.notify_all();
-    }
-}
-
-#[cfg(test)]
-mod test {
-    use std::cell::RefCell;
-    use std::io::{Read, Result, Write};
-
-    use super::{read_setup, PollMode, Stream};
-    use crate::errors::ConnectError;
-    use crate::protocol::xproto::{ImageOrder, Setup, SetupAuthenticate, SetupFailed};
-    use crate::utils::RawFdContainer;
-    use crate::x11_utils::Serialize;
-
-    struct SliceStream<'a, 'b> {
-        read_slice: RefCell<&'a [u8]>,
-        write_slice: RefCell<&'b mut [u8]>,
-    }
-
-    impl<'a, 'b> Stream for SliceStream<'a, 'b> {
-        fn poll(&self, _mode: PollMode) -> Result<()> {
-            Ok(())
-        }
-
-        fn read(&self, buf: &mut [u8], _fd_storage: &mut Vec<RawFdContainer>) -> Result<usize> {
-            self.read_slice.borrow_mut().read(buf)
-        }
-
-        fn write(&self, buf: &[u8], fds: &mut Vec<RawFdContainer>) -> Result<usize> {
-            assert!(fds.is_empty());
-            self.write_slice.borrow_mut().write(buf)
-        }
-    }
-
-    #[test]
-    fn read_setup_success() {
-        let mut setup = Setup {
-            status: 1,
-            protocol_major_version: 11,
-            protocol_minor_version: 0,
-            length: 0,
-            release_number: 0,
-            resource_id_base: 0,
-            resource_id_mask: 0,
-            motion_buffer_size: 0,
-            maximum_request_length: 0,
-            image_byte_order: ImageOrder::LSB_FIRST,
-            bitmap_format_bit_order: ImageOrder::LSB_FIRST,
-            bitmap_format_scanline_unit: 0,
-            bitmap_format_scanline_pad: 0,
-            min_keycode: 0,
-            max_keycode: 0,
-            vendor: vec![],
-            pixmap_formats: vec![],
-            roots: vec![],
-        };
-        setup.length = ((setup.serialize().len() - 8) / 4) as _;
-        let setup_bytes = setup.serialize();
-
-        let stream = SliceStream {
-            read_slice: RefCell::new(&setup_bytes),
-            write_slice: RefCell::new(&mut []),
-        };
-        let read = read_setup(&stream);
-        assert_eq!(setup, read.unwrap());
-    }
-
-    #[test]
-    fn read_setup_failed() {
-        let mut setup = SetupFailed {
-            status: 0,
-            protocol_major_version: 11,
-            protocol_minor_version: 0,
-            length: 0,
-            reason: b"whatever".to_vec(),
-        };
-        setup.length = ((setup.serialize().len() - 8) / 4) as _;
-        let setup_bytes = setup.serialize();
-
-        let stream = SliceStream {
-            read_slice: RefCell::new(&setup_bytes),
-            write_slice: RefCell::new(&mut []),
-        };
-        match read_setup(&stream) {
-            Err(ConnectError::SetupFailed(read)) => assert_eq!(setup, read),
-            value => panic!("Unexpected value {:?}", value),
-        }
-    }
-
-    #[test]
-    fn read_setup_authenticate() {
-        let setup = SetupAuthenticate {
-            status: 2,
-            reason: b"12345678".to_vec(),
-        };
-        let setup_bytes = setup.serialize();
-
-        let stream = SliceStream {
-            read_slice: RefCell::new(&setup_bytes),
-            write_slice: RefCell::new(&mut []),
-        };
-        match read_setup(&stream) {
-            Err(ConnectError::SetupAuthenticate(read)) => assert_eq!(setup, read),
-            value => panic!("Unexpected value {:?}", value),
-        }
     }
 }
