@@ -38,6 +38,7 @@ pub mod connection;
 pub mod x11_utils;
 pub mod errors;
 pub mod id_allocator;
+pub mod packet_reader;
 pub mod parse_display;
 #[rustfmt::skip]
 #[allow(missing_docs)]
