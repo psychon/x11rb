@@ -57,7 +57,10 @@ pub fn parse_request_header(
 /// ```
 /// # use x11rb::atom_manager;
 /// atom_manager! {
-///     pub AtomCollection: AtomCollectionCookie {
+///     /// A collection of Atoms.
+///     pub AtomCollection:
+///     /// A handle to a response from the X11 server.
+///     AtomCollectionCookie {
 ///         _NET_WM_NAME,
 ///         _NET_WM_ICON,
 ///         ATOM_WITH_SPACES: b"ATOM WITH SPACES",
@@ -72,6 +75,7 @@ pub fn parse_request_header(
 /// # use x11rb::cookie::Cookie;
 /// #[allow(non_snake_case)]
 /// #[derive(Debug, Clone, Copy)]
+/// /// A collection of Atoms.
 /// pub struct AtomCollection {
 ///     pub _NET_WM_NAME: Atom,
 ///     pub _NET_WM_ICON: Atom,
@@ -81,6 +85,7 @@ pub fn parse_request_header(
 ///
 /// #[allow(non_snake_case)]
 /// #[derive(Debug)]
+/// /// A handle to a response from the X11 server.
 /// struct AtomCollectionCookie<'c, C: ConnectionExt> {
 ///     phantom: std::marker::PhantomData<&'c C>,
 ///     _NET_WM_NAME: Cookie<'c, C, InternAtomReply>,
@@ -120,13 +125,17 @@ pub fn parse_request_header(
 #[macro_export]
 macro_rules! atom_manager {
     {
-        $vis:vis $struct_name:ident: $cookie_name:ident {
+        $(#[$struct_meta:meta])*
+        $vis:vis $struct_name:ident:
+        $(#[$cookie_meta:meta])*
+        $cookie_name:ident {
             $($field_name:ident$(: $atom_value:expr)?,)*
         }
     } => {
         // Cookie version
         #[allow(non_snake_case)]
         #[derive(Debug)]
+        $(#[$cookie_meta])*
         $vis struct $cookie_name<'a, C: $crate::protocol::xproto::ConnectionExt> {
             phantom: std::marker::PhantomData<&'a C>,
             $(
@@ -137,6 +146,7 @@ macro_rules! atom_manager {
         // Replies
         #[allow(non_snake_case)]
         #[derive(Debug, Clone, Copy)]
+        $(#[$struct_meta])*
         $vis struct $struct_name {
             $(
                 $vis $field_name: $crate::protocol::xproto::Atom,
