@@ -32,7 +32,7 @@ pub const X11_EXTENSION_NAME: &str = "XINERAMA";
 /// send the maximum version of the extension that you need.
 pub const X11_XML_VERSION: (u32, u32) = (1, 1);
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ScreenInfo {
     pub x_org: i16,
     pub y_org: i16,
@@ -78,7 +78,7 @@ impl Serialize for ScreenInfo {
 
 /// Opcode for the QueryVersion request
 pub const QUERY_VERSION_REQUEST: u8 = 0;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct QueryVersionRequest {
     pub major: u8,
     pub minor: u8,
@@ -133,7 +133,7 @@ impl crate::x11_utils::ReplyRequest for QueryVersionRequest {
     type Reply = QueryVersionReply;
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct QueryVersionReply {
     pub sequence: u16,
     pub length: u32,
@@ -162,7 +162,7 @@ impl TryParse for QueryVersionReply {
 
 /// Opcode for the GetState request
 pub const GET_STATE_REQUEST: u8 = 1;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetStateRequest {
     pub window: xproto::Window,
 }
@@ -213,7 +213,7 @@ impl crate::x11_utils::ReplyRequest for GetStateRequest {
     type Reply = GetStateReply;
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetStateReply {
     pub state: u8,
     pub sequence: u16,
@@ -241,7 +241,7 @@ impl TryParse for GetStateReply {
 
 /// Opcode for the GetScreenCount request
 pub const GET_SCREEN_COUNT_REQUEST: u8 = 2;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetScreenCountRequest {
     pub window: xproto::Window,
 }
@@ -292,7 +292,7 @@ impl crate::x11_utils::ReplyRequest for GetScreenCountRequest {
     type Reply = GetScreenCountReply;
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetScreenCountReply {
     pub screen_count: u8,
     pub sequence: u16,
@@ -320,7 +320,7 @@ impl TryParse for GetScreenCountReply {
 
 /// Opcode for the GetScreenSize request
 pub const GET_SCREEN_SIZE_REQUEST: u8 = 3;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetScreenSizeRequest {
     pub window: xproto::Window,
     pub screen: u32,
@@ -379,7 +379,7 @@ impl crate::x11_utils::ReplyRequest for GetScreenSizeRequest {
     type Reply = GetScreenSizeReply;
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetScreenSizeReply {
     pub sequence: u16,
     pub length: u32,
@@ -412,7 +412,7 @@ impl TryParse for GetScreenSizeReply {
 
 /// Opcode for the IsActive request
 pub const IS_ACTIVE_REQUEST: u8 = 4;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct IsActiveRequest;
 impl IsActiveRequest {
     /// Serialize this request into bytes for the provided connection
@@ -454,7 +454,7 @@ impl crate::x11_utils::ReplyRequest for IsActiveRequest {
     type Reply = IsActiveReply;
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct IsActiveReply {
     pub sequence: u16,
     pub length: u32,
@@ -481,7 +481,7 @@ impl TryParse for IsActiveReply {
 
 /// Opcode for the QueryScreens request
 pub const QUERY_SCREENS_REQUEST: u8 = 5;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct QueryScreensRequest;
 impl QueryScreensRequest {
     /// Serialize this request into bytes for the provided connection
@@ -523,7 +523,7 @@ impl crate::x11_utils::ReplyRequest for QueryScreensRequest {
     type Reply = QueryScreensReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct QueryScreensReply {
     pub sequence: u16,
     pub length: u32,

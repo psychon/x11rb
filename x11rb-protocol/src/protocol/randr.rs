@@ -56,7 +56,7 @@ pub const BAD_MODE_ERROR: u8 = 2;
 /// Opcode for the BadProvider error
 pub const BAD_PROVIDER_ERROR: u8 = 3;
 
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Rotation(u8);
 impl Rotation {
     pub const ROTATE0: Self = Self(1 << 0);
@@ -123,7 +123,7 @@ impl std::fmt::Debug for Rotation  {
 }
 bitmask_binop!(Rotation, u8);
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ScreenSize {
     pub width: u16,
     pub height: u16,
@@ -167,7 +167,7 @@ impl Serialize for ScreenSize {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct RefreshRates {
     pub rates: Vec<u16>,
 }
@@ -210,7 +210,7 @@ impl RefreshRates {
 
 /// Opcode for the QueryVersion request
 pub const QUERY_VERSION_REQUEST: u8 = 0;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct QueryVersionRequest {
     pub major_version: u32,
     pub minor_version: u32,
@@ -269,7 +269,7 @@ impl crate::x11_utils::ReplyRequest for QueryVersionRequest {
     type Reply = QueryVersionReply;
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct QueryVersionReply {
     pub sequence: u16,
     pub length: u32,
@@ -297,7 +297,7 @@ impl TryParse for QueryVersionReply {
     }
 }
 
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct SetConfig(u8);
 impl SetConfig {
     pub const SUCCESS: Self = Self(0);
@@ -361,7 +361,7 @@ impl std::fmt::Debug for SetConfig  {
 
 /// Opcode for the SetScreenConfig request
 pub const SET_SCREEN_CONFIG_REQUEST: u8 = 2;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct SetScreenConfigRequest {
     pub window: xproto::Window,
     pub timestamp: xproto::Timestamp,
@@ -449,7 +449,7 @@ impl crate::x11_utils::ReplyRequest for SetScreenConfigRequest {
     type Reply = SetScreenConfigReply;
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct SetScreenConfigReply {
     pub status: SetConfig,
     pub sequence: u16,
@@ -484,7 +484,7 @@ impl TryParse for SetScreenConfigReply {
     }
 }
 
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct NotifyMask(u8);
 impl NotifyMask {
     pub const SCREEN_CHANGE: Self = Self(1 << 0);
@@ -557,7 +557,7 @@ bitmask_binop!(NotifyMask, u8);
 
 /// Opcode for the SelectInput request
 pub const SELECT_INPUT_REQUEST: u8 = 4;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct SelectInputRequest {
     pub window: xproto::Window,
     pub enable: u16,
@@ -618,7 +618,7 @@ impl crate::x11_utils::VoidRequest for SelectInputRequest {
 
 /// Opcode for the GetScreenInfo request
 pub const GET_SCREEN_INFO_REQUEST: u8 = 5;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetScreenInfoRequest {
     pub window: xproto::Window,
 }
@@ -669,7 +669,7 @@ impl crate::x11_utils::ReplyRequest for GetScreenInfoRequest {
     type Reply = GetScreenInfoReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetScreenInfoReply {
     pub rotations: u8,
     pub sequence: u16,
@@ -730,7 +730,7 @@ impl GetScreenInfoReply {
 
 /// Opcode for the GetScreenSizeRange request
 pub const GET_SCREEN_SIZE_RANGE_REQUEST: u8 = 6;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetScreenSizeRangeRequest {
     pub window: xproto::Window,
 }
@@ -781,7 +781,7 @@ impl crate::x11_utils::ReplyRequest for GetScreenSizeRangeRequest {
     type Reply = GetScreenSizeRangeReply;
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetScreenSizeRangeReply {
     pub sequence: u16,
     pub length: u32,
@@ -815,7 +815,7 @@ impl TryParse for GetScreenSizeRangeReply {
 
 /// Opcode for the SetScreenSize request
 pub const SET_SCREEN_SIZE_REQUEST: u8 = 7;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct SetScreenSizeRequest {
     pub window: xproto::Window,
     pub width: u16,
@@ -893,7 +893,7 @@ impl Request for SetScreenSizeRequest {
 impl crate::x11_utils::VoidRequest for SetScreenSizeRequest {
 }
 
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ModeFlag(u16);
 impl ModeFlag {
     pub const HSYNC_POSITIVE: Self = Self(1 << 0);
@@ -970,7 +970,7 @@ impl std::fmt::Debug for ModeFlag  {
 }
 bitmask_binop!(ModeFlag, u16);
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ModeInfo {
     pub id: u32,
     pub width: u16,
@@ -1076,7 +1076,7 @@ impl Serialize for ModeInfo {
 
 /// Opcode for the GetScreenResources request
 pub const GET_SCREEN_RESOURCES_REQUEST: u8 = 8;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetScreenResourcesRequest {
     pub window: xproto::Window,
 }
@@ -1127,7 +1127,7 @@ impl crate::x11_utils::ReplyRequest for GetScreenResourcesRequest {
     type Reply = GetScreenResourcesReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetScreenResourcesReply {
     pub sequence: u16,
     pub length: u32,
@@ -1222,7 +1222,7 @@ impl GetScreenResourcesReply {
     }
 }
 
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Connection(u8);
 impl Connection {
     pub const CONNECTED: Self = Self(0);
@@ -1284,7 +1284,7 @@ impl std::fmt::Debug for Connection  {
 
 /// Opcode for the GetOutputInfo request
 pub const GET_OUTPUT_INFO_REQUEST: u8 = 9;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetOutputInfoRequest {
     pub output: Output,
     pub config_timestamp: xproto::Timestamp,
@@ -1343,7 +1343,7 @@ impl crate::x11_utils::ReplyRequest for GetOutputInfoRequest {
     type Reply = GetOutputInfoReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetOutputInfoReply {
     pub status: SetConfig,
     pub sequence: u16,
@@ -1453,7 +1453,7 @@ impl GetOutputInfoReply {
 
 /// Opcode for the ListOutputProperties request
 pub const LIST_OUTPUT_PROPERTIES_REQUEST: u8 = 10;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ListOutputPropertiesRequest {
     pub output: Output,
 }
@@ -1504,7 +1504,7 @@ impl crate::x11_utils::ReplyRequest for ListOutputPropertiesRequest {
     type Reply = ListOutputPropertiesReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ListOutputPropertiesReply {
     pub sequence: u16,
     pub length: u32,
@@ -1548,7 +1548,7 @@ impl ListOutputPropertiesReply {
 
 /// Opcode for the QueryOutputProperty request
 pub const QUERY_OUTPUT_PROPERTY_REQUEST: u8 = 11;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct QueryOutputPropertyRequest {
     pub output: Output,
     pub property: xproto::Atom,
@@ -1607,7 +1607,7 @@ impl crate::x11_utils::ReplyRequest for QueryOutputPropertyRequest {
     type Reply = QueryOutputPropertyReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct QueryOutputPropertyReply {
     pub sequence: u16,
     pub pending: bool,
@@ -1655,7 +1655,7 @@ impl QueryOutputPropertyReply {
 
 /// Opcode for the ConfigureOutputProperty request
 pub const CONFIGURE_OUTPUT_PROPERTY_REQUEST: u8 = 12;
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ConfigureOutputPropertyRequest<'input> {
     pub output: Output,
     pub property: xproto::Atom,
@@ -1752,7 +1752,7 @@ impl<'input> crate::x11_utils::VoidRequest for ConfigureOutputPropertyRequest<'i
 
 /// Opcode for the ChangeOutputProperty request
 pub const CHANGE_OUTPUT_PROPERTY_REQUEST: u8 = 13;
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ChangeOutputPropertyRequest<'input> {
     pub output: Output,
     pub property: xproto::Atom,
@@ -1861,7 +1861,7 @@ impl<'input> crate::x11_utils::VoidRequest for ChangeOutputPropertyRequest<'inpu
 
 /// Opcode for the DeleteOutputProperty request
 pub const DELETE_OUTPUT_PROPERTY_REQUEST: u8 = 14;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct DeleteOutputPropertyRequest {
     pub output: Output,
     pub property: xproto::Atom,
@@ -1921,7 +1921,7 @@ impl crate::x11_utils::VoidRequest for DeleteOutputPropertyRequest {
 
 /// Opcode for the GetOutputProperty request
 pub const GET_OUTPUT_PROPERTY_REQUEST: u8 = 15;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetOutputPropertyRequest {
     pub output: Output,
     pub property: xproto::Atom,
@@ -2017,7 +2017,7 @@ impl crate::x11_utils::ReplyRequest for GetOutputPropertyRequest {
     type Reply = GetOutputPropertyReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetOutputPropertyReply {
     pub format: u8,
     pub sequence: u16,
@@ -2053,7 +2053,7 @@ impl TryParse for GetOutputPropertyReply {
 
 /// Opcode for the CreateMode request
 pub const CREATE_MODE_REQUEST: u8 = 16;
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct CreateModeRequest<'input> {
     pub window: xproto::Window,
     pub mode_info: ModeInfo,
@@ -2154,7 +2154,7 @@ impl<'input> crate::x11_utils::ReplyRequest for CreateModeRequest<'input> {
     type Reply = CreateModeReply;
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct CreateModeReply {
     pub sequence: u16,
     pub length: u32,
@@ -2182,7 +2182,7 @@ impl TryParse for CreateModeReply {
 
 /// Opcode for the DestroyMode request
 pub const DESTROY_MODE_REQUEST: u8 = 17;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct DestroyModeRequest {
     pub mode: Mode,
 }
@@ -2234,7 +2234,7 @@ impl crate::x11_utils::VoidRequest for DestroyModeRequest {
 
 /// Opcode for the AddOutputMode request
 pub const ADD_OUTPUT_MODE_REQUEST: u8 = 18;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct AddOutputModeRequest {
     pub output: Output,
     pub mode: Mode,
@@ -2294,7 +2294,7 @@ impl crate::x11_utils::VoidRequest for AddOutputModeRequest {
 
 /// Opcode for the DeleteOutputMode request
 pub const DELETE_OUTPUT_MODE_REQUEST: u8 = 19;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct DeleteOutputModeRequest {
     pub output: Output,
     pub mode: Mode,
@@ -2354,7 +2354,7 @@ impl crate::x11_utils::VoidRequest for DeleteOutputModeRequest {
 
 /// Opcode for the GetCrtcInfo request
 pub const GET_CRTC_INFO_REQUEST: u8 = 20;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetCrtcInfoRequest {
     pub crtc: Crtc,
     pub config_timestamp: xproto::Timestamp,
@@ -2413,7 +2413,7 @@ impl crate::x11_utils::ReplyRequest for GetCrtcInfoRequest {
     type Reply = GetCrtcInfoReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetCrtcInfoReply {
     pub status: SetConfig,
     pub sequence: u16,
@@ -2490,7 +2490,7 @@ impl GetCrtcInfoReply {
 
 /// Opcode for the SetCrtcConfig request
 pub const SET_CRTC_CONFIG_REQUEST: u8 = 21;
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct SetCrtcConfigRequest<'input> {
     pub crtc: Crtc,
     pub timestamp: xproto::Timestamp,
@@ -2613,7 +2613,7 @@ impl<'input> crate::x11_utils::ReplyRequest for SetCrtcConfigRequest<'input> {
     type Reply = SetCrtcConfigReply;
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct SetCrtcConfigReply {
     pub status: SetConfig,
     pub sequence: u16,
@@ -2643,7 +2643,7 @@ impl TryParse for SetCrtcConfigReply {
 
 /// Opcode for the GetCrtcGammaSize request
 pub const GET_CRTC_GAMMA_SIZE_REQUEST: u8 = 22;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetCrtcGammaSizeRequest {
     pub crtc: Crtc,
 }
@@ -2694,7 +2694,7 @@ impl crate::x11_utils::ReplyRequest for GetCrtcGammaSizeRequest {
     type Reply = GetCrtcGammaSizeReply;
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetCrtcGammaSizeReply {
     pub sequence: u16,
     pub length: u32,
@@ -2722,7 +2722,7 @@ impl TryParse for GetCrtcGammaSizeReply {
 
 /// Opcode for the GetCrtcGamma request
 pub const GET_CRTC_GAMMA_REQUEST: u8 = 23;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetCrtcGammaRequest {
     pub crtc: Crtc,
 }
@@ -2773,7 +2773,7 @@ impl crate::x11_utils::ReplyRequest for GetCrtcGammaRequest {
     type Reply = GetCrtcGammaReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetCrtcGammaReply {
     pub sequence: u16,
     pub length: u32,
@@ -2821,7 +2821,7 @@ impl GetCrtcGammaReply {
 
 /// Opcode for the SetCrtcGamma request
 pub const SET_CRTC_GAMMA_REQUEST: u8 = 24;
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct SetCrtcGammaRequest<'input> {
     pub crtc: Crtc,
     pub red: Cow<'input, [u16]>,
@@ -2909,7 +2909,7 @@ impl<'input> crate::x11_utils::VoidRequest for SetCrtcGammaRequest<'input> {
 
 /// Opcode for the GetScreenResourcesCurrent request
 pub const GET_SCREEN_RESOURCES_CURRENT_REQUEST: u8 = 25;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetScreenResourcesCurrentRequest {
     pub window: xproto::Window,
 }
@@ -2960,7 +2960,7 @@ impl crate::x11_utils::ReplyRequest for GetScreenResourcesCurrentRequest {
     type Reply = GetScreenResourcesCurrentReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetScreenResourcesCurrentReply {
     pub sequence: u16,
     pub length: u32,
@@ -3055,7 +3055,7 @@ impl GetScreenResourcesCurrentReply {
     }
 }
 
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Transform(u8);
 impl Transform {
     pub const UNIT: Self = Self(1 << 0);
@@ -3120,7 +3120,7 @@ bitmask_binop!(Transform, u8);
 
 /// Opcode for the SetCrtcTransform request
 pub const SET_CRTC_TRANSFORM_REQUEST: u8 = 26;
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct SetCrtcTransformRequest<'input> {
     pub crtc: Crtc,
     pub transform: render::Transform,
@@ -3253,7 +3253,7 @@ impl<'input> crate::x11_utils::VoidRequest for SetCrtcTransformRequest<'input> {
 
 /// Opcode for the GetCrtcTransform request
 pub const GET_CRTC_TRANSFORM_REQUEST: u8 = 27;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetCrtcTransformRequest {
     pub crtc: Crtc,
 }
@@ -3304,7 +3304,7 @@ impl crate::x11_utils::ReplyRequest for GetCrtcTransformRequest {
     type Reply = GetCrtcTransformReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetCrtcTransformReply {
     pub sequence: u16,
     pub length: u32,
@@ -3414,7 +3414,7 @@ impl GetCrtcTransformReply {
 
 /// Opcode for the GetPanning request
 pub const GET_PANNING_REQUEST: u8 = 28;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetPanningRequest {
     pub crtc: Crtc,
 }
@@ -3465,7 +3465,7 @@ impl crate::x11_utils::ReplyRequest for GetPanningRequest {
     type Reply = GetPanningReply;
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetPanningReply {
     pub status: SetConfig,
     pub sequence: u16,
@@ -3518,7 +3518,7 @@ impl TryParse for GetPanningReply {
 
 /// Opcode for the SetPanning request
 pub const SET_PANNING_REQUEST: u8 = 29;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct SetPanningRequest {
     pub crtc: Crtc,
     pub timestamp: xproto::Timestamp,
@@ -3649,7 +3649,7 @@ impl crate::x11_utils::ReplyRequest for SetPanningRequest {
     type Reply = SetPanningReply;
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct SetPanningReply {
     pub status: SetConfig,
     pub sequence: u16,
@@ -3678,7 +3678,7 @@ impl TryParse for SetPanningReply {
 
 /// Opcode for the SetOutputPrimary request
 pub const SET_OUTPUT_PRIMARY_REQUEST: u8 = 30;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct SetOutputPrimaryRequest {
     pub window: xproto::Window,
     pub output: Output,
@@ -3738,7 +3738,7 @@ impl crate::x11_utils::VoidRequest for SetOutputPrimaryRequest {
 
 /// Opcode for the GetOutputPrimary request
 pub const GET_OUTPUT_PRIMARY_REQUEST: u8 = 31;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetOutputPrimaryRequest {
     pub window: xproto::Window,
 }
@@ -3789,7 +3789,7 @@ impl crate::x11_utils::ReplyRequest for GetOutputPrimaryRequest {
     type Reply = GetOutputPrimaryReply;
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetOutputPrimaryReply {
     pub sequence: u16,
     pub length: u32,
@@ -3816,7 +3816,7 @@ impl TryParse for GetOutputPrimaryReply {
 
 /// Opcode for the GetProviders request
 pub const GET_PROVIDERS_REQUEST: u8 = 32;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetProvidersRequest {
     pub window: xproto::Window,
 }
@@ -3867,7 +3867,7 @@ impl crate::x11_utils::ReplyRequest for GetProvidersRequest {
     type Reply = GetProvidersReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetProvidersReply {
     pub sequence: u16,
     pub length: u32,
@@ -3911,7 +3911,7 @@ impl GetProvidersReply {
     }
 }
 
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ProviderCapability(u8);
 impl ProviderCapability {
     pub const SOURCE_OUTPUT: Self = Self(1 << 0);
@@ -3976,7 +3976,7 @@ bitmask_binop!(ProviderCapability, u8);
 
 /// Opcode for the GetProviderInfo request
 pub const GET_PROVIDER_INFO_REQUEST: u8 = 33;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetProviderInfoRequest {
     pub provider: Provider,
     pub config_timestamp: xproto::Timestamp,
@@ -4035,7 +4035,7 @@ impl crate::x11_utils::ReplyRequest for GetProviderInfoRequest {
     type Reply = GetProviderInfoReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetProviderInfoReply {
     pub status: u8,
     pub sequence: u16,
@@ -4135,7 +4135,7 @@ impl GetProviderInfoReply {
 
 /// Opcode for the SetProviderOffloadSink request
 pub const SET_PROVIDER_OFFLOAD_SINK_REQUEST: u8 = 34;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct SetProviderOffloadSinkRequest {
     pub provider: Provider,
     pub sink_provider: Provider,
@@ -4203,7 +4203,7 @@ impl crate::x11_utils::VoidRequest for SetProviderOffloadSinkRequest {
 
 /// Opcode for the SetProviderOutputSource request
 pub const SET_PROVIDER_OUTPUT_SOURCE_REQUEST: u8 = 35;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct SetProviderOutputSourceRequest {
     pub provider: Provider,
     pub source_provider: Provider,
@@ -4271,7 +4271,7 @@ impl crate::x11_utils::VoidRequest for SetProviderOutputSourceRequest {
 
 /// Opcode for the ListProviderProperties request
 pub const LIST_PROVIDER_PROPERTIES_REQUEST: u8 = 36;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ListProviderPropertiesRequest {
     pub provider: Provider,
 }
@@ -4322,7 +4322,7 @@ impl crate::x11_utils::ReplyRequest for ListProviderPropertiesRequest {
     type Reply = ListProviderPropertiesReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ListProviderPropertiesReply {
     pub sequence: u16,
     pub length: u32,
@@ -4366,7 +4366,7 @@ impl ListProviderPropertiesReply {
 
 /// Opcode for the QueryProviderProperty request
 pub const QUERY_PROVIDER_PROPERTY_REQUEST: u8 = 37;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct QueryProviderPropertyRequest {
     pub provider: Provider,
     pub property: xproto::Atom,
@@ -4425,7 +4425,7 @@ impl crate::x11_utils::ReplyRequest for QueryProviderPropertyRequest {
     type Reply = QueryProviderPropertyReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct QueryProviderPropertyReply {
     pub sequence: u16,
     pub pending: bool,
@@ -4473,7 +4473,7 @@ impl QueryProviderPropertyReply {
 
 /// Opcode for the ConfigureProviderProperty request
 pub const CONFIGURE_PROVIDER_PROPERTY_REQUEST: u8 = 38;
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ConfigureProviderPropertyRequest<'input> {
     pub provider: Provider,
     pub property: xproto::Atom,
@@ -4570,7 +4570,7 @@ impl<'input> crate::x11_utils::VoidRequest for ConfigureProviderPropertyRequest<
 
 /// Opcode for the ChangeProviderProperty request
 pub const CHANGE_PROVIDER_PROPERTY_REQUEST: u8 = 39;
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ChangeProviderPropertyRequest<'input> {
     pub provider: Provider,
     pub property: xproto::Atom,
@@ -4678,7 +4678,7 @@ impl<'input> crate::x11_utils::VoidRequest for ChangeProviderPropertyRequest<'in
 
 /// Opcode for the DeleteProviderProperty request
 pub const DELETE_PROVIDER_PROPERTY_REQUEST: u8 = 40;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct DeleteProviderPropertyRequest {
     pub provider: Provider,
     pub property: xproto::Atom,
@@ -4738,7 +4738,7 @@ impl crate::x11_utils::VoidRequest for DeleteProviderPropertyRequest {
 
 /// Opcode for the GetProviderProperty request
 pub const GET_PROVIDER_PROPERTY_REQUEST: u8 = 41;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetProviderPropertyRequest {
     pub provider: Provider,
     pub property: xproto::Atom,
@@ -4834,7 +4834,7 @@ impl crate::x11_utils::ReplyRequest for GetProviderPropertyRequest {
     type Reply = GetProviderPropertyReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetProviderPropertyReply {
     pub format: u8,
     pub sequence: u16,
@@ -4870,7 +4870,7 @@ impl TryParse for GetProviderPropertyReply {
 
 /// Opcode for the ScreenChangeNotify event
 pub const SCREEN_CHANGE_NOTIFY_EVENT: u8 = 0;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ScreenChangeNotifyEvent {
     pub response_type: u8,
     pub rotation: u8,
@@ -4967,7 +4967,7 @@ impl From<ScreenChangeNotifyEvent> for [u8; 32] {
     }
 }
 
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Notify(u8);
 impl Notify {
     pub const CRTC_CHANGE: Self = Self(0);
@@ -5035,7 +5035,7 @@ impl std::fmt::Debug for Notify  {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct CrtcChange {
     pub timestamp: xproto::Timestamp,
     pub window: xproto::Window,
@@ -5121,7 +5121,7 @@ impl Serialize for CrtcChange {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct OutputChange {
     pub timestamp: xproto::Timestamp,
     pub config_timestamp: xproto::Timestamp,
@@ -5207,7 +5207,7 @@ impl Serialize for OutputChange {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct OutputProperty {
     pub window: xproto::Window,
     pub output: Output,
@@ -5278,7 +5278,7 @@ impl Serialize for OutputProperty {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ProviderChange {
     pub timestamp: xproto::Timestamp,
     pub window: xproto::Window,
@@ -5340,7 +5340,7 @@ impl Serialize for ProviderChange {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ProviderProperty {
     pub window: xproto::Window,
     pub provider: Provider,
@@ -5410,7 +5410,7 @@ impl Serialize for ProviderProperty {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ResourceChange {
     pub timestamp: xproto::Timestamp,
     pub window: xproto::Window,
@@ -5468,7 +5468,7 @@ impl Serialize for ResourceChange {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct MonitorInfo {
     pub name: xproto::Atom,
     pub primary: bool,
@@ -5539,7 +5539,7 @@ impl MonitorInfo {
 
 /// Opcode for the GetMonitors request
 pub const GET_MONITORS_REQUEST: u8 = 42;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetMonitorsRequest {
     pub window: xproto::Window,
     pub get_active: bool,
@@ -5598,7 +5598,7 @@ impl crate::x11_utils::ReplyRequest for GetMonitorsRequest {
     type Reply = GetMonitorsReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetMonitorsReply {
     pub sequence: u16,
     pub length: u32,
@@ -5646,7 +5646,7 @@ impl GetMonitorsReply {
 
 /// Opcode for the SetMonitor request
 pub const SET_MONITOR_REQUEST: u8 = 43;
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct SetMonitorRequest {
     pub window: xproto::Window,
     pub monitorinfo: MonitorInfo,
@@ -5705,7 +5705,7 @@ impl crate::x11_utils::VoidRequest for SetMonitorRequest {
 
 /// Opcode for the DeleteMonitor request
 pub const DELETE_MONITOR_REQUEST: u8 = 44;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct DeleteMonitorRequest {
     pub window: xproto::Window,
     pub name: xproto::Atom,
@@ -5765,7 +5765,7 @@ impl crate::x11_utils::VoidRequest for DeleteMonitorRequest {
 
 /// Opcode for the CreateLease request
 pub const CREATE_LEASE_REQUEST: u8 = 45;
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct CreateLeaseRequest<'input> {
     pub window: xproto::Window,
     pub lid: Lease,
@@ -5885,7 +5885,7 @@ impl TryParseFd for CreateLeaseReply {
 
 /// Opcode for the FreeLease request
 pub const FREE_LEASE_REQUEST: u8 = 46;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct FreeLeaseRequest {
     pub lid: Lease,
     pub terminate: u8,
@@ -5943,7 +5943,7 @@ impl Request for FreeLeaseRequest {
 impl crate::x11_utils::VoidRequest for FreeLeaseRequest {
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct LeaseNotify {
     pub timestamp: xproto::Timestamp,
     pub window: xproto::Window,

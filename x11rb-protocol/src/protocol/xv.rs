@@ -38,7 +38,7 @@ pub type Port = u32;
 
 pub type Encoding = u32;
 
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Type(u8);
 impl Type {
     pub const INPUT_MASK: Self = Self(1 << 0);
@@ -103,7 +103,7 @@ impl std::fmt::Debug for Type  {
 }
 bitmask_binop!(Type, u8);
 
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ImageFormatInfoType(u8);
 impl ImageFormatInfoType {
     pub const RGB: Self = Self(0);
@@ -161,7 +161,7 @@ impl std::fmt::Debug for ImageFormatInfoType  {
     }
 }
 
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ImageFormatInfoFormat(u8);
 impl ImageFormatInfoFormat {
     pub const PACKED: Self = Self(0);
@@ -219,7 +219,7 @@ impl std::fmt::Debug for ImageFormatInfoFormat  {
     }
 }
 
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct AttributeFlag(u8);
 impl AttributeFlag {
     pub const GETTABLE: Self = Self(1 << 0);
@@ -278,7 +278,7 @@ impl std::fmt::Debug for AttributeFlag  {
 }
 bitmask_binop!(AttributeFlag, u8);
 
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct VideoNotifyReason(u8);
 impl VideoNotifyReason {
     pub const STARTED: Self = Self(0);
@@ -342,7 +342,7 @@ impl std::fmt::Debug for VideoNotifyReason  {
     }
 }
 
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ScanlineOrder(u8);
 impl ScanlineOrder {
     pub const TOP_TO_BOTTOM: Self = Self(0);
@@ -400,7 +400,7 @@ impl std::fmt::Debug for ScanlineOrder  {
     }
 }
 
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GrabPortStatus(u8);
 impl GrabPortStatus {
     pub const SUCCESS: Self = Self(0);
@@ -466,7 +466,7 @@ impl std::fmt::Debug for GrabPortStatus  {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Rational {
     pub numerator: i32,
     pub denominator: i32,
@@ -502,7 +502,7 @@ impl Serialize for Rational {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Format {
     pub visual: xproto::Visualid,
     pub depth: u8,
@@ -540,7 +540,7 @@ impl Serialize for Format {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct AdaptorInfo {
     pub base_id: Port,
     pub num_ports: u16,
@@ -619,7 +619,7 @@ impl AdaptorInfo {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct EncodingInfo {
     pub encoding: Encoding,
     pub width: u16,
@@ -682,7 +682,7 @@ impl EncodingInfo {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Image {
     pub id: u32,
     pub width: u16,
@@ -757,7 +757,7 @@ impl Image {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct AttributeInfo {
     pub flags: u32,
     pub min: i32,
@@ -815,7 +815,7 @@ impl AttributeInfo {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ImageFormatInfo {
     pub id: u32,
     pub type_: ImageFormatInfoType,
@@ -1076,7 +1076,7 @@ pub const BAD_CONTROL_ERROR: u8 = 2;
 
 /// Opcode for the VideoNotify event
 pub const VIDEO_NOTIFY_EVENT: u8 = 0;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct VideoNotifyEvent {
     pub response_type: u8,
     pub reason: VideoNotifyReason,
@@ -1155,7 +1155,7 @@ impl From<VideoNotifyEvent> for [u8; 32] {
 
 /// Opcode for the PortNotify event
 pub const PORT_NOTIFY_EVENT: u8 = 1;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct PortNotifyEvent {
     pub response_type: u8,
     pub sequence: u16,
@@ -1234,7 +1234,7 @@ impl From<PortNotifyEvent> for [u8; 32] {
 
 /// Opcode for the QueryExtension request
 pub const QUERY_EXTENSION_REQUEST: u8 = 0;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct QueryExtensionRequest;
 impl QueryExtensionRequest {
     /// Serialize this request into bytes for the provided connection
@@ -1276,7 +1276,7 @@ impl crate::x11_utils::ReplyRequest for QueryExtensionRequest {
     type Reply = QueryExtensionReply;
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct QueryExtensionReply {
     pub sequence: u16,
     pub length: u32,
@@ -1305,7 +1305,7 @@ impl TryParse for QueryExtensionReply {
 
 /// Opcode for the QueryAdaptors request
 pub const QUERY_ADAPTORS_REQUEST: u8 = 1;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct QueryAdaptorsRequest {
     pub window: xproto::Window,
 }
@@ -1356,7 +1356,7 @@ impl crate::x11_utils::ReplyRequest for QueryAdaptorsRequest {
     type Reply = QueryAdaptorsReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct QueryAdaptorsReply {
     pub sequence: u16,
     pub length: u32,
@@ -1400,7 +1400,7 @@ impl QueryAdaptorsReply {
 
 /// Opcode for the QueryEncodings request
 pub const QUERY_ENCODINGS_REQUEST: u8 = 2;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct QueryEncodingsRequest {
     pub port: Port,
 }
@@ -1451,7 +1451,7 @@ impl crate::x11_utils::ReplyRequest for QueryEncodingsRequest {
     type Reply = QueryEncodingsReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct QueryEncodingsReply {
     pub sequence: u16,
     pub length: u32,
@@ -1495,7 +1495,7 @@ impl QueryEncodingsReply {
 
 /// Opcode for the GrabPort request
 pub const GRAB_PORT_REQUEST: u8 = 3;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GrabPortRequest {
     pub port: Port,
     pub time: xproto::Timestamp,
@@ -1554,7 +1554,7 @@ impl crate::x11_utils::ReplyRequest for GrabPortRequest {
     type Reply = GrabPortReply;
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GrabPortReply {
     pub result: GrabPortStatus,
     pub sequence: u16,
@@ -1581,7 +1581,7 @@ impl TryParse for GrabPortReply {
 
 /// Opcode for the UngrabPort request
 pub const UNGRAB_PORT_REQUEST: u8 = 4;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct UngrabPortRequest {
     pub port: Port,
     pub time: xproto::Timestamp,
@@ -1641,7 +1641,7 @@ impl crate::x11_utils::VoidRequest for UngrabPortRequest {
 
 /// Opcode for the PutVideo request
 pub const PUT_VIDEO_REQUEST: u8 = 5;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct PutVideoRequest {
     pub port: Port,
     pub drawable: xproto::Drawable,
@@ -1757,7 +1757,7 @@ impl crate::x11_utils::VoidRequest for PutVideoRequest {
 
 /// Opcode for the PutStill request
 pub const PUT_STILL_REQUEST: u8 = 6;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct PutStillRequest {
     pub port: Port,
     pub drawable: xproto::Drawable,
@@ -1873,7 +1873,7 @@ impl crate::x11_utils::VoidRequest for PutStillRequest {
 
 /// Opcode for the GetVideo request
 pub const GET_VIDEO_REQUEST: u8 = 7;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetVideoRequest {
     pub port: Port,
     pub drawable: xproto::Drawable,
@@ -1989,7 +1989,7 @@ impl crate::x11_utils::VoidRequest for GetVideoRequest {
 
 /// Opcode for the GetStill request
 pub const GET_STILL_REQUEST: u8 = 8;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetStillRequest {
     pub port: Port,
     pub drawable: xproto::Drawable,
@@ -2105,7 +2105,7 @@ impl crate::x11_utils::VoidRequest for GetStillRequest {
 
 /// Opcode for the StopVideo request
 pub const STOP_VIDEO_REQUEST: u8 = 9;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct StopVideoRequest {
     pub port: Port,
     pub drawable: xproto::Drawable,
@@ -2165,7 +2165,7 @@ impl crate::x11_utils::VoidRequest for StopVideoRequest {
 
 /// Opcode for the SelectVideoNotify request
 pub const SELECT_VIDEO_NOTIFY_REQUEST: u8 = 10;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct SelectVideoNotifyRequest {
     pub drawable: xproto::Drawable,
     pub onoff: bool,
@@ -2226,7 +2226,7 @@ impl crate::x11_utils::VoidRequest for SelectVideoNotifyRequest {
 
 /// Opcode for the SelectPortNotify request
 pub const SELECT_PORT_NOTIFY_REQUEST: u8 = 11;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct SelectPortNotifyRequest {
     pub port: Port,
     pub onoff: bool,
@@ -2287,7 +2287,7 @@ impl crate::x11_utils::VoidRequest for SelectPortNotifyRequest {
 
 /// Opcode for the QueryBestSize request
 pub const QUERY_BEST_SIZE_REQUEST: u8 = 12;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct QueryBestSizeRequest {
     pub port: Port,
     pub vid_w: u16,
@@ -2371,7 +2371,7 @@ impl crate::x11_utils::ReplyRequest for QueryBestSizeRequest {
     type Reply = QueryBestSizeReply;
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct QueryBestSizeReply {
     pub sequence: u16,
     pub length: u32,
@@ -2400,7 +2400,7 @@ impl TryParse for QueryBestSizeReply {
 
 /// Opcode for the SetPortAttribute request
 pub const SET_PORT_ATTRIBUTE_REQUEST: u8 = 13;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct SetPortAttributeRequest {
     pub port: Port,
     pub attribute: xproto::Atom,
@@ -2468,7 +2468,7 @@ impl crate::x11_utils::VoidRequest for SetPortAttributeRequest {
 
 /// Opcode for the GetPortAttribute request
 pub const GET_PORT_ATTRIBUTE_REQUEST: u8 = 14;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetPortAttributeRequest {
     pub port: Port,
     pub attribute: xproto::Atom,
@@ -2527,7 +2527,7 @@ impl crate::x11_utils::ReplyRequest for GetPortAttributeRequest {
     type Reply = GetPortAttributeReply;
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetPortAttributeReply {
     pub sequence: u16,
     pub length: u32,
@@ -2554,7 +2554,7 @@ impl TryParse for GetPortAttributeReply {
 
 /// Opcode for the QueryPortAttributes request
 pub const QUERY_PORT_ATTRIBUTES_REQUEST: u8 = 15;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct QueryPortAttributesRequest {
     pub port: Port,
 }
@@ -2605,7 +2605,7 @@ impl crate::x11_utils::ReplyRequest for QueryPortAttributesRequest {
     type Reply = QueryPortAttributesReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct QueryPortAttributesReply {
     pub sequence: u16,
     pub length: u32,
@@ -2651,7 +2651,7 @@ impl QueryPortAttributesReply {
 
 /// Opcode for the ListImageFormats request
 pub const LIST_IMAGE_FORMATS_REQUEST: u8 = 16;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ListImageFormatsRequest {
     pub port: Port,
 }
@@ -2702,7 +2702,7 @@ impl crate::x11_utils::ReplyRequest for ListImageFormatsRequest {
     type Reply = ListImageFormatsReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ListImageFormatsReply {
     pub sequence: u16,
     pub length: u32,
@@ -2746,7 +2746,7 @@ impl ListImageFormatsReply {
 
 /// Opcode for the QueryImageAttributes request
 pub const QUERY_IMAGE_ATTRIBUTES_REQUEST: u8 = 17;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct QueryImageAttributesRequest {
     pub port: Port,
     pub id: u32,
@@ -2817,7 +2817,7 @@ impl crate::x11_utils::ReplyRequest for QueryImageAttributesRequest {
     type Reply = QueryImageAttributesReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct QueryImageAttributesReply {
     pub sequence: u16,
     pub length: u32,
@@ -2869,7 +2869,7 @@ impl QueryImageAttributesReply {
 
 /// Opcode for the PutImage request
 pub const PUT_IMAGE_REQUEST: u8 = 18;
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct PutImageRequest<'input> {
     pub port: Port,
     pub drawable: xproto::Drawable,
@@ -3031,7 +3031,7 @@ impl<'input> crate::x11_utils::VoidRequest for PutImageRequest<'input> {
 
 /// Opcode for the ShmPutImage request
 pub const SHM_PUT_IMAGE_REQUEST: u8 = 19;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ShmPutImageRequest {
     pub port: Port,
     pub drawable: xproto::Drawable,

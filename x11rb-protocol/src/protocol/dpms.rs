@@ -32,7 +32,7 @@ pub const X11_XML_VERSION: (u32, u32) = (0, 0);
 
 /// Opcode for the GetVersion request
 pub const GET_VERSION_REQUEST: u8 = 0;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetVersionRequest {
     pub client_major_version: u16,
     pub client_minor_version: u16,
@@ -87,7 +87,7 @@ impl crate::x11_utils::ReplyRequest for GetVersionRequest {
     type Reply = GetVersionReply;
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetVersionReply {
     pub sequence: u16,
     pub length: u32,
@@ -116,7 +116,7 @@ impl TryParse for GetVersionReply {
 
 /// Opcode for the Capable request
 pub const CAPABLE_REQUEST: u8 = 1;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct CapableRequest;
 impl CapableRequest {
     /// Serialize this request into bytes for the provided connection
@@ -158,7 +158,7 @@ impl crate::x11_utils::ReplyRequest for CapableRequest {
     type Reply = CapableReply;
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct CapableReply {
     pub sequence: u16,
     pub length: u32,
@@ -186,7 +186,7 @@ impl TryParse for CapableReply {
 
 /// Opcode for the GetTimeouts request
 pub const GET_TIMEOUTS_REQUEST: u8 = 2;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetTimeoutsRequest;
 impl GetTimeoutsRequest {
     /// Serialize this request into bytes for the provided connection
@@ -228,7 +228,7 @@ impl crate::x11_utils::ReplyRequest for GetTimeoutsRequest {
     type Reply = GetTimeoutsReply;
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetTimeoutsReply {
     pub sequence: u16,
     pub length: u32,
@@ -260,7 +260,7 @@ impl TryParse for GetTimeoutsReply {
 
 /// Opcode for the SetTimeouts request
 pub const SET_TIMEOUTS_REQUEST: u8 = 3;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct SetTimeoutsRequest {
     pub standby_timeout: u16,
     pub suspend_timeout: u16,
@@ -324,7 +324,7 @@ impl crate::x11_utils::VoidRequest for SetTimeoutsRequest {
 
 /// Opcode for the Enable request
 pub const ENABLE_REQUEST: u8 = 4;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct EnableRequest;
 impl EnableRequest {
     /// Serialize this request into bytes for the provided connection
@@ -367,7 +367,7 @@ impl crate::x11_utils::VoidRequest for EnableRequest {
 
 /// Opcode for the Disable request
 pub const DISABLE_REQUEST: u8 = 5;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct DisableRequest;
 impl DisableRequest {
     /// Serialize this request into bytes for the provided connection
@@ -408,7 +408,7 @@ impl Request for DisableRequest {
 impl crate::x11_utils::VoidRequest for DisableRequest {
 }
 
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct DPMSMode(u16);
 impl DPMSMode {
     pub const ON: Self = Self(0);
@@ -466,7 +466,7 @@ impl std::fmt::Debug for DPMSMode  {
 
 /// Opcode for the ForceLevel request
 pub const FORCE_LEVEL_REQUEST: u8 = 6;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ForceLevelRequest {
     pub power_level: DPMSMode,
 }
@@ -519,7 +519,7 @@ impl crate::x11_utils::VoidRequest for ForceLevelRequest {
 
 /// Opcode for the Info request
 pub const INFO_REQUEST: u8 = 7;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct InfoRequest;
 impl InfoRequest {
     /// Serialize this request into bytes for the provided connection
@@ -561,7 +561,7 @@ impl crate::x11_utils::ReplyRequest for InfoRequest {
     type Reply = InfoReply;
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct InfoReply {
     pub sequence: u16,
     pub length: u32,

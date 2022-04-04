@@ -34,7 +34,7 @@ pub const X11_XML_VERSION: (u32, u32) = (2, 2);
 
 /// Opcode for the GetVersion request
 pub const GET_VERSION_REQUEST: u8 = 0;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetVersionRequest {
     pub major_version: u8,
     pub minor_version: u16,
@@ -90,7 +90,7 @@ impl crate::x11_utils::ReplyRequest for GetVersionRequest {
     type Reply = GetVersionReply;
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetVersionReply {
     pub major_version: u8,
     pub sequence: u16,
@@ -116,7 +116,7 @@ impl TryParse for GetVersionReply {
     }
 }
 
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Cursor(bool);
 impl Cursor {
     pub const NONE: Self = Self(false);
@@ -188,7 +188,7 @@ impl std::fmt::Debug for Cursor  {
 
 /// Opcode for the CompareCursor request
 pub const COMPARE_CURSOR_REQUEST: u8 = 1;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct CompareCursorRequest {
     pub window: xproto::Window,
     pub cursor: xproto::Cursor,
@@ -247,7 +247,7 @@ impl crate::x11_utils::ReplyRequest for CompareCursorRequest {
     type Reply = CompareCursorReply;
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct CompareCursorReply {
     pub same: bool,
     pub sequence: u16,
@@ -273,7 +273,7 @@ impl TryParse for CompareCursorReply {
 
 /// Opcode for the FakeInput request
 pub const FAKE_INPUT_REQUEST: u8 = 2;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct FakeInputRequest {
     pub type_: u8,
     pub detail: u8,
@@ -380,7 +380,7 @@ impl crate::x11_utils::VoidRequest for FakeInputRequest {
 
 /// Opcode for the GrabControl request
 pub const GRAB_CONTROL_REQUEST: u8 = 3;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GrabControlRequest {
     pub impervious: bool,
 }

@@ -688,7 +688,10 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             self.emit_doc(doc, out, None);
         }
 
-        outln!(out, "#[derive(Clone, Copy, PartialEq, Eq)]");
+        outln!(
+            out,
+            "#[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]"
+        );
         outln!(out, "pub struct {}({});", rust_name, raw_type);
 
         outln!(out, "impl {} {{", rust_name);
@@ -1424,6 +1427,10 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                     }
                 }
                 xcbdefs::FieldDef::Switch(switch_field) => {
+                    // non-bitcase switch cases can't be Default
+                    if switch_field.kind != xcbdefs::SwitchKind::BitCase {
+                        derives.default_ = false;
+                    }
                     for case in switch_field.cases.iter() {
                         self.filter_derives_for_fields(
                             derives,
@@ -1437,9 +1444,13 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                     }
                 }
                 xcbdefs::FieldDef::Fd(_) | xcbdefs::FieldDef::FdList(_) => {
-                    // RawFdContainer cannot be cloned
+                    // RawFdContainer cannot be cloned, compared, hashed or made default
                     derives.clone = false;
                     derives.copy = false;
+                    derives.partial_ord = false;
+                    derives.ord = false;
+                    derives.hash = false;
+                    derives.default_ = false;
                 }
                 xcbdefs::FieldDef::Expr(_) => {}
                 xcbdefs::FieldDef::VirtualLen(_) => {}
@@ -1454,8 +1465,10 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             xcbdefs::TypeRef::BuiltIn(builtin_type) => {
                 match builtin_type {
                     xcbdefs::BuiltInType::Float | xcbdefs::BuiltInType::Double => {
-                        // f32/f64 do not implement Eq
+                        // f32/f64 do not implement Eq, Ord or Hash
                         derives.eq = false;
+                        derives.ord = false;
+                        derives.hash = false;
                     }
                     _ => {}
                 }
@@ -1469,11 +1482,19 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 // Comparing unions makes no sense (in the current implementation)
                 derives.partial_eq = false;
                 derives.eq = false;
+                derives.partial_ord = false;
+                derives.ord = false;
+                derives.hash = false;
+                derives.default_ = false;
             }
             xcbdefs::TypeRef::EventStruct(_) => {
                 // Event structs don't support equality tests.
                 derives.partial_eq = false;
                 derives.eq = false;
+                derives.partial_ord = false;
+                derives.ord = false;
+                derives.hash = false;
+                derives.default_ = false;
             }
             xcbdefs::TypeRef::Xid(_) => {}
             xcbdefs::TypeRef::XidUnion(_) => {}
