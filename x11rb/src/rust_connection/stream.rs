@@ -8,6 +8,7 @@ use std::os::unix::net::UnixStream;
 use std::os::windows::io::{AsRawSocket, IntoRawSocket, RawSocket};
 
 use crate::utils::RawFdContainer;
+use x11rb_protocol::parse_display::ConnectAddress;
 use x11rb_protocol::xauth::Family;
 
 /// The kind of operation that one want to poll for.
@@ -186,43 +187,26 @@ enum DefaultStreamInner {
 
 impl DefaultStream {
     /// Try to connect to the X11 server described by the given arguments.
-    pub fn connect(host: &str, protocol: Option<&str>, display: u16) -> Result<Self> {
-        const TCP_PORT_BASE: u16 = 6000;
-
-        if (protocol.is_none() || protocol != Some("unix")) && !host.is_empty() && host != "unix" {
-            let stream = TcpStream::connect((host, TCP_PORT_BASE + display))?;
-            Self::from_tcp_stream(stream)
-        } else {
-            // On non-unix, this variable is not mutated.
-            #[allow(unused_mut)]
-            let mut error = None;
-
-            #[cfg(unix)]
-            {
-                if protocol.is_none() || protocol == Some("unix") {
-                    let file_name = format!("/tmp/.X11-unix/X{}", display);
-
-                    // TODO: Try abstract socket (file name with prepended '\0')
-                    // Not supported on Rust right now: https://github.com/rust-lang/rust/issues/42048
-
-                    match UnixStream::connect(file_name) {
-                        Ok(stream) => {
-                            return Self::from_unix_stream(stream);
-                        }
-                        Err(err) => error = Some(err),
-                    }
-                }
-            }
-
-            if protocol.is_none() && host.is_empty() {
-                let stream = TcpStream::connect(("localhost", TCP_PORT_BASE + display))?;
+    pub fn connect(addr: ConnectAddress<'_>) -> Result<Self> {
+        match addr {
+            ConnectAddress::Hostname(host, port) => {
+                // connect over TCP
+                let stream = TcpStream::connect((host, port))?;
                 Self::from_tcp_stream(stream)
-            } else {
-                use crate::errors::ConnectError;
-                use std::io::{Error, ErrorKind};
-                Err(error.unwrap_or_else(|| {
-                    Error::new(ErrorKind::Other, ConnectError::DisplayParsingError)
-                }))
+            }
+            #[cfg(unix)]
+            ConnectAddress::Socket(path) => {
+                // connect over Unix domain socket
+                let stream = UnixStream::connect(path)?;
+                Self::from_unix_stream(stream)
+            }
+            #[cfg(not(unix))]
+            ConnectAddress::Socket(_) => {
+                // Unix domain sockets are not supported on Windows
+                Err(std::io::Error::new(
+                    std::io::ErrorKind::Other,
+                    "Unix domain sockets are not supported on Windows",
+                ))
             }
         }
     }
