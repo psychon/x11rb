@@ -9,27 +9,27 @@ use crate::defs;
 pub(super) fn run(module: &defs::Module) {
     for ns in module.namespaces.borrow().values() {
         for request_def in ns.request_defs.borrow().values() {
-            run_in_request(request_def, module);
+            run_in_request(request_def);
         }
         for event_def in ns.event_defs.borrow().values() {
             if let defs::EventDef::Full(event_full_def) = event_def {
-                run_in_event(event_full_def, module);
+                run_in_event(event_full_def);
             }
         }
         for error_def in ns.error_defs.borrow().values() {
             if let defs::ErrorDef::Full(error_full_def) = error_def {
-                run_in_error(error_full_def, module);
+                run_in_error(error_full_def);
             }
         }
         for type_def in ns.type_defs.borrow().values() {
             if let defs::TypeDef::Struct(struct_def) = type_def {
-                run_in_struct(struct_def, module);
+                run_in_struct(struct_def);
             }
         }
     }
 }
 
-fn run_in_request(request_def: &defs::RequestDef, module: &defs::Module) {
+fn run_in_request(request_def: &defs::RequestDef) {
     let mut fields = request_def.fields.borrow_mut();
 
     let major_opcode_field = defs::FieldDef::Normal(defs::NormalField {
@@ -61,13 +61,13 @@ fn run_in_request(request_def: &defs::RequestDef, module: &defs::Module) {
         }
     }
     fields.insert(2, length_field);
-    run_in_field_list(&mut fields, module);
+    run_in_field_list(&mut fields);
     if let Some(ref reply_def) = request_def.reply {
-        run_in_reply(reply_def, module);
+        run_in_reply(reply_def);
     }
 }
 
-fn run_in_reply(reply_def: &defs::ReplyDef, module: &defs::Module) {
+fn run_in_reply(reply_def: &defs::ReplyDef) {
     let mut fields = reply_def.fields.borrow_mut();
 
     let response_type_field = defs::FieldDef::Expr(defs::ExprField {
@@ -97,10 +97,10 @@ fn run_in_reply(reply_def: &defs::ReplyDef, module: &defs::Module) {
     fields.insert(2, sequence_field);
     fields.insert(3, length_field);
 
-    run_in_field_list(&mut fields, module);
+    run_in_field_list(&mut fields);
 }
 
-fn run_in_event(event_def: &defs::EventFullDef, module: &defs::Module) {
+fn run_in_event(event_def: &defs::EventFullDef) {
     let mut fields = event_def.fields.borrow_mut();
 
     let response_type_field = defs::FieldDef::Normal(defs::NormalField {
@@ -146,10 +146,10 @@ fn run_in_event(event_def: &defs::EventFullDef, module: &defs::Module) {
         }
     }
 
-    run_in_field_list(&mut fields, module);
+    run_in_field_list(&mut fields);
 }
 
-fn run_in_error(error_def: &defs::ErrorFullDef, module: &defs::Module) {
+fn run_in_error(error_def: &defs::ErrorFullDef) {
     let mut fields = error_def.fields.borrow_mut();
 
     let response_type_field = defs::FieldDef::Expr(defs::ExprField {
@@ -169,14 +169,14 @@ fn run_in_error(error_def: &defs::ErrorFullDef, module: &defs::Module) {
     fields.insert(0, response_type_field);
     fields.insert(1, error_code_field);
     fields.insert(2, sequence_field);
-    run_in_field_list(&mut fields, module);
+    run_in_field_list(&mut fields);
 }
 
-fn run_in_struct(struct_def: &defs::StructDef, module: &defs::Module) {
-    run_in_field_list(&mut struct_def.fields.borrow_mut(), module);
+fn run_in_struct(struct_def: &defs::StructDef) {
+    run_in_field_list(&mut struct_def.fields.borrow_mut());
 }
 
-fn run_in_field_list(fields: &mut Vec<defs::FieldDef>, module: &defs::Module) {
+fn run_in_field_list(fields: &mut Vec<defs::FieldDef>) {
     let mut i: usize = 0;
     while i < fields.len() {
         match fields[i] {
@@ -199,7 +199,7 @@ fn run_in_field_list(fields: &mut Vec<defs::FieldDef>, module: &defs::Module) {
             }
             defs::FieldDef::Switch(ref switch_field) => {
                 for switch_case in switch_field.cases.iter() {
-                    run_in_field_list(&mut switch_case.fields.borrow_mut(), module);
+                    run_in_field_list(&mut switch_case.fields.borrow_mut());
                 }
             }
             defs::FieldDef::Fd(_) => {}
