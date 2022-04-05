@@ -32,7 +32,7 @@ pub const X11_XML_VERSION: (u32, u32) = (0, 0);
 
 /// Opcode for the Enable request
 pub const ENABLE_REQUEST: u8 = 0;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct EnableRequest;
 impl EnableRequest {
     /// Serialize this request into bytes for the provided connection
@@ -74,7 +74,7 @@ impl crate::x11_utils::ReplyRequest for EnableRequest {
     type Reply = EnableReply;
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct EnableReply {
     pub sequence: u16,
     pub length: u32,

@@ -8174,7 +8174,7 @@ pub(crate) fn request_name(extension: Option<&str>, major_opcode: u8, minor_opco
 }
 
 /// Enumeration of all possible X11 error kinds.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[non_exhaustive]
 pub enum ErrorKind {
     Unknown(u8),

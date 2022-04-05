@@ -209,8 +209,13 @@ pub(super) struct Derives {
     pub(super) debug: bool,
     pub(super) clone: bool,
     pub(super) copy: bool,
+    /// "default" is a reserved keyword
+    pub(super) default_: bool,
     pub(super) partial_eq: bool,
     pub(super) eq: bool,
+    pub(super) partial_ord: bool,
+    pub(super) ord: bool,
+    pub(super) hash: bool,
 }
 
 impl Derives {
@@ -220,8 +225,12 @@ impl Derives {
             debug: true,
             clone: true,
             copy: true,
+            default_: true,
             partial_eq: true,
             eq: true,
+            partial_ord: true,
+            ord: true,
+            hash: true,
         }
     }
 
@@ -229,8 +238,12 @@ impl Derives {
         self.debug &= other.debug;
         self.clone &= other.clone;
         self.copy &= other.copy;
+        self.default_ &= other.default_;
         self.partial_eq &= other.partial_eq;
         self.eq &= other.eq;
+        self.partial_ord &= other.partial_ord;
+        self.ord &= other.ord;
+        self.hash &= other.hash;
     }
 
     pub(super) fn to_list(self) -> Vec<&'static str> {
@@ -244,11 +257,23 @@ impl Derives {
         if self.copy {
             list.push("Copy");
         }
+        if self.default_ {
+            list.push("Default");
+        }
         if self.partial_eq {
             list.push("PartialEq");
         }
         if self.eq {
             list.push("Eq");
+        }
+        if self.partial_ord {
+            list.push("PartialOrd")
+        }
+        if self.ord {
+            list.push("Ord");
+        }
+        if self.hash {
+            list.push("Hash");
         }
         list
     }

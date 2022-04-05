@@ -36,7 +36,7 @@ pub type Op = u8;
 
 pub type Kind = u8;
 
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct SO(u8);
 impl SO {
     pub const SET: Self = Self(0);
@@ -100,7 +100,7 @@ impl std::fmt::Debug for SO  {
     }
 }
 
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct SK(u8);
 impl SK {
     pub const BOUNDING: Self = Self(0);
@@ -162,7 +162,7 @@ impl std::fmt::Debug for SK  {
 
 /// Opcode for the Notify event
 pub const NOTIFY_EVENT: u8 = 0;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct NotifyEvent {
     pub response_type: u8,
     pub shape_kind: SK,
@@ -253,7 +253,7 @@ impl From<NotifyEvent> for [u8; 32] {
 
 /// Opcode for the QueryVersion request
 pub const QUERY_VERSION_REQUEST: u8 = 0;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct QueryVersionRequest;
 impl QueryVersionRequest {
     /// Serialize this request into bytes for the provided connection
@@ -295,7 +295,7 @@ impl crate::x11_utils::ReplyRequest for QueryVersionRequest {
     type Reply = QueryVersionReply;
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct QueryVersionReply {
     pub sequence: u16,
     pub length: u32,
@@ -324,7 +324,7 @@ impl TryParse for QueryVersionReply {
 
 /// Opcode for the Rectangles request
 pub const RECTANGLES_REQUEST: u8 = 1;
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct RectanglesRequest<'input> {
     pub operation: SO,
     pub destination_kind: SK,
@@ -434,7 +434,7 @@ impl<'input> crate::x11_utils::VoidRequest for RectanglesRequest<'input> {
 
 /// Opcode for the Mask request
 pub const MASK_REQUEST: u8 = 2;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct MaskRequest {
     pub operation: SO,
     pub destination_kind: SK,
@@ -521,7 +521,7 @@ impl crate::x11_utils::VoidRequest for MaskRequest {
 
 /// Opcode for the Combine request
 pub const COMBINE_REQUEST: u8 = 3;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct CombineRequest {
     pub operation: SO,
     pub destination_kind: SK,
@@ -613,7 +613,7 @@ impl crate::x11_utils::VoidRequest for CombineRequest {
 
 /// Opcode for the Offset request
 pub const OFFSET_REQUEST: u8 = 4;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct OffsetRequest {
     pub destination_kind: SK,
     pub destination_window: xproto::Window,
@@ -687,7 +687,7 @@ impl crate::x11_utils::VoidRequest for OffsetRequest {
 
 /// Opcode for the QueryExtents request
 pub const QUERY_EXTENTS_REQUEST: u8 = 5;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct QueryExtentsRequest {
     pub destination_window: xproto::Window,
 }
@@ -738,7 +738,7 @@ impl crate::x11_utils::ReplyRequest for QueryExtentsRequest {
     type Reply = QueryExtentsReply;
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct QueryExtentsReply {
     pub sequence: u16,
     pub length: u32,
@@ -784,7 +784,7 @@ impl TryParse for QueryExtentsReply {
 
 /// Opcode for the SelectInput request
 pub const SELECT_INPUT_REQUEST: u8 = 6;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct SelectInputRequest {
     pub destination_window: xproto::Window,
     pub enable: bool,
@@ -845,7 +845,7 @@ impl crate::x11_utils::VoidRequest for SelectInputRequest {
 
 /// Opcode for the InputSelected request
 pub const INPUT_SELECTED_REQUEST: u8 = 7;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct InputSelectedRequest {
     pub destination_window: xproto::Window,
 }
@@ -896,7 +896,7 @@ impl crate::x11_utils::ReplyRequest for InputSelectedRequest {
     type Reply = InputSelectedReply;
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct InputSelectedReply {
     pub enabled: bool,
     pub sequence: u16,
@@ -922,7 +922,7 @@ impl TryParse for InputSelectedReply {
 
 /// Opcode for the GetRectangles request
 pub const GET_RECTANGLES_REQUEST: u8 = 8;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetRectanglesRequest {
     pub window: xproto::Window,
     pub source_kind: SK,
@@ -983,7 +983,7 @@ impl crate::x11_utils::ReplyRequest for GetRectanglesRequest {
     type Reply = GetRectanglesReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetRectanglesReply {
     pub ordering: xproto::ClipOrdering,
     pub sequence: u16,

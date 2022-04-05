@@ -34,7 +34,7 @@ pub const X11_XML_VERSION: (u32, u32) = (1, 2);
 
 /// Opcode for the QueryVersion request
 pub const QUERY_VERSION_REQUEST: u8 = 0;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct QueryVersionRequest {
     pub major_version: u32,
     pub minor_version: u32,
@@ -93,7 +93,7 @@ impl crate::x11_utils::ReplyRequest for QueryVersionRequest {
     type Reply = QueryVersionReply;
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct QueryVersionReply {
     pub sequence: u16,
     pub length: u32,
@@ -122,7 +122,7 @@ impl TryParse for QueryVersionReply {
 
 /// Opcode for the Open request
 pub const OPEN_REQUEST: u8 = 1;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct OpenRequest {
     pub drawable: xproto::Drawable,
     pub provider: u32,
@@ -311,7 +311,7 @@ impl crate::x11_utils::VoidRequest for PixmapFromBufferRequest {
 
 /// Opcode for the BufferFromPixmap request
 pub const BUFFER_FROM_PIXMAP_REQUEST: u8 = 3;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct BufferFromPixmapRequest {
     pub pixmap: xproto::Pixmap,
 }
@@ -477,7 +477,7 @@ impl crate::x11_utils::VoidRequest for FenceFromFDRequest {
 
 /// Opcode for the FDFromFence request
 pub const FD_FROM_FENCE_REQUEST: u8 = 5;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct FDFromFenceRequest {
     pub drawable: xproto::Drawable,
     pub fence: u32,
@@ -566,7 +566,7 @@ impl TryParseFd for FDFromFenceReply {
 
 /// Opcode for the GetSupportedModifiers request
 pub const GET_SUPPORTED_MODIFIERS_REQUEST: u8 = 6;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetSupportedModifiersRequest {
     pub window: u32,
     pub depth: u8,
@@ -630,7 +630,7 @@ impl crate::x11_utils::ReplyRequest for GetSupportedModifiersRequest {
     type Reply = GetSupportedModifiersReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetSupportedModifiersReply {
     pub sequence: u16,
     pub length: u32,
@@ -865,7 +865,7 @@ impl crate::x11_utils::VoidRequest for PixmapFromBuffersRequest {
 
 /// Opcode for the BuffersFromPixmap request
 pub const BUFFERS_FROM_PIXMAP_REQUEST: u8 = 8;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct BuffersFromPixmapRequest {
     pub pixmap: xproto::Pixmap,
 }

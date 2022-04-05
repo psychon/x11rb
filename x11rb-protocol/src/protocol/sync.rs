@@ -34,7 +34,7 @@ pub const X11_XML_VERSION: (u32, u32) = (3, 1);
 
 pub type Alarm = u32;
 
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ALARMSTATE(u8);
 impl ALARMSTATE {
     pub const ACTIVE: Self = Self(0);
@@ -98,7 +98,7 @@ pub type Counter = u32;
 
 pub type Fence = u32;
 
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct TESTTYPE(u32);
 impl TESTTYPE {
     pub const POSITIVE_TRANSITION: Self = Self(0);
@@ -148,7 +148,7 @@ impl std::fmt::Debug for TESTTYPE  {
     }
 }
 
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct VALUETYPE(u32);
 impl VALUETYPE {
     pub const ABSOLUTE: Self = Self(0);
@@ -194,7 +194,7 @@ impl std::fmt::Debug for VALUETYPE  {
     }
 }
 
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct CA(u8);
 impl CA {
     pub const COUNTER: Self = Self(1 << 0);
@@ -261,7 +261,7 @@ impl std::fmt::Debug for CA  {
 }
 bitmask_binop!(CA, u8);
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Int64 {
     pub hi: i32,
     pub lo: u32,
@@ -297,7 +297,7 @@ impl Serialize for Int64 {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Systemcounter {
     pub counter: Counter,
     pub resolution: Int64,
@@ -352,7 +352,7 @@ impl Systemcounter {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Trigger {
     pub counter: Counter,
     pub wait_type: VALUETYPE,
@@ -410,7 +410,7 @@ impl Serialize for Trigger {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Waitcondition {
     pub trigger: Trigger,
     pub event_threshold: Int64,
@@ -474,7 +474,7 @@ pub const ALARM_ERROR: u8 = 1;
 
 /// Opcode for the Initialize request
 pub const INITIALIZE_REQUEST: u8 = 0;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct InitializeRequest {
     pub desired_major_version: u8,
     pub desired_minor_version: u8,
@@ -529,7 +529,7 @@ impl crate::x11_utils::ReplyRequest for InitializeRequest {
     type Reply = InitializeReply;
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct InitializeReply {
     pub sequence: u16,
     pub length: u32,
@@ -559,7 +559,7 @@ impl TryParse for InitializeReply {
 
 /// Opcode for the ListSystemCounters request
 pub const LIST_SYSTEM_COUNTERS_REQUEST: u8 = 1;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ListSystemCountersRequest;
 impl ListSystemCountersRequest {
     /// Serialize this request into bytes for the provided connection
@@ -601,7 +601,7 @@ impl crate::x11_utils::ReplyRequest for ListSystemCountersRequest {
     type Reply = ListSystemCountersReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ListSystemCountersReply {
     pub sequence: u16,
     pub length: u32,
@@ -645,7 +645,7 @@ impl ListSystemCountersReply {
 
 /// Opcode for the CreateCounter request
 pub const CREATE_COUNTER_REQUEST: u8 = 2;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct CreateCounterRequest {
     pub id: Counter,
     pub initial_value: Int64,
@@ -709,7 +709,7 @@ impl crate::x11_utils::VoidRequest for CreateCounterRequest {
 
 /// Opcode for the DestroyCounter request
 pub const DESTROY_COUNTER_REQUEST: u8 = 6;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct DestroyCounterRequest {
     pub counter: Counter,
 }
@@ -761,7 +761,7 @@ impl crate::x11_utils::VoidRequest for DestroyCounterRequest {
 
 /// Opcode for the QueryCounter request
 pub const QUERY_COUNTER_REQUEST: u8 = 5;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct QueryCounterRequest {
     pub counter: Counter,
 }
@@ -812,7 +812,7 @@ impl crate::x11_utils::ReplyRequest for QueryCounterRequest {
     type Reply = QueryCounterReply;
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct QueryCounterReply {
     pub sequence: u16,
     pub length: u32,
@@ -839,7 +839,7 @@ impl TryParse for QueryCounterReply {
 
 /// Opcode for the Await request
 pub const AWAIT_REQUEST: u8 = 7;
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct AwaitRequest<'input> {
     pub wait_list: Cow<'input, [Waitcondition]>,
 }
@@ -903,7 +903,7 @@ impl<'input> crate::x11_utils::VoidRequest for AwaitRequest<'input> {
 
 /// Opcode for the ChangeCounter request
 pub const CHANGE_COUNTER_REQUEST: u8 = 4;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ChangeCounterRequest {
     pub counter: Counter,
     pub amount: Int64,
@@ -967,7 +967,7 @@ impl crate::x11_utils::VoidRequest for ChangeCounterRequest {
 
 /// Opcode for the SetCounter request
 pub const SET_COUNTER_REQUEST: u8 = 3;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct SetCounterRequest {
     pub counter: Counter,
     pub value: Int64,
@@ -1030,7 +1030,7 @@ impl crate::x11_utils::VoidRequest for SetCounterRequest {
 }
 
 /// Auxiliary and optional information for the `create_alarm` function
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
 pub struct CreateAlarmAux {
     pub counter: Option<Counter>,
     pub value_type: Option<VALUETYPE>,
@@ -1195,7 +1195,7 @@ impl CreateAlarmAux {
 
 /// Opcode for the CreateAlarm request
 pub const CREATE_ALARM_REQUEST: u8 = 8;
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct CreateAlarmRequest<'input> {
     pub id: Alarm,
     pub value_list: Cow<'input, CreateAlarmAux>,
@@ -1267,7 +1267,7 @@ impl<'input> crate::x11_utils::VoidRequest for CreateAlarmRequest<'input> {
 }
 
 /// Auxiliary and optional information for the `change_alarm` function
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
 pub struct ChangeAlarmAux {
     pub counter: Option<Counter>,
     pub value_type: Option<VALUETYPE>,
@@ -1432,7 +1432,7 @@ impl ChangeAlarmAux {
 
 /// Opcode for the ChangeAlarm request
 pub const CHANGE_ALARM_REQUEST: u8 = 9;
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ChangeAlarmRequest<'input> {
     pub id: Alarm,
     pub value_list: Cow<'input, ChangeAlarmAux>,
@@ -1505,7 +1505,7 @@ impl<'input> crate::x11_utils::VoidRequest for ChangeAlarmRequest<'input> {
 
 /// Opcode for the DestroyAlarm request
 pub const DESTROY_ALARM_REQUEST: u8 = 11;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct DestroyAlarmRequest {
     pub alarm: Alarm,
 }
@@ -1557,7 +1557,7 @@ impl crate::x11_utils::VoidRequest for DestroyAlarmRequest {
 
 /// Opcode for the QueryAlarm request
 pub const QUERY_ALARM_REQUEST: u8 = 10;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct QueryAlarmRequest {
     pub alarm: Alarm,
 }
@@ -1608,7 +1608,7 @@ impl crate::x11_utils::ReplyRequest for QueryAlarmRequest {
     type Reply = QueryAlarmReply;
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct QueryAlarmReply {
     pub sequence: u16,
     pub length: u32,
@@ -1643,7 +1643,7 @@ impl TryParse for QueryAlarmReply {
 
 /// Opcode for the SetPriority request
 pub const SET_PRIORITY_REQUEST: u8 = 12;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct SetPriorityRequest {
     pub id: u32,
     pub priority: i32,
@@ -1703,7 +1703,7 @@ impl crate::x11_utils::VoidRequest for SetPriorityRequest {
 
 /// Opcode for the GetPriority request
 pub const GET_PRIORITY_REQUEST: u8 = 13;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetPriorityRequest {
     pub id: u32,
 }
@@ -1754,7 +1754,7 @@ impl crate::x11_utils::ReplyRequest for GetPriorityRequest {
     type Reply = GetPriorityReply;
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetPriorityReply {
     pub sequence: u16,
     pub length: u32,
@@ -1781,7 +1781,7 @@ impl TryParse for GetPriorityReply {
 
 /// Opcode for the CreateFence request
 pub const CREATE_FENCE_REQUEST: u8 = 14;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct CreateFenceRequest {
     pub drawable: xproto::Drawable,
     pub fence: Fence,
@@ -1849,7 +1849,7 @@ impl crate::x11_utils::VoidRequest for CreateFenceRequest {
 
 /// Opcode for the TriggerFence request
 pub const TRIGGER_FENCE_REQUEST: u8 = 15;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct TriggerFenceRequest {
     pub fence: Fence,
 }
@@ -1901,7 +1901,7 @@ impl crate::x11_utils::VoidRequest for TriggerFenceRequest {
 
 /// Opcode for the ResetFence request
 pub const RESET_FENCE_REQUEST: u8 = 16;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ResetFenceRequest {
     pub fence: Fence,
 }
@@ -1953,7 +1953,7 @@ impl crate::x11_utils::VoidRequest for ResetFenceRequest {
 
 /// Opcode for the DestroyFence request
 pub const DESTROY_FENCE_REQUEST: u8 = 17;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct DestroyFenceRequest {
     pub fence: Fence,
 }
@@ -2005,7 +2005,7 @@ impl crate::x11_utils::VoidRequest for DestroyFenceRequest {
 
 /// Opcode for the QueryFence request
 pub const QUERY_FENCE_REQUEST: u8 = 18;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct QueryFenceRequest {
     pub fence: Fence,
 }
@@ -2056,7 +2056,7 @@ impl crate::x11_utils::ReplyRequest for QueryFenceRequest {
     type Reply = QueryFenceReply;
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct QueryFenceReply {
     pub sequence: u16,
     pub length: u32,
@@ -2084,7 +2084,7 @@ impl TryParse for QueryFenceReply {
 
 /// Opcode for the AwaitFence request
 pub const AWAIT_FENCE_REQUEST: u8 = 19;
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct AwaitFenceRequest<'input> {
     pub fence_list: Cow<'input, [Fence]>,
 }
@@ -2148,7 +2148,7 @@ impl<'input> crate::x11_utils::VoidRequest for AwaitFenceRequest<'input> {
 
 /// Opcode for the CounterNotify event
 pub const COUNTER_NOTIFY_EVENT: u8 = 0;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct CounterNotifyEvent {
     pub response_type: u8,
     pub kind: u8,
@@ -2235,7 +2235,7 @@ impl From<CounterNotifyEvent> for [u8; 32] {
 
 /// Opcode for the AlarmNotify event
 pub const ALARM_NOTIFY_EVENT: u8 = 1;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct AlarmNotifyEvent {
     pub response_type: u8,
     pub kind: u8,

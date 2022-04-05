@@ -84,6 +84,7 @@ pub(super) fn emit_switch_type(
             let type_name = format!("{}{}", name, to_rust_type_name(&field_name));
 
             let mut derives = Derives::all();
+            derives.default_ = false;
             let case_fields = case.fields.borrow();
             let ext_params = case.external_params.borrow();
 
@@ -116,6 +117,7 @@ pub(super) fn emit_switch_type(
     }
 
     let mut derives = Derives::all();
+    derives.default_ = false;
     for case in switch.cases.iter() {
         generator.filter_derives_for_fields(&mut derives, &*case.fields.borrow(), false);
     }

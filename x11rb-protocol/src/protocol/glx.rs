@@ -97,7 +97,7 @@ pub const GLX_BAD_PROFILE_ARB_ERROR: u8 = 13;
 
 /// Opcode for the PbufferClobber event
 pub const PBUFFER_CLOBBER_EVENT: u8 = 0;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct PbufferClobberEvent {
     pub response_type: u8,
     pub sequence: u16,
@@ -194,7 +194,7 @@ impl From<PbufferClobberEvent> for [u8; 32] {
 
 /// Opcode for the BufferSwapComplete event
 pub const BUFFER_SWAP_COMPLETE_EVENT: u8 = 1;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct BufferSwapCompleteEvent {
     pub response_type: u8,
     pub sequence: u16,
@@ -280,7 +280,7 @@ impl From<BufferSwapCompleteEvent> for [u8; 32] {
     }
 }
 
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct PBCET(u16);
 impl PBCET {
     pub const DAMAGED: Self = Self(32791);
@@ -332,7 +332,7 @@ impl std::fmt::Debug for PBCET  {
     }
 }
 
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct PBCDT(u16);
 impl PBCDT {
     pub const WINDOW: Self = Self(32793);
@@ -386,7 +386,7 @@ impl std::fmt::Debug for PBCDT  {
 
 /// Opcode for the Render request
 pub const RENDER_REQUEST: u8 = 1;
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct RenderRequest<'input> {
     pub context_tag: ContextTag,
     pub data: Cow<'input, [u8]>,
@@ -451,7 +451,7 @@ impl<'input> crate::x11_utils::VoidRequest for RenderRequest<'input> {
 
 /// Opcode for the RenderLarge request
 pub const RENDER_LARGE_REQUEST: u8 = 2;
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct RenderLargeRequest<'input> {
     pub context_tag: ContextTag,
     pub request_num: u16,
@@ -537,7 +537,7 @@ impl<'input> crate::x11_utils::VoidRequest for RenderLargeRequest<'input> {
 
 /// Opcode for the CreateContext request
 pub const CREATE_CONTEXT_REQUEST: u8 = 3;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct CreateContextRequest {
     pub context: Context,
     pub visual: xproto::Visualid,
@@ -622,7 +622,7 @@ impl crate::x11_utils::VoidRequest for CreateContextRequest {
 
 /// Opcode for the DestroyContext request
 pub const DESTROY_CONTEXT_REQUEST: u8 = 4;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct DestroyContextRequest {
     pub context: Context,
 }
@@ -674,7 +674,7 @@ impl crate::x11_utils::VoidRequest for DestroyContextRequest {
 
 /// Opcode for the MakeCurrent request
 pub const MAKE_CURRENT_REQUEST: u8 = 5;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct MakeCurrentRequest {
     pub drawable: Drawable,
     pub context: Context,
@@ -741,7 +741,7 @@ impl crate::x11_utils::ReplyRequest for MakeCurrentRequest {
     type Reply = MakeCurrentReply;
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct MakeCurrentReply {
     pub sequence: u16,
     pub length: u32,
@@ -769,7 +769,7 @@ impl TryParse for MakeCurrentReply {
 
 /// Opcode for the IsDirect request
 pub const IS_DIRECT_REQUEST: u8 = 6;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct IsDirectRequest {
     pub context: Context,
 }
@@ -820,7 +820,7 @@ impl crate::x11_utils::ReplyRequest for IsDirectRequest {
     type Reply = IsDirectReply;
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct IsDirectReply {
     pub sequence: u16,
     pub length: u32,
@@ -848,7 +848,7 @@ impl TryParse for IsDirectReply {
 
 /// Opcode for the QueryVersion request
 pub const QUERY_VERSION_REQUEST: u8 = 7;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct QueryVersionRequest {
     pub major_version: u32,
     pub minor_version: u32,
@@ -907,7 +907,7 @@ impl crate::x11_utils::ReplyRequest for QueryVersionRequest {
     type Reply = QueryVersionReply;
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct QueryVersionReply {
     pub sequence: u16,
     pub length: u32,
@@ -937,7 +937,7 @@ impl TryParse for QueryVersionReply {
 
 /// Opcode for the WaitGL request
 pub const WAIT_GL_REQUEST: u8 = 8;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct WaitGLRequest {
     pub context_tag: ContextTag,
 }
@@ -989,7 +989,7 @@ impl crate::x11_utils::VoidRequest for WaitGLRequest {
 
 /// Opcode for the WaitX request
 pub const WAIT_X_REQUEST: u8 = 9;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct WaitXRequest {
     pub context_tag: ContextTag,
 }
@@ -1041,7 +1041,7 @@ impl crate::x11_utils::VoidRequest for WaitXRequest {
 
 /// Opcode for the CopyContext request
 pub const COPY_CONTEXT_REQUEST: u8 = 10;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct CopyContextRequest {
     pub src: Context,
     pub dest: Context,
@@ -1115,7 +1115,7 @@ impl Request for CopyContextRequest {
 impl crate::x11_utils::VoidRequest for CopyContextRequest {
 }
 
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GC(u32);
 impl GC {
     pub const GL_CURRENT_BIT: Self = Self(1 << 0);
@@ -1201,7 +1201,7 @@ impl std::fmt::Debug for GC  {
 
 /// Opcode for the SwapBuffers request
 pub const SWAP_BUFFERS_REQUEST: u8 = 11;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct SwapBuffersRequest {
     pub context_tag: ContextTag,
     pub drawable: Drawable,
@@ -1261,7 +1261,7 @@ impl crate::x11_utils::VoidRequest for SwapBuffersRequest {
 
 /// Opcode for the UseXFont request
 pub const USE_X_FONT_REQUEST: u8 = 12;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct UseXFontRequest {
     pub context_tag: ContextTag,
     pub font: xproto::Font,
@@ -1345,7 +1345,7 @@ impl crate::x11_utils::VoidRequest for UseXFontRequest {
 
 /// Opcode for the CreateGLXPixmap request
 pub const CREATE_GLX_PIXMAP_REQUEST: u8 = 13;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct CreateGLXPixmapRequest {
     pub screen: u32,
     pub visual: xproto::Visualid,
@@ -1421,7 +1421,7 @@ impl crate::x11_utils::VoidRequest for CreateGLXPixmapRequest {
 
 /// Opcode for the GetVisualConfigs request
 pub const GET_VISUAL_CONFIGS_REQUEST: u8 = 14;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetVisualConfigsRequest {
     pub screen: u32,
 }
@@ -1472,7 +1472,7 @@ impl crate::x11_utils::ReplyRequest for GetVisualConfigsRequest {
     type Reply = GetVisualConfigsReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetVisualConfigsReply {
     pub sequence: u16,
     pub num_visuals: u32,
@@ -1518,7 +1518,7 @@ impl GetVisualConfigsReply {
 
 /// Opcode for the DestroyGLXPixmap request
 pub const DESTROY_GLX_PIXMAP_REQUEST: u8 = 15;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct DestroyGLXPixmapRequest {
     pub glx_pixmap: Pixmap,
 }
@@ -1570,7 +1570,7 @@ impl crate::x11_utils::VoidRequest for DestroyGLXPixmapRequest {
 
 /// Opcode for the VendorPrivate request
 pub const VENDOR_PRIVATE_REQUEST: u8 = 16;
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct VendorPrivateRequest<'input> {
     pub vendor_code: u32,
     pub context_tag: ContextTag,
@@ -1644,7 +1644,7 @@ impl<'input> crate::x11_utils::VoidRequest for VendorPrivateRequest<'input> {
 
 /// Opcode for the VendorPrivateWithReply request
 pub const VENDOR_PRIVATE_WITH_REPLY_REQUEST: u8 = 17;
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct VendorPrivateWithReplyRequest<'input> {
     pub vendor_code: u32,
     pub context_tag: ContextTag,
@@ -1717,7 +1717,7 @@ impl<'input> crate::x11_utils::ReplyRequest for VendorPrivateWithReplyRequest<'i
     type Reply = VendorPrivateWithReplyReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct VendorPrivateWithReplyReply {
     pub sequence: u16,
     pub retval: u32,
@@ -1765,7 +1765,7 @@ impl VendorPrivateWithReplyReply {
 
 /// Opcode for the QueryExtensionsString request
 pub const QUERY_EXTENSIONS_STRING_REQUEST: u8 = 18;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct QueryExtensionsStringRequest {
     pub screen: u32,
 }
@@ -1816,7 +1816,7 @@ impl crate::x11_utils::ReplyRequest for QueryExtensionsStringRequest {
     type Reply = QueryExtensionsStringReply;
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct QueryExtensionsStringReply {
     pub sequence: u16,
     pub length: u32,
@@ -1845,7 +1845,7 @@ impl TryParse for QueryExtensionsStringReply {
 
 /// Opcode for the QueryServerString request
 pub const QUERY_SERVER_STRING_REQUEST: u8 = 19;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct QueryServerStringRequest {
     pub screen: u32,
     pub name: u32,
@@ -1904,7 +1904,7 @@ impl crate::x11_utils::ReplyRequest for QueryServerStringRequest {
     type Reply = QueryServerStringReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct QueryServerStringReply {
     pub sequence: u16,
     pub length: u32,
@@ -1950,7 +1950,7 @@ impl QueryServerStringReply {
 
 /// Opcode for the ClientInfo request
 pub const CLIENT_INFO_REQUEST: u8 = 20;
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ClientInfoRequest<'input> {
     pub major_version: u32,
     pub minor_version: u32,
@@ -2031,7 +2031,7 @@ impl<'input> crate::x11_utils::VoidRequest for ClientInfoRequest<'input> {
 
 /// Opcode for the GetFBConfigs request
 pub const GET_FB_CONFIGS_REQUEST: u8 = 21;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetFBConfigsRequest {
     pub screen: u32,
 }
@@ -2082,7 +2082,7 @@ impl crate::x11_utils::ReplyRequest for GetFBConfigsRequest {
     type Reply = GetFBConfigsReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetFBConfigsReply {
     pub sequence: u16,
     pub num_fb_configs: u32,
@@ -2128,7 +2128,7 @@ impl GetFBConfigsReply {
 
 /// Opcode for the CreatePixmap request
 pub const CREATE_PIXMAP_REQUEST: u8 = 22;
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct CreatePixmapRequest<'input> {
     pub screen: u32,
     pub fbconfig: Fbconfig,
@@ -2229,7 +2229,7 @@ impl<'input> crate::x11_utils::VoidRequest for CreatePixmapRequest<'input> {
 
 /// Opcode for the DestroyPixmap request
 pub const DESTROY_PIXMAP_REQUEST: u8 = 23;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct DestroyPixmapRequest {
     pub glx_pixmap: Pixmap,
 }
@@ -2281,7 +2281,7 @@ impl crate::x11_utils::VoidRequest for DestroyPixmapRequest {
 
 /// Opcode for the CreateNewContext request
 pub const CREATE_NEW_CONTEXT_REQUEST: u8 = 24;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct CreateNewContextRequest {
     pub context: Context,
     pub fbconfig: Fbconfig,
@@ -2374,7 +2374,7 @@ impl crate::x11_utils::VoidRequest for CreateNewContextRequest {
 
 /// Opcode for the QueryContext request
 pub const QUERY_CONTEXT_REQUEST: u8 = 25;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct QueryContextRequest {
     pub context: Context,
 }
@@ -2425,7 +2425,7 @@ impl crate::x11_utils::ReplyRequest for QueryContextRequest {
     type Reply = QueryContextReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct QueryContextReply {
     pub sequence: u16,
     pub length: u32,
@@ -2470,7 +2470,7 @@ impl QueryContextReply {
 
 /// Opcode for the MakeContextCurrent request
 pub const MAKE_CONTEXT_CURRENT_REQUEST: u8 = 26;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct MakeContextCurrentRequest {
     pub old_context_tag: ContextTag,
     pub drawable: Drawable,
@@ -2545,7 +2545,7 @@ impl crate::x11_utils::ReplyRequest for MakeContextCurrentRequest {
     type Reply = MakeContextCurrentReply;
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct MakeContextCurrentReply {
     pub sequence: u16,
     pub length: u32,
@@ -2573,7 +2573,7 @@ impl TryParse for MakeContextCurrentReply {
 
 /// Opcode for the CreatePbuffer request
 pub const CREATE_PBUFFER_REQUEST: u8 = 27;
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct CreatePbufferRequest<'input> {
     pub screen: u32,
     pub fbconfig: Fbconfig,
@@ -2665,7 +2665,7 @@ impl<'input> crate::x11_utils::VoidRequest for CreatePbufferRequest<'input> {
 
 /// Opcode for the DestroyPbuffer request
 pub const DESTROY_PBUFFER_REQUEST: u8 = 28;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct DestroyPbufferRequest {
     pub pbuffer: Pbuffer,
 }
@@ -2717,7 +2717,7 @@ impl crate::x11_utils::VoidRequest for DestroyPbufferRequest {
 
 /// Opcode for the GetDrawableAttributes request
 pub const GET_DRAWABLE_ATTRIBUTES_REQUEST: u8 = 29;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetDrawableAttributesRequest {
     pub drawable: Drawable,
 }
@@ -2768,7 +2768,7 @@ impl crate::x11_utils::ReplyRequest for GetDrawableAttributesRequest {
     type Reply = GetDrawableAttributesReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetDrawableAttributesReply {
     pub sequence: u16,
     pub length: u32,
@@ -2813,7 +2813,7 @@ impl GetDrawableAttributesReply {
 
 /// Opcode for the ChangeDrawableAttributes request
 pub const CHANGE_DRAWABLE_ATTRIBUTES_REQUEST: u8 = 30;
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ChangeDrawableAttributesRequest<'input> {
     pub drawable: Drawable,
     pub attribs: Cow<'input, [u32]>,
@@ -2887,7 +2887,7 @@ impl<'input> crate::x11_utils::VoidRequest for ChangeDrawableAttributesRequest<'
 
 /// Opcode for the CreateWindow request
 pub const CREATE_WINDOW_REQUEST: u8 = 31;
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct CreateWindowRequest<'input> {
     pub screen: u32,
     pub fbconfig: Fbconfig,
@@ -2988,7 +2988,7 @@ impl<'input> crate::x11_utils::VoidRequest for CreateWindowRequest<'input> {
 
 /// Opcode for the DeleteWindow request
 pub const DELETE_WINDOW_REQUEST: u8 = 32;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct DeleteWindowRequest {
     pub glxwindow: Window,
 }
@@ -3040,7 +3040,7 @@ impl crate::x11_utils::VoidRequest for DeleteWindowRequest {
 
 /// Opcode for the SetClientInfoARB request
 pub const SET_CLIENT_INFO_ARB_REQUEST: u8 = 33;
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct SetClientInfoARBRequest<'input> {
     pub major_version: u32,
     pub minor_version: u32,
@@ -3147,7 +3147,7 @@ impl<'input> crate::x11_utils::VoidRequest for SetClientInfoARBRequest<'input> {
 
 /// Opcode for the CreateContextAttribsARB request
 pub const CREATE_CONTEXT_ATTRIBS_ARB_REQUEST: u8 = 34;
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct CreateContextAttribsARBRequest<'input> {
     pub context: Context,
     pub fbconfig: Fbconfig,
@@ -3258,7 +3258,7 @@ impl<'input> crate::x11_utils::VoidRequest for CreateContextAttribsARBRequest<'i
 
 /// Opcode for the SetClientInfo2ARB request
 pub const SET_CLIENT_INFO2_ARB_REQUEST: u8 = 35;
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct SetClientInfo2ARBRequest<'input> {
     pub major_version: u32,
     pub minor_version: u32,
@@ -3365,7 +3365,7 @@ impl<'input> crate::x11_utils::VoidRequest for SetClientInfo2ARBRequest<'input> 
 
 /// Opcode for the NewList request
 pub const NEW_LIST_REQUEST: u8 = 101;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct NewListRequest {
     pub context_tag: ContextTag,
     pub list: u32,
@@ -3433,7 +3433,7 @@ impl crate::x11_utils::VoidRequest for NewListRequest {
 
 /// Opcode for the EndList request
 pub const END_LIST_REQUEST: u8 = 102;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct EndListRequest {
     pub context_tag: ContextTag,
 }
@@ -3485,7 +3485,7 @@ impl crate::x11_utils::VoidRequest for EndListRequest {
 
 /// Opcode for the DeleteLists request
 pub const DELETE_LISTS_REQUEST: u8 = 103;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct DeleteListsRequest {
     pub context_tag: ContextTag,
     pub list: u32,
@@ -3553,7 +3553,7 @@ impl crate::x11_utils::VoidRequest for DeleteListsRequest {
 
 /// Opcode for the GenLists request
 pub const GEN_LISTS_REQUEST: u8 = 104;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GenListsRequest {
     pub context_tag: ContextTag,
     pub range: i32,
@@ -3612,7 +3612,7 @@ impl crate::x11_utils::ReplyRequest for GenListsRequest {
     type Reply = GenListsReply;
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GenListsReply {
     pub sequence: u16,
     pub length: u32,
@@ -3639,7 +3639,7 @@ impl TryParse for GenListsReply {
 
 /// Opcode for the FeedbackBuffer request
 pub const FEEDBACK_BUFFER_REQUEST: u8 = 105;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct FeedbackBufferRequest {
     pub context_tag: ContextTag,
     pub size: i32,
@@ -3707,7 +3707,7 @@ impl crate::x11_utils::VoidRequest for FeedbackBufferRequest {
 
 /// Opcode for the SelectBuffer request
 pub const SELECT_BUFFER_REQUEST: u8 = 106;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct SelectBufferRequest {
     pub context_tag: ContextTag,
     pub size: i32,
@@ -3767,7 +3767,7 @@ impl crate::x11_utils::VoidRequest for SelectBufferRequest {
 
 /// Opcode for the RenderMode request
 pub const RENDER_MODE_REQUEST: u8 = 107;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct RenderModeRequest {
     pub context_tag: ContextTag,
     pub mode: u32,
@@ -3826,7 +3826,7 @@ impl crate::x11_utils::ReplyRequest for RenderModeRequest {
     type Reply = RenderModeReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct RenderModeReply {
     pub sequence: u16,
     pub length: u32,
@@ -3872,7 +3872,7 @@ impl RenderModeReply {
     }
 }
 
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct RM(u16);
 impl RM {
     pub const GL_RENDER: Self = Self(7168);
@@ -3928,7 +3928,7 @@ impl std::fmt::Debug for RM  {
 
 /// Opcode for the Finish request
 pub const FINISH_REQUEST: u8 = 108;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct FinishRequest {
     pub context_tag: ContextTag,
 }
@@ -3979,7 +3979,7 @@ impl crate::x11_utils::ReplyRequest for FinishRequest {
     type Reply = FinishReply;
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct FinishReply {
     pub sequence: u16,
     pub length: u32,
@@ -4004,7 +4004,7 @@ impl TryParse for FinishReply {
 
 /// Opcode for the PixelStoref request
 pub const PIXEL_STOREF_REQUEST: u8 = 109;
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, PartialOrd)]
 pub struct PixelStorefRequest {
     pub context_tag: ContextTag,
     pub pname: u32,
@@ -4072,7 +4072,7 @@ impl crate::x11_utils::VoidRequest for PixelStorefRequest {
 
 /// Opcode for the PixelStorei request
 pub const PIXEL_STOREI_REQUEST: u8 = 110;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct PixelStoreiRequest {
     pub context_tag: ContextTag,
     pub pname: u32,
@@ -4140,7 +4140,7 @@ impl crate::x11_utils::VoidRequest for PixelStoreiRequest {
 
 /// Opcode for the ReadPixels request
 pub const READ_PIXELS_REQUEST: u8 = 111;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ReadPixelsRequest {
     pub context_tag: ContextTag,
     pub x: i32,
@@ -4251,7 +4251,7 @@ impl crate::x11_utils::ReplyRequest for ReadPixelsRequest {
     type Reply = ReadPixelsReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ReadPixelsReply {
     pub sequence: u16,
     pub data: Vec<u8>,
@@ -4295,7 +4295,7 @@ impl ReadPixelsReply {
 
 /// Opcode for the GetBooleanv request
 pub const GET_BOOLEANV_REQUEST: u8 = 112;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetBooleanvRequest {
     pub context_tag: ContextTag,
     pub pname: i32,
@@ -4354,7 +4354,7 @@ impl crate::x11_utils::ReplyRequest for GetBooleanvRequest {
     type Reply = GetBooleanvReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetBooleanvReply {
     pub sequence: u16,
     pub length: u32,
@@ -4401,7 +4401,7 @@ impl GetBooleanvReply {
 
 /// Opcode for the GetClipPlane request
 pub const GET_CLIP_PLANE_REQUEST: u8 = 113;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetClipPlaneRequest {
     pub context_tag: ContextTag,
     pub plane: i32,
@@ -4460,7 +4460,7 @@ impl crate::x11_utils::ReplyRequest for GetClipPlaneRequest {
     type Reply = GetClipPlaneReply;
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, Default, PartialEq, PartialOrd)]
 pub struct GetClipPlaneReply {
     pub sequence: u16,
     pub data: Vec<Float64>,
@@ -4503,7 +4503,7 @@ impl GetClipPlaneReply {
 
 /// Opcode for the GetDoublev request
 pub const GET_DOUBLEV_REQUEST: u8 = 114;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetDoublevRequest {
     pub context_tag: ContextTag,
     pub pname: u32,
@@ -4562,7 +4562,7 @@ impl crate::x11_utils::ReplyRequest for GetDoublevRequest {
     type Reply = GetDoublevReply;
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, Default, PartialEq, PartialOrd)]
 pub struct GetDoublevReply {
     pub sequence: u16,
     pub length: u32,
@@ -4609,7 +4609,7 @@ impl GetDoublevReply {
 
 /// Opcode for the GetError request
 pub const GET_ERROR_REQUEST: u8 = 115;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetErrorRequest {
     pub context_tag: ContextTag,
 }
@@ -4660,7 +4660,7 @@ impl crate::x11_utils::ReplyRequest for GetErrorRequest {
     type Reply = GetErrorReply;
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetErrorReply {
     pub sequence: u16,
     pub length: u32,
@@ -4687,7 +4687,7 @@ impl TryParse for GetErrorReply {
 
 /// Opcode for the GetFloatv request
 pub const GET_FLOATV_REQUEST: u8 = 116;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetFloatvRequest {
     pub context_tag: ContextTag,
     pub pname: u32,
@@ -4746,7 +4746,7 @@ impl crate::x11_utils::ReplyRequest for GetFloatvRequest {
     type Reply = GetFloatvReply;
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, Default, PartialEq, PartialOrd)]
 pub struct GetFloatvReply {
     pub sequence: u16,
     pub length: u32,
@@ -4793,7 +4793,7 @@ impl GetFloatvReply {
 
 /// Opcode for the GetIntegerv request
 pub const GET_INTEGERV_REQUEST: u8 = 117;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetIntegervRequest {
     pub context_tag: ContextTag,
     pub pname: u32,
@@ -4852,7 +4852,7 @@ impl crate::x11_utils::ReplyRequest for GetIntegervRequest {
     type Reply = GetIntegervReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetIntegervReply {
     pub sequence: u16,
     pub length: u32,
@@ -4899,7 +4899,7 @@ impl GetIntegervReply {
 
 /// Opcode for the GetLightfv request
 pub const GET_LIGHTFV_REQUEST: u8 = 118;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetLightfvRequest {
     pub context_tag: ContextTag,
     pub light: u32,
@@ -4966,7 +4966,7 @@ impl crate::x11_utils::ReplyRequest for GetLightfvRequest {
     type Reply = GetLightfvReply;
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, Default, PartialEq, PartialOrd)]
 pub struct GetLightfvReply {
     pub sequence: u16,
     pub length: u32,
@@ -5013,7 +5013,7 @@ impl GetLightfvReply {
 
 /// Opcode for the GetLightiv request
 pub const GET_LIGHTIV_REQUEST: u8 = 119;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetLightivRequest {
     pub context_tag: ContextTag,
     pub light: u32,
@@ -5080,7 +5080,7 @@ impl crate::x11_utils::ReplyRequest for GetLightivRequest {
     type Reply = GetLightivReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetLightivReply {
     pub sequence: u16,
     pub length: u32,
@@ -5127,7 +5127,7 @@ impl GetLightivReply {
 
 /// Opcode for the GetMapdv request
 pub const GET_MAPDV_REQUEST: u8 = 120;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetMapdvRequest {
     pub context_tag: ContextTag,
     pub target: u32,
@@ -5194,7 +5194,7 @@ impl crate::x11_utils::ReplyRequest for GetMapdvRequest {
     type Reply = GetMapdvReply;
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, Default, PartialEq, PartialOrd)]
 pub struct GetMapdvReply {
     pub sequence: u16,
     pub length: u32,
@@ -5241,7 +5241,7 @@ impl GetMapdvReply {
 
 /// Opcode for the GetMapfv request
 pub const GET_MAPFV_REQUEST: u8 = 121;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetMapfvRequest {
     pub context_tag: ContextTag,
     pub target: u32,
@@ -5308,7 +5308,7 @@ impl crate::x11_utils::ReplyRequest for GetMapfvRequest {
     type Reply = GetMapfvReply;
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, Default, PartialEq, PartialOrd)]
 pub struct GetMapfvReply {
     pub sequence: u16,
     pub length: u32,
@@ -5355,7 +5355,7 @@ impl GetMapfvReply {
 
 /// Opcode for the GetMapiv request
 pub const GET_MAPIV_REQUEST: u8 = 122;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetMapivRequest {
     pub context_tag: ContextTag,
     pub target: u32,
@@ -5422,7 +5422,7 @@ impl crate::x11_utils::ReplyRequest for GetMapivRequest {
     type Reply = GetMapivReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetMapivReply {
     pub sequence: u16,
     pub length: u32,
@@ -5469,7 +5469,7 @@ impl GetMapivReply {
 
 /// Opcode for the GetMaterialfv request
 pub const GET_MATERIALFV_REQUEST: u8 = 123;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetMaterialfvRequest {
     pub context_tag: ContextTag,
     pub face: u32,
@@ -5536,7 +5536,7 @@ impl crate::x11_utils::ReplyRequest for GetMaterialfvRequest {
     type Reply = GetMaterialfvReply;
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, Default, PartialEq, PartialOrd)]
 pub struct GetMaterialfvReply {
     pub sequence: u16,
     pub length: u32,
@@ -5583,7 +5583,7 @@ impl GetMaterialfvReply {
 
 /// Opcode for the GetMaterialiv request
 pub const GET_MATERIALIV_REQUEST: u8 = 124;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetMaterialivRequest {
     pub context_tag: ContextTag,
     pub face: u32,
@@ -5650,7 +5650,7 @@ impl crate::x11_utils::ReplyRequest for GetMaterialivRequest {
     type Reply = GetMaterialivReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetMaterialivReply {
     pub sequence: u16,
     pub length: u32,
@@ -5697,7 +5697,7 @@ impl GetMaterialivReply {
 
 /// Opcode for the GetPixelMapfv request
 pub const GET_PIXEL_MAPFV_REQUEST: u8 = 125;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetPixelMapfvRequest {
     pub context_tag: ContextTag,
     pub map: u32,
@@ -5756,7 +5756,7 @@ impl crate::x11_utils::ReplyRequest for GetPixelMapfvRequest {
     type Reply = GetPixelMapfvReply;
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, Default, PartialEq, PartialOrd)]
 pub struct GetPixelMapfvReply {
     pub sequence: u16,
     pub length: u32,
@@ -5803,7 +5803,7 @@ impl GetPixelMapfvReply {
 
 /// Opcode for the GetPixelMapuiv request
 pub const GET_PIXEL_MAPUIV_REQUEST: u8 = 126;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetPixelMapuivRequest {
     pub context_tag: ContextTag,
     pub map: u32,
@@ -5862,7 +5862,7 @@ impl crate::x11_utils::ReplyRequest for GetPixelMapuivRequest {
     type Reply = GetPixelMapuivReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetPixelMapuivReply {
     pub sequence: u16,
     pub length: u32,
@@ -5909,7 +5909,7 @@ impl GetPixelMapuivReply {
 
 /// Opcode for the GetPixelMapusv request
 pub const GET_PIXEL_MAPUSV_REQUEST: u8 = 127;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetPixelMapusvRequest {
     pub context_tag: ContextTag,
     pub map: u32,
@@ -5968,7 +5968,7 @@ impl crate::x11_utils::ReplyRequest for GetPixelMapusvRequest {
     type Reply = GetPixelMapusvReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetPixelMapusvReply {
     pub sequence: u16,
     pub length: u32,
@@ -6015,7 +6015,7 @@ impl GetPixelMapusvReply {
 
 /// Opcode for the GetPolygonStipple request
 pub const GET_POLYGON_STIPPLE_REQUEST: u8 = 128;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetPolygonStippleRequest {
     pub context_tag: ContextTag,
     pub lsb_first: bool,
@@ -6074,7 +6074,7 @@ impl crate::x11_utils::ReplyRequest for GetPolygonStippleRequest {
     type Reply = GetPolygonStippleReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetPolygonStippleReply {
     pub sequence: u16,
     pub data: Vec<u8>,
@@ -6118,7 +6118,7 @@ impl GetPolygonStippleReply {
 
 /// Opcode for the GetString request
 pub const GET_STRING_REQUEST: u8 = 129;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetStringRequest {
     pub context_tag: ContextTag,
     pub name: u32,
@@ -6177,7 +6177,7 @@ impl crate::x11_utils::ReplyRequest for GetStringRequest {
     type Reply = GetStringReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetStringReply {
     pub sequence: u16,
     pub length: u32,
@@ -6223,7 +6223,7 @@ impl GetStringReply {
 
 /// Opcode for the GetTexEnvfv request
 pub const GET_TEX_ENVFV_REQUEST: u8 = 130;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetTexEnvfvRequest {
     pub context_tag: ContextTag,
     pub target: u32,
@@ -6290,7 +6290,7 @@ impl crate::x11_utils::ReplyRequest for GetTexEnvfvRequest {
     type Reply = GetTexEnvfvReply;
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, Default, PartialEq, PartialOrd)]
 pub struct GetTexEnvfvReply {
     pub sequence: u16,
     pub length: u32,
@@ -6337,7 +6337,7 @@ impl GetTexEnvfvReply {
 
 /// Opcode for the GetTexEnviv request
 pub const GET_TEX_ENVIV_REQUEST: u8 = 131;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetTexEnvivRequest {
     pub context_tag: ContextTag,
     pub target: u32,
@@ -6404,7 +6404,7 @@ impl crate::x11_utils::ReplyRequest for GetTexEnvivRequest {
     type Reply = GetTexEnvivReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetTexEnvivReply {
     pub sequence: u16,
     pub length: u32,
@@ -6451,7 +6451,7 @@ impl GetTexEnvivReply {
 
 /// Opcode for the GetTexGendv request
 pub const GET_TEX_GENDV_REQUEST: u8 = 132;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetTexGendvRequest {
     pub context_tag: ContextTag,
     pub coord: u32,
@@ -6518,7 +6518,7 @@ impl crate::x11_utils::ReplyRequest for GetTexGendvRequest {
     type Reply = GetTexGendvReply;
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, Default, PartialEq, PartialOrd)]
 pub struct GetTexGendvReply {
     pub sequence: u16,
     pub length: u32,
@@ -6565,7 +6565,7 @@ impl GetTexGendvReply {
 
 /// Opcode for the GetTexGenfv request
 pub const GET_TEX_GENFV_REQUEST: u8 = 133;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetTexGenfvRequest {
     pub context_tag: ContextTag,
     pub coord: u32,
@@ -6632,7 +6632,7 @@ impl crate::x11_utils::ReplyRequest for GetTexGenfvRequest {
     type Reply = GetTexGenfvReply;
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, Default, PartialEq, PartialOrd)]
 pub struct GetTexGenfvReply {
     pub sequence: u16,
     pub length: u32,
@@ -6679,7 +6679,7 @@ impl GetTexGenfvReply {
 
 /// Opcode for the GetTexGeniv request
 pub const GET_TEX_GENIV_REQUEST: u8 = 134;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetTexGenivRequest {
     pub context_tag: ContextTag,
     pub coord: u32,
@@ -6746,7 +6746,7 @@ impl crate::x11_utils::ReplyRequest for GetTexGenivRequest {
     type Reply = GetTexGenivReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetTexGenivReply {
     pub sequence: u16,
     pub length: u32,
@@ -6793,7 +6793,7 @@ impl GetTexGenivReply {
 
 /// Opcode for the GetTexImage request
 pub const GET_TEX_IMAGE_REQUEST: u8 = 135;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetTexImageRequest {
     pub context_tag: ContextTag,
     pub target: u32,
@@ -6884,7 +6884,7 @@ impl crate::x11_utils::ReplyRequest for GetTexImageRequest {
     type Reply = GetTexImageReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetTexImageReply {
     pub sequence: u16,
     pub width: i32,
@@ -6935,7 +6935,7 @@ impl GetTexImageReply {
 
 /// Opcode for the GetTexParameterfv request
 pub const GET_TEX_PARAMETERFV_REQUEST: u8 = 136;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetTexParameterfvRequest {
     pub context_tag: ContextTag,
     pub target: u32,
@@ -7002,7 +7002,7 @@ impl crate::x11_utils::ReplyRequest for GetTexParameterfvRequest {
     type Reply = GetTexParameterfvReply;
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, Default, PartialEq, PartialOrd)]
 pub struct GetTexParameterfvReply {
     pub sequence: u16,
     pub length: u32,
@@ -7049,7 +7049,7 @@ impl GetTexParameterfvReply {
 
 /// Opcode for the GetTexParameteriv request
 pub const GET_TEX_PARAMETERIV_REQUEST: u8 = 137;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetTexParameterivRequest {
     pub context_tag: ContextTag,
     pub target: u32,
@@ -7116,7 +7116,7 @@ impl crate::x11_utils::ReplyRequest for GetTexParameterivRequest {
     type Reply = GetTexParameterivReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetTexParameterivReply {
     pub sequence: u16,
     pub length: u32,
@@ -7163,7 +7163,7 @@ impl GetTexParameterivReply {
 
 /// Opcode for the GetTexLevelParameterfv request
 pub const GET_TEX_LEVEL_PARAMETERFV_REQUEST: u8 = 138;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetTexLevelParameterfvRequest {
     pub context_tag: ContextTag,
     pub target: u32,
@@ -7238,7 +7238,7 @@ impl crate::x11_utils::ReplyRequest for GetTexLevelParameterfvRequest {
     type Reply = GetTexLevelParameterfvReply;
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, Default, PartialEq, PartialOrd)]
 pub struct GetTexLevelParameterfvReply {
     pub sequence: u16,
     pub length: u32,
@@ -7285,7 +7285,7 @@ impl GetTexLevelParameterfvReply {
 
 /// Opcode for the GetTexLevelParameteriv request
 pub const GET_TEX_LEVEL_PARAMETERIV_REQUEST: u8 = 139;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetTexLevelParameterivRequest {
     pub context_tag: ContextTag,
     pub target: u32,
@@ -7360,7 +7360,7 @@ impl crate::x11_utils::ReplyRequest for GetTexLevelParameterivRequest {
     type Reply = GetTexLevelParameterivReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetTexLevelParameterivReply {
     pub sequence: u16,
     pub length: u32,
@@ -7407,7 +7407,7 @@ impl GetTexLevelParameterivReply {
 
 /// Opcode for the IsEnabled request
 pub const IS_ENABLED_REQUEST: u8 = 140;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct IsEnabledRequest {
     pub context_tag: ContextTag,
     pub capability: u32,
@@ -7466,7 +7466,7 @@ impl crate::x11_utils::ReplyRequest for IsEnabledRequest {
     type Reply = IsEnabledReply;
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct IsEnabledReply {
     pub sequence: u16,
     pub length: u32,
@@ -7493,7 +7493,7 @@ impl TryParse for IsEnabledReply {
 
 /// Opcode for the IsList request
 pub const IS_LIST_REQUEST: u8 = 141;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct IsListRequest {
     pub context_tag: ContextTag,
     pub list: u32,
@@ -7552,7 +7552,7 @@ impl crate::x11_utils::ReplyRequest for IsListRequest {
     type Reply = IsListReply;
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct IsListReply {
     pub sequence: u16,
     pub length: u32,
@@ -7579,7 +7579,7 @@ impl TryParse for IsListReply {
 
 /// Opcode for the Flush request
 pub const FLUSH_REQUEST: u8 = 142;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct FlushRequest {
     pub context_tag: ContextTag,
 }
@@ -7631,7 +7631,7 @@ impl crate::x11_utils::VoidRequest for FlushRequest {
 
 /// Opcode for the AreTexturesResident request
 pub const ARE_TEXTURES_RESIDENT_REQUEST: u8 = 143;
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct AreTexturesResidentRequest<'input> {
     pub context_tag: ContextTag,
     pub textures: Cow<'input, [u32]>,
@@ -7703,7 +7703,7 @@ impl<'input> crate::x11_utils::ReplyRequest for AreTexturesResidentRequest<'inpu
     type Reply = AreTexturesResidentReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct AreTexturesResidentReply {
     pub sequence: u16,
     pub ret_val: Bool32,
@@ -7748,7 +7748,7 @@ impl AreTexturesResidentReply {
 
 /// Opcode for the DeleteTextures request
 pub const DELETE_TEXTURES_REQUEST: u8 = 144;
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct DeleteTexturesRequest<'input> {
     pub context_tag: ContextTag,
     pub textures: Cow<'input, [u32]>,
@@ -7821,7 +7821,7 @@ impl<'input> crate::x11_utils::VoidRequest for DeleteTexturesRequest<'input> {
 
 /// Opcode for the GenTextures request
 pub const GEN_TEXTURES_REQUEST: u8 = 145;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GenTexturesRequest {
     pub context_tag: ContextTag,
     pub n: i32,
@@ -7880,7 +7880,7 @@ impl crate::x11_utils::ReplyRequest for GenTexturesRequest {
     type Reply = GenTexturesReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GenTexturesReply {
     pub sequence: u16,
     pub data: Vec<u32>,
@@ -7922,7 +7922,7 @@ impl GenTexturesReply {
 
 /// Opcode for the IsTexture request
 pub const IS_TEXTURE_REQUEST: u8 = 146;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct IsTextureRequest {
     pub context_tag: ContextTag,
     pub texture: u32,
@@ -7981,7 +7981,7 @@ impl crate::x11_utils::ReplyRequest for IsTextureRequest {
     type Reply = IsTextureReply;
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct IsTextureReply {
     pub sequence: u16,
     pub length: u32,
@@ -8008,7 +8008,7 @@ impl TryParse for IsTextureReply {
 
 /// Opcode for the GetColorTable request
 pub const GET_COLOR_TABLE_REQUEST: u8 = 147;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetColorTableRequest {
     pub context_tag: ContextTag,
     pub target: u32,
@@ -8091,7 +8091,7 @@ impl crate::x11_utils::ReplyRequest for GetColorTableRequest {
     type Reply = GetColorTableReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetColorTableReply {
     pub sequence: u16,
     pub width: i32,
@@ -8138,7 +8138,7 @@ impl GetColorTableReply {
 
 /// Opcode for the GetColorTableParameterfv request
 pub const GET_COLOR_TABLE_PARAMETERFV_REQUEST: u8 = 148;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetColorTableParameterfvRequest {
     pub context_tag: ContextTag,
     pub target: u32,
@@ -8205,7 +8205,7 @@ impl crate::x11_utils::ReplyRequest for GetColorTableParameterfvRequest {
     type Reply = GetColorTableParameterfvReply;
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, Default, PartialEq, PartialOrd)]
 pub struct GetColorTableParameterfvReply {
     pub sequence: u16,
     pub length: u32,
@@ -8252,7 +8252,7 @@ impl GetColorTableParameterfvReply {
 
 /// Opcode for the GetColorTableParameteriv request
 pub const GET_COLOR_TABLE_PARAMETERIV_REQUEST: u8 = 149;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetColorTableParameterivRequest {
     pub context_tag: ContextTag,
     pub target: u32,
@@ -8319,7 +8319,7 @@ impl crate::x11_utils::ReplyRequest for GetColorTableParameterivRequest {
     type Reply = GetColorTableParameterivReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetColorTableParameterivReply {
     pub sequence: u16,
     pub length: u32,
@@ -8366,7 +8366,7 @@ impl GetColorTableParameterivReply {
 
 /// Opcode for the GetConvolutionFilter request
 pub const GET_CONVOLUTION_FILTER_REQUEST: u8 = 150;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetConvolutionFilterRequest {
     pub context_tag: ContextTag,
     pub target: u32,
@@ -8449,7 +8449,7 @@ impl crate::x11_utils::ReplyRequest for GetConvolutionFilterRequest {
     type Reply = GetConvolutionFilterReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetConvolutionFilterReply {
     pub sequence: u16,
     pub width: i32,
@@ -8498,7 +8498,7 @@ impl GetConvolutionFilterReply {
 
 /// Opcode for the GetConvolutionParameterfv request
 pub const GET_CONVOLUTION_PARAMETERFV_REQUEST: u8 = 151;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetConvolutionParameterfvRequest {
     pub context_tag: ContextTag,
     pub target: u32,
@@ -8565,7 +8565,7 @@ impl crate::x11_utils::ReplyRequest for GetConvolutionParameterfvRequest {
     type Reply = GetConvolutionParameterfvReply;
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, Default, PartialEq, PartialOrd)]
 pub struct GetConvolutionParameterfvReply {
     pub sequence: u16,
     pub length: u32,
@@ -8612,7 +8612,7 @@ impl GetConvolutionParameterfvReply {
 
 /// Opcode for the GetConvolutionParameteriv request
 pub const GET_CONVOLUTION_PARAMETERIV_REQUEST: u8 = 152;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetConvolutionParameterivRequest {
     pub context_tag: ContextTag,
     pub target: u32,
@@ -8679,7 +8679,7 @@ impl crate::x11_utils::ReplyRequest for GetConvolutionParameterivRequest {
     type Reply = GetConvolutionParameterivReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetConvolutionParameterivReply {
     pub sequence: u16,
     pub length: u32,
@@ -8726,7 +8726,7 @@ impl GetConvolutionParameterivReply {
 
 /// Opcode for the GetSeparableFilter request
 pub const GET_SEPARABLE_FILTER_REQUEST: u8 = 153;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetSeparableFilterRequest {
     pub context_tag: ContextTag,
     pub target: u32,
@@ -8809,7 +8809,7 @@ impl crate::x11_utils::ReplyRequest for GetSeparableFilterRequest {
     type Reply = GetSeparableFilterReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetSeparableFilterReply {
     pub sequence: u16,
     pub row_w: i32,
@@ -8858,7 +8858,7 @@ impl GetSeparableFilterReply {
 
 /// Opcode for the GetHistogram request
 pub const GET_HISTOGRAM_REQUEST: u8 = 154;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetHistogramRequest {
     pub context_tag: ContextTag,
     pub target: u32,
@@ -8945,7 +8945,7 @@ impl crate::x11_utils::ReplyRequest for GetHistogramRequest {
     type Reply = GetHistogramReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetHistogramReply {
     pub sequence: u16,
     pub width: i32,
@@ -8992,7 +8992,7 @@ impl GetHistogramReply {
 
 /// Opcode for the GetHistogramParameterfv request
 pub const GET_HISTOGRAM_PARAMETERFV_REQUEST: u8 = 155;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetHistogramParameterfvRequest {
     pub context_tag: ContextTag,
     pub target: u32,
@@ -9059,7 +9059,7 @@ impl crate::x11_utils::ReplyRequest for GetHistogramParameterfvRequest {
     type Reply = GetHistogramParameterfvReply;
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, Default, PartialEq, PartialOrd)]
 pub struct GetHistogramParameterfvReply {
     pub sequence: u16,
     pub length: u32,
@@ -9106,7 +9106,7 @@ impl GetHistogramParameterfvReply {
 
 /// Opcode for the GetHistogramParameteriv request
 pub const GET_HISTOGRAM_PARAMETERIV_REQUEST: u8 = 156;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetHistogramParameterivRequest {
     pub context_tag: ContextTag,
     pub target: u32,
@@ -9173,7 +9173,7 @@ impl crate::x11_utils::ReplyRequest for GetHistogramParameterivRequest {
     type Reply = GetHistogramParameterivReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetHistogramParameterivReply {
     pub sequence: u16,
     pub length: u32,
@@ -9220,7 +9220,7 @@ impl GetHistogramParameterivReply {
 
 /// Opcode for the GetMinmax request
 pub const GET_MINMAX_REQUEST: u8 = 157;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetMinmaxRequest {
     pub context_tag: ContextTag,
     pub target: u32,
@@ -9307,7 +9307,7 @@ impl crate::x11_utils::ReplyRequest for GetMinmaxRequest {
     type Reply = GetMinmaxReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetMinmaxReply {
     pub sequence: u16,
     pub data: Vec<u8>,
@@ -9351,7 +9351,7 @@ impl GetMinmaxReply {
 
 /// Opcode for the GetMinmaxParameterfv request
 pub const GET_MINMAX_PARAMETERFV_REQUEST: u8 = 158;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetMinmaxParameterfvRequest {
     pub context_tag: ContextTag,
     pub target: u32,
@@ -9418,7 +9418,7 @@ impl crate::x11_utils::ReplyRequest for GetMinmaxParameterfvRequest {
     type Reply = GetMinmaxParameterfvReply;
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, Default, PartialEq, PartialOrd)]
 pub struct GetMinmaxParameterfvReply {
     pub sequence: u16,
     pub length: u32,
@@ -9465,7 +9465,7 @@ impl GetMinmaxParameterfvReply {
 
 /// Opcode for the GetMinmaxParameteriv request
 pub const GET_MINMAX_PARAMETERIV_REQUEST: u8 = 159;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetMinmaxParameterivRequest {
     pub context_tag: ContextTag,
     pub target: u32,
@@ -9532,7 +9532,7 @@ impl crate::x11_utils::ReplyRequest for GetMinmaxParameterivRequest {
     type Reply = GetMinmaxParameterivReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetMinmaxParameterivReply {
     pub sequence: u16,
     pub length: u32,
@@ -9579,7 +9579,7 @@ impl GetMinmaxParameterivReply {
 
 /// Opcode for the GetCompressedTexImageARB request
 pub const GET_COMPRESSED_TEX_IMAGE_ARB_REQUEST: u8 = 160;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetCompressedTexImageARBRequest {
     pub context_tag: ContextTag,
     pub target: u32,
@@ -9646,7 +9646,7 @@ impl crate::x11_utils::ReplyRequest for GetCompressedTexImageARBRequest {
     type Reply = GetCompressedTexImageARBReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetCompressedTexImageARBReply {
     pub sequence: u16,
     pub size: i32,
@@ -9693,7 +9693,7 @@ impl GetCompressedTexImageARBReply {
 
 /// Opcode for the DeleteQueriesARB request
 pub const DELETE_QUERIES_ARB_REQUEST: u8 = 161;
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct DeleteQueriesARBRequest<'input> {
     pub context_tag: ContextTag,
     pub ids: Cow<'input, [u32]>,
@@ -9766,7 +9766,7 @@ impl<'input> crate::x11_utils::VoidRequest for DeleteQueriesARBRequest<'input> {
 
 /// Opcode for the GenQueriesARB request
 pub const GEN_QUERIES_ARB_REQUEST: u8 = 162;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GenQueriesARBRequest {
     pub context_tag: ContextTag,
     pub n: i32,
@@ -9825,7 +9825,7 @@ impl crate::x11_utils::ReplyRequest for GenQueriesARBRequest {
     type Reply = GenQueriesARBReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GenQueriesARBReply {
     pub sequence: u16,
     pub data: Vec<u32>,
@@ -9867,7 +9867,7 @@ impl GenQueriesARBReply {
 
 /// Opcode for the IsQueryARB request
 pub const IS_QUERY_ARB_REQUEST: u8 = 163;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct IsQueryARBRequest {
     pub context_tag: ContextTag,
     pub id: u32,
@@ -9926,7 +9926,7 @@ impl crate::x11_utils::ReplyRequest for IsQueryARBRequest {
     type Reply = IsQueryARBReply;
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct IsQueryARBReply {
     pub sequence: u16,
     pub length: u32,
@@ -9953,7 +9953,7 @@ impl TryParse for IsQueryARBReply {
 
 /// Opcode for the GetQueryivARB request
 pub const GET_QUERYIV_ARB_REQUEST: u8 = 164;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetQueryivARBRequest {
     pub context_tag: ContextTag,
     pub target: u32,
@@ -10020,7 +10020,7 @@ impl crate::x11_utils::ReplyRequest for GetQueryivARBRequest {
     type Reply = GetQueryivARBReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetQueryivARBReply {
     pub sequence: u16,
     pub length: u32,
@@ -10067,7 +10067,7 @@ impl GetQueryivARBReply {
 
 /// Opcode for the GetQueryObjectivARB request
 pub const GET_QUERY_OBJECTIV_ARB_REQUEST: u8 = 165;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetQueryObjectivARBRequest {
     pub context_tag: ContextTag,
     pub id: u32,
@@ -10134,7 +10134,7 @@ impl crate::x11_utils::ReplyRequest for GetQueryObjectivARBRequest {
     type Reply = GetQueryObjectivARBReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetQueryObjectivARBReply {
     pub sequence: u16,
     pub length: u32,
@@ -10181,7 +10181,7 @@ impl GetQueryObjectivARBReply {
 
 /// Opcode for the GetQueryObjectuivARB request
 pub const GET_QUERY_OBJECTUIV_ARB_REQUEST: u8 = 166;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetQueryObjectuivARBRequest {
     pub context_tag: ContextTag,
     pub id: u32,
@@ -10248,7 +10248,7 @@ impl crate::x11_utils::ReplyRequest for GetQueryObjectuivARBRequest {
     type Reply = GetQueryObjectuivARBReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetQueryObjectuivARBReply {
     pub sequence: u16,
     pub length: u32,

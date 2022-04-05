@@ -34,7 +34,7 @@ pub const X11_XML_VERSION: (u32, u32) = (1, 0);
 
 /// Opcode for the QueryVersion request
 pub const QUERY_VERSION_REQUEST: u8 = 0;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct QueryVersionRequest {
     pub client_major: u8,
     pub client_minor: u8,
@@ -89,7 +89,7 @@ impl crate::x11_utils::ReplyRequest for QueryVersionRequest {
     type Reply = QueryVersionReply;
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct QueryVersionReply {
     pub sequence: u16,
     pub length: u32,
@@ -118,7 +118,7 @@ impl TryParse for QueryVersionReply {
 
 /// Opcode for the SetDeviceCreateContext request
 pub const SET_DEVICE_CREATE_CONTEXT_REQUEST: u8 = 1;
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct SetDeviceCreateContextRequest<'input> {
     pub context: Cow<'input, [u8]>,
 }
@@ -181,7 +181,7 @@ impl<'input> crate::x11_utils::VoidRequest for SetDeviceCreateContextRequest<'in
 
 /// Opcode for the GetDeviceCreateContext request
 pub const GET_DEVICE_CREATE_CONTEXT_REQUEST: u8 = 2;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetDeviceCreateContextRequest;
 impl GetDeviceCreateContextRequest {
     /// Serialize this request into bytes for the provided connection
@@ -223,7 +223,7 @@ impl crate::x11_utils::ReplyRequest for GetDeviceCreateContextRequest {
     type Reply = GetDeviceCreateContextReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetDeviceCreateContextReply {
     pub sequence: u16,
     pub length: u32,
@@ -268,7 +268,7 @@ impl GetDeviceCreateContextReply {
 
 /// Opcode for the SetDeviceContext request
 pub const SET_DEVICE_CONTEXT_REQUEST: u8 = 3;
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct SetDeviceContextRequest<'input> {
     pub device: u32,
     pub context: Cow<'input, [u8]>,
@@ -340,7 +340,7 @@ impl<'input> crate::x11_utils::VoidRequest for SetDeviceContextRequest<'input> {
 
 /// Opcode for the GetDeviceContext request
 pub const GET_DEVICE_CONTEXT_REQUEST: u8 = 4;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetDeviceContextRequest {
     pub device: u32,
 }
@@ -391,7 +391,7 @@ impl crate::x11_utils::ReplyRequest for GetDeviceContextRequest {
     type Reply = GetDeviceContextReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetDeviceContextReply {
     pub sequence: u16,
     pub length: u32,
@@ -436,7 +436,7 @@ impl GetDeviceContextReply {
 
 /// Opcode for the SetWindowCreateContext request
 pub const SET_WINDOW_CREATE_CONTEXT_REQUEST: u8 = 5;
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct SetWindowCreateContextRequest<'input> {
     pub context: Cow<'input, [u8]>,
 }
@@ -499,7 +499,7 @@ impl<'input> crate::x11_utils::VoidRequest for SetWindowCreateContextRequest<'in
 
 /// Opcode for the GetWindowCreateContext request
 pub const GET_WINDOW_CREATE_CONTEXT_REQUEST: u8 = 6;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetWindowCreateContextRequest;
 impl GetWindowCreateContextRequest {
     /// Serialize this request into bytes for the provided connection
@@ -541,7 +541,7 @@ impl crate::x11_utils::ReplyRequest for GetWindowCreateContextRequest {
     type Reply = GetWindowCreateContextReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetWindowCreateContextReply {
     pub sequence: u16,
     pub length: u32,
@@ -586,7 +586,7 @@ impl GetWindowCreateContextReply {
 
 /// Opcode for the GetWindowContext request
 pub const GET_WINDOW_CONTEXT_REQUEST: u8 = 7;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetWindowContextRequest {
     pub window: xproto::Window,
 }
@@ -637,7 +637,7 @@ impl crate::x11_utils::ReplyRequest for GetWindowContextRequest {
     type Reply = GetWindowContextReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetWindowContextReply {
     pub sequence: u16,
     pub length: u32,
@@ -680,7 +680,7 @@ impl GetWindowContextReply {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ListItem {
     pub name: xproto::Atom,
     pub object_context: Vec<u8>,
@@ -759,7 +759,7 @@ impl ListItem {
 
 /// Opcode for the SetPropertyCreateContext request
 pub const SET_PROPERTY_CREATE_CONTEXT_REQUEST: u8 = 8;
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct SetPropertyCreateContextRequest<'input> {
     pub context: Cow<'input, [u8]>,
 }
@@ -822,7 +822,7 @@ impl<'input> crate::x11_utils::VoidRequest for SetPropertyCreateContextRequest<'
 
 /// Opcode for the GetPropertyCreateContext request
 pub const GET_PROPERTY_CREATE_CONTEXT_REQUEST: u8 = 9;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetPropertyCreateContextRequest;
 impl GetPropertyCreateContextRequest {
     /// Serialize this request into bytes for the provided connection
@@ -864,7 +864,7 @@ impl crate::x11_utils::ReplyRequest for GetPropertyCreateContextRequest {
     type Reply = GetPropertyCreateContextReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetPropertyCreateContextReply {
     pub sequence: u16,
     pub length: u32,
@@ -909,7 +909,7 @@ impl GetPropertyCreateContextReply {
 
 /// Opcode for the SetPropertyUseContext request
 pub const SET_PROPERTY_USE_CONTEXT_REQUEST: u8 = 10;
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct SetPropertyUseContextRequest<'input> {
     pub context: Cow<'input, [u8]>,
 }
@@ -972,7 +972,7 @@ impl<'input> crate::x11_utils::VoidRequest for SetPropertyUseContextRequest<'inp
 
 /// Opcode for the GetPropertyUseContext request
 pub const GET_PROPERTY_USE_CONTEXT_REQUEST: u8 = 11;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetPropertyUseContextRequest;
 impl GetPropertyUseContextRequest {
     /// Serialize this request into bytes for the provided connection
@@ -1014,7 +1014,7 @@ impl crate::x11_utils::ReplyRequest for GetPropertyUseContextRequest {
     type Reply = GetPropertyUseContextReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetPropertyUseContextReply {
     pub sequence: u16,
     pub length: u32,
@@ -1059,7 +1059,7 @@ impl GetPropertyUseContextReply {
 
 /// Opcode for the GetPropertyContext request
 pub const GET_PROPERTY_CONTEXT_REQUEST: u8 = 12;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetPropertyContextRequest {
     pub window: xproto::Window,
     pub property: xproto::Atom,
@@ -1118,7 +1118,7 @@ impl crate::x11_utils::ReplyRequest for GetPropertyContextRequest {
     type Reply = GetPropertyContextReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetPropertyContextReply {
     pub sequence: u16,
     pub length: u32,
@@ -1163,7 +1163,7 @@ impl GetPropertyContextReply {
 
 /// Opcode for the GetPropertyDataContext request
 pub const GET_PROPERTY_DATA_CONTEXT_REQUEST: u8 = 13;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetPropertyDataContextRequest {
     pub window: xproto::Window,
     pub property: xproto::Atom,
@@ -1222,7 +1222,7 @@ impl crate::x11_utils::ReplyRequest for GetPropertyDataContextRequest {
     type Reply = GetPropertyDataContextReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetPropertyDataContextReply {
     pub sequence: u16,
     pub length: u32,
@@ -1267,7 +1267,7 @@ impl GetPropertyDataContextReply {
 
 /// Opcode for the ListProperties request
 pub const LIST_PROPERTIES_REQUEST: u8 = 14;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ListPropertiesRequest {
     pub window: xproto::Window,
 }
@@ -1318,7 +1318,7 @@ impl crate::x11_utils::ReplyRequest for ListPropertiesRequest {
     type Reply = ListPropertiesReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ListPropertiesReply {
     pub sequence: u16,
     pub length: u32,
@@ -1362,7 +1362,7 @@ impl ListPropertiesReply {
 
 /// Opcode for the SetSelectionCreateContext request
 pub const SET_SELECTION_CREATE_CONTEXT_REQUEST: u8 = 15;
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct SetSelectionCreateContextRequest<'input> {
     pub context: Cow<'input, [u8]>,
 }
@@ -1425,7 +1425,7 @@ impl<'input> crate::x11_utils::VoidRequest for SetSelectionCreateContextRequest<
 
 /// Opcode for the GetSelectionCreateContext request
 pub const GET_SELECTION_CREATE_CONTEXT_REQUEST: u8 = 16;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetSelectionCreateContextRequest;
 impl GetSelectionCreateContextRequest {
     /// Serialize this request into bytes for the provided connection
@@ -1467,7 +1467,7 @@ impl crate::x11_utils::ReplyRequest for GetSelectionCreateContextRequest {
     type Reply = GetSelectionCreateContextReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetSelectionCreateContextReply {
     pub sequence: u16,
     pub length: u32,
@@ -1512,7 +1512,7 @@ impl GetSelectionCreateContextReply {
 
 /// Opcode for the SetSelectionUseContext request
 pub const SET_SELECTION_USE_CONTEXT_REQUEST: u8 = 17;
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct SetSelectionUseContextRequest<'input> {
     pub context: Cow<'input, [u8]>,
 }
@@ -1575,7 +1575,7 @@ impl<'input> crate::x11_utils::VoidRequest for SetSelectionUseContextRequest<'in
 
 /// Opcode for the GetSelectionUseContext request
 pub const GET_SELECTION_USE_CONTEXT_REQUEST: u8 = 18;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetSelectionUseContextRequest;
 impl GetSelectionUseContextRequest {
     /// Serialize this request into bytes for the provided connection
@@ -1617,7 +1617,7 @@ impl crate::x11_utils::ReplyRequest for GetSelectionUseContextRequest {
     type Reply = GetSelectionUseContextReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetSelectionUseContextReply {
     pub sequence: u16,
     pub length: u32,
@@ -1662,7 +1662,7 @@ impl GetSelectionUseContextReply {
 
 /// Opcode for the GetSelectionContext request
 pub const GET_SELECTION_CONTEXT_REQUEST: u8 = 19;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetSelectionContextRequest {
     pub selection: xproto::Atom,
 }
@@ -1713,7 +1713,7 @@ impl crate::x11_utils::ReplyRequest for GetSelectionContextRequest {
     type Reply = GetSelectionContextReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetSelectionContextReply {
     pub sequence: u16,
     pub length: u32,
@@ -1758,7 +1758,7 @@ impl GetSelectionContextReply {
 
 /// Opcode for the GetSelectionDataContext request
 pub const GET_SELECTION_DATA_CONTEXT_REQUEST: u8 = 20;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetSelectionDataContextRequest {
     pub selection: xproto::Atom,
 }
@@ -1809,7 +1809,7 @@ impl crate::x11_utils::ReplyRequest for GetSelectionDataContextRequest {
     type Reply = GetSelectionDataContextReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetSelectionDataContextReply {
     pub sequence: u16,
     pub length: u32,
@@ -1854,7 +1854,7 @@ impl GetSelectionDataContextReply {
 
 /// Opcode for the ListSelections request
 pub const LIST_SELECTIONS_REQUEST: u8 = 21;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ListSelectionsRequest;
 impl ListSelectionsRequest {
     /// Serialize this request into bytes for the provided connection
@@ -1896,7 +1896,7 @@ impl crate::x11_utils::ReplyRequest for ListSelectionsRequest {
     type Reply = ListSelectionsReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ListSelectionsReply {
     pub sequence: u16,
     pub length: u32,
@@ -1940,7 +1940,7 @@ impl ListSelectionsReply {
 
 /// Opcode for the GetClientContext request
 pub const GET_CLIENT_CONTEXT_REQUEST: u8 = 22;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetClientContextRequest {
     pub resource: u32,
 }
@@ -1991,7 +1991,7 @@ impl crate::x11_utils::ReplyRequest for GetClientContextRequest {
     type Reply = GetClientContextReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetClientContextReply {
     pub sequence: u16,
     pub length: u32,

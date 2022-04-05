@@ -34,7 +34,7 @@ pub const X11_EXTENSION_NAME: &str = "Composite";
 /// send the maximum version of the extension that you need.
 pub const X11_XML_VERSION: (u32, u32) = (0, 4);
 
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Redirect(u8);
 impl Redirect {
     pub const AUTOMATIC: Self = Self(0);
@@ -94,7 +94,7 @@ impl std::fmt::Debug for Redirect  {
 
 /// Opcode for the QueryVersion request
 pub const QUERY_VERSION_REQUEST: u8 = 0;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct QueryVersionRequest {
     pub client_major_version: u32,
     pub client_minor_version: u32,
@@ -153,7 +153,7 @@ impl crate::x11_utils::ReplyRequest for QueryVersionRequest {
     type Reply = QueryVersionReply;
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct QueryVersionReply {
     pub sequence: u16,
     pub length: u32,
@@ -183,7 +183,7 @@ impl TryParse for QueryVersionReply {
 
 /// Opcode for the RedirectWindow request
 pub const REDIRECT_WINDOW_REQUEST: u8 = 1;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct RedirectWindowRequest {
     pub window: xproto::Window,
     pub update: Redirect,
@@ -245,7 +245,7 @@ impl crate::x11_utils::VoidRequest for RedirectWindowRequest {
 
 /// Opcode for the RedirectSubwindows request
 pub const REDIRECT_SUBWINDOWS_REQUEST: u8 = 2;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct RedirectSubwindowsRequest {
     pub window: xproto::Window,
     pub update: Redirect,
@@ -307,7 +307,7 @@ impl crate::x11_utils::VoidRequest for RedirectSubwindowsRequest {
 
 /// Opcode for the UnredirectWindow request
 pub const UNREDIRECT_WINDOW_REQUEST: u8 = 3;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct UnredirectWindowRequest {
     pub window: xproto::Window,
     pub update: Redirect,
@@ -369,7 +369,7 @@ impl crate::x11_utils::VoidRequest for UnredirectWindowRequest {
 
 /// Opcode for the UnredirectSubwindows request
 pub const UNREDIRECT_SUBWINDOWS_REQUEST: u8 = 4;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct UnredirectSubwindowsRequest {
     pub window: xproto::Window,
     pub update: Redirect,
@@ -431,7 +431,7 @@ impl crate::x11_utils::VoidRequest for UnredirectSubwindowsRequest {
 
 /// Opcode for the CreateRegionFromBorderClip request
 pub const CREATE_REGION_FROM_BORDER_CLIP_REQUEST: u8 = 5;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct CreateRegionFromBorderClipRequest {
     pub region: xfixes::Region,
     pub window: xproto::Window,
@@ -491,7 +491,7 @@ impl crate::x11_utils::VoidRequest for CreateRegionFromBorderClipRequest {
 
 /// Opcode for the NameWindowPixmap request
 pub const NAME_WINDOW_PIXMAP_REQUEST: u8 = 6;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct NameWindowPixmapRequest {
     pub window: xproto::Window,
     pub pixmap: xproto::Pixmap,
@@ -551,7 +551,7 @@ impl crate::x11_utils::VoidRequest for NameWindowPixmapRequest {
 
 /// Opcode for the GetOverlayWindow request
 pub const GET_OVERLAY_WINDOW_REQUEST: u8 = 7;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetOverlayWindowRequest {
     pub window: xproto::Window,
 }
@@ -602,7 +602,7 @@ impl crate::x11_utils::ReplyRequest for GetOverlayWindowRequest {
     type Reply = GetOverlayWindowReply;
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetOverlayWindowReply {
     pub sequence: u16,
     pub length: u32,
@@ -630,7 +630,7 @@ impl TryParse for GetOverlayWindowReply {
 
 /// Opcode for the ReleaseOverlayWindow request
 pub const RELEASE_OVERLAY_WINDOW_REQUEST: u8 = 8;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ReleaseOverlayWindowRequest {
     pub window: xproto::Window,
 }

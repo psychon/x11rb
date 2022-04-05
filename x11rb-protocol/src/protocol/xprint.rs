@@ -34,7 +34,7 @@ pub const X11_XML_VERSION: (u32, u32) = (1, 0);
 
 pub type String8 = u8;
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Printer {
     pub name: Vec<String8>,
     pub description: Vec<String8>,
@@ -109,7 +109,7 @@ impl Printer {
 
 pub type Pcontext = u32;
 
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetDoc(bool);
 impl GetDoc {
     pub const FINISHED: Self = Self(false);
@@ -179,7 +179,7 @@ impl std::fmt::Debug for GetDoc  {
     }
 }
 
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct EvMask(u8);
 impl EvMask {
     pub const NO_EVENT_MASK: Self = Self(0);
@@ -240,7 +240,7 @@ impl std::fmt::Debug for EvMask  {
 }
 bitmask_binop!(EvMask, u8);
 
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Detail(u8);
 impl Detail {
     pub const START_JOB_NOTIFY: Self = Self(1);
@@ -306,7 +306,7 @@ impl std::fmt::Debug for Detail  {
     }
 }
 
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Attr(u8);
 impl Attr {
     pub const JOB_ATTR: Self = Self(1);
@@ -376,7 +376,7 @@ impl std::fmt::Debug for Attr  {
 
 /// Opcode for the PrintQueryVersion request
 pub const PRINT_QUERY_VERSION_REQUEST: u8 = 0;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct PrintQueryVersionRequest;
 impl PrintQueryVersionRequest {
     /// Serialize this request into bytes for the provided connection
@@ -418,7 +418,7 @@ impl crate::x11_utils::ReplyRequest for PrintQueryVersionRequest {
     type Reply = PrintQueryVersionReply;
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct PrintQueryVersionReply {
     pub sequence: u16,
     pub length: u32,
@@ -447,7 +447,7 @@ impl TryParse for PrintQueryVersionReply {
 
 /// Opcode for the PrintGetPrinterList request
 pub const PRINT_GET_PRINTER_LIST_REQUEST: u8 = 1;
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct PrintGetPrinterListRequest<'input> {
     pub printer_name: Cow<'input, [String8]>,
     pub locale: Cow<'input, [String8]>,
@@ -521,7 +521,7 @@ impl<'input> crate::x11_utils::ReplyRequest for PrintGetPrinterListRequest<'inpu
     type Reply = PrintGetPrinterListReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct PrintGetPrinterListReply {
     pub sequence: u16,
     pub length: u32,
@@ -565,7 +565,7 @@ impl PrintGetPrinterListReply {
 
 /// Opcode for the PrintRehashPrinterList request
 pub const PRINT_REHASH_PRINTER_LIST_REQUEST: u8 = 20;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct PrintRehashPrinterListRequest;
 impl PrintRehashPrinterListRequest {
     /// Serialize this request into bytes for the provided connection
@@ -608,7 +608,7 @@ impl crate::x11_utils::VoidRequest for PrintRehashPrinterListRequest {
 
 /// Opcode for the CreateContext request
 pub const CREATE_CONTEXT_REQUEST: u8 = 2;
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct CreateContextRequest<'input> {
     pub context_id: u32,
     pub printer_name: Cow<'input, [String8]>,
@@ -692,7 +692,7 @@ impl<'input> crate::x11_utils::VoidRequest for CreateContextRequest<'input> {
 
 /// Opcode for the PrintSetContext request
 pub const PRINT_SET_CONTEXT_REQUEST: u8 = 3;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct PrintSetContextRequest {
     pub context: u32,
 }
@@ -744,7 +744,7 @@ impl crate::x11_utils::VoidRequest for PrintSetContextRequest {
 
 /// Opcode for the PrintGetContext request
 pub const PRINT_GET_CONTEXT_REQUEST: u8 = 4;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct PrintGetContextRequest;
 impl PrintGetContextRequest {
     /// Serialize this request into bytes for the provided connection
@@ -786,7 +786,7 @@ impl crate::x11_utils::ReplyRequest for PrintGetContextRequest {
     type Reply = PrintGetContextReply;
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct PrintGetContextReply {
     pub sequence: u16,
     pub length: u32,
@@ -813,7 +813,7 @@ impl TryParse for PrintGetContextReply {
 
 /// Opcode for the PrintDestroyContext request
 pub const PRINT_DESTROY_CONTEXT_REQUEST: u8 = 5;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct PrintDestroyContextRequest {
     pub context: u32,
 }
@@ -865,7 +865,7 @@ impl crate::x11_utils::VoidRequest for PrintDestroyContextRequest {
 
 /// Opcode for the PrintGetScreenOfContext request
 pub const PRINT_GET_SCREEN_OF_CONTEXT_REQUEST: u8 = 6;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct PrintGetScreenOfContextRequest;
 impl PrintGetScreenOfContextRequest {
     /// Serialize this request into bytes for the provided connection
@@ -907,7 +907,7 @@ impl crate::x11_utils::ReplyRequest for PrintGetScreenOfContextRequest {
     type Reply = PrintGetScreenOfContextReply;
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct PrintGetScreenOfContextReply {
     pub sequence: u16,
     pub length: u32,
@@ -934,7 +934,7 @@ impl TryParse for PrintGetScreenOfContextReply {
 
 /// Opcode for the PrintStartJob request
 pub const PRINT_START_JOB_REQUEST: u8 = 7;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct PrintStartJobRequest {
     pub output_mode: u8,
 }
@@ -986,7 +986,7 @@ impl crate::x11_utils::VoidRequest for PrintStartJobRequest {
 
 /// Opcode for the PrintEndJob request
 pub const PRINT_END_JOB_REQUEST: u8 = 8;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct PrintEndJobRequest {
     pub cancel: bool,
 }
@@ -1038,7 +1038,7 @@ impl crate::x11_utils::VoidRequest for PrintEndJobRequest {
 
 /// Opcode for the PrintStartDoc request
 pub const PRINT_START_DOC_REQUEST: u8 = 9;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct PrintStartDocRequest {
     pub driver_mode: u8,
 }
@@ -1090,7 +1090,7 @@ impl crate::x11_utils::VoidRequest for PrintStartDocRequest {
 
 /// Opcode for the PrintEndDoc request
 pub const PRINT_END_DOC_REQUEST: u8 = 10;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct PrintEndDocRequest {
     pub cancel: bool,
 }
@@ -1142,7 +1142,7 @@ impl crate::x11_utils::VoidRequest for PrintEndDocRequest {
 
 /// Opcode for the PrintPutDocumentData request
 pub const PRINT_PUT_DOCUMENT_DATA_REQUEST: u8 = 11;
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct PrintPutDocumentDataRequest<'input> {
     pub drawable: xproto::Drawable,
     pub data: Cow<'input, [u8]>,
@@ -1234,7 +1234,7 @@ impl<'input> crate::x11_utils::VoidRequest for PrintPutDocumentDataRequest<'inpu
 
 /// Opcode for the PrintGetDocumentData request
 pub const PRINT_GET_DOCUMENT_DATA_REQUEST: u8 = 12;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct PrintGetDocumentDataRequest {
     pub context: Pcontext,
     pub max_bytes: u32,
@@ -1293,7 +1293,7 @@ impl crate::x11_utils::ReplyRequest for PrintGetDocumentDataRequest {
     type Reply = PrintGetDocumentDataReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct PrintGetDocumentDataReply {
     pub sequence: u16,
     pub length: u32,
@@ -1342,7 +1342,7 @@ impl PrintGetDocumentDataReply {
 
 /// Opcode for the PrintStartPage request
 pub const PRINT_START_PAGE_REQUEST: u8 = 13;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct PrintStartPageRequest {
     pub window: xproto::Window,
 }
@@ -1394,7 +1394,7 @@ impl crate::x11_utils::VoidRequest for PrintStartPageRequest {
 
 /// Opcode for the PrintEndPage request
 pub const PRINT_END_PAGE_REQUEST: u8 = 14;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct PrintEndPageRequest {
     pub cancel: bool,
 }
@@ -1447,7 +1447,7 @@ impl crate::x11_utils::VoidRequest for PrintEndPageRequest {
 
 /// Opcode for the PrintSelectInput request
 pub const PRINT_SELECT_INPUT_REQUEST: u8 = 15;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct PrintSelectInputRequest {
     pub context: Pcontext,
     pub event_mask: u32,
@@ -1507,7 +1507,7 @@ impl crate::x11_utils::VoidRequest for PrintSelectInputRequest {
 
 /// Opcode for the PrintInputSelected request
 pub const PRINT_INPUT_SELECTED_REQUEST: u8 = 16;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct PrintInputSelectedRequest {
     pub context: Pcontext,
 }
@@ -1558,7 +1558,7 @@ impl crate::x11_utils::ReplyRequest for PrintInputSelectedRequest {
     type Reply = PrintInputSelectedReply;
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct PrintInputSelectedReply {
     pub sequence: u16,
     pub length: u32,
@@ -1587,7 +1587,7 @@ impl TryParse for PrintInputSelectedReply {
 
 /// Opcode for the PrintGetAttributes request
 pub const PRINT_GET_ATTRIBUTES_REQUEST: u8 = 17;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct PrintGetAttributesRequest {
     pub context: Pcontext,
     pub pool: u8,
@@ -1647,7 +1647,7 @@ impl crate::x11_utils::ReplyRequest for PrintGetAttributesRequest {
     type Reply = PrintGetAttributesReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct PrintGetAttributesReply {
     pub sequence: u16,
     pub length: u32,
@@ -1692,7 +1692,7 @@ impl PrintGetAttributesReply {
 
 /// Opcode for the PrintGetOneAttributes request
 pub const PRINT_GET_ONE_ATTRIBUTES_REQUEST: u8 = 19;
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct PrintGetOneAttributesRequest<'input> {
     pub context: Pcontext,
     pub pool: u8,
@@ -1773,7 +1773,7 @@ impl<'input> crate::x11_utils::ReplyRequest for PrintGetOneAttributesRequest<'in
     type Reply = PrintGetOneAttributesReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct PrintGetOneAttributesReply {
     pub sequence: u16,
     pub length: u32,
@@ -1818,7 +1818,7 @@ impl PrintGetOneAttributesReply {
 
 /// Opcode for the PrintSetAttributes request
 pub const PRINT_SET_ATTRIBUTES_REQUEST: u8 = 18;
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct PrintSetAttributesRequest<'input> {
     pub context: Pcontext,
     pub string_len: u32,
@@ -1907,7 +1907,7 @@ impl<'input> crate::x11_utils::VoidRequest for PrintSetAttributesRequest<'input>
 
 /// Opcode for the PrintGetPageDimensions request
 pub const PRINT_GET_PAGE_DIMENSIONS_REQUEST: u8 = 21;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct PrintGetPageDimensionsRequest {
     pub context: Pcontext,
 }
@@ -1958,7 +1958,7 @@ impl crate::x11_utils::ReplyRequest for PrintGetPageDimensionsRequest {
     type Reply = PrintGetPageDimensionsReply;
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct PrintGetPageDimensionsReply {
     pub sequence: u16,
     pub length: u32,
@@ -1995,7 +1995,7 @@ impl TryParse for PrintGetPageDimensionsReply {
 
 /// Opcode for the PrintQueryScreens request
 pub const PRINT_QUERY_SCREENS_REQUEST: u8 = 22;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct PrintQueryScreensRequest;
 impl PrintQueryScreensRequest {
     /// Serialize this request into bytes for the provided connection
@@ -2037,7 +2037,7 @@ impl crate::x11_utils::ReplyRequest for PrintQueryScreensRequest {
     type Reply = PrintQueryScreensReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct PrintQueryScreensReply {
     pub sequence: u16,
     pub length: u32,
@@ -2081,7 +2081,7 @@ impl PrintQueryScreensReply {
 
 /// Opcode for the PrintSetImageResolution request
 pub const PRINT_SET_IMAGE_RESOLUTION_REQUEST: u8 = 23;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct PrintSetImageResolutionRequest {
     pub context: Pcontext,
     pub image_resolution: u16,
@@ -2140,7 +2140,7 @@ impl crate::x11_utils::ReplyRequest for PrintSetImageResolutionRequest {
     type Reply = PrintSetImageResolutionReply;
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct PrintSetImageResolutionReply {
     pub status: bool,
     pub sequence: u16,
@@ -2168,7 +2168,7 @@ impl TryParse for PrintSetImageResolutionReply {
 
 /// Opcode for the PrintGetImageResolution request
 pub const PRINT_GET_IMAGE_RESOLUTION_REQUEST: u8 = 24;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct PrintGetImageResolutionRequest {
     pub context: Pcontext,
 }
@@ -2219,7 +2219,7 @@ impl crate::x11_utils::ReplyRequest for PrintGetImageResolutionRequest {
     type Reply = PrintGetImageResolutionReply;
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct PrintGetImageResolutionReply {
     pub sequence: u16,
     pub length: u32,
@@ -2246,7 +2246,7 @@ impl TryParse for PrintGetImageResolutionReply {
 
 /// Opcode for the Notify event
 pub const NOTIFY_EVENT: u8 = 0;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct NotifyEvent {
     pub response_type: u8,
     pub detail: u8,
@@ -2321,7 +2321,7 @@ impl From<NotifyEvent> for [u8; 32] {
 
 /// Opcode for the AttributNotify event
 pub const ATTRIBUT_NOTIFY_EVENT: u8 = 1;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct AttributNotifyEvent {
     pub response_type: u8,
     pub detail: u8,

@@ -30,7 +30,7 @@ pub const X11_EXTENSION_NAME: &str = "XFree86-DRI";
 /// send the maximum version of the extension that you need.
 pub const X11_XML_VERSION: (u32, u32) = (4, 1);
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct DrmClipRect {
     pub x1: i16,
     pub y1: i16,
@@ -76,7 +76,7 @@ impl Serialize for DrmClipRect {
 
 /// Opcode for the QueryVersion request
 pub const QUERY_VERSION_REQUEST: u8 = 0;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct QueryVersionRequest;
 impl QueryVersionRequest {
     /// Serialize this request into bytes for the provided connection
@@ -118,7 +118,7 @@ impl crate::x11_utils::ReplyRequest for QueryVersionRequest {
     type Reply = QueryVersionReply;
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct QueryVersionReply {
     pub sequence: u16,
     pub length: u32,
@@ -149,7 +149,7 @@ impl TryParse for QueryVersionReply {
 
 /// Opcode for the QueryDirectRenderingCapable request
 pub const QUERY_DIRECT_RENDERING_CAPABLE_REQUEST: u8 = 1;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct QueryDirectRenderingCapableRequest {
     pub screen: u32,
 }
@@ -200,7 +200,7 @@ impl crate::x11_utils::ReplyRequest for QueryDirectRenderingCapableRequest {
     type Reply = QueryDirectRenderingCapableReply;
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct QueryDirectRenderingCapableReply {
     pub sequence: u16,
     pub length: u32,
@@ -227,7 +227,7 @@ impl TryParse for QueryDirectRenderingCapableReply {
 
 /// Opcode for the OpenConnection request
 pub const OPEN_CONNECTION_REQUEST: u8 = 2;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct OpenConnectionRequest {
     pub screen: u32,
 }
@@ -278,7 +278,7 @@ impl crate::x11_utils::ReplyRequest for OpenConnectionRequest {
     type Reply = OpenConnectionReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct OpenConnectionReply {
     pub sequence: u16,
     pub length: u32,
@@ -327,7 +327,7 @@ impl OpenConnectionReply {
 
 /// Opcode for the CloseConnection request
 pub const CLOSE_CONNECTION_REQUEST: u8 = 3;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct CloseConnectionRequest {
     pub screen: u32,
 }
@@ -379,7 +379,7 @@ impl crate::x11_utils::VoidRequest for CloseConnectionRequest {
 
 /// Opcode for the GetClientDriverName request
 pub const GET_CLIENT_DRIVER_NAME_REQUEST: u8 = 4;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetClientDriverNameRequest {
     pub screen: u32,
 }
@@ -430,7 +430,7 @@ impl crate::x11_utils::ReplyRequest for GetClientDriverNameRequest {
     type Reply = GetClientDriverNameReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetClientDriverNameReply {
     pub sequence: u16,
     pub length: u32,
@@ -481,7 +481,7 @@ impl GetClientDriverNameReply {
 
 /// Opcode for the CreateContext request
 pub const CREATE_CONTEXT_REQUEST: u8 = 5;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct CreateContextRequest {
     pub screen: u32,
     pub visual: u32,
@@ -548,7 +548,7 @@ impl crate::x11_utils::ReplyRequest for CreateContextRequest {
     type Reply = CreateContextReply;
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct CreateContextReply {
     pub sequence: u16,
     pub length: u32,
@@ -575,7 +575,7 @@ impl TryParse for CreateContextReply {
 
 /// Opcode for the DestroyContext request
 pub const DESTROY_CONTEXT_REQUEST: u8 = 6;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct DestroyContextRequest {
     pub screen: u32,
     pub context: u32,
@@ -635,7 +635,7 @@ impl crate::x11_utils::VoidRequest for DestroyContextRequest {
 
 /// Opcode for the CreateDrawable request
 pub const CREATE_DRAWABLE_REQUEST: u8 = 7;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct CreateDrawableRequest {
     pub screen: u32,
     pub drawable: u32,
@@ -694,7 +694,7 @@ impl crate::x11_utils::ReplyRequest for CreateDrawableRequest {
     type Reply = CreateDrawableReply;
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct CreateDrawableReply {
     pub sequence: u16,
     pub length: u32,
@@ -721,7 +721,7 @@ impl TryParse for CreateDrawableReply {
 
 /// Opcode for the DestroyDrawable request
 pub const DESTROY_DRAWABLE_REQUEST: u8 = 8;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct DestroyDrawableRequest {
     pub screen: u32,
     pub drawable: u32,
@@ -781,7 +781,7 @@ impl crate::x11_utils::VoidRequest for DestroyDrawableRequest {
 
 /// Opcode for the GetDrawableInfo request
 pub const GET_DRAWABLE_INFO_REQUEST: u8 = 9;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetDrawableInfoRequest {
     pub screen: u32,
     pub drawable: u32,
@@ -840,7 +840,7 @@ impl crate::x11_utils::ReplyRequest for GetDrawableInfoRequest {
     type Reply = GetDrawableInfoReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetDrawableInfoReply {
     pub sequence: u16,
     pub length: u32,
@@ -915,7 +915,7 @@ impl GetDrawableInfoReply {
 
 /// Opcode for the GetDeviceInfo request
 pub const GET_DEVICE_INFO_REQUEST: u8 = 10;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetDeviceInfoRequest {
     pub screen: u32,
 }
@@ -966,7 +966,7 @@ impl crate::x11_utils::ReplyRequest for GetDeviceInfoRequest {
     type Reply = GetDeviceInfoReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetDeviceInfoReply {
     pub sequence: u16,
     pub length: u32,
@@ -1019,7 +1019,7 @@ impl GetDeviceInfoReply {
 
 /// Opcode for the AuthConnection request
 pub const AUTH_CONNECTION_REQUEST: u8 = 11;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct AuthConnectionRequest {
     pub screen: u32,
     pub magic: u32,
@@ -1078,7 +1078,7 @@ impl crate::x11_utils::ReplyRequest for AuthConnectionRequest {
     type Reply = AuthConnectionReply;
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct AuthConnectionReply {
     pub sequence: u16,
     pub length: u32,

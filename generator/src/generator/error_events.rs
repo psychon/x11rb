@@ -41,7 +41,10 @@ fn generate_errors(out: &mut Output, module: &xcbgen::defs::Module) {
     let namespaces = module.sorted_namespaces();
 
     outln!(out, "/// Enumeration of all possible X11 error kinds.");
-    outln!(out, "#[derive(Debug, Clone, Copy, PartialEq, Eq)]");
+    outln!(
+        out,
+        "#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]"
+    );
     outln!(out, "#[non_exhaustive]");
     outln!(out, "pub enum ErrorKind {{");
     out.indented(|out| {
