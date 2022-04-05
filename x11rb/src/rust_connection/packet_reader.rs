@@ -1,23 +1,30 @@
 //! Read X11 packets from a reader
 
-use std::convert::TryInto;
 use std::io::{Error, ErrorKind, Result};
+use std::{cmp, fmt, io};
 
 use super::Stream;
 use crate::utils::RawFdContainer;
-
-/// Minimal length of an X11 packet
-const MINIMAL_PACKET_LENGTH: usize = 32;
+use x11rb_protocol::packet_reader::PacketReader as ProtoPacketReader;
 
 /// A wrapper around a reader that reads X11 packet.
-#[derive(Debug)]
 pub(crate) struct PacketReader {
+    /// The read buffer to store incoming bytes in.
     read_buffer: Box<[u8]>,
+    /// The inner reader that breaks these bytes into packets.
+    inner: ProtoPacketReader,
+}
 
-    // A packet that was partially read.
-    pending_packet: Vec<u8>,
-    // Up to where the packet is already read.
-    already_read: usize,
+impl fmt::Debug for PacketReader {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("PacketReader")
+            .field(
+                "read_buffer",
+                &format_args!("[buffer of size {}]", self.read_buffer.len()),
+            )
+            .field("inner", &self.inner)
+            .finish()
+    }
 }
 
 impl PacketReader {
@@ -26,36 +33,7 @@ impl PacketReader {
         Self {
             // Buffer size chosen by checking what libxcb does
             read_buffer: vec![0; 4096].into_boxed_slice(),
-            pending_packet: vec![0; MINIMAL_PACKET_LENGTH],
-            already_read: 0,
-        }
-    }
-
-    /// To be called after `nread` bytes have been writen into `pending_packet`.
-    fn handle_partial_read(&mut self, nread: usize, out_packets: &mut Vec<Vec<u8>>) {
-        self.already_read += nread;
-        // Do we still need to compute the length field? (length == MINIMAL_PACKET_LENGTH)
-        if self.already_read == MINIMAL_PACKET_LENGTH {
-            // Yes, then compute the packet length and resize the `Vec` to its final size.
-            let extra = extra_length(self.pending_packet[..].try_into().unwrap());
-            self.pending_packet.reserve_exact(extra);
-            self.pending_packet.resize(MINIMAL_PACKET_LENGTH + extra, 0);
-        }
-
-        // Has the packet been completely read?
-        if self.already_read == self.pending_packet.len() {
-            // Check that we really read the whole packet
-            let initial_packet = &self.pending_packet[0..MINIMAL_PACKET_LENGTH]
-                .try_into()
-                .unwrap();
-            let extra = extra_length(initial_packet);
-            assert_eq!(self.pending_packet.len(), MINIMAL_PACKET_LENGTH + extra);
-
-            out_packets.push(std::mem::replace(
-                &mut self.pending_packet,
-                vec![0; MINIMAL_PACKET_LENGTH],
-            ));
-            self.already_read = 0;
+            inner: ProtoPacketReader::new(),
         }
     }
 
@@ -67,44 +45,54 @@ impl PacketReader {
         fd_storage: &mut Vec<RawFdContainer>,
     ) -> Result<()> {
         loop {
-            if (self.pending_packet.len() - self.already_read) >= self.read_buffer.len() {
-                assert_ne!(self.already_read, self.pending_packet.len());
-                // Bypass the read buffer
-                match stream.read(&mut self.pending_packet[self.already_read..], fd_storage) {
+            // if the necessary packet size is larger than our buffer, just fill straight
+            // into the buffer
+            if self.inner.remaining_capacity() >= self.read_buffer.len() {
+                match stream.read(self.inner.buffer(), fd_storage) {
                     Ok(0) => {
                         return Err(Error::new(
                             ErrorKind::UnexpectedEof,
                             "The X11 server closed the connection",
                         ));
                     }
-                    Ok(nread) => self.handle_partial_read(nread, out_packets),
-                    Err(ref e) if e.kind() == std::io::ErrorKind::WouldBlock => break,
+                    Ok(n) => {
+                        if let Some(packet) = self.inner.advance(n) {
+                            out_packets.push(packet);
+                        }
+                    }
+                    Err(ref e) if e.kind() == io::ErrorKind::WouldBlock => break,
                     Err(e) => return Err(e),
                 }
             } else {
-                // Fill the read buffer
-                match stream.read(&mut self.read_buffer, fd_storage) {
+                // read into our buffer
+                let nread = match stream.read(&mut self.read_buffer, fd_storage) {
                     Ok(0) => {
                         return Err(Error::new(
                             ErrorKind::UnexpectedEof,
                             "The X11 server closed the connection",
                         ));
                     }
-                    Ok(nread) => {
-                        let mut used_from_buffer = 0;
-                        // Take packets from `read_buffer`.
-                        while used_from_buffer != nread {
-                            let rem_read_buffer = &self.read_buffer[used_from_buffer..nread];
-                            let rem_packet = &mut self.pending_packet[self.already_read..];
-                            let to_copy = rem_read_buffer.len().min(rem_packet.len());
-                            assert_ne!(to_copy, 0);
-                            rem_packet[..to_copy].copy_from_slice(&rem_read_buffer[..to_copy]);
-                            used_from_buffer += to_copy;
-                            self.handle_partial_read(to_copy, out_packets);
-                        }
-                    }
-                    Err(ref e) if e.kind() == std::io::ErrorKind::WouldBlock => break,
+                    Ok(n) => n,
+                    Err(ref e) if e.kind() == io::ErrorKind::WouldBlock => break,
                     Err(e) => return Err(e),
+                };
+
+                // begin reading that data into packets
+                let mut src = &self.read_buffer[..nread];
+                while !src.is_empty() {
+                    let dest = self.inner.buffer();
+                    let amt_to_read = cmp::min(src.len(), dest.len());
+
+                    // copy slices over
+                    dest[..amt_to_read].copy_from_slice(&src[..amt_to_read]);
+
+                    // reborrow src
+                    src = &src[amt_to_read..];
+
+                    // advance by the given amount
+                    if let Some(packet) = self.inner.advance(amt_to_read) {
+                        out_packets.push(packet);
+                    }
                 }
             }
         }
@@ -113,19 +101,95 @@ impl PacketReader {
     }
 }
 
-// Compute the length beyond `MINIMAL_PACKET_LENGTH` of an X11 packet.
-fn extra_length(buffer: &[u8; MINIMAL_PACKET_LENGTH]) -> usize {
-    use crate::protocol::xproto::GE_GENERIC_EVENT;
+#[cfg(test)]
+mod tests {
+    use super::PacketReader;
+    use crate::rust_connection::{PollMode, Stream};
+    use crate::utils::RawFdContainer;
+    use std::cell::RefCell;
+    use std::cmp;
+    use std::io::{Error, ErrorKind, Result};
 
-    let response_type = buffer[0];
+    // make a Stream that just reads from a Vec<u8>
+    struct TestStream {
+        data: RefCell<Vec<u8>>,
+    }
 
-    const REPLY: u8 = 1;
-    if response_type == REPLY || response_type & 0x7f == GE_GENERIC_EVENT {
-        let length_field = buffer[4..8].try_into().unwrap();
-        let length_field = u32::from_ne_bytes(length_field) as usize;
-        4 * length_field
-    } else {
-        // Fixed size packet: error or event that is not GE_GENERIC_EVENT
-        0
+    impl TestStream {
+        fn new(data: Vec<u8>) -> Self {
+            Self {
+                data: RefCell::new(data),
+            }
+        }
+    }
+
+    impl Stream for TestStream {
+        fn read(&self, buf: &mut [u8], _: &mut Vec<RawFdContainer>) -> Result<usize> {
+            let mut data = self.data.borrow_mut();
+            if data.len() == 0 {
+                return Err(Error::from(ErrorKind::WouldBlock));
+            }
+
+            let nread = cmp::min(data.len(), buf.len());
+            buf[..nread].copy_from_slice(&data[..nread]);
+            let _ = data.drain(..nread);
+            Ok(nread)
+        }
+
+        fn poll(&self, _: PollMode) -> Result<()> {
+            Ok(())
+        }
+
+        fn write(&self, _: &[u8], _: &mut Vec<RawFdContainer>) -> Result<usize> {
+            unreachable!()
+        }
+    }
+
+    fn test_packet(packet: Vec<u8>) {
+        let mut reader = PacketReader::new();
+        let original_packet = packet.clone();
+        let stream = TestStream::new(packet);
+
+        let mut packets = Vec::new();
+        let mut fd_storage = Vec::new();
+
+        reader
+            .try_read_packets(&stream, &mut packets, &mut fd_storage)
+            .unwrap();
+
+        assert_eq!(packets.len(), 1);
+        assert_eq!(packets[0], original_packet);
+    }
+
+    #[test]
+    fn fixed_size_packet() {
+        let packet = vec![0; 32];
+        test_packet(packet);
+    }
+
+    #[test]
+    fn variable_size_packet() {
+        let mut len = 120;
+        let mut packet = vec![0; len];
+        len = (len - 32) / 4;
+
+        // copy len to 4..8
+        packet[4..8].copy_from_slice(&(len as u32).to_ne_bytes());
+        packet[0] = 1;
+
+        test_packet(packet);
+    }
+
+    #[test]
+    fn very_large_packet() {
+        let mut len = 4800;
+        let mut packet = vec![0; len];
+        len = (len - 32) / 4;
+
+        // copy len to 4..8
+        packet[4..8].copy_from_slice(&(len as u32).to_ne_bytes());
+        packet[0] = 1;
+
+        test_packet(packet);
     }
 }
