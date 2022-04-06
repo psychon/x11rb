@@ -5,6 +5,7 @@ description = "Rust bindings to X11"
 authors = [
     "Uli Schlachter <psychon@znc.in>",
     "Eduardo Sánchez Muñoz <esm@eduardosm.net>",
+    "notgull <jtnunley01@gmail.com>",
 ]
 repository = "https://github.com/psychon/x11rb"
 readme = "README.md"
