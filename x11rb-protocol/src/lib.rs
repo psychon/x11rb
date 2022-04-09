@@ -43,6 +43,8 @@ pub mod parse_display;
 #[rustfmt::skip]
 #[allow(missing_docs)]
 pub mod protocol;
+#[cfg(feature = "resource_manager")]
+pub mod resource_manager;
 mod utils;
 pub mod wrapper;
 pub mod xauth;
