@@ -49,7 +49,7 @@ image = []
 
 # Enable utility functions in `x11rb::resource_manager` for querying the
 # resource databases.
-resource_manager = []
+resource_manager = ["x11rb-protocol/resource_manager"]
 
 dl-libxcb = ["allow-unsafe-code", "libloading", "once_cell"]
 

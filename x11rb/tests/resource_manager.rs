@@ -12,7 +12,7 @@ mod test {
     use x11rb::errors::{ConnectionError, ParseError, ReplyOrIdError};
     use x11rb::protocol::xproto::{Screen, Setup};
     use x11rb::protocol::Event;
-    use x11rb::resource_manager::Database;
+    use x11rb::resource_manager::{new_from_default, Database};
     use x11rb::utils::RawFdContainer;
     use x11rb::x11_utils::{ExtensionInformation, Serialize, TryParse, TryParseFd, X11Error};
     use x11rb_protocol::SequenceNumber;
@@ -114,14 +114,14 @@ mod test {
 
         let conn = mock_connection(None);
 
-        let db = Database::new_from_default(&conn).unwrap();
+        let db = new_from_default(&conn).unwrap();
         check_db(&db, &[("First", b"1"), ("Second", b"2")]);
     }
 
     #[test]
     fn from_resource_manager() {
         let conn = mock_connection(Some(b"First: 1\n*Second: 2\n"));
-        let db = Database::new_from_default(&conn).unwrap();
+        let db = new_from_default(&conn).unwrap();
         check_db(&db, &[("First", b"1"), ("Second", b"2")]);
     }
 
