@@ -15,6 +15,9 @@ keywords = ["xcb", "X11"]
 
 [dependencies]
 
+[dev-dependencies]
+criterion = "0.3"
+
 [target.'cfg(unix)'.dependencies]
 nix = "0.23"
 
@@ -47,3 +50,7 @@ xselinux = []
 xtest = []
 xv = ["shm"]
 xvmc = ["xv"]
+
+[[bench]]
+name = "proto_connection"
+harness = false
