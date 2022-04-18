@@ -1,16 +1,24 @@
 //! Helper types for implementing an X11 client.
 
+use ahash::RandomState;
+use alloc::boxed::Box;
 use alloc::collections::VecDeque;
 use alloc::vec::Vec;
+use hashbrown::HashMap as HbHashMap;
 
 use crate::utils::RawFdContainer;
 use crate::{DiscardMode, SequenceNumber};
+
+mod special_events;
+use special_events::SpecialEventClassifier;
 
 /// A combination of a buffer and a list of file descriptors.
 pub type BufWithFds = crate::BufWithFds<Vec<u8>>;
 
 /// The raw bytes of an X11 event and its sequence number.
 pub type RawEventAndSeqNumber = crate::RawEventAndSeqNumber<Vec<u8>>;
+
+type HashMap<K, V> = HbHashMap<K, V, RandomState>;
 
 /// Information about the reply to an X11 request.
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
@@ -41,6 +49,8 @@ struct SentRequest {
     has_fds: bool,
 }
 
+type EventQueue = VecDeque<(SequenceNumber, Vec<u8>)>;
+
 /// A pure-rust, sans-I/O implementation of the X11 protocol.
 ///
 /// This object is designed to be used in combination with an I/O backend, in
@@ -58,9 +68,14 @@ pub struct Connection {
     // The sequence number of the last reply/error/event that was read
     last_sequence_read: SequenceNumber,
     // Events that were read, but not yet returned to the API user
-    pending_events: VecDeque<(SequenceNumber, Vec<u8>)>,
+    pending_events: EventQueue,
     // Replies that were read, but not yet returned to the API user
     pending_replies: VecDeque<(SequenceNumber, BufWithFds)>,
+
+    // The special event classifier
+    classifier: SpecialEventClassifier,
+    // A set of queues for special events.
+    special_event_queues: HashMap<u32, EventQueue>,
 
     // FDs that were read, but not yet assigned to any reply
     pending_fds: VecDeque<RawFdContainer>,
@@ -81,6 +96,8 @@ impl Connection {
             pending_events: VecDeque::new(),
             pending_replies: VecDeque::new(),
             pending_fds: VecDeque::new(),
+            classifier: SpecialEventClassifier::default(),
+            special_event_queues: HashMap::with_hasher(RandomState::default()),
         }
     }
 
@@ -245,7 +262,26 @@ impl Connection {
             }
         } else {
             // It is an event
-            self.pending_events.push_back((seqno, packet));
+            self.enqueue_event(seqno, packet);
+        }
+    }
+
+    /// Enqueue an event packet.
+    ///
+    /// This checks to see if it is a special event before queueing it.
+    fn enqueue_event(&mut self, seqno: u64, packet: Vec<u8>) {
+        match self.classifier.classify(&packet) {
+            Some(eid) => {
+                // push into the corresponding queue
+                // unwrap() is good here because eid is always valid
+                self.special_event_queues
+                    .get_mut(&eid)
+                    .unwrap()
+                    .push_back((seqno, packet));
+            }
+            None => {
+                self.pending_events.push_back((seqno, packet));
+            }
         }
     }
 
@@ -319,11 +355,52 @@ impl Connection {
             .pop_front()
             .map(|(seqno, event)| (event, seqno))
     }
+
+    /// Indicate to the connection that it should classify events that fulfill
+    /// the callback as special events.
+    ///
+    /// This should use a unique EID for identification purposes.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the queue ID is not unique.
+    pub fn create_special_event_queue(
+        &mut self,
+        eid: u32,
+        callback: impl FnMut(&[u8]) -> bool + Send + Sync + 'static,
+    ) {
+        if self
+            .special_event_queues
+            .insert(eid, VecDeque::new())
+            .is_some()
+        {
+            panic!("Special event queue IDs should be unique.")
+        }
+        self.classifier.add_class(eid, Box::new(callback));
+    }
+
+    /// Delete the special event queue with the given ID.
+    pub fn delete_special_event_queue(&mut self, eid: u32) {
+        let _ = self.special_event_queues.remove(&eid);
+        self.classifier.remove_class(eid);
+    }
+
+    /// Get a pending special event.
+    pub fn poll_for_special_event_with_sequence(
+        &mut self,
+        eid: u32,
+    ) -> Option<RawEventAndSeqNumber> {
+        self.special_event_queues
+            .get_mut(&eid)
+            .and_then(|queue| queue.pop_front())
+            .map(|(seqno, event)| (event, seqno))
+    }
 }
 
 #[cfg(test)]
 mod test {
     use super::{Connection, ReplyFdKind};
+    use alloc::vec;
 
     #[test]
     fn insert_sync_no_reply() {
@@ -375,5 +452,30 @@ mod test {
 
         let seqno = connection.send_request(ReplyFdKind::ReplyWithoutFDs);
         assert_eq!(Some(0x10000), seqno);
+    }
+
+    #[test]
+    fn insert_special_event() {
+        let mut packet1 = vec![0; 32];
+        packet1[0] = 7;
+        let mut packet2 = vec![0; 32];
+        packet2[0] = crate::protocol::xproto::GE_GENERIC_EVENT;
+        packet2[31] = 0x42;
+
+        // here's our callback
+        let mut conn = Connection::new();
+        let eid = 0x11;
+        conn.create_special_event_queue(eid, |ev| ev[31] == 0x42);
+
+        // insert packets
+        conn.enqueue_packet(packet1.clone());
+        conn.enqueue_packet(packet2.clone());
+
+        // pop both of them
+        let (event, _) = conn.poll_for_event_with_sequence().unwrap();
+        let (sevent, _) = conn.poll_for_special_event_with_sequence(eid).unwrap();
+
+        assert_eq!(event, packet1);
+        assert_eq!(sevent, packet2);
     }
 }

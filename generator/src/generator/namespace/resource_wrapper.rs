@@ -1,4 +1,5 @@
 use std::collections::BTreeSet;
+use std::fmt::Write;
 use std::rc::Rc;
 
 use xcbgen::defs as xcbdefs;
@@ -269,7 +270,7 @@ fn generate_creator(
             .created_argument
             .eq_ignore_ascii_case(&rust_field_name)
         {
-            function_args.push_str(&format!(", {}: {}", rust_field_name, rust_field_type));
+            write!(function_args, ", {}: {}", rust_field_name, rust_field_type).ok();
 
             forward_args_without_resource.push(rust_field_name.clone());
         }
