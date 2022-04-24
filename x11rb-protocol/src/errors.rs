@@ -4,6 +4,11 @@ use crate::protocol::xproto::{SetupAuthenticate, SetupFailed};
 
 pub use crate::id_allocator::IdsExhausted;
 
+use core::fmt;
+
+#[cfg(feature = "std")]
+use std::error::Error;
+
 /// An error occurred while parsing some data
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 #[non_exhaustive]
@@ -49,10 +54,11 @@ pub enum ParseError {
     MissingFileDescriptors,
 }
 
-impl std::error::Error for ParseError {}
+#[cfg(feature = "std")]
+impl Error for ParseError {}
 
-impl std::fmt::Display for ParseError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl fmt::Display for ParseError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             ParseError::InsufficientData => write!(f, "Insufficient data was provided"),
             ParseError::ConversionFailed => {
@@ -100,6 +106,7 @@ pub enum ConnectError {
     InvalidScreen,
 
     /// An I/O error occurred on the connection.
+    #[cfg(feature = "std")]
     IoError(std::io::Error),
 
     /// Invalid ID mask provided by the server.
@@ -123,16 +130,13 @@ pub enum ConnectError {
     },
 }
 
-impl std::error::Error for ConnectError {}
+#[cfg(feature = "std")]
+impl Error for ConnectError {}
 
-impl std::fmt::Display for ConnectError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        fn display(
-            f: &mut std::fmt::Formatter<'_>,
-            prefix: &str,
-            value: &[u8],
-        ) -> std::fmt::Result {
-            match std::str::from_utf8(value).ok() {
+impl fmt::Display for ConnectError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        fn display(f: &mut fmt::Formatter<'_>, prefix: &str, value: &[u8]) -> fmt::Result {
+            match core::str::from_utf8(value).ok() {
                 Some(value) => write!(f, "{}: '{}'", prefix, value),
                 None => write!(f, "{}: {:?} [message is not utf8]", prefix, value),
             }
@@ -143,6 +147,7 @@ impl std::fmt::Display for ConnectError {
             ConnectError::DisplayParsingError => write!(f, "Display parsing error"),
             ConnectError::InvalidScreen => write!(f, "Invalid screen"),
             ConnectError::ParseError(err) => err.fmt(f),
+            #[cfg(feature = "std")]
             ConnectError::IoError(err) => err.fmt(f),
             ConnectError::ZeroIdMask => write!(f, "XID mask was zero"),
             ConnectError::SetupFailed(err) => display(f, "X11 setup failed", &err.reason),
@@ -164,6 +169,7 @@ impl From<ParseError> for ConnectError {
     }
 }
 
+#[cfg(feature = "std")]
 impl From<std::io::Error> for ConnectError {
     fn from(err: std::io::Error) -> Self {
         ConnectError::IoError(err)

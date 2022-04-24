@@ -29,8 +29,15 @@
     // Not everything in x11rb_protocol::protocol has doc comments
     missing_docs,
 )]
+#![no_std]
 
-use std::borrow::Cow;
+// std crate imports
+extern crate alloc;
+#[cfg(feature = "std")]
+extern crate std;
+
+use alloc::borrow::Cow;
+use alloc::vec::Vec;
 
 pub mod connect;
 pub mod connection;
@@ -47,6 +54,7 @@ pub mod protocol;
 pub mod resource_manager;
 mod utils;
 pub mod wrapper;
+#[cfg(feature = "std")]
 pub mod xauth;
 
 pub use utils::RawFdContainer;

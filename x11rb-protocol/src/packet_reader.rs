@@ -1,8 +1,10 @@
 //! Collects X11 data into "packets" to be parsed by a display.
 
-use std::convert::TryInto;
-use std::fmt;
-use std::mem::replace;
+use core::convert::TryInto;
+use core::fmt;
+use core::mem::replace;
+
+use alloc::{vec, vec::Vec};
 
 /// Minimal length of an X11 packet.
 const MINIMAL_PACKET_LENGTH: usize = 32;
@@ -126,6 +128,7 @@ fn extra_length(buffer: &[u8]) -> usize {
 #[cfg(test)]
 mod tests {
     use super::PacketReader;
+    use alloc::{vec, vec::Vec};
 
     fn test_packets(packets: Vec<Vec<u8>>) {
         let mut reader = PacketReader::new();

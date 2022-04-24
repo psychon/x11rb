@@ -1,7 +1,7 @@
 //! Helpers for the generated code
 
 use super::x11_utils::TryParse;
-use std::marker::PhantomData;
+use core::marker::PhantomData;
 
 /// Iterator implementation used by [GetPropertyReply].
 ///
@@ -41,9 +41,9 @@ where
     }
 
     fn size_hint(&self) -> (usize, Option<usize>) {
-        let size = self.0.len() / std::mem::size_of::<T>();
+        let size = self.0.len() / core::mem::size_of::<T>();
         (size, Some(size))
     }
 }
 
-impl<T: TryParse> std::iter::FusedIterator for PropertyIterator<'_, T> {}
+impl<T: TryParse> core::iter::FusedIterator for PropertyIterator<'_, T> {}

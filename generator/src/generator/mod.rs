@@ -46,8 +46,9 @@ pub(crate) fn generate(module: &xcbgen::defs::Module) -> Vec<Generated> {
         );
     }
     outln!(main_proto_out, "");
-    outln!(main_proto_out, "use std::borrow::Cow;");
-    outln!(main_proto_out, "use std::convert::TryInto;");
+    outln!(main_proto_out, "use alloc::borrow::Cow;");
+    outln!(main_proto_out, "use alloc::vec::Vec;");
+    outln!(main_proto_out, "use core::convert::TryInto;");
     outln!(main_proto_out, "use crate::errors::ParseError;");
     outln!(main_proto_out, "use crate::RawFdContainer;");
     outln!(

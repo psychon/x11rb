@@ -1,5 +1,8 @@
 //! Match Xrm entries against a query.
 
+use alloc::string::String;
+use alloc::vec;
+use alloc::vec::Vec;
 use std::cmp::Ordering;
 
 use super::parser::parse_query;
@@ -47,6 +50,7 @@ mod zip_longest {
     #[cfg(test)]
     mod test_zip_longest {
         use super::zip_longest;
+        use alloc::vec::Vec;
 
         #[test]
         fn empty() {
@@ -340,6 +344,11 @@ pub(crate) fn match_entry<'a>(
 mod test {
     use super::super::parser::parse_database;
     use super::match_entry;
+
+    use alloc::format;
+    use alloc::string::{String, ToString};
+    use alloc::vec::Vec;
+    use std::eprintln;
 
     // Most tests in here are based on [1], which is: Copyright © 2016 Ingo Bürk
     // [1]: https://github.com/Airblader/xcb-util-xrm/blob/master/tests/tests_match.c

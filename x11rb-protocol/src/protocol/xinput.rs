@@ -6,10 +6,12 @@
 #![allow(clippy::too_many_arguments)]
 
 #[allow(unused_imports)]
-use std::borrow::Cow;
+use alloc::borrow::Cow;
 #[allow(unused_imports)]
-use std::convert::TryInto;
-use std::convert::TryFrom;
+use core::convert::TryInto;
+use alloc::vec;
+use alloc::vec::Vec;
+use core::convert::TryFrom;
 use crate::errors::ParseError;
 #[allow(unused_imports)]
 use crate::x11_utils::TryIntoUSize;
@@ -225,8 +227,8 @@ impl From<u8> for DeviceUse {
         Self(value)
     }
 }
-impl std::fmt::Debug for DeviceUse  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for DeviceUse  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::IS_X_POINTER.0.into(), "IS_X_POINTER", "IsXPointer"),
             (Self::IS_X_KEYBOARD.0.into(), "IS_X_KEYBOARD", "IsXKeyboard"),
@@ -291,8 +293,8 @@ impl From<u8> for InputClass {
         Self(value)
     }
 }
-impl std::fmt::Debug for InputClass  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for InputClass  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::KEY.0.into(), "KEY", "Key"),
             (Self::BUTTON.0.into(), "BUTTON", "Button"),
@@ -354,8 +356,8 @@ impl From<u8> for ValuatorMode {
         Self(value)
     }
 }
-impl std::fmt::Debug for ValuatorMode  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for ValuatorMode  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::RELATIVE.0.into(), "RELATIVE", "Relative"),
             (Self::ABSOLUTE.0.into(), "ABSOLUTE", "Absolute"),
@@ -1481,8 +1483,8 @@ impl From<u8> for PropagateMode {
         Self(value)
     }
 }
-impl std::fmt::Debug for PropagateMode  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for PropagateMode  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::ADD_TO_LIST.0.into(), "ADD_TO_LIST", "AddToList"),
             (Self::DELETE_FROM_LIST.0.into(), "DELETE_FROM_LIST", "DeleteFromList"),
@@ -2237,8 +2239,8 @@ impl From<u8> for ModifierDevice {
         Self(value)
     }
 }
-impl std::fmt::Debug for ModifierDevice  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for ModifierDevice  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::USE_X_KEYBOARD.0.into(), "USE_X_KEYBOARD", "UseXKeyboard"),
         ];
@@ -2689,8 +2691,8 @@ impl From<u8> for DeviceInputMode {
         Self(value)
     }
 }
-impl std::fmt::Debug for DeviceInputMode  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for DeviceInputMode  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::ASYNC_THIS_DEVICE.0.into(), "ASYNC_THIS_DEVICE", "AsyncThisDevice"),
             (Self::SYNC_THIS_DEVICE.0.into(), "SYNC_THIS_DEVICE", "SyncThisDevice"),
@@ -2981,8 +2983,8 @@ impl From<u8> for FeedbackClass {
         Self(value)
     }
 }
-impl std::fmt::Debug for FeedbackClass  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for FeedbackClass  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::KEYBOARD.0.into(), "KEYBOARD", "Keyboard"),
             (Self::POINTER.0.into(), "POINTER", "Pointer"),
@@ -4811,8 +4813,8 @@ impl From<u8> for ChangeFeedbackControlMask {
         Self(value)
     }
 }
-impl std::fmt::Debug for ChangeFeedbackControlMask  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for ChangeFeedbackControlMask  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::KEY_CLICK_PERCENT.0.into(), "KEY_CLICK_PERCENT", "KeyClickPercent"),
             (Self::PERCENT.0.into(), "PERCENT", "Percent"),
@@ -5689,8 +5691,8 @@ impl From<u8> for ValuatorStateModeMask {
         Self(value)
     }
 }
-impl std::fmt::Debug for ValuatorStateModeMask  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for ValuatorStateModeMask  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::DEVICE_MODE_ABSOLUTE.0.into(), "DEVICE_MODE_ABSOLUTE", "DeviceModeAbsolute"),
             (Self::OUT_OF_PROXIMITY.0.into(), "OUT_OF_PROXIMITY", "OutOfProximity"),
@@ -6354,8 +6356,8 @@ impl From<u16> for DeviceControl {
         Self(value)
     }
 }
-impl std::fmt::Debug for DeviceControl  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for DeviceControl  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::RESOLUTION.0.into(), "RESOLUTION", "Resolution"),
             (Self::ABSCALIB.0.into(), "ABSCALIB", "Abscalib"),
@@ -8109,8 +8111,8 @@ impl From<u8> for PropertyFormat {
         Self(value)
     }
 }
-impl std::fmt::Debug for PropertyFormat  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for PropertyFormat  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::M8_BITS.0.into(), "M8_BITS", "M8Bits"),
             (Self::M16_BITS.0.into(), "M16_BITS", "M16Bits"),
@@ -8666,8 +8668,8 @@ impl From<bool> for Device {
         Self(value)
     }
 }
-impl std::fmt::Debug for Device  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for Device  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::ALL.0.into(), "ALL", "All"),
             (Self::ALL_MASTER.0.into(), "ALL_MASTER", "AllMaster"),
@@ -9116,8 +9118,8 @@ impl From<u16> for HierarchyChangeType {
         Self(value)
     }
 }
-impl std::fmt::Debug for HierarchyChangeType  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for HierarchyChangeType  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::ADD_MASTER.0.into(), "ADD_MASTER", "AddMaster"),
             (Self::REMOVE_MASTER.0.into(), "REMOVE_MASTER", "RemoveMaster"),
@@ -9176,8 +9178,8 @@ impl From<u8> for ChangeMode {
         Self(value)
     }
 }
-impl std::fmt::Debug for ChangeMode  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for ChangeMode  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::ATTACH.0.into(), "ATTACH", "Attach"),
             (Self::FLOAT.0.into(), "FLOAT", "Float"),
@@ -9961,8 +9963,8 @@ impl From<u32> for XIEventMask {
         Self(value)
     }
 }
-impl std::fmt::Debug for XIEventMask  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for XIEventMask  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::DEVICE_CHANGED.0, "DEVICE_CHANGED", "DeviceChanged"),
             (Self::KEY_PRESS.0, "KEY_PRESS", "KeyPress"),
@@ -10245,8 +10247,8 @@ impl From<u16> for DeviceClassType {
         Self(value)
     }
 }
-impl std::fmt::Debug for DeviceClassType  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for DeviceClassType  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::KEY.0.into(), "KEY", "Key"),
             (Self::BUTTON.0.into(), "BUTTON", "Button"),
@@ -10303,8 +10305,8 @@ impl From<u16> for DeviceType {
         Self(value)
     }
 }
-impl std::fmt::Debug for DeviceType  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for DeviceType  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::MASTER_POINTER.0.into(), "MASTER_POINTER", "MasterPointer"),
             (Self::MASTER_KEYBOARD.0.into(), "MASTER_KEYBOARD", "MasterKeyboard"),
@@ -10364,8 +10366,8 @@ impl From<u8> for ScrollFlags {
         Self(value)
     }
 }
-impl std::fmt::Debug for ScrollFlags  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for ScrollFlags  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::NO_EMULATION.0.into(), "NO_EMULATION", "NoEmulation"),
             (Self::PREFERRED.0.into(), "PREFERRED", "Preferred"),
@@ -10417,8 +10419,8 @@ impl From<u16> for ScrollType {
         Self(value)
     }
 }
-impl std::fmt::Debug for ScrollType  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for ScrollType  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::VERTICAL.0.into(), "VERTICAL", "Vertical"),
             (Self::HORIZONTAL.0.into(), "HORIZONTAL", "Horizontal"),
@@ -10475,8 +10477,8 @@ impl From<u8> for TouchMode {
         Self(value)
     }
 }
-impl std::fmt::Debug for TouchMode  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for TouchMode  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::DIRECT.0.into(), "DIRECT", "Direct"),
             (Self::DEPENDENT.0.into(), "DEPENDENT", "Dependent"),
@@ -11628,8 +11630,8 @@ impl From<bool> for GrabOwner {
         Self(value)
     }
 }
-impl std::fmt::Debug for GrabOwner  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for GrabOwner  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::NO_OWNER.0.into(), "NO_OWNER", "NoOwner"),
             (Self::OWNER.0.into(), "OWNER", "Owner"),
@@ -11900,8 +11902,8 @@ impl From<u8> for EventMode {
         Self(value)
     }
 }
-impl std::fmt::Debug for EventMode  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for EventMode  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::ASYNC_DEVICE.0.into(), "ASYNC_DEVICE", "AsyncDevice"),
             (Self::SYNC_DEVICE.0.into(), "SYNC_DEVICE", "SyncDevice"),
@@ -12047,8 +12049,8 @@ impl From<u8> for GrabMode22 {
         Self(value)
     }
 }
-impl std::fmt::Debug for GrabMode22  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for GrabMode22  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::SYNC.0.into(), "SYNC", "Sync"),
             (Self::ASYNC.0.into(), "ASYNC", "Async"),
@@ -12109,8 +12111,8 @@ impl From<u8> for GrabType {
         Self(value)
     }
 }
-impl std::fmt::Debug for GrabType  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for GrabType  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::BUTTON.0.into(), "BUTTON", "Button"),
             (Self::KEYCODE.0.into(), "KEYCODE", "Keycode"),
@@ -12157,8 +12159,8 @@ impl From<u32> for ModifierMask {
         Self(value)
     }
 }
-impl std::fmt::Debug for ModifierMask  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for ModifierMask  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::ANY.0, "ANY", "Any"),
         ];
@@ -13422,8 +13424,8 @@ impl From<u8> for MoreEventsMask {
         Self(value)
     }
 }
-impl std::fmt::Debug for MoreEventsMask  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for MoreEventsMask  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::MORE_EVENTS.0.into(), "MORE_EVENTS", "MoreEvents"),
         ];
@@ -13695,8 +13697,8 @@ impl From<u8> for ClassesReportedMask {
         Self(value)
     }
 }
-impl std::fmt::Debug for ClassesReportedMask  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for ClassesReportedMask  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::OUT_OF_PROXIMITY.0.into(), "OUT_OF_PROXIMITY", "OutOfProximity"),
             (Self::DEVICE_MODE_ABSOLUTE.0.into(), "DEVICE_MODE_ABSOLUTE", "DeviceModeAbsolute"),
@@ -13941,8 +13943,8 @@ impl From<u8> for ChangeDevice {
         Self(value)
     }
 }
-impl std::fmt::Debug for ChangeDevice  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for ChangeDevice  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::NEW_POINTER.0.into(), "NEW_POINTER", "NewPointer"),
             (Self::NEW_KEYBOARD.0.into(), "NEW_KEYBOARD", "NewKeyboard"),
@@ -14221,8 +14223,8 @@ impl From<u8> for DeviceChange {
         Self(value)
     }
 }
-impl std::fmt::Debug for DeviceChange  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for DeviceChange  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::ADDED.0.into(), "ADDED", "Added"),
             (Self::REMOVED.0.into(), "REMOVED", "Removed"),
@@ -14442,8 +14444,8 @@ impl From<u8> for ChangeReason {
         Self(value)
     }
 }
-impl std::fmt::Debug for ChangeReason  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for ChangeReason  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::SLAVE_SWITCH.0.into(), "SLAVE_SWITCH", "SlaveSwitch"),
             (Self::DEVICE_CHANGE.0.into(), "DEVICE_CHANGE", "DeviceChange"),
@@ -14541,8 +14543,8 @@ impl From<u32> for KeyEventFlags {
         Self(value)
     }
 }
-impl std::fmt::Debug for KeyEventFlags  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for KeyEventFlags  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::KEY_REPEAT.0, "KEY_REPEAT", "KeyRepeat"),
         ];
@@ -14681,8 +14683,8 @@ impl From<u32> for PointerEventFlags {
         Self(value)
     }
 }
-impl std::fmt::Debug for PointerEventFlags  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for PointerEventFlags  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::POINTER_EMULATED.0, "POINTER_EMULATED", "PointerEmulated"),
         ];
@@ -14842,8 +14844,8 @@ impl From<u8> for NotifyMode {
         Self(value)
     }
 }
-impl std::fmt::Debug for NotifyMode  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for NotifyMode  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::NORMAL.0.into(), "NORMAL", "Normal"),
             (Self::GRAB.0.into(), "GRAB", "Grab"),
@@ -14910,8 +14912,8 @@ impl From<u8> for NotifyDetail {
         Self(value)
     }
 }
-impl std::fmt::Debug for NotifyDetail  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for NotifyDetail  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::ANCESTOR.0.into(), "ANCESTOR", "Ancestor"),
             (Self::VIRTUAL.0.into(), "VIRTUAL", "Virtual"),
@@ -15070,8 +15072,8 @@ impl From<u8> for HierarchyMask {
         Self(value)
     }
 }
-impl std::fmt::Debug for HierarchyMask  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for HierarchyMask  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::MASTER_ADDED.0.into(), "MASTER_ADDED", "MasterAdded"),
             (Self::MASTER_REMOVED.0.into(), "MASTER_REMOVED", "MasterRemoved"),
@@ -15242,8 +15244,8 @@ impl From<u8> for PropertyFlag {
         Self(value)
     }
 }
-impl std::fmt::Debug for PropertyFlag  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for PropertyFlag  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::DELETED.0.into(), "DELETED", "Deleted"),
             (Self::CREATED.0.into(), "CREATED", "Created"),
@@ -15455,8 +15457,8 @@ impl From<u32> for TouchEventFlags {
         Self(value)
     }
 }
-impl std::fmt::Debug for TouchEventFlags  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for TouchEventFlags  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::TOUCH_PENDING_END.0, "TOUCH_PENDING_END", "TouchPendingEnd"),
             (Self::TOUCH_EMULATING_POINTER.0, "TOUCH_EMULATING_POINTER", "TouchEmulatingPointer"),
@@ -15600,8 +15602,8 @@ impl From<u32> for TouchOwnershipFlags {
         Self(value)
     }
 }
-impl std::fmt::Debug for TouchOwnershipFlags  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for TouchOwnershipFlags  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::NONE.0, "NONE", "None"),
         ];
@@ -15769,8 +15771,8 @@ impl From<u8> for BarrierFlags {
         Self(value)
     }
 }
-impl std::fmt::Debug for BarrierFlags  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for BarrierFlags  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::POINTER_RELEASED.0.into(), "POINTER_RELEASED", "PointerReleased"),
             (Self::DEVICE_IS_GRABBED.0.into(), "DEVICE_IS_GRABBED", "DeviceIsGrabbed"),

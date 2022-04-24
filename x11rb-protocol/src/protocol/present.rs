@@ -6,10 +6,12 @@
 #![allow(clippy::too_many_arguments)]
 
 #[allow(unused_imports)]
-use std::borrow::Cow;
+use alloc::borrow::Cow;
 #[allow(unused_imports)]
-use std::convert::TryInto;
-use std::convert::TryFrom;
+use core::convert::TryInto;
+use alloc::vec;
+use alloc::vec::Vec;
+use core::convert::TryFrom;
 use crate::errors::ParseError;
 #[allow(unused_imports)]
 use crate::x11_utils::TryIntoUSize;
@@ -88,8 +90,8 @@ impl From<u8> for EventEnum {
         Self(value)
     }
 }
-impl std::fmt::Debug for EventEnum  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for EventEnum  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::CONFIGURE_NOTIFY.0.into(), "CONFIGURE_NOTIFY", "ConfigureNotify"),
             (Self::COMPLETE_NOTIFY.0.into(), "COMPLETE_NOTIFY", "CompleteNotify"),
@@ -151,8 +153,8 @@ impl From<u8> for EventMask {
         Self(value)
     }
 }
-impl std::fmt::Debug for EventMask  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for EventMask  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::NO_EVENT.0.into(), "NO_EVENT", "NoEvent"),
             (Self::CONFIGURE_NOTIFY.0.into(), "CONFIGURE_NOTIFY", "ConfigureNotify"),
@@ -216,8 +218,8 @@ impl From<u8> for Option {
         Self(value)
     }
 }
-impl std::fmt::Debug for Option  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for Option  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::NONE.0.into(), "NONE", "None"),
             (Self::ASYNC.0.into(), "ASYNC", "Async"),
@@ -280,8 +282,8 @@ impl From<u8> for Capability {
         Self(value)
     }
 }
-impl std::fmt::Debug for Capability  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for Capability  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::NONE.0.into(), "NONE", "None"),
             (Self::ASYNC.0.into(), "ASYNC", "Async"),
@@ -341,8 +343,8 @@ impl From<u8> for CompleteKind {
         Self(value)
     }
 }
-impl std::fmt::Debug for CompleteKind  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for CompleteKind  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::PIXMAP.0.into(), "PIXMAP", "Pixmap"),
             (Self::NOTIFY_MSC.0.into(), "NOTIFY_MSC", "NotifyMSC"),
@@ -401,8 +403,8 @@ impl From<u8> for CompleteMode {
         Self(value)
     }
 }
-impl std::fmt::Debug for CompleteMode  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for CompleteMode  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::COPY.0.into(), "COPY", "Copy"),
             (Self::FLIP.0.into(), "FLIP", "Flip"),

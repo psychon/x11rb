@@ -11,8 +11,9 @@
 // This is not easy to fix, so ignore it.
 #![allow(clippy::needless_borrow, clippy::needless_lifetimes)]
 
-use std::borrow::Cow;
-use std::convert::TryInto;
+use alloc::borrow::Cow;
+use alloc::vec::Vec;
+use core::convert::TryInto;
 use crate::errors::ParseError;
 use crate::RawFdContainer;
 use crate::x11_utils::{TryParse, TryParseFd, X11Error, ReplyRequest, ReplyFDsRequest};

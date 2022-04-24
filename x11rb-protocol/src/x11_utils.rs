@@ -4,7 +4,10 @@
 //! [`Serialize`] traits. These traits are used internally for parsing incoming data and producing
 //! outgoing data when talking with the X11 server.
 
-use std::convert::TryInto;
+use core::convert::TryInto;
+
+use alloc::string::{String, ToString};
+use alloc::vec::Vec;
 
 use crate::errors::ParseError;
 use crate::protocol::{request_name, ErrorKind};
@@ -249,7 +252,7 @@ macro_rules! implement_try_parse {
     ($t:ty) => {
         impl TryParse for $t {
             fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-                let len = std::mem::size_of::<$t>();
+                let len = core::mem::size_of::<$t>();
                 let bytes = value
                     .get(..len)
                     .ok_or(ParseError::InsufficientData)?
@@ -455,30 +458,30 @@ impl<T: Serialize> Serialize for [T] {
 // `std::ops::BitOrAssign`.
 macro_rules! bitmask_binop {
     ($t:ty, $u:ty) => {
-        impl std::ops::BitOr for $t {
+        impl core::ops::BitOr for $t {
             type Output = $t;
             fn bitor(self, other: Self) -> Self::Output {
                 Self::from(<$u>::from(self) | <$u>::from(other))
             }
         }
-        impl std::ops::BitOr<$u> for $t {
+        impl core::ops::BitOr<$u> for $t {
             type Output = $t;
             fn bitor(self, other: $u) -> Self::Output {
                 self | Self::from(other)
             }
         }
-        impl std::ops::BitOr<$t> for $u {
+        impl core::ops::BitOr<$t> for $u {
             type Output = $t;
             fn bitor(self, other: $t) -> Self::Output {
                 <$t>::from(self) | other
             }
         }
-        impl std::ops::BitOrAssign<$t> for $u {
+        impl core::ops::BitOrAssign<$t> for $u {
             fn bitor_assign(&mut self, other: $t) {
                 *self |= Self::from(other)
             }
         }
-        impl std::ops::BitOrAssign<$u> for $t {
+        impl core::ops::BitOrAssign<$u> for $t {
             fn bitor_assign(&mut self, other: $u) {
                 *self = *self | Self::from(other)
             }

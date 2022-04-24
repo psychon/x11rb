@@ -6,10 +6,12 @@
 #![allow(clippy::too_many_arguments)]
 
 #[allow(unused_imports)]
-use std::borrow::Cow;
+use alloc::borrow::Cow;
 #[allow(unused_imports)]
-use std::convert::TryInto;
-use std::convert::TryFrom;
+use core::convert::TryInto;
+use alloc::vec;
+use alloc::vec::Vec;
+use core::convert::TryFrom;
 use crate::errors::ParseError;
 #[allow(unused_imports)]
 use crate::x11_utils::TryIntoUSize;
@@ -81,8 +83,8 @@ impl From<u8> for Kind {
         Self(value)
     }
 }
-impl std::fmt::Debug for Kind  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for Kind  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::BLANKED.0.into(), "BLANKED", "Blanked"),
             (Self::INTERNAL.0.into(), "INTERNAL", "Internal"),
@@ -140,8 +142,8 @@ impl From<u8> for Event {
         Self(value)
     }
 }
-impl std::fmt::Debug for Event  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for Event  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::NOTIFY_MASK.0.into(), "NOTIFY_MASK", "NotifyMask"),
             (Self::CYCLE_MASK.0.into(), "CYCLE_MASK", "CycleMask"),
@@ -201,8 +203,8 @@ impl From<u8> for State {
         Self(value)
     }
 }
-impl std::fmt::Debug for State  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for State  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::OFF.0.into(), "OFF", "Off"),
             (Self::ON.0.into(), "ON", "On"),

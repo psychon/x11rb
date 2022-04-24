@@ -6,10 +6,12 @@
 #![allow(clippy::too_many_arguments)]
 
 #[allow(unused_imports)]
-use std::borrow::Cow;
+use alloc::borrow::Cow;
 #[allow(unused_imports)]
-use std::convert::TryInto;
-use std::convert::TryFrom;
+use core::convert::TryInto;
+use alloc::vec;
+use alloc::vec::Vec;
+use core::convert::TryFrom;
 use crate::errors::ParseError;
 #[allow(unused_imports)]
 use crate::x11_utils::TryIntoUSize;
@@ -83,8 +85,8 @@ impl From<u8> for ALARMSTATE {
         Self(value)
     }
 }
-impl std::fmt::Debug for ALARMSTATE  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for ALARMSTATE  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::ACTIVE.0.into(), "ACTIVE", "Active"),
             (Self::INACTIVE.0.into(), "INACTIVE", "Inactive"),
@@ -136,8 +138,8 @@ impl From<u32> for TESTTYPE {
         Self(value)
     }
 }
-impl std::fmt::Debug for TESTTYPE  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for TESTTYPE  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::POSITIVE_TRANSITION.0, "POSITIVE_TRANSITION", "PositiveTransition"),
             (Self::NEGATIVE_TRANSITION.0, "NEGATIVE_TRANSITION", "NegativeTransition"),
@@ -184,8 +186,8 @@ impl From<u32> for VALUETYPE {
         Self(value)
     }
 }
-impl std::fmt::Debug for VALUETYPE  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for VALUETYPE  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::ABSOLUTE.0, "ABSOLUTE", "Absolute"),
             (Self::RELATIVE.0, "RELATIVE", "Relative"),
@@ -246,8 +248,8 @@ impl From<u8> for CA {
         Self(value)
     }
 }
-impl std::fmt::Debug for CA  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for CA  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::COUNTER.0.into(), "COUNTER", "Counter"),
             (Self::VALUE_TYPE.0.into(), "VALUE_TYPE", "ValueType"),

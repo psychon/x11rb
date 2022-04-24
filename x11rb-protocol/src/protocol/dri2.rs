@@ -6,10 +6,12 @@
 #![allow(clippy::too_many_arguments)]
 
 #[allow(unused_imports)]
-use std::borrow::Cow;
+use alloc::borrow::Cow;
 #[allow(unused_imports)]
-use std::convert::TryInto;
-use std::convert::TryFrom;
+use core::convert::TryInto;
+use alloc::vec;
+use alloc::vec::Vec;
+use core::convert::TryFrom;
 use crate::errors::ParseError;
 #[allow(unused_imports)]
 use crate::x11_utils::TryIntoUSize;
@@ -77,8 +79,8 @@ impl From<u32> for Attachment {
         Self(value)
     }
 }
-impl std::fmt::Debug for Attachment  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for Attachment  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::BUFFER_FRONT_LEFT.0, "BUFFER_FRONT_LEFT", "BufferFrontLeft"),
             (Self::BUFFER_BACK_LEFT.0, "BUFFER_BACK_LEFT", "BufferBackLeft"),
@@ -132,8 +134,8 @@ impl From<u32> for DriverType {
         Self(value)
     }
 }
-impl std::fmt::Debug for DriverType  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for DriverType  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::DRI.0, "DRI", "DRI"),
             (Self::VDPAU.0, "VDPAU", "VDPAU"),
@@ -185,8 +187,8 @@ impl From<u16> for EventType {
         Self(value)
     }
 }
-impl std::fmt::Debug for EventType  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for EventType  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::EXCHANGE_COMPLETE.0.into(), "EXCHANGE_COMPLETE", "ExchangeComplete"),
             (Self::BLIT_COMPLETE.0.into(), "BLIT_COMPLETE", "BlitComplete"),

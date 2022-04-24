@@ -6,10 +6,12 @@
 #![allow(clippy::too_many_arguments)]
 
 #[allow(unused_imports)]
-use std::borrow::Cow;
+use alloc::borrow::Cow;
 #[allow(unused_imports)]
-use std::convert::TryInto;
-use std::convert::TryFrom;
+use core::convert::TryInto;
+use alloc::vec;
+use alloc::vec::Vec;
+use core::convert::TryFrom;
 use crate::errors::ParseError;
 #[allow(unused_imports)]
 use crate::x11_utils::TryIntoUSize;
@@ -173,8 +175,8 @@ impl From<u8> for SaveSetMode {
         Self(value)
     }
 }
-impl std::fmt::Debug for SaveSetMode  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for SaveSetMode  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::INSERT.0.into(), "INSERT", "Insert"),
             (Self::DELETE.0.into(), "DELETE", "Delete"),
@@ -231,8 +233,8 @@ impl From<u8> for SaveSetTarget {
         Self(value)
     }
 }
-impl std::fmt::Debug for SaveSetTarget  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for SaveSetTarget  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::NEAREST.0.into(), "NEAREST", "Nearest"),
             (Self::ROOT.0.into(), "ROOT", "Root"),
@@ -289,8 +291,8 @@ impl From<u8> for SaveSetMapping {
         Self(value)
     }
 }
-impl std::fmt::Debug for SaveSetMapping  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for SaveSetMapping  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::MAP.0.into(), "MAP", "Map"),
             (Self::UNMAP.0.into(), "UNMAP", "Unmap"),
@@ -420,8 +422,8 @@ impl From<u8> for SelectionEvent {
         Self(value)
     }
 }
-impl std::fmt::Debug for SelectionEvent  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for SelectionEvent  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::SET_SELECTION_OWNER.0.into(), "SET_SELECTION_OWNER", "SetSelectionOwner"),
             (Self::SELECTION_WINDOW_DESTROY.0.into(), "SELECTION_WINDOW_DESTROY", "SelectionWindowDestroy"),
@@ -480,8 +482,8 @@ impl From<u8> for SelectionEventMask {
         Self(value)
     }
 }
-impl std::fmt::Debug for SelectionEventMask  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for SelectionEventMask  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::SET_SELECTION_OWNER.0.into(), "SET_SELECTION_OWNER", "SetSelectionOwner"),
             (Self::SELECTION_WINDOW_DESTROY.0.into(), "SELECTION_WINDOW_DESTROY", "SelectionWindowDestroy"),
@@ -692,8 +694,8 @@ impl From<u8> for CursorNotify {
         Self(value)
     }
 }
-impl std::fmt::Debug for CursorNotify  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for CursorNotify  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::DISPLAY_CURSOR.0.into(), "DISPLAY_CURSOR", "DisplayCursor"),
         ];
@@ -748,8 +750,8 @@ impl From<u8> for CursorNotifyMask {
         Self(value)
     }
 }
-impl std::fmt::Debug for CursorNotifyMask  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for CursorNotifyMask  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::DISPLAY_CURSOR.0.into(), "DISPLAY_CURSOR", "DisplayCursor"),
         ];
@@ -1036,8 +1038,8 @@ impl From<u8> for RegionEnum {
         Self(value)
     }
 }
-impl std::fmt::Debug for RegionEnum  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for RegionEnum  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::NONE.0.into(), "NONE", "None"),
         ];
@@ -2924,8 +2926,8 @@ impl From<u8> for BarrierDirections {
         Self(value)
     }
 }
-impl std::fmt::Debug for BarrierDirections  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for BarrierDirections  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::POSITIVE_X.0.into(), "POSITIVE_X", "PositiveX"),
             (Self::POSITIVE_Y.0.into(), "POSITIVE_Y", "PositiveY"),

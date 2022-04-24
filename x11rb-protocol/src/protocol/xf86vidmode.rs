@@ -6,10 +6,12 @@
 #![allow(clippy::too_many_arguments)]
 
 #[allow(unused_imports)]
-use std::borrow::Cow;
+use alloc::borrow::Cow;
 #[allow(unused_imports)]
-use std::convert::TryInto;
-use std::convert::TryFrom;
+use core::convert::TryInto;
+use alloc::vec;
+use alloc::vec::Vec;
+use core::convert::TryFrom;
 use crate::errors::ParseError;
 #[allow(unused_imports)]
 use crate::x11_utils::TryIntoUSize;
@@ -87,8 +89,8 @@ impl From<u16> for ModeFlag {
         Self(value)
     }
 }
-impl std::fmt::Debug for ModeFlag  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for ModeFlag  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::POSITIVE_H_SYNC.0.into(), "POSITIVE_H_SYNC", "PositiveHSync"),
             (Self::NEGATIVE_H_SYNC.0.into(), "NEGATIVE_H_SYNC", "NegativeHSync"),
@@ -156,8 +158,8 @@ impl From<u8> for ClockFlag {
         Self(value)
     }
 }
-impl std::fmt::Debug for ClockFlag  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for ClockFlag  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::PROGRAMABLE.0.into(), "PROGRAMABLE", "Programable"),
         ];
@@ -214,8 +216,8 @@ impl From<u8> for Permission {
         Self(value)
     }
 }
-impl std::fmt::Debug for Permission  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for Permission  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::READ.0.into(), "READ", "Read"),
             (Self::WRITE.0.into(), "WRITE", "Write"),

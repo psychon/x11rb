@@ -1,7 +1,11 @@
 //! Utilities for parsing X11 display strings.
 
+#![cfg(feature = "std")]
+
 mod connect_instruction;
 pub use connect_instruction::ConnectAddress;
+
+use alloc::string::{String, ToString};
 
 /// A parsed X11 display string.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -76,6 +80,7 @@ fn parse_display_impl(dpy_name: &str) -> Option<ParsedDisplay> {
 #[cfg(test)]
 mod test {
     use super::{parse_display, ParsedDisplay};
+    use alloc::string::ToString;
 
     fn do_parse_display(input: &str) -> Option<ParsedDisplay> {
         std::env::set_var("DISPLAY", input);

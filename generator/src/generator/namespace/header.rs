@@ -28,15 +28,23 @@ pub(super) fn write_header(out: &mut Output, ns: &xcbdefs::Namespace, mode: Mode
         );
         outln!(out, "//! specific errors, events, or requests.");
     }
+
+    let (alloc_name, core_name) = match mode {
+        Mode::Protocol => ("alloc", "core"),
+        Mode::X11rb => ("std", "std"),
+    };
+
     outln!(out, "");
     outln!(out, "#![allow(clippy::too_many_arguments)]");
     outln!(out, "");
     outln!(out, "#[allow(unused_imports)]");
-    outln!(out, "use std::borrow::Cow;");
+    outln!(out, "use {}::borrow::Cow;", alloc_name);
     outln!(out, "#[allow(unused_imports)]");
-    outln!(out, "use std::convert::TryInto;");
+    outln!(out, "use {}::convert::TryInto;", core_name);
     if mode == Mode::Protocol {
-        outln!(out, "use std::convert::TryFrom;");
+        outln!(out, "use alloc::vec;");
+        outln!(out, "use alloc::vec::Vec;");
+        outln!(out, "use core::convert::TryFrom;");
         outln!(out, "use crate::errors::ParseError;");
         outln!(out, "#[allow(unused_imports)]");
         outln!(out, "use crate::x11_utils::TryIntoUSize;");

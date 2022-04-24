@@ -6,10 +6,12 @@
 #![allow(clippy::too_many_arguments)]
 
 #[allow(unused_imports)]
-use std::borrow::Cow;
+use alloc::borrow::Cow;
 #[allow(unused_imports)]
-use std::convert::TryInto;
-use std::convert::TryFrom;
+use core::convert::TryInto;
+use alloc::vec;
+use alloc::vec::Vec;
+use core::convert::TryFrom;
 use crate::errors::ParseError;
 #[allow(unused_imports)]
 use crate::x11_utils::TryIntoUSize;
@@ -80,8 +82,8 @@ impl From<u8> for PictType {
         Self(value)
     }
 }
-impl std::fmt::Debug for PictType  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for PictType  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::INDEXED.0.into(), "INDEXED", "Indexed"),
             (Self::DIRECT.0.into(), "DIRECT", "Direct"),
@@ -137,8 +139,8 @@ impl From<u8> for PictureEnum {
         Self(value)
     }
 }
-impl std::fmt::Debug for PictureEnum  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for PictureEnum  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::NONE.0.into(), "NONE", "None"),
         ];
@@ -245,8 +247,8 @@ impl From<u8> for PictOp {
         Self(value)
     }
 }
-impl std::fmt::Debug for PictOp  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for PictOp  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::CLEAR.0.into(), "CLEAR", "Clear"),
             (Self::SRC.0.into(), "SRC", "Src"),
@@ -342,8 +344,8 @@ impl From<u32> for PolyEdge {
         Self(value)
     }
 }
-impl std::fmt::Debug for PolyEdge  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for PolyEdge  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::SHARP.0, "SHARP", "Sharp"),
             (Self::SMOOTH.0, "SMOOTH", "Smooth"),
@@ -388,8 +390,8 @@ impl From<u32> for PolyMode {
         Self(value)
     }
 }
-impl std::fmt::Debug for PolyMode  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for PolyMode  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::PRECISE.0, "PRECISE", "Precise"),
             (Self::IMPRECISE.0, "IMPRECISE", "Imprecise"),
@@ -451,8 +453,8 @@ impl From<u16> for CP {
         Self(value)
     }
 }
-impl std::fmt::Debug for CP  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for CP  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::REPEAT.0.into(), "REPEAT", "Repeat"),
             (Self::ALPHA_MAP.0.into(), "ALPHA_MAP", "AlphaMap"),
@@ -513,8 +515,8 @@ impl From<u32> for SubPixel {
         Self(value)
     }
 }
-impl std::fmt::Debug for SubPixel  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for SubPixel  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::UNKNOWN.0, "UNKNOWN", "Unknown"),
             (Self::HORIZONTAL_RGB.0, "HORIZONTAL_RGB", "HorizontalRGB"),
@@ -565,8 +567,8 @@ impl From<u32> for Repeat {
         Self(value)
     }
 }
-impl std::fmt::Debug for Repeat  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for Repeat  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::NONE.0, "NONE", "None"),
             (Self::NORMAL.0, "NORMAL", "Normal"),

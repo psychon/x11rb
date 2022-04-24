@@ -6,10 +6,12 @@
 #![allow(clippy::too_many_arguments)]
 
 #[allow(unused_imports)]
-use std::borrow::Cow;
+use alloc::borrow::Cow;
 #[allow(unused_imports)]
-use std::convert::TryInto;
-use std::convert::TryFrom;
+use core::convert::TryInto;
+use alloc::vec;
+use alloc::vec::Vec;
+use core::convert::TryFrom;
 use crate::errors::ParseError;
 #[allow(unused_imports)]
 use crate::x11_utils::TryIntoUSize;
@@ -322,8 +324,8 @@ impl From<u16> for PBCET {
         Self(value)
     }
 }
-impl std::fmt::Debug for PBCET  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for PBCET  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::DAMAGED.0.into(), "DAMAGED", "Damaged"),
             (Self::SAVED.0.into(), "SAVED", "Saved"),
@@ -374,8 +376,8 @@ impl From<u16> for PBCDT {
         Self(value)
     }
 }
-impl std::fmt::Debug for PBCDT  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for PBCDT  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::WINDOW.0.into(), "WINDOW", "Window"),
             (Self::PBUFFER.0.into(), "PBUFFER", "Pbuffer"),
@@ -1170,8 +1172,8 @@ impl From<u32> for GC {
         Self(value)
     }
 }
-impl std::fmt::Debug for GC  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for GC  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::GL_CURRENT_BIT.0, "GL_CURRENT_BIT", "GL_CURRENT_BIT"),
             (Self::GL_POINT_BIT.0, "GL_POINT_BIT", "GL_POINT_BIT"),
@@ -3915,8 +3917,8 @@ impl From<u16> for RM {
         Self(value)
     }
 }
-impl std::fmt::Debug for RM  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for RM  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::GL_RENDER.0.into(), "GL_RENDER", "GL_RENDER"),
             (Self::GL_FEEDBACK.0.into(), "GL_FEEDBACK", "GL_FEEDBACK"),

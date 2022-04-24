@@ -10,10 +10,15 @@
 //! The code in this module is only available when the `resource_manager` feature of the library is
 //! enabled.
 
+#![cfg(feature = "std")]
+
 use std::env::var_os;
 use std::ffi::OsString;
 use std::path::{Path, PathBuf};
 use std::str::FromStr;
+
+use alloc::string::String;
+use alloc::vec::Vec;
 
 use crate::protocol::xproto::{GetPropertyReply, GetPropertyRequest};
 

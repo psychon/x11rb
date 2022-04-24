@@ -3,8 +3,10 @@
 use crate::errors::ConnectError;
 use crate::protocol::xc_misc::GetXIDRangeReply;
 
+#[cfg(feature = "std")]
 use std::error::Error;
-use std::fmt;
+
+use core::fmt;
 
 /// An allocator for X11 IDs.
 ///
@@ -75,6 +77,7 @@ impl fmt::Display for IdsExhausted {
     }
 }
 
+#[cfg(feature = "std")]
 impl Error for IdsExhausted {}
 
 #[cfg(test)]

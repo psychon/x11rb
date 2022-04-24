@@ -6,10 +6,12 @@
 #![allow(clippy::too_many_arguments)]
 
 #[allow(unused_imports)]
-use std::borrow::Cow;
+use alloc::borrow::Cow;
 #[allow(unused_imports)]
-use std::convert::TryInto;
-use std::convert::TryFrom;
+use core::convert::TryInto;
+use alloc::vec;
+use alloc::vec::Vec;
+use core::convert::TryFrom;
 use crate::errors::ParseError;
 #[allow(unused_imports)]
 use crate::x11_utils::TryIntoUSize;
@@ -89,8 +91,8 @@ impl From<u8> for Type {
         Self(value)
     }
 }
-impl std::fmt::Debug for Type  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for Type  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::INPUT_MASK.0.into(), "INPUT_MASK", "InputMask"),
             (Self::OUTPUT_MASK.0.into(), "OUTPUT_MASK", "OutputMask"),
@@ -151,8 +153,8 @@ impl From<u8> for ImageFormatInfoType {
         Self(value)
     }
 }
-impl std::fmt::Debug for ImageFormatInfoType  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for ImageFormatInfoType  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::RGB.0.into(), "RGB", "RGB"),
             (Self::YUV.0.into(), "YUV", "YUV"),
@@ -209,8 +211,8 @@ impl From<u8> for ImageFormatInfoFormat {
         Self(value)
     }
 }
-impl std::fmt::Debug for ImageFormatInfoFormat  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for ImageFormatInfoFormat  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::PACKED.0.into(), "PACKED", "Packed"),
             (Self::PLANAR.0.into(), "PLANAR", "Planar"),
@@ -267,8 +269,8 @@ impl From<u8> for AttributeFlag {
         Self(value)
     }
 }
-impl std::fmt::Debug for AttributeFlag  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for AttributeFlag  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::GETTABLE.0.into(), "GETTABLE", "Gettable"),
             (Self::SETTABLE.0.into(), "SETTABLE", "Settable"),
@@ -329,8 +331,8 @@ impl From<u8> for VideoNotifyReason {
         Self(value)
     }
 }
-impl std::fmt::Debug for VideoNotifyReason  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for VideoNotifyReason  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::STARTED.0.into(), "STARTED", "Started"),
             (Self::STOPPED.0.into(), "STOPPED", "Stopped"),
@@ -390,8 +392,8 @@ impl From<u8> for ScanlineOrder {
         Self(value)
     }
 }
-impl std::fmt::Debug for ScanlineOrder  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for ScanlineOrder  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::TOP_TO_BOTTOM.0.into(), "TOP_TO_BOTTOM", "TopToBottom"),
             (Self::BOTTOM_TO_TOP.0.into(), "BOTTOM_TO_TOP", "BottomToTop"),
@@ -452,8 +454,8 @@ impl From<u8> for GrabPortStatus {
         Self(value)
     }
 }
-impl std::fmt::Debug for GrabPortStatus  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for GrabPortStatus  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::SUCCESS.0.into(), "SUCCESS", "Success"),
             (Self::BAD_EXTENSION.0.into(), "BAD_EXTENSION", "BadExtension"),
