@@ -15,7 +15,6 @@ keywords = ["xcb", "X11"]
 
 [dependencies]
 x11rb-protocol = { version = "0.9.0", path = "../x11rb-protocol" }
-# TODO: Strip down features
 async-lock = "2.5"
 event-listener = "2.5"
 
@@ -25,7 +24,6 @@ default-features = false
 features = ["io"]
 
 [dev-dependencies]
-# TODO: Strip down features
-tokio = { version = "1", features = ["full"] }
+tokio = { version = "1", features = ["macros", "net", "rt-multi-thread"] }
 tokio-util = {version = "0.7", features = ["compat"] }
 smol = "1.2"
