@@ -6,7 +6,7 @@
 //! [`DefaultStream`](../rust_connection/struct.DefaultStream.html#impl-AsRawFd) and
 //! [`XCBConnection`](../xcb_ffi/struct.XCBConnection.html#impl-AsRawFd). This allows to integrate
 //! with an event loop that also handles timeouts or network I/O. See
-//! [`xclock_utc`](https://github.com/psychon/x11rb/blob/master/examples/xclock_utc.rs) for an
+//! [`xclock_utc`](https://github.com/psychon/x11rb/blob/master/x11rb/examples/xclock_utc.rs) for an
 //! example.
 //!
 //! The general form of such an integration could be as follows:
@@ -39,7 +39,7 @@
 //! ```
 //! The function `poll_for_readable` could wait for any number of I/O streams (besides the one from
 //! x11rb) to become readable. It can also implement timeouts, as seen in the
-//! [`xclock_utc` example](https://github.com/psychon/x11rb/blob/master/examples/xclock_utc.rs).
+//! [`xclock_utc` example](https://github.com/psychon/x11rb/blob/master/x11rb/examples/xclock_utc.rs).
 //!
 //!
 //! ## Threads and Races

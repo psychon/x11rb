@@ -15,7 +15,7 @@
 //! is still difficult to get into it. A good starting point might be some [libxcb
 //! tutorial](https://www.x.org/releases/X11R7.7/doc/libxcb/tutorial/index.html). This tutorial
 //! was adapted in this crate [as an
-//! example](https://github.com/psychon/x11rb/blob/master/examples/tutorial.rs). A more in-depth
+//! example](https://github.com/psychon/x11rb/blob/master/x11rb/examples/tutorial.rs). A more in-depth
 //! look at the X11 protocol can be gained from the [protocol reference
 //! manual](https://www.x.org/releases/X11R7.6/doc/xproto/x11protocol.html), but this requires some
 //! existing basic understanding of X11. If you want to figure out what some specific request does,
