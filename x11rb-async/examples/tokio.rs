@@ -26,9 +26,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let request = GetWindowAttributesRequest { window: 1234 };
     conn.send_request_with_reply(request).await?;
 
-    // FIXME: This should receive the reply from the above request, but that would require async
-    // drop to implement.... so... something is needed?
-
     println!("Waiting for event");
     println!("Event: {:?}", conn.wait_for_event().await);
 

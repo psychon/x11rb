@@ -1,3 +1,4 @@
+use async_channel::{Receiver, Sender};
 use async_lock::{Mutex, MutexGuard};
 use futures_util::io::{AsyncRead, AsyncReadExt, AsyncWrite, AsyncWriteExt};
 use std::marker::PhantomData;
@@ -24,6 +25,7 @@ use crate::Condvar;
 pub struct Connection<Writer: AsyncWrite + Unpin> {
     inner: Arc<Mutex<ConnectionInner>>,
     packet_condition: Arc<Condvar>,
+    cookie_drop_sender: Sender<SequenceNumber>,
 
     writer: Mutex<Option<Writer>>,
 
@@ -69,20 +71,32 @@ impl<Writer: AsyncWrite + Unpin> Connection<Writer> {
         }));
         let packet_condition = Arc::new(Condvar::new());
 
+        let (cookie_drop_sender, drop_receiver) = async_channel::unbounded();
+
         let inner2 = Arc::clone(&inner);
         let packet_condition2 = Arc::clone(&packet_condition);
-        let reader = read_packets(read, inner2, packet_condition2);
+        let reader = Box::pin(read_packets(read, inner2, packet_condition2));
+
+        let inner2 = Arc::clone(&inner);
+        let packet_condition2 = Arc::clone(&packet_condition);
+        let cookie_drop_reader =
+            Box::pin(read_dropped_seqno(inner2, drop_receiver, packet_condition2));
+
+        let worker = async move {
+            futures_util::future::select(reader, cookie_drop_reader).await;
+        };
 
         let connection = Connection {
             inner,
             packet_condition,
+            cookie_drop_sender,
             extension_manager: Default::default(),
             id_allocator,
             setup,
             writer: Mutex::new(Some(write)),
         };
 
-        Ok((connection, reader))
+        Ok((connection, worker))
     }
 
     pub fn setup(&self) -> &Setup {
@@ -210,6 +224,7 @@ impl<Writer: AsyncWrite + Unpin> Connection<Writer> {
         Ok(Cookie::new(
             Arc::clone(&self.inner),
             Arc::clone(&self.packet_condition),
+            self.cookie_drop_sender.clone(),
             seqno,
         ))
     }
@@ -251,6 +266,7 @@ pub struct Cookie<Reply: TryParse> {
     inner: Arc<Mutex<ConnectionInner>>,
     packet_condition: Arc<Condvar>,
     seqno: SequenceNumber,
+    cookie_drop_sender: Option<Sender<SequenceNumber>>,
     _phantom: PhantomData<Reply>,
 }
 
@@ -258,21 +274,26 @@ impl<Reply: TryParse> Cookie<Reply> {
     fn new(
         inner: Arc<Mutex<ConnectionInner>>,
         packet_condition: Arc<Condvar>,
+        cookie_drop_sender: Sender<SequenceNumber>,
         seqno: SequenceNumber,
     ) -> Self {
         Self {
             inner,
             packet_condition,
+            cookie_drop_sender: Some(cookie_drop_sender),
             seqno,
             _phantom: PhantomData,
         }
     }
 
-    pub async fn raw_reply(self) -> Result<Vec<u8>, ConnectError> {
+    pub async fn raw_reply(mut self) -> Result<Vec<u8>, ConnectError> {
         // TODO: Flush if the request was not yet sent
         let mut inner = self.inner.lock().await;
         loop {
             if let Some(reply) = inner.inner.poll_for_reply_or_error(self.seqno) {
+                // Signal to the Drop impl not to do anything
+                self.cookie_drop_sender.take();
+
                 // TODO: Check for and handle X11 errors
                 break Ok(reply.0);
             }
@@ -282,6 +303,17 @@ impl<Reply: TryParse> Cookie<Reply> {
 
     pub async fn reply(self) -> Result<Reply, ConnectError> {
         Ok(Reply::try_parse(self.raw_reply().await?.as_ref())?.0)
+    }
+}
+
+impl<Reply: TryParse> Drop for Cookie<Reply> {
+    fn drop(&mut self) {
+        if let Some(sender) = self.cookie_drop_sender.take() {
+            // We ignore errors because the only possible errors are "channel is full" or "closed".
+            // This is an unbounded channel, so it cannot be full, and if it was closed, then the
+            // whole Connection was also dropped and no one cares about the reply any more.
+            let _ = sender.try_send(self.seqno);
+        }
     }
 }
 
@@ -344,5 +376,22 @@ async fn read_packets(
 
     if let Err(err) = do_read_packets(reader, &state, packet_condition).await {
         state.lock().await.io_error = Some(err);
+    }
+}
+
+async fn read_dropped_seqno(
+    state: Arc<Mutex<ConnectionInner>>,
+    receiver: Receiver<SequenceNumber>,
+    packet_condition: Arc<Condvar>,
+) {
+    // The only possible error is "sender was dropped", which means we should just exit. Thus, loop
+    // as long as we get Ok()s.
+    while let Ok(seqno) = receiver.recv().await {
+        let mut inner = state.lock().await;
+        inner
+            .inner
+            .discard_reply(seqno, x11rb_protocol::DiscardMode::DiscardReply);
+        // Notify the packet condition in case something is already waiting
+        packet_condition.notify_all();
     }
 }
