@@ -50,7 +50,7 @@ module helps with loading cursors from the current cursor theme.
 
 The full X11 protocol is supported by this library. All extensions that are
 available in `xcb-proto` can be used and even [FD
-passing](examples/shared_memory.rs) with the server is supported.
+passing](x11rb/examples/shared_memory.rs) with the server is supported.
 
 The changelog is available in a [separate file](doc/changelog.md).
 
