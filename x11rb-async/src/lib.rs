@@ -6,6 +6,7 @@ pub mod reexports {
 mod condvar;
 mod connection;
 pub(crate) mod extension_manager;
+pub mod tokio;
 
 use condvar::Condvar;
 

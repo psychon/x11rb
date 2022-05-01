@@ -13,6 +13,10 @@ edition = "2018"
 license = "MIT OR Apache-2.0"
 keywords = ["xcb", "X11"]
 
+[features]
+default = ["tokio-support"]
+tokio-support = ["tokio", "tokio-util"]
+
 [dependencies]
 x11rb-protocol = { version = "0.9.0", path = "../x11rb-protocol" }
 async-lock = "2.5"
@@ -24,7 +28,15 @@ version = "0.3"
 default-features = false
 features = ["io"]
 
+[dependencies.tokio]
+version = "1"
+features = ["macros", "net", "rt-multi-thread"]
+optional = true
+
+[dependencies.tokio-util]
+version = "0.7"
+features = ["compat"]
+optional = true
+
 [dev-dependencies]
-tokio = { version = "1", features = ["macros", "net", "rt-multi-thread"] }
-tokio-util = {version = "0.7", features = ["compat"] }
 smol = "1.2"

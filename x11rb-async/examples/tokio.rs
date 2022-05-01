@@ -1,23 +1,9 @@
-use tokio::net::TcpStream;
-use tokio_util::compat::{TokioAsyncReadCompatExt, TokioAsyncWriteCompatExt};
-use x11rb_async::Connection;
 use x11rb_protocol::protocol::xproto::{GetInputFocusRequest, GetWindowAttributesRequest};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let (read, write) = TcpStream::connect(("127.0.0.1".to_string(), 6000 + 4))
-        .await?
-        .into_split();
-
-    let (conn, reader) = Connection::connect_streams_with_auth_data(
-        read.compat(),
-        write.compat_write(),
-        vec![],
-        vec![],
-    )
-    .await?;
-    tokio::spawn(reader);
-    println!("Root window: {:?}", conn.setup().roots[0].root);
+    let (conn, screen) = x11rb_async::tokio::connect(None).await?;
+    println!("Root window: {:?}", conn.setup().roots[screen].root);
 
     let request = GetInputFocusRequest;
     let reply = conn.send_request_with_reply(request).await?.reply().await;
