@@ -1,10 +1,6 @@
-use std::future::Future;
-use std::pin::Pin;
-use std::task::{Context, Poll};
-
 use async_lock::MutexGuard;
 
-use event_listener::{Event, EventListener};
+use event_listener::Event;
 
 /// Async condition variable
 #[derive(Debug, Default)]
@@ -17,26 +13,19 @@ impl Condvar {
 
     pub async fn wait<'g, T>(&self, guard: MutexGuard<'g, T>) -> MutexGuard<'g, T> {
         let source = MutexGuard::source(&guard);
-        WaitOnce(self.0.listen(), Some(guard)).await;
+
+        // Register a listener
+        let listen = self.0.listen();
+        // ...and drop the mutex only afterwards so that we do not miss any wakeups
+        drop(guard);
+        // Now wait for a notification
+        listen.await;
         source.lock().await
     }
 
     pub fn notify_all(&self) {
         // Wake all waiting futures
         self.0.notify_additional(usize::MAX);
-    }
-}
-
-// Helper struct that drops the mutex guard *after* we registered for notification
-struct WaitOnce<'g, T>(EventListener, Option<MutexGuard<'g, T>>);
-
-impl<T> Future for WaitOnce<'_, T> {
-    type Output = ();
-
-    fn poll(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
-        let result = Pin::new(&mut self.0).poll(cx);
-        self.1.take();
-        result
     }
 }
 
@@ -111,5 +100,40 @@ mod test {
                 guard = condvar.wait(guard).await;
             }
         }));
+    }
+
+    #[test]
+    fn condvar_wakes_multiple_tasks() {
+        let ex = Executor::new();
+        let mutex_condvar = Arc::new((Mutex::new(0u32), Condvar::new()));
+
+        for _ in 0..2 {
+            let mutex_condvar = Arc::clone(&mutex_condvar);
+            let task = async move {
+                let mut guard = mutex_condvar.0.lock().await;
+                *guard += 1;
+                while *guard != 10 {
+                    guard = mutex_condvar.1.wait(guard).await;
+                }
+            };
+            ex.spawn(task).detach()
+        }
+
+        // Make sure the tasks are waiting
+        while ex.try_tick() {}
+
+        // Both tasks should have incremented the value
+        let value = smol::block_on(ex.run(async { *mutex_condvar.0.lock().await }));
+        assert_eq!(value, 2);
+
+        // Let the tasks exit. This actually tests that notify_all() notifies all
+        smol::block_on(ex.run(async {
+            let mut guard = mutex_condvar.0.lock().await;
+            *guard = 10;
+            mutex_condvar.1.notify_all();
+        }));
+
+        // Wait for everything to exit
+        while ex.try_tick() {}
     }
 }
