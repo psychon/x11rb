@@ -1,4 +1,4 @@
-use std::io::{IoSlice, Result};
+use std::io::{IoSlice, IoSliceMut, Result};
 use std::net::{Ipv4Addr, SocketAddr, TcpStream};
 #[cfg(unix)]
 use std::os::unix::io::{AsRawFd, IntoRawFd, RawFd};
@@ -321,17 +321,17 @@ impl IntoRawSocket for DefaultStream {
 #[cfg(unix)]
 fn do_write(
     stream: &DefaultStream,
-    bufs: &[nix::sys::uio::IoVec<&[u8]>],
+    bufs: &[IoSlice<'_>],
     fds: &mut Vec<RawFdContainer>,
 ) -> Result<usize> {
-    use nix::sys::socket::{sendmsg, ControlMessage, MsgFlags};
+    use nix::sys::socket::{sendmsg, ControlMessage, MsgFlags, SockaddrLike};
 
-    fn sendmsg_wrapper(
+    fn sendmsg_wrapper<S: SockaddrLike>(
         fd: RawFd,
-        iov: &[nix::sys::uio::IoVec<&[u8]>],
+        iov: &[IoSlice<'_>],
         cmsgs: &[ControlMessage<'_>],
         flags: MsgFlags,
-        addr: Option<&nix::sys::socket::SockAddr>,
+        addr: Option<&S>,
     ) -> Result<usize> {
         loop {
             match sendmsg(fd, iov, cmsgs, flags, addr) {
@@ -348,9 +348,9 @@ fn do_write(
     let res = if !fds.is_empty() {
         let fds = fds.iter().map(|fd| fd.as_raw_fd()).collect::<Vec<_>>();
         let cmsgs = [ControlMessage::ScmRights(&fds[..])];
-        sendmsg_wrapper(fd, bufs, &cmsgs, MsgFlags::empty(), None)?
+        sendmsg_wrapper::<()>(fd, bufs, &cmsgs, MsgFlags::empty(), None)?
     } else {
-        sendmsg_wrapper(fd, bufs, &[], MsgFlags::empty(), None)?
+        sendmsg_wrapper::<()>(fd, bufs, &[], MsgFlags::empty(), None)?
     };
 
     // We successfully sent all FDs
@@ -411,19 +411,16 @@ impl Stream for DefaultStream {
     fn read(&self, buf: &mut [u8], fd_storage: &mut Vec<RawFdContainer>) -> Result<usize> {
         #[cfg(unix)]
         {
-            use nix::sys::{
-                socket::{recvmsg, ControlMessageOwned, MsgFlags},
-                uio::IoVec,
-            };
+            use nix::sys::socket::{recvmsg, ControlMessageOwned, MsgFlags};
 
             // Chosen by checking what libxcb does
             const MAX_FDS_RECEIVED: usize = 16;
             let mut cmsg = nix::cmsg_space!([RawFd; MAX_FDS_RECEIVED]);
-            let iov = [IoVec::from_mut_slice(buf)];
+            let mut iov = [IoSliceMut::new(buf)];
 
             let fd = self.as_raw_fd();
             let msg = loop {
-                match recvmsg(fd, &iov[..], Some(&mut cmsg), MsgFlags::empty()) {
+                match recvmsg::<()>(fd, &mut iov, Some(&mut cmsg), MsgFlags::empty()) {
                     Ok(msg) => break msg,
                     // try again
                     Err(nix::Error::EINTR) => {}
@@ -467,7 +464,7 @@ impl Stream for DefaultStream {
     fn write(&self, buf: &[u8], fds: &mut Vec<RawFdContainer>) -> Result<usize> {
         #[cfg(unix)]
         {
-            do_write(self, &[nix::sys::uio::IoVec::from_slice(buf)], fds)
+            do_write(self, &[IoSlice::new(buf)], fds)
         }
         #[cfg(not(unix))]
         {
@@ -495,10 +492,6 @@ impl Stream for DefaultStream {
     fn write_vectored(&self, bufs: &[IoSlice<'_>], fds: &mut Vec<RawFdContainer>) -> Result<usize> {
         #[cfg(unix)]
         {
-            let bufs = bufs
-                .iter()
-                .map(|b| nix::sys::uio::IoVec::from_slice(&**b))
-                .collect::<Vec<_>>();
             do_write(self, &bufs, fds)
         }
         #[cfg(not(unix))]
