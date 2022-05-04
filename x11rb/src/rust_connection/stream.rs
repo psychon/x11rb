@@ -492,7 +492,7 @@ impl Stream for DefaultStream {
     fn write_vectored(&self, bufs: &[IoSlice<'_>], fds: &mut Vec<RawFdContainer>) -> Result<usize> {
         #[cfg(unix)]
         {
-            do_write(self, &bufs, fds)
+            do_write(self, bufs, fds)
         }
         #[cfg(not(unix))]
         {
