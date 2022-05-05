@@ -10,7 +10,7 @@ use x11rb_protocol::packet_reader::PacketReader as ProtoPacketReader;
 /// A wrapper around a reader that reads X11 packet.
 pub(crate) struct PacketReader {
     /// The read buffer to store incoming bytes in.
-    read_buffer: Box<[u8]>,
+    read_buffer: [u8; 4096],
     /// The inner reader that breaks these bytes into packets.
     inner: ProtoPacketReader,
 }
@@ -32,7 +32,7 @@ impl PacketReader {
     pub(crate) fn new() -> Self {
         Self {
             // Buffer size chosen by checking what libxcb does
-            read_buffer: vec![0; 4096].into_boxed_slice(),
+            read_buffer: [0; 4096],
             inner: ProtoPacketReader::new(),
         }
     }
