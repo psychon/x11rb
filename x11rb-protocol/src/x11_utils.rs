@@ -36,7 +36,7 @@ impl X11Error {
     /// Parse an X11 error.
     pub fn try_parse(
         data: &[u8],
-        ext_info_provider: &dyn ExtInfoProvider,
+        ext_info_provider: &impl ExtInfoProvider,
     ) -> Result<Self, ParseError> {
         let (response_type, remaining) = u8::try_parse(data)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;

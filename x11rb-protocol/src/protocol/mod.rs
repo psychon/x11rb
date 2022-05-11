@@ -1283,7 +1283,7 @@ impl<'input> Request<'input> {
         // Might not be used if none of the extensions that use FD passing is enabled
         #[allow(unused_variables, clippy::ptr_arg)]
         fds: &mut Vec<RawFdContainer>,
-        ext_info_provider: &dyn ExtInfoProvider,
+        ext_info_provider: &impl ExtInfoProvider,
     ) -> Result<Self, ParseError> {
         let remaining = body;
         // Check if this is a core protocol request.
@@ -8295,7 +8295,7 @@ impl ErrorKind {
     #[allow(clippy::match_single_binding)]
     pub fn from_wire_error_code(
         error_code: u8,
-        ext_info_provider: &dyn ExtInfoProvider,
+        ext_info_provider: &impl ExtInfoProvider,
     ) -> Self {
         // Check if this is a core protocol error
         match error_code {
@@ -8656,7 +8656,7 @@ impl Event {
     #[allow(clippy::cognitive_complexity, clippy::match_single_binding)]
     pub fn parse(
         event: &[u8],
-        ext_info_provider: &dyn ExtInfoProvider,
+        ext_info_provider: &impl ExtInfoProvider,
     ) -> Result<Self, ParseError> {
         let event_code = response_type(event)?;
 
@@ -8844,7 +8844,7 @@ impl Event {
     #[allow(clippy::match_single_binding)]
     fn from_generic_event(
         event: &[u8],
-        ext_info_provider: &dyn ExtInfoProvider,
+        ext_info_provider: &impl ExtInfoProvider,
     ) -> Result<Self, ParseError> {
         let ge_event = xproto::GeGenericEvent::try_parse(event)?.0;
         let ext_name = ext_info_provider

@@ -68,7 +68,7 @@ fn generate_errors(out: &mut Output, module: &xcbgen::defs::Module) {
         outln!(out, "#[allow(clippy::match_single_binding)]");
         outln!(out, "pub fn from_wire_error_code(");
         outln!(out.indent(), "error_code: u8,");
-        outln!(out.indent(), "ext_info_provider: &dyn ExtInfoProvider,");
+        outln!(out.indent(), "ext_info_provider: &impl ExtInfoProvider,");
         outln!(out, ") -> Self {{");
         out.indented(|out| {
             outln!(out, "// Check if this is a core protocol error");
@@ -184,7 +184,7 @@ fn generate_events(out: &mut Output, module: &xcbgen::defs::Module) {
         );
         outln!(out, "pub fn parse(");
         outln!(out.indent(), "event: &[u8],");
-        outln!(out.indent(), "ext_info_provider: &dyn ExtInfoProvider,");
+        outln!(out.indent(), "ext_info_provider: &impl ExtInfoProvider,");
         outln!(out, ") -> Result<Self, ParseError> {{");
         out.indented(|out| {
             outln!(out, "let event_code = response_type(event)?;");
@@ -290,7 +290,7 @@ fn generate_events(out: &mut Output, module: &xcbgen::defs::Module) {
         outln!(out, "#[allow(clippy::match_single_binding)]");
         outln!(out, "fn from_generic_event(");
         outln!(out.indent(), "event: &[u8],");
-        outln!(out.indent(), "ext_info_provider: &dyn ExtInfoProvider,");
+        outln!(out.indent(), "ext_info_provider: &impl ExtInfoProvider,");
         outln!(out, ") -> Result<Self, ParseError> {{");
         out.indented(|out| {
             outln!(

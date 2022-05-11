@@ -70,7 +70,7 @@ pub(super) fn generate(out: &mut Output, module: &xcbdefs::Module, mut enum_case
             );
             outln!(out, "#[allow(unused_variables, clippy::ptr_arg)]");
             outln!(out, "fds: &mut Vec<RawFdContainer>,");
-            outln!(out, "ext_info_provider: &dyn ExtInfoProvider,");
+            outln!(out, "ext_info_provider: &impl ExtInfoProvider,");
         });
         outln!(out, ") -> Result<Self, ParseError> {{");
         out.indented(|out| {
