@@ -2,6 +2,8 @@
 //! to be transformed into a server connection.
 
 use super::ParsedDisplay;
+use alloc::format;
+use alloc::vec::Vec;
 use std::path::PathBuf;
 
 /// Either a hostname and port to connect to, or a socket to connect to.
@@ -57,6 +59,7 @@ pub(super) fn connect_addresses(p: &ParsedDisplay) -> impl Iterator<Item = Conne
 mod tests {
     // make sure iterator properties are clean
     use super::{super::parse_display, ConnectAddress};
+    use alloc::{vec, vec::Vec};
     use std::path::PathBuf;
 
     #[test]

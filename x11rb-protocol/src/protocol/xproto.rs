@@ -11,10 +11,12 @@
 #![allow(clippy::too_many_arguments)]
 
 #[allow(unused_imports)]
-use std::borrow::Cow;
+use alloc::borrow::Cow;
 #[allow(unused_imports)]
-use std::convert::TryInto;
-use std::convert::TryFrom;
+use core::convert::TryInto;
+use alloc::vec;
+use alloc::vec::Vec;
+use core::convert::TryFrom;
 use crate::errors::ParseError;
 #[allow(unused_imports)]
 use crate::x11_utils::TryIntoUSize;
@@ -312,8 +314,8 @@ impl From<u8> for VisualClass {
         Self(value)
     }
 }
-impl std::fmt::Debug for VisualClass  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for VisualClass  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::STATIC_GRAY.0.into(), "STATIC_GRAY", "StaticGray"),
             (Self::GRAY_SCALE.0.into(), "GRAY_SCALE", "GrayScale"),
@@ -510,8 +512,8 @@ impl From<u32> for EventMask {
         Self(value)
     }
 }
-impl std::fmt::Debug for EventMask  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for EventMask  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::NO_EVENT.0, "NO_EVENT", "NoEvent"),
             (Self::KEY_PRESS.0, "KEY_PRESS", "KeyPress"),
@@ -582,8 +584,8 @@ impl From<u32> for BackingStore {
         Self(value)
     }
 }
-impl std::fmt::Debug for BackingStore  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for BackingStore  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::NOT_USEFUL.0, "NOT_USEFUL", "NotUseful"),
             (Self::WHEN_MAPPED.0, "WHEN_MAPPED", "WhenMapped"),
@@ -921,8 +923,8 @@ impl From<u8> for ImageOrder {
         Self(value)
     }
 }
-impl std::fmt::Debug for ImageOrder  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for ImageOrder  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::LSB_FIRST.0.into(), "LSB_FIRST", "LSBFirst"),
             (Self::MSB_FIRST.0.into(), "MSB_FIRST", "MSBFirst"),
@@ -1118,8 +1120,8 @@ impl From<u16> for ModMask {
         Self(value)
     }
 }
-impl std::fmt::Debug for ModMask  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for ModMask  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::SHIFT.0.into(), "SHIFT", "Shift"),
             (Self::LOCK.0.into(), "LOCK", "Lock"),
@@ -1189,8 +1191,8 @@ impl From<u16> for KeyButMask {
         Self(value)
     }
 }
-impl std::fmt::Debug for KeyButMask  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for KeyButMask  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::SHIFT.0.into(), "SHIFT", "Shift"),
             (Self::LOCK.0.into(), "LOCK", "Lock"),
@@ -1258,8 +1260,8 @@ impl From<u8> for WindowEnum {
         Self(value)
     }
 }
-impl std::fmt::Debug for WindowEnum  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for WindowEnum  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::NONE.0.into(), "NONE", "None"),
         ];
@@ -1440,8 +1442,8 @@ impl From<u16> for ButtonMask {
         Self(value)
     }
 }
-impl std::fmt::Debug for ButtonMask  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for ButtonMask  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::M1.0.into(), "M1", "M1"),
             (Self::M2.0.into(), "M2", "M2"),
@@ -1630,8 +1632,8 @@ impl From<u8> for Motion {
         Self(value)
     }
 }
-impl std::fmt::Debug for Motion  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for Motion  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::NORMAL.0.into(), "NORMAL", "Normal"),
             (Self::HINT.0.into(), "HINT", "Hint"),
@@ -1818,8 +1820,8 @@ impl From<u8> for NotifyDetail {
         Self(value)
     }
 }
-impl std::fmt::Debug for NotifyDetail  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for NotifyDetail  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::ANCESTOR.0.into(), "ANCESTOR", "Ancestor"),
             (Self::VIRTUAL.0.into(), "VIRTUAL", "Virtual"),
@@ -1884,8 +1886,8 @@ impl From<u8> for NotifyMode {
         Self(value)
     }
 }
-impl std::fmt::Debug for NotifyMode  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for NotifyMode  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::NORMAL.0.into(), "NORMAL", "Normal"),
             (Self::GRAB.0.into(), "GRAB", "Grab"),
@@ -2492,8 +2494,8 @@ impl From<u8> for Visibility {
         Self(value)
     }
 }
-impl std::fmt::Debug for Visibility  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for Visibility  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::UNOBSCURED.0.into(), "UNOBSCURED", "Unobscured"),
             (Self::PARTIALLY_OBSCURED.0.into(), "PARTIALLY_OBSCURED", "PartiallyObscured"),
@@ -3523,8 +3525,8 @@ impl From<u8> for Place {
         Self(value)
     }
 }
-impl std::fmt::Debug for Place  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for Place  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::ON_TOP.0.into(), "ON_TOP", "OnTop"),
             (Self::ON_BOTTOM.0.into(), "ON_BOTTOM", "OnBottom"),
@@ -3676,8 +3678,8 @@ impl From<u8> for Property {
         Self(value)
     }
 }
-impl std::fmt::Debug for Property  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for Property  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::NEW_VALUE.0.into(), "NEW_VALUE", "NewValue"),
             (Self::DELETE.0.into(), "DELETE", "Delete"),
@@ -3902,8 +3904,8 @@ impl From<u8> for Time {
         Self(value)
     }
 }
-impl std::fmt::Debug for Time  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for Time  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::CURRENT_TIME.0.into(), "CURRENT_TIME", "CurrentTime"),
         ];
@@ -4027,8 +4029,8 @@ impl From<u8> for AtomEnum {
         Self(value)
     }
 }
-impl std::fmt::Debug for AtomEnum  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for AtomEnum  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::NONE.0.into(), "NONE", "None"),
             (Self::ANY.0.into(), "ANY", "Any"),
@@ -4324,8 +4326,8 @@ impl From<u8> for ColormapState {
         Self(value)
     }
 }
-impl std::fmt::Debug for ColormapState  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for ColormapState  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::UNINSTALLED.0.into(), "UNINSTALLED", "Uninstalled"),
             (Self::INSTALLED.0.into(), "INSTALLED", "Installed"),
@@ -4381,8 +4383,8 @@ impl From<u8> for ColormapEnum {
         Self(value)
     }
 }
-impl std::fmt::Debug for ColormapEnum  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for ColormapEnum  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::NONE.0.into(), "NONE", "None"),
         ];
@@ -4802,8 +4804,8 @@ impl From<u8> for Mapping {
         Self(value)
     }
 }
-impl std::fmt::Debug for Mapping  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for Mapping  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::MODIFIER.0.into(), "MODIFIER", "Modifier"),
             (Self::KEYBOARD.0.into(), "KEYBOARD", "Keyboard"),
@@ -5026,8 +5028,8 @@ impl From<u16> for WindowClass {
         Self(value)
     }
 }
-impl std::fmt::Debug for WindowClass  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for WindowClass  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::COPY_FROM_PARENT.0.into(), "COPY_FROM_PARENT", "CopyFromParent"),
             (Self::INPUT_OUTPUT.0.into(), "INPUT_OUTPUT", "InputOutput"),
@@ -5162,8 +5164,8 @@ impl From<u16> for CW {
         Self(value)
     }
 }
-impl std::fmt::Debug for CW  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for CW  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::BACK_PIXMAP.0.into(), "BACK_PIXMAP", "BackPixmap"),
             (Self::BACK_PIXEL.0.into(), "BACK_PIXEL", "BackPixel"),
@@ -5246,8 +5248,8 @@ impl From<bool> for BackPixmap {
         Self(value)
     }
 }
-impl std::fmt::Debug for BackPixmap  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for BackPixmap  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::NONE.0.into(), "NONE", "None"),
             (Self::PARENT_RELATIVE.0.into(), "PARENT_RELATIVE", "ParentRelative"),
@@ -5302,8 +5304,8 @@ impl From<u32> for Gravity {
         Self(value)
     }
 }
-impl std::fmt::Debug for Gravity  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for Gravity  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::BIT_FORGET.0, "BIT_FORGET", "BitForget"),
             (Self::WIN_UNMAP.0, "WIN_UNMAP", "WinUnmap"),
@@ -6370,8 +6372,8 @@ impl From<u8> for MapState {
         Self(value)
     }
 }
-impl std::fmt::Debug for MapState  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for MapState  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::UNMAPPED.0.into(), "UNMAPPED", "Unmapped"),
             (Self::UNVIEWABLE.0.into(), "UNVIEWABLE", "Unviewable"),
@@ -6703,8 +6705,8 @@ impl From<u8> for SetMode {
         Self(value)
     }
 }
-impl std::fmt::Debug for SetMode  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for SetMode  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::INSERT.0.into(), "INSERT", "Insert"),
             (Self::DELETE.0.into(), "DELETE", "Delete"),
@@ -7230,8 +7232,8 @@ impl From<u8> for ConfigWindow {
         Self(value)
     }
 }
-impl std::fmt::Debug for ConfigWindow  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for ConfigWindow  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::X.0.into(), "X", "X"),
             (Self::Y.0.into(), "Y", "Y"),
@@ -7285,8 +7287,8 @@ impl From<u32> for StackMode {
         Self(value)
     }
 }
-impl std::fmt::Debug for StackMode  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for StackMode  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::ABOVE.0, "ABOVE", "Above"),
             (Self::BELOW.0, "BELOW", "Below"),
@@ -7688,8 +7690,8 @@ impl From<u8> for Circulate {
         Self(value)
     }
 }
-impl std::fmt::Debug for Circulate  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for Circulate  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::RAISE_LOWEST.0.into(), "RAISE_LOWEST", "RaiseLowest"),
             (Self::LOWER_HIGHEST.0.into(), "LOWER_HIGHEST", "LowerHighest"),
@@ -8357,8 +8359,8 @@ impl From<u8> for PropMode {
         Self(value)
     }
 }
-impl std::fmt::Debug for PropMode  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for PropMode  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::REPLACE.0.into(), "REPLACE", "Replace"),
             (Self::PREPEND.0.into(), "PREPEND", "Prepend"),
@@ -8640,8 +8642,8 @@ impl From<u8> for GetPropertyType {
         Self(value)
     }
 }
-impl std::fmt::Debug for GetPropertyType  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for GetPropertyType  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::ANY.0.into(), "ANY", "Any"),
         ];
@@ -9455,8 +9457,8 @@ impl From<bool> for SendEventDest {
         Self(value)
     }
 }
-impl std::fmt::Debug for SendEventDest  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for SendEventDest  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::POINTER_WINDOW.0.into(), "POINTER_WINDOW", "PointerWindow"),
             (Self::ITEM_FOCUS.0.into(), "ITEM_FOCUS", "ItemFocus"),
@@ -9672,8 +9674,8 @@ impl From<u8> for GrabMode {
         Self(value)
     }
 }
-impl std::fmt::Debug for GrabMode  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for GrabMode  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::SYNC.0.into(), "SYNC", "Sync"),
             (Self::ASYNC.0.into(), "ASYNC", "Async"),
@@ -9733,8 +9735,8 @@ impl From<u8> for GrabStatus {
         Self(value)
     }
 }
-impl std::fmt::Debug for GrabStatus  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for GrabStatus  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::SUCCESS.0.into(), "SUCCESS", "Success"),
             (Self::ALREADY_GRABBED.0.into(), "ALREADY_GRABBED", "AlreadyGrabbed"),
@@ -9793,8 +9795,8 @@ impl From<u8> for CursorEnum {
         Self(value)
     }
 }
-impl std::fmt::Debug for CursorEnum  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for CursorEnum  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::NONE.0.into(), "NONE", "None"),
         ];
@@ -10137,8 +10139,8 @@ impl From<u8> for ButtonIndex {
         Self(value)
     }
 }
-impl std::fmt::Debug for ButtonIndex  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for ButtonIndex  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::ANY.0.into(), "ANY", "Any"),
             (Self::M1.0.into(), "M1", "M1"),
@@ -10735,8 +10737,8 @@ impl From<u8> for Grab {
         Self(value)
     }
 }
-impl std::fmt::Debug for Grab  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for Grab  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::ANY.0.into(), "ANY", "Any"),
         ];
@@ -11094,8 +11096,8 @@ impl From<u8> for Allow {
         Self(value)
     }
 }
-impl std::fmt::Debug for Allow  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for Allow  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::ASYNC_POINTER.0.into(), "ASYNC_POINTER", "AsyncPointer"),
             (Self::SYNC_POINTER.0.into(), "SYNC_POINTER", "SyncPointer"),
@@ -11856,8 +11858,8 @@ impl From<u8> for InputFocus {
         Self(value)
     }
 }
-impl std::fmt::Debug for InputFocus  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for InputFocus  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::NONE.0.into(), "NONE", "None"),
             (Self::POINTER_ROOT.0.into(), "POINTER_ROOT", "PointerRoot"),
@@ -12315,8 +12317,8 @@ impl From<u8> for FontDraw {
         Self(value)
     }
 }
-impl std::fmt::Debug for FontDraw  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for FontDraw  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::LEFT_TO_RIGHT.0.into(), "LEFT_TO_RIGHT", "LeftToRight"),
             (Self::RIGHT_TO_LEFT.0.into(), "RIGHT_TO_LEFT", "RightToLeft"),
@@ -13568,8 +13570,8 @@ impl From<u32> for GC {
         Self(value)
     }
 }
-impl std::fmt::Debug for GC  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for GC  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::FUNCTION.0, "FUNCTION", "Function"),
             (Self::PLANE_MASK.0, "PLANE_MASK", "PlaneMask"),
@@ -13650,8 +13652,8 @@ impl From<u32> for GX {
         Self(value)
     }
 }
-impl std::fmt::Debug for GX  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for GX  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::CLEAR.0, "CLEAR", "Clear"),
             (Self::AND.0, "AND", "And"),
@@ -13711,8 +13713,8 @@ impl From<u32> for LineStyle {
         Self(value)
     }
 }
-impl std::fmt::Debug for LineStyle  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for LineStyle  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::SOLID.0, "SOLID", "Solid"),
             (Self::ON_OFF_DASH.0, "ON_OFF_DASH", "OnOffDash"),
@@ -13760,8 +13762,8 @@ impl From<u32> for CapStyle {
         Self(value)
     }
 }
-impl std::fmt::Debug for CapStyle  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for CapStyle  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::NOT_LAST.0, "NOT_LAST", "NotLast"),
             (Self::BUTT.0, "BUTT", "Butt"),
@@ -13809,8 +13811,8 @@ impl From<u32> for JoinStyle {
         Self(value)
     }
 }
-impl std::fmt::Debug for JoinStyle  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for JoinStyle  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::MITER.0, "MITER", "Miter"),
             (Self::ROUND.0, "ROUND", "Round"),
@@ -13858,8 +13860,8 @@ impl From<u32> for FillStyle {
         Self(value)
     }
 }
-impl std::fmt::Debug for FillStyle  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for FillStyle  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::SOLID.0, "SOLID", "Solid"),
             (Self::TILED.0, "TILED", "Tiled"),
@@ -13906,8 +13908,8 @@ impl From<u32> for FillRule {
         Self(value)
     }
 }
-impl std::fmt::Debug for FillRule  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for FillRule  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::EVEN_ODD.0, "EVEN_ODD", "EvenOdd"),
             (Self::WINDING.0, "WINDING", "Winding"),
@@ -13952,8 +13954,8 @@ impl From<u32> for SubwindowMode {
         Self(value)
     }
 }
-impl std::fmt::Debug for SubwindowMode  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for SubwindowMode  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::CLIP_BY_CHILDREN.0, "CLIP_BY_CHILDREN", "ClipByChildren"),
             (Self::INCLUDE_INFERIORS.0, "INCLUDE_INFERIORS", "IncludeInferiors"),
@@ -13998,8 +14000,8 @@ impl From<u32> for ArcMode {
         Self(value)
     }
 }
-impl std::fmt::Debug for ArcMode  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for ArcMode  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::CHORD.0, "CHORD", "Chord"),
             (Self::PIE_SLICE.0, "PIE_SLICE", "PieSlice"),
@@ -15491,8 +15493,8 @@ impl From<u8> for ClipOrdering {
         Self(value)
     }
 }
-impl std::fmt::Debug for ClipOrdering  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for ClipOrdering  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::UNSORTED.0.into(), "UNSORTED", "Unsorted"),
             (Self::Y_SORTED.0.into(), "Y_SORTED", "YSorted"),
@@ -16041,8 +16043,8 @@ impl From<u8> for CoordMode {
         Self(value)
     }
 }
-impl std::fmt::Debug for CoordMode  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for CoordMode  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::ORIGIN.0.into(), "ORIGIN", "Origin"),
             (Self::PREVIOUS.0.into(), "PREVIOUS", "Previous"),
@@ -16644,8 +16646,8 @@ impl From<u8> for PolyShape {
         Self(value)
     }
 }
-impl std::fmt::Debug for PolyShape  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for PolyShape  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::COMPLEX.0.into(), "COMPLEX", "Complex"),
             (Self::NONCONVEX.0.into(), "NONCONVEX", "Nonconvex"),
@@ -17001,8 +17003,8 @@ impl From<u8> for ImageFormat {
         Self(value)
     }
 }
-impl std::fmt::Debug for ImageFormat  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for ImageFormat  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::XY_BITMAP.0.into(), "XY_BITMAP", "XYBitmap"),
             (Self::XY_PIXMAP.0.into(), "XY_PIXMAP", "XYPixmap"),
@@ -17756,8 +17758,8 @@ impl From<u8> for ColormapAlloc {
         Self(value)
     }
 }
-impl std::fmt::Debug for ColormapAlloc  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for ColormapAlloc  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::NONE.0.into(), "NONE", "None"),
             (Self::ALL.0.into(), "ALL", "All"),
@@ -18803,8 +18805,8 @@ impl From<u8> for ColorFlag {
         Self(value)
     }
 }
-impl std::fmt::Debug for ColorFlag  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for ColorFlag  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::RED.0.into(), "RED", "Red"),
             (Self::GREEN.0.into(), "GREEN", "Green"),
@@ -19354,8 +19356,8 @@ impl From<u8> for PixmapEnum {
         Self(value)
     }
 }
-impl std::fmt::Debug for PixmapEnum  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for PixmapEnum  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::NONE.0.into(), "NONE", "None"),
         ];
@@ -19529,8 +19531,8 @@ impl From<u8> for FontEnum {
         Self(value)
     }
 }
-impl std::fmt::Debug for FontEnum  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for FontEnum  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::NONE.0.into(), "NONE", "None"),
         ];
@@ -19897,8 +19899,8 @@ impl From<u8> for QueryShapeOf {
         Self(value)
     }
 }
-impl std::fmt::Debug for QueryShapeOf  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for QueryShapeOf  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::LARGEST_CURSOR.0.into(), "LARGEST_CURSOR", "LargestCursor"),
             (Self::FASTEST_TILE.0.into(), "FASTEST_TILE", "FastestTile"),
@@ -20456,8 +20458,8 @@ impl From<u8> for KB {
         Self(value)
     }
 }
-impl std::fmt::Debug for KB  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for KB  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::KEY_CLICK_PERCENT.0.into(), "KEY_CLICK_PERCENT", "KeyClickPercent"),
             (Self::BELL_PERCENT.0.into(), "BELL_PERCENT", "BellPercent"),
@@ -20509,8 +20511,8 @@ impl From<u32> for LedMode {
         Self(value)
     }
 }
-impl std::fmt::Debug for LedMode  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for LedMode  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::OFF.0, "OFF", "Off"),
             (Self::ON.0, "ON", "On"),
@@ -20556,8 +20558,8 @@ impl From<u32> for AutoRepeatMode {
         Self(value)
     }
 }
-impl std::fmt::Debug for AutoRepeatMode  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for AutoRepeatMode  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::OFF.0, "OFF", "Off"),
             (Self::ON.0, "ON", "On"),
@@ -21177,8 +21179,8 @@ impl From<u8> for Blanking {
         Self(value)
     }
 }
-impl std::fmt::Debug for Blanking  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for Blanking  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::NOT_PREFERRED.0.into(), "NOT_PREFERRED", "NotPreferred"),
             (Self::PREFERRED.0.into(), "PREFERRED", "Preferred"),
@@ -21237,8 +21239,8 @@ impl From<u8> for Exposures {
         Self(value)
     }
 }
-impl std::fmt::Debug for Exposures  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for Exposures  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::NOT_ALLOWED.0.into(), "NOT_ALLOWED", "NotAllowed"),
             (Self::ALLOWED.0.into(), "ALLOWED", "Allowed"),
@@ -21450,8 +21452,8 @@ impl From<u8> for HostMode {
         Self(value)
     }
 }
-impl std::fmt::Debug for HostMode  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for HostMode  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::INSERT.0.into(), "INSERT", "Insert"),
             (Self::DELETE.0.into(), "DELETE", "Delete"),
@@ -21511,8 +21513,8 @@ impl From<u8> for Family {
         Self(value)
     }
 }
-impl std::fmt::Debug for Family  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for Family  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::INTERNET.0.into(), "INTERNET", "Internet"),
             (Self::DEC_NET.0.into(), "DEC_NET", "DECnet"),
@@ -21796,8 +21798,8 @@ impl From<u8> for AccessControl {
         Self(value)
     }
 }
-impl std::fmt::Debug for AccessControl  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for AccessControl  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::DISABLE.0.into(), "DISABLE", "Disable"),
             (Self::ENABLE.0.into(), "ENABLE", "Enable"),
@@ -21906,8 +21908,8 @@ impl From<u8> for CloseDown {
         Self(value)
     }
 }
-impl std::fmt::Debug for CloseDown  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for CloseDown  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::DESTROY_ALL.0.into(), "DESTROY_ALL", "DestroyAll"),
             (Self::RETAIN_PERMANENT.0.into(), "RETAIN_PERMANENT", "RetainPermanent"),
@@ -22015,8 +22017,8 @@ impl From<u8> for Kill {
         Self(value)
     }
 }
-impl std::fmt::Debug for Kill  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for Kill  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::ALL_TEMPORARY.0.into(), "ALL_TEMPORARY", "AllTemporary"),
         ];
@@ -22227,8 +22229,8 @@ impl From<u8> for ScreenSaver {
         Self(value)
     }
 }
-impl std::fmt::Debug for ScreenSaver  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for ScreenSaver  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::RESET.0.into(), "RESET", "Reset"),
             (Self::ACTIVE.0.into(), "ACTIVE", "Active"),
@@ -22337,8 +22339,8 @@ impl From<u8> for MappingStatus {
         Self(value)
     }
 }
-impl std::fmt::Debug for MappingStatus  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for MappingStatus  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::SUCCESS.0.into(), "SUCCESS", "Success"),
             (Self::BUSY.0.into(), "BUSY", "Busy"),
@@ -22578,8 +22580,8 @@ impl From<u8> for MapIndex {
         Self(value)
     }
 }
-impl std::fmt::Debug for MapIndex  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for MapIndex  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::SHIFT.0.into(), "SHIFT", "Shift"),
             (Self::LOCK.0.into(), "LOCK", "Lock"),

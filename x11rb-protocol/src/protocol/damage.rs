@@ -6,10 +6,12 @@
 #![allow(clippy::too_many_arguments)]
 
 #[allow(unused_imports)]
-use std::borrow::Cow;
+use alloc::borrow::Cow;
 #[allow(unused_imports)]
-use std::convert::TryInto;
-use std::convert::TryFrom;
+use core::convert::TryInto;
+use alloc::vec;
+use alloc::vec::Vec;
+use core::convert::TryFrom;
 use crate::errors::ParseError;
 #[allow(unused_imports)]
 use crate::x11_utils::TryIntoUSize;
@@ -86,8 +88,8 @@ impl From<u8> for ReportLevel {
         Self(value)
     }
 }
-impl std::fmt::Debug for ReportLevel  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for ReportLevel  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::RAW_RECTANGLES.0.into(), "RAW_RECTANGLES", "RawRectangles"),
             (Self::DELTA_RECTANGLES.0.into(), "DELTA_RECTANGLES", "DeltaRectangles"),

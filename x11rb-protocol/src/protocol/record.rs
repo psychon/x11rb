@@ -6,10 +6,12 @@
 #![allow(clippy::too_many_arguments)]
 
 #[allow(unused_imports)]
-use std::borrow::Cow;
+use alloc::borrow::Cow;
 #[allow(unused_imports)]
-use std::convert::TryInto;
-use std::convert::TryFrom;
+use core::convert::TryInto;
+use alloc::vec;
+use alloc::vec::Vec;
+use core::convert::TryFrom;
 use crate::errors::ParseError;
 #[allow(unused_imports)]
 use crate::x11_utils::TryIntoUSize;
@@ -259,8 +261,8 @@ impl From<u8> for HType {
         Self(value)
     }
 }
-impl std::fmt::Debug for HType  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for HType  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::FROM_SERVER_TIME.0.into(), "FROM_SERVER_TIME", "FromServerTime"),
             (Self::FROM_CLIENT_TIME.0.into(), "FROM_CLIENT_TIME", "FromClientTime"),
@@ -322,8 +324,8 @@ impl From<u8> for CS {
         Self(value)
     }
 }
-impl std::fmt::Debug for CS  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for CS  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::CURRENT_CLIENTS.0.into(), "CURRENT_CLIENTS", "CurrentClients"),
             (Self::FUTURE_CLIENTS.0.into(), "FUTURE_CLIENTS", "FutureClients"),

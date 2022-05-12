@@ -9,10 +9,9 @@
 //! that it can appear in interfaces, but it is not actually possible to construct an instance of
 //! `RawFdContainer`.
 
-#[cfg(unix)]
+#[cfg(all(feature = "std", unix))]
 mod raw_fd_container {
     use std::mem::forget;
-    #[cfg(unix)]
     use std::os::unix::io::{AsRawFd, IntoRawFd, RawFd};
 
     /// A simple wrapper around RawFd that closes the fd on drop.
@@ -78,18 +77,21 @@ mod raw_fd_container {
     }
 }
 
-#[cfg(not(unix))]
+#[cfg(not(all(feature = "std", unix)))]
 mod raw_fd_container {
+    use core::convert::Infallible;
+
     /// A simple wrapper around RawFd that closes the fd on drop.
     ///
     /// On non-unix systems, this type is empty and does not provide
     /// any method.
     #[derive(Debug, Hash, PartialEq, Eq)]
-    pub struct RawFdContainer(());
+    pub struct RawFdContainer(Infallible);
 
     impl Drop for RawFdContainer {
         fn drop(&mut self) {
             // This function exists for symmetry with cfg(unix)
+            match self.0 {}
         }
     }
 }
@@ -97,7 +99,7 @@ mod raw_fd_container {
 pub use raw_fd_container::RawFdContainer;
 
 mod pretty_printer {
-    use std::fmt::{Debug, Formatter, Result};
+    use core::fmt::{Debug, Formatter, Result};
 
     /// A helper to pretty-print an enumeration value.
     ///
@@ -161,7 +163,8 @@ mod pretty_printer {
     #[cfg(test)]
     mod test {
         use super::{pretty_print_bitmask, pretty_print_enum};
-        use std::fmt::{Display, Formatter, Result};
+        use alloc::format;
+        use core::fmt::{Display, Formatter, Result};
 
         type CallbackType = fn(&mut Formatter<'_>, u32, &[(u32, &str, &str)]) -> Result;
 

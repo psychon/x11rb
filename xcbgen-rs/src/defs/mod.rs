@@ -143,6 +143,10 @@ pub struct Namespace {
 
     /// All definitions in this module in the order they appear in the XML description.
     pub src_order_defs: RefCell<Vec<Def>>,
+
+    /// Does this module contain any file descriptors, or depend on any
+    /// that do?
+    contains_fds: OnceCell<bool>,
 }
 
 impl Namespace {
@@ -162,6 +166,7 @@ impl Namespace {
             error_defs: RefCell::new(HashMap::new()),
             type_defs: RefCell::new(HashMap::new()),
             src_order_defs: RefCell::new(Vec::new()),
+            contains_fds: OnceCell::new(),
         })
     }
 
@@ -332,6 +337,38 @@ impl Namespace {
                 }
             })
             .cloned()
+    }
+
+    /// Tell if the namespace contains file descriptors, or depend on any
+    /// modules containing file descriptors.
+    pub fn contains_fds(&self) -> bool {
+        *self.contains_fds.get_or_init(|| {
+            // iterate over the types we have to see if any of them
+            // use fd fields
+            // only requests and replies will have fds
+            let request_defs = self.request_defs.borrow();
+
+            let has_fd = request_defs.values().any(|request| {
+                // combine request/reply fields into a single iterator
+                let request_fields = request.fields.borrow();
+                let reply_fields = request.reply.as_ref().map(|reply| reply.fields.borrow());
+
+                request_fields
+                    .iter()
+                    .chain(reply_fields.iter().flat_map(|i| i.iter()))
+                    .any(|field| matches!(field, FieldDef::Fd(_) | FieldDef::FdList(_)))
+            });
+
+            // see if any of our dependent modules contain fds
+            let imports = self.imports.borrow();
+            let dependencies_have_fds = imports
+                .values()
+                .filter_map(|import| import.ns.get())
+                .filter_map(|ns| ns.upgrade())
+                .any(|ns| ns.contains_fds());
+
+            has_fd || dependencies_have_fds
+        })
     }
 }
 

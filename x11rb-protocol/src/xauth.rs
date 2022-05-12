@@ -1,5 +1,9 @@
 //! Helpers for working with `~/.Xauthority`.
 
+#![cfg(feature = "std")]
+
+use alloc::string::ToString;
+use alloc::vec::Vec;
 use std::io::Error;
 
 use crate::protocol::xproto::Family as X11Family;
@@ -67,6 +71,7 @@ pub(crate) struct AuthEntry {
 mod file {
     //! Code for actually reading `~/.Xauthority`.
 
+    use alloc::{vec, vec::Vec};
     use std::env::var_os;
     use std::fs::File;
     use std::io::{BufReader, Error, ErrorKind, Read};
@@ -168,6 +173,7 @@ mod file {
     mod test {
         use super::super::{AuthEntry, Family};
         use super::read_entry;
+        use alloc::vec;
         use std::io::Cursor;
 
         #[test]
@@ -289,6 +295,7 @@ fn get_auth_impl(
 #[cfg(test)]
 mod test {
     use super::{get_auth_impl, AuthEntry, Family, MIT_MAGIC_COOKIE_1};
+    use alloc::vec;
 
     // Call the given function on a matching auth entry. The function can change the entry.
     // Afterwards, it should still be a match.

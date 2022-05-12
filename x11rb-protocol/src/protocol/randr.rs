@@ -6,10 +6,12 @@
 #![allow(clippy::too_many_arguments)]
 
 #[allow(unused_imports)]
-use std::borrow::Cow;
+use alloc::borrow::Cow;
 #[allow(unused_imports)]
-use std::convert::TryInto;
-use std::convert::TryFrom;
+use core::convert::TryInto;
+use alloc::vec;
+use alloc::vec::Vec;
+use core::convert::TryFrom;
 use crate::errors::ParseError;
 #[allow(unused_imports)]
 use crate::x11_utils::TryIntoUSize;
@@ -108,8 +110,8 @@ impl From<u8> for Rotation {
         Self(value)
     }
 }
-impl std::fmt::Debug for Rotation  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for Rotation  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::ROTATE0.0.into(), "ROTATE0", "Rotate0"),
             (Self::ROTATE90.0.into(), "ROTATE90", "Rotate90"),
@@ -347,8 +349,8 @@ impl From<u8> for SetConfig {
         Self(value)
     }
 }
-impl std::fmt::Debug for SetConfig  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for SetConfig  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::SUCCESS.0.into(), "SUCCESS", "Success"),
             (Self::INVALID_CONFIG_TIME.0.into(), "INVALID_CONFIG_TIME", "InvalidConfigTime"),
@@ -538,8 +540,8 @@ impl From<u8> for NotifyMask {
         Self(value)
     }
 }
-impl std::fmt::Debug for NotifyMask  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for NotifyMask  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::SCREEN_CHANGE.0.into(), "SCREEN_CHANGE", "ScreenChange"),
             (Self::CRTC_CHANGE.0.into(), "CRTC_CHANGE", "CrtcChange"),
@@ -947,8 +949,8 @@ impl From<u16> for ModeFlag {
         Self(value)
     }
 }
-impl std::fmt::Debug for ModeFlag  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for ModeFlag  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::HSYNC_POSITIVE.0.into(), "HSYNC_POSITIVE", "HsyncPositive"),
             (Self::HSYNC_NEGATIVE.0.into(), "HSYNC_NEGATIVE", "HsyncNegative"),
@@ -1271,8 +1273,8 @@ impl From<u8> for Connection {
         Self(value)
     }
 }
-impl std::fmt::Debug for Connection  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for Connection  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::CONNECTED.0.into(), "CONNECTED", "Connected"),
             (Self::DISCONNECTED.0.into(), "DISCONNECTED", "Disconnected"),
@@ -3105,8 +3107,8 @@ impl From<u8> for Transform {
         Self(value)
     }
 }
-impl std::fmt::Debug for Transform  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for Transform  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::UNIT.0.into(), "UNIT", "Unit"),
             (Self::SCALE_UP.0.into(), "SCALE_UP", "ScaleUp"),
@@ -3961,8 +3963,8 @@ impl From<u8> for ProviderCapability {
         Self(value)
     }
 }
-impl std::fmt::Debug for ProviderCapability  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for ProviderCapability  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::SOURCE_OUTPUT.0.into(), "SOURCE_OUTPUT", "SourceOutput"),
             (Self::SINK_OUTPUT.0.into(), "SINK_OUTPUT", "SinkOutput"),
@@ -5020,8 +5022,8 @@ impl From<u8> for Notify {
         Self(value)
     }
 }
-impl std::fmt::Debug for Notify  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for Notify  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::CRTC_CHANGE.0.into(), "CRTC_CHANGE", "CrtcChange"),
             (Self::OUTPUT_CHANGE.0.into(), "OUTPUT_CHANGE", "OutputChange"),

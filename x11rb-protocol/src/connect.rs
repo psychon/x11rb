@@ -3,10 +3,14 @@
 use crate::errors::{ConnectError, ParseError};
 use crate::protocol::xproto::{Setup, SetupAuthenticate, SetupFailed, SetupRequest};
 use crate::x11_utils::{Serialize, TryParse};
+
+#[cfg(feature = "std")]
 use crate::xauth::{get_auth, Family};
 
-use std::convert::TryFrom;
-use std::fmt;
+use alloc::{vec, vec::Vec};
+
+use core::convert::TryFrom;
+use core::fmt;
 
 /// The connection handshake used to connect to the X11 server.
 ///
@@ -147,6 +151,7 @@ impl Connect {
     /// Create a new `Connect` from the information necessary to connect to the X11 server.
     ///
     /// This returns the connection handshake object as well as the setup request to send to the server.
+    #[cfg(feature = "std")]
     pub fn new(
         family: Family,
         address: &[u8],
@@ -263,7 +268,8 @@ mod tests {
     use crate::errors::ConnectError;
     use crate::protocol::xproto::{ImageOrder, Setup, SetupAuthenticate, SetupFailed};
     use crate::x11_utils::Serialize;
-    use std::mem::drop;
+    use alloc::vec;
+    use core::mem::drop;
 
     fn test_setup() -> Setup {
         let mut s = Setup {

@@ -19,28 +19,31 @@ keywords = ["xcb", "X11"]
 criterion = "0.3"
 
 [target.'cfg(unix)'.dependencies]
-nix = "0.24"
+nix = { version = "0.24", optional = true }
 
 [features]
+default = ["std"]
+std = ["nix"]
+
 # Enable utility functions in `x11rb::resource_manager` for querying the
 # resource databases.
-resource_manager = []
+resource_manager = ["std"]
 
 # Features to enable individual X11 extensions
 composite = ["xfixes"]
 damage = ["xfixes"]
 dpms = []
 dri2 = []
-dri3 = []
+dri3 = ["std"]
 glx = []
 present = ["randr", "xfixes", "sync"]
-randr = ["render"]
+randr = ["render", "std"]
 record = []
 render = []
 res = []
 screensaver = []
 shape = []
-shm = []
+shm = ["std"]
 sync = []
 xevie = []
 xf86dri = []

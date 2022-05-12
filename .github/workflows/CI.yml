@@ -98,6 +98,10 @@ jobs:
     - name: cargo build with all features
       run: cargo build --workspace --verbose --all-targets --all-features
 
+    # build no_std
+    - name: cargo build protocol with no default features
+      run: cargo build --manifest-path x11rb-protocol/Cargo.toml --no-default-features
+
     # test
     - name: cargo test with all features
       run: cargo test --workspace --verbose --all-features

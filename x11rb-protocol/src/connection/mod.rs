@@ -1,6 +1,7 @@
 //! Helper types for implementing an X11 client.
 
-use std::collections::VecDeque;
+use alloc::collections::VecDeque;
+use alloc::vec::Vec;
 
 use crate::utils::RawFdContainer;
 use crate::{DiscardMode, SequenceNumber};

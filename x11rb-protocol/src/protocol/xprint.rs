@@ -6,10 +6,12 @@
 #![allow(clippy::too_many_arguments)]
 
 #[allow(unused_imports)]
-use std::borrow::Cow;
+use alloc::borrow::Cow;
 #[allow(unused_imports)]
-use std::convert::TryInto;
-use std::convert::TryFrom;
+use core::convert::TryInto;
+use alloc::vec;
+use alloc::vec::Vec;
+use core::convert::TryFrom;
 use crate::errors::ParseError;
 #[allow(unused_imports)]
 use crate::x11_utils::TryIntoUSize;
@@ -169,8 +171,8 @@ impl From<bool> for GetDoc {
         Self(value)
     }
 }
-impl std::fmt::Debug for GetDoc  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for GetDoc  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::FINISHED.0.into(), "FINISHED", "Finished"),
             (Self::SECOND_CONSUMER.0.into(), "SECOND_CONSUMER", "SecondConsumer"),
@@ -228,8 +230,8 @@ impl From<u8> for EvMask {
         Self(value)
     }
 }
-impl std::fmt::Debug for EvMask  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for EvMask  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::NO_EVENT_MASK.0.into(), "NO_EVENT_MASK", "NoEventMask"),
             (Self::PRINT_MASK.0.into(), "PRINT_MASK", "PrintMask"),
@@ -292,8 +294,8 @@ impl From<u8> for Detail {
         Self(value)
     }
 }
-impl std::fmt::Debug for Detail  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for Detail  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::START_JOB_NOTIFY.0.into(), "START_JOB_NOTIFY", "StartJobNotify"),
             (Self::END_JOB_NOTIFY.0.into(), "END_JOB_NOTIFY", "EndJobNotify"),
@@ -359,8 +361,8 @@ impl From<u8> for Attr {
         Self(value)
     }
 }
-impl std::fmt::Debug for Attr  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for Attr  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::JOB_ATTR.0.into(), "JOB_ATTR", "JobAttr"),
             (Self::DOC_ATTR.0.into(), "DOC_ATTR", "DocAttr"),

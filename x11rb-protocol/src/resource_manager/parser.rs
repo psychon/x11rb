@@ -1,6 +1,8 @@
 //! Code for parsing resource management things
 
 use super::{Binding, Component, Entry};
+use alloc::string::{String, ToString};
+use alloc::vec::Vec;
 
 // =======================
 // Common helper functions
@@ -267,6 +269,10 @@ pub(crate) fn parse_query(data: &[u8]) -> Option<Vec<String>> {
 #[cfg(test)]
 mod test {
     use super::{parse_database, parse_entry, parse_query, Binding, Component, Entry};
+    use alloc::string::{String, ToString};
+    use alloc::vec;
+    use alloc::vec::Vec;
+    use std::eprintln;
 
     // Most tests in here are based on [1], which is: Copyright © 2016 Ingo Bürk
     // [1]: https://github.com/Airblader/xcb-util-xrm/blob/master/tests/tests_parser.c

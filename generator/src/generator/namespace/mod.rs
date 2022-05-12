@@ -815,11 +815,11 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 xcbdefs::EnumValue::Bit(_) => true,
             });
 
-        outln!(out, "impl std::fmt::Debug for {}  {{", rust_name);
+        outln!(out, "impl core::fmt::Debug for {}  {{", rust_name);
         out.indented(|out| {
             outln!(
                 out,
-                "fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {{"
+                "fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {{"
             );
             out.indented(|out| {
                 let into = match global_enum_size {
