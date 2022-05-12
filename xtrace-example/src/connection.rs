@@ -51,7 +51,7 @@ impl Connection {
             } else {
                 // Big requests
                 let length_field = match packet.get(4..8) {
-                    None => return Some(packet.len() - 8),
+                    None => return Some(8 - packet.len()),
                     Some(length_field) => u32::from_ne_bytes(length_field.try_into().unwrap()),
                 };
                 usize::try_from(length_field).unwrap() * 4
