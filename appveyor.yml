@@ -4,6 +4,7 @@ install:
   - set PATH=%PATH%;C:\Users\appveyor\.cargo\bin
   - rustc -V
   - cargo -V
+  - curl -sSf -o C:\cygwin\setup-x86.exe https://cygwin.com/setup-x86.exe
   - C:\cygwin\setup-x86.exe --quiet-mode --no-shortcuts --no-startmenu --no-desktop --upgrade-also --root c:\cygwin --packages xorg-server-extra
   # This uses libc::mmap and thus is Unix-only
   - del x11rb\examples\shared_memory.rs
