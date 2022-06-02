@@ -94,6 +94,14 @@ jobs:
         toolchain: ${{ matrix.rust }}
         override: true
 
+    - name: Install profiling tools
+      if: matrix.rust == 'nightly'
+      run: rustup component add llvm-tools-preview
+
+    - name: Install grcov
+      if: matrix.rust == 'nightly'
+      run: cargo install grcov
+
     # build
     - name: cargo build with all features
       run: cargo build --workspace --verbose --all-targets --all-features
@@ -102,9 +110,15 @@ jobs:
     - name: cargo build protocol with no default features
       run: cargo build --manifest-path x11rb-protocol/Cargo.toml --no-default-features
 
+    - name: Add rustflag for instrument coverage
+      if: matrix.rust == 'nightly'
+      run: echo "RUSTFLAGS=-C instrument-coverage" >> $GITHUB_ENV
+
     # test
     - name: cargo test with all features
       run: cargo test --workspace --verbose --all-features
+      env:
+        LLVM_PROFILE_FILE: coverage-%m.profraw
 
     # doc
     - name: cargo doc with all features
@@ -129,7 +143,17 @@ jobs:
       run: ./run_examples --features "$MOST_FEATURES libc allow-unsafe-code"
     - name: run examples with XCBConnection and dl-libxcb
       run: ./run_examples --features "$MOST_FEATURES libc allow-unsafe-code dl-libxcb"
-
+    - name: Prepare coverage information for upload
+      if: matrix.rust == 'nightly'
+      run: grcov $(find ./ -type f -name "coverage-*.profraw") -s . --binary-path ./target/debug --branch --ignore-not-existing --ignore 'tests/*' -t coveralls+ --token ? -o ./coveralls.json
+    - name: Upload to codecov.io
+      if: matrix.rust == 'nightly'
+      uses: codecov/codecov-action@v2
+      with:
+        files: ./coveralls.json
+        flags: tests
+        verbose: true
+      continue-on-error: true
 
   big-endian-test:
     runs-on: ubuntu-latest
