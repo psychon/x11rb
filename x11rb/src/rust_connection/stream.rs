@@ -420,7 +420,7 @@ impl Stream for DefaultStream {
 
             let fd = self.as_raw_fd();
             let msg = loop {
-                match recvmsg::<()>(fd, &mut iov, Some(&mut cmsg), MsgFlags::empty()) {
+                match recvmsg::<()>(fd, &mut iov, Some(&mut cmsg), MsgFlags::MSG_CMSG_CLOEXEC) {
                     Ok(msg) => break msg,
                     // try again
                     Err(nix::Error::EINTR) => {}
