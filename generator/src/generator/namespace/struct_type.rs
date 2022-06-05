@@ -38,12 +38,25 @@ pub(super) fn emit_struct_type(
         out,
     );
 
+    let has_fds = fields.iter().any(|field| {
+        matches!(
+            field,
+            xcbdefs::FieldDef::Fd(_) | xcbdefs::FieldDef::FdList(_)
+        )
+    });
+
     if let Some(doc) = doc {
         generator.emit_doc(doc, out, Some(&deducible_fields));
     }
     let derives = derives.to_list();
     if !derives.is_empty() {
         outln!(out, "#[derive({})]", derives.join(", "));
+    }
+    if !has_fds {
+        outln!(
+            out,
+            r#"#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]"#
+        );
     }
     outln!(out, "pub struct {} {{", name);
     for field in fields.iter() {
@@ -61,13 +74,6 @@ pub(super) fn emit_struct_type(
         }
     }
     outln!(out, "}}");
-
-    let has_fds = fields.iter().any(|field| {
-        matches!(
-            field,
-            xcbdefs::FieldDef::Fd(_) | xcbdefs::FieldDef::FdList(_)
-        )
-    });
 
     if generate_try_parse {
         let input_name = if parse_size_constraint != StructSizeConstraint::None {

@@ -10,7 +10,6 @@
     missing_copy_implementations,
     missing_debug_implementations,
     private_doc_tests,
-    rust_2018_idioms,
     //single_use_lifetimes,
     trivial_casts,
     trivial_numeric_casts,
@@ -26,6 +25,8 @@
 #![deny(
     // #[derive] generates an #[allow] for this
     unused_qualifications,
+    // serde's Deserialize/Serialize impls add allows for this
+    rust_2018_idioms,
     // Not everything in x11rb_protocol::protocol has doc comments
     missing_docs,
 )]

@@ -27,6 +27,7 @@ use crate::utils::{RawFdContainer, pretty_print_bitmask, pretty_print_enum};
 use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse, TryParseFd};
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Char2b {
     pub byte1: u8,
     pub byte2: u8,
@@ -89,6 +90,7 @@ pub type Keycode32 = u32;
 pub type Button = u8;
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Point {
     pub x: i16,
     pub y: i16,
@@ -121,6 +123,7 @@ impl Serialize for Point {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Rectangle {
     pub x: i16,
     pub y: i16,
@@ -165,6 +168,7 @@ impl Serialize for Rectangle {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Arc {
     pub x: i16,
     pub y: i16,
@@ -221,6 +225,7 @@ impl Serialize for Arc {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Format {
     pub depth: u8,
     pub bits_per_pixel: u8,
@@ -263,6 +268,7 @@ impl Serialize for Format {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct VisualClass(u8);
 impl VisualClass {
     pub const STATIC_GRAY: Self = Self(0);
@@ -329,6 +335,7 @@ impl core::fmt::Debug for VisualClass  {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Visualtype {
     pub visual_id: Visualid,
     pub class: VisualClass,
@@ -404,6 +411,7 @@ impl Serialize for Visualtype {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Depth {
     pub depth: u8,
     pub visuals: Vec<Visualtype>,
@@ -453,6 +461,7 @@ impl Depth {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct EventMask(u32);
 impl EventMask {
     pub const NO_EVENT: Self = Self(0);
@@ -548,6 +557,7 @@ impl core::fmt::Debug for EventMask  {
 bitmask_binop!(EventMask, u32);
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct BackingStore(u32);
 impl BackingStore {
     pub const NOT_USEFUL: Self = Self(0);
@@ -596,6 +606,7 @@ impl core::fmt::Debug for BackingStore  {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Screen {
     pub root: Window,
     pub default_colormap: Colormap,
@@ -684,6 +695,7 @@ impl Screen {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetupRequest {
     pub byte_order: u8,
     pub protocol_major_version: u16,
@@ -771,6 +783,7 @@ impl SetupRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetupFailed {
     pub status: u8,
     pub protocol_major_version: u16,
@@ -826,6 +839,7 @@ impl SetupFailed {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetupAuthenticate {
     pub status: u8,
     pub reason: Vec<u8>,
@@ -876,6 +890,7 @@ impl SetupAuthenticate {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ImageOrder(u8);
 impl ImageOrder {
     pub const LSB_FIRST: Self = Self(0);
@@ -934,6 +949,7 @@ impl core::fmt::Debug for ImageOrder  {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Setup {
     pub status: u8,
     pub protocol_major_version: u16,
@@ -1072,6 +1088,7 @@ impl Setup {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ModMask(u16);
 impl ModMask {
     pub const SHIFT: Self = Self(1 << 0);
@@ -1139,6 +1156,7 @@ impl core::fmt::Debug for ModMask  {
 bitmask_binop!(ModMask, u16);
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct KeyButMask(u16);
 impl KeyButMask {
     pub const SHIFT: Self = Self(1 << 0);
@@ -1214,6 +1232,7 @@ impl core::fmt::Debug for KeyButMask  {
 bitmask_binop!(KeyButMask, u16);
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct WindowEnum(u8);
 impl WindowEnum {
     pub const NONE: Self = Self(0);
@@ -1296,6 +1315,7 @@ pub const KEY_PRESS_EVENT: u8 = 2;
 /// * `GrabKey`: request
 /// * `GrabKeyboard`: request
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct KeyPressEvent {
     pub response_type: u8,
     pub detail: Keycode,
@@ -1397,6 +1417,7 @@ pub const KEY_RELEASE_EVENT: u8 = 3;
 pub type KeyReleaseEvent = KeyPressEvent;
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ButtonMask(u16);
 impl ButtonMask {
     pub const M1: Self = Self(1 << 8);
@@ -1484,6 +1505,7 @@ pub const BUTTON_PRESS_EVENT: u8 = 4;
 /// * `GrabButton`: request
 /// * `GrabPointer`: request
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ButtonPressEvent {
     pub response_type: u8,
     pub detail: Button,
@@ -1585,6 +1607,7 @@ pub const BUTTON_RELEASE_EVENT: u8 = 5;
 pub type ButtonReleaseEvent = ButtonPressEvent;
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Motion(u8);
 impl Motion {
     pub const NORMAL: Self = Self(0);
@@ -1669,6 +1692,7 @@ pub const MOTION_NOTIFY_EVENT: u8 = 6;
 /// * `GrabKey`: request
 /// * `GrabKeyboard`: request
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct MotionNotifyEvent {
     pub response_type: u8,
     pub detail: Motion,
@@ -1767,6 +1791,7 @@ impl From<MotionNotifyEvent> for [u8; 32] {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct NotifyDetail(u8);
 impl NotifyDetail {
     pub const ANCESTOR: Self = Self(0);
@@ -1837,6 +1862,7 @@ impl core::fmt::Debug for NotifyDetail  {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct NotifyMode(u8);
 impl NotifyMode {
     pub const NORMAL: Self = Self(0);
@@ -1916,6 +1942,7 @@ pub const ENTER_NOTIFY_EVENT: u8 = 7;
 /// relative to the event window's origin.
 /// * `mode` -
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct EnterNotifyEvent {
     pub response_type: u8,
     pub detail: NotifyDetail,
@@ -2031,6 +2058,7 @@ pub const FOCUS_IN_EVENT: u8 = 9;
 /// * `detail` -
 /// * `mode` -
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct FocusInEvent {
     pub response_type: u8,
     pub detail: NotifyDetail,
@@ -2113,6 +2141,7 @@ pub type FocusOutEvent = FocusInEvent;
 /// Opcode for the KeymapNotify event
 pub const KEYMAP_NOTIFY_EVENT: u8 = 11;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct KeymapNotifyEvent {
     pub response_type: u8,
     pub keys: [u8; 31],
@@ -2193,6 +2222,7 @@ pub const EXPOSE_EVENT: u8 = 12;
 /// can just ignore all Expose events with nonzero counts and perform full
 /// redisplays on events with zero counts.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ExposeEvent {
     pub response_type: u8,
     pub sequence: u16,
@@ -2279,6 +2309,7 @@ impl From<ExposeEvent> for [u8; 32] {
 /// Opcode for the GraphicsExposure event
 pub const GRAPHICS_EXPOSURE_EVENT: u8 = 13;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GraphicsExposureEvent {
     pub response_type: u8,
     pub sequence: u16,
@@ -2371,6 +2402,7 @@ impl From<GraphicsExposureEvent> for [u8; 32] {
 /// Opcode for the NoExposure event
 pub const NO_EXPOSURE_EVENT: u8 = 14;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct NoExposureEvent {
     pub response_type: u8,
     pub sequence: u16,
@@ -2446,6 +2478,7 @@ impl From<NoExposureEvent> for [u8; 32] {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Visibility(u8);
 impl Visibility {
     pub const UNOBSCURED: Self = Self(0);
@@ -2508,6 +2541,7 @@ impl core::fmt::Debug for Visibility  {
 /// Opcode for the VisibilityNotify event
 pub const VISIBILITY_NOTIFY_EVENT: u8 = 15;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct VisibilityNotifyEvent {
     pub response_type: u8,
     pub sequence: u16,
@@ -2583,6 +2617,7 @@ impl From<VisibilityNotifyEvent> for [u8; 32] {
 /// Opcode for the CreateNotify event
 pub const CREATE_NOTIFY_EVENT: u8 = 16;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CreateNotifyEvent {
     pub response_type: u8,
     pub sequence: u16,
@@ -2686,6 +2721,7 @@ pub const DESTROY_NOTIFY_EVENT: u8 = 17;
 ///
 /// * `DestroyWindow`: request
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DestroyNotifyEvent {
     pub response_type: u8,
     pub sequence: u16,
@@ -2772,6 +2808,7 @@ pub const UNMAP_NOTIFY_EVENT: u8 = 18;
 ///
 /// * `UnmapWindow`: request
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct UnmapNotifyEvent {
     pub response_type: u8,
     pub sequence: u16,
@@ -2861,6 +2898,7 @@ pub const MAP_NOTIFY_EVENT: u8 = 19;
 ///
 /// * `MapWindow`: request
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct MapNotifyEvent {
     pub response_type: u8,
     pub sequence: u16,
@@ -2948,6 +2986,7 @@ pub const MAP_REQUEST_EVENT: u8 = 20;
 ///
 /// * `MapWindow`: request
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct MapRequestEvent {
     pub response_type: u8,
     pub sequence: u16,
@@ -3021,6 +3060,7 @@ impl From<MapRequestEvent> for [u8; 32] {
 /// Opcode for the ReparentNotify event
 pub const REPARENT_NOTIFY_EVENT: u8 = 21;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ReparentNotifyEvent {
     pub response_type: u8,
     pub sequence: u16,
@@ -3129,6 +3169,7 @@ pub const CONFIGURE_NOTIFY_EVENT: u8 = 22;
 ///
 /// * `FreeColormap`: request
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ConfigureNotifyEvent {
     pub response_type: u8,
     pub sequence: u16,
@@ -3224,6 +3265,7 @@ impl From<ConfigureNotifyEvent> for [u8; 32] {
 /// Opcode for the ConfigureRequest event
 pub const CONFIGURE_REQUEST_EVENT: u8 = 23;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ConfigureRequestEvent {
     pub response_type: u8,
     pub stack_mode: StackMode,
@@ -3321,6 +3363,7 @@ impl From<ConfigureRequestEvent> for [u8; 32] {
 /// Opcode for the GravityNotify event
 pub const GRAVITY_NOTIFY_EVENT: u8 = 24;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GravityNotifyEvent {
     pub response_type: u8,
     pub sequence: u16,
@@ -3400,6 +3443,7 @@ impl From<GravityNotifyEvent> for [u8; 32] {
 /// Opcode for the ResizeRequest event
 pub const RESIZE_REQUEST_EVENT: u8 = 25;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ResizeRequestEvent {
     pub response_type: u8,
     pub sequence: u16,
@@ -3478,6 +3522,7 @@ impl From<ResizeRequestEvent> for [u8; 32] {
 /// * `OnTop` - The window is now on top of all siblings.
 /// * `OnBottom` - The window is now below all siblings.
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Place(u8);
 impl Place {
     pub const ON_TOP: Self = Self(0);
@@ -3550,6 +3595,7 @@ pub const CIRCULATE_NOTIFY_EVENT: u8 = 26;
 ///
 /// * `CirculateWindow`: request
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CirculateNotifyEvent {
     pub response_type: u8,
     pub sequence: u16,
@@ -3631,6 +3677,7 @@ pub const CIRCULATE_REQUEST_EVENT: u8 = 27;
 pub type CirculateRequestEvent = CirculateNotifyEvent;
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Property(u8);
 impl Property {
     pub const NEW_VALUE: Self = Self(0);
@@ -3703,6 +3750,7 @@ pub const PROPERTY_NOTIFY_EVENT: u8 = 28;
 ///
 /// * `ChangeProperty`: request
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PropertyNotifyEvent {
     pub response_type: u8,
     pub sequence: u16,
@@ -3784,6 +3832,7 @@ impl From<PropertyNotifyEvent> for [u8; 32] {
 /// Opcode for the SelectionClear event
 pub const SELECTION_CLEAR_EVENT: u8 = 29;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SelectionClearEvent {
     pub response_type: u8,
     pub sequence: u16,
@@ -3858,6 +3907,7 @@ impl From<SelectionClearEvent> for [u8; 32] {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Time(u8);
 impl Time {
     pub const CURRENT_TIME: Self = Self(0);
@@ -3914,6 +3964,7 @@ impl core::fmt::Debug for Time  {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct AtomEnum(u8);
 impl AtomEnum {
     pub const NONE: Self = Self(0);
@@ -4110,6 +4161,7 @@ impl core::fmt::Debug for AtomEnum  {
 /// Opcode for the SelectionRequest event
 pub const SELECTION_REQUEST_EVENT: u8 = 30;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SelectionRequestEvent {
     pub response_type: u8,
     pub sequence: u16,
@@ -4195,6 +4247,7 @@ impl From<SelectionRequestEvent> for [u8; 32] {
 /// Opcode for the SelectionNotify event
 pub const SELECTION_NOTIFY_EVENT: u8 = 31;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SelectionNotifyEvent {
     pub response_type: u8,
     pub sequence: u16,
@@ -4279,6 +4332,7 @@ impl From<SelectionNotifyEvent> for [u8; 32] {
 /// * `Uninstalled` - The colormap was uninstalled.
 /// * `Installed` - The colormap was installed.
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ColormapState(u8);
 impl ColormapState {
     pub const UNINSTALLED: Self = Self(0);
@@ -4337,6 +4391,7 @@ impl core::fmt::Debug for ColormapState  {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ColormapEnum(u8);
 impl ColormapEnum {
     pub const NONE: Self = Self(0);
@@ -4408,6 +4463,7 @@ pub const COLORMAP_NOTIFY_EVENT: u8 = 32;
 ///
 /// * `FreeColormap`: request
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ColormapNotifyEvent {
     pub response_type: u8,
     pub sequence: u16,
@@ -4487,6 +4543,7 @@ impl From<ColormapNotifyEvent> for [u8; 32] {
 }
 
 #[derive(Debug, Copy, Clone)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ClientMessageData([u8; 20]);
 impl ClientMessageData {
     pub fn as_data8(&self) -> [u8; 20] {
@@ -4661,6 +4718,7 @@ pub const CLIENT_MESSAGE_EVENT: u8 = 33;
 ///
 /// * `SendEvent`: request
 #[derive(Debug, Clone, Copy)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ClientMessageEvent {
     pub response_type: u8,
     pub format: u8,
@@ -4756,6 +4814,7 @@ impl ClientMessageEvent {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Mapping(u8);
 impl Mapping {
     pub const MODIFIER: Self = Self(0);
@@ -4825,6 +4884,7 @@ pub const MAPPING_NOTIFY_EVENT: u8 = 34;
 /// * `first_keycode` - The first number in the range of the altered mapping.
 /// * `count` - The number of keycodes altered.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct MappingNotifyEvent {
     pub response_type: u8,
     pub sequence: u16,
@@ -4910,6 +4970,7 @@ pub const GE_GENERIC_EVENT: u8 = 35;
 /// * `length` - The amount (in 4-byte units) of data beyond 32 bytes
 /// * `evtype` - The extension-specific event type
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GeGenericEvent {
     pub response_type: u8,
     pub extension: u8,
@@ -4986,6 +5047,7 @@ pub const LENGTH_ERROR: u8 = 16;
 pub const IMPLEMENTATION_ERROR: u8 = 17;
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct WindowClass(u16);
 impl WindowClass {
     pub const COPY_FROM_PARENT: Self = Self(0);
@@ -5110,6 +5172,7 @@ impl core::fmt::Debug for WindowClass  {
 /// fied, the parent's cursor will be used when the pointer is in the window, and any change in the
 /// parent's cursor will cause an immediate change in the displayed cursor.
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CW(u16);
 impl CW {
     pub const BACK_PIXMAP: Self = Self(1 << 0);
@@ -5189,6 +5252,7 @@ impl core::fmt::Debug for CW  {
 bitmask_binop!(CW, u16);
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct BackPixmap(bool);
 impl BackPixmap {
     pub const NONE: Self = Self(false);
@@ -5259,6 +5323,7 @@ impl core::fmt::Debug for BackPixmap  {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Gravity(u32);
 impl Gravity {
     pub const BIT_FORGET: Self = Self(0);
@@ -5326,6 +5391,7 @@ impl core::fmt::Debug for Gravity  {
 
 /// Auxiliary and optional information for the `create_window` function
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CreateWindowAux {
     pub background_pixmap: Option<Pixmap>,
     pub background_pixel: Option<u32>,
@@ -5735,6 +5801,7 @@ pub const CREATE_WINDOW_REQUEST: u8 = 1;
 /// * `MapWindow`: request
 /// * `CreateNotify`: event
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CreateWindowRequest<'input> {
     pub depth: u8,
     pub wid: Window,
@@ -5875,6 +5942,7 @@ impl<'input> crate::x11_utils::VoidRequest for CreateWindowRequest<'input> {
 
 /// Auxiliary and optional information for the `change_window_attributes` function
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ChangeWindowAttributesAux {
     pub background_pixmap: Option<Pixmap>,
     pub background_pixel: Option<u32>,
@@ -6250,6 +6318,7 @@ pub const CHANGE_WINDOW_ATTRIBUTES_REQUEST: u8 = 2;
 /// * `Value` - TODO: reasons?
 /// * `Window` - The specified `window` does not exist.
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ChangeWindowAttributesRequest<'input> {
     pub window: Window,
     pub value_list: Cow<'input, ChangeWindowAttributesAux>,
@@ -6324,6 +6393,7 @@ impl<'input> crate::x11_utils::VoidRequest for ChangeWindowAttributesRequest<'in
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct MapState(u8);
 impl MapState {
     pub const UNMAPPED: Self = Self(0);
@@ -6398,6 +6468,7 @@ pub const GET_WINDOW_ATTRIBUTES_REQUEST: u8 = 3;
 /// * `Window` - The specified `window` does not exist.
 /// * `Drawable` - TODO: reasons?
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetWindowAttributesRequest {
     pub window: Window,
 }
@@ -6468,6 +6539,7 @@ impl crate::x11_utils::ReplyRequest for GetWindowAttributesRequest {
 /// * `win_gravity` -
 /// * `map_state` -
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetWindowAttributesReply {
     pub backing_store: BackingStore,
     pub sequence: u16,
@@ -6550,6 +6622,7 @@ pub const DESTROY_WINDOW_REQUEST: u8 = 4;
 /// * `MapWindow`: request
 /// * `UnmapWindow`: request
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DestroyWindowRequest {
     pub window: Window,
 }
@@ -6605,6 +6678,7 @@ impl crate::x11_utils::VoidRequest for DestroyWindowRequest {
 /// Opcode for the DestroySubwindows request
 pub const DESTROY_SUBWINDOWS_REQUEST: u8 = 5;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DestroySubwindowsRequest {
     pub window: Window,
 }
@@ -6658,6 +6732,7 @@ impl crate::x11_utils::VoidRequest for DestroySubwindowsRequest {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetMode(u8);
 impl SetMode {
     pub const INSERT: Self = Self(0);
@@ -6740,6 +6815,7 @@ pub const CHANGE_SAVE_SET_REQUEST: u8 = 6;
 ///
 /// * `ReparentWindow`: request
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ChangeSaveSetRequest {
     pub mode: SetMode,
     pub window: Window,
@@ -6831,6 +6907,7 @@ pub const REPARENT_WINDOW_REQUEST: u8 = 7;
 /// * `MapWindow`: request
 /// * `UnmapWindow`: request
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ReparentWindowRequest {
     pub window: Window,
     pub parent: Window,
@@ -6941,6 +7018,7 @@ pub const MAP_WINDOW_REQUEST: u8 = 8;
 /// * `Expose`: event
 /// * `UnmapWindow`: request
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct MapWindowRequest {
     pub window: Window,
 }
@@ -6996,6 +7074,7 @@ impl crate::x11_utils::VoidRequest for MapWindowRequest {
 /// Opcode for the MapSubwindows request
 pub const MAP_SUBWINDOWS_REQUEST: u8 = 9;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct MapSubwindowsRequest {
     pub window: Window,
 }
@@ -7072,6 +7151,7 @@ pub const UNMAP_WINDOW_REQUEST: u8 = 10;
 /// * `Expose`: event
 /// * `MapWindow`: request
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct UnmapWindowRequest {
     pub window: Window,
 }
@@ -7127,6 +7207,7 @@ impl crate::x11_utils::VoidRequest for UnmapWindowRequest {
 /// Opcode for the UnmapSubwindows request
 pub const UNMAP_SUBWINDOWS_REQUEST: u8 = 11;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct UnmapSubwindowsRequest {
     pub window: Window,
 }
@@ -7180,6 +7261,7 @@ impl crate::x11_utils::VoidRequest for UnmapSubwindowsRequest {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ConfigWindow(u8);
 impl ConfigWindow {
     pub const X: Self = Self(1 << 0);
@@ -7249,6 +7331,7 @@ impl core::fmt::Debug for ConfigWindow  {
 bitmask_binop!(ConfigWindow, u8);
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct StackMode(u32);
 impl StackMode {
     pub const ABOVE: Self = Self(0);
@@ -7302,6 +7385,7 @@ impl core::fmt::Debug for StackMode  {
 
 /// Auxiliary and optional information for the `configure_window` function
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ConfigureWindowAux {
     pub x: Option<i32>,
     pub y: Option<i32>,
@@ -7568,6 +7652,7 @@ pub const CONFIGURE_WINDOW_REQUEST: u8 = 12;
 /// }
 /// ```
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ConfigureWindowRequest<'input> {
     pub window: Window,
     pub value_list: Cow<'input, ConfigureWindowAux>,
@@ -7643,6 +7728,7 @@ impl<'input> crate::x11_utils::VoidRequest for ConfigureWindowRequest<'input> {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Circulate(u8);
 impl Circulate {
     pub const RAISE_LOWEST: Self = Self(0);
@@ -7720,6 +7806,7 @@ pub const CIRCULATE_WINDOW_REQUEST: u8 = 13;
 /// * `Window` - The specified `window` does not exist.
 /// * `Value` - The specified `direction` is invalid.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CirculateWindowRequest {
     pub direction: Circulate,
     pub window: Window,
@@ -7815,6 +7902,7 @@ pub const GET_GEOMETRY_REQUEST: u8 = 14;
 /// }
 /// ```
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetGeometryRequest {
     pub drawable: Drawable,
 }
@@ -7882,6 +7970,7 @@ impl crate::x11_utils::ReplyRequest for GetGeometryRequest {
 /// * `border_width` - The border width (in pixels).
 /// * `depth` - The depth of the drawable (bits per pixel for the object).
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetGeometryReply {
     pub depth: u8,
     pub sequence: u16,
@@ -7958,6 +8047,7 @@ pub const QUERY_TREE_REQUEST: u8 = 15;
 /// }
 /// ```
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryTreeRequest {
     pub window: Window,
 }
@@ -8016,6 +8106,7 @@ impl crate::x11_utils::ReplyRequest for QueryTreeRequest {
 /// * `root` - The root window of `window`.
 /// * `parent` - The parent window of `window`.
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryTreeReply {
     pub sequence: u16,
     pub length: u32,
@@ -8108,6 +8199,7 @@ pub const INTERN_ATOM_REQUEST: u8 = 16;
 /// }
 /// ```
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct InternAtomRequest<'input> {
     pub only_if_exists: bool,
     pub name: Cow<'input, [u8]>,
@@ -8178,6 +8270,7 @@ impl<'input> crate::x11_utils::ReplyRequest for InternAtomRequest<'input> {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct InternAtomReply {
     pub sequence: u16,
     pub length: u32,
@@ -8205,6 +8298,7 @@ impl TryParse for InternAtomReply {
 /// Opcode for the GetAtomName request
 pub const GET_ATOM_NAME_REQUEST: u8 = 17;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetAtomNameRequest {
     pub atom: Atom,
 }
@@ -8259,6 +8353,7 @@ impl crate::x11_utils::ReplyRequest for GetAtomNameRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetAtomNameReply {
     pub sequence: u16,
     pub length: u32,
@@ -8311,6 +8406,7 @@ impl GetAtomNameReply {
 /// match existing property value. If the property is undefined, it is treated as
 /// defined with the correct type and format with zero-length data.
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PropMode(u8);
 impl PropMode {
     pub const REPLACE: Self = Self(0);
@@ -8424,6 +8520,7 @@ pub const CHANGE_PROPERTY_REQUEST: u8 = 18;
 /// }
 /// ```
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ChangePropertyRequest<'input> {
     pub mode: PropMode,
     pub window: Window,
@@ -8535,6 +8632,7 @@ impl<'input> crate::x11_utils::VoidRequest for ChangePropertyRequest<'input> {
 /// Opcode for the DeleteProperty request
 pub const DELETE_PROPERTY_REQUEST: u8 = 19;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DeletePropertyRequest {
     pub window: Window,
     pub property: Atom,
@@ -8596,6 +8694,7 @@ impl crate::x11_utils::VoidRequest for DeletePropertyRequest {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetPropertyType(u8);
 impl GetPropertyType {
     pub const ANY: Self = Self(0);
@@ -8722,6 +8821,7 @@ pub const GET_PROPERTY_REQUEST: u8 = 20;
 /// }
 /// ```
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetPropertyRequest {
     pub delete: bool,
     pub window: Window,
@@ -8978,6 +9078,7 @@ impl GetPropertyReply {
 /// * `value_len` - The length of value. You should use the corresponding accessor instead of this
 /// field.
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetPropertyReply {
     pub format: u8,
     pub sequence: u16,
@@ -9014,6 +9115,7 @@ impl TryParse for GetPropertyReply {
 /// Opcode for the ListProperties request
 pub const LIST_PROPERTIES_REQUEST: u8 = 21;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ListPropertiesRequest {
     pub window: Window,
 }
@@ -9068,6 +9170,7 @@ impl crate::x11_utils::ReplyRequest for ListPropertiesRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ListPropertiesReply {
     pub sequence: u16,
     pub length: u32,
@@ -9141,6 +9244,7 @@ pub const SET_SELECTION_OWNER_REQUEST: u8 = 22;
 ///
 /// * `SetSelectionOwner`: request
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetSelectionOwnerRequest {
     pub owner: Window,
     pub selection: Atom,
@@ -9229,6 +9333,7 @@ pub const GET_SELECTION_OWNER_REQUEST: u8 = 23;
 ///
 /// * `SetSelectionOwner`: request
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetSelectionOwnerRequest {
     pub selection: Atom,
 }
@@ -9286,6 +9391,7 @@ impl crate::x11_utils::ReplyRequest for GetSelectionOwnerRequest {
 ///
 /// * `owner` - The current selection owner window.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetSelectionOwnerReply {
     pub sequence: u16,
     pub length: u32,
@@ -9313,6 +9419,7 @@ impl TryParse for GetSelectionOwnerReply {
 /// Opcode for the ConvertSelection request
 pub const CONVERT_SELECTION_REQUEST: u8 = 24;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ConvertSelectionRequest {
     pub requestor: Window,
     pub selection: Atom,
@@ -9398,6 +9505,7 @@ impl crate::x11_utils::VoidRequest for ConvertSelectionRequest {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SendEventDest(bool);
 impl SendEventDest {
     pub const POINTER_WINDOW: Self = Self(false);
@@ -9543,6 +9651,7 @@ pub const SEND_EVENT_REQUEST: u8 = 25;
 /// }
 /// ```
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SendEventRequest<'input> {
     pub propagate: bool,
     pub destination: Window,
@@ -9627,6 +9736,7 @@ impl<'input> crate::x11_utils::VoidRequest for SendEventRequest<'input> {
 /// `AllowEvents` request or until the keyboard grab is released.
 /// * `Async` - Keyboard event processing continues normally.
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GrabMode(u8);
 impl GrabMode {
     pub const SYNC: Self = Self(0);
@@ -9685,6 +9795,7 @@ impl core::fmt::Debug for GrabMode  {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GrabStatus(u8);
 impl GrabStatus {
     pub const SUCCESS: Self = Self(0);
@@ -9749,6 +9860,7 @@ impl core::fmt::Debug for GrabStatus  {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CursorEnum(u8);
 impl CursorEnum {
     pub const NONE: Self = Self(0);
@@ -9878,6 +9990,7 @@ pub const GRAB_POINTER_REQUEST: u8 = 26;
 /// }
 /// ```
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GrabPointerRequest {
     pub owner_events: bool,
     pub grab_window: Window,
@@ -9977,6 +10090,7 @@ impl crate::x11_utils::ReplyRequest for GrabPointerRequest {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GrabPointerReply {
     pub status: GrabStatus,
     pub sequence: u16,
@@ -10027,6 +10141,7 @@ pub const UNGRAB_POINTER_REQUEST: u8 = 27;
 /// * `EnterNotify`: event
 /// * `LeaveNotify`: event
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct UngrabPointerRequest {
     pub time: Timestamp,
 }
@@ -10088,6 +10203,7 @@ impl crate::x11_utils::VoidRequest for UngrabPointerRequest {
 /// * `4` - Scroll wheel. TODO: direction?
 /// * `5` - Scroll wheel. TODO: direction?
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ButtonIndex(u8);
 impl ButtonIndex {
     pub const ANY: Self = Self(0);
@@ -10223,6 +10339,7 @@ pub const GRAB_BUTTON_REQUEST: u8 = 28;
 /// * `Cursor` - The specified `cursor` does not exist.
 /// * `Window` - The specified `window` does not exist.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GrabButtonRequest {
     pub owner_events: bool,
     pub grab_window: Window,
@@ -10329,6 +10446,7 @@ impl crate::x11_utils::VoidRequest for GrabButtonRequest {
 /// Opcode for the UngrabButton request
 pub const UNGRAB_BUTTON_REQUEST: u8 = 29;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct UngrabButtonRequest {
     pub button: ButtonIndex,
     pub grab_window: Window,
@@ -10397,6 +10515,7 @@ impl crate::x11_utils::VoidRequest for UngrabButtonRequest {
 /// Opcode for the ChangeActivePointerGrab request
 pub const CHANGE_ACTIVE_POINTER_GRAB_REQUEST: u8 = 30;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ChangeActivePointerGrabRequest {
     pub cursor: Cursor,
     pub time: Timestamp,
@@ -10531,6 +10650,7 @@ pub const GRAB_KEYBOARD_REQUEST: u8 = 31;
 /// }
 /// ```
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GrabKeyboardRequest {
     pub owner_events: bool,
     pub grab_window: Window,
@@ -10611,6 +10731,7 @@ impl crate::x11_utils::ReplyRequest for GrabKeyboardRequest {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GrabKeyboardReply {
     pub status: GrabStatus,
     pub sequence: u16,
@@ -10638,6 +10759,7 @@ impl TryParse for GrabKeyboardReply {
 /// Opcode for the UngrabKeyboard request
 pub const UNGRAB_KEYBOARD_REQUEST: u8 = 32;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct UngrabKeyboardRequest {
     pub time: Timestamp,
 }
@@ -10691,6 +10813,7 @@ impl crate::x11_utils::VoidRequest for UngrabKeyboardRequest {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Grab(u8);
 impl Grab {
     pub const ANY: Self = Self(0);
@@ -10809,6 +10932,7 @@ pub const GRAB_KEY_REQUEST: u8 = 33;
 ///
 /// * `GrabKeyboard`: request
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GrabKeyRequest {
     pub owner_events: bool,
     pub grab_window: Window,
@@ -10919,6 +11043,7 @@ pub const UNGRAB_KEY_REQUEST: u8 = 34;
 /// * `GrabKey`: request
 /// * `xev`: program
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct UngrabKeyRequest {
     pub key: Keycode,
     pub grab_window: Window,
@@ -11043,6 +11168,7 @@ impl crate::x11_utils::VoidRequest for UngrabKeyRequest {
 /// the client on behalf of two separate grabs, AsyncBoth thaws for both. AsyncBoth
 /// has no effect unless both pointer and keyboard are frozen by the client.
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Allow(u8);
 impl Allow {
     pub const ASYNC_POINTER: Self = Self(0);
@@ -11133,6 +11259,7 @@ pub const ALLOW_EVENTS_REQUEST: u8 = 35;
 ///
 /// * `Value` - You specified an invalid `mode`.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct AllowEventsRequest {
     pub mode: Allow,
     pub time: Timestamp,
@@ -11192,6 +11319,7 @@ impl crate::x11_utils::VoidRequest for AllowEventsRequest {
 /// Opcode for the GrabServer request
 pub const GRAB_SERVER_REQUEST: u8 = 36;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GrabServerRequest;
 impl GrabServerRequest {
     /// Serialize this request into bytes for the provided connection
@@ -11238,6 +11366,7 @@ impl crate::x11_utils::VoidRequest for GrabServerRequest {
 /// Opcode for the UngrabServer request
 pub const UNGRAB_SERVER_REQUEST: u8 = 37;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct UngrabServerRequest;
 impl UngrabServerRequest {
     /// Serialize this request into bytes for the provided connection
@@ -11297,6 +11426,7 @@ pub const QUERY_POINTER_REQUEST: u8 = 38;
 ///
 /// * `Window` - The specified `window` does not exist.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryPointerRequest {
     pub window: Window,
 }
@@ -11370,6 +11500,7 @@ impl crate::x11_utils::ReplyRequest for QueryPointerRequest {
 /// logical state of a device (as seen by means of the protocol) may lag the
 /// physical state if device event processing is frozen.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryPointerReply {
     pub same_screen: bool,
     pub sequence: u16,
@@ -11409,6 +11540,7 @@ impl TryParse for QueryPointerReply {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Timecoord {
     pub time: Timestamp,
     pub x: i16,
@@ -11451,6 +11583,7 @@ impl Serialize for Timecoord {
 /// Opcode for the GetMotionEvents request
 pub const GET_MOTION_EVENTS_REQUEST: u8 = 39;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetMotionEventsRequest {
     pub window: Window,
     pub start: Timestamp,
@@ -11521,6 +11654,7 @@ impl crate::x11_utils::ReplyRequest for GetMotionEventsRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetMotionEventsReply {
     pub sequence: u16,
     pub length: u32,
@@ -11565,6 +11699,7 @@ impl GetMotionEventsReply {
 /// Opcode for the TranslateCoordinates request
 pub const TRANSLATE_COORDINATES_REQUEST: u8 = 40;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct TranslateCoordinatesRequest {
     pub src_window: Window,
     pub dst_window: Window,
@@ -11639,6 +11774,7 @@ impl crate::x11_utils::ReplyRequest for TranslateCoordinatesRequest {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct TranslateCoordinatesReply {
     pub same_screen: bool,
     pub sequence: u16,
@@ -11703,6 +11839,7 @@ pub const WARP_POINTER_REQUEST: u8 = 41;
 ///
 /// * `SetInputFocus`: request
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct WarpPointerRequest {
     pub src_window: Window,
     pub dst_window: Window,
@@ -11809,6 +11946,7 @@ impl crate::x11_utils::VoidRequest for WarpPointerRequest {
 /// revert_to value is `XCB_INPUT_FOCUS_NONE`.
 /// * `FollowKeyboard` - NOT YET DOCUMENTED. Only relevant for the xinput extension.
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct InputFocus(u8);
 impl InputFocus {
     pub const NONE: Self = Self(0);
@@ -11908,6 +12046,7 @@ pub const SET_INPUT_FOCUS_REQUEST: u8 = 42;
 /// * `FocusIn`: event
 /// * `FocusOut`: event
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetInputFocusRequest {
     pub revert_to: InputFocus,
     pub focus: Window,
@@ -11975,6 +12114,7 @@ impl crate::x11_utils::VoidRequest for SetInputFocusRequest {
 /// Opcode for the GetInputFocus request
 pub const GET_INPUT_FOCUS_REQUEST: u8 = 43;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetInputFocusRequest;
 impl GetInputFocusRequest {
     /// Serialize this request into bytes for the provided connection
@@ -12020,6 +12160,7 @@ impl crate::x11_utils::ReplyRequest for GetInputFocusRequest {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetInputFocusReply {
     pub revert_to: InputFocus,
     pub sequence: u16,
@@ -12049,6 +12190,7 @@ impl TryParse for GetInputFocusReply {
 /// Opcode for the QueryKeymap request
 pub const QUERY_KEYMAP_REQUEST: u8 = 44;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryKeymapRequest;
 impl QueryKeymapRequest {
     /// Serialize this request into bytes for the provided connection
@@ -12094,6 +12236,7 @@ impl crate::x11_utils::ReplyRequest for QueryKeymapRequest {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryKeymapReply {
     pub sequence: u16,
     pub length: u32,
@@ -12141,6 +12284,7 @@ pub const OPEN_FONT_REQUEST: u8 = 45;
 ///
 /// * `xcb_generate_id`: function
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct OpenFontRequest<'input> {
     pub fid: Font,
     pub name: Cow<'input, [u8]>,
@@ -12217,6 +12361,7 @@ impl<'input> crate::x11_utils::VoidRequest for OpenFontRequest<'input> {
 /// Opcode for the CloseFont request
 pub const CLOSE_FONT_REQUEST: u8 = 46;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CloseFontRequest {
     pub font: Font,
 }
@@ -12270,6 +12415,7 @@ impl crate::x11_utils::VoidRequest for CloseFontRequest {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct FontDraw(u8);
 impl FontDraw {
     pub const LEFT_TO_RIGHT: Self = Self(0);
@@ -12328,6 +12474,7 @@ impl core::fmt::Debug for FontDraw  {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Fontprop {
     pub name: Atom,
     pub value: u32,
@@ -12364,6 +12511,7 @@ impl Serialize for Fontprop {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Charinfo {
     pub left_side_bearing: i16,
     pub right_side_bearing: i16,
@@ -12429,6 +12577,7 @@ pub const QUERY_FONT_REQUEST: u8 = 47;
 ///
 /// * `font` - The fontable (Font or Graphics Context) to query.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryFontRequest {
     pub font: Fontable,
 }
@@ -12494,6 +12643,7 @@ impl crate::x11_utils::ReplyRequest for QueryFontRequest {
 /// * `font_descent` - baseline to bottom edge of raster
 /// * `draw_direction` -
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryFontReply {
     pub sequence: u16,
     pub length: u32,
@@ -12612,6 +12762,7 @@ pub const QUERY_TEXT_EXTENTS_REQUEST: u8 = 48;
 /// * `GContext` - The specified graphics context does not exist.
 /// * `Font` - The specified `font` does not exist.
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryTextExtentsRequest<'input> {
     pub font: Fontable,
     pub string: Cow<'input, [Char2b]>,
@@ -12696,6 +12847,7 @@ impl<'input> crate::x11_utils::ReplyRequest for QueryTextExtentsRequest<'input> 
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryTextExtentsReply {
     pub draw_direction: FontDraw,
     pub sequence: u16,
@@ -12735,6 +12887,7 @@ impl TryParse for QueryTextExtentsReply {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Str {
     pub name: Vec<u8>,
 }
@@ -12791,6 +12944,7 @@ pub const LIST_FONTS_REQUEST: u8 = 49;
 /// not matter.
 /// * `max_names` - The maximum number of fonts to be returned.
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ListFontsRequest<'input> {
     pub max_names: u16,
     pub pattern: Cow<'input, [u8]>,
@@ -12863,6 +13017,7 @@ impl<'input> crate::x11_utils::ReplyRequest for ListFontsRequest<'input> {
 /// # Fields
 ///
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ListFontsReply {
     pub sequence: u16,
     pub length: u32,
@@ -12919,6 +13074,7 @@ pub const LIST_FONTS_WITH_INFO_REQUEST: u8 = 50;
 /// not matter.
 /// * `max_names` - The maximum number of fonts to be returned.
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ListFontsWithInfoRequest<'input> {
     pub max_names: u16,
     pub pattern: Cow<'input, [u8]>,
@@ -13003,6 +13159,7 @@ impl<'input> crate::x11_utils::ReplyRequest for ListFontsWithInfoRequest<'input>
 /// value does not guarantee that no more fonts will be returned.
 /// * `draw_direction` -
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ListFontsWithInfoReply {
     pub sequence: u16,
     pub length: u32,
@@ -13089,6 +13246,7 @@ impl ListFontsWithInfoReply {
 /// Opcode for the SetFontPath request
 pub const SET_FONT_PATH_REQUEST: u8 = 51;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetFontPathRequest<'input> {
     pub font: Cow<'input, [Str]>,
 }
@@ -13157,6 +13315,7 @@ impl<'input> crate::x11_utils::VoidRequest for SetFontPathRequest<'input> {
 /// Opcode for the GetFontPath request
 pub const GET_FONT_PATH_REQUEST: u8 = 52;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetFontPathRequest;
 impl GetFontPathRequest {
     /// Serialize this request into bytes for the provided connection
@@ -13202,6 +13361,7 @@ impl crate::x11_utils::ReplyRequest for GetFontPathRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetFontPathReply {
     pub sequence: u16,
     pub length: u32,
@@ -13269,6 +13429,7 @@ pub const CREATE_PIXMAP_REQUEST: u8 = 53;
 ///
 /// * `xcb_generate_id`: function
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CreatePixmapRequest {
     pub depth: u8,
     pub pid: Pixmap,
@@ -13359,6 +13520,7 @@ pub const FREE_PIXMAP_REQUEST: u8 = 54;
 ///
 /// * `Pixmap` - The specified pixmap does not exist.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct FreePixmapRequest {
     pub pixmap: Pixmap,
 }
@@ -13514,6 +13676,7 @@ impl crate::x11_utils::VoidRequest for FreePixmapRequest {
 /// * `DashList` - TODO
 /// * `ArcMode` - TODO
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GC(u32);
 impl GC {
     pub const FUNCTION: Self = Self(1 << 0);
@@ -13603,6 +13766,7 @@ impl core::fmt::Debug for GC  {
 bitmask_binop!(GC, u32);
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GX(u32);
 impl GX {
     pub const CLEAR: Self = Self(0);
@@ -13677,6 +13841,7 @@ impl core::fmt::Debug for GX  {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct LineStyle(u32);
 impl LineStyle {
     pub const SOLID: Self = Self(0);
@@ -13725,6 +13890,7 @@ impl core::fmt::Debug for LineStyle  {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CapStyle(u32);
 impl CapStyle {
     pub const NOT_LAST: Self = Self(0);
@@ -13775,6 +13941,7 @@ impl core::fmt::Debug for CapStyle  {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct JoinStyle(u32);
 impl JoinStyle {
     pub const MITER: Self = Self(0);
@@ -13823,6 +13990,7 @@ impl core::fmt::Debug for JoinStyle  {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct FillStyle(u32);
 impl FillStyle {
     pub const SOLID: Self = Self(0);
@@ -13873,6 +14041,7 @@ impl core::fmt::Debug for FillStyle  {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct FillRule(u32);
 impl FillRule {
     pub const EVEN_ODD: Self = Self(0);
@@ -13919,6 +14088,7 @@ impl core::fmt::Debug for FillRule  {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SubwindowMode(u32);
 impl SubwindowMode {
     pub const CLIP_BY_CHILDREN: Self = Self(0);
@@ -13965,6 +14135,7 @@ impl core::fmt::Debug for SubwindowMode  {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ArcMode(u32);
 impl ArcMode {
     pub const CHORD: Self = Self(0);
@@ -14012,6 +14183,7 @@ impl core::fmt::Debug for ArcMode  {
 
 /// Auxiliary and optional information for the `create_gc` function
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CreateGCAux {
     pub function: Option<GX>,
     pub plane_mask: Option<u32>,
@@ -14563,6 +14735,7 @@ pub const CREATE_GC_REQUEST: u8 = 55;
 ///
 /// * `xcb_generate_id`: function
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CreateGCRequest<'input> {
     pub cid: Gcontext,
     pub drawable: Drawable,
@@ -14647,6 +14820,7 @@ impl<'input> crate::x11_utils::VoidRequest for CreateGCRequest<'input> {
 
 /// Auxiliary and optional information for the `change_gc` function
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ChangeGCAux {
     pub function: Option<GX>,
     pub plane_mask: Option<u32>,
@@ -15219,6 +15393,7 @@ pub const CHANGE_GC_REQUEST: u8 = 56;
 /// }
 /// ```
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ChangeGCRequest<'input> {
     pub gc: Gcontext,
     pub value_list: Cow<'input, ChangeGCAux>,
@@ -15295,6 +15470,7 @@ impl<'input> crate::x11_utils::VoidRequest for ChangeGCRequest<'input> {
 /// Opcode for the CopyGC request
 pub const COPY_GC_REQUEST: u8 = 57;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CopyGCRequest {
     pub src_gc: Gcontext,
     pub dst_gc: Gcontext,
@@ -15366,6 +15542,7 @@ impl crate::x11_utils::VoidRequest for CopyGCRequest {
 /// Opcode for the SetDashes request
 pub const SET_DASHES_REQUEST: u8 = 58;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetDashesRequest<'input> {
     pub gc: Gcontext,
     pub dash_offset: u16,
@@ -15444,6 +15621,7 @@ impl<'input> crate::x11_utils::VoidRequest for SetDashesRequest<'input> {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ClipOrdering(u8);
 impl ClipOrdering {
     pub const UNSORTED: Self = Self(0);
@@ -15508,6 +15686,7 @@ impl core::fmt::Debug for ClipOrdering  {
 /// Opcode for the SetClipRectangles request
 pub const SET_CLIP_RECTANGLES_REQUEST: u8 = 59;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetClipRectanglesRequest<'input> {
     pub ordering: ClipOrdering,
     pub gc: Gcontext,
@@ -15614,6 +15793,7 @@ pub const FREE_GC_REQUEST: u8 = 60;
 ///
 /// * `GContext` - The specified graphics context does not exist.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct FreeGCRequest {
     pub gc: Gcontext,
 }
@@ -15669,6 +15849,7 @@ impl crate::x11_utils::VoidRequest for FreeGCRequest {
 /// Opcode for the ClearArea request
 pub const CLEAR_AREA_REQUEST: u8 = 61;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ClearAreaRequest {
     pub exposures: bool,
     pub window: Window,
@@ -15772,6 +15953,7 @@ pub const COPY_AREA_REQUEST: u8 = 62;
 /// * `GContext` - The specified graphics context does not exist.
 /// * `Match` - `src_drawable` has a different root or depth than `dst_drawable`.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CopyAreaRequest {
     pub src_drawable: Drawable,
     pub dst_drawable: Drawable,
@@ -15879,6 +16061,7 @@ impl crate::x11_utils::VoidRequest for CopyAreaRequest {
 /// Opcode for the CopyPlane request
 pub const COPY_PLANE_REQUEST: u8 = 63;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CopyPlaneRequest {
     pub src_drawable: Drawable,
     pub dst_drawable: Drawable,
@@ -15996,6 +16179,7 @@ impl crate::x11_utils::VoidRequest for CopyPlaneRequest {
 /// * `Origin` - Treats all coordinates as relative to the origin.
 /// * `Previous` - Treats all coordinates after the first as relative to the previous coordinate.
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CoordMode(u8);
 impl CoordMode {
     pub const ORIGIN: Self = Self(0);
@@ -16056,6 +16240,7 @@ impl core::fmt::Debug for CoordMode  {
 /// Opcode for the PolyPoint request
 pub const POLY_POINT_REQUEST: u8 = 64;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PolyPointRequest<'input> {
     pub coordinate_mode: CoordMode,
     pub drawable: Drawable,
@@ -16185,6 +16370,7 @@ pub const POLY_LINE_REQUEST: u8 = 65;
 /// }
 /// ```
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PolyLineRequest<'input> {
     pub coordinate_mode: CoordMode,
     pub drawable: Drawable,
@@ -16273,6 +16459,7 @@ impl<'input> crate::x11_utils::VoidRequest for PolyLineRequest<'input> {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Segment {
     pub x1: i16,
     pub y1: i16,
@@ -16345,6 +16532,7 @@ pub const POLY_SEGMENT_REQUEST: u8 = 66;
 /// * `GContext` - The specified `gc` does not exist.
 /// * `Match` - TODO: reasons?
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PolySegmentRequest<'input> {
     pub drawable: Drawable,
     pub gc: Gcontext,
@@ -16430,6 +16618,7 @@ impl<'input> crate::x11_utils::VoidRequest for PolySegmentRequest<'input> {
 /// Opcode for the PolyRectangle request
 pub const POLY_RECTANGLE_REQUEST: u8 = 67;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PolyRectangleRequest<'input> {
     pub drawable: Drawable,
     pub gc: Gcontext,
@@ -16515,6 +16704,7 @@ impl<'input> crate::x11_utils::VoidRequest for PolyRectangleRequest<'input> {
 /// Opcode for the PolyArc request
 pub const POLY_ARC_REQUEST: u8 = 68;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PolyArcRequest<'input> {
     pub drawable: Drawable,
     pub gc: Gcontext,
@@ -16598,6 +16788,7 @@ impl<'input> crate::x11_utils::VoidRequest for PolyArcRequest<'input> {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PolyShape(u8);
 impl PolyShape {
     pub const COMPLEX: Self = Self(0);
@@ -16660,6 +16851,7 @@ impl core::fmt::Debug for PolyShape  {
 /// Opcode for the FillPoly request
 pub const FILL_POLY_REQUEST: u8 = 69;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct FillPolyRequest<'input> {
     pub drawable: Drawable,
     pub gc: Gcontext,
@@ -16787,6 +16979,7 @@ pub const POLY_FILL_RECTANGLE_REQUEST: u8 = 70;
 /// * `GContext` - The specified graphics context does not exist.
 /// * `Match` - TODO: reasons?
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PolyFillRectangleRequest<'input> {
     pub drawable: Drawable,
     pub gc: Gcontext,
@@ -16872,6 +17065,7 @@ impl<'input> crate::x11_utils::VoidRequest for PolyFillRectangleRequest<'input> 
 /// Opcode for the PolyFillArc request
 pub const POLY_FILL_ARC_REQUEST: u8 = 71;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PolyFillArcRequest<'input> {
     pub drawable: Drawable,
     pub gc: Gcontext,
@@ -16955,6 +17149,7 @@ impl<'input> crate::x11_utils::VoidRequest for PolyFillArcRequest<'input> {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ImageFormat(u8);
 impl ImageFormat {
     pub const XY_BITMAP: Self = Self(0);
@@ -17017,6 +17212,7 @@ impl core::fmt::Debug for ImageFormat  {
 /// Opcode for the PutImage request
 pub const PUT_IMAGE_REQUEST: u8 = 72;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PutImageRequest<'input> {
     pub format: ImageFormat,
     pub drawable: Drawable,
@@ -17142,6 +17338,7 @@ impl<'input> crate::x11_utils::VoidRequest for PutImageRequest<'input> {
 /// Opcode for the GetImage request
 pub const GET_IMAGE_REQUEST: u8 = 73;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetImageRequest {
     pub format: ImageFormat,
     pub drawable: Drawable,
@@ -17232,6 +17429,7 @@ impl crate::x11_utils::ReplyRequest for GetImageRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetImageReply {
     pub depth: u8,
     pub sequence: u16,
@@ -17279,6 +17477,7 @@ impl GetImageReply {
 /// Opcode for the PolyText8 request
 pub const POLY_TEXT8_REQUEST: u8 = 74;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PolyText8Request<'input> {
     pub drawable: Drawable,
     pub gc: Gcontext,
@@ -17370,6 +17569,7 @@ impl<'input> crate::x11_utils::VoidRequest for PolyText8Request<'input> {
 /// Opcode for the PolyText16 request
 pub const POLY_TEXT16_REQUEST: u8 = 75;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PolyText16Request<'input> {
     pub drawable: Drawable,
     pub gc: Gcontext,
@@ -17493,6 +17693,7 @@ pub const IMAGE_TEXT8_REQUEST: u8 = 76;
 ///
 /// * `ImageText16`: request
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ImageText8Request<'input> {
     pub drawable: Drawable,
     pub gc: Gcontext,
@@ -17619,6 +17820,7 @@ pub const IMAGE_TEXT16_REQUEST: u8 = 77;
 ///
 /// * `ImageText8`: request
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ImageText16Request<'input> {
     pub drawable: Drawable,
     pub gc: Gcontext,
@@ -17711,6 +17913,7 @@ impl<'input> crate::x11_utils::VoidRequest for ImageText16Request<'input> {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ColormapAlloc(u8);
 impl ColormapAlloc {
     pub const NONE: Self = Self(0);
@@ -17771,6 +17974,7 @@ impl core::fmt::Debug for ColormapAlloc  {
 /// Opcode for the CreateColormap request
 pub const CREATE_COLORMAP_REQUEST: u8 = 78;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CreateColormapRequest {
     pub alloc: ColormapAlloc,
     pub mid: Colormap,
@@ -17846,6 +18050,7 @@ impl crate::x11_utils::VoidRequest for CreateColormapRequest {
 /// Opcode for the FreeColormap request
 pub const FREE_COLORMAP_REQUEST: u8 = 79;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct FreeColormapRequest {
     pub cmap: Colormap,
 }
@@ -17901,6 +18106,7 @@ impl crate::x11_utils::VoidRequest for FreeColormapRequest {
 /// Opcode for the CopyColormapAndFree request
 pub const COPY_COLORMAP_AND_FREE_REQUEST: u8 = 80;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CopyColormapAndFreeRequest {
     pub mid: Colormap,
     pub src_cmap: Colormap,
@@ -17964,6 +18170,7 @@ impl crate::x11_utils::VoidRequest for CopyColormapAndFreeRequest {
 /// Opcode for the InstallColormap request
 pub const INSTALL_COLORMAP_REQUEST: u8 = 81;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct InstallColormapRequest {
     pub cmap: Colormap,
 }
@@ -18019,6 +18226,7 @@ impl crate::x11_utils::VoidRequest for InstallColormapRequest {
 /// Opcode for the UninstallColormap request
 pub const UNINSTALL_COLORMAP_REQUEST: u8 = 82;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct UninstallColormapRequest {
     pub cmap: Colormap,
 }
@@ -18074,6 +18282,7 @@ impl crate::x11_utils::VoidRequest for UninstallColormapRequest {
 /// Opcode for the ListInstalledColormaps request
 pub const LIST_INSTALLED_COLORMAPS_REQUEST: u8 = 83;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ListInstalledColormapsRequest {
     pub window: Window,
 }
@@ -18128,6 +18337,7 @@ impl crate::x11_utils::ReplyRequest for ListInstalledColormapsRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ListInstalledColormapsReply {
     pub sequence: u16,
     pub length: u32,
@@ -18190,6 +18400,7 @@ pub const ALLOC_COLOR_REQUEST: u8 = 84;
 ///
 /// * `Colormap` - The specified colormap `cmap` does not exist.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct AllocColorRequest {
     pub cmap: Colormap,
     pub red: u16,
@@ -18265,6 +18476,7 @@ impl crate::x11_utils::ReplyRequest for AllocColorRequest {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct AllocColorReply {
     pub sequence: u16,
     pub length: u32,
@@ -18299,6 +18511,7 @@ impl TryParse for AllocColorReply {
 /// Opcode for the AllocNamedColor request
 pub const ALLOC_NAMED_COLOR_REQUEST: u8 = 85;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct AllocNamedColorRequest<'input> {
     pub cmap: Colormap,
     pub name: Cow<'input, [u8]>,
@@ -18374,6 +18587,7 @@ impl<'input> crate::x11_utils::ReplyRequest for AllocNamedColorRequest<'input> {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct AllocNamedColorReply {
     pub sequence: u16,
     pub length: u32,
@@ -18413,6 +18627,7 @@ impl TryParse for AllocNamedColorReply {
 /// Opcode for the AllocColorCells request
 pub const ALLOC_COLOR_CELLS_REQUEST: u8 = 86;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct AllocColorCellsRequest {
     pub contiguous: bool,
     pub cmap: Colormap,
@@ -18482,6 +18697,7 @@ impl crate::x11_utils::ReplyRequest for AllocColorCellsRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct AllocColorCellsReply {
     pub sequence: u16,
     pub length: u32,
@@ -18542,6 +18758,7 @@ impl AllocColorCellsReply {
 /// Opcode for the AllocColorPlanes request
 pub const ALLOC_COLOR_PLANES_REQUEST: u8 = 87;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct AllocColorPlanesRequest {
     pub contiguous: bool,
     pub cmap: Colormap,
@@ -18623,6 +18840,7 @@ impl crate::x11_utils::ReplyRequest for AllocColorPlanesRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct AllocColorPlanesReply {
     pub sequence: u16,
     pub length: u32,
@@ -18674,6 +18892,7 @@ impl AllocColorPlanesReply {
 /// Opcode for the FreeColors request
 pub const FREE_COLORS_REQUEST: u8 = 88;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct FreeColorsRequest<'input> {
     pub cmap: Colormap,
     pub plane_mask: u32,
@@ -18757,6 +18976,7 @@ impl<'input> crate::x11_utils::VoidRequest for FreeColorsRequest<'input> {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ColorFlag(u8);
 impl ColorFlag {
     pub const RED: Self = Self(1 << 0);
@@ -18818,6 +19038,7 @@ impl core::fmt::Debug for ColorFlag  {
 bitmask_binop!(ColorFlag, u8);
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Coloritem {
     pub pixel: u32,
     pub red: u16,
@@ -18874,6 +19095,7 @@ impl Serialize for Coloritem {
 /// Opcode for the StoreColors request
 pub const STORE_COLORS_REQUEST: u8 = 89;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct StoreColorsRequest<'input> {
     pub cmap: Colormap,
     pub items: Cow<'input, [Coloritem]>,
@@ -18950,6 +19172,7 @@ impl<'input> crate::x11_utils::VoidRequest for StoreColorsRequest<'input> {
 /// Opcode for the StoreNamedColor request
 pub const STORE_NAMED_COLOR_REQUEST: u8 = 90;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct StoreNamedColorRequest<'input> {
     pub flags: u8,
     pub cmap: Colormap,
@@ -19037,6 +19260,7 @@ impl<'input> crate::x11_utils::VoidRequest for StoreNamedColorRequest<'input> {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Rgb {
     pub red: u16,
     pub green: u16,
@@ -19081,6 +19305,7 @@ impl Serialize for Rgb {
 /// Opcode for the QueryColors request
 pub const QUERY_COLORS_REQUEST: u8 = 91;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryColorsRequest<'input> {
     pub cmap: Colormap,
     pub pixels: Cow<'input, [u32]>,
@@ -19156,6 +19381,7 @@ impl<'input> crate::x11_utils::ReplyRequest for QueryColorsRequest<'input> {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryColorsReply {
     pub sequence: u16,
     pub length: u32,
@@ -19200,6 +19426,7 @@ impl QueryColorsReply {
 /// Opcode for the LookupColor request
 pub const LOOKUP_COLOR_REQUEST: u8 = 92;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct LookupColorRequest<'input> {
     pub cmap: Colormap,
     pub name: Cow<'input, [u8]>,
@@ -19275,6 +19502,7 @@ impl<'input> crate::x11_utils::ReplyRequest for LookupColorRequest<'input> {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct LookupColorReply {
     pub sequence: u16,
     pub length: u32,
@@ -19310,6 +19538,7 @@ impl TryParse for LookupColorReply {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PixmapEnum(u8);
 impl PixmapEnum {
     pub const NONE: Self = Self(0);
@@ -19368,6 +19597,7 @@ impl core::fmt::Debug for PixmapEnum  {
 /// Opcode for the CreateCursor request
 pub const CREATE_CURSOR_REQUEST: u8 = 93;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CreateCursorRequest {
     pub cid: Cursor,
     pub source: Pixmap,
@@ -19485,6 +19715,7 @@ impl crate::x11_utils::VoidRequest for CreateCursorRequest {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct FontEnum(u8);
 impl FontEnum {
     pub const NONE: Self = Self(0);
@@ -19576,6 +19807,7 @@ pub const CREATE_GLYPH_CURSOR_REQUEST: u8 = 94;
 /// * `Font` - The specified `source_font` or `mask_font` does not exist.
 /// * `Value` - Either `source_char` or `mask_char` are not defined in `source_font` or `mask_font`, respectively.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CreateGlyphCursorRequest {
     pub cid: Cursor,
     pub source_font: Font,
@@ -19707,6 +19939,7 @@ pub const FREE_CURSOR_REQUEST: u8 = 95;
 ///
 /// * `Cursor` - The specified cursor does not exist.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct FreeCursorRequest {
     pub cursor: Cursor,
 }
@@ -19762,6 +19995,7 @@ impl crate::x11_utils::VoidRequest for FreeCursorRequest {
 /// Opcode for the RecolorCursor request
 pub const RECOLOR_CURSOR_REQUEST: u8 = 96;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct RecolorCursorRequest {
     pub cursor: Cursor,
     pub fore_red: u16,
@@ -19851,6 +20085,7 @@ impl crate::x11_utils::VoidRequest for RecolorCursorRequest {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryShapeOf(u8);
 impl QueryShapeOf {
     pub const LARGEST_CURSOR: Self = Self(0);
@@ -19913,6 +20148,7 @@ impl core::fmt::Debug for QueryShapeOf  {
 /// Opcode for the QueryBestSize request
 pub const QUERY_BEST_SIZE_REQUEST: u8 = 97;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryBestSizeRequest {
     pub class: QueryShapeOf,
     pub drawable: Drawable,
@@ -19983,6 +20219,7 @@ impl crate::x11_utils::ReplyRequest for QueryBestSizeRequest {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryBestSizeReply {
     pub sequence: u16,
     pub length: u32,
@@ -20033,6 +20270,7 @@ pub const QUERY_EXTENSION_REQUEST: u8 = 98;
 /// * `xdpyinfo`: program
 /// * `xcb_get_extension_data`: function
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryExtensionRequest<'input> {
     pub name: Cow<'input, [u8]>,
 }
@@ -20105,6 +20343,7 @@ impl<'input> crate::x11_utils::ReplyRequest for QueryExtensionRequest<'input> {
 /// * `first_event` - The first event code, if any.
 /// * `first_error` - The first error code, if any.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryExtensionReply {
     pub sequence: u16,
     pub length: u32,
@@ -20138,6 +20377,7 @@ impl TryParse for QueryExtensionReply {
 /// Opcode for the ListExtensions request
 pub const LIST_EXTENSIONS_REQUEST: u8 = 99;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ListExtensionsRequest;
 impl ListExtensionsRequest {
     /// Serialize this request into bytes for the provided connection
@@ -20183,6 +20423,7 @@ impl crate::x11_utils::ReplyRequest for ListExtensionsRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ListExtensionsReply {
     pub sequence: u16,
     pub length: u32,
@@ -20226,6 +20467,7 @@ impl ListExtensionsReply {
 /// Opcode for the ChangeKeyboardMapping request
 pub const CHANGE_KEYBOARD_MAPPING_REQUEST: u8 = 100;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ChangeKeyboardMappingRequest<'input> {
     pub keycode_count: u8,
     pub first_keycode: Keycode,
@@ -20306,6 +20548,7 @@ impl<'input> crate::x11_utils::VoidRequest for ChangeKeyboardMappingRequest<'inp
 /// Opcode for the GetKeyboardMapping request
 pub const GET_KEYBOARD_MAPPING_REQUEST: u8 = 101;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetKeyboardMappingRequest {
     pub first_keycode: Keycode,
     pub count: u8,
@@ -20364,6 +20607,7 @@ impl crate::x11_utils::ReplyRequest for GetKeyboardMappingRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetKeyboardMappingReply {
     pub keysyms_per_keycode: u8,
     pub sequence: u16,
@@ -20405,6 +20649,7 @@ impl GetKeyboardMappingReply {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct KB(u8);
 impl KB {
     pub const KEY_CLICK_PERCENT: Self = Self(1 << 0);
@@ -20476,6 +20721,7 @@ impl core::fmt::Debug for KB  {
 bitmask_binop!(KB, u8);
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct LedMode(u32);
 impl LedMode {
     pub const OFF: Self = Self(0);
@@ -20522,6 +20768,7 @@ impl core::fmt::Debug for LedMode  {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct AutoRepeatMode(u32);
 impl AutoRepeatMode {
     pub const OFF: Self = Self(0);
@@ -20571,6 +20818,7 @@ impl core::fmt::Debug for AutoRepeatMode  {
 
 /// Auxiliary and optional information for the `change_keyboard_control` function
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ChangeKeyboardControlAux {
     pub key_click_percent: Option<i32>,
     pub bell_percent: Option<i32>,
@@ -20778,6 +21026,7 @@ impl ChangeKeyboardControlAux {
 /// Opcode for the ChangeKeyboardControl request
 pub const CHANGE_KEYBOARD_CONTROL_REQUEST: u8 = 102;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ChangeKeyboardControlRequest<'input> {
     pub value_list: Cow<'input, ChangeKeyboardControlAux>,
 }
@@ -20845,6 +21094,7 @@ impl<'input> crate::x11_utils::VoidRequest for ChangeKeyboardControlRequest<'inp
 /// Opcode for the GetKeyboardControl request
 pub const GET_KEYBOARD_CONTROL_REQUEST: u8 = 103;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetKeyboardControlRequest;
 impl GetKeyboardControlRequest {
     /// Serialize this request into bytes for the provided connection
@@ -20890,6 +21140,7 @@ impl crate::x11_utils::ReplyRequest for GetKeyboardControlRequest {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetKeyboardControlReply {
     pub global_auto_repeat: AutoRepeatMode,
     pub sequence: u16,
@@ -20931,6 +21182,7 @@ impl TryParse for GetKeyboardControlReply {
 /// Opcode for the Bell request
 pub const BELL_REQUEST: u8 = 104;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct BellRequest {
     pub percent: i8,
 }
@@ -20981,6 +21233,7 @@ impl crate::x11_utils::VoidRequest for BellRequest {
 /// Opcode for the ChangePointerControl request
 pub const CHANGE_POINTER_CONTROL_REQUEST: u8 = 105;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ChangePointerControlRequest {
     pub acceleration_numerator: i16,
     pub acceleration_denominator: i16,
@@ -21056,6 +21309,7 @@ impl crate::x11_utils::VoidRequest for ChangePointerControlRequest {
 /// Opcode for the GetPointerControl request
 pub const GET_POINTER_CONTROL_REQUEST: u8 = 106;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetPointerControlRequest;
 impl GetPointerControlRequest {
     /// Serialize this request into bytes for the provided connection
@@ -21101,6 +21355,7 @@ impl crate::x11_utils::ReplyRequest for GetPointerControlRequest {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetPointerControlReply {
     pub sequence: u16,
     pub length: u32,
@@ -21131,6 +21386,7 @@ impl TryParse for GetPointerControlReply {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Blanking(u8);
 impl Blanking {
     pub const NOT_PREFERRED: Self = Self(0);
@@ -21191,6 +21447,7 @@ impl core::fmt::Debug for Blanking  {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Exposures(u8);
 impl Exposures {
     pub const NOT_ALLOWED: Self = Self(0);
@@ -21253,6 +21510,7 @@ impl core::fmt::Debug for Exposures  {
 /// Opcode for the SetScreenSaver request
 pub const SET_SCREEN_SAVER_REQUEST: u8 = 107;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetScreenSaverRequest {
     pub timeout: i16,
     pub interval: i16,
@@ -21326,6 +21584,7 @@ impl crate::x11_utils::VoidRequest for SetScreenSaverRequest {
 /// Opcode for the GetScreenSaver request
 pub const GET_SCREEN_SAVER_REQUEST: u8 = 108;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetScreenSaverRequest;
 impl GetScreenSaverRequest {
     /// Serialize this request into bytes for the provided connection
@@ -21371,6 +21630,7 @@ impl crate::x11_utils::ReplyRequest for GetScreenSaverRequest {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetScreenSaverReply {
     pub sequence: u16,
     pub length: u32,
@@ -21405,6 +21665,7 @@ impl TryParse for GetScreenSaverReply {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct HostMode(u8);
 impl HostMode {
     pub const INSERT: Self = Self(0);
@@ -21463,6 +21724,7 @@ impl core::fmt::Debug for HostMode  {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Family(u8);
 impl Family {
     pub const INTERNET: Self = Self(0);
@@ -21529,6 +21791,7 @@ impl core::fmt::Debug for Family  {
 /// Opcode for the ChangeHosts request
 pub const CHANGE_HOSTS_REQUEST: u8 = 109;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ChangeHostsRequest<'input> {
     pub mode: HostMode,
     pub family: Family,
@@ -21605,6 +21868,7 @@ impl<'input> crate::x11_utils::VoidRequest for ChangeHostsRequest<'input> {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Host {
     pub family: Family,
     pub address: Vec<u8>,
@@ -21662,6 +21926,7 @@ impl Host {
 /// Opcode for the ListHosts request
 pub const LIST_HOSTS_REQUEST: u8 = 110;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ListHostsRequest;
 impl ListHostsRequest {
     /// Serialize this request into bytes for the provided connection
@@ -21707,6 +21972,7 @@ impl crate::x11_utils::ReplyRequest for ListHostsRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ListHostsReply {
     pub mode: AccessControl,
     pub sequence: u16,
@@ -21751,6 +22017,7 @@ impl ListHostsReply {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct AccessControl(u8);
 impl AccessControl {
     pub const DISABLE: Self = Self(0);
@@ -21811,6 +22078,7 @@ impl core::fmt::Debug for AccessControl  {
 /// Opcode for the SetAccessControl request
 pub const SET_ACCESS_CONTROL_REQUEST: u8 = 111;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetAccessControlRequest {
     pub mode: AccessControl,
 }
@@ -21860,6 +22128,7 @@ impl crate::x11_utils::VoidRequest for SetAccessControlRequest {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CloseDown(u8);
 impl CloseDown {
     pub const DESTROY_ALL: Self = Self(0);
@@ -21922,6 +22191,7 @@ impl core::fmt::Debug for CloseDown  {
 /// Opcode for the SetCloseDownMode request
 pub const SET_CLOSE_DOWN_MODE_REQUEST: u8 = 112;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetCloseDownModeRequest {
     pub mode: CloseDown,
 }
@@ -21971,6 +22241,7 @@ impl crate::x11_utils::VoidRequest for SetCloseDownModeRequest {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Kill(u8);
 impl Kill {
     pub const ALL_TEMPORARY: Self = Self(0);
@@ -22048,6 +22319,7 @@ pub const KILL_CLIENT_REQUEST: u8 = 113;
 ///
 /// * `xkill`: program
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct KillClientRequest {
     pub resource: u32,
 }
@@ -22103,6 +22375,7 @@ impl crate::x11_utils::VoidRequest for KillClientRequest {
 /// Opcode for the RotateProperties request
 pub const ROTATE_PROPERTIES_REQUEST: u8 = 114;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct RotatePropertiesRequest<'input> {
     pub window: Window,
     pub delta: i16,
@@ -22182,6 +22455,7 @@ impl<'input> crate::x11_utils::VoidRequest for RotatePropertiesRequest<'input> {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ScreenSaver(u8);
 impl ScreenSaver {
     pub const RESET: Self = Self(0);
@@ -22242,6 +22516,7 @@ impl core::fmt::Debug for ScreenSaver  {
 /// Opcode for the ForceScreenSaver request
 pub const FORCE_SCREEN_SAVER_REQUEST: u8 = 115;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ForceScreenSaverRequest {
     pub mode: ScreenSaver,
 }
@@ -22291,6 +22566,7 @@ impl crate::x11_utils::VoidRequest for ForceScreenSaverRequest {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct MappingStatus(u8);
 impl MappingStatus {
     pub const SUCCESS: Self = Self(0);
@@ -22353,6 +22629,7 @@ impl core::fmt::Debug for MappingStatus  {
 /// Opcode for the SetPointerMapping request
 pub const SET_POINTER_MAPPING_REQUEST: u8 = 116;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetPointerMappingRequest<'input> {
     pub map: Cow<'input, [u8]>,
 }
@@ -22413,6 +22690,7 @@ impl<'input> crate::x11_utils::ReplyRequest for SetPointerMappingRequest<'input>
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetPointerMappingReply {
     pub status: MappingStatus,
     pub sequence: u16,
@@ -22440,6 +22718,7 @@ impl TryParse for SetPointerMappingReply {
 /// Opcode for the GetPointerMapping request
 pub const GET_POINTER_MAPPING_REQUEST: u8 = 117;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetPointerMappingRequest;
 impl GetPointerMappingRequest {
     /// Serialize this request into bytes for the provided connection
@@ -22485,6 +22764,7 @@ impl crate::x11_utils::ReplyRequest for GetPointerMappingRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetPointerMappingReply {
     pub sequence: u16,
     pub length: u32,
@@ -22527,6 +22807,7 @@ impl GetPointerMappingReply {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct MapIndex(u8);
 impl MapIndex {
     pub const SHIFT: Self = Self(0);
@@ -22599,6 +22880,7 @@ impl core::fmt::Debug for MapIndex  {
 /// Opcode for the SetModifierMapping request
 pub const SET_MODIFIER_MAPPING_REQUEST: u8 = 118;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetModifierMappingRequest<'input> {
     pub keycodes: Cow<'input, [Keycode]>,
 }
@@ -22660,6 +22942,7 @@ impl<'input> crate::x11_utils::ReplyRequest for SetModifierMappingRequest<'input
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetModifierMappingReply {
     pub status: MappingStatus,
     pub sequence: u16,
@@ -22687,6 +22970,7 @@ impl TryParse for SetModifierMappingReply {
 /// Opcode for the GetModifierMapping request
 pub const GET_MODIFIER_MAPPING_REQUEST: u8 = 119;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetModifierMappingRequest;
 impl GetModifierMappingRequest {
     /// Serialize this request into bytes for the provided connection
@@ -22732,6 +23016,7 @@ impl crate::x11_utils::ReplyRequest for GetModifierMappingRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetModifierMappingReply {
     pub sequence: u16,
     pub length: u32,
@@ -22777,6 +23062,7 @@ impl GetModifierMappingReply {
 /// Opcode for the NoOperation request
 pub const NO_OPERATION_REQUEST: u8 = 127;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct NoOperationRequest;
 impl NoOperationRequest {
     /// Serialize this request into bytes for the provided connection

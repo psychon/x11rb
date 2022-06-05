@@ -375,6 +375,10 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         let union_size = union_def.size();
 
         outln!(out, "#[derive(Debug, Copy, Clone)]");
+        outln!(
+            out,
+            r#"#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]"#
+        );
         outln!(out, "pub struct {}([u8; {}]);", rust_name, union_size);
 
         let fields = union_def.fields.as_slice();
@@ -557,6 +561,10 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         }
 
         outln!(out, "#[derive(Debug, Copy, Clone)]");
+        outln!(
+            out,
+            r#"#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]"#
+        );
         outln!(out, "pub struct {}([u8; 32]);", rust_name);
 
         outln!(out, "impl {} {{", rust_name);
@@ -691,6 +699,10 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         outln!(
             out,
             "#[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]"
+        );
+        outln!(
+            out,
+            r#"#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]"#
         );
         outln!(out, "pub struct {}({});", rust_name, raw_type);
 

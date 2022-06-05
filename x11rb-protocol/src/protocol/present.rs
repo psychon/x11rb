@@ -41,6 +41,7 @@ pub const X11_EXTENSION_NAME: &str = "Present";
 pub const X11_XML_VERSION: (u32, u32) = (1, 2);
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct EventEnum(u8);
 impl EventEnum {
     pub const CONFIGURE_NOTIFY: Self = Self(0);
@@ -103,6 +104,7 @@ impl core::fmt::Debug for EventEnum  {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct EventMask(u8);
 impl EventMask {
     pub const NO_EVENT: Self = Self(0);
@@ -168,6 +170,7 @@ impl core::fmt::Debug for EventMask  {
 bitmask_binop!(EventMask, u8);
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Option(u8);
 impl Option {
     pub const NONE: Self = Self(0);
@@ -233,6 +236,7 @@ impl core::fmt::Debug for Option  {
 bitmask_binop!(Option, u8);
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Capability(u8);
 impl Capability {
     pub const NONE: Self = Self(0);
@@ -296,6 +300,7 @@ impl core::fmt::Debug for Capability  {
 bitmask_binop!(Capability, u8);
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CompleteKind(u8);
 impl CompleteKind {
     pub const PIXMAP: Self = Self(0);
@@ -354,6 +359,7 @@ impl core::fmt::Debug for CompleteKind  {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CompleteMode(u8);
 impl CompleteMode {
     pub const COPY: Self = Self(0);
@@ -416,6 +422,7 @@ impl core::fmt::Debug for CompleteMode  {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Notify {
     pub window: xproto::Window,
     pub serial: u32,
@@ -454,6 +461,7 @@ impl Serialize for Notify {
 /// Opcode for the QueryVersion request
 pub const QUERY_VERSION_REQUEST: u8 = 0;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryVersionRequest {
     pub major_version: u32,
     pub minor_version: u32,
@@ -513,6 +521,7 @@ impl crate::x11_utils::ReplyRequest for QueryVersionRequest {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryVersionReply {
     pub sequence: u16,
     pub length: u32,
@@ -542,6 +551,7 @@ impl TryParse for QueryVersionReply {
 /// Opcode for the Pixmap request
 pub const PIXMAP_REQUEST: u8 = 1;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PixmapRequest<'input> {
     pub window: xproto::Window,
     pub pixmap: xproto::Pixmap,
@@ -745,6 +755,7 @@ impl<'input> crate::x11_utils::VoidRequest for PixmapRequest<'input> {
 /// Opcode for the NotifyMSC request
 pub const NOTIFY_MSC_REQUEST: u8 = 2;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct NotifyMSCRequest {
     pub window: xproto::Window,
     pub serial: u32,
@@ -848,6 +859,7 @@ pub type Event = u32;
 /// Opcode for the SelectInput request
 pub const SELECT_INPUT_REQUEST: u8 = 3;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SelectInputRequest {
     pub eid: Event,
     pub window: xproto::Window,
@@ -916,6 +928,7 @@ impl crate::x11_utils::VoidRequest for SelectInputRequest {
 /// Opcode for the QueryCapabilities request
 pub const QUERY_CAPABILITIES_REQUEST: u8 = 4;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryCapabilitiesRequest {
     pub target: u32,
 }
@@ -967,6 +980,7 @@ impl crate::x11_utils::ReplyRequest for QueryCapabilitiesRequest {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryCapabilitiesReply {
     pub sequence: u16,
     pub length: u32,
@@ -994,6 +1008,7 @@ impl TryParse for QueryCapabilitiesReply {
 /// Opcode for the Generic event
 pub const GENERIC_EVENT: u8 = 0;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GenericEvent {
     pub response_type: u8,
     pub extension: u8,
@@ -1073,6 +1088,7 @@ impl From<GenericEvent> for [u8; 32] {
 /// Opcode for the ConfigureNotify event
 pub const CONFIGURE_NOTIFY_EVENT: u16 = 0;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ConfigureNotifyEvent {
     pub response_type: u8,
     pub extension: u8,
@@ -1122,6 +1138,7 @@ impl TryParse for ConfigureNotifyEvent {
 /// Opcode for the CompleteNotify event
 pub const COMPLETE_NOTIFY_EVENT: u16 = 1;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CompleteNotifyEvent {
     pub response_type: u8,
     pub extension: u8,
@@ -1164,6 +1181,7 @@ impl TryParse for CompleteNotifyEvent {
 /// Opcode for the IdleNotify event
 pub const IDLE_NOTIFY_EVENT: u16 = 2;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct IdleNotifyEvent {
     pub response_type: u8,
     pub extension: u8,
@@ -1201,6 +1219,7 @@ impl TryParse for IdleNotifyEvent {
 /// Opcode for the RedirectNotify event
 pub const REDIRECT_NOTIFY_EVENT: u16 = 3;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct RedirectNotifyEvent {
     pub response_type: u8,
     pub extension: u8,

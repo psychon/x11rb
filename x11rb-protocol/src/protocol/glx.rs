@@ -100,6 +100,7 @@ pub const GLX_BAD_PROFILE_ARB_ERROR: u8 = 13;
 /// Opcode for the PbufferClobber event
 pub const PBUFFER_CLOBBER_EVENT: u8 = 0;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PbufferClobberEvent {
     pub response_type: u8,
     pub sequence: u16,
@@ -197,6 +198,7 @@ impl From<PbufferClobberEvent> for [u8; 32] {
 /// Opcode for the BufferSwapComplete event
 pub const BUFFER_SWAP_COMPLETE_EVENT: u8 = 1;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct BufferSwapCompleteEvent {
     pub response_type: u8,
     pub sequence: u16,
@@ -283,6 +285,7 @@ impl From<BufferSwapCompleteEvent> for [u8; 32] {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PBCET(u16);
 impl PBCET {
     pub const DAMAGED: Self = Self(32791);
@@ -335,6 +338,7 @@ impl core::fmt::Debug for PBCET  {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PBCDT(u16);
 impl PBCDT {
     pub const WINDOW: Self = Self(32793);
@@ -389,6 +393,7 @@ impl core::fmt::Debug for PBCDT  {
 /// Opcode for the Render request
 pub const RENDER_REQUEST: u8 = 1;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct RenderRequest<'input> {
     pub context_tag: ContextTag,
     pub data: Cow<'input, [u8]>,
@@ -454,6 +459,7 @@ impl<'input> crate::x11_utils::VoidRequest for RenderRequest<'input> {
 /// Opcode for the RenderLarge request
 pub const RENDER_LARGE_REQUEST: u8 = 2;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct RenderLargeRequest<'input> {
     pub context_tag: ContextTag,
     pub request_num: u16,
@@ -540,6 +546,7 @@ impl<'input> crate::x11_utils::VoidRequest for RenderLargeRequest<'input> {
 /// Opcode for the CreateContext request
 pub const CREATE_CONTEXT_REQUEST: u8 = 3;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CreateContextRequest {
     pub context: Context,
     pub visual: xproto::Visualid,
@@ -625,6 +632,7 @@ impl crate::x11_utils::VoidRequest for CreateContextRequest {
 /// Opcode for the DestroyContext request
 pub const DESTROY_CONTEXT_REQUEST: u8 = 4;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DestroyContextRequest {
     pub context: Context,
 }
@@ -677,6 +685,7 @@ impl crate::x11_utils::VoidRequest for DestroyContextRequest {
 /// Opcode for the MakeCurrent request
 pub const MAKE_CURRENT_REQUEST: u8 = 5;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct MakeCurrentRequest {
     pub drawable: Drawable,
     pub context: Context,
@@ -744,6 +753,7 @@ impl crate::x11_utils::ReplyRequest for MakeCurrentRequest {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct MakeCurrentReply {
     pub sequence: u16,
     pub length: u32,
@@ -772,6 +782,7 @@ impl TryParse for MakeCurrentReply {
 /// Opcode for the IsDirect request
 pub const IS_DIRECT_REQUEST: u8 = 6;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct IsDirectRequest {
     pub context: Context,
 }
@@ -823,6 +834,7 @@ impl crate::x11_utils::ReplyRequest for IsDirectRequest {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct IsDirectReply {
     pub sequence: u16,
     pub length: u32,
@@ -851,6 +863,7 @@ impl TryParse for IsDirectReply {
 /// Opcode for the QueryVersion request
 pub const QUERY_VERSION_REQUEST: u8 = 7;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryVersionRequest {
     pub major_version: u32,
     pub minor_version: u32,
@@ -910,6 +923,7 @@ impl crate::x11_utils::ReplyRequest for QueryVersionRequest {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryVersionReply {
     pub sequence: u16,
     pub length: u32,
@@ -940,6 +954,7 @@ impl TryParse for QueryVersionReply {
 /// Opcode for the WaitGL request
 pub const WAIT_GL_REQUEST: u8 = 8;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct WaitGLRequest {
     pub context_tag: ContextTag,
 }
@@ -992,6 +1007,7 @@ impl crate::x11_utils::VoidRequest for WaitGLRequest {
 /// Opcode for the WaitX request
 pub const WAIT_X_REQUEST: u8 = 9;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct WaitXRequest {
     pub context_tag: ContextTag,
 }
@@ -1044,6 +1060,7 @@ impl crate::x11_utils::VoidRequest for WaitXRequest {
 /// Opcode for the CopyContext request
 pub const COPY_CONTEXT_REQUEST: u8 = 10;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CopyContextRequest {
     pub src: Context,
     pub dest: Context,
@@ -1118,6 +1135,7 @@ impl crate::x11_utils::VoidRequest for CopyContextRequest {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GC(u32);
 impl GC {
     pub const GL_CURRENT_BIT: Self = Self(1 << 0);
@@ -1204,6 +1222,7 @@ impl core::fmt::Debug for GC  {
 /// Opcode for the SwapBuffers request
 pub const SWAP_BUFFERS_REQUEST: u8 = 11;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SwapBuffersRequest {
     pub context_tag: ContextTag,
     pub drawable: Drawable,
@@ -1264,6 +1283,7 @@ impl crate::x11_utils::VoidRequest for SwapBuffersRequest {
 /// Opcode for the UseXFont request
 pub const USE_X_FONT_REQUEST: u8 = 12;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct UseXFontRequest {
     pub context_tag: ContextTag,
     pub font: xproto::Font,
@@ -1348,6 +1368,7 @@ impl crate::x11_utils::VoidRequest for UseXFontRequest {
 /// Opcode for the CreateGLXPixmap request
 pub const CREATE_GLX_PIXMAP_REQUEST: u8 = 13;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CreateGLXPixmapRequest {
     pub screen: u32,
     pub visual: xproto::Visualid,
@@ -1424,6 +1445,7 @@ impl crate::x11_utils::VoidRequest for CreateGLXPixmapRequest {
 /// Opcode for the GetVisualConfigs request
 pub const GET_VISUAL_CONFIGS_REQUEST: u8 = 14;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetVisualConfigsRequest {
     pub screen: u32,
 }
@@ -1475,6 +1497,7 @@ impl crate::x11_utils::ReplyRequest for GetVisualConfigsRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetVisualConfigsReply {
     pub sequence: u16,
     pub num_visuals: u32,
@@ -1521,6 +1544,7 @@ impl GetVisualConfigsReply {
 /// Opcode for the DestroyGLXPixmap request
 pub const DESTROY_GLX_PIXMAP_REQUEST: u8 = 15;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DestroyGLXPixmapRequest {
     pub glx_pixmap: Pixmap,
 }
@@ -1573,6 +1597,7 @@ impl crate::x11_utils::VoidRequest for DestroyGLXPixmapRequest {
 /// Opcode for the VendorPrivate request
 pub const VENDOR_PRIVATE_REQUEST: u8 = 16;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct VendorPrivateRequest<'input> {
     pub vendor_code: u32,
     pub context_tag: ContextTag,
@@ -1647,6 +1672,7 @@ impl<'input> crate::x11_utils::VoidRequest for VendorPrivateRequest<'input> {
 /// Opcode for the VendorPrivateWithReply request
 pub const VENDOR_PRIVATE_WITH_REPLY_REQUEST: u8 = 17;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct VendorPrivateWithReplyRequest<'input> {
     pub vendor_code: u32,
     pub context_tag: ContextTag,
@@ -1720,6 +1746,7 @@ impl<'input> crate::x11_utils::ReplyRequest for VendorPrivateWithReplyRequest<'i
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct VendorPrivateWithReplyReply {
     pub sequence: u16,
     pub retval: u32,
@@ -1768,6 +1795,7 @@ impl VendorPrivateWithReplyReply {
 /// Opcode for the QueryExtensionsString request
 pub const QUERY_EXTENSIONS_STRING_REQUEST: u8 = 18;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryExtensionsStringRequest {
     pub screen: u32,
 }
@@ -1819,6 +1847,7 @@ impl crate::x11_utils::ReplyRequest for QueryExtensionsStringRequest {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryExtensionsStringReply {
     pub sequence: u16,
     pub length: u32,
@@ -1848,6 +1877,7 @@ impl TryParse for QueryExtensionsStringReply {
 /// Opcode for the QueryServerString request
 pub const QUERY_SERVER_STRING_REQUEST: u8 = 19;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryServerStringRequest {
     pub screen: u32,
     pub name: u32,
@@ -1907,6 +1937,7 @@ impl crate::x11_utils::ReplyRequest for QueryServerStringRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryServerStringReply {
     pub sequence: u16,
     pub length: u32,
@@ -1953,6 +1984,7 @@ impl QueryServerStringReply {
 /// Opcode for the ClientInfo request
 pub const CLIENT_INFO_REQUEST: u8 = 20;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ClientInfoRequest<'input> {
     pub major_version: u32,
     pub minor_version: u32,
@@ -2034,6 +2066,7 @@ impl<'input> crate::x11_utils::VoidRequest for ClientInfoRequest<'input> {
 /// Opcode for the GetFBConfigs request
 pub const GET_FB_CONFIGS_REQUEST: u8 = 21;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetFBConfigsRequest {
     pub screen: u32,
 }
@@ -2085,6 +2118,7 @@ impl crate::x11_utils::ReplyRequest for GetFBConfigsRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetFBConfigsReply {
     pub sequence: u16,
     pub num_fb_configs: u32,
@@ -2131,6 +2165,7 @@ impl GetFBConfigsReply {
 /// Opcode for the CreatePixmap request
 pub const CREATE_PIXMAP_REQUEST: u8 = 22;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CreatePixmapRequest<'input> {
     pub screen: u32,
     pub fbconfig: Fbconfig,
@@ -2232,6 +2267,7 @@ impl<'input> crate::x11_utils::VoidRequest for CreatePixmapRequest<'input> {
 /// Opcode for the DestroyPixmap request
 pub const DESTROY_PIXMAP_REQUEST: u8 = 23;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DestroyPixmapRequest {
     pub glx_pixmap: Pixmap,
 }
@@ -2284,6 +2320,7 @@ impl crate::x11_utils::VoidRequest for DestroyPixmapRequest {
 /// Opcode for the CreateNewContext request
 pub const CREATE_NEW_CONTEXT_REQUEST: u8 = 24;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CreateNewContextRequest {
     pub context: Context,
     pub fbconfig: Fbconfig,
@@ -2377,6 +2414,7 @@ impl crate::x11_utils::VoidRequest for CreateNewContextRequest {
 /// Opcode for the QueryContext request
 pub const QUERY_CONTEXT_REQUEST: u8 = 25;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryContextRequest {
     pub context: Context,
 }
@@ -2428,6 +2466,7 @@ impl crate::x11_utils::ReplyRequest for QueryContextRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryContextReply {
     pub sequence: u16,
     pub length: u32,
@@ -2473,6 +2512,7 @@ impl QueryContextReply {
 /// Opcode for the MakeContextCurrent request
 pub const MAKE_CONTEXT_CURRENT_REQUEST: u8 = 26;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct MakeContextCurrentRequest {
     pub old_context_tag: ContextTag,
     pub drawable: Drawable,
@@ -2548,6 +2588,7 @@ impl crate::x11_utils::ReplyRequest for MakeContextCurrentRequest {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct MakeContextCurrentReply {
     pub sequence: u16,
     pub length: u32,
@@ -2576,6 +2617,7 @@ impl TryParse for MakeContextCurrentReply {
 /// Opcode for the CreatePbuffer request
 pub const CREATE_PBUFFER_REQUEST: u8 = 27;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CreatePbufferRequest<'input> {
     pub screen: u32,
     pub fbconfig: Fbconfig,
@@ -2668,6 +2710,7 @@ impl<'input> crate::x11_utils::VoidRequest for CreatePbufferRequest<'input> {
 /// Opcode for the DestroyPbuffer request
 pub const DESTROY_PBUFFER_REQUEST: u8 = 28;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DestroyPbufferRequest {
     pub pbuffer: Pbuffer,
 }
@@ -2720,6 +2763,7 @@ impl crate::x11_utils::VoidRequest for DestroyPbufferRequest {
 /// Opcode for the GetDrawableAttributes request
 pub const GET_DRAWABLE_ATTRIBUTES_REQUEST: u8 = 29;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetDrawableAttributesRequest {
     pub drawable: Drawable,
 }
@@ -2771,6 +2815,7 @@ impl crate::x11_utils::ReplyRequest for GetDrawableAttributesRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetDrawableAttributesReply {
     pub sequence: u16,
     pub length: u32,
@@ -2816,6 +2861,7 @@ impl GetDrawableAttributesReply {
 /// Opcode for the ChangeDrawableAttributes request
 pub const CHANGE_DRAWABLE_ATTRIBUTES_REQUEST: u8 = 30;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ChangeDrawableAttributesRequest<'input> {
     pub drawable: Drawable,
     pub attribs: Cow<'input, [u32]>,
@@ -2890,6 +2936,7 @@ impl<'input> crate::x11_utils::VoidRequest for ChangeDrawableAttributesRequest<'
 /// Opcode for the CreateWindow request
 pub const CREATE_WINDOW_REQUEST: u8 = 31;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CreateWindowRequest<'input> {
     pub screen: u32,
     pub fbconfig: Fbconfig,
@@ -2991,6 +3038,7 @@ impl<'input> crate::x11_utils::VoidRequest for CreateWindowRequest<'input> {
 /// Opcode for the DeleteWindow request
 pub const DELETE_WINDOW_REQUEST: u8 = 32;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DeleteWindowRequest {
     pub glxwindow: Window,
 }
@@ -3043,6 +3091,7 @@ impl crate::x11_utils::VoidRequest for DeleteWindowRequest {
 /// Opcode for the SetClientInfoARB request
 pub const SET_CLIENT_INFO_ARB_REQUEST: u8 = 33;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetClientInfoARBRequest<'input> {
     pub major_version: u32,
     pub minor_version: u32,
@@ -3150,6 +3199,7 @@ impl<'input> crate::x11_utils::VoidRequest for SetClientInfoARBRequest<'input> {
 /// Opcode for the CreateContextAttribsARB request
 pub const CREATE_CONTEXT_ATTRIBS_ARB_REQUEST: u8 = 34;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CreateContextAttribsARBRequest<'input> {
     pub context: Context,
     pub fbconfig: Fbconfig,
@@ -3261,6 +3311,7 @@ impl<'input> crate::x11_utils::VoidRequest for CreateContextAttribsARBRequest<'i
 /// Opcode for the SetClientInfo2ARB request
 pub const SET_CLIENT_INFO2_ARB_REQUEST: u8 = 35;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetClientInfo2ARBRequest<'input> {
     pub major_version: u32,
     pub minor_version: u32,
@@ -3368,6 +3419,7 @@ impl<'input> crate::x11_utils::VoidRequest for SetClientInfo2ARBRequest<'input> 
 /// Opcode for the NewList request
 pub const NEW_LIST_REQUEST: u8 = 101;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct NewListRequest {
     pub context_tag: ContextTag,
     pub list: u32,
@@ -3436,6 +3488,7 @@ impl crate::x11_utils::VoidRequest for NewListRequest {
 /// Opcode for the EndList request
 pub const END_LIST_REQUEST: u8 = 102;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct EndListRequest {
     pub context_tag: ContextTag,
 }
@@ -3488,6 +3541,7 @@ impl crate::x11_utils::VoidRequest for EndListRequest {
 /// Opcode for the DeleteLists request
 pub const DELETE_LISTS_REQUEST: u8 = 103;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DeleteListsRequest {
     pub context_tag: ContextTag,
     pub list: u32,
@@ -3556,6 +3610,7 @@ impl crate::x11_utils::VoidRequest for DeleteListsRequest {
 /// Opcode for the GenLists request
 pub const GEN_LISTS_REQUEST: u8 = 104;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GenListsRequest {
     pub context_tag: ContextTag,
     pub range: i32,
@@ -3615,6 +3670,7 @@ impl crate::x11_utils::ReplyRequest for GenListsRequest {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GenListsReply {
     pub sequence: u16,
     pub length: u32,
@@ -3642,6 +3698,7 @@ impl TryParse for GenListsReply {
 /// Opcode for the FeedbackBuffer request
 pub const FEEDBACK_BUFFER_REQUEST: u8 = 105;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct FeedbackBufferRequest {
     pub context_tag: ContextTag,
     pub size: i32,
@@ -3710,6 +3767,7 @@ impl crate::x11_utils::VoidRequest for FeedbackBufferRequest {
 /// Opcode for the SelectBuffer request
 pub const SELECT_BUFFER_REQUEST: u8 = 106;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SelectBufferRequest {
     pub context_tag: ContextTag,
     pub size: i32,
@@ -3770,6 +3828,7 @@ impl crate::x11_utils::VoidRequest for SelectBufferRequest {
 /// Opcode for the RenderMode request
 pub const RENDER_MODE_REQUEST: u8 = 107;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct RenderModeRequest {
     pub context_tag: ContextTag,
     pub mode: u32,
@@ -3829,6 +3888,7 @@ impl crate::x11_utils::ReplyRequest for RenderModeRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct RenderModeReply {
     pub sequence: u16,
     pub length: u32,
@@ -3875,6 +3935,7 @@ impl RenderModeReply {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct RM(u16);
 impl RM {
     pub const GL_RENDER: Self = Self(7168);
@@ -3931,6 +3992,7 @@ impl core::fmt::Debug for RM  {
 /// Opcode for the Finish request
 pub const FINISH_REQUEST: u8 = 108;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct FinishRequest {
     pub context_tag: ContextTag,
 }
@@ -3982,6 +4044,7 @@ impl crate::x11_utils::ReplyRequest for FinishRequest {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct FinishReply {
     pub sequence: u16,
     pub length: u32,
@@ -4007,6 +4070,7 @@ impl TryParse for FinishReply {
 /// Opcode for the PixelStoref request
 pub const PIXEL_STOREF_REQUEST: u8 = 109;
 #[derive(Debug, Clone, Copy, Default, PartialEq, PartialOrd)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PixelStorefRequest {
     pub context_tag: ContextTag,
     pub pname: u32,
@@ -4075,6 +4139,7 @@ impl crate::x11_utils::VoidRequest for PixelStorefRequest {
 /// Opcode for the PixelStorei request
 pub const PIXEL_STOREI_REQUEST: u8 = 110;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PixelStoreiRequest {
     pub context_tag: ContextTag,
     pub pname: u32,
@@ -4143,6 +4208,7 @@ impl crate::x11_utils::VoidRequest for PixelStoreiRequest {
 /// Opcode for the ReadPixels request
 pub const READ_PIXELS_REQUEST: u8 = 111;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ReadPixelsRequest {
     pub context_tag: ContextTag,
     pub x: i32,
@@ -4254,6 +4320,7 @@ impl crate::x11_utils::ReplyRequest for ReadPixelsRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ReadPixelsReply {
     pub sequence: u16,
     pub data: Vec<u8>,
@@ -4298,6 +4365,7 @@ impl ReadPixelsReply {
 /// Opcode for the GetBooleanv request
 pub const GET_BOOLEANV_REQUEST: u8 = 112;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetBooleanvRequest {
     pub context_tag: ContextTag,
     pub pname: i32,
@@ -4357,6 +4425,7 @@ impl crate::x11_utils::ReplyRequest for GetBooleanvRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetBooleanvReply {
     pub sequence: u16,
     pub length: u32,
@@ -4404,6 +4473,7 @@ impl GetBooleanvReply {
 /// Opcode for the GetClipPlane request
 pub const GET_CLIP_PLANE_REQUEST: u8 = 113;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetClipPlaneRequest {
     pub context_tag: ContextTag,
     pub plane: i32,
@@ -4463,6 +4533,7 @@ impl crate::x11_utils::ReplyRequest for GetClipPlaneRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, PartialOrd)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetClipPlaneReply {
     pub sequence: u16,
     pub data: Vec<Float64>,
@@ -4506,6 +4577,7 @@ impl GetClipPlaneReply {
 /// Opcode for the GetDoublev request
 pub const GET_DOUBLEV_REQUEST: u8 = 114;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetDoublevRequest {
     pub context_tag: ContextTag,
     pub pname: u32,
@@ -4565,6 +4637,7 @@ impl crate::x11_utils::ReplyRequest for GetDoublevRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, PartialOrd)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetDoublevReply {
     pub sequence: u16,
     pub length: u32,
@@ -4612,6 +4685,7 @@ impl GetDoublevReply {
 /// Opcode for the GetError request
 pub const GET_ERROR_REQUEST: u8 = 115;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetErrorRequest {
     pub context_tag: ContextTag,
 }
@@ -4663,6 +4737,7 @@ impl crate::x11_utils::ReplyRequest for GetErrorRequest {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetErrorReply {
     pub sequence: u16,
     pub length: u32,
@@ -4690,6 +4765,7 @@ impl TryParse for GetErrorReply {
 /// Opcode for the GetFloatv request
 pub const GET_FLOATV_REQUEST: u8 = 116;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetFloatvRequest {
     pub context_tag: ContextTag,
     pub pname: u32,
@@ -4749,6 +4825,7 @@ impl crate::x11_utils::ReplyRequest for GetFloatvRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, PartialOrd)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetFloatvReply {
     pub sequence: u16,
     pub length: u32,
@@ -4796,6 +4873,7 @@ impl GetFloatvReply {
 /// Opcode for the GetIntegerv request
 pub const GET_INTEGERV_REQUEST: u8 = 117;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetIntegervRequest {
     pub context_tag: ContextTag,
     pub pname: u32,
@@ -4855,6 +4933,7 @@ impl crate::x11_utils::ReplyRequest for GetIntegervRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetIntegervReply {
     pub sequence: u16,
     pub length: u32,
@@ -4902,6 +4981,7 @@ impl GetIntegervReply {
 /// Opcode for the GetLightfv request
 pub const GET_LIGHTFV_REQUEST: u8 = 118;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetLightfvRequest {
     pub context_tag: ContextTag,
     pub light: u32,
@@ -4969,6 +5049,7 @@ impl crate::x11_utils::ReplyRequest for GetLightfvRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, PartialOrd)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetLightfvReply {
     pub sequence: u16,
     pub length: u32,
@@ -5016,6 +5097,7 @@ impl GetLightfvReply {
 /// Opcode for the GetLightiv request
 pub const GET_LIGHTIV_REQUEST: u8 = 119;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetLightivRequest {
     pub context_tag: ContextTag,
     pub light: u32,
@@ -5083,6 +5165,7 @@ impl crate::x11_utils::ReplyRequest for GetLightivRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetLightivReply {
     pub sequence: u16,
     pub length: u32,
@@ -5130,6 +5213,7 @@ impl GetLightivReply {
 /// Opcode for the GetMapdv request
 pub const GET_MAPDV_REQUEST: u8 = 120;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetMapdvRequest {
     pub context_tag: ContextTag,
     pub target: u32,
@@ -5197,6 +5281,7 @@ impl crate::x11_utils::ReplyRequest for GetMapdvRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, PartialOrd)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetMapdvReply {
     pub sequence: u16,
     pub length: u32,
@@ -5244,6 +5329,7 @@ impl GetMapdvReply {
 /// Opcode for the GetMapfv request
 pub const GET_MAPFV_REQUEST: u8 = 121;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetMapfvRequest {
     pub context_tag: ContextTag,
     pub target: u32,
@@ -5311,6 +5397,7 @@ impl crate::x11_utils::ReplyRequest for GetMapfvRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, PartialOrd)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetMapfvReply {
     pub sequence: u16,
     pub length: u32,
@@ -5358,6 +5445,7 @@ impl GetMapfvReply {
 /// Opcode for the GetMapiv request
 pub const GET_MAPIV_REQUEST: u8 = 122;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetMapivRequest {
     pub context_tag: ContextTag,
     pub target: u32,
@@ -5425,6 +5513,7 @@ impl crate::x11_utils::ReplyRequest for GetMapivRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetMapivReply {
     pub sequence: u16,
     pub length: u32,
@@ -5472,6 +5561,7 @@ impl GetMapivReply {
 /// Opcode for the GetMaterialfv request
 pub const GET_MATERIALFV_REQUEST: u8 = 123;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetMaterialfvRequest {
     pub context_tag: ContextTag,
     pub face: u32,
@@ -5539,6 +5629,7 @@ impl crate::x11_utils::ReplyRequest for GetMaterialfvRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, PartialOrd)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetMaterialfvReply {
     pub sequence: u16,
     pub length: u32,
@@ -5586,6 +5677,7 @@ impl GetMaterialfvReply {
 /// Opcode for the GetMaterialiv request
 pub const GET_MATERIALIV_REQUEST: u8 = 124;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetMaterialivRequest {
     pub context_tag: ContextTag,
     pub face: u32,
@@ -5653,6 +5745,7 @@ impl crate::x11_utils::ReplyRequest for GetMaterialivRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetMaterialivReply {
     pub sequence: u16,
     pub length: u32,
@@ -5700,6 +5793,7 @@ impl GetMaterialivReply {
 /// Opcode for the GetPixelMapfv request
 pub const GET_PIXEL_MAPFV_REQUEST: u8 = 125;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetPixelMapfvRequest {
     pub context_tag: ContextTag,
     pub map: u32,
@@ -5759,6 +5853,7 @@ impl crate::x11_utils::ReplyRequest for GetPixelMapfvRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, PartialOrd)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetPixelMapfvReply {
     pub sequence: u16,
     pub length: u32,
@@ -5806,6 +5901,7 @@ impl GetPixelMapfvReply {
 /// Opcode for the GetPixelMapuiv request
 pub const GET_PIXEL_MAPUIV_REQUEST: u8 = 126;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetPixelMapuivRequest {
     pub context_tag: ContextTag,
     pub map: u32,
@@ -5865,6 +5961,7 @@ impl crate::x11_utils::ReplyRequest for GetPixelMapuivRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetPixelMapuivReply {
     pub sequence: u16,
     pub length: u32,
@@ -5912,6 +6009,7 @@ impl GetPixelMapuivReply {
 /// Opcode for the GetPixelMapusv request
 pub const GET_PIXEL_MAPUSV_REQUEST: u8 = 127;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetPixelMapusvRequest {
     pub context_tag: ContextTag,
     pub map: u32,
@@ -5971,6 +6069,7 @@ impl crate::x11_utils::ReplyRequest for GetPixelMapusvRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetPixelMapusvReply {
     pub sequence: u16,
     pub length: u32,
@@ -6018,6 +6117,7 @@ impl GetPixelMapusvReply {
 /// Opcode for the GetPolygonStipple request
 pub const GET_POLYGON_STIPPLE_REQUEST: u8 = 128;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetPolygonStippleRequest {
     pub context_tag: ContextTag,
     pub lsb_first: bool,
@@ -6077,6 +6177,7 @@ impl crate::x11_utils::ReplyRequest for GetPolygonStippleRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetPolygonStippleReply {
     pub sequence: u16,
     pub data: Vec<u8>,
@@ -6121,6 +6222,7 @@ impl GetPolygonStippleReply {
 /// Opcode for the GetString request
 pub const GET_STRING_REQUEST: u8 = 129;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetStringRequest {
     pub context_tag: ContextTag,
     pub name: u32,
@@ -6180,6 +6282,7 @@ impl crate::x11_utils::ReplyRequest for GetStringRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetStringReply {
     pub sequence: u16,
     pub length: u32,
@@ -6226,6 +6329,7 @@ impl GetStringReply {
 /// Opcode for the GetTexEnvfv request
 pub const GET_TEX_ENVFV_REQUEST: u8 = 130;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetTexEnvfvRequest {
     pub context_tag: ContextTag,
     pub target: u32,
@@ -6293,6 +6397,7 @@ impl crate::x11_utils::ReplyRequest for GetTexEnvfvRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, PartialOrd)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetTexEnvfvReply {
     pub sequence: u16,
     pub length: u32,
@@ -6340,6 +6445,7 @@ impl GetTexEnvfvReply {
 /// Opcode for the GetTexEnviv request
 pub const GET_TEX_ENVIV_REQUEST: u8 = 131;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetTexEnvivRequest {
     pub context_tag: ContextTag,
     pub target: u32,
@@ -6407,6 +6513,7 @@ impl crate::x11_utils::ReplyRequest for GetTexEnvivRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetTexEnvivReply {
     pub sequence: u16,
     pub length: u32,
@@ -6454,6 +6561,7 @@ impl GetTexEnvivReply {
 /// Opcode for the GetTexGendv request
 pub const GET_TEX_GENDV_REQUEST: u8 = 132;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetTexGendvRequest {
     pub context_tag: ContextTag,
     pub coord: u32,
@@ -6521,6 +6629,7 @@ impl crate::x11_utils::ReplyRequest for GetTexGendvRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, PartialOrd)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetTexGendvReply {
     pub sequence: u16,
     pub length: u32,
@@ -6568,6 +6677,7 @@ impl GetTexGendvReply {
 /// Opcode for the GetTexGenfv request
 pub const GET_TEX_GENFV_REQUEST: u8 = 133;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetTexGenfvRequest {
     pub context_tag: ContextTag,
     pub coord: u32,
@@ -6635,6 +6745,7 @@ impl crate::x11_utils::ReplyRequest for GetTexGenfvRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, PartialOrd)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetTexGenfvReply {
     pub sequence: u16,
     pub length: u32,
@@ -6682,6 +6793,7 @@ impl GetTexGenfvReply {
 /// Opcode for the GetTexGeniv request
 pub const GET_TEX_GENIV_REQUEST: u8 = 134;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetTexGenivRequest {
     pub context_tag: ContextTag,
     pub coord: u32,
@@ -6749,6 +6861,7 @@ impl crate::x11_utils::ReplyRequest for GetTexGenivRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetTexGenivReply {
     pub sequence: u16,
     pub length: u32,
@@ -6796,6 +6909,7 @@ impl GetTexGenivReply {
 /// Opcode for the GetTexImage request
 pub const GET_TEX_IMAGE_REQUEST: u8 = 135;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetTexImageRequest {
     pub context_tag: ContextTag,
     pub target: u32,
@@ -6887,6 +7001,7 @@ impl crate::x11_utils::ReplyRequest for GetTexImageRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetTexImageReply {
     pub sequence: u16,
     pub width: i32,
@@ -6938,6 +7053,7 @@ impl GetTexImageReply {
 /// Opcode for the GetTexParameterfv request
 pub const GET_TEX_PARAMETERFV_REQUEST: u8 = 136;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetTexParameterfvRequest {
     pub context_tag: ContextTag,
     pub target: u32,
@@ -7005,6 +7121,7 @@ impl crate::x11_utils::ReplyRequest for GetTexParameterfvRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, PartialOrd)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetTexParameterfvReply {
     pub sequence: u16,
     pub length: u32,
@@ -7052,6 +7169,7 @@ impl GetTexParameterfvReply {
 /// Opcode for the GetTexParameteriv request
 pub const GET_TEX_PARAMETERIV_REQUEST: u8 = 137;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetTexParameterivRequest {
     pub context_tag: ContextTag,
     pub target: u32,
@@ -7119,6 +7237,7 @@ impl crate::x11_utils::ReplyRequest for GetTexParameterivRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetTexParameterivReply {
     pub sequence: u16,
     pub length: u32,
@@ -7166,6 +7285,7 @@ impl GetTexParameterivReply {
 /// Opcode for the GetTexLevelParameterfv request
 pub const GET_TEX_LEVEL_PARAMETERFV_REQUEST: u8 = 138;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetTexLevelParameterfvRequest {
     pub context_tag: ContextTag,
     pub target: u32,
@@ -7241,6 +7361,7 @@ impl crate::x11_utils::ReplyRequest for GetTexLevelParameterfvRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, PartialOrd)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetTexLevelParameterfvReply {
     pub sequence: u16,
     pub length: u32,
@@ -7288,6 +7409,7 @@ impl GetTexLevelParameterfvReply {
 /// Opcode for the GetTexLevelParameteriv request
 pub const GET_TEX_LEVEL_PARAMETERIV_REQUEST: u8 = 139;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetTexLevelParameterivRequest {
     pub context_tag: ContextTag,
     pub target: u32,
@@ -7363,6 +7485,7 @@ impl crate::x11_utils::ReplyRequest for GetTexLevelParameterivRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetTexLevelParameterivReply {
     pub sequence: u16,
     pub length: u32,
@@ -7410,6 +7533,7 @@ impl GetTexLevelParameterivReply {
 /// Opcode for the IsEnabled request
 pub const IS_ENABLED_REQUEST: u8 = 140;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct IsEnabledRequest {
     pub context_tag: ContextTag,
     pub capability: u32,
@@ -7469,6 +7593,7 @@ impl crate::x11_utils::ReplyRequest for IsEnabledRequest {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct IsEnabledReply {
     pub sequence: u16,
     pub length: u32,
@@ -7496,6 +7621,7 @@ impl TryParse for IsEnabledReply {
 /// Opcode for the IsList request
 pub const IS_LIST_REQUEST: u8 = 141;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct IsListRequest {
     pub context_tag: ContextTag,
     pub list: u32,
@@ -7555,6 +7681,7 @@ impl crate::x11_utils::ReplyRequest for IsListRequest {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct IsListReply {
     pub sequence: u16,
     pub length: u32,
@@ -7582,6 +7709,7 @@ impl TryParse for IsListReply {
 /// Opcode for the Flush request
 pub const FLUSH_REQUEST: u8 = 142;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct FlushRequest {
     pub context_tag: ContextTag,
 }
@@ -7634,6 +7762,7 @@ impl crate::x11_utils::VoidRequest for FlushRequest {
 /// Opcode for the AreTexturesResident request
 pub const ARE_TEXTURES_RESIDENT_REQUEST: u8 = 143;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct AreTexturesResidentRequest<'input> {
     pub context_tag: ContextTag,
     pub textures: Cow<'input, [u32]>,
@@ -7706,6 +7835,7 @@ impl<'input> crate::x11_utils::ReplyRequest for AreTexturesResidentRequest<'inpu
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct AreTexturesResidentReply {
     pub sequence: u16,
     pub ret_val: Bool32,
@@ -7751,6 +7881,7 @@ impl AreTexturesResidentReply {
 /// Opcode for the DeleteTextures request
 pub const DELETE_TEXTURES_REQUEST: u8 = 144;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DeleteTexturesRequest<'input> {
     pub context_tag: ContextTag,
     pub textures: Cow<'input, [u32]>,
@@ -7824,6 +7955,7 @@ impl<'input> crate::x11_utils::VoidRequest for DeleteTexturesRequest<'input> {
 /// Opcode for the GenTextures request
 pub const GEN_TEXTURES_REQUEST: u8 = 145;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GenTexturesRequest {
     pub context_tag: ContextTag,
     pub n: i32,
@@ -7883,6 +8015,7 @@ impl crate::x11_utils::ReplyRequest for GenTexturesRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GenTexturesReply {
     pub sequence: u16,
     pub data: Vec<u32>,
@@ -7925,6 +8058,7 @@ impl GenTexturesReply {
 /// Opcode for the IsTexture request
 pub const IS_TEXTURE_REQUEST: u8 = 146;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct IsTextureRequest {
     pub context_tag: ContextTag,
     pub texture: u32,
@@ -7984,6 +8118,7 @@ impl crate::x11_utils::ReplyRequest for IsTextureRequest {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct IsTextureReply {
     pub sequence: u16,
     pub length: u32,
@@ -8011,6 +8146,7 @@ impl TryParse for IsTextureReply {
 /// Opcode for the GetColorTable request
 pub const GET_COLOR_TABLE_REQUEST: u8 = 147;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetColorTableRequest {
     pub context_tag: ContextTag,
     pub target: u32,
@@ -8094,6 +8230,7 @@ impl crate::x11_utils::ReplyRequest for GetColorTableRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetColorTableReply {
     pub sequence: u16,
     pub width: i32,
@@ -8141,6 +8278,7 @@ impl GetColorTableReply {
 /// Opcode for the GetColorTableParameterfv request
 pub const GET_COLOR_TABLE_PARAMETERFV_REQUEST: u8 = 148;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetColorTableParameterfvRequest {
     pub context_tag: ContextTag,
     pub target: u32,
@@ -8208,6 +8346,7 @@ impl crate::x11_utils::ReplyRequest for GetColorTableParameterfvRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, PartialOrd)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetColorTableParameterfvReply {
     pub sequence: u16,
     pub length: u32,
@@ -8255,6 +8394,7 @@ impl GetColorTableParameterfvReply {
 /// Opcode for the GetColorTableParameteriv request
 pub const GET_COLOR_TABLE_PARAMETERIV_REQUEST: u8 = 149;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetColorTableParameterivRequest {
     pub context_tag: ContextTag,
     pub target: u32,
@@ -8322,6 +8462,7 @@ impl crate::x11_utils::ReplyRequest for GetColorTableParameterivRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetColorTableParameterivReply {
     pub sequence: u16,
     pub length: u32,
@@ -8369,6 +8510,7 @@ impl GetColorTableParameterivReply {
 /// Opcode for the GetConvolutionFilter request
 pub const GET_CONVOLUTION_FILTER_REQUEST: u8 = 150;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetConvolutionFilterRequest {
     pub context_tag: ContextTag,
     pub target: u32,
@@ -8452,6 +8594,7 @@ impl crate::x11_utils::ReplyRequest for GetConvolutionFilterRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetConvolutionFilterReply {
     pub sequence: u16,
     pub width: i32,
@@ -8501,6 +8644,7 @@ impl GetConvolutionFilterReply {
 /// Opcode for the GetConvolutionParameterfv request
 pub const GET_CONVOLUTION_PARAMETERFV_REQUEST: u8 = 151;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetConvolutionParameterfvRequest {
     pub context_tag: ContextTag,
     pub target: u32,
@@ -8568,6 +8712,7 @@ impl crate::x11_utils::ReplyRequest for GetConvolutionParameterfvRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, PartialOrd)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetConvolutionParameterfvReply {
     pub sequence: u16,
     pub length: u32,
@@ -8615,6 +8760,7 @@ impl GetConvolutionParameterfvReply {
 /// Opcode for the GetConvolutionParameteriv request
 pub const GET_CONVOLUTION_PARAMETERIV_REQUEST: u8 = 152;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetConvolutionParameterivRequest {
     pub context_tag: ContextTag,
     pub target: u32,
@@ -8682,6 +8828,7 @@ impl crate::x11_utils::ReplyRequest for GetConvolutionParameterivRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetConvolutionParameterivReply {
     pub sequence: u16,
     pub length: u32,
@@ -8729,6 +8876,7 @@ impl GetConvolutionParameterivReply {
 /// Opcode for the GetSeparableFilter request
 pub const GET_SEPARABLE_FILTER_REQUEST: u8 = 153;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetSeparableFilterRequest {
     pub context_tag: ContextTag,
     pub target: u32,
@@ -8812,6 +8960,7 @@ impl crate::x11_utils::ReplyRequest for GetSeparableFilterRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetSeparableFilterReply {
     pub sequence: u16,
     pub row_w: i32,
@@ -8861,6 +9010,7 @@ impl GetSeparableFilterReply {
 /// Opcode for the GetHistogram request
 pub const GET_HISTOGRAM_REQUEST: u8 = 154;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetHistogramRequest {
     pub context_tag: ContextTag,
     pub target: u32,
@@ -8948,6 +9098,7 @@ impl crate::x11_utils::ReplyRequest for GetHistogramRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetHistogramReply {
     pub sequence: u16,
     pub width: i32,
@@ -8995,6 +9146,7 @@ impl GetHistogramReply {
 /// Opcode for the GetHistogramParameterfv request
 pub const GET_HISTOGRAM_PARAMETERFV_REQUEST: u8 = 155;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetHistogramParameterfvRequest {
     pub context_tag: ContextTag,
     pub target: u32,
@@ -9062,6 +9214,7 @@ impl crate::x11_utils::ReplyRequest for GetHistogramParameterfvRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, PartialOrd)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetHistogramParameterfvReply {
     pub sequence: u16,
     pub length: u32,
@@ -9109,6 +9262,7 @@ impl GetHistogramParameterfvReply {
 /// Opcode for the GetHistogramParameteriv request
 pub const GET_HISTOGRAM_PARAMETERIV_REQUEST: u8 = 156;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetHistogramParameterivRequest {
     pub context_tag: ContextTag,
     pub target: u32,
@@ -9176,6 +9330,7 @@ impl crate::x11_utils::ReplyRequest for GetHistogramParameterivRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetHistogramParameterivReply {
     pub sequence: u16,
     pub length: u32,
@@ -9223,6 +9378,7 @@ impl GetHistogramParameterivReply {
 /// Opcode for the GetMinmax request
 pub const GET_MINMAX_REQUEST: u8 = 157;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetMinmaxRequest {
     pub context_tag: ContextTag,
     pub target: u32,
@@ -9310,6 +9466,7 @@ impl crate::x11_utils::ReplyRequest for GetMinmaxRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetMinmaxReply {
     pub sequence: u16,
     pub data: Vec<u8>,
@@ -9354,6 +9511,7 @@ impl GetMinmaxReply {
 /// Opcode for the GetMinmaxParameterfv request
 pub const GET_MINMAX_PARAMETERFV_REQUEST: u8 = 158;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetMinmaxParameterfvRequest {
     pub context_tag: ContextTag,
     pub target: u32,
@@ -9421,6 +9579,7 @@ impl crate::x11_utils::ReplyRequest for GetMinmaxParameterfvRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, PartialOrd)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetMinmaxParameterfvReply {
     pub sequence: u16,
     pub length: u32,
@@ -9468,6 +9627,7 @@ impl GetMinmaxParameterfvReply {
 /// Opcode for the GetMinmaxParameteriv request
 pub const GET_MINMAX_PARAMETERIV_REQUEST: u8 = 159;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetMinmaxParameterivRequest {
     pub context_tag: ContextTag,
     pub target: u32,
@@ -9535,6 +9695,7 @@ impl crate::x11_utils::ReplyRequest for GetMinmaxParameterivRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetMinmaxParameterivReply {
     pub sequence: u16,
     pub length: u32,
@@ -9582,6 +9743,7 @@ impl GetMinmaxParameterivReply {
 /// Opcode for the GetCompressedTexImageARB request
 pub const GET_COMPRESSED_TEX_IMAGE_ARB_REQUEST: u8 = 160;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetCompressedTexImageARBRequest {
     pub context_tag: ContextTag,
     pub target: u32,
@@ -9649,6 +9811,7 @@ impl crate::x11_utils::ReplyRequest for GetCompressedTexImageARBRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetCompressedTexImageARBReply {
     pub sequence: u16,
     pub size: i32,
@@ -9696,6 +9859,7 @@ impl GetCompressedTexImageARBReply {
 /// Opcode for the DeleteQueriesARB request
 pub const DELETE_QUERIES_ARB_REQUEST: u8 = 161;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DeleteQueriesARBRequest<'input> {
     pub context_tag: ContextTag,
     pub ids: Cow<'input, [u32]>,
@@ -9769,6 +9933,7 @@ impl<'input> crate::x11_utils::VoidRequest for DeleteQueriesARBRequest<'input> {
 /// Opcode for the GenQueriesARB request
 pub const GEN_QUERIES_ARB_REQUEST: u8 = 162;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GenQueriesARBRequest {
     pub context_tag: ContextTag,
     pub n: i32,
@@ -9828,6 +9993,7 @@ impl crate::x11_utils::ReplyRequest for GenQueriesARBRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GenQueriesARBReply {
     pub sequence: u16,
     pub data: Vec<u32>,
@@ -9870,6 +10036,7 @@ impl GenQueriesARBReply {
 /// Opcode for the IsQueryARB request
 pub const IS_QUERY_ARB_REQUEST: u8 = 163;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct IsQueryARBRequest {
     pub context_tag: ContextTag,
     pub id: u32,
@@ -9929,6 +10096,7 @@ impl crate::x11_utils::ReplyRequest for IsQueryARBRequest {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct IsQueryARBReply {
     pub sequence: u16,
     pub length: u32,
@@ -9956,6 +10124,7 @@ impl TryParse for IsQueryARBReply {
 /// Opcode for the GetQueryivARB request
 pub const GET_QUERYIV_ARB_REQUEST: u8 = 164;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetQueryivARBRequest {
     pub context_tag: ContextTag,
     pub target: u32,
@@ -10023,6 +10192,7 @@ impl crate::x11_utils::ReplyRequest for GetQueryivARBRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetQueryivARBReply {
     pub sequence: u16,
     pub length: u32,
@@ -10070,6 +10240,7 @@ impl GetQueryivARBReply {
 /// Opcode for the GetQueryObjectivARB request
 pub const GET_QUERY_OBJECTIV_ARB_REQUEST: u8 = 165;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetQueryObjectivARBRequest {
     pub context_tag: ContextTag,
     pub id: u32,
@@ -10137,6 +10308,7 @@ impl crate::x11_utils::ReplyRequest for GetQueryObjectivARBRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetQueryObjectivARBReply {
     pub sequence: u16,
     pub length: u32,
@@ -10184,6 +10356,7 @@ impl GetQueryObjectivARBReply {
 /// Opcode for the GetQueryObjectuivARB request
 pub const GET_QUERY_OBJECTUIV_ARB_REQUEST: u8 = 166;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetQueryObjectuivARBRequest {
     pub context_tag: ContextTag,
     pub id: u32,
@@ -10251,6 +10424,7 @@ impl crate::x11_utils::ReplyRequest for GetQueryObjectuivARBRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetQueryObjectuivARBReply {
     pub sequence: u16,
     pub length: u32,

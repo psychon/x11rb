@@ -35,6 +35,7 @@ pub const X11_EXTENSION_NAME: &str = "X-Resource";
 pub const X11_XML_VERSION: (u32, u32) = (1, 2);
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Client {
     pub resource_base: u32,
     pub resource_mask: u32,
@@ -71,6 +72,7 @@ impl Serialize for Client {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Type {
     pub resource_type: xproto::Atom,
     pub count: u32,
@@ -107,6 +109,7 @@ impl Serialize for Type {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ClientIdMask(u8);
 impl ClientIdMask {
     pub const CLIENT_XID: Self = Self(1 << 0);
@@ -166,6 +169,7 @@ impl core::fmt::Debug for ClientIdMask  {
 bitmask_binop!(ClientIdMask, u8);
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ClientIdSpec {
     pub client: u32,
     pub mask: u32,
@@ -202,6 +206,7 @@ impl Serialize for ClientIdSpec {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ClientIdValue {
     pub spec: ClientIdSpec,
     pub value: Vec<u32>,
@@ -248,6 +253,7 @@ impl ClientIdValue {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ResourceIdSpec {
     pub resource: u32,
     pub type_: u32,
@@ -284,6 +290,7 @@ impl Serialize for ResourceIdSpec {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ResourceSizeSpec {
     pub spec: ResourceIdSpec,
     pub bytes: u32,
@@ -340,6 +347,7 @@ impl Serialize for ResourceSizeSpec {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ResourceSizeValue {
     pub size: ResourceSizeSpec,
     pub cross_references: Vec<ResourceSizeSpec>,
@@ -387,6 +395,7 @@ impl ResourceSizeValue {
 /// Opcode for the QueryVersion request
 pub const QUERY_VERSION_REQUEST: u8 = 0;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryVersionRequest {
     pub client_major: u8,
     pub client_minor: u8,
@@ -442,6 +451,7 @@ impl crate::x11_utils::ReplyRequest for QueryVersionRequest {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryVersionReply {
     pub sequence: u16,
     pub length: u32,
@@ -471,6 +481,7 @@ impl TryParse for QueryVersionReply {
 /// Opcode for the QueryClients request
 pub const QUERY_CLIENTS_REQUEST: u8 = 1;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryClientsRequest;
 impl QueryClientsRequest {
     /// Serialize this request into bytes for the provided connection
@@ -513,6 +524,7 @@ impl crate::x11_utils::ReplyRequest for QueryClientsRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryClientsReply {
     pub sequence: u16,
     pub length: u32,
@@ -557,6 +569,7 @@ impl QueryClientsReply {
 /// Opcode for the QueryClientResources request
 pub const QUERY_CLIENT_RESOURCES_REQUEST: u8 = 2;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryClientResourcesRequest {
     pub xid: u32,
 }
@@ -608,6 +621,7 @@ impl crate::x11_utils::ReplyRequest for QueryClientResourcesRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryClientResourcesReply {
     pub sequence: u16,
     pub length: u32,
@@ -652,6 +666,7 @@ impl QueryClientResourcesReply {
 /// Opcode for the QueryClientPixmapBytes request
 pub const QUERY_CLIENT_PIXMAP_BYTES_REQUEST: u8 = 3;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryClientPixmapBytesRequest {
     pub xid: u32,
 }
@@ -703,6 +718,7 @@ impl crate::x11_utils::ReplyRequest for QueryClientPixmapBytesRequest {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryClientPixmapBytesReply {
     pub sequence: u16,
     pub length: u32,
@@ -732,6 +748,7 @@ impl TryParse for QueryClientPixmapBytesReply {
 /// Opcode for the QueryClientIds request
 pub const QUERY_CLIENT_IDS_REQUEST: u8 = 4;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryClientIdsRequest<'input> {
     pub specs: Cow<'input, [ClientIdSpec]>,
 }
@@ -795,6 +812,7 @@ impl<'input> crate::x11_utils::ReplyRequest for QueryClientIdsRequest<'input> {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryClientIdsReply {
     pub sequence: u16,
     pub length: u32,
@@ -839,6 +857,7 @@ impl QueryClientIdsReply {
 /// Opcode for the QueryResourceBytes request
 pub const QUERY_RESOURCE_BYTES_REQUEST: u8 = 5;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryResourceBytesRequest<'input> {
     pub client: u32,
     pub specs: Cow<'input, [ResourceIdSpec]>,
@@ -911,6 +930,7 @@ impl<'input> crate::x11_utils::ReplyRequest for QueryResourceBytesRequest<'input
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryResourceBytesReply {
     pub sequence: u16,
     pub length: u32,

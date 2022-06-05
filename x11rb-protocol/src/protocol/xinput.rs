@@ -45,6 +45,7 @@ pub type DeviceId = u16;
 pub type Fp1616 = i32;
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Fp3232 {
     pub integral: i32,
     pub frac: u32,
@@ -83,6 +84,7 @@ impl Serialize for Fp3232 {
 /// Opcode for the GetExtensionVersion request
 pub const GET_EXTENSION_VERSION_REQUEST: u8 = 1;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetExtensionVersionRequest<'input> {
     pub name: Cow<'input, [u8]>,
 }
@@ -146,6 +148,7 @@ impl<'input> crate::x11_utils::ReplyRequest for GetExtensionVersionRequest<'inpu
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetExtensionVersionReply {
     pub xi_reply_type: u8,
     pub sequence: u16,
@@ -177,6 +180,7 @@ impl TryParse for GetExtensionVersionReply {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DeviceUse(u8);
 impl DeviceUse {
     pub const IS_X_POINTER: Self = Self(0);
@@ -241,6 +245,7 @@ impl core::fmt::Debug for DeviceUse  {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct InputClass(u8);
 impl InputClass {
     pub const KEY: Self = Self(0);
@@ -309,6 +314,7 @@ impl core::fmt::Debug for InputClass  {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ValuatorMode(u8);
 impl ValuatorMode {
     pub const RELATIVE: Self = Self(0);
@@ -367,6 +373,7 @@ impl core::fmt::Debug for ValuatorMode  {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DeviceInfo {
     pub device_type: xproto::Atom,
     pub device_id: u8,
@@ -414,6 +421,7 @@ impl Serialize for DeviceInfo {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct KeyInfo {
     pub class_id: InputClass,
     pub len: u8,
@@ -465,6 +473,7 @@ impl Serialize for KeyInfo {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ButtonInfo {
     pub class_id: InputClass,
     pub len: u8,
@@ -502,6 +511,7 @@ impl Serialize for ButtonInfo {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct AxisInfo {
     pub resolution: u32,
     pub minimum: i32,
@@ -546,6 +556,7 @@ impl Serialize for AxisInfo {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ValuatorInfo {
     pub class_id: InputClass,
     pub len: u8,
@@ -602,6 +613,7 @@ impl ValuatorInfo {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct InputInfoInfoKey {
     pub min_keycode: KeyCode,
     pub max_keycode: KeyCode,
@@ -641,6 +653,7 @@ impl Serialize for InputInfoInfoKey {
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct InputInfoInfoButton {
     pub num_buttons: u16,
 }
@@ -666,6 +679,7 @@ impl Serialize for InputInfoInfoButton {
     }
 }
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct InputInfoInfoValuator {
     pub mode: ValuatorMode,
     pub motion_size: u32,
@@ -714,6 +728,7 @@ impl InputInfoInfoValuator {
     }
 }
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum InputInfoInfo {
     Key(InputInfoInfoKey),
     Button(InputInfoInfoButton),
@@ -806,6 +821,7 @@ impl InputInfoInfo {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct InputInfo {
     pub len: u8,
     pub info: InputInfoInfo,
@@ -836,6 +852,7 @@ impl Serialize for InputInfo {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DeviceName {
     pub string: Vec<u8>,
 }
@@ -881,6 +898,7 @@ impl DeviceName {
 /// Opcode for the ListInputDevices request
 pub const LIST_INPUT_DEVICES_REQUEST: u8 = 2;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ListInputDevicesRequest;
 impl ListInputDevicesRequest {
     /// Serialize this request into bytes for the provided connection
@@ -923,6 +941,7 @@ impl crate::x11_utils::ReplyRequest for ListInputDevicesRequest {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ListInputDevicesReply {
     pub xi_reply_type: u8,
     pub sequence: u16,
@@ -977,6 +996,7 @@ impl ListInputDevicesReply {
 pub type EventTypeBase = u8;
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct InputClassInfo {
     pub class_id: InputClass,
     pub event_type_base: EventTypeBase,
@@ -1010,6 +1030,7 @@ impl Serialize for InputClassInfo {
 /// Opcode for the OpenDevice request
 pub const OPEN_DEVICE_REQUEST: u8 = 3;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct OpenDeviceRequest {
     pub device_id: u8,
 }
@@ -1062,6 +1083,7 @@ impl crate::x11_utils::ReplyRequest for OpenDeviceRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct OpenDeviceReply {
     pub xi_reply_type: u8,
     pub sequence: u16,
@@ -1112,6 +1134,7 @@ impl OpenDeviceReply {
 /// Opcode for the CloseDevice request
 pub const CLOSE_DEVICE_REQUEST: u8 = 4;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CloseDeviceRequest {
     pub device_id: u8,
 }
@@ -1165,6 +1188,7 @@ impl crate::x11_utils::VoidRequest for CloseDeviceRequest {
 /// Opcode for the SetDeviceMode request
 pub const SET_DEVICE_MODE_REQUEST: u8 = 5;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetDeviceModeRequest {
     pub device_id: u8,
     pub mode: ValuatorMode,
@@ -1222,6 +1246,7 @@ impl crate::x11_utils::ReplyRequest for SetDeviceModeRequest {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetDeviceModeReply {
     pub xi_reply_type: u8,
     pub sequence: u16,
@@ -1252,6 +1277,7 @@ impl TryParse for SetDeviceModeReply {
 /// Opcode for the SelectExtensionEvent request
 pub const SELECT_EXTENSION_EVENT_REQUEST: u8 = 6;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SelectExtensionEventRequest<'input> {
     pub window: xproto::Window,
     pub classes: Cow<'input, [EventClass]>,
@@ -1326,6 +1352,7 @@ impl<'input> crate::x11_utils::VoidRequest for SelectExtensionEventRequest<'inpu
 /// Opcode for the GetSelectedExtensionEvents request
 pub const GET_SELECTED_EXTENSION_EVENTS_REQUEST: u8 = 7;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetSelectedExtensionEventsRequest {
     pub window: xproto::Window,
 }
@@ -1377,6 +1404,7 @@ impl crate::x11_utils::ReplyRequest for GetSelectedExtensionEventsRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetSelectedExtensionEventsReply {
     pub xi_reply_type: u8,
     pub sequence: u16,
@@ -1436,6 +1464,7 @@ impl GetSelectedExtensionEventsReply {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PropagateMode(u8);
 impl PropagateMode {
     pub const ADD_TO_LIST: Self = Self(0);
@@ -1496,6 +1525,7 @@ impl core::fmt::Debug for PropagateMode  {
 /// Opcode for the ChangeDeviceDontPropagateList request
 pub const CHANGE_DEVICE_DONT_PROPAGATE_LIST_REQUEST: u8 = 8;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ChangeDeviceDontPropagateListRequest<'input> {
     pub window: xproto::Window,
     pub mode: PropagateMode,
@@ -1576,6 +1606,7 @@ impl<'input> crate::x11_utils::VoidRequest for ChangeDeviceDontPropagateListRequ
 /// Opcode for the GetDeviceDontPropagateList request
 pub const GET_DEVICE_DONT_PROPAGATE_LIST_REQUEST: u8 = 9;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetDeviceDontPropagateListRequest {
     pub window: xproto::Window,
 }
@@ -1627,6 +1658,7 @@ impl crate::x11_utils::ReplyRequest for GetDeviceDontPropagateListRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetDeviceDontPropagateListReply {
     pub xi_reply_type: u8,
     pub sequence: u16,
@@ -1670,6 +1702,7 @@ impl GetDeviceDontPropagateListReply {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DeviceTimeCoord {
     pub time: xproto::Timestamp,
     pub axisvalues: Vec<i32>,
@@ -1699,6 +1732,7 @@ impl DeviceTimeCoord {
 /// Opcode for the GetDeviceMotionEvents request
 pub const GET_DEVICE_MOTION_EVENTS_REQUEST: u8 = 10;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetDeviceMotionEventsRequest {
     pub start: xproto::Timestamp,
     pub stop: xproto::Timestamp,
@@ -1767,6 +1801,7 @@ impl crate::x11_utils::ReplyRequest for GetDeviceMotionEventsRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetDeviceMotionEventsReply {
     pub xi_reply_type: u8,
     pub sequence: u16,
@@ -1824,6 +1859,7 @@ impl GetDeviceMotionEventsReply {
 /// Opcode for the ChangeKeyboardDevice request
 pub const CHANGE_KEYBOARD_DEVICE_REQUEST: u8 = 11;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ChangeKeyboardDeviceRequest {
     pub device_id: u8,
 }
@@ -1876,6 +1912,7 @@ impl crate::x11_utils::ReplyRequest for ChangeKeyboardDeviceRequest {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ChangeKeyboardDeviceReply {
     pub xi_reply_type: u8,
     pub sequence: u16,
@@ -1906,6 +1943,7 @@ impl TryParse for ChangeKeyboardDeviceReply {
 /// Opcode for the ChangePointerDevice request
 pub const CHANGE_POINTER_DEVICE_REQUEST: u8 = 12;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ChangePointerDeviceRequest {
     pub x_axis: u8,
     pub y_axis: u8,
@@ -1966,6 +2004,7 @@ impl crate::x11_utils::ReplyRequest for ChangePointerDeviceRequest {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ChangePointerDeviceReply {
     pub xi_reply_type: u8,
     pub sequence: u16,
@@ -1996,6 +2035,7 @@ impl TryParse for ChangePointerDeviceReply {
 /// Opcode for the GrabDevice request
 pub const GRAB_DEVICE_REQUEST: u8 = 13;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GrabDeviceRequest<'input> {
     pub grab_window: xproto::Window,
     pub time: xproto::Timestamp,
@@ -2104,6 +2144,7 @@ impl<'input> crate::x11_utils::ReplyRequest for GrabDeviceRequest<'input> {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GrabDeviceReply {
     pub xi_reply_type: u8,
     pub sequence: u16,
@@ -2134,6 +2175,7 @@ impl TryParse for GrabDeviceReply {
 /// Opcode for the UngrabDevice request
 pub const UNGRAB_DEVICE_REQUEST: u8 = 14;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct UngrabDeviceRequest {
     pub time: xproto::Timestamp,
     pub device_id: u8,
@@ -2193,6 +2235,7 @@ impl crate::x11_utils::VoidRequest for UngrabDeviceRequest {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ModifierDevice(u8);
 impl ModifierDevice {
     pub const USE_X_KEYBOARD: Self = Self(255);
@@ -2251,6 +2294,7 @@ impl core::fmt::Debug for ModifierDevice  {
 /// Opcode for the GrabDeviceKey request
 pub const GRAB_DEVICE_KEY_REQUEST: u8 = 15;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GrabDeviceKeyRequest<'input> {
     pub grab_window: xproto::Window,
     pub modifiers: u16,
@@ -2370,6 +2414,7 @@ impl<'input> crate::x11_utils::VoidRequest for GrabDeviceKeyRequest<'input> {
 /// Opcode for the UngrabDeviceKey request
 pub const UNGRAB_DEVICE_KEY_REQUEST: u8 = 16;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct UngrabDeviceKeyRequest {
     pub grab_window: xproto::Window,
     pub modifiers: u16,
@@ -2446,6 +2491,7 @@ impl crate::x11_utils::VoidRequest for UngrabDeviceKeyRequest {
 /// Opcode for the GrabDeviceButton request
 pub const GRAB_DEVICE_BUTTON_REQUEST: u8 = 17;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GrabDeviceButtonRequest<'input> {
     pub grab_window: xproto::Window,
     pub grabbed_device: u8,
@@ -2565,6 +2611,7 @@ impl<'input> crate::x11_utils::VoidRequest for GrabDeviceButtonRequest<'input> {
 /// Opcode for the UngrabDeviceButton request
 pub const UNGRAB_DEVICE_BUTTON_REQUEST: u8 = 18;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct UngrabDeviceButtonRequest {
     pub grab_window: xproto::Window,
     pub modifiers: u16,
@@ -2640,6 +2687,7 @@ impl crate::x11_utils::VoidRequest for UngrabDeviceButtonRequest {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DeviceInputMode(u8);
 impl DeviceInputMode {
     pub const ASYNC_THIS_DEVICE: Self = Self(0);
@@ -2708,6 +2756,7 @@ impl core::fmt::Debug for DeviceInputMode  {
 /// Opcode for the AllowDeviceEvents request
 pub const ALLOW_DEVICE_EVENTS_REQUEST: u8 = 19;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct AllowDeviceEventsRequest {
     pub time: xproto::Timestamp,
     pub mode: DeviceInputMode,
@@ -2774,6 +2823,7 @@ impl crate::x11_utils::VoidRequest for AllowDeviceEventsRequest {
 /// Opcode for the GetDeviceFocus request
 pub const GET_DEVICE_FOCUS_REQUEST: u8 = 20;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetDeviceFocusRequest {
     pub device_id: u8,
 }
@@ -2826,6 +2876,7 @@ impl crate::x11_utils::ReplyRequest for GetDeviceFocusRequest {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetDeviceFocusReply {
     pub xi_reply_type: u8,
     pub sequence: u16,
@@ -2860,6 +2911,7 @@ impl TryParse for GetDeviceFocusReply {
 /// Opcode for the SetDeviceFocus request
 pub const SET_DEVICE_FOCUS_REQUEST: u8 = 21;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetDeviceFocusRequest {
     pub focus: xproto::Window,
     pub time: xproto::Timestamp,
@@ -2932,6 +2984,7 @@ impl crate::x11_utils::VoidRequest for SetDeviceFocusRequest {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct FeedbackClass(u8);
 impl FeedbackClass {
     pub const KEYBOARD: Self = Self(0);
@@ -2998,6 +3051,7 @@ impl core::fmt::Debug for FeedbackClass  {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct KbdFeedbackState {
     pub class_id: FeedbackClass,
     pub feedback_id: u8,
@@ -3117,6 +3171,7 @@ impl Serialize for KbdFeedbackState {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PtrFeedbackState {
     pub class_id: FeedbackClass,
     pub feedback_id: u8,
@@ -3176,6 +3231,7 @@ impl Serialize for PtrFeedbackState {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct IntegerFeedbackState {
     pub class_id: FeedbackClass,
     pub feedback_id: u8,
@@ -3237,6 +3293,7 @@ impl Serialize for IntegerFeedbackState {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct StringFeedbackState {
     pub class_id: FeedbackClass,
     pub feedback_id: u8,
@@ -3292,6 +3349,7 @@ impl StringFeedbackState {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct BellFeedbackState {
     pub class_id: FeedbackClass,
     pub feedback_id: u8,
@@ -3351,6 +3409,7 @@ impl Serialize for BellFeedbackState {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct LedFeedbackState {
     pub class_id: FeedbackClass,
     pub feedback_id: u8,
@@ -3404,6 +3463,7 @@ impl Serialize for LedFeedbackState {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct FeedbackStateDataKeyboard {
     pub pitch: u16,
     pub duration: u16,
@@ -3505,6 +3565,7 @@ impl Serialize for FeedbackStateDataKeyboard {
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct FeedbackStateDataPointer {
     pub accel_num: u16,
     pub accel_denom: u16,
@@ -3546,6 +3607,7 @@ impl Serialize for FeedbackStateDataPointer {
     }
 }
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct FeedbackStateDataString {
     pub max_symbols: u16,
     pub keysyms: Vec<xproto::Keysym>,
@@ -3590,6 +3652,7 @@ impl FeedbackStateDataString {
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct FeedbackStateDataInteger {
     pub resolution: u32,
     pub min_value: i32,
@@ -3633,6 +3696,7 @@ impl Serialize for FeedbackStateDataInteger {
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct FeedbackStateDataLed {
     pub led_mask: u32,
     pub led_values: u32,
@@ -3668,6 +3732,7 @@ impl Serialize for FeedbackStateDataLed {
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct FeedbackStateDataBell {
     pub percent: u8,
     pub pitch: u16,
@@ -3709,6 +3774,7 @@ impl Serialize for FeedbackStateDataBell {
     }
 }
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum FeedbackStateData {
     Keyboard(FeedbackStateDataKeyboard),
     Pointer(FeedbackStateDataPointer),
@@ -3846,6 +3912,7 @@ impl FeedbackStateData {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct FeedbackState {
     pub feedback_id: u8,
     pub len: u16,
@@ -3881,6 +3948,7 @@ impl Serialize for FeedbackState {
 /// Opcode for the GetFeedbackControl request
 pub const GET_FEEDBACK_CONTROL_REQUEST: u8 = 22;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetFeedbackControlRequest {
     pub device_id: u8,
 }
@@ -3933,6 +4001,7 @@ impl crate::x11_utils::ReplyRequest for GetFeedbackControlRequest {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetFeedbackControlReply {
     pub xi_reply_type: u8,
     pub sequence: u16,
@@ -3976,6 +4045,7 @@ impl GetFeedbackControlReply {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct KbdFeedbackCtl {
     pub class_id: FeedbackClass,
     pub feedback_id: u8,
@@ -4061,6 +4131,7 @@ impl Serialize for KbdFeedbackCtl {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PtrFeedbackCtl {
     pub class_id: FeedbackClass,
     pub feedback_id: u8,
@@ -4120,6 +4191,7 @@ impl Serialize for PtrFeedbackCtl {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct IntegerFeedbackCtl {
     pub class_id: FeedbackClass,
     pub feedback_id: u8,
@@ -4165,6 +4237,7 @@ impl Serialize for IntegerFeedbackCtl {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct StringFeedbackCtl {
     pub class_id: FeedbackClass,
     pub feedback_id: u8,
@@ -4219,6 +4292,7 @@ impl StringFeedbackCtl {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct BellFeedbackCtl {
     pub class_id: FeedbackClass,
     pub feedback_id: u8,
@@ -4278,6 +4352,7 @@ impl Serialize for BellFeedbackCtl {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct LedFeedbackCtl {
     pub class_id: FeedbackClass,
     pub feedback_id: u8,
@@ -4331,6 +4406,7 @@ impl Serialize for LedFeedbackCtl {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct FeedbackCtlDataKeyboard {
     pub key: KeyCode,
     pub auto_repeat_mode: u8,
@@ -4398,6 +4474,7 @@ impl Serialize for FeedbackCtlDataKeyboard {
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct FeedbackCtlDataPointer {
     pub num: i16,
     pub denom: i16,
@@ -4439,6 +4516,7 @@ impl Serialize for FeedbackCtlDataPointer {
     }
 }
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct FeedbackCtlDataString {
     pub keysyms: Vec<xproto::Keysym>,
 }
@@ -4482,6 +4560,7 @@ impl FeedbackCtlDataString {
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct FeedbackCtlDataInteger {
     pub int_to_display: i32,
 }
@@ -4509,6 +4588,7 @@ impl Serialize for FeedbackCtlDataInteger {
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct FeedbackCtlDataLed {
     pub led_mask: u32,
     pub led_values: u32,
@@ -4544,6 +4624,7 @@ impl Serialize for FeedbackCtlDataLed {
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct FeedbackCtlDataBell {
     pub percent: i8,
     pub pitch: i16,
@@ -4585,6 +4666,7 @@ impl Serialize for FeedbackCtlDataBell {
     }
 }
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum FeedbackCtlData {
     Keyboard(FeedbackCtlDataKeyboard),
     Pointer(FeedbackCtlDataPointer),
@@ -4722,6 +4804,7 @@ impl FeedbackCtlData {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct FeedbackCtl {
     pub feedback_id: u8,
     pub len: u16,
@@ -4755,6 +4838,7 @@ impl Serialize for FeedbackCtl {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ChangeFeedbackControlMask(u8);
 impl ChangeFeedbackControlMask {
     pub const KEY_CLICK_PERCENT: Self = Self(1 << 0);
@@ -4838,6 +4922,7 @@ bitmask_binop!(ChangeFeedbackControlMask, u8);
 /// Opcode for the ChangeFeedbackControl request
 pub const CHANGE_FEEDBACK_CONTROL_REQUEST: u8 = 23;
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ChangeFeedbackControlRequest {
     pub mask: u32,
     pub device_id: u8,
@@ -4910,6 +4995,7 @@ impl crate::x11_utils::VoidRequest for ChangeFeedbackControlRequest {
 /// Opcode for the GetDeviceKeyMapping request
 pub const GET_DEVICE_KEY_MAPPING_REQUEST: u8 = 24;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetDeviceKeyMappingRequest {
     pub device_id: u8,
     pub first_keycode: KeyCode,
@@ -4970,6 +5056,7 @@ impl crate::x11_utils::ReplyRequest for GetDeviceKeyMappingRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetDeviceKeyMappingReply {
     pub xi_reply_type: u8,
     pub sequence: u16,
@@ -5015,6 +5102,7 @@ impl GetDeviceKeyMappingReply {
 /// Opcode for the ChangeDeviceKeyMapping request
 pub const CHANGE_DEVICE_KEY_MAPPING_REQUEST: u8 = 25;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ChangeDeviceKeyMappingRequest<'input> {
     pub device_id: u8,
     pub first_keycode: KeyCode,
@@ -5097,6 +5185,7 @@ impl<'input> crate::x11_utils::VoidRequest for ChangeDeviceKeyMappingRequest<'in
 /// Opcode for the GetDeviceModifierMapping request
 pub const GET_DEVICE_MODIFIER_MAPPING_REQUEST: u8 = 26;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetDeviceModifierMappingRequest {
     pub device_id: u8,
 }
@@ -5149,6 +5238,7 @@ impl crate::x11_utils::ReplyRequest for GetDeviceModifierMappingRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetDeviceModifierMappingReply {
     pub xi_reply_type: u8,
     pub sequence: u16,
@@ -5196,6 +5286,7 @@ impl GetDeviceModifierMappingReply {
 /// Opcode for the SetDeviceModifierMapping request
 pub const SET_DEVICE_MODIFIER_MAPPING_REQUEST: u8 = 27;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetDeviceModifierMappingRequest<'input> {
     pub device_id: u8,
     pub keymaps: Cow<'input, [u8]>,
@@ -5265,6 +5356,7 @@ impl<'input> crate::x11_utils::ReplyRequest for SetDeviceModifierMappingRequest<
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetDeviceModifierMappingReply {
     pub xi_reply_type: u8,
     pub sequence: u16,
@@ -5295,6 +5387,7 @@ impl TryParse for SetDeviceModifierMappingReply {
 /// Opcode for the GetDeviceButtonMapping request
 pub const GET_DEVICE_BUTTON_MAPPING_REQUEST: u8 = 28;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetDeviceButtonMappingRequest {
     pub device_id: u8,
 }
@@ -5347,6 +5440,7 @@ impl crate::x11_utils::ReplyRequest for GetDeviceButtonMappingRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetDeviceButtonMappingReply {
     pub xi_reply_type: u8,
     pub sequence: u16,
@@ -5398,6 +5492,7 @@ impl GetDeviceButtonMappingReply {
 /// Opcode for the SetDeviceButtonMapping request
 pub const SET_DEVICE_BUTTON_MAPPING_REQUEST: u8 = 29;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetDeviceButtonMappingRequest<'input> {
     pub device_id: u8,
     pub map: Cow<'input, [u8]>,
@@ -5466,6 +5561,7 @@ impl<'input> crate::x11_utils::ReplyRequest for SetDeviceButtonMappingRequest<'i
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetDeviceButtonMappingReply {
     pub xi_reply_type: u8,
     pub sequence: u16,
@@ -5494,6 +5590,7 @@ impl TryParse for SetDeviceButtonMappingReply {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct KeyState {
     pub class_id: InputClass,
     pub len: u8,
@@ -5569,6 +5666,7 @@ impl Serialize for KeyState {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ButtonState {
     pub class_id: InputClass,
     pub len: u8,
@@ -5644,6 +5742,7 @@ impl Serialize for ButtonState {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ValuatorStateModeMask(u8);
 impl ValuatorStateModeMask {
     pub const DEVICE_MODE_ABSOLUTE: Self = Self(1 << 0);
@@ -5703,6 +5802,7 @@ impl core::fmt::Debug for ValuatorStateModeMask  {
 bitmask_binop!(ValuatorStateModeMask, u8);
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ValuatorState {
     pub class_id: InputClass,
     pub len: u8,
@@ -5755,6 +5855,7 @@ impl ValuatorState {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct InputStateDataKey {
     pub num_keys: u8,
     pub keys: [u8; 32],
@@ -5818,6 +5919,7 @@ impl Serialize for InputStateDataKey {
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct InputStateDataButton {
     pub num_buttons: u8,
     pub buttons: [u8; 32],
@@ -5881,6 +5983,7 @@ impl Serialize for InputStateDataButton {
     }
 }
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct InputStateDataValuator {
     pub mode: u8,
     pub valuators: Vec<i32>,
@@ -5925,6 +6028,7 @@ impl InputStateDataValuator {
     }
 }
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum InputStateData {
     Key(InputStateDataKey),
     Button(InputStateDataButton),
@@ -6017,6 +6121,7 @@ impl InputStateData {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct InputState {
     pub len: u8,
     pub data: InputStateData,
@@ -6049,6 +6154,7 @@ impl Serialize for InputState {
 /// Opcode for the QueryDeviceState request
 pub const QUERY_DEVICE_STATE_REQUEST: u8 = 30;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryDeviceStateRequest {
     pub device_id: u8,
 }
@@ -6101,6 +6207,7 @@ impl crate::x11_utils::ReplyRequest for QueryDeviceStateRequest {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryDeviceStateReply {
     pub xi_reply_type: u8,
     pub sequence: u16,
@@ -6146,6 +6253,7 @@ impl QueryDeviceStateReply {
 /// Opcode for the DeviceBell request
 pub const DEVICE_BELL_REQUEST: u8 = 32;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DeviceBellRequest {
     pub device_id: u8,
     pub feedback_id: u8,
@@ -6210,6 +6318,7 @@ impl crate::x11_utils::VoidRequest for DeviceBellRequest {
 /// Opcode for the SetDeviceValuators request
 pub const SET_DEVICE_VALUATORS_REQUEST: u8 = 33;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetDeviceValuatorsRequest<'input> {
     pub device_id: u8,
     pub first_valuator: u8,
@@ -6284,6 +6393,7 @@ impl<'input> crate::x11_utils::ReplyRequest for SetDeviceValuatorsRequest<'input
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetDeviceValuatorsReply {
     pub xi_reply_type: u8,
     pub sequence: u16,
@@ -6312,6 +6422,7 @@ impl TryParse for SetDeviceValuatorsReply {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DeviceControl(u16);
 impl DeviceControl {
     pub const RESOLUTION: Self = Self(1);
@@ -6370,6 +6481,7 @@ impl core::fmt::Debug for DeviceControl  {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DeviceResolutionState {
     pub control_id: DeviceControl,
     pub len: u16,
@@ -6427,6 +6539,7 @@ impl DeviceResolutionState {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DeviceAbsCalibState {
     pub control_id: DeviceControl,
     pub len: u16,
@@ -6524,6 +6637,7 @@ impl Serialize for DeviceAbsCalibState {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DeviceAbsAreaState {
     pub control_id: DeviceControl,
     pub len: u16,
@@ -6605,6 +6719,7 @@ impl Serialize for DeviceAbsAreaState {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DeviceCoreState {
     pub control_id: DeviceControl,
     pub len: u16,
@@ -6652,6 +6767,7 @@ impl Serialize for DeviceCoreState {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DeviceEnableState {
     pub control_id: DeviceControl,
     pub len: u16,
@@ -6695,6 +6811,7 @@ impl Serialize for DeviceEnableState {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DeviceStateDataResolution {
     pub resolution_values: Vec<u32>,
     pub resolution_min: Vec<u32>,
@@ -6743,6 +6860,7 @@ impl DeviceStateDataResolution {
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DeviceStateDataAbsCalib {
     pub min_x: i32,
     pub max_x: i32,
@@ -6826,6 +6944,7 @@ impl Serialize for DeviceStateDataAbsCalib {
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DeviceStateDataCore {
     pub status: u8,
     pub iscore: u8,
@@ -6859,6 +6978,7 @@ impl Serialize for DeviceStateDataCore {
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DeviceStateDataAbsArea {
     pub offset_x: u32,
     pub offset_y: u32,
@@ -6926,6 +7046,7 @@ impl Serialize for DeviceStateDataAbsArea {
     }
 }
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum DeviceStateData {
     Resolution(DeviceStateDataResolution),
     AbsCalib(DeviceStateDataAbsCalib),
@@ -7054,6 +7175,7 @@ impl DeviceStateData {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DeviceState {
     pub len: u16,
     pub data: DeviceStateData,
@@ -7086,6 +7208,7 @@ impl Serialize for DeviceState {
 /// Opcode for the GetDeviceControl request
 pub const GET_DEVICE_CONTROL_REQUEST: u8 = 34;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetDeviceControlRequest {
     pub control_id: DeviceControl,
     pub device_id: u8,
@@ -7143,6 +7266,7 @@ impl crate::x11_utils::ReplyRequest for GetDeviceControlRequest {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetDeviceControlReply {
     pub xi_reply_type: u8,
     pub sequence: u16,
@@ -7172,6 +7296,7 @@ impl TryParse for GetDeviceControlReply {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DeviceResolutionCtl {
     pub control_id: DeviceControl,
     pub len: u16,
@@ -7226,6 +7351,7 @@ impl DeviceResolutionCtl {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DeviceAbsCalibCtl {
     pub control_id: DeviceControl,
     pub len: u16,
@@ -7323,6 +7449,7 @@ impl Serialize for DeviceAbsCalibCtl {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DeviceAbsAreaCtrl {
     pub control_id: DeviceControl,
     pub len: u16,
@@ -7404,6 +7531,7 @@ impl Serialize for DeviceAbsAreaCtrl {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DeviceCoreCtrl {
     pub control_id: DeviceControl,
     pub len: u16,
@@ -7447,6 +7575,7 @@ impl Serialize for DeviceCoreCtrl {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DeviceEnableCtrl {
     pub control_id: DeviceControl,
     pub len: u16,
@@ -7490,6 +7619,7 @@ impl Serialize for DeviceEnableCtrl {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DeviceCtlDataResolution {
     pub first_valuator: u8,
     pub resolution_values: Vec<u32>,
@@ -7536,6 +7666,7 @@ impl DeviceCtlDataResolution {
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DeviceCtlDataAbsCalib {
     pub min_x: i32,
     pub max_x: i32,
@@ -7619,6 +7750,7 @@ impl Serialize for DeviceCtlDataAbsCalib {
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DeviceCtlDataCore {
     pub status: u8,
 }
@@ -7648,6 +7780,7 @@ impl Serialize for DeviceCtlDataCore {
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DeviceCtlDataAbsArea {
     pub offset_x: u32,
     pub offset_y: u32,
@@ -7715,6 +7848,7 @@ impl Serialize for DeviceCtlDataAbsArea {
     }
 }
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum DeviceCtlData {
     Resolution(DeviceCtlDataResolution),
     AbsCalib(DeviceCtlDataAbsCalib),
@@ -7843,6 +7977,7 @@ impl DeviceCtlData {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DeviceCtl {
     pub len: u16,
     pub data: DeviceCtlData,
@@ -7875,6 +8010,7 @@ impl Serialize for DeviceCtl {
 /// Opcode for the ChangeDeviceControl request
 pub const CHANGE_DEVICE_CONTROL_REQUEST: u8 = 35;
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ChangeDeviceControlRequest {
     pub control_id: DeviceControl,
     pub device_id: u8,
@@ -7939,6 +8075,7 @@ impl crate::x11_utils::ReplyRequest for ChangeDeviceControlRequest {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ChangeDeviceControlReply {
     pub xi_reply_type: u8,
     pub sequence: u16,
@@ -7968,6 +8105,7 @@ impl TryParse for ChangeDeviceControlReply {
 /// Opcode for the ListDeviceProperties request
 pub const LIST_DEVICE_PROPERTIES_REQUEST: u8 = 36;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ListDevicePropertiesRequest {
     pub device_id: u8,
 }
@@ -8020,6 +8158,7 @@ impl crate::x11_utils::ReplyRequest for ListDevicePropertiesRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ListDevicePropertiesReply {
     pub xi_reply_type: u8,
     pub sequence: u16,
@@ -8063,6 +8202,7 @@ impl ListDevicePropertiesReply {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PropertyFormat(u8);
 impl PropertyFormat {
     pub const M8_BITS: Self = Self(8);
@@ -8123,6 +8263,7 @@ impl core::fmt::Debug for PropertyFormat  {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum ChangeDevicePropertyAux {
     Data8(Vec<u8>),
     Data16(Vec<u16>),
@@ -8242,6 +8383,7 @@ impl ChangeDevicePropertyAux {
 /// Opcode for the ChangeDeviceProperty request
 pub const CHANGE_DEVICE_PROPERTY_REQUEST: u8 = 37;
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ChangeDevicePropertyRequest<'input> {
     pub property: xproto::Atom,
     pub type_: xproto::Atom,
@@ -8345,6 +8487,7 @@ impl<'input> crate::x11_utils::VoidRequest for ChangeDevicePropertyRequest<'inpu
 /// Opcode for the DeleteDeviceProperty request
 pub const DELETE_DEVICE_PROPERTY_REQUEST: u8 = 38;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DeleteDevicePropertyRequest {
     pub property: xproto::Atom,
     pub device_id: u8,
@@ -8406,6 +8549,7 @@ impl crate::x11_utils::VoidRequest for DeleteDevicePropertyRequest {
 /// Opcode for the GetDeviceProperty request
 pub const GET_DEVICE_PROPERTY_REQUEST: u8 = 39;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetDevicePropertyRequest {
     pub property: xproto::Atom,
     pub type_: xproto::Atom,
@@ -8494,6 +8638,7 @@ impl crate::x11_utils::ReplyRequest for GetDevicePropertyRequest {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum GetDevicePropertyItems {
     Data8(Vec<u8>),
     Data16(Vec<u16>),
@@ -8573,6 +8718,7 @@ impl GetDevicePropertyItems {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetDevicePropertyReply {
     pub xi_reply_type: u8,
     pub sequence: u16,
@@ -8609,6 +8755,7 @@ impl TryParse for GetDevicePropertyReply {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Device(bool);
 impl Device {
     pub const ALL: Self = Self(false);
@@ -8679,6 +8826,7 @@ impl core::fmt::Debug for Device  {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GroupInfo {
     pub base: u8,
     pub latched: u8,
@@ -8719,6 +8867,7 @@ impl Serialize for GroupInfo {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ModifierInfo {
     pub base: u32,
     pub latched: u32,
@@ -8773,6 +8922,7 @@ impl Serialize for ModifierInfo {
 /// Opcode for the XIQueryPointer request
 pub const XI_QUERY_POINTER_REQUEST: u8 = 40;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct XIQueryPointerRequest {
     pub window: xproto::Window,
     pub deviceid: DeviceId,
@@ -8833,6 +8983,7 @@ impl crate::x11_utils::ReplyRequest for XIQueryPointerRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct XIQueryPointerReply {
     pub sequence: u16,
     pub length: u32,
@@ -8895,6 +9046,7 @@ impl XIQueryPointerReply {
 /// Opcode for the XIWarpPointer request
 pub const XI_WARP_POINTER_REQUEST: u8 = 41;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct XIWarpPointerRequest {
     pub src_win: xproto::Window,
     pub dst_win: xproto::Window,
@@ -9008,6 +9160,7 @@ impl crate::x11_utils::VoidRequest for XIWarpPointerRequest {
 /// Opcode for the XIChangeCursor request
 pub const XI_CHANGE_CURSOR_REQUEST: u8 = 42;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct XIChangeCursorRequest {
     pub window: xproto::Window,
     pub cursor: xproto::Cursor,
@@ -9075,6 +9228,7 @@ impl crate::x11_utils::VoidRequest for XIChangeCursorRequest {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct HierarchyChangeType(u16);
 impl HierarchyChangeType {
     pub const ADD_MASTER: Self = Self(1);
@@ -9131,6 +9285,7 @@ impl core::fmt::Debug for HierarchyChangeType  {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ChangeMode(u8);
 impl ChangeMode {
     pub const ATTACH: Self = Self(1);
@@ -9189,6 +9344,7 @@ impl core::fmt::Debug for ChangeMode  {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct AddMaster {
     pub type_: HierarchyChangeType,
     pub len: u16,
@@ -9251,6 +9407,7 @@ impl AddMaster {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct RemoveMaster {
     pub type_: HierarchyChangeType,
     pub len: u16,
@@ -9311,6 +9468,7 @@ impl Serialize for RemoveMaster {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct AttachSlave {
     pub type_: HierarchyChangeType,
     pub len: u16,
@@ -9356,6 +9514,7 @@ impl Serialize for AttachSlave {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DetachSlave {
     pub type_: HierarchyChangeType,
     pub len: u16,
@@ -9399,6 +9558,7 @@ impl Serialize for DetachSlave {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct HierarchyChangeDataAddMaster {
     pub send_core: bool,
     pub enable: bool,
@@ -9453,6 +9613,7 @@ impl HierarchyChangeDataAddMaster {
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct HierarchyChangeDataRemoveMaster {
     pub deviceid: DeviceId,
     pub return_mode: ChangeMode,
@@ -9499,6 +9660,7 @@ impl Serialize for HierarchyChangeDataRemoveMaster {
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct HierarchyChangeDataAttachSlave {
     pub deviceid: DeviceId,
     pub master: DeviceId,
@@ -9530,6 +9692,7 @@ impl Serialize for HierarchyChangeDataAttachSlave {
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct HierarchyChangeDataDetachSlave {
     pub deviceid: DeviceId,
 }
@@ -9559,6 +9722,7 @@ impl Serialize for HierarchyChangeDataDetachSlave {
     }
 }
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum HierarchyChangeData {
     AddMaster(HierarchyChangeDataAddMaster),
     RemoveMaster(HierarchyChangeDataRemoveMaster),
@@ -9666,6 +9830,7 @@ impl HierarchyChangeData {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct HierarchyChange {
     pub len: u16,
     pub data: HierarchyChangeData,
@@ -9698,6 +9863,7 @@ impl Serialize for HierarchyChange {
 /// Opcode for the XIChangeHierarchy request
 pub const XI_CHANGE_HIERARCHY_REQUEST: u8 = 43;
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct XIChangeHierarchyRequest<'input> {
     pub changes: Cow<'input, [HierarchyChange]>,
 }
@@ -9763,6 +9929,7 @@ impl<'input> crate::x11_utils::VoidRequest for XIChangeHierarchyRequest<'input> 
 /// Opcode for the XISetClientPointer request
 pub const XI_SET_CLIENT_POINTER_REQUEST: u8 = 44;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct XISetClientPointerRequest {
     pub window: xproto::Window,
     pub deviceid: DeviceId,
@@ -9824,6 +9991,7 @@ impl crate::x11_utils::VoidRequest for XISetClientPointerRequest {
 /// Opcode for the XIGetClientPointer request
 pub const XI_GET_CLIENT_POINTER_REQUEST: u8 = 45;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct XIGetClientPointerRequest {
     pub window: xproto::Window,
 }
@@ -9875,6 +10043,7 @@ impl crate::x11_utils::ReplyRequest for XIGetClientPointerRequest {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct XIGetClientPointerReply {
     pub sequence: u16,
     pub length: u32,
@@ -9904,6 +10073,7 @@ impl TryParse for XIGetClientPointerReply {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct XIEventMask(u32);
 impl XIEventMask {
     pub const DEVICE_CHANGED: Self = Self(1 << 1);
@@ -9999,6 +10169,7 @@ impl core::fmt::Debug for XIEventMask  {
 bitmask_binop!(XIEventMask, u32);
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct EventMask {
     pub deviceid: DeviceId,
     pub mask: Vec<u32>,
@@ -10046,6 +10217,7 @@ impl EventMask {
 /// Opcode for the XISelectEvents request
 pub const XI_SELECT_EVENTS_REQUEST: u8 = 46;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct XISelectEventsRequest<'input> {
     pub window: xproto::Window,
     pub masks: Cow<'input, [EventMask]>,
@@ -10120,6 +10292,7 @@ impl<'input> crate::x11_utils::VoidRequest for XISelectEventsRequest<'input> {
 /// Opcode for the XIQueryVersion request
 pub const XI_QUERY_VERSION_REQUEST: u8 = 47;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct XIQueryVersionRequest {
     pub major_version: u16,
     pub minor_version: u16,
@@ -10175,6 +10348,7 @@ impl crate::x11_utils::ReplyRequest for XIQueryVersionRequest {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct XIQueryVersionReply {
     pub sequence: u16,
     pub length: u32,
@@ -10203,6 +10377,7 @@ impl TryParse for XIQueryVersionReply {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DeviceClassType(u16);
 impl DeviceClassType {
     pub const KEY: Self = Self(0);
@@ -10261,6 +10436,7 @@ impl core::fmt::Debug for DeviceClassType  {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DeviceType(u16);
 impl DeviceType {
     pub const MASTER_POINTER: Self = Self(1);
@@ -10319,6 +10495,7 @@ impl core::fmt::Debug for DeviceType  {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ScrollFlags(u8);
 impl ScrollFlags {
     pub const NO_EMULATION: Self = Self(1 << 0);
@@ -10378,6 +10555,7 @@ impl core::fmt::Debug for ScrollFlags  {
 bitmask_binop!(ScrollFlags, u8);
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ScrollType(u16);
 impl ScrollType {
     pub const VERTICAL: Self = Self(1);
@@ -10430,6 +10608,7 @@ impl core::fmt::Debug for ScrollType  {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct TouchMode(u8);
 impl TouchMode {
     pub const DIRECT: Self = Self(1);
@@ -10488,6 +10667,7 @@ impl core::fmt::Debug for TouchMode  {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ButtonClass {
     pub type_: DeviceClassType,
     pub len: u16,
@@ -10544,6 +10724,7 @@ impl ButtonClass {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct KeyClass {
     pub type_: DeviceClassType,
     pub len: u16,
@@ -10596,6 +10777,7 @@ impl KeyClass {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ScrollClass {
     pub type_: DeviceClassType,
     pub len: u16,
@@ -10672,6 +10854,7 @@ impl Serialize for ScrollClass {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct TouchClass {
     pub type_: DeviceClassType,
     pub len: u16,
@@ -10722,6 +10905,7 @@ impl Serialize for TouchClass {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ValuatorClass {
     pub type_: DeviceClassType,
     pub len: u16,
@@ -10830,6 +11014,7 @@ impl Serialize for ValuatorClass {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DeviceClassDataKey {
     pub keys: Vec<u32>,
 }
@@ -10870,6 +11055,7 @@ impl DeviceClassDataKey {
     }
 }
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DeviceClassDataButton {
     pub state: Vec<u32>,
     pub labels: Vec<xproto::Atom>,
@@ -10914,6 +11100,7 @@ impl DeviceClassDataButton {
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DeviceClassDataValuator {
     pub number: u16,
     pub label: xproto::Atom,
@@ -11002,6 +11189,7 @@ impl Serialize for DeviceClassDataValuator {
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DeviceClassDataScroll {
     pub number: u16,
     pub scroll_type: ScrollType,
@@ -11058,6 +11246,7 @@ impl Serialize for DeviceClassDataScroll {
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DeviceClassDataTouch {
     pub mode: TouchMode,
     pub num_touches: u8,
@@ -11088,6 +11277,7 @@ impl Serialize for DeviceClassDataTouch {
     }
 }
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum DeviceClassData {
     Key(DeviceClassDataKey),
     Button(DeviceClassDataButton),
@@ -11210,6 +11400,7 @@ impl DeviceClassData {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DeviceClass {
     pub len: u16,
     pub sourceid: DeviceId,
@@ -11243,6 +11434,7 @@ impl Serialize for DeviceClass {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct XIDeviceInfo {
     pub deviceid: DeviceId,
     pub type_: DeviceType,
@@ -11328,6 +11520,7 @@ impl XIDeviceInfo {
 /// Opcode for the XIQueryDevice request
 pub const XI_QUERY_DEVICE_REQUEST: u8 = 48;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct XIQueryDeviceRequest {
     pub deviceid: DeviceId,
 }
@@ -11380,6 +11573,7 @@ impl crate::x11_utils::ReplyRequest for XIQueryDeviceRequest {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct XIQueryDeviceReply {
     pub sequence: u16,
     pub length: u32,
@@ -11424,6 +11618,7 @@ impl XIQueryDeviceReply {
 /// Opcode for the XISetFocus request
 pub const XI_SET_FOCUS_REQUEST: u8 = 49;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct XISetFocusRequest {
     pub window: xproto::Window,
     pub time: xproto::Timestamp,
@@ -11493,6 +11688,7 @@ impl crate::x11_utils::VoidRequest for XISetFocusRequest {
 /// Opcode for the XIGetFocus request
 pub const XI_GET_FOCUS_REQUEST: u8 = 50;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct XIGetFocusRequest {
     pub deviceid: DeviceId,
 }
@@ -11545,6 +11741,7 @@ impl crate::x11_utils::ReplyRequest for XIGetFocusRequest {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct XIGetFocusReply {
     pub sequence: u16,
     pub length: u32,
@@ -11571,6 +11768,7 @@ impl TryParse for XIGetFocusReply {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GrabOwner(bool);
 impl GrabOwner {
     pub const NO_OWNER: Self = Self(false);
@@ -11643,6 +11841,7 @@ impl core::fmt::Debug for GrabOwner  {
 /// Opcode for the XIGrabDevice request
 pub const XI_GRAB_DEVICE_REQUEST: u8 = 51;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct XIGrabDeviceRequest<'input> {
     pub window: xproto::Window,
     pub time: xproto::Timestamp,
@@ -11761,6 +11960,7 @@ impl<'input> crate::x11_utils::ReplyRequest for XIGrabDeviceRequest<'input> {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct XIGrabDeviceReply {
     pub sequence: u16,
     pub length: u32,
@@ -11790,6 +11990,7 @@ impl TryParse for XIGrabDeviceReply {
 /// Opcode for the XIUngrabDevice request
 pub const XI_UNGRAB_DEVICE_REQUEST: u8 = 52;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct XIUngrabDeviceRequest {
     pub time: xproto::Timestamp,
     pub deviceid: DeviceId,
@@ -11849,6 +12050,7 @@ impl crate::x11_utils::VoidRequest for XIUngrabDeviceRequest {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct EventMode(u8);
 impl EventMode {
     pub const ASYNC_DEVICE: Self = Self(0);
@@ -11921,6 +12123,7 @@ impl core::fmt::Debug for EventMode  {
 /// Opcode for the XIAllowEvents request
 pub const XI_ALLOW_EVENTS_REQUEST: u8 = 53;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct XIAllowEventsRequest {
     pub time: xproto::Timestamp,
     pub deviceid: DeviceId,
@@ -12001,6 +12204,7 @@ impl crate::x11_utils::VoidRequest for XIAllowEventsRequest {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GrabMode22(u8);
 impl GrabMode22 {
     pub const SYNC: Self = Self(0);
@@ -12061,6 +12265,7 @@ impl core::fmt::Debug for GrabMode22  {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GrabType(u8);
 impl GrabType {
     pub const BUTTON: Self = Self(0);
@@ -12125,6 +12330,7 @@ impl core::fmt::Debug for GrabType  {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ModifierMask(u32);
 impl ModifierMask {
     pub const ANY: Self = Self(1 << 31);
@@ -12170,6 +12376,7 @@ impl core::fmt::Debug for ModifierMask  {
 bitmask_binop!(ModifierMask, u32);
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GrabModifierInfo {
     pub modifiers: u32,
     pub status: xproto::GrabStatus,
@@ -12211,6 +12418,7 @@ impl Serialize for GrabModifierInfo {
 /// Opcode for the XIPassiveGrabDevice request
 pub const XI_PASSIVE_GRAB_DEVICE_REQUEST: u8 = 54;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct XIPassiveGrabDeviceRequest<'input> {
     pub time: xproto::Timestamp,
     pub grab_window: xproto::Window,
@@ -12357,6 +12565,7 @@ impl<'input> crate::x11_utils::ReplyRequest for XIPassiveGrabDeviceRequest<'inpu
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct XIPassiveGrabDeviceReply {
     pub sequence: u16,
     pub length: u32,
@@ -12401,6 +12610,7 @@ impl XIPassiveGrabDeviceReply {
 /// Opcode for the XIPassiveUngrabDevice request
 pub const XI_PASSIVE_UNGRAB_DEVICE_REQUEST: u8 = 55;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct XIPassiveUngrabDeviceRequest<'input> {
     pub grab_window: xproto::Window,
     pub detail: u32,
@@ -12499,6 +12709,7 @@ impl<'input> crate::x11_utils::VoidRequest for XIPassiveUngrabDeviceRequest<'inp
 /// Opcode for the XIListProperties request
 pub const XI_LIST_PROPERTIES_REQUEST: u8 = 56;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct XIListPropertiesRequest {
     pub deviceid: DeviceId,
 }
@@ -12551,6 +12762,7 @@ impl crate::x11_utils::ReplyRequest for XIListPropertiesRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct XIListPropertiesReply {
     pub sequence: u16,
     pub length: u32,
@@ -12593,6 +12805,7 @@ impl XIListPropertiesReply {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum XIChangePropertyAux {
     Data8(Vec<u8>),
     Data16(Vec<u16>),
@@ -12712,6 +12925,7 @@ impl XIChangePropertyAux {
 /// Opcode for the XIChangeProperty request
 pub const XI_CHANGE_PROPERTY_REQUEST: u8 = 57;
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct XIChangePropertyRequest<'input> {
     pub deviceid: DeviceId,
     pub mode: xproto::PropMode,
@@ -12814,6 +13028,7 @@ impl<'input> crate::x11_utils::VoidRequest for XIChangePropertyRequest<'input> {
 /// Opcode for the XIDeleteProperty request
 pub const XI_DELETE_PROPERTY_REQUEST: u8 = 58;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct XIDeletePropertyRequest {
     pub deviceid: DeviceId,
     pub property: xproto::Atom,
@@ -12875,6 +13090,7 @@ impl crate::x11_utils::VoidRequest for XIDeletePropertyRequest {
 /// Opcode for the XIGetProperty request
 pub const XI_GET_PROPERTY_REQUEST: u8 = 59;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct XIGetPropertyRequest {
     pub deviceid: DeviceId,
     pub delete: bool,
@@ -12963,6 +13179,7 @@ impl crate::x11_utils::ReplyRequest for XIGetPropertyRequest {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum XIGetPropertyItems {
     Data8(Vec<u8>),
     Data16(Vec<u16>),
@@ -13042,6 +13259,7 @@ impl XIGetPropertyItems {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct XIGetPropertyReply {
     pub sequence: u16,
     pub length: u32,
@@ -13077,6 +13295,7 @@ impl TryParse for XIGetPropertyReply {
 /// Opcode for the XIGetSelectedEvents request
 pub const XI_GET_SELECTED_EVENTS_REQUEST: u8 = 60;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct XIGetSelectedEventsRequest {
     pub window: xproto::Window,
 }
@@ -13128,6 +13347,7 @@ impl crate::x11_utils::ReplyRequest for XIGetSelectedEventsRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct XIGetSelectedEventsReply {
     pub sequence: u16,
     pub length: u32,
@@ -13170,6 +13390,7 @@ impl XIGetSelectedEventsReply {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct BarrierReleasePointerInfo {
     pub deviceid: DeviceId,
     pub barrier: xfixes::Barrier,
@@ -13218,6 +13439,7 @@ impl Serialize for BarrierReleasePointerInfo {
 /// Opcode for the XIBarrierReleasePointer request
 pub const XI_BARRIER_RELEASE_POINTER_REQUEST: u8 = 61;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct XIBarrierReleasePointerRequest<'input> {
     pub barriers: Cow<'input, [BarrierReleasePointerInfo]>,
 }
@@ -13282,6 +13504,7 @@ impl<'input> crate::x11_utils::VoidRequest for XIBarrierReleasePointerRequest<'i
 /// Opcode for the DeviceValuator event
 pub const DEVICE_VALUATOR_EVENT: u8 = 0;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DeviceValuatorEvent {
     pub response_type: u8,
     pub device_id: u8,
@@ -13378,6 +13601,7 @@ impl From<DeviceValuatorEvent> for [u8; 32] {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct MoreEventsMask(u8);
 impl MoreEventsMask {
     pub const MORE_EVENTS: Self = Self(1 << 7);
@@ -13437,6 +13661,7 @@ bitmask_binop!(MoreEventsMask, u8);
 /// Opcode for the DeviceKeyPress event
 pub const DEVICE_KEY_PRESS_EVENT: u8 = 1;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DeviceKeyPressEvent {
     pub response_type: u8,
     pub detail: u8,
@@ -13554,6 +13779,7 @@ pub type DeviceMotionNotifyEvent = DeviceKeyPressEvent;
 /// Opcode for the DeviceFocusIn event
 pub const DEVICE_FOCUS_IN_EVENT: u8 = 6;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DeviceFocusInEvent {
     pub response_type: u8,
     pub detail: xproto::NotifyDetail,
@@ -13647,6 +13873,7 @@ pub const PROXIMITY_OUT_EVENT: u8 = 9;
 pub type ProximityOutEvent = DeviceKeyPressEvent;
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ClassesReportedMask(u8);
 impl ClassesReportedMask {
     pub const OUT_OF_PROXIMITY: Self = Self(1 << 7);
@@ -13714,6 +13941,7 @@ bitmask_binop!(ClassesReportedMask, u8);
 /// Opcode for the DeviceStateNotify event
 pub const DEVICE_STATE_NOTIFY_EVENT: u8 = 10;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DeviceStateNotifyEvent {
     pub response_type: u8,
     pub device_id: u8,
@@ -13815,6 +14043,7 @@ impl From<DeviceStateNotifyEvent> for [u8; 32] {
 /// Opcode for the DeviceMappingNotify event
 pub const DEVICE_MAPPING_NOTIFY_EVENT: u8 = 11;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DeviceMappingNotifyEvent {
     pub response_type: u8,
     pub device_id: u8,
@@ -13896,6 +14125,7 @@ impl From<DeviceMappingNotifyEvent> for [u8; 32] {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ChangeDevice(u8);
 impl ChangeDevice {
     pub const NEW_POINTER: Self = Self(0);
@@ -13956,6 +14186,7 @@ impl core::fmt::Debug for ChangeDevice  {
 /// Opcode for the ChangeDeviceNotify event
 pub const CHANGE_DEVICE_NOTIFY_EVENT: u8 = 12;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ChangeDeviceNotifyEvent {
     pub response_type: u8,
     pub device_id: u8,
@@ -14032,6 +14263,7 @@ impl From<ChangeDeviceNotifyEvent> for [u8; 32] {
 /// Opcode for the DeviceKeyStateNotify event
 pub const DEVICE_KEY_STATE_NOTIFY_EVENT: u8 = 13;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DeviceKeyStateNotifyEvent {
     pub response_type: u8,
     pub device_id: u8,
@@ -14103,6 +14335,7 @@ impl From<DeviceKeyStateNotifyEvent> for [u8; 32] {
 /// Opcode for the DeviceButtonStateNotify event
 pub const DEVICE_BUTTON_STATE_NOTIFY_EVENT: u8 = 14;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DeviceButtonStateNotifyEvent {
     pub response_type: u8,
     pub device_id: u8,
@@ -14172,6 +14405,7 @@ impl From<DeviceButtonStateNotifyEvent> for [u8; 32] {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DeviceChange(u8);
 impl DeviceChange {
     pub const ADDED: Self = Self(0);
@@ -14240,6 +14474,7 @@ impl core::fmt::Debug for DeviceChange  {
 /// Opcode for the DevicePresenceNotify event
 pub const DEVICE_PRESENCE_NOTIFY_EVENT: u8 = 15;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DevicePresenceNotifyEvent {
     pub response_type: u8,
     pub sequence: u16,
@@ -14320,6 +14555,7 @@ impl From<DevicePresenceNotifyEvent> for [u8; 32] {
 /// Opcode for the DevicePropertyNotify event
 pub const DEVICE_PROPERTY_NOTIFY_EVENT: u8 = 16;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DevicePropertyNotifyEvent {
     pub response_type: u8,
     pub state: xproto::Property,
@@ -14397,6 +14633,7 @@ impl From<DevicePropertyNotifyEvent> for [u8; 32] {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ChangeReason(u8);
 impl ChangeReason {
     pub const SLAVE_SWITCH: Self = Self(1);
@@ -14457,6 +14694,7 @@ impl core::fmt::Debug for ChangeReason  {
 /// Opcode for the DeviceChanged event
 pub const DEVICE_CHANGED_EVENT: u16 = 1;
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DeviceChangedEvent {
     pub response_type: u8,
     pub extension: u8,
@@ -14509,6 +14747,7 @@ impl DeviceChangedEvent {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct KeyEventFlags(u32);
 impl KeyEventFlags {
     pub const KEY_REPEAT: Self = Self(1 << 16);
@@ -14556,6 +14795,7 @@ bitmask_binop!(KeyEventFlags, u32);
 /// Opcode for the KeyPress event
 pub const KEY_PRESS_EVENT: u16 = 2;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct KeyPressEvent {
     pub response_type: u8,
     pub extension: u8,
@@ -14649,6 +14889,7 @@ pub const KEY_RELEASE_EVENT: u16 = 3;
 pub type KeyReleaseEvent = KeyPressEvent;
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PointerEventFlags(u32);
 impl PointerEventFlags {
     pub const POINTER_EMULATED: Self = Self(1 << 16);
@@ -14696,6 +14937,7 @@ bitmask_binop!(PointerEventFlags, u32);
 /// Opcode for the ButtonPress event
 pub const BUTTON_PRESS_EVENT: u16 = 4;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ButtonPressEvent {
     pub response_type: u8,
     pub extension: u8,
@@ -14793,6 +15035,7 @@ pub const MOTION_EVENT: u16 = 6;
 pub type MotionEvent = ButtonPressEvent;
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct NotifyMode(u8);
 impl NotifyMode {
     pub const NORMAL: Self = Self(0);
@@ -14859,6 +15102,7 @@ impl core::fmt::Debug for NotifyMode  {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct NotifyDetail(u8);
 impl NotifyDetail {
     pub const ANCESTOR: Self = Self(0);
@@ -14931,6 +15175,7 @@ impl core::fmt::Debug for NotifyDetail  {
 /// Opcode for the Enter event
 pub const ENTER_EVENT: u16 = 7;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct EnterEvent {
     pub response_type: u8,
     pub extension: u8,
@@ -15019,6 +15264,7 @@ pub const FOCUS_OUT_EVENT: u16 = 10;
 pub type FocusOutEvent = EnterEvent;
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct HierarchyMask(u8);
 impl HierarchyMask {
     pub const MASTER_ADDED: Self = Self(1 << 0);
@@ -15090,6 +15336,7 @@ impl core::fmt::Debug for HierarchyMask  {
 bitmask_binop!(HierarchyMask, u8);
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct HierarchyInfo {
     pub deviceid: DeviceId,
     pub attachment: DeviceId,
@@ -15147,6 +15394,7 @@ impl Serialize for HierarchyInfo {
 /// Opcode for the Hierarchy event
 pub const HIERARCHY_EVENT: u16 = 11;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct HierarchyEvent {
     pub response_type: u8,
     pub extension: u8,
@@ -15196,6 +15444,7 @@ impl HierarchyEvent {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PropertyFlag(u8);
 impl PropertyFlag {
     pub const DELETED: Self = Self(0);
@@ -15258,6 +15507,7 @@ impl core::fmt::Debug for PropertyFlag  {
 /// Opcode for the Property event
 pub const PROPERTY_EVENT: u16 = 12;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PropertyEvent {
     pub response_type: u8,
     pub extension: u8,
@@ -15294,6 +15544,7 @@ impl TryParse for PropertyEvent {
 /// Opcode for the RawKeyPress event
 pub const RAW_KEY_PRESS_EVENT: u16 = 13;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct RawKeyPressEvent {
     pub response_type: u8,
     pub extension: u8,
@@ -15357,6 +15608,7 @@ pub type RawKeyReleaseEvent = RawKeyPressEvent;
 /// Opcode for the RawButtonPress event
 pub const RAW_BUTTON_PRESS_EVENT: u16 = 15;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct RawButtonPressEvent {
     pub response_type: u8,
     pub extension: u8,
@@ -15422,6 +15674,7 @@ pub const RAW_MOTION_EVENT: u16 = 17;
 pub type RawMotionEvent = RawButtonPressEvent;
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct TouchEventFlags(u32);
 impl TouchEventFlags {
     pub const TOUCH_PENDING_END: Self = Self(1 << 16);
@@ -15471,6 +15724,7 @@ bitmask_binop!(TouchEventFlags, u32);
 /// Opcode for the TouchBegin event
 pub const TOUCH_BEGIN_EVENT: u16 = 18;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct TouchBeginEvent {
     pub response_type: u8,
     pub extension: u8,
@@ -15568,6 +15822,7 @@ pub const TOUCH_END_EVENT: u16 = 20;
 pub type TouchEndEvent = TouchBeginEvent;
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct TouchOwnershipFlags(u32);
 impl TouchOwnershipFlags {
     pub const NONE: Self = Self(0);
@@ -15614,6 +15869,7 @@ impl core::fmt::Debug for TouchOwnershipFlags  {
 /// Opcode for the TouchOwnership event
 pub const TOUCH_OWNERSHIP_EVENT: u16 = 21;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct TouchOwnershipEvent {
     pub response_type: u8,
     pub extension: u8,
@@ -15659,6 +15915,7 @@ impl TryParse for TouchOwnershipEvent {
 /// Opcode for the RawTouchBegin event
 pub const RAW_TOUCH_BEGIN_EVENT: u16 = 22;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct RawTouchBeginEvent {
     pub response_type: u8,
     pub extension: u8,
@@ -15724,6 +15981,7 @@ pub const RAW_TOUCH_END_EVENT: u16 = 24;
 pub type RawTouchEndEvent = RawTouchBeginEvent;
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct BarrierFlags(u8);
 impl BarrierFlags {
     pub const POINTER_RELEASED: Self = Self(1 << 0);
@@ -15785,6 +16043,7 @@ bitmask_binop!(BarrierFlags, u8);
 /// Opcode for the BarrierHit event
 pub const BARRIER_HIT_EVENT: u16 = 25;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct BarrierHitEvent {
     pub response_type: u8,
     pub extension: u8,
@@ -15840,6 +16099,7 @@ pub const BARRIER_LEAVE_EVENT: u16 = 26;
 pub type BarrierLeaveEvent = BarrierHitEvent;
 
 #[derive(Debug, Copy, Clone)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct EventForSend([u8; 32]);
 impl EventForSend {
     pub fn as_device_valuator_event(&self) -> DeviceValuatorEvent {
@@ -16051,6 +16311,7 @@ impl From<&DevicePropertyNotifyEvent> for EventForSend {
 /// Opcode for the SendExtensionEvent request
 pub const SEND_EXTENSION_EVENT_REQUEST: u8 = 31;
 #[derive(Debug, Clone)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SendExtensionEventRequest<'input> {
     pub destination: xproto::Window,
     pub device_id: u8,

@@ -39,6 +39,7 @@ pub const X11_XML_VERSION: (u32, u32) = (1, 1);
 pub type Damage = u32;
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ReportLevel(u8);
 impl ReportLevel {
     pub const RAW_RECTANGLES: Self = Self(0);
@@ -106,6 +107,7 @@ pub const BAD_DAMAGE_ERROR: u8 = 0;
 /// Opcode for the QueryVersion request
 pub const QUERY_VERSION_REQUEST: u8 = 0;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryVersionRequest {
     pub client_major_version: u32,
     pub client_minor_version: u32,
@@ -165,6 +167,7 @@ impl crate::x11_utils::ReplyRequest for QueryVersionRequest {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryVersionReply {
     pub sequence: u16,
     pub length: u32,
@@ -195,6 +198,7 @@ impl TryParse for QueryVersionReply {
 /// Opcode for the Create request
 pub const CREATE_REQUEST: u8 = 1;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CreateRequest {
     pub damage: Damage,
     pub drawable: xproto::Drawable,
@@ -265,6 +269,7 @@ impl crate::x11_utils::VoidRequest for CreateRequest {
 /// Opcode for the Destroy request
 pub const DESTROY_REQUEST: u8 = 2;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DestroyRequest {
     pub damage: Damage,
 }
@@ -317,6 +322,7 @@ impl crate::x11_utils::VoidRequest for DestroyRequest {
 /// Opcode for the Subtract request
 pub const SUBTRACT_REQUEST: u8 = 3;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SubtractRequest {
     pub damage: Damage,
     pub repair: xfixes::Region,
@@ -385,6 +391,7 @@ impl crate::x11_utils::VoidRequest for SubtractRequest {
 /// Opcode for the Add request
 pub const ADD_REQUEST: u8 = 4;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct AddRequest {
     pub drawable: xproto::Drawable,
     pub region: xfixes::Region,
@@ -445,6 +452,7 @@ impl crate::x11_utils::VoidRequest for AddRequest {
 /// Opcode for the Notify event
 pub const NOTIFY_EVENT: u8 = 0;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct NotifyEvent {
     pub response_type: u8,
     pub level: ReportLevel,

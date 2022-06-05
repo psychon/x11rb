@@ -35,6 +35,7 @@ pub const X11_EXTENSION_NAME: &str = "MIT-SCREEN-SAVER";
 pub const X11_XML_VERSION: (u32, u32) = (1, 1);
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Kind(u8);
 impl Kind {
     pub const BLANKED: Self = Self(0);
@@ -95,6 +96,7 @@ impl core::fmt::Debug for Kind  {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Event(u8);
 impl Event {
     pub const NOTIFY_MASK: Self = Self(1 << 0);
@@ -154,6 +156,7 @@ impl core::fmt::Debug for Event  {
 bitmask_binop!(Event, u8);
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct State(u8);
 impl State {
     pub const OFF: Self = Self(0);
@@ -218,6 +221,7 @@ impl core::fmt::Debug for State  {
 /// Opcode for the QueryVersion request
 pub const QUERY_VERSION_REQUEST: u8 = 0;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryVersionRequest {
     pub client_major_version: u8,
     pub client_minor_version: u8,
@@ -274,6 +278,7 @@ impl crate::x11_utils::ReplyRequest for QueryVersionRequest {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryVersionReply {
     pub sequence: u16,
     pub length: u32,
@@ -304,6 +309,7 @@ impl TryParse for QueryVersionReply {
 /// Opcode for the QueryInfo request
 pub const QUERY_INFO_REQUEST: u8 = 1;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryInfoRequest {
     pub drawable: xproto::Drawable,
 }
@@ -355,6 +361,7 @@ impl crate::x11_utils::ReplyRequest for QueryInfoRequest {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryInfoReply {
     pub state: u8,
     pub sequence: u16,
@@ -393,6 +400,7 @@ impl TryParse for QueryInfoReply {
 /// Opcode for the SelectInput request
 pub const SELECT_INPUT_REQUEST: u8 = 2;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SelectInputRequest {
     pub drawable: xproto::Drawable,
     pub event_mask: u32,
@@ -452,6 +460,7 @@ impl crate::x11_utils::VoidRequest for SelectInputRequest {
 
 /// Auxiliary and optional information for the `set_attributes` function
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetAttributesAux {
     pub background_pixmap: Option<xproto::Pixmap>,
     pub background_pixel: Option<u32>,
@@ -807,6 +816,7 @@ impl SetAttributesAux {
 /// Opcode for the SetAttributes request
 pub const SET_ATTRIBUTES_REQUEST: u8 = 3;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetAttributesRequest<'input> {
     pub drawable: xproto::Drawable,
     pub x: i16,
@@ -937,6 +947,7 @@ impl<'input> crate::x11_utils::VoidRequest for SetAttributesRequest<'input> {
 /// Opcode for the UnsetAttributes request
 pub const UNSET_ATTRIBUTES_REQUEST: u8 = 4;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct UnsetAttributesRequest {
     pub drawable: xproto::Drawable,
 }
@@ -989,6 +1000,7 @@ impl crate::x11_utils::VoidRequest for UnsetAttributesRequest {
 /// Opcode for the Suspend request
 pub const SUSPEND_REQUEST: u8 = 5;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SuspendRequest {
     pub suspend: u32,
 }
@@ -1041,6 +1053,7 @@ impl crate::x11_utils::VoidRequest for SuspendRequest {
 /// Opcode for the Notify event
 pub const NOTIFY_EVENT: u8 = 0;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct NotifyEvent {
     pub response_type: u8,
     pub state: State,

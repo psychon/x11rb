@@ -35,6 +35,7 @@ pub const X11_EXTENSION_NAME: &str = "XKEYBOARD";
 pub const X11_XML_VERSION: (u32, u32) = (1, 0);
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Const(u8);
 impl Const {
     pub const MAX_LEGAL_KEY_CODE: Self = Self(255);
@@ -95,6 +96,7 @@ impl core::fmt::Debug for Const  {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct EventType(u16);
 impl EventType {
     pub const NEW_KEYBOARD_NOTIFY: Self = Self(1 << 0);
@@ -168,6 +170,7 @@ impl core::fmt::Debug for EventType  {
 bitmask_binop!(EventType, u16);
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct NKNDetail(u8);
 impl NKNDetail {
     pub const KEYCODES: Self = Self(1 << 0);
@@ -229,6 +232,7 @@ impl core::fmt::Debug for NKNDetail  {
 bitmask_binop!(NKNDetail, u8);
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct AXNDetail(u8);
 impl AXNDetail {
     pub const SK_PRESS: Self = Self(1 << 0);
@@ -298,6 +302,7 @@ impl core::fmt::Debug for AXNDetail  {
 bitmask_binop!(AXNDetail, u8);
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct MapPart(u8);
 impl MapPart {
     pub const KEY_TYPES: Self = Self(1 << 0);
@@ -369,6 +374,7 @@ impl core::fmt::Debug for MapPart  {
 bitmask_binop!(MapPart, u8);
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetMapFlags(u8);
 impl SetMapFlags {
     pub const RESIZE_TYPES: Self = Self(1 << 0);
@@ -428,6 +434,7 @@ impl core::fmt::Debug for SetMapFlags  {
 bitmask_binop!(SetMapFlags, u8);
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct StatePart(u16);
 impl StatePart {
     pub const MODIFIER_STATE: Self = Self(1 << 0);
@@ -505,6 +512,7 @@ impl core::fmt::Debug for StatePart  {
 bitmask_binop!(StatePart, u16);
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct BoolCtrl(u16);
 impl BoolCtrl {
     pub const REPEAT_KEYS: Self = Self(1 << 0);
@@ -580,6 +588,7 @@ impl core::fmt::Debug for BoolCtrl  {
 bitmask_binop!(BoolCtrl, u16);
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Control(u32);
 impl Control {
     pub const GROUPS_WRAP: Self = Self(1 << 27);
@@ -633,6 +642,7 @@ impl core::fmt::Debug for Control  {
 bitmask_binop!(Control, u32);
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct AXOption(u16);
 impl AXOption {
     pub const SK_PRESS_FB: Self = Self(1 << 0);
@@ -708,6 +718,7 @@ bitmask_binop!(AXOption, u16);
 pub type DeviceSpec = u16;
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct LedClassResult(u16);
 impl LedClassResult {
     pub const KBD_FEEDBACK_CLASS: Self = Self(0);
@@ -760,6 +771,7 @@ impl core::fmt::Debug for LedClassResult  {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct LedClass(u16);
 impl LedClass {
     pub const KBD_FEEDBACK_CLASS: Self = Self(0);
@@ -818,6 +830,7 @@ impl core::fmt::Debug for LedClass  {
 pub type LedClassSpec = u16;
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct BellClassResult(u8);
 impl BellClassResult {
     pub const KBD_FEEDBACK_CLASS: Self = Self(0);
@@ -876,6 +889,7 @@ impl core::fmt::Debug for BellClassResult  {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct BellClass(u16);
 impl BellClass {
     pub const KBD_FEEDBACK_CLASS: Self = Self(0);
@@ -932,6 +946,7 @@ impl core::fmt::Debug for BellClass  {
 pub type BellClassSpec = u16;
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ID(u16);
 impl ID {
     pub const USE_CORE_KBD: Self = Self(256);
@@ -996,6 +1011,7 @@ impl core::fmt::Debug for ID  {
 pub type IDSpec = u16;
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Group(u8);
 impl Group {
     pub const M1: Self = Self(0);
@@ -1058,6 +1074,7 @@ impl core::fmt::Debug for Group  {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Groups(u8);
 impl Groups {
     pub const ANY: Self = Self(254);
@@ -1116,6 +1133,7 @@ impl core::fmt::Debug for Groups  {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetOfGroup(u8);
 impl SetOfGroup {
     pub const GROUP1: Self = Self(1 << 0);
@@ -1179,6 +1197,7 @@ impl core::fmt::Debug for SetOfGroup  {
 bitmask_binop!(SetOfGroup, u8);
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetOfGroups(u8);
 impl SetOfGroups {
     pub const ANY: Self = Self(1 << 7);
@@ -1236,6 +1255,7 @@ impl core::fmt::Debug for SetOfGroups  {
 bitmask_binop!(SetOfGroups, u8);
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GroupsWrap(u8);
 impl GroupsWrap {
     pub const WRAP_INTO_RANGE: Self = Self(0);
@@ -1297,6 +1317,7 @@ impl core::fmt::Debug for GroupsWrap  {
 bitmask_binop!(GroupsWrap, u8);
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct VModsHigh(u8);
 impl VModsHigh {
     pub const M15: Self = Self(1 << 7);
@@ -1368,6 +1389,7 @@ impl core::fmt::Debug for VModsHigh  {
 bitmask_binop!(VModsHigh, u8);
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct VModsLow(u8);
 impl VModsLow {
     pub const M7: Self = Self(1 << 7);
@@ -1439,6 +1461,7 @@ impl core::fmt::Debug for VModsLow  {
 bitmask_binop!(VModsLow, u8);
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct VMod(u16);
 impl VMod {
     pub const M15: Self = Self(1 << 15);
@@ -1520,6 +1543,7 @@ impl core::fmt::Debug for VMod  {
 bitmask_binop!(VMod, u16);
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Explicit(u8);
 impl Explicit {
     pub const V_MOD_MAP: Self = Self(1 << 7);
@@ -1591,6 +1615,7 @@ impl core::fmt::Debug for Explicit  {
 bitmask_binop!(Explicit, u8);
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SymInterpretMatch(u8);
 impl SymInterpretMatch {
     pub const NONE_OF: Self = Self(0);
@@ -1655,6 +1680,7 @@ impl core::fmt::Debug for SymInterpretMatch  {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SymInterpMatch(u8);
 impl SymInterpMatch {
     pub const LEVEL_ONE_ONLY: Self = Self(1 << 7);
@@ -1713,6 +1739,7 @@ impl core::fmt::Debug for SymInterpMatch  {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct IMFlag(u8);
 impl IMFlag {
     pub const NO_EXPLICIT: Self = Self(1 << 7);
@@ -1774,6 +1801,7 @@ impl core::fmt::Debug for IMFlag  {
 bitmask_binop!(IMFlag, u8);
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct IMModsWhich(u8);
 impl IMModsWhich {
     pub const USE_COMPAT: Self = Self(1 << 4);
@@ -1839,6 +1867,7 @@ impl core::fmt::Debug for IMModsWhich  {
 bitmask_binop!(IMModsWhich, u8);
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct IMGroupsWhich(u8);
 impl IMGroupsWhich {
     pub const USE_COMPAT: Self = Self(1 << 4);
@@ -1904,6 +1933,7 @@ impl core::fmt::Debug for IMGroupsWhich  {
 bitmask_binop!(IMGroupsWhich, u8);
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct IndicatorMap {
     pub flags: IMFlag,
     pub which_groups: IMGroupsWhich,
@@ -1972,6 +2002,7 @@ impl Serialize for IndicatorMap {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CMDetail(u8);
 impl CMDetail {
     pub const SYM_INTERP: Self = Self(1 << 0);
@@ -2031,6 +2062,7 @@ impl core::fmt::Debug for CMDetail  {
 bitmask_binop!(CMDetail, u8);
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct NameDetail(u16);
 impl NameDetail {
     pub const KEYCODES: Self = Self(1 << 0);
@@ -2108,6 +2140,7 @@ impl core::fmt::Debug for NameDetail  {
 bitmask_binop!(NameDetail, u16);
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GBNDetail(u8);
 impl GBNDetail {
     pub const TYPES: Self = Self(1 << 0);
@@ -2179,6 +2212,7 @@ impl core::fmt::Debug for GBNDetail  {
 bitmask_binop!(GBNDetail, u8);
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct XIFeature(u8);
 impl XIFeature {
     pub const KEYBOARDS: Self = Self(1 << 0);
@@ -2244,6 +2278,7 @@ impl core::fmt::Debug for XIFeature  {
 bitmask_binop!(XIFeature, u8);
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PerClientFlag(u8);
 impl PerClientFlag {
     pub const DETECTABLE_AUTO_REPEAT: Self = Self(1 << 0);
@@ -2309,6 +2344,7 @@ impl core::fmt::Debug for PerClientFlag  {
 bitmask_binop!(PerClientFlag, u8);
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ModDef {
     pub mask: u8,
     pub real_mods: u8,
@@ -2345,6 +2381,7 @@ impl Serialize for ModDef {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct KeyName {
     pub name: [u8; 4],
 }
@@ -2373,6 +2410,7 @@ impl Serialize for KeyName {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct KeyAlias {
     pub real: [u8; 4],
     pub alias: [u8; 4],
@@ -2409,6 +2447,7 @@ impl Serialize for KeyAlias {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CountedString16 {
     pub string: Vec<u8>,
     pub alignment_pad: Vec<u8>,
@@ -2456,6 +2495,7 @@ impl CountedString16 {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct KTMapEntry {
     pub active: bool,
     pub mods_mask: u8,
@@ -2506,6 +2546,7 @@ impl Serialize for KTMapEntry {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct KeyType {
     pub mods_mask: u8,
     pub mods_mods: u8,
@@ -2569,6 +2610,7 @@ impl KeyType {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct KeySymMap {
     pub kt_index: [u8; 4],
     pub group_info: u8,
@@ -2621,6 +2663,7 @@ impl KeySymMap {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CommonBehavior {
     pub type_: u8,
     pub data: u8,
@@ -2651,6 +2694,7 @@ impl Serialize for CommonBehavior {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DefaultBehavior {
     pub type_: u8,
 }
@@ -2681,6 +2725,7 @@ impl Serialize for DefaultBehavior {
 pub type LockBehavior = DefaultBehavior;
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct RadioGroupBehavior {
     pub type_: u8,
     pub group: u8,
@@ -2711,6 +2756,7 @@ impl Serialize for RadioGroupBehavior {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct OverlayBehavior {
     pub type_: u8,
     pub key: xproto::Keycode,
@@ -2747,6 +2793,7 @@ pub type PermamentRadioGroupBehavior = RadioGroupBehavior;
 pub type PermamentOverlayBehavior = OverlayBehavior;
 
 #[derive(Debug, Copy, Clone)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Behavior([u8; 2]);
 impl Behavior {
     pub fn as_common(&self) -> CommonBehavior {
@@ -2893,6 +2940,7 @@ impl From<u8> for Behavior {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct BehaviorType(u8);
 impl BehaviorType {
     pub const DEFAULT: Self = Self(0);
@@ -2965,6 +3013,7 @@ impl core::fmt::Debug for BehaviorType  {
 }
 
 #[derive(Debug, Clone, Copy)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetBehavior {
     pub keycode: xproto::Keycode,
     pub behavior: Behavior,
@@ -2999,6 +3048,7 @@ impl Serialize for SetBehavior {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetExplicit {
     pub keycode: xproto::Keycode,
     pub explicit: u8,
@@ -3029,6 +3079,7 @@ impl Serialize for SetExplicit {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct KeyModMap {
     pub keycode: xproto::Keycode,
     pub mods: u8,
@@ -3059,6 +3110,7 @@ impl Serialize for KeyModMap {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct KeyVModMap {
     pub keycode: xproto::Keycode,
     pub vmods: u16,
@@ -3093,6 +3145,7 @@ impl Serialize for KeyVModMap {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct KTSetMapEntry {
     pub level: u8,
     pub real_mods: u8,
@@ -3129,6 +3182,7 @@ impl Serialize for KTSetMapEntry {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetKeyType {
     pub mask: u8,
     pub real_mods: u8,
@@ -3194,6 +3248,7 @@ impl SetKeyType {
 pub type String8 = u8;
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Outline {
     pub corner_radius: u8,
     pub points: Vec<xproto::Point>,
@@ -3241,6 +3296,7 @@ impl Outline {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Shape {
     pub name: xproto::Atom,
     pub primary_ndx: u8,
@@ -3294,6 +3350,7 @@ impl Shape {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Key {
     pub name: [String8; 4],
     pub gap: i16,
@@ -3338,6 +3395,7 @@ impl Serialize for Key {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct OverlayKey {
     pub over: [String8; 4],
     pub under: [String8; 4],
@@ -3374,6 +3432,7 @@ impl Serialize for OverlayKey {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct OverlayRow {
     pub row_under: u8,
     pub keys: Vec<OverlayKey>,
@@ -3421,6 +3480,7 @@ impl OverlayRow {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Overlay {
     pub name: xproto::Atom,
     pub rows: Vec<OverlayRow>,
@@ -3468,6 +3528,7 @@ impl Overlay {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Row {
     pub top: i16,
     pub left: i16,
@@ -3521,6 +3582,7 @@ impl Row {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DoodadType(u8);
 impl DoodadType {
     pub const OUTLINE: Self = Self(1);
@@ -3585,6 +3647,7 @@ impl core::fmt::Debug for DoodadType  {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Listing {
     pub flags: u16,
     pub string: Vec<String8>,
@@ -3637,6 +3700,7 @@ impl Listing {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DeviceLedInfo {
     pub led_class: LedClass,
     pub led_id: IDSpec,
@@ -3685,6 +3749,7 @@ impl Serialize for DeviceLedInfo {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Error(u8);
 impl Error {
     pub const BAD_DEVICE: Self = Self(255);
@@ -3748,6 +3813,7 @@ impl core::fmt::Debug for Error  {
 pub const KEYBOARD_ERROR: u8 = 0;
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SA(u8);
 impl SA {
     pub const CLEAR_LOCKS: Self = Self(1 << 0);
@@ -3811,6 +3877,7 @@ impl core::fmt::Debug for SA  {
 bitmask_binop!(SA, u8);
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SAType(u8);
 impl SAType {
     pub const NO_ACTION: Self = Self(0);
@@ -3907,6 +3974,7 @@ impl core::fmt::Debug for SAType  {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SANoAction {
     pub type_: SAType,
 }
@@ -3942,6 +4010,7 @@ impl Serialize for SANoAction {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SASetMods {
     pub type_: SAType,
     pub flags: u8,
@@ -4001,6 +4070,7 @@ pub type SALatchMods = SASetMods;
 pub type SALockMods = SASetMods;
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SASetGroup {
     pub type_: SAType,
     pub flags: u8,
@@ -4048,6 +4118,7 @@ pub type SALatchGroup = SASetGroup;
 pub type SALockGroup = SASetGroup;
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SAMovePtrFlag(u8);
 impl SAMovePtrFlag {
     pub const NO_ACCELERATION: Self = Self(1 << 0);
@@ -4109,6 +4180,7 @@ impl core::fmt::Debug for SAMovePtrFlag  {
 bitmask_binop!(SAMovePtrFlag, u8);
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SAMovePtr {
     pub type_: SAType,
     pub flags: u8,
@@ -4164,6 +4236,7 @@ impl Serialize for SAMovePtr {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SAPtrBtn {
     pub type_: SAType,
     pub flags: u8,
@@ -4211,6 +4284,7 @@ impl Serialize for SAPtrBtn {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SALockPtrBtn {
     pub type_: SAType,
     pub flags: u8,
@@ -4256,6 +4330,7 @@ impl Serialize for SALockPtrBtn {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SASetPtrDfltFlag(u8);
 impl SASetPtrDfltFlag {
     pub const DFLT_BTN_ABSOLUTE: Self = Self(1 << 2);
@@ -4315,6 +4390,7 @@ impl core::fmt::Debug for SASetPtrDfltFlag  {
 bitmask_binop!(SASetPtrDfltFlag, u8);
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SASetPtrDflt {
     pub type_: SAType,
     pub flags: u8,
@@ -4362,6 +4438,7 @@ impl Serialize for SASetPtrDflt {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SAIsoLockFlag(u8);
 impl SAIsoLockFlag {
     pub const NO_LOCK: Self = Self(1 << 0);
@@ -4427,6 +4504,7 @@ impl core::fmt::Debug for SAIsoLockFlag  {
 bitmask_binop!(SAIsoLockFlag, u8);
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SAIsoLockNoAffect(u8);
 impl SAIsoLockNoAffect {
     pub const CTRLS: Self = Self(1 << 3);
@@ -4490,6 +4568,7 @@ impl core::fmt::Debug for SAIsoLockNoAffect  {
 bitmask_binop!(SAIsoLockNoAffect, u8);
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SAIsoLock {
     pub type_: SAType,
     pub flags: u8,
@@ -4551,6 +4630,7 @@ impl Serialize for SAIsoLock {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SATerminate {
     pub type_: SAType,
 }
@@ -4586,6 +4666,7 @@ impl Serialize for SATerminate {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SwitchScreenFlag(u8);
 impl SwitchScreenFlag {
     pub const APPLICATION: Self = Self(1 << 0);
@@ -4645,6 +4726,7 @@ impl core::fmt::Debug for SwitchScreenFlag  {
 bitmask_binop!(SwitchScreenFlag, u8);
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SASwitchScreen {
     pub type_: SAType,
     pub flags: u8,
@@ -4688,6 +4770,7 @@ impl Serialize for SASwitchScreen {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct BoolCtrlsHigh(u8);
 impl BoolCtrlsHigh {
     pub const ACCESS_X_FEEDBACK: Self = Self(1 << 0);
@@ -4753,6 +4836,7 @@ impl core::fmt::Debug for BoolCtrlsHigh  {
 bitmask_binop!(BoolCtrlsHigh, u8);
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct BoolCtrlsLow(u8);
 impl BoolCtrlsLow {
     pub const REPEAT_KEYS: Self = Self(1 << 0);
@@ -4824,6 +4908,7 @@ impl core::fmt::Debug for BoolCtrlsLow  {
 bitmask_binop!(BoolCtrlsLow, u8);
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SASetControls {
     pub type_: SAType,
     pub bool_ctrls_high: u8,
@@ -4871,6 +4956,7 @@ impl Serialize for SASetControls {
 pub type SALockControls = SASetControls;
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ActionMessageFlag(u8);
 impl ActionMessageFlag {
     pub const ON_PRESS: Self = Self(1 << 0);
@@ -4932,6 +5018,7 @@ impl core::fmt::Debug for ActionMessageFlag  {
 bitmask_binop!(ActionMessageFlag, u8);
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SAActionMessage {
     pub type_: SAType,
     pub flags: u8,
@@ -4973,6 +5060,7 @@ impl Serialize for SAActionMessage {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SARedirectKey {
     pub type_: SAType,
     pub newkey: xproto::Keycode,
@@ -5034,6 +5122,7 @@ impl Serialize for SARedirectKey {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SADeviceBtn {
     pub type_: SAType,
     pub flags: u8,
@@ -5085,6 +5174,7 @@ impl Serialize for SADeviceBtn {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct LockDeviceFlags(u8);
 impl LockDeviceFlags {
     pub const NO_LOCK: Self = Self(1 << 0);
@@ -5144,6 +5234,7 @@ impl core::fmt::Debug for LockDeviceFlags  {
 bitmask_binop!(LockDeviceFlags, u8);
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SALockDeviceBtn {
     pub type_: SAType,
     pub flags: u8,
@@ -5193,6 +5284,7 @@ impl Serialize for SALockDeviceBtn {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SAValWhat(u8);
 impl SAValWhat {
     pub const IGNORE_VAL: Self = Self(0);
@@ -5259,6 +5351,7 @@ impl core::fmt::Debug for SAValWhat  {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SADeviceValuator {
     pub type_: SAType,
     pub device: u8,
@@ -5322,6 +5415,7 @@ impl Serialize for SADeviceValuator {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SIAction {
     pub type_: SAType,
     pub data: [u8; 7],
@@ -5359,6 +5453,7 @@ impl Serialize for SIAction {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SymInterpret {
     pub sym: xproto::Keysym,
     pub mods: u8,
@@ -5419,6 +5514,7 @@ impl Serialize for SymInterpret {
 }
 
 #[derive(Debug, Copy, Clone)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Action([u8; 8]);
 impl Action {
     pub fn as_noaction(&self) -> SANoAction {
@@ -5734,6 +5830,7 @@ impl From<SAType> for Action {
 /// Opcode for the UseExtension request
 pub const USE_EXTENSION_REQUEST: u8 = 0;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct UseExtensionRequest {
     pub wanted_major: u16,
     pub wanted_minor: u16,
@@ -5789,6 +5886,7 @@ impl crate::x11_utils::ReplyRequest for UseExtensionRequest {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct UseExtensionReply {
     pub supported: bool,
     pub sequence: u16,
@@ -5818,6 +5916,7 @@ impl TryParse for UseExtensionReply {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SelectEventsAuxBitcase1 {
     pub affect_new_keyboard: u16,
     pub new_keyboard_details: u16,
@@ -5849,6 +5948,7 @@ impl Serialize for SelectEventsAuxBitcase1 {
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SelectEventsAuxBitcase2 {
     pub affect_state: u16,
     pub state_details: u16,
@@ -5880,6 +5980,7 @@ impl Serialize for SelectEventsAuxBitcase2 {
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SelectEventsAuxBitcase3 {
     pub affect_ctrls: u32,
     pub ctrl_details: u32,
@@ -5915,6 +6016,7 @@ impl Serialize for SelectEventsAuxBitcase3 {
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SelectEventsAuxBitcase4 {
     pub affect_indicator_state: u32,
     pub indicator_state_details: u32,
@@ -5950,6 +6052,7 @@ impl Serialize for SelectEventsAuxBitcase4 {
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SelectEventsAuxBitcase5 {
     pub affect_indicator_map: u32,
     pub indicator_map_details: u32,
@@ -5985,6 +6088,7 @@ impl Serialize for SelectEventsAuxBitcase5 {
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SelectEventsAuxBitcase6 {
     pub affect_names: u16,
     pub names_details: u16,
@@ -6016,6 +6120,7 @@ impl Serialize for SelectEventsAuxBitcase6 {
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SelectEventsAuxBitcase7 {
     pub affect_compat: u8,
     pub compat_details: u8,
@@ -6045,6 +6150,7 @@ impl Serialize for SelectEventsAuxBitcase7 {
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SelectEventsAuxBitcase8 {
     pub affect_bell: u8,
     pub bell_details: u8,
@@ -6074,6 +6180,7 @@ impl Serialize for SelectEventsAuxBitcase8 {
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SelectEventsAuxBitcase9 {
     pub affect_msg_details: u8,
     pub msg_details: u8,
@@ -6103,6 +6210,7 @@ impl Serialize for SelectEventsAuxBitcase9 {
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SelectEventsAuxBitcase10 {
     pub affect_access_x: u16,
     pub access_x_details: u16,
@@ -6134,6 +6242,7 @@ impl Serialize for SelectEventsAuxBitcase10 {
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SelectEventsAuxBitcase11 {
     pub affect_ext_dev: u16,
     pub extdev_details: u16,
@@ -6166,6 +6275,7 @@ impl Serialize for SelectEventsAuxBitcase11 {
 }
 /// Auxiliary and optional information for the `select_events` function
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SelectEventsAux {
     pub bitcase1: Option<SelectEventsAuxBitcase1>,
     pub bitcase2: Option<SelectEventsAuxBitcase2>,
@@ -6423,6 +6533,7 @@ impl SelectEventsAux {
 /// Opcode for the SelectEvents request
 pub const SELECT_EVENTS_REQUEST: u8 = 1;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SelectEventsRequest<'input> {
     pub device_spec: DeviceSpec,
     pub clear: u16,
@@ -6520,6 +6631,7 @@ impl<'input> crate::x11_utils::VoidRequest for SelectEventsRequest<'input> {
 /// Opcode for the Bell request
 pub const BELL_REQUEST: u8 = 3;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct BellRequest {
     pub device_spec: DeviceSpec,
     pub bell_class: BellClassSpec,
@@ -6630,6 +6742,7 @@ impl crate::x11_utils::VoidRequest for BellRequest {
 /// Opcode for the GetState request
 pub const GET_STATE_REQUEST: u8 = 4;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetStateRequest {
     pub device_spec: DeviceSpec,
 }
@@ -6682,6 +6795,7 @@ impl crate::x11_utils::ReplyRequest for GetStateRequest {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetStateReply {
     pub device_id: u8,
     pub sequence: u16,
@@ -6740,6 +6854,7 @@ impl TryParse for GetStateReply {
 /// Opcode for the LatchLockState request
 pub const LATCH_LOCK_STATE_REQUEST: u8 = 5;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct LatchLockStateRequest {
     pub device_spec: DeviceSpec,
     pub affect_mod_locks: u8,
@@ -6831,6 +6946,7 @@ impl crate::x11_utils::VoidRequest for LatchLockStateRequest {
 /// Opcode for the GetControls request
 pub const GET_CONTROLS_REQUEST: u8 = 6;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetControlsRequest {
     pub device_spec: DeviceSpec,
 }
@@ -6883,6 +6999,7 @@ impl crate::x11_utils::ReplyRequest for GetControlsRequest {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetControlsReply {
     pub device_id: u8,
     pub sequence: u16,
@@ -6964,6 +7081,7 @@ impl TryParse for GetControlsReply {
 /// Opcode for the SetControls request
 pub const SET_CONTROLS_REQUEST: u8 = 7;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetControlsRequest<'input> {
     pub device_spec: DeviceSpec,
     pub affect_internal_real_mods: u8,
@@ -7229,6 +7347,7 @@ impl<'input> crate::x11_utils::VoidRequest for SetControlsRequest<'input> {
 /// Opcode for the GetMap request
 pub const GET_MAP_REQUEST: u8 = 8;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetMapRequest {
     pub device_spec: DeviceSpec,
     pub full: u16,
@@ -7369,6 +7488,7 @@ impl crate::x11_utils::ReplyRequest for GetMapRequest {
 }
 
 #[derive(Debug, Clone)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetMapMapBitcase3 {
     pub acts_rtrn_count: Vec<u8>,
     pub acts_rtrn_acts: Vec<Action>,
@@ -7388,6 +7508,7 @@ impl GetMapMapBitcase3 {
     }
 }
 #[derive(Debug, Clone, Default)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetMapMap {
     pub types_rtrn: Option<Vec<KeyType>>,
     pub syms_rtrn: Option<Vec<KeySymMap>>,
@@ -7487,6 +7608,7 @@ impl GetMapMap {
 }
 
 #[derive(Debug, Clone)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetMapReply {
     pub device_id: u8,
     pub sequence: u16,
@@ -7564,6 +7686,7 @@ impl TryParse for GetMapReply {
 }
 
 #[derive(Debug, Clone)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetMapAuxBitcase3 {
     pub actions_count: Vec<u8>,
     pub actions: Vec<Action>,
@@ -7599,6 +7722,7 @@ impl SetMapAuxBitcase3 {
 }
 /// Auxiliary and optional information for the `set_map` function
 #[derive(Debug, Clone, Default)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetMapAux {
     pub types: Option<Vec<SetKeyType>>,
     pub syms: Option<Vec<KeySymMap>>,
@@ -7817,6 +7941,7 @@ impl SetMapAux {
 /// Opcode for the SetMap request
 pub const SET_MAP_REQUEST: u8 = 9;
 #[derive(Debug, Clone)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetMapRequest<'input> {
     pub device_spec: DeviceSpec,
     pub flags: u16,
@@ -8034,6 +8159,7 @@ impl<'input> crate::x11_utils::VoidRequest for SetMapRequest<'input> {
 /// Opcode for the GetCompatMap request
 pub const GET_COMPAT_MAP_REQUEST: u8 = 10;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetCompatMapRequest {
     pub device_spec: DeviceSpec,
     pub groups: u8,
@@ -8105,6 +8231,7 @@ impl crate::x11_utils::ReplyRequest for GetCompatMapRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetCompatMapReply {
     pub device_id: u8,
     pub sequence: u16,
@@ -8159,6 +8286,7 @@ impl GetCompatMapReply {
 /// Opcode for the SetCompatMap request
 pub const SET_COMPAT_MAP_REQUEST: u8 = 11;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetCompatMapRequest<'input> {
     pub device_spec: DeviceSpec,
     pub recompute_actions: bool,
@@ -8265,6 +8393,7 @@ impl<'input> crate::x11_utils::VoidRequest for SetCompatMapRequest<'input> {
 /// Opcode for the GetIndicatorState request
 pub const GET_INDICATOR_STATE_REQUEST: u8 = 12;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetIndicatorStateRequest {
     pub device_spec: DeviceSpec,
 }
@@ -8317,6 +8446,7 @@ impl crate::x11_utils::ReplyRequest for GetIndicatorStateRequest {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetIndicatorStateReply {
     pub device_id: u8,
     pub sequence: u16,
@@ -8346,6 +8476,7 @@ impl TryParse for GetIndicatorStateReply {
 /// Opcode for the GetIndicatorMap request
 pub const GET_INDICATOR_MAP_REQUEST: u8 = 13;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetIndicatorMapRequest {
     pub device_spec: DeviceSpec,
     pub which: u32,
@@ -8406,6 +8537,7 @@ impl crate::x11_utils::ReplyRequest for GetIndicatorMapRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetIndicatorMapReply {
     pub device_id: u8,
     pub sequence: u16,
@@ -8441,6 +8573,7 @@ impl TryParse for GetIndicatorMapReply {
 /// Opcode for the SetIndicatorMap request
 pub const SET_INDICATOR_MAP_REQUEST: u8 = 14;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetIndicatorMapRequest<'input> {
     pub device_spec: DeviceSpec,
     pub which: u32,
@@ -8518,6 +8651,7 @@ impl<'input> crate::x11_utils::VoidRequest for SetIndicatorMapRequest<'input> {
 /// Opcode for the GetNamedIndicator request
 pub const GET_NAMED_INDICATOR_REQUEST: u8 = 15;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetNamedIndicatorRequest {
     pub device_spec: DeviceSpec,
     pub led_class: LedClass,
@@ -8591,6 +8725,7 @@ impl crate::x11_utils::ReplyRequest for GetNamedIndicatorRequest {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetNamedIndicatorReply {
     pub device_id: u8,
     pub sequence: u16,
@@ -8646,6 +8781,7 @@ impl TryParse for GetNamedIndicatorReply {
 /// Opcode for the SetNamedIndicator request
 pub const SET_NAMED_INDICATOR_REQUEST: u8 = 16;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetNamedIndicatorRequest {
     pub device_spec: DeviceSpec,
     pub led_class: LedClass,
@@ -8781,6 +8917,7 @@ impl crate::x11_utils::VoidRequest for SetNamedIndicatorRequest {
 /// Opcode for the GetNames request
 pub const GET_NAMES_REQUEST: u8 = 17;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetNamesRequest {
     pub device_spec: DeviceSpec,
     pub which: u32,
@@ -8841,6 +8978,7 @@ impl crate::x11_utils::ReplyRequest for GetNamesRequest {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetNamesValueListBitcase8 {
     pub n_levels_per_type: Vec<u8>,
     pub kt_level_names: Vec<xproto::Atom>,
@@ -8860,6 +8998,7 @@ impl GetNamesValueListBitcase8 {
     }
 }
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetNamesValueList {
     pub keycodes_name: Option<xproto::Atom>,
     pub geometry_name: Option<xproto::Atom>,
@@ -8997,6 +9136,7 @@ impl GetNamesValueList {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetNamesReply {
     pub device_id: u8,
     pub sequence: u16,
@@ -9047,6 +9187,7 @@ impl TryParse for GetNamesReply {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetNamesAuxBitcase8 {
     pub n_levels_per_type: Vec<u8>,
     pub kt_level_names: Vec<xproto::Atom>,
@@ -9082,6 +9223,7 @@ impl SetNamesAuxBitcase8 {
 }
 /// Auxiliary and optional information for the `set_names` function
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetNamesAux {
     pub keycodes_name: Option<xproto::Atom>,
     pub geometry_name: Option<xproto::Atom>,
@@ -9419,6 +9561,7 @@ impl SetNamesAux {
 /// Opcode for the SetNames request
 pub const SET_NAMES_REQUEST: u8 = 18;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetNamesRequest<'input> {
     pub device_spec: DeviceSpec,
     pub virtual_mods: u16,
@@ -9569,6 +9712,7 @@ impl<'input> crate::x11_utils::VoidRequest for SetNamesRequest<'input> {
 /// Opcode for the PerClientFlags request
 pub const PER_CLIENT_FLAGS_REQUEST: u8 = 21;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PerClientFlagsRequest {
     pub device_spec: DeviceSpec,
     pub change: u32,
@@ -9661,6 +9805,7 @@ impl crate::x11_utils::ReplyRequest for PerClientFlagsRequest {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PerClientFlagsReply {
     pub device_id: u8,
     pub sequence: u16,
@@ -9696,6 +9841,7 @@ impl TryParse for PerClientFlagsReply {
 /// Opcode for the ListComponents request
 pub const LIST_COMPONENTS_REQUEST: u8 = 22;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ListComponentsRequest {
     pub device_spec: DeviceSpec,
     pub max_names: u16,
@@ -9751,6 +9897,7 @@ impl crate::x11_utils::ReplyRequest for ListComponentsRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ListComponentsReply {
     pub device_id: u8,
     pub sequence: u16,
@@ -9878,6 +10025,7 @@ impl ListComponentsReply {
 /// Opcode for the GetKbdByName request
 pub const GET_KBD_BY_NAME_REQUEST: u8 = 23;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetKbdByNameRequest {
     pub device_spec: DeviceSpec,
     pub need: u16,
@@ -9946,6 +10094,7 @@ impl crate::x11_utils::ReplyRequest for GetKbdByNameRequest {
 }
 
 #[derive(Debug, Clone)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetKbdByNameRepliesTypesMapBitcase3 {
     pub acts_rtrn_count: Vec<u8>,
     pub acts_rtrn_acts: Vec<Action>,
@@ -9965,6 +10114,7 @@ impl GetKbdByNameRepliesTypesMapBitcase3 {
     }
 }
 #[derive(Debug, Clone, Default)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetKbdByNameRepliesTypesMap {
     pub types_rtrn: Option<Vec<KeyType>>,
     pub syms_rtrn: Option<Vec<KeySymMap>>,
@@ -10064,6 +10214,7 @@ impl GetKbdByNameRepliesTypesMap {
 }
 
 #[derive(Debug, Clone)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetKbdByNameRepliesTypes {
     pub getmap_type: u8,
     pub type_device_id: u8,
@@ -10134,6 +10285,7 @@ impl TryParse for GetKbdByNameRepliesTypes {
     }
 }
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetKbdByNameRepliesCompatMap {
     pub compatmap_type: u8,
     pub compat_device_id: u8,
@@ -10179,6 +10331,7 @@ impl GetKbdByNameRepliesCompatMap {
     }
 }
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetKbdByNameRepliesIndicatorMaps {
     pub indicatormap_type: u8,
     pub indicator_device_id: u8,
@@ -10219,6 +10372,7 @@ impl GetKbdByNameRepliesIndicatorMaps {
     }
 }
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetKbdByNameRepliesKeyNamesValueListBitcase8 {
     pub n_levels_per_type: Vec<u8>,
     pub kt_level_names: Vec<xproto::Atom>,
@@ -10238,6 +10392,7 @@ impl GetKbdByNameRepliesKeyNamesValueListBitcase8 {
     }
 }
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetKbdByNameRepliesKeyNamesValueList {
     pub keycodes_name: Option<xproto::Atom>,
     pub geometry_name: Option<xproto::Atom>,
@@ -10375,6 +10530,7 @@ impl GetKbdByNameRepliesKeyNamesValueList {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetKbdByNameRepliesKeyNames {
     pub keyname_type: u8,
     pub key_device_id: u8,
@@ -10418,6 +10574,7 @@ impl TryParse for GetKbdByNameRepliesKeyNames {
     }
 }
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetKbdByNameRepliesGeometry {
     pub geometry_type: u8,
     pub geometry_device_id: u8,
@@ -10462,6 +10619,7 @@ impl TryParse for GetKbdByNameRepliesGeometry {
     }
 }
 #[derive(Debug, Clone, Default)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetKbdByNameReplies {
     pub types: Option<GetKbdByNameRepliesTypes>,
     pub compat_map: Option<GetKbdByNameRepliesCompatMap>,
@@ -10514,6 +10672,7 @@ impl GetKbdByNameReplies {
 }
 
 #[derive(Debug, Clone)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetKbdByNameReply {
     pub device_id: u8,
     pub sequence: u16,
@@ -10555,6 +10714,7 @@ impl TryParse for GetKbdByNameReply {
 /// Opcode for the GetDeviceInfo request
 pub const GET_DEVICE_INFO_REQUEST: u8 = 24;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetDeviceInfoRequest {
     pub device_spec: DeviceSpec,
     pub wanted: u16,
@@ -10640,6 +10800,7 @@ impl crate::x11_utils::ReplyRequest for GetDeviceInfoRequest {
 }
 
 #[derive(Debug, Clone)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetDeviceInfoReply {
     pub device_id: u8,
     pub sequence: u16,
@@ -10745,6 +10906,7 @@ impl GetDeviceInfoReply {
 /// Opcode for the SetDeviceInfo request
 pub const SET_DEVICE_INFO_REQUEST: u8 = 25;
 #[derive(Debug, Clone)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetDeviceInfoRequest<'input> {
     pub device_spec: DeviceSpec,
     pub first_btn: u8,
@@ -10837,6 +10999,7 @@ impl<'input> crate::x11_utils::VoidRequest for SetDeviceInfoRequest<'input> {
 /// Opcode for the SetDebuggingFlags request
 pub const SET_DEBUGGING_FLAGS_REQUEST: u8 = 101;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetDebuggingFlagsRequest<'input> {
     pub affect_flags: u32,
     pub flags: u32,
@@ -10936,6 +11099,7 @@ impl<'input> crate::x11_utils::ReplyRequest for SetDebuggingFlagsRequest<'input>
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetDebuggingFlagsReply {
     pub sequence: u16,
     pub length: u32,
@@ -10970,6 +11134,7 @@ impl TryParse for SetDebuggingFlagsReply {
 /// Opcode for the NewKeyboardNotify event
 pub const NEW_KEYBOARD_NOTIFY_EVENT: u8 = 0;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct NewKeyboardNotifyEvent {
     pub response_type: u8,
     pub xkb_type: u8,
@@ -11069,6 +11234,7 @@ impl From<NewKeyboardNotifyEvent> for [u8; 32] {
 /// Opcode for the MapNotify event
 pub const MAP_NOTIFY_EVENT: u8 = 1;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct MapNotifyEvent {
     pub response_type: u8,
     pub xkb_type: u8,
@@ -11201,6 +11367,7 @@ impl From<MapNotifyEvent> for [u8; 32] {
 /// Opcode for the StateNotify event
 pub const STATE_NOTIFY_EVENT: u8 = 2;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct StateNotifyEvent {
     pub response_type: u8,
     pub xkb_type: u8,
@@ -11334,6 +11501,7 @@ impl From<StateNotifyEvent> for [u8; 32] {
 /// Opcode for the ControlsNotify event
 pub const CONTROLS_NOTIFY_EVENT: u8 = 3;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ControlsNotifyEvent {
     pub response_type: u8,
     pub xkb_type: u8,
@@ -11434,6 +11602,7 @@ impl From<ControlsNotifyEvent> for [u8; 32] {
 /// Opcode for the IndicatorStateNotify event
 pub const INDICATOR_STATE_NOTIFY_EVENT: u8 = 4;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct IndicatorStateNotifyEvent {
     pub response_type: u8,
     pub xkb_type: u8,
@@ -11516,6 +11685,7 @@ impl From<IndicatorStateNotifyEvent> for [u8; 32] {
 /// Opcode for the IndicatorMapNotify event
 pub const INDICATOR_MAP_NOTIFY_EVENT: u8 = 5;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct IndicatorMapNotifyEvent {
     pub response_type: u8,
     pub xkb_type: u8,
@@ -11598,6 +11768,7 @@ impl From<IndicatorMapNotifyEvent> for [u8; 32] {
 /// Opcode for the NamesNotify event
 pub const NAMES_NOTIFY_EVENT: u8 = 6;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct NamesNotifyEvent {
     pub response_type: u8,
     pub xkb_type: u8,
@@ -11711,6 +11882,7 @@ impl From<NamesNotifyEvent> for [u8; 32] {
 /// Opcode for the CompatMapNotify event
 pub const COMPAT_MAP_NOTIFY_EVENT: u8 = 7;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CompatMapNotifyEvent {
     pub response_type: u8,
     pub xkb_type: u8,
@@ -11798,6 +11970,7 @@ impl From<CompatMapNotifyEvent> for [u8; 32] {
 /// Opcode for the BellNotify event
 pub const BELL_NOTIFY_EVENT: u8 = 8;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct BellNotifyEvent {
     pub response_type: u8,
     pub xkb_type: u8,
@@ -11898,6 +12071,7 @@ impl From<BellNotifyEvent> for [u8; 32] {
 /// Opcode for the ActionMessage event
 pub const ACTION_MESSAGE_EVENT: u8 = 9;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ActionMessageEvent {
     pub response_type: u8,
     pub xkb_type: u8,
@@ -11992,6 +12166,7 @@ impl From<ActionMessageEvent> for [u8; 32] {
 /// Opcode for the AccessXNotify event
 pub const ACCESS_X_NOTIFY_EVENT: u8 = 10;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct AccessXNotifyEvent {
     pub response_type: u8,
     pub xkb_type: u8,
@@ -12079,6 +12254,7 @@ impl From<AccessXNotifyEvent> for [u8; 32] {
 /// Opcode for the ExtensionDeviceNotify event
 pub const EXTENSION_DEVICE_NOTIFY_EVENT: u8 = 11;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ExtensionDeviceNotifyEvent {
     pub response_type: u8,
     pub xkb_type: u8,

@@ -35,6 +35,7 @@ pub const X11_XML_VERSION: (u32, u32) = (1, 13);
 pub type Context = u32;
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Range8 {
     pub first: u8,
     pub last: u8,
@@ -65,6 +66,7 @@ impl Serialize for Range8 {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Range16 {
     pub first: u16,
     pub last: u16,
@@ -97,6 +99,7 @@ impl Serialize for Range16 {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ExtRange {
     pub major: Range8,
     pub minor: Range16,
@@ -131,6 +134,7 @@ impl Serialize for ExtRange {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Range {
     pub core_requests: Range8,
     pub core_replies: Range8,
@@ -213,6 +217,7 @@ impl Serialize for Range {
 pub type ElementHeader = u8;
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct HType(u8);
 impl HType {
     pub const FROM_SERVER_TIME: Self = Self(1 << 0);
@@ -276,6 +281,7 @@ bitmask_binop!(HType, u8);
 pub type ClientSpec = u32;
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CS(u8);
 impl CS {
     pub const CURRENT_CLIENTS: Self = Self(1);
@@ -336,6 +342,7 @@ impl core::fmt::Debug for CS  {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ClientInfo {
     pub client_resource: ClientSpec,
     pub ranges: Vec<Range>,
@@ -386,6 +393,7 @@ pub const BAD_CONTEXT_ERROR: u8 = 0;
 /// Opcode for the QueryVersion request
 pub const QUERY_VERSION_REQUEST: u8 = 0;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryVersionRequest {
     pub major_version: u16,
     pub minor_version: u16,
@@ -441,6 +449,7 @@ impl crate::x11_utils::ReplyRequest for QueryVersionRequest {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryVersionReply {
     pub sequence: u16,
     pub length: u32,
@@ -470,6 +479,7 @@ impl TryParse for QueryVersionReply {
 /// Opcode for the CreateContext request
 pub const CREATE_CONTEXT_REQUEST: u8 = 1;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CreateContextRequest<'input> {
     pub context: Context,
     pub element_header: ElementHeader,
@@ -566,6 +576,7 @@ impl<'input> crate::x11_utils::VoidRequest for CreateContextRequest<'input> {
 /// Opcode for the RegisterClients request
 pub const REGISTER_CLIENTS_REQUEST: u8 = 2;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct RegisterClientsRequest<'input> {
     pub context: Context,
     pub element_header: ElementHeader,
@@ -662,6 +673,7 @@ impl<'input> crate::x11_utils::VoidRequest for RegisterClientsRequest<'input> {
 /// Opcode for the UnregisterClients request
 pub const UNREGISTER_CLIENTS_REQUEST: u8 = 3;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct UnregisterClientsRequest<'input> {
     pub context: Context,
     pub client_specs: Cow<'input, [ClientSpec]>,
@@ -735,6 +747,7 @@ impl<'input> crate::x11_utils::VoidRequest for UnregisterClientsRequest<'input> 
 /// Opcode for the GetContext request
 pub const GET_CONTEXT_REQUEST: u8 = 4;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetContextRequest {
     pub context: Context,
 }
@@ -786,6 +799,7 @@ impl crate::x11_utils::ReplyRequest for GetContextRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetContextReply {
     pub enabled: bool,
     pub sequence: u16,
@@ -834,6 +848,7 @@ impl GetContextReply {
 /// Opcode for the EnableContext request
 pub const ENABLE_CONTEXT_REQUEST: u8 = 5;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct EnableContextRequest {
     pub context: Context,
 }
@@ -885,6 +900,7 @@ impl crate::x11_utils::ReplyRequest for EnableContextRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct EnableContextReply {
     pub category: u8,
     pub sequence: u16,
@@ -941,6 +957,7 @@ impl EnableContextReply {
 /// Opcode for the DisableContext request
 pub const DISABLE_CONTEXT_REQUEST: u8 = 6;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DisableContextRequest {
     pub context: Context,
 }
@@ -993,6 +1010,7 @@ impl crate::x11_utils::VoidRequest for DisableContextRequest {
 /// Opcode for the FreeContext request
 pub const FREE_CONTEXT_REQUEST: u8 = 7;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct FreeContextRequest {
     pub context: Context,
 }

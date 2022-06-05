@@ -128,6 +128,10 @@ pub(super) fn emit_switch_type(
     if !derives.is_empty() {
         outln!(out, "#[derive({})]", derives.join(", "));
     }
+    outln!(
+        out,
+        r#"#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]"#
+    );
 
     if switch.kind == xcbdefs::SwitchKind::BitCase {
         outln!(out, "pub struct {} {{", name);

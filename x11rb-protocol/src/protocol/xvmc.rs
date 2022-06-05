@@ -41,6 +41,7 @@ pub type Surface = u32;
 pub type Subpicture = u32;
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SurfaceInfo {
     pub id: Surface,
     pub chroma_format: u16,
@@ -123,6 +124,7 @@ impl Serialize for SurfaceInfo {
 /// Opcode for the QueryVersion request
 pub const QUERY_VERSION_REQUEST: u8 = 0;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryVersionRequest;
 impl QueryVersionRequest {
     /// Serialize this request into bytes for the provided connection
@@ -165,6 +167,7 @@ impl crate::x11_utils::ReplyRequest for QueryVersionRequest {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryVersionReply {
     pub sequence: u16,
     pub length: u32,
@@ -194,6 +197,7 @@ impl TryParse for QueryVersionReply {
 /// Opcode for the ListSurfaceTypes request
 pub const LIST_SURFACE_TYPES_REQUEST: u8 = 1;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ListSurfaceTypesRequest {
     pub port_id: xv::Port,
 }
@@ -245,6 +249,7 @@ impl crate::x11_utils::ReplyRequest for ListSurfaceTypesRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ListSurfaceTypesReply {
     pub sequence: u16,
     pub length: u32,
@@ -289,6 +294,7 @@ impl ListSurfaceTypesReply {
 /// Opcode for the CreateContext request
 pub const CREATE_CONTEXT_REQUEST: u8 = 2;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CreateContextRequest {
     pub context_id: Context,
     pub port_id: xv::Port,
@@ -376,6 +382,7 @@ impl crate::x11_utils::ReplyRequest for CreateContextRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CreateContextReply {
     pub sequence: u16,
     pub width_actual: u16,
@@ -424,6 +431,7 @@ impl CreateContextReply {
 /// Opcode for the DestroyContext request
 pub const DESTROY_CONTEXT_REQUEST: u8 = 3;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DestroyContextRequest {
     pub context_id: Context,
 }
@@ -476,6 +484,7 @@ impl crate::x11_utils::VoidRequest for DestroyContextRequest {
 /// Opcode for the CreateSurface request
 pub const CREATE_SURFACE_REQUEST: u8 = 4;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CreateSurfaceRequest {
     pub surface_id: Surface,
     pub context_id: Context,
@@ -535,6 +544,7 @@ impl crate::x11_utils::ReplyRequest for CreateSurfaceRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CreateSurfaceReply {
     pub sequence: u16,
     pub priv_data: Vec<u32>,
@@ -577,6 +587,7 @@ impl CreateSurfaceReply {
 /// Opcode for the DestroySurface request
 pub const DESTROY_SURFACE_REQUEST: u8 = 5;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DestroySurfaceRequest {
     pub surface_id: Surface,
 }
@@ -629,6 +640,7 @@ impl crate::x11_utils::VoidRequest for DestroySurfaceRequest {
 /// Opcode for the CreateSubpicture request
 pub const CREATE_SUBPICTURE_REQUEST: u8 = 6;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CreateSubpictureRequest {
     pub subpicture_id: Subpicture,
     pub context: Context,
@@ -708,6 +720,7 @@ impl crate::x11_utils::ReplyRequest for CreateSubpictureRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CreateSubpictureReply {
     pub sequence: u16,
     pub width_actual: u16,
@@ -761,6 +774,7 @@ impl CreateSubpictureReply {
 /// Opcode for the DestroySubpicture request
 pub const DESTROY_SUBPICTURE_REQUEST: u8 = 7;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DestroySubpictureRequest {
     pub subpicture_id: Subpicture,
 }
@@ -813,6 +827,7 @@ impl crate::x11_utils::VoidRequest for DestroySubpictureRequest {
 /// Opcode for the ListSubpictureTypes request
 pub const LIST_SUBPICTURE_TYPES_REQUEST: u8 = 8;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ListSubpictureTypesRequest {
     pub port_id: xv::Port,
     pub surface_id: Surface,
@@ -872,6 +887,7 @@ impl crate::x11_utils::ReplyRequest for ListSubpictureTypesRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ListSubpictureTypesReply {
     pub sequence: u16,
     pub length: u32,
