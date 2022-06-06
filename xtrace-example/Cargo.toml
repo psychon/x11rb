@@ -9,8 +9,8 @@ publish = false
 [dependencies]
 smol = "1.2.5"
 
-[dependencies.x11rb]
-path = "../x11rb"
+[dependencies.x11rb-protocol]
+path = "../x11rb-protocol"
 features = ["all-extensions"]
 
 [dependencies.futures-util]

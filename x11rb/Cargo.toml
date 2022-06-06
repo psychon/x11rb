@@ -55,6 +55,7 @@ dl-libxcb = ["allow-unsafe-code", "libloading", "once_cell"]
 
 # Enable this feature to enable all the X11 extensions
 all-extensions = [
+    "x11rb-protocol/all-extensions",
     "composite",
     "damage",
     "dpms",

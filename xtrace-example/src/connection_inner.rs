@@ -1,6 +1,6 @@
-use x11rb::errors::ParseError;
-use x11rb::protocol::{xproto, Event, Reply, Request};
-use x11rb::x11_utils::{
+use x11rb_protocol::errors::ParseError;
+use x11rb_protocol::protocol::{xproto, Event, Reply, Request};
+use x11rb_protocol::x11_utils::{
     parse_request_header, BigRequests, ExtInfoProvider, ExtensionInformation, ReplyParsingFunction,
     TryParse, X11Error,
 };
