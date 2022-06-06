@@ -29,6 +29,37 @@ std = ["nix"]
 # resource databases.
 resource_manager = ["std"]
 
+# Enable this feature to enable all the X11 extensions
+all-extensions = [
+    "composite",
+    "damage",
+    "dpms",
+    "dri2",
+    "dri3",
+    "glx",
+    "present",
+    "randr",
+    "record",
+    "render",
+    "res",
+    "screensaver",
+    "shape",
+    "shm",
+    "sync",
+    "xevie",
+    "xf86dri",
+    "xf86vidmode",
+    "xfixes",
+    "xinerama",
+    "xinput",
+    "xkb",
+    "xprint",
+    "xselinux",
+    "xtest",
+    "xv",
+    "xvmc",
+]
+
 # Features to enable individual X11 extensions
 composite = ["xfixes"]
 damage = ["xfixes"]

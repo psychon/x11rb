@@ -4,7 +4,7 @@ use std::convert::{TryFrom, TryInto};
 use std::io::Result as IOResult;
 use std::sync::atomic::{AtomicBool, Ordering};
 
-use x11rb::protocol::xproto::GE_GENERIC_EVENT;
+use x11rb_protocol::protocol::xproto::GE_GENERIC_EVENT;
 
 use crate::connection_inner::ConnectionInner;
 use crate::forwarder::forward_with_callback;
