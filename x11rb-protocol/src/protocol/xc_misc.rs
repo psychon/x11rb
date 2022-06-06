@@ -35,6 +35,7 @@ pub const X11_XML_VERSION: (u32, u32) = (1, 1);
 /// Opcode for the GetVersion request
 pub const GET_VERSION_REQUEST: u8 = 0;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetVersionRequest {
     pub client_major_version: u16,
     pub client_minor_version: u16,
@@ -90,6 +91,7 @@ impl crate::x11_utils::ReplyRequest for GetVersionRequest {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetVersionReply {
     pub sequence: u16,
     pub length: u32,
@@ -119,6 +121,7 @@ impl TryParse for GetVersionReply {
 /// Opcode for the GetXIDRange request
 pub const GET_XID_RANGE_REQUEST: u8 = 1;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetXIDRangeRequest;
 impl GetXIDRangeRequest {
     /// Serialize this request into bytes for the provided connection
@@ -161,6 +164,7 @@ impl crate::x11_utils::ReplyRequest for GetXIDRangeRequest {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetXIDRangeReply {
     pub sequence: u16,
     pub length: u32,
@@ -190,6 +194,7 @@ impl TryParse for GetXIDRangeReply {
 /// Opcode for the GetXIDList request
 pub const GET_XID_LIST_REQUEST: u8 = 2;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetXIDListRequest {
     pub count: u32,
 }
@@ -241,6 +246,7 @@ impl crate::x11_utils::ReplyRequest for GetXIDListRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetXIDListReply {
     pub sequence: u16,
     pub length: u32,

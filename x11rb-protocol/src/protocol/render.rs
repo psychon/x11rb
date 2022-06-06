@@ -35,6 +35,7 @@ pub const X11_EXTENSION_NAME: &str = "RENDER";
 pub const X11_XML_VERSION: (u32, u32) = (0, 11);
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PictType(u8);
 impl PictType {
     pub const INDEXED: Self = Self(0);
@@ -93,6 +94,7 @@ impl core::fmt::Debug for PictType  {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PictureEnum(u8);
 impl PictureEnum {
     pub const NONE: Self = Self(0);
@@ -149,6 +151,7 @@ impl core::fmt::Debug for PictureEnum  {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PictOp(u8);
 impl PictOp {
     pub const CLEAR: Self = Self(0);
@@ -309,6 +312,7 @@ impl core::fmt::Debug for PictOp  {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PolyEdge(u32);
 impl PolyEdge {
     pub const SHARP: Self = Self(0);
@@ -355,6 +359,7 @@ impl core::fmt::Debug for PolyEdge  {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PolyMode(u32);
 impl PolyMode {
     pub const PRECISE: Self = Self(0);
@@ -401,6 +406,7 @@ impl core::fmt::Debug for PolyMode  {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CP(u16);
 impl CP {
     pub const REPEAT: Self = Self(1 << 0);
@@ -476,6 +482,7 @@ impl core::fmt::Debug for CP  {
 bitmask_binop!(CP, u16);
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SubPixel(u32);
 impl SubPixel {
     pub const UNKNOWN: Self = Self(0);
@@ -530,6 +537,7 @@ impl core::fmt::Debug for SubPixel  {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Repeat(u32);
 impl Repeat {
     pub const NONE: Self = Self(0);
@@ -605,6 +613,7 @@ pub const GLYPH_SET_ERROR: u8 = 3;
 pub const GLYPH_ERROR: u8 = 4;
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Directformat {
     pub red_shift: u16,
     pub red_mask: u16,
@@ -673,6 +682,7 @@ impl Serialize for Directformat {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Pictforminfo {
     pub id: Pictformat,
     pub type_: PictType,
@@ -744,6 +754,7 @@ impl Serialize for Pictforminfo {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Pictvisual {
     pub visual: xproto::Visualid,
     pub format: Pictformat,
@@ -780,6 +791,7 @@ impl Serialize for Pictvisual {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Pictdepth {
     pub depth: u8,
     pub visuals: Vec<Pictvisual>,
@@ -829,6 +841,7 @@ impl Pictdepth {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Pictscreen {
     pub fallback: Pictformat,
     pub depths: Vec<Pictdepth>,
@@ -874,6 +887,7 @@ impl Pictscreen {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Indexvalue {
     pub pixel: u32,
     pub red: u16,
@@ -926,6 +940,7 @@ impl Serialize for Indexvalue {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Color {
     pub red: u16,
     pub green: u16,
@@ -970,6 +985,7 @@ impl Serialize for Color {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Pointfix {
     pub x: Fixed,
     pub y: Fixed,
@@ -1006,6 +1022,7 @@ impl Serialize for Pointfix {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Linefix {
     pub p1: Pointfix,
     pub p2: Pointfix,
@@ -1050,6 +1067,7 @@ impl Serialize for Linefix {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Triangle {
     pub p1: Pointfix,
     pub p2: Pointfix,
@@ -1106,6 +1124,7 @@ impl Serialize for Triangle {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Trapezoid {
     pub top: Fixed,
     pub bottom: Fixed,
@@ -1182,6 +1201,7 @@ impl Serialize for Trapezoid {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Glyphinfo {
     pub width: u16,
     pub height: u16,
@@ -1240,6 +1260,7 @@ impl Serialize for Glyphinfo {
 /// Opcode for the QueryVersion request
 pub const QUERY_VERSION_REQUEST: u8 = 0;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryVersionRequest {
     pub client_major_version: u32,
     pub client_minor_version: u32,
@@ -1299,6 +1320,7 @@ impl crate::x11_utils::ReplyRequest for QueryVersionRequest {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryVersionReply {
     pub sequence: u16,
     pub length: u32,
@@ -1329,6 +1351,7 @@ impl TryParse for QueryVersionReply {
 /// Opcode for the QueryPictFormats request
 pub const QUERY_PICT_FORMATS_REQUEST: u8 = 1;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryPictFormatsRequest;
 impl QueryPictFormatsRequest {
     /// Serialize this request into bytes for the provided connection
@@ -1371,6 +1394,7 @@ impl crate::x11_utils::ReplyRequest for QueryPictFormatsRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryPictFormatsReply {
     pub sequence: u16,
     pub length: u32,
@@ -1459,6 +1483,7 @@ impl QueryPictFormatsReply {
 /// Opcode for the QueryPictIndexValues request
 pub const QUERY_PICT_INDEX_VALUES_REQUEST: u8 = 2;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryPictIndexValuesRequest {
     pub format: Pictformat,
 }
@@ -1510,6 +1535,7 @@ impl crate::x11_utils::ReplyRequest for QueryPictIndexValuesRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryPictIndexValuesReply {
     pub sequence: u16,
     pub length: u32,
@@ -1553,6 +1579,7 @@ impl QueryPictIndexValuesReply {
 
 /// Auxiliary and optional information for the `create_picture` function
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CreatePictureAux {
     pub repeat: Option<Repeat>,
     pub alphamap: Option<Picture>,
@@ -1867,6 +1894,7 @@ impl CreatePictureAux {
 /// Opcode for the CreatePicture request
 pub const CREATE_PICTURE_REQUEST: u8 = 4;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CreatePictureRequest<'input> {
     pub pid: Picture,
     pub drawable: xproto::Drawable,
@@ -1957,6 +1985,7 @@ impl<'input> crate::x11_utils::VoidRequest for CreatePictureRequest<'input> {
 
 /// Auxiliary and optional information for the `change_picture` function
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ChangePictureAux {
     pub repeat: Option<Repeat>,
     pub alphamap: Option<Picture>,
@@ -2271,6 +2300,7 @@ impl ChangePictureAux {
 /// Opcode for the ChangePicture request
 pub const CHANGE_PICTURE_REQUEST: u8 = 5;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ChangePictureRequest<'input> {
     pub picture: Picture,
     pub value_list: Cow<'input, ChangePictureAux>,
@@ -2344,6 +2374,7 @@ impl<'input> crate::x11_utils::VoidRequest for ChangePictureRequest<'input> {
 /// Opcode for the SetPictureClipRectangles request
 pub const SET_PICTURE_CLIP_RECTANGLES_REQUEST: u8 = 6;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetPictureClipRectanglesRequest<'input> {
     pub picture: Picture,
     pub clip_x_origin: i16,
@@ -2431,6 +2462,7 @@ impl<'input> crate::x11_utils::VoidRequest for SetPictureClipRectanglesRequest<'
 /// Opcode for the FreePicture request
 pub const FREE_PICTURE_REQUEST: u8 = 7;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct FreePictureRequest {
     pub picture: Picture,
 }
@@ -2483,6 +2515,7 @@ impl crate::x11_utils::VoidRequest for FreePictureRequest {
 /// Opcode for the Composite request
 pub const COMPOSITE_REQUEST: u8 = 8;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CompositeRequest {
     pub op: PictOp,
     pub src: Picture,
@@ -2609,6 +2642,7 @@ impl crate::x11_utils::VoidRequest for CompositeRequest {
 /// Opcode for the Trapezoids request
 pub const TRAPEZOIDS_REQUEST: u8 = 10;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct TrapezoidsRequest<'input> {
     pub op: PictOp,
     pub src: Picture,
@@ -2725,6 +2759,7 @@ impl<'input> crate::x11_utils::VoidRequest for TrapezoidsRequest<'input> {
 /// Opcode for the Triangles request
 pub const TRIANGLES_REQUEST: u8 = 11;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct TrianglesRequest<'input> {
     pub op: PictOp,
     pub src: Picture,
@@ -2841,6 +2876,7 @@ impl<'input> crate::x11_utils::VoidRequest for TrianglesRequest<'input> {
 /// Opcode for the TriStrip request
 pub const TRI_STRIP_REQUEST: u8 = 12;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct TriStripRequest<'input> {
     pub op: PictOp,
     pub src: Picture,
@@ -2957,6 +2993,7 @@ impl<'input> crate::x11_utils::VoidRequest for TriStripRequest<'input> {
 /// Opcode for the TriFan request
 pub const TRI_FAN_REQUEST: u8 = 13;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct TriFanRequest<'input> {
     pub op: PictOp,
     pub src: Picture,
@@ -3073,6 +3110,7 @@ impl<'input> crate::x11_utils::VoidRequest for TriFanRequest<'input> {
 /// Opcode for the CreateGlyphSet request
 pub const CREATE_GLYPH_SET_REQUEST: u8 = 17;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CreateGlyphSetRequest {
     pub gsid: Glyphset,
     pub format: Pictformat,
@@ -3133,6 +3171,7 @@ impl crate::x11_utils::VoidRequest for CreateGlyphSetRequest {
 /// Opcode for the ReferenceGlyphSet request
 pub const REFERENCE_GLYPH_SET_REQUEST: u8 = 18;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ReferenceGlyphSetRequest {
     pub gsid: Glyphset,
     pub existing: Glyphset,
@@ -3193,6 +3232,7 @@ impl crate::x11_utils::VoidRequest for ReferenceGlyphSetRequest {
 /// Opcode for the FreeGlyphSet request
 pub const FREE_GLYPH_SET_REQUEST: u8 = 19;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct FreeGlyphSetRequest {
     pub glyphset: Glyphset,
 }
@@ -3245,6 +3285,7 @@ impl crate::x11_utils::VoidRequest for FreeGlyphSetRequest {
 /// Opcode for the AddGlyphs request
 pub const ADD_GLYPHS_REQUEST: u8 = 20;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct AddGlyphsRequest<'input> {
     pub glyphset: Glyphset,
     pub glyphids: Cow<'input, [u32]>,
@@ -3330,6 +3371,7 @@ impl<'input> crate::x11_utils::VoidRequest for AddGlyphsRequest<'input> {
 /// Opcode for the FreeGlyphs request
 pub const FREE_GLYPHS_REQUEST: u8 = 22;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct FreeGlyphsRequest<'input> {
     pub glyphset: Glyphset,
     pub glyphs: Cow<'input, [Glyph]>,
@@ -3403,6 +3445,7 @@ impl<'input> crate::x11_utils::VoidRequest for FreeGlyphsRequest<'input> {
 /// Opcode for the CompositeGlyphs8 request
 pub const COMPOSITE_GLYPHS8_REQUEST: u8 = 23;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CompositeGlyphs8Request<'input> {
     pub op: PictOp,
     pub src: Picture,
@@ -3520,6 +3563,7 @@ impl<'input> crate::x11_utils::VoidRequest for CompositeGlyphs8Request<'input> {
 /// Opcode for the CompositeGlyphs16 request
 pub const COMPOSITE_GLYPHS16_REQUEST: u8 = 24;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CompositeGlyphs16Request<'input> {
     pub op: PictOp,
     pub src: Picture,
@@ -3637,6 +3681,7 @@ impl<'input> crate::x11_utils::VoidRequest for CompositeGlyphs16Request<'input> 
 /// Opcode for the CompositeGlyphs32 request
 pub const COMPOSITE_GLYPHS32_REQUEST: u8 = 25;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CompositeGlyphs32Request<'input> {
     pub op: PictOp,
     pub src: Picture,
@@ -3754,6 +3799,7 @@ impl<'input> crate::x11_utils::VoidRequest for CompositeGlyphs32Request<'input> 
 /// Opcode for the FillRectangles request
 pub const FILL_RECTANGLES_REQUEST: u8 = 26;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct FillRectanglesRequest<'input> {
     pub op: PictOp,
     pub dst: Picture,
@@ -3851,6 +3897,7 @@ impl<'input> crate::x11_utils::VoidRequest for FillRectanglesRequest<'input> {
 /// Opcode for the CreateCursor request
 pub const CREATE_CURSOR_REQUEST: u8 = 27;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CreateCursorRequest {
     pub cid: xproto::Cursor,
     pub source: Picture,
@@ -3921,6 +3968,7 @@ impl crate::x11_utils::VoidRequest for CreateCursorRequest {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Transform {
     pub matrix11: Fixed,
     pub matrix12: Fixed,
@@ -4015,6 +4063,7 @@ impl Serialize for Transform {
 /// Opcode for the SetPictureTransform request
 pub const SET_PICTURE_TRANSFORM_REQUEST: u8 = 28;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetPictureTransformRequest {
     pub picture: Picture,
     pub transform: Transform,
@@ -4107,6 +4156,7 @@ impl crate::x11_utils::VoidRequest for SetPictureTransformRequest {
 /// Opcode for the QueryFilters request
 pub const QUERY_FILTERS_REQUEST: u8 = 29;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryFiltersRequest {
     pub drawable: xproto::Drawable,
 }
@@ -4158,6 +4208,7 @@ impl crate::x11_utils::ReplyRequest for QueryFiltersRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryFiltersReply {
     pub sequence: u16,
     pub length: u32,
@@ -4218,6 +4269,7 @@ impl QueryFiltersReply {
 /// Opcode for the SetPictureFilter request
 pub const SET_PICTURE_FILTER_REQUEST: u8 = 30;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetPictureFilterRequest<'input> {
     pub picture: Picture,
     pub filter: Cow<'input, [u8]>,
@@ -4308,6 +4360,7 @@ impl<'input> crate::x11_utils::VoidRequest for SetPictureFilterRequest<'input> {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Animcursorelt {
     pub cursor: xproto::Cursor,
     pub delay: u32,
@@ -4346,6 +4399,7 @@ impl Serialize for Animcursorelt {
 /// Opcode for the CreateAnimCursor request
 pub const CREATE_ANIM_CURSOR_REQUEST: u8 = 31;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CreateAnimCursorRequest<'input> {
     pub cid: xproto::Cursor,
     pub cursors: Cow<'input, [Animcursorelt]>,
@@ -4417,6 +4471,7 @@ impl<'input> crate::x11_utils::VoidRequest for CreateAnimCursorRequest<'input> {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Spanfix {
     pub l: Fixed,
     pub r: Fixed,
@@ -4461,6 +4516,7 @@ impl Serialize for Spanfix {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Trap {
     pub top: Spanfix,
     pub bot: Spanfix,
@@ -4515,6 +4571,7 @@ impl Serialize for Trap {
 /// Opcode for the AddTraps request
 pub const ADD_TRAPS_REQUEST: u8 = 32;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct AddTrapsRequest<'input> {
     pub picture: Picture,
     pub x_off: i16,
@@ -4602,6 +4659,7 @@ impl<'input> crate::x11_utils::VoidRequest for AddTrapsRequest<'input> {
 /// Opcode for the CreateSolidFill request
 pub const CREATE_SOLID_FILL_REQUEST: u8 = 33;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CreateSolidFillRequest {
     pub picture: Picture,
     pub color: Color,
@@ -4666,6 +4724,7 @@ impl crate::x11_utils::VoidRequest for CreateSolidFillRequest {
 /// Opcode for the CreateLinearGradient request
 pub const CREATE_LINEAR_GRADIENT_REQUEST: u8 = 34;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CreateLinearGradientRequest<'input> {
     pub picture: Picture,
     pub p1: Pointfix,
@@ -4772,6 +4831,7 @@ impl<'input> crate::x11_utils::VoidRequest for CreateLinearGradientRequest<'inpu
 /// Opcode for the CreateRadialGradient request
 pub const CREATE_RADIAL_GRADIENT_REQUEST: u8 = 35;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CreateRadialGradientRequest<'input> {
     pub picture: Picture,
     pub inner: Pointfix,
@@ -4896,6 +4956,7 @@ impl<'input> crate::x11_utils::VoidRequest for CreateRadialGradientRequest<'inpu
 /// Opcode for the CreateConicalGradient request
 pub const CREATE_CONICAL_GRADIENT_REQUEST: u8 = 36;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CreateConicalGradientRequest<'input> {
     pub picture: Picture,
     pub center: Pointfix,

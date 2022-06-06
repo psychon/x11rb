@@ -41,6 +41,7 @@ pub const X11_XML_VERSION: (u32, u32) = (5, 0);
 /// Opcode for the QueryVersion request
 pub const QUERY_VERSION_REQUEST: u8 = 0;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryVersionRequest {
     pub client_major_version: u32,
     pub client_minor_version: u32,
@@ -100,6 +101,7 @@ impl crate::x11_utils::ReplyRequest for QueryVersionRequest {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryVersionReply {
     pub sequence: u16,
     pub length: u32,
@@ -128,6 +130,7 @@ impl TryParse for QueryVersionReply {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SaveSetMode(u8);
 impl SaveSetMode {
     pub const INSERT: Self = Self(0);
@@ -186,6 +189,7 @@ impl core::fmt::Debug for SaveSetMode  {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SaveSetTarget(u8);
 impl SaveSetTarget {
     pub const NEAREST: Self = Self(0);
@@ -244,6 +248,7 @@ impl core::fmt::Debug for SaveSetTarget  {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SaveSetMapping(u8);
 impl SaveSetMapping {
     pub const MAP: Self = Self(0);
@@ -304,6 +309,7 @@ impl core::fmt::Debug for SaveSetMapping  {
 /// Opcode for the ChangeSaveSet request
 pub const CHANGE_SAVE_SET_REQUEST: u8 = 1;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ChangeSaveSetRequest {
     pub mode: SaveSetMode,
     pub target: SaveSetTarget,
@@ -374,6 +380,7 @@ impl crate::x11_utils::VoidRequest for ChangeSaveSetRequest {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SelectionEvent(u8);
 impl SelectionEvent {
     pub const SET_SELECTION_OWNER: Self = Self(0);
@@ -434,6 +441,7 @@ impl core::fmt::Debug for SelectionEvent  {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SelectionEventMask(u8);
 impl SelectionEventMask {
     pub const SET_SELECTION_OWNER: Self = Self(1 << 0);
@@ -497,6 +505,7 @@ bitmask_binop!(SelectionEventMask, u8);
 /// Opcode for the SelectionNotify event
 pub const SELECTION_NOTIFY_EVENT: u8 = 0;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SelectionNotifyEvent {
     pub response_type: u8,
     pub subtype: SelectionEvent,
@@ -582,6 +591,7 @@ impl From<SelectionNotifyEvent> for [u8; 32] {
 /// Opcode for the SelectSelectionInput request
 pub const SELECT_SELECTION_INPUT_REQUEST: u8 = 2;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SelectSelectionInputRequest {
     pub window: xproto::Window,
     pub selection: xproto::Atom,
@@ -648,6 +658,7 @@ impl crate::x11_utils::VoidRequest for SelectSelectionInputRequest {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CursorNotify(u8);
 impl CursorNotify {
     pub const DISPLAY_CURSOR: Self = Self(0);
@@ -704,6 +715,7 @@ impl core::fmt::Debug for CursorNotify  {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CursorNotifyMask(u8);
 impl CursorNotifyMask {
     pub const DISPLAY_CURSOR: Self = Self(1 << 0);
@@ -763,6 +775,7 @@ bitmask_binop!(CursorNotifyMask, u8);
 /// Opcode for the CursorNotify event
 pub const CURSOR_NOTIFY_EVENT: u8 = 1;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CursorNotifyEvent {
     pub response_type: u8,
     pub subtype: CursorNotify,
@@ -845,6 +858,7 @@ impl From<CursorNotifyEvent> for [u8; 32] {
 /// Opcode for the SelectCursorInput request
 pub const SELECT_CURSOR_INPUT_REQUEST: u8 = 3;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SelectCursorInputRequest {
     pub window: xproto::Window,
     pub event_mask: u32,
@@ -905,6 +919,7 @@ impl crate::x11_utils::VoidRequest for SelectCursorInputRequest {
 /// Opcode for the GetCursorImage request
 pub const GET_CURSOR_IMAGE_REQUEST: u8 = 4;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetCursorImageRequest;
 impl GetCursorImageRequest {
     /// Serialize this request into bytes for the provided connection
@@ -947,6 +962,7 @@ impl crate::x11_utils::ReplyRequest for GetCursorImageRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetCursorImageReply {
     pub sequence: u16,
     pub length: u32,
@@ -992,6 +1008,7 @@ pub type Region = u32;
 pub const BAD_REGION_ERROR: u8 = 0;
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct RegionEnum(u8);
 impl RegionEnum {
     pub const NONE: Self = Self(0);
@@ -1050,6 +1067,7 @@ impl core::fmt::Debug for RegionEnum  {
 /// Opcode for the CreateRegion request
 pub const CREATE_REGION_REQUEST: u8 = 5;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CreateRegionRequest<'input> {
     pub region: Region,
     pub rectangles: Cow<'input, [xproto::Rectangle]>,
@@ -1123,6 +1141,7 @@ impl<'input> crate::x11_utils::VoidRequest for CreateRegionRequest<'input> {
 /// Opcode for the CreateRegionFromBitmap request
 pub const CREATE_REGION_FROM_BITMAP_REQUEST: u8 = 6;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CreateRegionFromBitmapRequest {
     pub region: Region,
     pub bitmap: xproto::Pixmap,
@@ -1183,6 +1202,7 @@ impl crate::x11_utils::VoidRequest for CreateRegionFromBitmapRequest {
 /// Opcode for the CreateRegionFromWindow request
 pub const CREATE_REGION_FROM_WINDOW_REQUEST: u8 = 7;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CreateRegionFromWindowRequest {
     pub region: Region,
     pub window: xproto::Window,
@@ -1253,6 +1273,7 @@ impl crate::x11_utils::VoidRequest for CreateRegionFromWindowRequest {
 /// Opcode for the CreateRegionFromGC request
 pub const CREATE_REGION_FROM_GC_REQUEST: u8 = 8;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CreateRegionFromGCRequest {
     pub region: Region,
     pub gc: xproto::Gcontext,
@@ -1313,6 +1334,7 @@ impl crate::x11_utils::VoidRequest for CreateRegionFromGCRequest {
 /// Opcode for the CreateRegionFromPicture request
 pub const CREATE_REGION_FROM_PICTURE_REQUEST: u8 = 9;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CreateRegionFromPictureRequest {
     pub region: Region,
     pub picture: render::Picture,
@@ -1373,6 +1395,7 @@ impl crate::x11_utils::VoidRequest for CreateRegionFromPictureRequest {
 /// Opcode for the DestroyRegion request
 pub const DESTROY_REGION_REQUEST: u8 = 10;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DestroyRegionRequest {
     pub region: Region,
 }
@@ -1425,6 +1448,7 @@ impl crate::x11_utils::VoidRequest for DestroyRegionRequest {
 /// Opcode for the SetRegion request
 pub const SET_REGION_REQUEST: u8 = 11;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetRegionRequest<'input> {
     pub region: Region,
     pub rectangles: Cow<'input, [xproto::Rectangle]>,
@@ -1498,6 +1522,7 @@ impl<'input> crate::x11_utils::VoidRequest for SetRegionRequest<'input> {
 /// Opcode for the CopyRegion request
 pub const COPY_REGION_REQUEST: u8 = 12;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CopyRegionRequest {
     pub source: Region,
     pub destination: Region,
@@ -1558,6 +1583,7 @@ impl crate::x11_utils::VoidRequest for CopyRegionRequest {
 /// Opcode for the UnionRegion request
 pub const UNION_REGION_REQUEST: u8 = 13;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct UnionRegionRequest {
     pub source1: Region,
     pub source2: Region,
@@ -1626,6 +1652,7 @@ impl crate::x11_utils::VoidRequest for UnionRegionRequest {
 /// Opcode for the IntersectRegion request
 pub const INTERSECT_REGION_REQUEST: u8 = 14;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct IntersectRegionRequest {
     pub source1: Region,
     pub source2: Region,
@@ -1694,6 +1721,7 @@ impl crate::x11_utils::VoidRequest for IntersectRegionRequest {
 /// Opcode for the SubtractRegion request
 pub const SUBTRACT_REGION_REQUEST: u8 = 15;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SubtractRegionRequest {
     pub source1: Region,
     pub source2: Region,
@@ -1762,6 +1790,7 @@ impl crate::x11_utils::VoidRequest for SubtractRegionRequest {
 /// Opcode for the InvertRegion request
 pub const INVERT_REGION_REQUEST: u8 = 16;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct InvertRegionRequest {
     pub source: Region,
     pub bounds: xproto::Rectangle,
@@ -1834,6 +1863,7 @@ impl crate::x11_utils::VoidRequest for InvertRegionRequest {
 /// Opcode for the TranslateRegion request
 pub const TRANSLATE_REGION_REQUEST: u8 = 17;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct TranslateRegionRequest {
     pub region: Region,
     pub dx: i16,
@@ -1898,6 +1928,7 @@ impl crate::x11_utils::VoidRequest for TranslateRegionRequest {
 /// Opcode for the RegionExtents request
 pub const REGION_EXTENTS_REQUEST: u8 = 18;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct RegionExtentsRequest {
     pub source: Region,
     pub destination: Region,
@@ -1958,6 +1989,7 @@ impl crate::x11_utils::VoidRequest for RegionExtentsRequest {
 /// Opcode for the FetchRegion request
 pub const FETCH_REGION_REQUEST: u8 = 19;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct FetchRegionRequest {
     pub region: Region,
 }
@@ -2009,6 +2041,7 @@ impl crate::x11_utils::ReplyRequest for FetchRegionRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct FetchRegionReply {
     pub sequence: u16,
     pub extents: xproto::Rectangle,
@@ -2054,6 +2087,7 @@ impl FetchRegionReply {
 /// Opcode for the SetGCClipRegion request
 pub const SET_GC_CLIP_REGION_REQUEST: u8 = 20;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetGCClipRegionRequest {
     pub gc: xproto::Gcontext,
     pub region: Region,
@@ -2126,6 +2160,7 @@ impl crate::x11_utils::VoidRequest for SetGCClipRegionRequest {
 /// Opcode for the SetWindowShapeRegion request
 pub const SET_WINDOW_SHAPE_REGION_REQUEST: u8 = 21;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetWindowShapeRegionRequest {
     pub dest: xproto::Window,
     pub dest_kind: shape::SK,
@@ -2208,6 +2243,7 @@ impl crate::x11_utils::VoidRequest for SetWindowShapeRegionRequest {
 /// Opcode for the SetPictureClipRegion request
 pub const SET_PICTURE_CLIP_REGION_REQUEST: u8 = 22;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetPictureClipRegionRequest {
     pub picture: render::Picture,
     pub region: Region,
@@ -2280,6 +2316,7 @@ impl crate::x11_utils::VoidRequest for SetPictureClipRegionRequest {
 /// Opcode for the SetCursorName request
 pub const SET_CURSOR_NAME_REQUEST: u8 = 23;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetCursorNameRequest<'input> {
     pub cursor: xproto::Cursor,
     pub name: Cow<'input, [u8]>,
@@ -2353,6 +2390,7 @@ impl<'input> crate::x11_utils::VoidRequest for SetCursorNameRequest<'input> {
 /// Opcode for the GetCursorName request
 pub const GET_CURSOR_NAME_REQUEST: u8 = 24;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetCursorNameRequest {
     pub cursor: xproto::Cursor,
 }
@@ -2404,6 +2442,7 @@ impl crate::x11_utils::ReplyRequest for GetCursorNameRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetCursorNameReply {
     pub sequence: u16,
     pub length: u32,
@@ -2451,6 +2490,7 @@ impl GetCursorNameReply {
 /// Opcode for the GetCursorImageAndName request
 pub const GET_CURSOR_IMAGE_AND_NAME_REQUEST: u8 = 25;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetCursorImageAndNameRequest;
 impl GetCursorImageAndNameRequest {
     /// Serialize this request into bytes for the provided connection
@@ -2493,6 +2533,7 @@ impl crate::x11_utils::ReplyRequest for GetCursorImageAndNameRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetCursorImageAndNameReply {
     pub sequence: u16,
     pub length: u32,
@@ -2556,6 +2597,7 @@ impl GetCursorImageAndNameReply {
 /// Opcode for the ChangeCursor request
 pub const CHANGE_CURSOR_REQUEST: u8 = 26;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ChangeCursorRequest {
     pub source: xproto::Cursor,
     pub destination: xproto::Cursor,
@@ -2616,6 +2658,7 @@ impl crate::x11_utils::VoidRequest for ChangeCursorRequest {
 /// Opcode for the ChangeCursorByName request
 pub const CHANGE_CURSOR_BY_NAME_REQUEST: u8 = 27;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ChangeCursorByNameRequest<'input> {
     pub src: xproto::Cursor,
     pub name: Cow<'input, [u8]>,
@@ -2689,6 +2732,7 @@ impl<'input> crate::x11_utils::VoidRequest for ChangeCursorByNameRequest<'input>
 /// Opcode for the ExpandRegion request
 pub const EXPAND_REGION_REQUEST: u8 = 28;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ExpandRegionRequest {
     pub source: Region,
     pub destination: Region,
@@ -2773,6 +2817,7 @@ impl crate::x11_utils::VoidRequest for ExpandRegionRequest {
 /// Opcode for the HideCursor request
 pub const HIDE_CURSOR_REQUEST: u8 = 29;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct HideCursorRequest {
     pub window: xproto::Window,
 }
@@ -2825,6 +2870,7 @@ impl crate::x11_utils::VoidRequest for HideCursorRequest {
 /// Opcode for the ShowCursor request
 pub const SHOW_CURSOR_REQUEST: u8 = 30;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ShowCursorRequest {
     pub window: xproto::Window,
 }
@@ -2877,6 +2923,7 @@ impl crate::x11_utils::VoidRequest for ShowCursorRequest {
 pub type Barrier = u32;
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct BarrierDirections(u8);
 impl BarrierDirections {
     pub const POSITIVE_X: Self = Self(1 << 0);
@@ -2942,6 +2989,7 @@ bitmask_binop!(BarrierDirections, u8);
 /// Opcode for the CreatePointerBarrier request
 pub const CREATE_POINTER_BARRIER_REQUEST: u8 = 31;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CreatePointerBarrierRequest<'input> {
     pub barrier: Barrier,
     pub window: xproto::Window,
@@ -3062,6 +3110,7 @@ impl<'input> crate::x11_utils::VoidRequest for CreatePointerBarrierRequest<'inpu
 /// Opcode for the DeletePointerBarrier request
 pub const DELETE_POINTER_BARRIER_REQUEST: u8 = 32;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DeletePointerBarrierRequest {
     pub barrier: Barrier,
 }

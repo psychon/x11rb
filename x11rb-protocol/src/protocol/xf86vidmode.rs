@@ -37,6 +37,7 @@ pub type Syncrange = u32;
 pub type Dotclock = u32;
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ModeFlag(u16);
 impl ModeFlag {
     pub const POSITIVE_H_SYNC: Self = Self(1 << 0);
@@ -112,6 +113,7 @@ impl core::fmt::Debug for ModeFlag  {
 bitmask_binop!(ModeFlag, u16);
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ClockFlag(u8);
 impl ClockFlag {
     pub const PROGRAMABLE: Self = Self(1 << 0);
@@ -169,6 +171,7 @@ impl core::fmt::Debug for ClockFlag  {
 bitmask_binop!(ClockFlag, u8);
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Permission(u8);
 impl Permission {
     pub const READ: Self = Self(1 << 0);
@@ -228,6 +231,7 @@ impl core::fmt::Debug for Permission  {
 bitmask_binop!(Permission, u8);
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ModeInfo {
     pub dotclock: Dotclock,
     pub hdisplay: u16,
@@ -350,6 +354,7 @@ impl Serialize for ModeInfo {
 /// Opcode for the QueryVersion request
 pub const QUERY_VERSION_REQUEST: u8 = 0;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryVersionRequest;
 impl QueryVersionRequest {
     /// Serialize this request into bytes for the provided connection
@@ -392,6 +397,7 @@ impl crate::x11_utils::ReplyRequest for QueryVersionRequest {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryVersionReply {
     pub sequence: u16,
     pub length: u32,
@@ -421,6 +427,7 @@ impl TryParse for QueryVersionReply {
 /// Opcode for the GetModeLine request
 pub const GET_MODE_LINE_REQUEST: u8 = 1;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetModeLineRequest {
     pub screen: u16,
 }
@@ -473,6 +480,7 @@ impl crate::x11_utils::ReplyRequest for GetModeLineRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetModeLineReply {
     pub sequence: u16,
     pub length: u32,
@@ -541,6 +549,7 @@ impl GetModeLineReply {
 /// Opcode for the ModModeLine request
 pub const MOD_MODE_LINE_REQUEST: u8 = 2;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ModModeLineRequest<'input> {
     pub screen: u32,
     pub hdisplay: u16,
@@ -701,6 +710,7 @@ impl<'input> crate::x11_utils::VoidRequest for ModModeLineRequest<'input> {
 /// Opcode for the SwitchMode request
 pub const SWITCH_MODE_REQUEST: u8 = 3;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SwitchModeRequest {
     pub screen: u16,
     pub zoom: u16,
@@ -757,6 +767,7 @@ impl crate::x11_utils::VoidRequest for SwitchModeRequest {
 /// Opcode for the GetMonitor request
 pub const GET_MONITOR_REQUEST: u8 = 4;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetMonitorRequest {
     pub screen: u16,
 }
@@ -809,6 +820,7 @@ impl crate::x11_utils::ReplyRequest for GetMonitorRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetMonitorReply {
     pub sequence: u16,
     pub length: u32,
@@ -906,6 +918,7 @@ impl GetMonitorReply {
 /// Opcode for the LockModeSwitch request
 pub const LOCK_MODE_SWITCH_REQUEST: u8 = 5;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct LockModeSwitchRequest {
     pub screen: u16,
     pub lock: u16,
@@ -962,6 +975,7 @@ impl crate::x11_utils::VoidRequest for LockModeSwitchRequest {
 /// Opcode for the GetAllModeLines request
 pub const GET_ALL_MODE_LINES_REQUEST: u8 = 6;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetAllModeLinesRequest {
     pub screen: u16,
 }
@@ -1014,6 +1028,7 @@ impl crate::x11_utils::ReplyRequest for GetAllModeLinesRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetAllModeLinesReply {
     pub sequence: u16,
     pub length: u32,
@@ -1058,6 +1073,7 @@ impl GetAllModeLinesReply {
 /// Opcode for the AddModeLine request
 pub const ADD_MODE_LINE_REQUEST: u8 = 7;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct AddModeLineRequest<'input> {
     pub screen: u32,
     pub dotclock: Dotclock,
@@ -1324,6 +1340,7 @@ impl<'input> crate::x11_utils::VoidRequest for AddModeLineRequest<'input> {
 /// Opcode for the DeleteModeLine request
 pub const DELETE_MODE_LINE_REQUEST: u8 = 8;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DeleteModeLineRequest<'input> {
     pub screen: u32,
     pub dotclock: Dotclock,
@@ -1493,6 +1510,7 @@ impl<'input> crate::x11_utils::VoidRequest for DeleteModeLineRequest<'input> {
 /// Opcode for the ValidateModeLine request
 pub const VALIDATE_MODE_LINE_REQUEST: u8 = 9;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ValidateModeLineRequest<'input> {
     pub screen: u32,
     pub dotclock: Dotclock,
@@ -1661,6 +1679,7 @@ impl<'input> crate::x11_utils::ReplyRequest for ValidateModeLineRequest<'input> 
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ValidateModeLineReply {
     pub sequence: u16,
     pub length: u32,
@@ -1689,6 +1708,7 @@ impl TryParse for ValidateModeLineReply {
 /// Opcode for the SwitchToMode request
 pub const SWITCH_TO_MODE_REQUEST: u8 = 10;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SwitchToModeRequest<'input> {
     pub screen: u32,
     pub dotclock: Dotclock,
@@ -1858,6 +1878,7 @@ impl<'input> crate::x11_utils::VoidRequest for SwitchToModeRequest<'input> {
 /// Opcode for the GetViewPort request
 pub const GET_VIEW_PORT_REQUEST: u8 = 11;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetViewPortRequest {
     pub screen: u16,
 }
@@ -1910,6 +1931,7 @@ impl crate::x11_utils::ReplyRequest for GetViewPortRequest {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetViewPortReply {
     pub sequence: u16,
     pub length: u32,
@@ -1940,6 +1962,7 @@ impl TryParse for GetViewPortReply {
 /// Opcode for the SetViewPort request
 pub const SET_VIEW_PORT_REQUEST: u8 = 12;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetViewPortRequest {
     pub screen: u16,
     pub x: u32,
@@ -2009,6 +2032,7 @@ impl crate::x11_utils::VoidRequest for SetViewPortRequest {
 /// Opcode for the GetDotClocks request
 pub const GET_DOT_CLOCKS_REQUEST: u8 = 13;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetDotClocksRequest {
     pub screen: u16,
 }
@@ -2061,6 +2085,7 @@ impl crate::x11_utils::ReplyRequest for GetDotClocksRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetDotClocksReply {
     pub sequence: u16,
     pub length: u32,
@@ -2095,6 +2120,7 @@ impl TryParse for GetDotClocksReply {
 /// Opcode for the SetClientVersion request
 pub const SET_CLIENT_VERSION_REQUEST: u8 = 14;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetClientVersionRequest {
     pub major: u16,
     pub minor: u16,
@@ -2151,6 +2177,7 @@ impl crate::x11_utils::VoidRequest for SetClientVersionRequest {
 /// Opcode for the SetGamma request
 pub const SET_GAMMA_REQUEST: u8 = 15;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetGammaRequest {
     pub screen: u16,
     pub red: u32,
@@ -2241,6 +2268,7 @@ impl crate::x11_utils::VoidRequest for SetGammaRequest {
 /// Opcode for the GetGamma request
 pub const GET_GAMMA_REQUEST: u8 = 16;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetGammaRequest {
     pub screen: u16,
 }
@@ -2317,6 +2345,7 @@ impl crate::x11_utils::ReplyRequest for GetGammaRequest {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetGammaReply {
     pub sequence: u16,
     pub length: u32,
@@ -2349,6 +2378,7 @@ impl TryParse for GetGammaReply {
 /// Opcode for the GetGammaRamp request
 pub const GET_GAMMA_RAMP_REQUEST: u8 = 17;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetGammaRampRequest {
     pub screen: u16,
     pub size: u16,
@@ -2404,6 +2434,7 @@ impl crate::x11_utils::ReplyRequest for GetGammaRampRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetGammaRampReply {
     pub sequence: u16,
     pub length: u32,
@@ -2438,6 +2469,7 @@ impl TryParse for GetGammaRampReply {
 /// Opcode for the SetGammaRamp request
 pub const SET_GAMMA_RAMP_REQUEST: u8 = 18;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetGammaRampRequest<'input> {
     pub screen: u16,
     pub size: u16,
@@ -2524,6 +2556,7 @@ impl<'input> crate::x11_utils::VoidRequest for SetGammaRampRequest<'input> {
 /// Opcode for the GetGammaRampSize request
 pub const GET_GAMMA_RAMP_SIZE_REQUEST: u8 = 19;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetGammaRampSizeRequest {
     pub screen: u16,
 }
@@ -2576,6 +2609,7 @@ impl crate::x11_utils::ReplyRequest for GetGammaRampSizeRequest {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetGammaRampSizeReply {
     pub sequence: u16,
     pub length: u32,
@@ -2604,6 +2638,7 @@ impl TryParse for GetGammaRampSizeReply {
 /// Opcode for the GetPermissions request
 pub const GET_PERMISSIONS_REQUEST: u8 = 20;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetPermissionsRequest {
     pub screen: u16,
 }
@@ -2656,6 +2691,7 @@ impl crate::x11_utils::ReplyRequest for GetPermissionsRequest {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetPermissionsReply {
     pub sequence: u16,
     pub length: u32,

@@ -35,6 +35,7 @@ pub const X11_EXTENSION_NAME: &str = "XINERAMA";
 pub const X11_XML_VERSION: (u32, u32) = (1, 1);
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ScreenInfo {
     pub x_org: i16,
     pub y_org: i16,
@@ -81,6 +82,7 @@ impl Serialize for ScreenInfo {
 /// Opcode for the QueryVersion request
 pub const QUERY_VERSION_REQUEST: u8 = 0;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryVersionRequest {
     pub major: u8,
     pub minor: u8,
@@ -136,6 +138,7 @@ impl crate::x11_utils::ReplyRequest for QueryVersionRequest {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryVersionReply {
     pub sequence: u16,
     pub length: u32,
@@ -165,6 +168,7 @@ impl TryParse for QueryVersionReply {
 /// Opcode for the GetState request
 pub const GET_STATE_REQUEST: u8 = 1;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetStateRequest {
     pub window: xproto::Window,
 }
@@ -216,6 +220,7 @@ impl crate::x11_utils::ReplyRequest for GetStateRequest {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetStateReply {
     pub state: u8,
     pub sequence: u16,
@@ -244,6 +249,7 @@ impl TryParse for GetStateReply {
 /// Opcode for the GetScreenCount request
 pub const GET_SCREEN_COUNT_REQUEST: u8 = 2;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetScreenCountRequest {
     pub window: xproto::Window,
 }
@@ -295,6 +301,7 @@ impl crate::x11_utils::ReplyRequest for GetScreenCountRequest {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetScreenCountReply {
     pub screen_count: u8,
     pub sequence: u16,
@@ -323,6 +330,7 @@ impl TryParse for GetScreenCountReply {
 /// Opcode for the GetScreenSize request
 pub const GET_SCREEN_SIZE_REQUEST: u8 = 3;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetScreenSizeRequest {
     pub window: xproto::Window,
     pub screen: u32,
@@ -382,6 +390,7 @@ impl crate::x11_utils::ReplyRequest for GetScreenSizeRequest {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetScreenSizeReply {
     pub sequence: u16,
     pub length: u32,
@@ -415,6 +424,7 @@ impl TryParse for GetScreenSizeReply {
 /// Opcode for the IsActive request
 pub const IS_ACTIVE_REQUEST: u8 = 4;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct IsActiveRequest;
 impl IsActiveRequest {
     /// Serialize this request into bytes for the provided connection
@@ -457,6 +467,7 @@ impl crate::x11_utils::ReplyRequest for IsActiveRequest {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct IsActiveReply {
     pub sequence: u16,
     pub length: u32,
@@ -484,6 +495,7 @@ impl TryParse for IsActiveReply {
 /// Opcode for the QueryScreens request
 pub const QUERY_SCREENS_REQUEST: u8 = 5;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryScreensRequest;
 impl QueryScreensRequest {
     /// Serialize this request into bytes for the provided connection
@@ -526,6 +538,7 @@ impl crate::x11_utils::ReplyRequest for QueryScreensRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryScreensReply {
     pub sequence: u16,
     pub length: u32,

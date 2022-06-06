@@ -35,6 +35,7 @@ pub const X11_XML_VERSION: (u32, u32) = (1, 0);
 /// Opcode for the QueryVersion request
 pub const QUERY_VERSION_REQUEST: u8 = 0;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryVersionRequest {
     pub client_major_version: u16,
     pub client_minor_version: u16,
@@ -90,6 +91,7 @@ impl crate::x11_utils::ReplyRequest for QueryVersionRequest {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryVersionReply {
     pub sequence: u16,
     pub length: u32,
@@ -120,6 +122,7 @@ impl TryParse for QueryVersionReply {
 /// Opcode for the Start request
 pub const START_REQUEST: u8 = 1;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct StartRequest {
     pub screen: u32,
 }
@@ -171,6 +174,7 @@ impl crate::x11_utils::ReplyRequest for StartRequest {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct StartReply {
     pub sequence: u16,
     pub length: u32,
@@ -197,6 +201,7 @@ impl TryParse for StartReply {
 /// Opcode for the End request
 pub const END_REQUEST: u8 = 2;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct EndRequest {
     pub cmap: u32,
 }
@@ -248,6 +253,7 @@ impl crate::x11_utils::ReplyRequest for EndRequest {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct EndReply {
     pub sequence: u16,
     pub length: u32,
@@ -272,6 +278,7 @@ impl TryParse for EndReply {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Datatype(bool);
 impl Datatype {
     pub const UNMODIFIED: Self = Self(false);
@@ -342,6 +349,7 @@ impl core::fmt::Debug for Datatype  {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Event {
 }
 impl TryParse for Event {
@@ -398,6 +406,7 @@ impl Serialize for Event {
 /// Opcode for the Send request
 pub const SEND_REQUEST: u8 = 3;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SendRequest {
     pub event: Event,
     pub data_type: u32,
@@ -550,6 +559,7 @@ impl crate::x11_utils::ReplyRequest for SendRequest {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SendReply {
     pub sequence: u16,
     pub length: u32,
@@ -576,6 +586,7 @@ impl TryParse for SendReply {
 /// Opcode for the SelectInput request
 pub const SELECT_INPUT_REQUEST: u8 = 4;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SelectInputRequest {
     pub event_mask: u32,
 }
@@ -627,6 +638,7 @@ impl crate::x11_utils::ReplyRequest for SelectInputRequest {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SelectInputReply {
     pub sequence: u16,
     pub length: u32,

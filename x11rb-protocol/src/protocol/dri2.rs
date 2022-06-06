@@ -35,6 +35,7 @@ pub const X11_EXTENSION_NAME: &str = "DRI2";
 pub const X11_XML_VERSION: (u32, u32) = (1, 4);
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Attachment(u32);
 impl Attachment {
     pub const BUFFER_FRONT_LEFT: Self = Self(0);
@@ -99,6 +100,7 @@ impl core::fmt::Debug for Attachment  {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DriverType(u32);
 impl DriverType {
     pub const DRI: Self = Self(0);
@@ -145,6 +147,7 @@ impl core::fmt::Debug for DriverType  {
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct EventType(u16);
 impl EventType {
     pub const EXCHANGE_COMPLETE: Self = Self(1);
@@ -199,6 +202,7 @@ impl core::fmt::Debug for EventType  {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DRI2Buffer {
     pub attachment: Attachment,
     pub name: u32,
@@ -260,6 +264,7 @@ impl Serialize for DRI2Buffer {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct AttachFormat {
     pub attachment: Attachment,
     pub format: u32,
@@ -299,6 +304,7 @@ impl Serialize for AttachFormat {
 /// Opcode for the QueryVersion request
 pub const QUERY_VERSION_REQUEST: u8 = 0;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryVersionRequest {
     pub major_version: u32,
     pub minor_version: u32,
@@ -358,6 +364,7 @@ impl crate::x11_utils::ReplyRequest for QueryVersionRequest {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryVersionReply {
     pub sequence: u16,
     pub length: u32,
@@ -387,6 +394,7 @@ impl TryParse for QueryVersionReply {
 /// Opcode for the Connect request
 pub const CONNECT_REQUEST: u8 = 1;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ConnectRequest {
     pub window: xproto::Window,
     pub driver_type: DriverType,
@@ -447,6 +455,7 @@ impl crate::x11_utils::ReplyRequest for ConnectRequest {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ConnectReply {
     pub sequence: u16,
     pub length: u32,
@@ -512,6 +521,7 @@ impl ConnectReply {
 /// Opcode for the Authenticate request
 pub const AUTHENTICATE_REQUEST: u8 = 2;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct AuthenticateRequest {
     pub window: xproto::Window,
     pub magic: u32,
@@ -571,6 +581,7 @@ impl crate::x11_utils::ReplyRequest for AuthenticateRequest {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct AuthenticateReply {
     pub sequence: u16,
     pub length: u32,
@@ -598,6 +609,7 @@ impl TryParse for AuthenticateReply {
 /// Opcode for the CreateDrawable request
 pub const CREATE_DRAWABLE_REQUEST: u8 = 3;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CreateDrawableRequest {
     pub drawable: xproto::Drawable,
 }
@@ -650,6 +662,7 @@ impl crate::x11_utils::VoidRequest for CreateDrawableRequest {
 /// Opcode for the DestroyDrawable request
 pub const DESTROY_DRAWABLE_REQUEST: u8 = 4;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DestroyDrawableRequest {
     pub drawable: xproto::Drawable,
 }
@@ -702,6 +715,7 @@ impl crate::x11_utils::VoidRequest for DestroyDrawableRequest {
 /// Opcode for the GetBuffers request
 pub const GET_BUFFERS_REQUEST: u8 = 5;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetBuffersRequest<'input> {
     pub drawable: xproto::Drawable,
     pub count: u32,
@@ -783,6 +797,7 @@ impl<'input> crate::x11_utils::ReplyRequest for GetBuffersRequest<'input> {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetBuffersReply {
     pub sequence: u16,
     pub length: u32,
@@ -831,6 +846,7 @@ impl GetBuffersReply {
 /// Opcode for the CopyRegion request
 pub const COPY_REGION_REQUEST: u8 = 6;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CopyRegionRequest {
     pub drawable: xproto::Drawable,
     pub region: u32,
@@ -906,6 +922,7 @@ impl crate::x11_utils::ReplyRequest for CopyRegionRequest {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CopyRegionReply {
     pub sequence: u16,
     pub length: u32,
@@ -931,6 +948,7 @@ impl TryParse for CopyRegionReply {
 /// Opcode for the GetBuffersWithFormat request
 pub const GET_BUFFERS_WITH_FORMAT_REQUEST: u8 = 7;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetBuffersWithFormatRequest<'input> {
     pub drawable: xproto::Drawable,
     pub count: u32,
@@ -1012,6 +1030,7 @@ impl<'input> crate::x11_utils::ReplyRequest for GetBuffersWithFormatRequest<'inp
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetBuffersWithFormatReply {
     pub sequence: u16,
     pub length: u32,
@@ -1060,6 +1079,7 @@ impl GetBuffersWithFormatReply {
 /// Opcode for the SwapBuffers request
 pub const SWAP_BUFFERS_REQUEST: u8 = 8;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SwapBuffersRequest {
     pub drawable: xproto::Drawable,
     pub target_msc_hi: u32,
@@ -1159,6 +1179,7 @@ impl crate::x11_utils::ReplyRequest for SwapBuffersRequest {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SwapBuffersReply {
     pub sequence: u16,
     pub length: u32,
@@ -1188,6 +1209,7 @@ impl TryParse for SwapBuffersReply {
 /// Opcode for the GetMSC request
 pub const GET_MSC_REQUEST: u8 = 9;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetMSCRequest {
     pub drawable: xproto::Drawable,
 }
@@ -1239,6 +1261,7 @@ impl crate::x11_utils::ReplyRequest for GetMSCRequest {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetMSCReply {
     pub sequence: u16,
     pub length: u32,
@@ -1276,6 +1299,7 @@ impl TryParse for GetMSCReply {
 /// Opcode for the WaitMSC request
 pub const WAIT_MSC_REQUEST: u8 = 10;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct WaitMSCRequest {
     pub drawable: xproto::Drawable,
     pub target_msc_hi: u32,
@@ -1375,6 +1399,7 @@ impl crate::x11_utils::ReplyRequest for WaitMSCRequest {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct WaitMSCReply {
     pub sequence: u16,
     pub length: u32,
@@ -1412,6 +1437,7 @@ impl TryParse for WaitMSCReply {
 /// Opcode for the WaitSBC request
 pub const WAIT_SBC_REQUEST: u8 = 11;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct WaitSBCRequest {
     pub drawable: xproto::Drawable,
     pub target_sbc_hi: u32,
@@ -1479,6 +1505,7 @@ impl crate::x11_utils::ReplyRequest for WaitSBCRequest {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct WaitSBCReply {
     pub sequence: u16,
     pub length: u32,
@@ -1516,6 +1543,7 @@ impl TryParse for WaitSBCReply {
 /// Opcode for the SwapInterval request
 pub const SWAP_INTERVAL_REQUEST: u8 = 12;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SwapIntervalRequest {
     pub drawable: xproto::Drawable,
     pub interval: u32,
@@ -1576,6 +1604,7 @@ impl crate::x11_utils::VoidRequest for SwapIntervalRequest {
 /// Opcode for the GetParam request
 pub const GET_PARAM_REQUEST: u8 = 13;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetParamRequest {
     pub drawable: xproto::Drawable,
     pub param: u32,
@@ -1635,6 +1664,7 @@ impl crate::x11_utils::ReplyRequest for GetParamRequest {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetParamReply {
     pub is_param_recognized: bool,
     pub sequence: u16,
@@ -1665,6 +1695,7 @@ impl TryParse for GetParamReply {
 /// Opcode for the BufferSwapComplete event
 pub const BUFFER_SWAP_COMPLETE_EVENT: u8 = 0;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct BufferSwapCompleteEvent {
     pub response_type: u8,
     pub sequence: u16,
@@ -1754,6 +1785,7 @@ impl From<BufferSwapCompleteEvent> for [u8; 32] {
 /// Opcode for the InvalidateBuffers event
 pub const INVALIDATE_BUFFERS_EVENT: u8 = 1;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct InvalidateBuffersEvent {
     pub response_type: u8,
     pub sequence: u16,

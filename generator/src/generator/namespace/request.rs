@@ -404,6 +404,12 @@ fn emit_request_struct(
     if !derives.is_empty() {
         outln!(out, "#[derive({})]", derives.join(", "));
     }
+    if !gathered.has_fds() {
+        outln!(
+            out,
+            r#"#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]"#
+        );
+    }
 
     let (struct_lifetime_block, serialize_lifetime_return, parse_lifetime_block) =
         if gathered.needs_lifetime {

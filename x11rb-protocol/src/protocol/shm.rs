@@ -39,6 +39,7 @@ pub type Seg = u32;
 /// Opcode for the Completion event
 pub const COMPLETION_EVENT: u8 = 0;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CompletionEvent {
     pub response_type: u8,
     pub sequence: u16,
@@ -125,6 +126,7 @@ pub const BAD_SEG_ERROR: u8 = 0;
 /// Opcode for the QueryVersion request
 pub const QUERY_VERSION_REQUEST: u8 = 0;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryVersionRequest;
 impl QueryVersionRequest {
     /// Serialize this request into bytes for the provided connection
@@ -167,6 +169,7 @@ impl crate::x11_utils::ReplyRequest for QueryVersionRequest {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryVersionReply {
     pub shared_pixmaps: bool,
     pub sequence: u16,
@@ -204,6 +207,7 @@ impl TryParse for QueryVersionReply {
 /// Opcode for the Attach request
 pub const ATTACH_REQUEST: u8 = 1;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct AttachRequest {
     pub shmseg: Seg,
     pub shmid: u32,
@@ -273,6 +277,7 @@ impl crate::x11_utils::VoidRequest for AttachRequest {
 /// Opcode for the Detach request
 pub const DETACH_REQUEST: u8 = 2;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DetachRequest {
     pub shmseg: Seg,
 }
@@ -325,6 +330,7 @@ impl crate::x11_utils::VoidRequest for DetachRequest {
 /// Opcode for the PutImage request
 pub const PUT_IMAGE_REQUEST: u8 = 3;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PutImageRequest {
     pub drawable: xproto::Drawable,
     pub gc: xproto::Gcontext,
@@ -466,6 +472,7 @@ impl crate::x11_utils::VoidRequest for PutImageRequest {
 /// Opcode for the GetImage request
 pub const GET_IMAGE_REQUEST: u8 = 4;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetImageRequest {
     pub drawable: xproto::Drawable,
     pub x: i16,
@@ -574,6 +581,7 @@ impl crate::x11_utils::ReplyRequest for GetImageRequest {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetImageReply {
     pub depth: u8,
     pub sequence: u16,
@@ -604,6 +612,7 @@ impl TryParse for GetImageReply {
 /// Opcode for the CreatePixmap request
 pub const CREATE_PIXMAP_REQUEST: u8 = 5;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CreatePixmapRequest {
     pub pid: xproto::Pixmap,
     pub drawable: xproto::Drawable,
@@ -766,6 +775,7 @@ impl crate::x11_utils::VoidRequest for AttachFdRequest {
 /// Opcode for the CreateSegment request
 pub const CREATE_SEGMENT_REQUEST: u8 = 7;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CreateSegmentRequest {
     pub shmseg: Seg,
     pub size: u32,
