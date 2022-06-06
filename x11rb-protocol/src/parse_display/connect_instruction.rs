@@ -6,14 +6,16 @@ use alloc::format;
 use alloc::vec::Vec;
 use std::path::PathBuf;
 
-/// Either a hostname and port to connect to, or a socket to connect to.
-// Do we want to make this #[non_exhaustive], in case we add more connection
-// instructions in the future? i.e. what if we want to do X11 over QUIC?
+/// A possible address for an X11 server.
 #[derive(Debug, Clone, PartialEq, Eq)]
+#[non_exhaustive]
 pub enum ConnectAddress<'a> {
     /// Connect to this hostname and port over TCP.
     Hostname(&'a str, u16),
     /// Connect to this Unix socket.
+    ///
+    /// First, the given path should be attempted in the abstract namespace. Only if that fails,
+    /// then the named socket with the given name should be tried.
     Socket(PathBuf),
 }
 
@@ -39,9 +41,6 @@ pub(super) fn connect_addresses(p: &ParsedDisplay) -> impl Iterator<Item = Conne
         if protocol.is_none() || protocol.as_deref() == Some("unix") {
             let file_name = format!("/tmp/.X11-unix/X{}", display);
             targets.push(ConnectAddress::Socket(file_name.into()));
-
-            // TODO: Try abstract socket (file name with prepended '\0')
-            // Not supported on Rust right now: https://github.com/rust-lang/rust/issues/42048
         }
 
         if protocol.is_none() && host.is_empty() {
