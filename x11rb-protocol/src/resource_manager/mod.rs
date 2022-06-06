@@ -85,7 +85,7 @@ impl Database {
     ///
     /// Copy this struct, set its `window` field to the root window of the first screen send the
     /// resulting request to the X11 server. The reply can be passed to
-    /// [`new_from_default`].
+    /// [`Self::new_from_default`].
     pub const GET_RESOURCE_DATABASE: GetPropertyRequest = GetPropertyRequest {
         delete: false,
         window: 0,
@@ -98,14 +98,14 @@ impl Database {
 
     /// Create a new X11 resource database from the default locations.
     ///
-    /// The `reply` argument should come from [`GET_RESOURCE_DATABASE`] with its `window` field set
-    /// to the window ID of the first root window. The `hostname` argument should be the hostname
-    /// of the running system.
+    /// The `reply` argument should come from [`Self::GET_RESOURCE_DATABASE`] with its `window`
+    /// field set to the window ID of the first root window. The `hostname` argument should be the
+    /// hostname of the running system.
     ///
     /// The default location is a combination of two places. First, the following places are
     /// searched for data:
     /// - The `RESOURCE_MANAGER` property of the first screen's root window (See
-    ///   [`Self::new_from_resource_manager`]).
+    ///   [`Self::GET_RESOURCE_DATABASE`] and [`Self::new_from_get_property_reply`]).
     /// - If not found, the file `$HOME/.Xresources` is loaded.
     /// - If not found, the file `$HOME/.Xdefaults` is loaded.
     ///
@@ -179,8 +179,8 @@ impl Database {
 
     /// Construct a new X11 resource database from a [`GetPropertyReply`].
     ///
-    /// The reply should come from [`GET_RESOURCE_DATABASE`] with its `window` field set to the
-    /// window ID of the first root window.
+    /// The reply should come from [`Self::GET_RESOURCE_DATABASE`] with its `window` field set to
+    /// the window ID of the first root window.
     pub fn new_from_get_property_reply(reply: &GetPropertyReply) -> Option<Database> {
         if reply.format == 8 && !reply.value.is_empty() {
             Some(Database::new_from_data(&reply.value))

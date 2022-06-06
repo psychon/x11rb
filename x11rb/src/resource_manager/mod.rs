@@ -45,7 +45,7 @@ pub fn new_from_resource_manager(conn: &impl Connection) -> Result<Option<Databa
 /// The default location is a combination of two places. First, the following places are
 /// searched for data:
 /// - The `RESOURCE_MANAGER` property of the first screen's root window (See
-///   [`Self::new_from_resource_manager`]).
+///   [`new_from_resource_manager`]).
 /// - If not found, the file `$HOME/.Xresources` is loaded.
 /// - If not found, the file `$HOME/.Xdefaults` is loaded.
 ///
