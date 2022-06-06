@@ -12,7 +12,7 @@ const MIT_MAGIC_COOKIE_1: &[u8] = b"MIT-MAGIC-COOKIE-1";
 
 /// A family describes how to interpret some bytes as an address in an `AuthEntry`.
 ///
-/// Compared to [`x11rb_protocol::protocol::xproto::Family`], this is a `u16` and not an `u8` since
+/// Compared to [`super::protocol::xproto::Family`], this is a `u16` and not an `u8` since
 /// that's what is used in `~/.Xauthority` files.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Family(u16);

@@ -168,7 +168,7 @@ impl Connect {
 
     /// Returns the buffer that needs to be filled with incoming data from the server.
     ///
-    /// After filling this buffer (using a method like `Read::read`), call [`advance`] with
+    /// After filling this buffer (using a method like `Read::read`), call [`Self::advance`] with
     /// the number of bytes read to indicate that the buffer has been filled.
     pub fn buffer(&mut self) -> &mut [u8] {
         &mut self.buffer[self.advanced..]
