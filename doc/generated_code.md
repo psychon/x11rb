@@ -30,10 +30,12 @@ The following code is generated at the beginning of a module (example for
 #![allow(clippy::too_many_arguments)]
 
 #[allow(unused_imports)]
-use std::borrow::Cow;
+use alloc::borrow::Cow;
 #[allow(unused_imports)]
-use std::convert::TryInto;
-use std::convert::TryFrom;
+use core::convert::TryInto;
+use alloc::vec;
+use alloc::vec::Vec;
+use core::convert::TryFrom;
 use crate::errors::ParseError;
 #[allow(unused_imports)]
 use crate::x11_utils::TryIntoUSize;
@@ -78,7 +80,7 @@ We must also be able to send structs to the server. This is handled through the
 `Serialize` trait that produces data in the native endian.
 
 ```rust
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Point {
     pub x: i16,
     pub y: i16,
@@ -130,7 +132,7 @@ The field `visuals_len` is not part of the generated struct since it is
 represented implicitly as the length of the `visuals` `Vec`. To make this less
 confusing, a function `visuals_len` is generated.
 ```rust
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Depth {
     pub depth: u8,
     pub visuals: Vec<Visualtype>,
@@ -200,7 +202,7 @@ Depending on the largest value, appropriate `From` and `TryFrom` implementations
 are generated.
 
 ```rust
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct BackingStore(u32);
 impl BackingStore {
     pub const NOT_USEFUL: Self = Self(0);
@@ -237,8 +239,8 @@ impl From<u32> for BackingStore {
         Self(value)
     }
 }
-impl std::fmt::Debug for BackingStore  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for BackingStore  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::NOT_USEFUL.0, "NOT_USEFUL", "NotUseful"),
             (Self::WHEN_MAPPED.0, "WHEN_MAPPED", "WhenMapped"),
@@ -266,7 +268,7 @@ implementations of `BitOr` and `BitOrAssign`.
 ```
 
 ```rust
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ConfigWindow(u8);
 impl ConfigWindow {
     pub const X: Self = Self(1 << 0);
@@ -319,8 +321,8 @@ impl From<u8> for ConfigWindow {
         Self(value)
     }
 }
-impl std::fmt::Debug for ConfigWindow  {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for ConfigWindow  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
             (Self::X.0.into(), "X", "X"),
             (Self::Y.0.into(), "Y", "Y"),
@@ -535,7 +537,7 @@ impl From<[u32; 5]> for ClientMessageData {
 /// Opcode for the KeyPress event
 pub const KEY_PRESS_EVENT: u8 = 2;
 /// [SNIP]
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct KeyPressEvent {
     pub response_type: u8,
     pub detail: Keycode,
@@ -679,7 +681,7 @@ This code is generated in the module in `x11rb-protocol`:
 ```rust
 /// Opcode for the NoOperation request
 pub const NO_OPERATION_REQUEST: u8 = 127;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct NoOperationRequest;
 impl NoOperationRequest {
     /// Serialize this request into bytes for the provided connection
@@ -758,7 +760,7 @@ There is again a structure generated in `x11rb-protocol` that represents the req
 ```rust
 /// Opcode for the GetInputFocus request
 pub const GET_INPUT_FOCUS_REQUEST: u8 = 43;
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetInputFocusRequest;
 impl GetInputFocusRequest {
     /// Serialize this request into bytes for the provided connection
@@ -805,7 +807,7 @@ impl crate::x11_utils::ReplyRequest for GetInputFocusRequest {
 ```
 The reply is handled similar to a `struct`:
 ```rust
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GetInputFocusReply {
     pub revert_to: InputFocus,
     pub sequence: u16,
@@ -888,7 +890,7 @@ generated.
 The switch is represented via a helper struct:
 ```rust
 /// Auxiliary and optional information for the `create_window` function
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
 pub struct CreateWindowAux {
     pub background_pixmap: Option<Pixmap>,
     pub background_pixel: Option<u32>,
@@ -956,11 +958,13 @@ impl CreateWindowAux {
         Default::default()
     }
     /// Set the `background_pixmap` field of this structure.
+    #[must_use]
     pub fn background_pixmap<I>(mut self, value: I) -> Self where I: Into<Option<Pixmap>> {
         self.background_pixmap = value.into();
         self
     }
     /// Set the `background_pixel` field of this structure.
+    #[must_use]
     pub fn background_pixel<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.background_pixel = value.into();
         self
@@ -973,7 +977,7 @@ This code is generated for the actual request:
 /// Opcode for the CreateWindow request
 pub const CREATE_WINDOW_REQUEST: u8 = 1;
 /// [SNIP]
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct CreateWindowRequest<'input> {
     pub depth: u8,
     pub wid: Window,
@@ -1140,9 +1144,9 @@ where
 And this code is in the extension trait:
 ```rust
     /// [SNIP]
-    pub fn create_window(conn: &'c C, depth: u8, parent: Window, x: i16, y: i16, width: u16, height: u16, border_width: u16, class: WindowClass, visual: Visualid, value_list: &CreateWindowAux) -> Result<Self, ReplyOrIdError>
+    fn create_window<'c, 'input>(&'c self, depth: u8, wid: Window, parent: Window, x: i16, y: i16, width: u16, height: u16, border_width: u16, class: WindowClass, visual: Visualid, value_list: &'input CreateWindowAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
-        Ok(Self::create_window_and_get_cookie(conn, depth, parent, x, y, width, height, border_width, class, visual, value_list)?.0)
+        create_window(self, depth, wid, parent, x, y, width, height, border_width, class, visual, value_list)
     }
 ```
 
