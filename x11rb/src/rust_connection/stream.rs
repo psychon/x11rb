@@ -196,6 +196,9 @@ impl DefaultStream {
             }
             #[cfg(unix)]
             ConnectAddress::Socket(path) => {
+                // TODO: Try abstract socket (file name with prepended '\0')
+                // Not supported on Rust right now: https://github.com/rust-lang/rust/issues/42048
+
                 // connect over Unix domain socket
                 let stream = UnixStream::connect(path)?;
                 Self::from_unix_stream(stream)
@@ -208,6 +211,10 @@ impl DefaultStream {
                     "Unix domain sockets are not supported on Windows",
                 ))
             }
+            _ => Err(std::io::Error::new(
+                std::io::ErrorKind::Other,
+                "The given address family is not implemented",
+            )),
         }
     }
 
