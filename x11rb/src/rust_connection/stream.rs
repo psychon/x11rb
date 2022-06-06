@@ -1,6 +1,8 @@
 use std::io::{IoSlice, IoSliceMut, Result};
 use std::net::{Ipv4Addr, SocketAddr, TcpStream};
 #[cfg(unix)]
+use std::os::unix::ffi::OsStrExt as _;
+#[cfg(unix)]
 use std::os::unix::io::{AsRawFd, IntoRawFd, RawFd};
 #[cfg(unix)]
 use std::os::unix::net::UnixStream;
@@ -183,6 +185,8 @@ enum DefaultStreamInner {
     TcpStream(TcpStream),
     #[cfg(unix)]
     UnixStream(UnixStream),
+    #[cfg(unix)]
+    AbstractUnix(RawFdContainer),
 }
 
 impl DefaultStream {
@@ -196,12 +200,19 @@ impl DefaultStream {
             }
             #[cfg(unix)]
             ConnectAddress::Socket(path) => {
-                // TODO: Try abstract socket (file name with prepended '\0')
-                // Not supported on Rust right now: https://github.com/rust-lang/rust/issues/42048
-
-                // connect over Unix domain socket
-                let stream = UnixStream::connect(path)?;
-                Self::from_unix_stream(stream)
+                // Try abstract unix socket first. If that fails, fall back to normal unix socket
+                if let Ok(stream) = connect_abstract_unix_stream(path.as_os_str().as_bytes()) {
+                    // TODO: Does it make sense to add a constructor similar to from_unix_stream()?
+                    // If this is done: Move the set_nonblocking() from
+                    // connect_abstract_unix_stream() to that new function.
+                    Ok(Self {
+                        inner: DefaultStreamInner::AbstractUnix(stream),
+                    })
+                } else {
+                    // connect over Unix domain socket
+                    let stream = UnixStream::connect(path)?;
+                    Self::from_unix_stream(stream)
+                }
             }
             #[cfg(not(unix))]
             ConnectAddress::Socket(_) => {
@@ -273,7 +284,7 @@ impl DefaultStream {
                 }
             }
             #[cfg(unix)]
-            DefaultStreamInner::UnixStream(_) => {
+            DefaultStreamInner::UnixStream(_) | DefaultStreamInner::AbstractUnix(_) => {
                 // Fall through to the code below.
             }
         };
@@ -293,6 +304,7 @@ impl AsRawFd for DefaultStream {
         match self.inner {
             DefaultStreamInner::TcpStream(ref stream) => stream.as_raw_fd(),
             DefaultStreamInner::UnixStream(ref stream) => stream.as_raw_fd(),
+            DefaultStreamInner::AbstractUnix(ref stream) => stream.as_raw_fd(),
         }
     }
 }
@@ -303,6 +315,7 @@ impl IntoRawFd for DefaultStream {
         match self.inner {
             DefaultStreamInner::TcpStream(stream) => stream.into_raw_fd(),
             DefaultStreamInner::UnixStream(stream) => stream.into_raw_fd(),
+            DefaultStreamInner::AbstractUnix(stream) => stream.into_raw_fd(),
         }
     }
 }
@@ -523,4 +536,32 @@ impl Stream for DefaultStream {
             }
         }
     }
+}
+
+#[cfg(unix)]
+fn connect_abstract_unix_stream(path: &[u8]) -> nix::Result<RawFdContainer> {
+    use nix::fcntl::{fcntl, FcntlArg, OFlag};
+    use nix::sys::socket::{connect, socket, AddressFamily, SockFlag, SockType, UnixAddr};
+
+    let socket = socket(
+        AddressFamily::Unix,
+        SockType::Stream,
+        SockFlag::SOCK_CLOEXEC,
+        None,
+    )?;
+
+    // Wrap it in a RawFdContainer. Its Drop impl makes sure to close the socket if something
+    // errors out below.
+    let socket = RawFdContainer::new(socket);
+
+    connect(socket.as_raw_fd(), &UnixAddr::new_abstract(path)?)?;
+
+    // Make the FD non-blocking
+    let flags = fcntl(socket.as_raw_fd(), FcntlArg::F_GETFL)?;
+    let _ = fcntl(
+        socket.as_raw_fd(),
+        FcntlArg::F_SETFL(OFlag::from_bits_truncate(flags) | OFlag::O_NONBLOCK),
+    )?;
+
+    Ok(socket)
 }
