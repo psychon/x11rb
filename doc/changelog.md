@@ -1,3 +1,41 @@
+# Version 0.10.0 (2022-XX-XX)
+
+New features:
+* x11rb was split into two crates: x11rb-protocol contains code for working with
+  the X11 protocol, but does not do any X11 I/O. The x11rb crate uses
+  x11rb-protocol to implement an X11 client. This change allows to use
+  x11rb-protocol in other crates without depending on a whole X11 client.
+* Lots of new utilities to implement a X11 client in preparation of a possible
+  future x11rb-async. Most of these previously already existed, but were not
+  public. Now, x11rb-protocol makes them available.
+* Add traits around requests that allow to send a request in a generic way.
+* Implement more traits in the generated code, where possible: `Default`,
+  `PartialOrd`, `Ord`, and `Hash`.
+* `x11rb-protocol` can be used in `no_std` mode.
+* Optional serde support via deriving `serde::Serialize` and
+  `serde::Deserialize`.
+* Added support for X11 connections over abstract unix sockets.
+* Increased the bus factor of the project by about 50%. Welcome @notgull!
+
+Breaking changes:
+* Bump MSRV to 1.46 due to the bitflags crate requiring this version. We depend
+  on bitflags through the nix crate.
+* Some minor API breakage due to the split into x11rb/x11rb-protocol. For
+  example, `CreateWindowRequest::send()` was previously an associated function
+  and was removed, because a similar feature is available via the new request
+  traits. Also, the API for constructing a resource manager database was changed
+  to remove the need for network I/O from its constructor. A convenience
+  function for the old default behaviour is provided in `x11rb`.
+
+Minor changes:
+* Deal with warnings from newest clippy.
+* Remove incorrect documentation for non-present fields from the generated code.
+  This documentation was present because the field value is actually deduced
+  from another field's value, for example the length of a vector.
+* Add `#[must_use]` to setter methods on `*Aux` structs.
+* Updated to latest versions of dependencies.
+* Received FDs now automatically get the `CLOEXEC` flag applied.
+
 # Version 0.9.0 (2021-08-29)
 
 New features:
