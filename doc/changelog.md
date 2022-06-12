@@ -1,4 +1,4 @@
-# Version 0.10.0 (2022-XX-XX)
+# Version 0.10.0 (2022-06-12)
 
 New features:
 * x11rb was split into two crates: x11rb-protocol contains code for working with
