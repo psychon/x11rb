@@ -8,7 +8,7 @@ authors = [
     "notgull <jtnunley01@gmail.com>",
 ]
 repository = "https://github.com/psychon/x11rb"
-readme = "README.md"
+readme = "../README.md"
 edition = "2018"
 license = "MIT OR Apache-2.0"
 keywords = ["xcb", "X11"]
