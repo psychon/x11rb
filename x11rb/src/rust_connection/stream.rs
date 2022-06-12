@@ -1,6 +1,6 @@
 use std::io::{IoSlice, IoSliceMut, Result};
 use std::net::{Ipv4Addr, SocketAddr, TcpStream};
-#[cfg(unix)]
+#[cfg(any(target_os = "linux", target_os = "android"))]
 use std::os::unix::ffi::OsStrExt as _;
 #[cfg(unix)]
 use std::os::unix::io::{AsRawFd, IntoRawFd, RawFd};
@@ -185,7 +185,7 @@ enum DefaultStreamInner {
     TcpStream(TcpStream),
     #[cfg(unix)]
     UnixStream(UnixStream),
-    #[cfg(unix)]
+    #[cfg(any(target_os = "linux", target_os = "android"))]
     AbstractUnix(RawFdContainer),
 }
 
@@ -201,18 +201,19 @@ impl DefaultStream {
             #[cfg(unix)]
             ConnectAddress::Socket(path) => {
                 // Try abstract unix socket first. If that fails, fall back to normal unix socket
+                #[cfg(any(target_os = "linux", target_os = "android"))]
                 if let Ok(stream) = connect_abstract_unix_stream(path.as_os_str().as_bytes()) {
                     // TODO: Does it make sense to add a constructor similar to from_unix_stream()?
                     // If this is done: Move the set_nonblocking() from
                     // connect_abstract_unix_stream() to that new function.
-                    Ok(Self {
+                    return Ok(Self {
                         inner: DefaultStreamInner::AbstractUnix(stream),
-                    })
-                } else {
-                    // connect over Unix domain socket
-                    let stream = UnixStream::connect(path)?;
-                    Self::from_unix_stream(stream)
+                    });
                 }
+
+                // connect over Unix domain socket
+                let stream = UnixStream::connect(path)?;
+                Self::from_unix_stream(stream)
             }
             #[cfg(not(unix))]
             ConnectAddress::Socket(_) => {
@@ -284,7 +285,11 @@ impl DefaultStream {
                 }
             }
             #[cfg(unix)]
-            DefaultStreamInner::UnixStream(_) | DefaultStreamInner::AbstractUnix(_) => {
+            DefaultStreamInner::UnixStream(_) => {
+                // Fall through to the code below.
+            }
+            #[cfg(any(target_os = "linux", target_os = "android"))]
+            DefaultStreamInner::AbstractUnix(_) => {
                 // Fall through to the code below.
             }
         };
@@ -304,6 +309,7 @@ impl AsRawFd for DefaultStream {
         match self.inner {
             DefaultStreamInner::TcpStream(ref stream) => stream.as_raw_fd(),
             DefaultStreamInner::UnixStream(ref stream) => stream.as_raw_fd(),
+            #[cfg(any(target_os = "linux", target_os = "android"))]
             DefaultStreamInner::AbstractUnix(ref stream) => stream.as_raw_fd(),
         }
     }
@@ -315,6 +321,7 @@ impl IntoRawFd for DefaultStream {
         match self.inner {
             DefaultStreamInner::TcpStream(stream) => stream.into_raw_fd(),
             DefaultStreamInner::UnixStream(stream) => stream.into_raw_fd(),
+            #[cfg(any(target_os = "linux", target_os = "android"))]
             DefaultStreamInner::AbstractUnix(stream) => stream.into_raw_fd(),
         }
     }
@@ -431,6 +438,15 @@ impl Stream for DefaultStream {
     fn read(&self, buf: &mut [u8], fd_storage: &mut Vec<RawFdContainer>) -> Result<usize> {
         #[cfg(unix)]
         {
+            #[cfg(not(any(
+                target_os = "android",
+                target_os = "dragonfly",
+                target_os = "freebsd",
+                target_os = "linux",
+                target_os = "netbsd",
+                target_os = "openbsd"
+            )))]
+            use nix::fcntl;
             use nix::sys::socket::{recvmsg, ControlMessageOwned, MsgFlags};
 
             // Chosen by checking what libxcb does
@@ -440,7 +456,26 @@ impl Stream for DefaultStream {
 
             let fd = self.as_raw_fd();
             let msg = loop {
-                match recvmsg::<()>(fd, &mut iov, Some(&mut cmsg), MsgFlags::MSG_CMSG_CLOEXEC) {
+                #[cfg(any(
+                    target_os = "android",
+                    target_os = "dragonfly",
+                    target_os = "freebsd",
+                    target_os = "linux",
+                    target_os = "netbsd",
+                    target_os = "openbsd"
+                ))]
+                let flags = MsgFlags::MSG_CMSG_CLOEXEC;
+                #[cfg(not(any(
+                    target_os = "android",
+                    target_os = "dragonfly",
+                    target_os = "freebsd",
+                    target_os = "linux",
+                    target_os = "netbsd",
+                    target_os = "openbsd"
+                )))]
+                let flags = MsgFlags::empty();
+
+                match recvmsg::<()>(fd, &mut iov, Some(&mut cmsg), flags) {
                     Ok(msg) => break msg,
                     // try again
                     Err(nix::Error::EINTR) => {}
@@ -448,16 +483,49 @@ impl Stream for DefaultStream {
                 }
             };
 
+            let mut cloexec_error = None;
             let fds_received = msg
                 .cmsgs()
                 .flat_map(|cmsg| match cmsg {
                     ControlMessageOwned::ScmRights(r) => r,
                     _ => Vec::new(),
                 })
-                .map(RawFdContainer::new);
+                .filter_map(|fd| {
+                    // set cloexec if we didn't before
+                    #[cfg(not(any(
+                        target_os = "android",
+                        target_os = "dragonfly",
+                        target_os = "freebsd",
+                        target_os = "linux",
+                        target_os = "netbsd",
+                        target_os = "openbsd"
+                    )))]
+                    let res = fcntl::fcntl(fd, fcntl::FcntlArg::F_SETFD(fcntl::FdFlag::FD_CLOEXEC))
+                        .map(|_| fd);
+                    #[cfg(any(
+                        target_os = "android",
+                        target_os = "dragonfly",
+                        target_os = "freebsd",
+                        target_os = "linux",
+                        target_os = "netbsd",
+                        target_os = "openbsd"
+                    ))]
+                    let res = nix::Result::Ok(fd);
+
+                    match res {
+                        Ok(fd) => Some(RawFdContainer::new(fd)),
+                        Err(e) => {
+                            cloexec_error = Some(e);
+                            None
+                        }
+                    }
+                });
             fd_storage.extend(fds_received);
 
-            Ok(msg.bytes)
+            match cloexec_error {
+                None => Ok(msg.bytes),
+                Some(e) => Err(e.into()),
+            }
         }
         #[cfg(not(unix))]
         {
@@ -538,7 +606,7 @@ impl Stream for DefaultStream {
     }
 }
 
-#[cfg(unix)]
+#[cfg(any(target_os = "linux", target_os = "android"))]
 fn connect_abstract_unix_stream(path: &[u8]) -> nix::Result<RawFdContainer> {
     use nix::fcntl::{fcntl, FcntlArg, OFlag};
     use nix::sys::socket::{connect, socket, AddressFamily, SockFlag, SockType, UnixAddr};

@@ -172,3 +172,16 @@ jobs:
       run: cargo install cross --force
     - name: cargo test
       run: cross test --target "$CROSS_TARGET" --verbose --package x11rb --features "$MOST_FEATURES"
+
+  # future-proof against issue #721
+  non-linux-unix-test:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: stable
+        override: true
+    - name: Run tests
+      run: cargo test --verbose --package x11rb --features "$MOST_FEATURES"
