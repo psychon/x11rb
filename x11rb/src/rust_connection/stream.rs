@@ -577,16 +577,13 @@ fn connect_abstract_unix_stream(path: &[u8]) -> nix::Result<RawFdContainer> {
 }
 
 /// Helper code to make sure that received FDs are marked as CLOEXEC
-#[cfg(all(
-    unix,
-    any(
-        target_os = "android",
-        target_os = "dragonfly",
-        target_os = "freebsd",
-        target_os = "linux",
-        target_os = "netbsd",
-        target_os = "openbsd"
-    )
+#[cfg(any(
+    target_os = "android",
+    target_os = "dragonfly",
+    target_os = "freebsd",
+    target_os = "linux",
+    target_os = "netbsd",
+    target_os = "openbsd"
 ))]
 mod recvmsg {
     use super::RawFdContainer;
