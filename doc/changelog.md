@@ -1,4 +1,4 @@
-# Version 0.10.1 (2022-06-XX)
+# Version 0.10.1 (2022-06-15)
 
 Fixes:
 * Fix compilation on non-Linux unixes.
