@@ -438,16 +438,7 @@ impl Stream for DefaultStream {
     fn read(&self, buf: &mut [u8], fd_storage: &mut Vec<RawFdContainer>) -> Result<usize> {
         #[cfg(unix)]
         {
-            #[cfg(not(any(
-                target_os = "android",
-                target_os = "dragonfly",
-                target_os = "freebsd",
-                target_os = "linux",
-                target_os = "netbsd",
-                target_os = "openbsd"
-            )))]
-            use nix::fcntl;
-            use nix::sys::socket::{recvmsg, ControlMessageOwned, MsgFlags};
+            use nix::sys::socket::{recvmsg, ControlMessageOwned};
 
             // Chosen by checking what libxcb does
             const MAX_FDS_RECEIVED: usize = 16;
@@ -456,26 +447,7 @@ impl Stream for DefaultStream {
 
             let fd = self.as_raw_fd();
             let msg = loop {
-                #[cfg(any(
-                    target_os = "android",
-                    target_os = "dragonfly",
-                    target_os = "freebsd",
-                    target_os = "linux",
-                    target_os = "netbsd",
-                    target_os = "openbsd"
-                ))]
-                let flags = MsgFlags::MSG_CMSG_CLOEXEC;
-                #[cfg(not(any(
-                    target_os = "android",
-                    target_os = "dragonfly",
-                    target_os = "freebsd",
-                    target_os = "linux",
-                    target_os = "netbsd",
-                    target_os = "openbsd"
-                )))]
-                let flags = MsgFlags::empty();
-
-                match recvmsg::<()>(fd, &mut iov, Some(&mut cmsg), flags) {
+                match recvmsg::<()>(fd, &mut iov, Some(&mut cmsg), recvmsg::flags()) {
                     Ok(msg) => break msg,
                     // try again
                     Err(nix::Error::EINTR) => {}
@@ -483,49 +455,19 @@ impl Stream for DefaultStream {
                 }
             };
 
-            let mut cloexec_error = None;
             let fds_received = msg
                 .cmsgs()
                 .flat_map(|cmsg| match cmsg {
                     ControlMessageOwned::ScmRights(r) => r,
                     _ => Vec::new(),
                 })
-                .filter_map(|fd| {
-                    // set cloexec if we didn't before
-                    #[cfg(not(any(
-                        target_os = "android",
-                        target_os = "dragonfly",
-                        target_os = "freebsd",
-                        target_os = "linux",
-                        target_os = "netbsd",
-                        target_os = "openbsd"
-                    )))]
-                    let res = fcntl::fcntl(fd, fcntl::FcntlArg::F_SETFD(fcntl::FdFlag::FD_CLOEXEC))
-                        .map(|_| fd);
-                    #[cfg(any(
-                        target_os = "android",
-                        target_os = "dragonfly",
-                        target_os = "freebsd",
-                        target_os = "linux",
-                        target_os = "netbsd",
-                        target_os = "openbsd"
-                    ))]
-                    let res = nix::Result::Ok(fd);
+                .map(RawFdContainer::new);
 
-                    match res {
-                        Ok(fd) => Some(RawFdContainer::new(fd)),
-                        Err(e) => {
-                            cloexec_error = Some(e);
-                            None
-                        }
-                    }
-                });
-            fd_storage.extend(fds_received);
+            let mut cloexec_error = Ok(());
+            fd_storage.extend(recvmsg::after_recvmsg(fds_received, &mut cloexec_error));
+            cloexec_error?;
 
-            match cloexec_error {
-                None => Ok(msg.bytes),
-                Some(e) => Err(e.into()),
-            }
+            Ok(msg.bytes)
         }
         #[cfg(not(unix))]
         {
@@ -632,4 +574,66 @@ fn connect_abstract_unix_stream(path: &[u8]) -> nix::Result<RawFdContainer> {
     )?;
 
     Ok(socket)
+}
+
+/// Helper code to make sure that received FDs are marked as CLOEXEC
+#[cfg(all(
+    unix,
+    any(
+        target_os = "android",
+        target_os = "dragonfly",
+        target_os = "freebsd",
+        target_os = "linux",
+        target_os = "netbsd",
+        target_os = "openbsd"
+    )
+))]
+mod recvmsg {
+    use super::RawFdContainer;
+
+    pub(crate) fn flags() -> nix::sys::socket::MsgFlags {
+        nix::sys::socket::MsgFlags::MSG_CMSG_CLOEXEC
+    }
+
+    pub(crate) fn after_recvmsg<'a>(
+        fds: impl Iterator<Item = RawFdContainer> + 'a,
+        _cloexec_error: &'a mut nix::Result<()>,
+    ) -> impl Iterator<Item = RawFdContainer> + 'a {
+        fds
+    }
+}
+
+/// Helper code to make sure that received FDs are marked as CLOEXEC
+#[cfg(all(
+    unix,
+    not(any(
+        target_os = "android",
+        target_os = "dragonfly",
+        target_os = "freebsd",
+        target_os = "linux",
+        target_os = "netbsd",
+        target_os = "openbsd"
+    ))
+))]
+mod recvmsg {
+    use super::RawFdContainer;
+    use nix::fcntl::{fcntl, FcntlArg, FdFlag};
+    use nix::sys::socket::MsgFlags;
+    use std::os::unix::io::AsRawFd;
+
+    pub(crate) fn flags() -> MsgFlags {
+        MsgFlags::empty()
+    }
+
+    pub(crate) fn after_recvmsg<'a>(
+        fds: impl Iterator<Item = RawFdContainer> + 'a,
+        cloexec_error: &'a mut nix::Result<()>,
+    ) -> impl Iterator<Item = RawFdContainer> + 'a {
+        fds.map(move |fd| {
+            if let Err(e) = fcntl(fd.as_raw_fd(), FcntlArg::F_SETFD(FdFlag::FD_CLOEXEC)) {
+                *cloexec_error = Err(e);
+            }
+            fd
+        })
+    }
 }
