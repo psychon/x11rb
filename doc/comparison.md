@@ -69,8 +69,7 @@ time.
 
 "An implementation of the X Window System Protocol in Rust. 100% safe and mutex-free."
 
-[breadx](https://github.com/not-a-seagull/breadx) is another project that uses
-the xcb-proto XML description of the X11 protocol to generate code. The project
+[breadx](https://github.com/bread-graphics/breadx) uses the same generated bindings as `x11rb`. The project
 claims that it is "generally faster (awaiting verification)".
 
 One highlight is support for async. However, interactions with the X11 server
