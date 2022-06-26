@@ -549,16 +549,11 @@ impl NamedEventRef {
             .expect("named event reference already resolved")
     }
 
-    /// Returns the resolved event, or `None` if not set.
-    #[inline]
-    fn try_get_resolved(&self) -> Option<&EventRef> {
-        self.def.get()
-    }
-
     /// Returns the resolved event, or panics if not set.
     #[inline]
     pub fn get_resolved(&self) -> &EventRef {
-        self.try_get_resolved()
+        self.def
+            .get()
             .expect("named event reference has not been resolved")
     }
 }
@@ -647,16 +642,11 @@ impl NamedErrorRef {
             .expect("named error reference already resolved")
     }
 
-    /// Returns the resolved error, or `None` if not set.
-    #[inline]
-    fn try_get_resolved(&self) -> Option<&ErrorRef> {
-        self.def.get()
-    }
-
     /// Returns the resolved error, or panics if not set.
     #[inline]
     fn get_resolved(&self) -> &ErrorRef {
-        self.try_get_resolved()
+        self.def
+            .get()
             .expect("named error reference has not been resolved")
     }
 }
@@ -745,16 +735,11 @@ impl NamedTypeRef {
             .expect("named type reference already resolved")
     }
 
-    /// Returns the resolved type, or `None` if not set.
-    #[inline]
-    fn try_get_resolved(&self) -> Option<&TypeRef> {
-        self.def.get()
-    }
-
     /// Returns the resolved type, or panics if not set.
     #[inline]
     pub fn get_resolved(&self) -> &TypeRef {
-        self.try_get_resolved()
+        self.def
+            .get()
             .expect("named type reference has not been resolved")
     }
 }
