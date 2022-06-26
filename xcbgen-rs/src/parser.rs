@@ -83,13 +83,11 @@ impl Parser {
             .attribute("extension-xname")
             .map::<Result<defs::ExtInfo, ParseError>, _>(|xname| {
                 let name = get_attr(node, "extension-name")?;
-                let multiword = try_get_attr_parsed(node, "extension-multiword")?.unwrap_or(false);
                 let major_version = get_attr_parsed(node, "major-version")?;
                 let minor_version = get_attr_parsed(node, "minor-version")?;
                 Ok(defs::ExtInfo {
                     xname: xname.into(),
                     name: name.into(),
-                    multiword,
                     major_version,
                     minor_version,
                 })

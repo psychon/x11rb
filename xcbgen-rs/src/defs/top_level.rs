@@ -41,7 +41,7 @@ pub struct RequestDef {
     pub combine_adjacent: bool,
 
     /// The value of this request's `<required_start_align>` child, if any.
-    pub required_start_align: Option<Alignment>,
+    pub(crate) required_start_align: Option<Alignment>,
 
     /// The list of fields of this request.
     ///
@@ -62,10 +62,10 @@ pub struct ReplyDef {
     ///
     /// This reference should always be set after parsing so that `.get()` should not return
     /// `None`.
-    pub request: OnceCell<Weak<RequestDef>>,
+    pub(crate) request: OnceCell<Weak<RequestDef>>,
 
     /// The value of this request's `<required_start_align>` child, if any.
-    pub required_start_align: Option<Alignment>,
+    pub(crate) required_start_align: Option<Alignment>,
 
     /// The list of fields of this reply.
     ///
@@ -126,7 +126,7 @@ impl EventDef {
     /// Downgrade this definition to a weak reference.
     ///
     /// See [`Rc::downgrade`].
-    pub fn as_event_ref(&self) -> EventRef {
+    pub(crate) fn as_event_ref(&self) -> EventRef {
         match self {
             Self::Full(event_full_def) => EventRef::Full(Rc::downgrade(event_full_def)),
             Self::Copy(event_copy_def) => EventRef::Copy(Rc::downgrade(event_copy_def)),
@@ -155,7 +155,7 @@ pub struct EventFullDef {
     pub xge: bool,
 
     /// The value of this event's `<required_start_align>` child, if any.
-    pub required_start_align: Option<Alignment>,
+    pub(crate) required_start_align: Option<Alignment>,
 
     /// The list of fields of this event.
     ///
@@ -170,7 +170,7 @@ pub struct EventFullDef {
 #[derive(Debug)]
 pub struct EventCopyDef {
     /// The namespace that this event belongs to.
-    pub namespace: Weak<Namespace>,
+    pub(crate) namespace: Weak<Namespace>,
 
     /// The `name` of the new event.
     pub name: String,
@@ -250,7 +250,7 @@ pub struct ErrorFullDef {
     pub number: i16,
 
     /// The value of this error's `<required_start_align>` child, if any.
-    pub required_start_align: Option<Alignment>,
+    pub(crate) required_start_align: Option<Alignment>,
 
     /// The list of fields of this error.
     ///
@@ -271,7 +271,7 @@ pub struct ErrorCopyDef {
     pub number: i16,
 
     /// A reference to the error that is copied.
-    pub ref_: NamedErrorRef,
+    pub(crate) ref_: NamedErrorRef,
 }
 
 impl ErrorCopyDef {
@@ -343,7 +343,7 @@ impl StructDef {
     /// Get the size in bytes of this struct on the wire.
     ///
     /// This returns `None` if the struct does not have a fixed size.
-    pub fn size(&self) -> Option<u32> {
+    fn size(&self) -> Option<u32> {
         self.fields
             .borrow()
             .iter()
@@ -401,16 +401,16 @@ pub struct EventStructDef {
 #[derive(Clone, Debug)]
 pub struct EventStructAllowed {
     /// The extension that events come from.
-    pub extension: String,
+    pub(crate) extension: String,
 
     /// Whether XGEs are allowed.
     pub xge: bool,
 
     /// The minimum opcode of the events.
-    pub opcode_min: u16,
+    pub(crate) opcode_min: u16,
 
     /// The maximum opcode of the events.
-    pub opcode_max: u16,
+    pub(crate) opcode_max: u16,
 
     /// The list of events that this `<allowed>` references.
     ///
@@ -438,7 +438,7 @@ pub struct XidUnionDef {
     pub name: String,
 
     /// The list of types that are contained in the union.
-    pub types: Vec<NamedTypeRef>,
+    pub(crate) types: Vec<NamedTypeRef>,
 }
 
 /// An `<enum>` definition.
@@ -526,39 +526,24 @@ pub struct NamedEventRef {
 impl NamedEventRef {
     /// Create a new unresolved instance.
     #[inline]
-    pub fn unresolved(name: String) -> Self {
+    pub(crate) fn unresolved(name: String) -> Self {
         Self {
             name,
             def: OnceCell::new(),
         }
     }
 
-    /// Create a new resolved instance.
-    #[inline]
-    pub fn resolved(name: String, def: EventRef) -> Self {
-        Self {
-            name,
-            def: OnceCell::from(def),
-        }
-    }
-
     /// Returns the event name as it appears in the XML.
     #[inline]
-    pub fn name(&self) -> &str {
+    pub(crate) fn name(&self) -> &str {
         self.name.as_str()
-    }
-
-    /// Returns whether the event name has been resolved.
-    #[inline]
-    pub fn is_resolved(&self) -> bool {
-        self.def.get().is_some()
     }
 
     /// Sets the resolved event. Panics if it is already set.
     ///
     /// This is called during resolving (see the `resolve` function from this crate).
     #[inline]
-    pub fn set_resolved(&self, def: EventRef) {
+    pub(crate) fn set_resolved(&self, def: EventRef) {
         self.def
             .set(def)
             .expect("named event reference already resolved")
@@ -566,7 +551,7 @@ impl NamedEventRef {
 
     /// Returns the resolved event, or `None` if not set.
     #[inline]
-    pub fn try_get_resolved(&self) -> Option<&EventRef> {
+    fn try_get_resolved(&self) -> Option<&EventRef> {
         self.def.get()
     }
 
@@ -614,11 +599,6 @@ impl EventRef {
         }
     }
 
-    /// Is this an XGE?
-    pub fn is_xge(&self) -> bool {
-        self.get_original_full_def().xge
-    }
-
     /// Upgrade this event reference to an event definition.
     ///
     /// See [`Weak::upgrade`] for more about what this really does.
@@ -644,39 +624,24 @@ pub struct NamedErrorRef {
 
 impl NamedErrorRef {
     /// Create a new unresolved instance.
-    pub fn unresolved(name: String) -> Self {
+    pub(crate) fn unresolved(name: String) -> Self {
         Self {
             name,
             def: OnceCell::new(),
         }
     }
 
-    /// Create a new resolved instance.
-    #[inline]
-    pub fn resolved(name: String, def: ErrorRef) -> Self {
-        Self {
-            name,
-            def: OnceCell::from(def),
-        }
-    }
-
     /// Returns the error name as it appears in the XML.
     #[inline]
-    pub fn name(&self) -> &str {
+    pub(crate) fn name(&self) -> &str {
         self.name.as_str()
-    }
-
-    /// Returns whether the event name has been resolved.
-    #[inline]
-    pub fn is_resolved(&self) -> bool {
-        self.def.get().is_some()
     }
 
     /// Sets the resolved error. Panics if it is already set.
     ///
     /// This is called during resolving (see the `resolve` function from this crate).
     #[inline]
-    pub fn set_resolved(&self, def: ErrorRef) {
+    pub(crate) fn set_resolved(&self, def: ErrorRef) {
         self.def
             .set(def)
             .expect("named error reference already resolved")
@@ -684,13 +649,13 @@ impl NamedErrorRef {
 
     /// Returns the resolved error, or `None` if not set.
     #[inline]
-    pub fn try_get_resolved(&self) -> Option<&ErrorRef> {
+    fn try_get_resolved(&self) -> Option<&ErrorRef> {
         self.def.get()
     }
 
     /// Returns the resolved error, or panics if not set.
     #[inline]
-    pub fn get_resolved(&self) -> &ErrorRef {
+    fn get_resolved(&self) -> &ErrorRef {
         self.try_get_resolved()
             .expect("named error reference has not been resolved")
     }
@@ -698,7 +663,7 @@ impl NamedErrorRef {
 
 /// A reference to an error.
 #[derive(Clone, Debug)]
-pub enum ErrorRef {
+pub(crate) enum ErrorRef {
     /// A reference to an `<error>`.
     Full(Weak<ErrorFullDef>),
 
@@ -715,7 +680,7 @@ impl ErrorRef {
     /// # Panics
     ///
     /// Panics if an `<errorcopy>` was not yet resolved.
-    pub fn get_original_full_def(&self) -> Rc<ErrorFullDef> {
+    fn get_original_full_def(&self) -> Rc<ErrorFullDef> {
         match self {
             Self::Full(error_full_def) => error_full_def.upgrade().unwrap(),
             Self::Copy(error_copy_def) => {
@@ -729,16 +694,6 @@ impl ErrorRef {
                     }
                 }
             }
-        }
-    }
-
-    /// Upgrade this error reference to an error definition.
-    ///
-    /// See [`Weak::upgrade`] for more about what this really does.
-    pub fn as_error_def(&self) -> ErrorDef {
-        match self {
-            Self::Full(error_full_def) => ErrorDef::Full(error_full_def.upgrade().unwrap()),
-            Self::Copy(error_copy_def) => ErrorDef::Copy(error_copy_def.upgrade().unwrap()),
         }
     }
 }
@@ -758,7 +713,7 @@ pub struct NamedTypeRef {
 impl NamedTypeRef {
     /// Create a new unresolved instance.
     #[inline]
-    pub fn unresolved(name: String) -> Self {
+    pub(crate) fn unresolved(name: String) -> Self {
         Self {
             name,
             def: OnceCell::new(),
@@ -767,7 +722,7 @@ impl NamedTypeRef {
 
     /// Create a new resolved instance.
     #[inline]
-    pub fn resolved(name: String, def: TypeRef) -> Self {
+    pub(crate) fn resolved(name: String, def: TypeRef) -> Self {
         Self {
             name,
             def: OnceCell::from(def),
@@ -776,21 +731,15 @@ impl NamedTypeRef {
 
     /// Returns the type name as it appears in the XML.
     #[inline]
-    pub fn name(&self) -> &str {
+    pub(crate) fn name(&self) -> &str {
         self.name.as_str()
-    }
-
-    /// Returns whether the type name has been resolved.
-    #[inline]
-    pub fn is_resolved(&self) -> bool {
-        self.def.get().is_some()
     }
 
     /// Sets the resolved type. Panics if it is already set.
     ///
     /// This is called during resolving (see the `resolve` function from this crate).
     #[inline]
-    pub fn set_resolved(&self, def: TypeRef) {
+    pub(crate) fn set_resolved(&self, def: TypeRef) {
         self.def
             .set(def)
             .expect("named type reference already resolved")
@@ -798,7 +747,7 @@ impl NamedTypeRef {
 
     /// Returns the resolved type, or `None` if not set.
     #[inline]
-    pub fn try_get_resolved(&self) -> Option<&TypeRef> {
+    fn try_get_resolved(&self) -> Option<&TypeRef> {
         self.def.get()
     }
 
@@ -843,7 +792,7 @@ impl TypeRef {
     ///
     /// This does e.g. not resolve type aliases, but instead checks that both sides reference the
     /// same type alias.
-    pub fn same_as(&self, other: &Self) -> bool {
+    pub(crate) fn same_as(&self, other: &Self) -> bool {
         match (self, other) {
             (Self::BuiltIn(builtin1), Self::BuiltIn(builtin2)) => builtin1 == builtin2,
             (Self::Struct(def1), Self::Struct(def2)) => def1.ptr_eq(def2),
