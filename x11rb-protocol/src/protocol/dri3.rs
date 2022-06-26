@@ -837,7 +837,7 @@ impl PixmapFromBuffersRequest {
         let fds_len = num_buffers.try_to_usize()?;
         if fds.len() < fds_len { return Err(ParseError::MissingFileDescriptors) }
         let mut buffers = fds.split_off(fds_len);
-        std::mem::swap(fds, &mut buffers);
+        core::mem::swap(fds, &mut buffers);
         let _ = remaining;
         Ok(PixmapFromBuffersRequest {
             pixmap,
@@ -958,7 +958,7 @@ impl TryParseFd for BuffersFromPixmapReply {
         let fds_len = nfd.try_to_usize()?;
         if fds.len() < fds_len { return Err(ParseError::MissingFileDescriptors) }
         let mut buffers = fds.split_off(fds_len);
-        std::mem::swap(fds, &mut buffers);
+        core::mem::swap(fds, &mut buffers);
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }

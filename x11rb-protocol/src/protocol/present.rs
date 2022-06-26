@@ -55,7 +55,7 @@ impl From<EventEnum> for u8 {
         input.0
     }
 }
-impl From<EventEnum> for std::option::Option<u8> {
+impl From<EventEnum> for core::option::Option<u8> {
     #[inline]
     fn from(input: EventEnum) -> Self {
         Some(input.0)
@@ -67,7 +67,7 @@ impl From<EventEnum> for u16 {
         u16::from(input.0)
     }
 }
-impl From<EventEnum> for std::option::Option<u16> {
+impl From<EventEnum> for core::option::Option<u16> {
     #[inline]
     fn from(input: EventEnum) -> Self {
         Some(u16::from(input.0))
@@ -79,7 +79,7 @@ impl From<EventEnum> for u32 {
         u32::from(input.0)
     }
 }
-impl From<EventEnum> for std::option::Option<u32> {
+impl From<EventEnum> for core::option::Option<u32> {
     #[inline]
     fn from(input: EventEnum) -> Self {
         Some(u32::from(input.0))
@@ -119,7 +119,7 @@ impl From<EventMask> for u8 {
         input.0
     }
 }
-impl From<EventMask> for std::option::Option<u8> {
+impl From<EventMask> for core::option::Option<u8> {
     #[inline]
     fn from(input: EventMask) -> Self {
         Some(input.0)
@@ -131,7 +131,7 @@ impl From<EventMask> for u16 {
         u16::from(input.0)
     }
 }
-impl From<EventMask> for std::option::Option<u16> {
+impl From<EventMask> for core::option::Option<u16> {
     #[inline]
     fn from(input: EventMask) -> Self {
         Some(u16::from(input.0))
@@ -143,7 +143,7 @@ impl From<EventMask> for u32 {
         u32::from(input.0)
     }
 }
-impl From<EventMask> for std::option::Option<u32> {
+impl From<EventMask> for core::option::Option<u32> {
     #[inline]
     fn from(input: EventMask) -> Self {
         Some(u32::from(input.0))
@@ -185,7 +185,7 @@ impl From<Option> for u8 {
         input.0
     }
 }
-impl From<Option> for std::option::Option<u8> {
+impl From<Option> for core::option::Option<u8> {
     #[inline]
     fn from(input: Option) -> Self {
         Some(input.0)
@@ -197,7 +197,7 @@ impl From<Option> for u16 {
         u16::from(input.0)
     }
 }
-impl From<Option> for std::option::Option<u16> {
+impl From<Option> for core::option::Option<u16> {
     #[inline]
     fn from(input: Option) -> Self {
         Some(u16::from(input.0))
@@ -209,7 +209,7 @@ impl From<Option> for u32 {
         u32::from(input.0)
     }
 }
-impl From<Option> for std::option::Option<u32> {
+impl From<Option> for core::option::Option<u32> {
     #[inline]
     fn from(input: Option) -> Self {
         Some(u32::from(input.0))
@@ -250,7 +250,7 @@ impl From<Capability> for u8 {
         input.0
     }
 }
-impl From<Capability> for std::option::Option<u8> {
+impl From<Capability> for core::option::Option<u8> {
     #[inline]
     fn from(input: Capability) -> Self {
         Some(input.0)
@@ -262,7 +262,7 @@ impl From<Capability> for u16 {
         u16::from(input.0)
     }
 }
-impl From<Capability> for std::option::Option<u16> {
+impl From<Capability> for core::option::Option<u16> {
     #[inline]
     fn from(input: Capability) -> Self {
         Some(u16::from(input.0))
@@ -274,7 +274,7 @@ impl From<Capability> for u32 {
         u32::from(input.0)
     }
 }
-impl From<Capability> for std::option::Option<u32> {
+impl From<Capability> for core::option::Option<u32> {
     #[inline]
     fn from(input: Capability) -> Self {
         Some(u32::from(input.0))
@@ -312,7 +312,7 @@ impl From<CompleteKind> for u8 {
         input.0
     }
 }
-impl From<CompleteKind> for std::option::Option<u8> {
+impl From<CompleteKind> for core::option::Option<u8> {
     #[inline]
     fn from(input: CompleteKind) -> Self {
         Some(input.0)
@@ -324,7 +324,7 @@ impl From<CompleteKind> for u16 {
         u16::from(input.0)
     }
 }
-impl From<CompleteKind> for std::option::Option<u16> {
+impl From<CompleteKind> for core::option::Option<u16> {
     #[inline]
     fn from(input: CompleteKind) -> Self {
         Some(u16::from(input.0))
@@ -336,7 +336,7 @@ impl From<CompleteKind> for u32 {
         u32::from(input.0)
     }
 }
-impl From<CompleteKind> for std::option::Option<u32> {
+impl From<CompleteKind> for core::option::Option<u32> {
     #[inline]
     fn from(input: CompleteKind) -> Self {
         Some(u32::from(input.0))
@@ -373,7 +373,7 @@ impl From<CompleteMode> for u8 {
         input.0
     }
 }
-impl From<CompleteMode> for std::option::Option<u8> {
+impl From<CompleteMode> for core::option::Option<u8> {
     #[inline]
     fn from(input: CompleteMode) -> Self {
         Some(input.0)
@@ -385,7 +385,7 @@ impl From<CompleteMode> for u16 {
         u16::from(input.0)
     }
 }
-impl From<CompleteMode> for std::option::Option<u16> {
+impl From<CompleteMode> for core::option::Option<u16> {
     #[inline]
     fn from(input: CompleteMode) -> Self {
         Some(u16::from(input.0))
@@ -397,7 +397,7 @@ impl From<CompleteMode> for u32 {
         u32::from(input.0)
     }
 }
-impl From<CompleteMode> for std::option::Option<u32> {
+impl From<CompleteMode> for core::option::Option<u32> {
     #[inline]
     fn from(input: CompleteMode) -> Self {
         Some(u32::from(input.0))
@@ -507,7 +507,7 @@ impl QueryVersionRequest {
     }
 }
 impl Request for QueryVersionRequest {
-    const EXTENSION_NAME: std::option::Option<&'static str> = Some(X11_EXTENSION_NAME);
+    const EXTENSION_NAME: core::option::Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
         let (bufs, fds) = self.serialize(major_opcode);
@@ -740,7 +740,7 @@ impl<'input> PixmapRequest<'input> {
     }
 }
 impl<'input> Request for PixmapRequest<'input> {
-    const EXTENSION_NAME: std::option::Option<&'static str> = Some(X11_EXTENSION_NAME);
+    const EXTENSION_NAME: core::option::Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
         let (bufs, fds) = self.serialize(major_opcode);
@@ -842,7 +842,7 @@ impl NotifyMSCRequest {
     }
 }
 impl Request for NotifyMSCRequest {
-    const EXTENSION_NAME: std::option::Option<&'static str> = Some(X11_EXTENSION_NAME);
+    const EXTENSION_NAME: core::option::Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
         let (bufs, fds) = self.serialize(major_opcode);
@@ -913,7 +913,7 @@ impl SelectInputRequest {
     }
 }
 impl Request for SelectInputRequest {
-    const EXTENSION_NAME: std::option::Option<&'static str> = Some(X11_EXTENSION_NAME);
+    const EXTENSION_NAME: core::option::Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
         let (bufs, fds) = self.serialize(major_opcode);
@@ -966,7 +966,7 @@ impl QueryCapabilitiesRequest {
     }
 }
 impl Request for QueryCapabilitiesRequest {
-    const EXTENSION_NAME: std::option::Option<&'static str> = Some(X11_EXTENSION_NAME);
+    const EXTENSION_NAME: core::option::Option<&'static str> = Some(X11_EXTENSION_NAME);
 
     fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
         let (bufs, fds) = self.serialize(major_opcode);

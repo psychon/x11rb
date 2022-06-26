@@ -52,7 +52,7 @@ struct NamespaceGenerator<'ns, 'c> {
     ns: &'ns xcbdefs::Namespace,
     caches: &'c RefCell<Caches>,
 
-    /// `Option` or `std::option::Option`
+    /// `Option` or `core::option::Option`
     option_name: &'static str,
 }
 
@@ -64,7 +64,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         caches: &'c RefCell<Caches>,
     ) -> Self {
         let option_name = if ns.header == "present" {
-            "std::option::Option"
+            "core::option::Option"
         } else {
             "Option"
         };
