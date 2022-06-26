@@ -245,7 +245,7 @@ pub(super) fn emit_field_parse(
                 "if fds.len() < fds_len {{ return Err(ParseError::MissingFileDescriptors) }}",
             );
             outln!(out, "let mut {} = fds.split_off(fds_len);", rust_field_name);
-            outln!(out, "std::mem::swap(fds, &mut {});", rust_field_name);
+            outln!(out, "core::mem::swap(fds, &mut {});", rust_field_name);
         }
         xcbdefs::FieldDef::Expr(expr_ref) => {
             match expr_ref.expr {
