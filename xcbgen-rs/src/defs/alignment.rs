@@ -17,7 +17,7 @@ impl Alignment {
     ///
     /// Panics if `align` is not a power of two or if `offset` is
     /// equal or greater than `align`.
-    pub fn new(align: u32, offset: u32) -> Self {
+    pub(crate) fn new(align: u32, offset: u32) -> Self {
         assert!(align.is_power_of_two() && offset < align);
         Self { align, offset }
     }
@@ -39,7 +39,7 @@ impl Alignment {
     /// The resulting value describes the alignment at the end of the variably sized object if it
     /// is aligned by `self` at its beginning.
     #[must_use]
-    pub fn advance_variable_size(self, size: VariableSize) -> Self {
+    fn advance_variable_size(self, size: VariableSize) -> Self {
         let align = if size.incr == 0 {
             self.align
         } else {
@@ -50,7 +50,7 @@ impl Alignment {
     }
 
     /// Returns an alignment that meets `self` and `other`.
-    pub fn union(self, other: Self) -> Option<Self> {
+    fn union(self, other: Self) -> Option<Self> {
         match self.align.cmp(&other.align) {
             std::cmp::Ordering::Less => {
                 if (other.offset % self.align) != self.offset {
@@ -78,7 +78,7 @@ impl Alignment {
 
     /// Returns an alignment that is met by `self` and `other`.
     #[must_use]
-    pub fn intersection(self, other: Self) -> Self {
+    fn intersection(self, other: Self) -> Self {
         let align = self.align.min(other.align);
         let offset1 = self.offset % align;
         let offset2 = other.offset % align;
@@ -100,7 +100,7 @@ impl Alignment {
 
     /// Returns whether `self` meets the alignment requirements
     /// of `required`.
-    pub fn meets(self, required: Self) -> bool {
+    fn meets(self, required: Self) -> bool {
         // `self.align >= required.align` is equivalent to
         // `self.align % required.align == 0` because `align`
         // is always a power of 2.
@@ -116,7 +116,7 @@ impl Alignment {
 ///
 /// `incr` must be zero or a power of 2
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
-pub struct VariableSize {
+pub(crate) struct VariableSize {
     base: u32,
     incr: u32,
 }
@@ -127,21 +127,9 @@ impl VariableSize {
     /// # Panics
     ///
     /// Panics if `incr` neither zero nor a power of 2.
-    pub fn new(base: u32, incr: u32) -> Self {
+    pub(crate) fn new(base: u32, incr: u32) -> Self {
         assert!(incr == 0 || incr.is_power_of_two());
         Self { base, incr }
-    }
-
-    /// Returns the value of `base`.
-    #[inline]
-    pub fn base(self) -> u32 {
-        self.base
-    }
-
-    /// Returns the value of `incr`.
-    #[inline]
-    pub fn incr(self) -> u32 {
-        self.incr
     }
 
     /// Get the minimum of two values, but not zero (unless both are zero).
@@ -166,7 +154,7 @@ impl VariableSize {
 
     /// Create an instance that describes a zero-sized type.
     #[inline]
-    pub fn zero() -> Self {
+    pub(crate) fn zero() -> Self {
         Self { base: 0, incr: 0 }
     }
 
@@ -177,7 +165,7 @@ impl VariableSize {
     /// are described by the returned object can necessarily be constructed by such a
     /// concatenation.
     #[must_use]
-    pub fn append(self, other: Self) -> Self {
+    fn append(self, other: Self) -> Self {
         Self {
             // FIXME: check overflow
             base: self.base + other.base,
@@ -188,7 +176,7 @@ impl VariableSize {
     /// Returns an `VariableSize` that can represent all the sizes
     /// represented by `self` and `other`.
     #[must_use]
-    pub fn union(self, other: Self) -> Self {
+    fn union(self, other: Self) -> Self {
         let incr_union = Self::incr_union(self.incr, other.incr);
         if self.base == other.base {
             Self {
@@ -233,7 +221,7 @@ impl VariableSize {
 
     /// Describe the size of an arbitrary number of elements.
     #[must_use]
-    pub fn zero_one_or_many(self) -> Self {
+    fn zero_one_or_many(self) -> Self {
         // Self represents sizes `base + incr * n`, where `n >= 0`.
         // The returned value must represent sizes `(base + incr * n) * m`
         // (or a superset), where `m >= 0`.
@@ -251,7 +239,7 @@ impl VariableSize {
 
     /// Describe the size of `n` elements of this type.
     #[must_use]
-    pub fn repeat_n(self, n: u32) -> Self {
+    fn repeat_n(self, n: u32) -> Self {
         if n == 0 {
             Self::zero()
         } else {
@@ -285,7 +273,7 @@ pub struct ComplexAlignment {
     /// Alignment at the beginning of the structure.
     pub begin: Alignment,
     /// Alignment at the end of the structure.
-    pub body: AlignBody,
+    pub(crate) body: AlignBody,
     /// The size of the largest alignment pad inside this object.
     ///
     /// At the time of writing, the code generator assumes that the start of an object is suitable
@@ -296,7 +284,7 @@ pub struct ComplexAlignment {
 
 /// Alignment information after some structure.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
-pub enum AlignBody {
+pub(crate) enum AlignBody {
     /// Some `VariableSize` can describe the size of the body.
     Size(VariableSize),
 
@@ -308,7 +296,7 @@ impl ComplexAlignment {
     /// Create alignment information for some structure with a fixed size `size` that needs to be
     /// aligned to a multiple of `align`.
     #[inline]
-    pub fn fixed_size(size: u32, align: u32) -> Self {
+    pub(crate) fn fixed_size(size: u32, align: u32) -> Self {
         Self {
             begin: Alignment { align, offset: 0 },
             body: AlignBody::Size(VariableSize::new(size, 0)),
@@ -318,12 +306,12 @@ impl ComplexAlignment {
 
     /// Create alignment information for an empty structure.
     #[inline]
-    pub fn zero_sized() -> Self {
+    pub(crate) fn zero_sized() -> Self {
         Self::fixed_size(0, 1)
     }
 
     /// Get the alignment after the structure.
-    pub fn end_align(self) -> Alignment {
+    fn end_align(self) -> Alignment {
         match self.body {
             AlignBody::Size(size) => self.begin.advance_variable_size(size),
             AlignBody::EndAlign(end_align) => end_align,
@@ -334,7 +322,7 @@ impl ComplexAlignment {
     ///
     /// This returns `None` if the alignment of this structure is violated, i.e. it cannot be
     /// repeated.
-    pub fn zero_one_or_many(self) -> Option<Self> {
+    pub(crate) fn zero_one_or_many(self) -> Option<Self> {
         if !self.end_align().meets(self.begin) {
             None
         } else {
@@ -357,7 +345,7 @@ impl ComplexAlignment {
     ///
     /// This returns `None` if the alignment of this structure is violated, i.e. it cannot be
     /// repeated.
-    pub fn repeat_n(self, n: u32) -> Option<Self> {
+    pub(crate) fn repeat_n(self, n: u32) -> Option<Self> {
         if n == 0 {
             Some(Self {
                 begin: self.begin,
@@ -383,7 +371,7 @@ impl ComplexAlignment {
     }
 
     /// Get a new alignment description for the combination of two types right after each other.
-    pub fn append(self, next: Self) -> Option<Self> {
+    pub(crate) fn append(self, next: Self) -> Option<Self> {
         if !self.end_align().meets(next.begin) {
             None
         } else {
@@ -406,7 +394,7 @@ impl ComplexAlignment {
 
     /// Compute a new alignment description for two types appearing in a union, i.e. both starting
     /// at the same position.
-    pub fn union_append(self, other: Self) -> Option<Self> {
+    pub(crate) fn union_append(self, other: Self) -> Option<Self> {
         if !self.begin.meets(other.begin) {
             None
         } else {
@@ -441,7 +429,7 @@ impl ComplexAlignment {
     /// Compute alignment information of types that can appear optionally after each other.
     ///
     /// This computes the alignment for the concatenation of bitcases.
-    pub fn bitcase_append(self, next: Self) -> Option<Self> {
+    pub(crate) fn bitcase_append(self, next: Self) -> Option<Self> {
         if !self.end_align().meets(next.begin) {
             None
         } else {

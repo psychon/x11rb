@@ -56,7 +56,7 @@ impl FieldDef {
     /// * For `<field>`s and `<exprfield>`s, this returns the type of the field.
     /// * For `<list>`s, this returns the element type of the list.
     /// * For virtual length fields, this returns the type of the length, which is a `CARD32`.
-    pub fn value_type(&self) -> Option<&FieldValueType> {
+    pub(crate) fn value_type(&self) -> Option<&FieldValueType> {
         match self {
             Self::Pad(_) => None,
             Self::Normal(normal_field) => Some(&normal_field.type_),
@@ -229,7 +229,7 @@ pub struct SwitchCase {
     pub exprs: Vec<Expression>,
 
     /// The value of the `<required_start_align>` child, if any.
-    pub required_start_align: Option<Alignment>,
+    pub(crate) required_start_align: Option<Alignment>,
 
     /// Alignment information about this case.
     ///
@@ -324,7 +324,7 @@ pub struct VirtualLenField {
     pub name: String,
 
     /// The type of the field.
-    pub type_: FieldValueType,
+    pub(crate) type_: FieldValueType,
 
     /// The name of the referenced list.
     pub list_name: String,
@@ -443,7 +443,7 @@ pub enum BuiltInType {
 
 impl BuiltInType {
     /// Get the size in bytes of this type on the wire.
-    pub fn size(self) -> u32 {
+    pub(crate) fn size(self) -> u32 {
         match self {
             Self::Card8 => 1,
             Self::Card16 => 2,

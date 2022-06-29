@@ -172,7 +172,7 @@ pub struct ParamRefExpr {
     pub field_name: String,
 
     /// The type of the referenced field.
-    pub type_: NamedTypeRef,
+    pub(crate) type_: NamedTypeRef,
 }
 
 /// An expression referencing a value from an enumeration.

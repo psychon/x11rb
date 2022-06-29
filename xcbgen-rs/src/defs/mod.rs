@@ -17,7 +17,7 @@ mod expression;
 mod fields;
 mod top_level;
 
-pub use alignment::*;
+pub(crate) use alignment::*;
 pub use doc::*;
 pub use expression::*;
 pub use fields::*;
@@ -39,7 +39,7 @@ impl Module {
     }
 
     /// Returns `false` if the namespace name was already used.
-    pub fn insert_namespace(&self, ns: Rc<Namespace>) -> bool {
+    pub(crate) fn insert_namespace(&self, ns: Rc<Namespace>) -> bool {
         match self.namespaces.borrow_mut().entry(ns.header.clone()) {
             HashMapEntry::Occupied(_) => false,
             HashMapEntry::Vacant(entry) => {
@@ -55,7 +55,7 @@ impl Module {
     }
 
     /// Find a namespace by `extension-name`.
-    pub fn get_namespace_by_ext_name(&self, name: &str) -> Option<Rc<Namespace>> {
+    pub(crate) fn get_namespace_by_ext_name(&self, name: &str) -> Option<Rc<Namespace>> {
         self.namespaces
             .borrow()
             .values()
@@ -96,11 +96,6 @@ pub struct ExtInfo {
     /// The name of the extension as meant for humans.
     pub name: String,
 
-    /// A special property used by libxcb.
-    ///
-    /// See xcb-proto's `NEWS` file for more information.
-    pub multiword: bool,
-
     /// The major version number of the extension.
     pub major_version: u16,
 
@@ -114,7 +109,7 @@ pub struct ExtInfo {
 #[derive(Debug)]
 pub struct Namespace {
     /// The module that owns this namespace.
-    pub module: Weak<Module>,
+    pub(crate) module: Weak<Module>,
 
     /// The `header` name for this namespace.
     ///
@@ -143,10 +138,6 @@ pub struct Namespace {
 
     /// All definitions in this module in the order they appear in the XML description.
     pub src_order_defs: RefCell<Vec<Def>>,
-
-    /// Does this module contain any file descriptors, or depend on any
-    /// that do?
-    contains_fds: OnceCell<bool>,
 }
 
 impl Namespace {
@@ -155,7 +146,7 @@ impl Namespace {
     /// This function creates a new namespace in the given `module`.
     ///
     /// The namespace is not added to the `module` yet. See [`Module::insert_namespace`] for that.
-    pub fn new(module: &Rc<Module>, header: String, ext_info: Option<ExtInfo>) -> Rc<Self> {
+    pub(crate) fn new(module: &Rc<Module>, header: String, ext_info: Option<ExtInfo>) -> Rc<Self> {
         Rc::new(Self {
             module: Rc::downgrade(module),
             header,
@@ -166,14 +157,13 @@ impl Namespace {
             error_defs: RefCell::new(HashMap::new()),
             type_defs: RefCell::new(HashMap::new()),
             src_order_defs: RefCell::new(Vec::new()),
-            contains_fds: OnceCell::new(),
         })
     }
 
     /// Record a new import in this namespace.
     ///
     /// The import is not yet resolved, but only its existence recorded.
-    pub fn add_import(&self, import_name: String) {
+    pub(crate) fn add_import(&self, import_name: String) {
         self.imports.borrow_mut().insert(
             import_name.clone(),
             Import {
@@ -187,7 +177,7 @@ impl Namespace {
     ///
     /// Returns `false` if the name is already in use.
     #[must_use]
-    pub fn insert_request_def(&self, name: String, request_def: Rc<RequestDef>) -> bool {
+    pub(crate) fn insert_request_def(&self, name: String, request_def: Rc<RequestDef>) -> bool {
         match self.request_defs.borrow_mut().entry(name) {
             HashMapEntry::Occupied(_) => false,
             HashMapEntry::Vacant(entry) => {
@@ -204,7 +194,7 @@ impl Namespace {
     ///
     /// Returns `false` if the name is already in use.
     #[must_use]
-    pub fn insert_event_def(&self, name: String, event_def: EventDef) -> bool {
+    pub(crate) fn insert_event_def(&self, name: String, event_def: EventDef) -> bool {
         match self.event_defs.borrow_mut().entry(name) {
             HashMapEntry::Occupied(_) => false,
             HashMapEntry::Vacant(entry) => {
@@ -223,7 +213,7 @@ impl Namespace {
     ///
     /// Returns `false` if the name is already in use.
     #[must_use]
-    pub fn insert_error_def(&self, name: String, error_def: ErrorDef) -> bool {
+    pub(crate) fn insert_error_def(&self, name: String, error_def: ErrorDef) -> bool {
         match self.error_defs.borrow_mut().entry(name) {
             HashMapEntry::Occupied(_) => false,
             HashMapEntry::Vacant(entry) => {
@@ -242,7 +232,7 @@ impl Namespace {
     ///
     /// Returns `false` if the name is already in use.
     #[must_use]
-    pub fn insert_type_def(&self, name: String, type_def: TypeDef) -> bool {
+    pub(crate) fn insert_type_def(&self, name: String, type_def: TypeDef) -> bool {
         match self.type_defs.borrow_mut().entry(name) {
             HashMapEntry::Occupied(_) => false,
             HashMapEntry::Vacant(entry) => {
@@ -269,7 +259,7 @@ impl Namespace {
     /// # Panics
     ///
     /// Panics if the namespace exists, but was not yet resolved.
-    pub fn get_import(&self, name: &str) -> Option<Rc<Namespace>> {
+    pub(crate) fn get_import(&self, name: &str) -> Option<Rc<Namespace>> {
         self.imports.borrow().get(name).map(|import| import.ns())
     }
 
@@ -278,7 +268,7 @@ impl Namespace {
     /// Only the current namespace is searched and not its imports.
     ///
     /// This function returns `None` if the event is not found.
-    pub fn get_event(&self, name: &str) -> Option<EventRef> {
+    pub(crate) fn get_event(&self, name: &str) -> Option<EventRef> {
         self.event_defs
             .borrow()
             .get(name)
@@ -293,7 +283,7 @@ impl Namespace {
     /// Only the current namespace is searched and not its imports.
     ///
     /// This function returns `None` if the event is not found.
-    pub fn get_error(&self, name: &str) -> Option<ErrorRef> {
+    pub(crate) fn get_error(&self, name: &str) -> Option<ErrorRef> {
         self.error_defs
             .borrow()
             .get(name)
@@ -308,7 +298,7 @@ impl Namespace {
     /// Only the current namespace is searched and not its imports.
     ///
     /// This function returns `None` if the event is not found.
-    pub fn get_type(&self, name: &str) -> Option<TypeRef> {
+    pub(crate) fn get_type(&self, name: &str) -> Option<TypeRef> {
         self.type_defs
             .borrow()
             .get(name)
@@ -324,7 +314,7 @@ impl Namespace {
     }
 
     /// Get an event definition by event `number` and whether it is XGE.
-    pub fn get_event_by_number(&self, number: u16, is_xge: bool) -> Option<EventDef> {
+    pub(crate) fn get_event_by_number(&self, number: u16, is_xge: bool) -> Option<EventDef> {
         self.event_defs
             .borrow()
             .values()
@@ -338,38 +328,6 @@ impl Namespace {
             })
             .cloned()
     }
-
-    /// Tell if the namespace contains file descriptors, or depend on any
-    /// modules containing file descriptors.
-    pub fn contains_fds(&self) -> bool {
-        *self.contains_fds.get_or_init(|| {
-            // iterate over the types we have to see if any of them
-            // use fd fields
-            // only requests and replies will have fds
-            let request_defs = self.request_defs.borrow();
-
-            let has_fd = request_defs.values().any(|request| {
-                // combine request/reply fields into a single iterator
-                let request_fields = request.fields.borrow();
-                let reply_fields = request.reply.as_ref().map(|reply| reply.fields.borrow());
-
-                request_fields
-                    .iter()
-                    .chain(reply_fields.iter().flat_map(|i| i.iter()))
-                    .any(|field| matches!(field, FieldDef::Fd(_) | FieldDef::FdList(_)))
-            });
-
-            // see if any of our dependent modules contain fds
-            let imports = self.imports.borrow();
-            let dependencies_have_fds = imports
-                .values()
-                .filter_map(|import| import.ns.get())
-                .filter_map(|ns| ns.upgrade())
-                .any(|ns| ns.contains_fds());
-
-            has_fd || dependencies_have_fds
-        })
-    }
 }
 
 /// Representation of an `<import>`.
@@ -379,7 +337,7 @@ pub struct Import {
     pub name: String,
 
     /// After resolving, this is a reference to the namespace that was imported.
-    pub ns: OnceCell<Weak<Namespace>>,
+    pub(crate) ns: OnceCell<Weak<Namespace>>,
 }
 
 impl Import {
@@ -388,7 +346,7 @@ impl Import {
     /// # Panics
     ///
     /// Panics if this import was not yet resolved or if the target namespace was already dropped.
-    pub fn ns(&self) -> Rc<Namespace> {
+    pub(crate) fn ns(&self) -> Rc<Namespace> {
         self.ns.get().unwrap().upgrade().unwrap()
     }
 }
