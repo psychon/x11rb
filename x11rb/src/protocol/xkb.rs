@@ -43,7 +43,7 @@ where
         wanted_minor,
     };
     let (bytes, fds) = request0.serialize(major_opcode(conn)?);
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
     conn.send_request_with_reply(&slices, fds)
 }
 
@@ -68,7 +68,7 @@ where
         details: Cow::Borrowed(details),
     };
     let (bytes, fds) = request0.serialize(major_opcode(conn)?);
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
 
@@ -89,7 +89,7 @@ where
         window,
     };
     let (bytes, fds) = request0.serialize(major_opcode(conn)?);
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
 
@@ -101,7 +101,7 @@ where
         device_spec,
     };
     let (bytes, fds) = request0.serialize(major_opcode(conn)?);
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
     conn.send_request_with_reply(&slices, fds)
 }
 
@@ -126,7 +126,7 @@ where
         group_latch,
     };
     let (bytes, fds) = request0.serialize(major_opcode(conn)?);
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
 
@@ -138,7 +138,7 @@ where
         device_spec,
     };
     let (bytes, fds) = request0.serialize(major_opcode(conn)?);
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
     conn.send_request_with_reply(&slices, fds)
 }
 
@@ -211,7 +211,7 @@ where
         per_key_repeat: Cow::Borrowed(per_key_repeat),
     };
     let (bytes, fds) = request0.serialize(major_opcode(conn)?);
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
 
@@ -246,7 +246,7 @@ where
         n_v_mod_map_keys,
     };
     let (bytes, fds) = request0.serialize(major_opcode(conn)?);
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
     conn.send_request_with_reply(&slices, fds)
 }
 
@@ -287,7 +287,7 @@ where
         values: Cow::Borrowed(values),
     };
     let (bytes, fds) = request0.serialize(major_opcode(conn)?);
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
 
@@ -305,7 +305,7 @@ where
         n_si,
     };
     let (bytes, fds) = request0.serialize(major_opcode(conn)?);
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
     conn.send_request_with_reply(&slices, fds)
 }
 
@@ -325,7 +325,7 @@ where
         group_maps: Cow::Borrowed(group_maps),
     };
     let (bytes, fds) = request0.serialize(major_opcode(conn)?);
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
 
@@ -337,7 +337,7 @@ where
         device_spec,
     };
     let (bytes, fds) = request0.serialize(major_opcode(conn)?);
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
     conn.send_request_with_reply(&slices, fds)
 }
 
@@ -350,7 +350,7 @@ where
         which,
     };
     let (bytes, fds) = request0.serialize(major_opcode(conn)?);
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
     conn.send_request_with_reply(&slices, fds)
 }
 
@@ -364,7 +364,7 @@ where
         maps: Cow::Borrowed(maps),
     };
     let (bytes, fds) = request0.serialize(major_opcode(conn)?);
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
 
@@ -381,7 +381,7 @@ where
         indicator,
     };
     let (bytes, fds) = request0.serialize(major_opcode(conn)?);
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
     conn.send_request_with_reply(&slices, fds)
 }
 
@@ -423,7 +423,7 @@ where
         map_ctrls,
     };
     let (bytes, fds) = request0.serialize(major_opcode(conn)?);
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
 
@@ -438,7 +438,7 @@ where
         which,
     };
     let (bytes, fds) = request0.serialize(major_opcode(conn)?);
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
     conn.send_request_with_reply(&slices, fds)
 }
 
@@ -467,7 +467,7 @@ where
         values: Cow::Borrowed(values),
     };
     let (bytes, fds) = request0.serialize(major_opcode(conn)?);
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
 
@@ -494,7 +494,7 @@ where
         auto_ctrls_values,
     };
     let (bytes, fds) = request0.serialize(major_opcode(conn)?);
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
     conn.send_request_with_reply(&slices, fds)
 }
 
@@ -507,7 +507,7 @@ where
         max_names,
     };
     let (bytes, fds) = request0.serialize(major_opcode(conn)?);
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
     conn.send_request_with_reply(&slices, fds)
 }
 
@@ -526,7 +526,7 @@ where
         load,
     };
     let (bytes, fds) = request0.serialize(major_opcode(conn)?);
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
     conn.send_request_with_reply(&slices, fds)
 }
 
@@ -548,7 +548,7 @@ where
         led_id,
     };
     let (bytes, fds) = request0.serialize(major_opcode(conn)?);
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
     conn.send_request_with_reply(&slices, fds)
 }
 
@@ -566,7 +566,7 @@ where
         leds: Cow::Borrowed(leds),
     };
     let (bytes, fds) = request0.serialize(major_opcode(conn)?);
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
 
@@ -582,7 +582,7 @@ where
         message: Cow::Borrowed(message),
     };
     let (bytes, fds) = request0.serialize(major_opcode(conn)?);
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
     conn.send_request_with_reply(&slices, fds)
 }
 

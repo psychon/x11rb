@@ -41,7 +41,7 @@ where
         client_minor_version,
     };
     let (bytes, fds) = request0.serialize(major_opcode(conn)?);
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
     conn.send_request_with_reply(&slices, fds)
 }
 
