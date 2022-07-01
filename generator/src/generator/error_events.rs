@@ -15,7 +15,7 @@ pub(super) fn generate(out: &mut Output, module: &xcbgen::defs::Module) {
         "fn response_type(raw_bytes: &[u8]) -> Result<u8, ParseError> {{"
     );
     out.indented(|out| {
-        outln!(out, "raw_bytes.get(0)");
+        outln!(out, "raw_bytes.first()");
         outln!(out.indent(), ".map(|x| x & 0x7f)");
         outln!(out.indent(), ".ok_or(ParseError::InsufficientData)");
     });
