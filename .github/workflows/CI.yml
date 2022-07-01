@@ -143,6 +143,14 @@ jobs:
       run: ./run_examples --features "$MOST_FEATURES libc allow-unsafe-code"
     - name: run examples with XCBConnection and dl-libxcb
       run: ./run_examples --features "$MOST_FEATURES libc allow-unsafe-code dl-libxcb"
+
+    # run code generator in nightly builds for coverage
+    - name: Run code generator
+      if: matrix.rust == 'nightly'
+      run: make
+      env:
+        LLVM_PROFILE_FILE: coverage-%m.profraw
+
     - name: Prepare coverage information for upload
       if: matrix.rust == 'nightly'
       run: grcov $(find ./ -type f -name "coverage-*.profraw") -s . --binary-path ./target/debug --branch --ignore-not-existing --ignore 'tests/*' -t coveralls+ --token ? -o ./coveralls.json
