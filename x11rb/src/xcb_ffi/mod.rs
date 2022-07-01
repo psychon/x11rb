@@ -163,7 +163,7 @@ impl XCBConnection {
         let length = usize::from(length) * 4 + 8;
 
         let slice = from_raw_parts(wrapper.as_ptr(), length);
-        let result = Setup::try_parse(&*slice)?.0;
+        let result = Setup::try_parse(slice)?.0;
 
         Ok(result)
     }
