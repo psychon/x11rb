@@ -164,7 +164,7 @@ fn parse_inherits_impl(input: &mut impl BufRead) -> Result<Vec<String>, IOError>
             to_parse = skip_while(to_parse, |c| c == b' ');
 
             // Now we need an equal sign
-            if to_parse.get(0) == Some(&b'=') {
+            if to_parse.first() == Some(&b'=') {
                 to_parse = &to_parse[1..];
 
                 fn should_skip(c: u8) -> bool {

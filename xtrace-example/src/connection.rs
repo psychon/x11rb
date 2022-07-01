@@ -98,7 +98,7 @@ impl Connection {
             const REPLY: u8 = 1;
 
             // Try to figure out the length of the packet
-            let has_length_field = match packet.get(0) {
+            let has_length_field = match packet.first() {
                 Some(&REPLY) => true,
                 Some(x) if x & 0x7f == GE_GENERIC_EVENT => true,
                 _ => false,
