@@ -969,7 +969,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                             " | {expr}",
                             expr = expr_to_str(
                                 self,
-                                &*or_expr,
+                                or_expr,
                                 &mut wrap_field_ref,
                                 true,
                                 Some(&rust_field_type),
