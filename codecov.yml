@@ -1,0 +1,5 @@
+ignore:
+  # Coverage for examples is not interesting, so exclude examples
+  - "x11rb/examples"
+  - "cairo-example"
+  - "xtrace-example"
