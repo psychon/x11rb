@@ -1212,7 +1212,7 @@ fn emit_request_function(
         );
         outln!(
             out,
-            "let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();"
+            "let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();"
         );
 
         if let Some(cookie) = special_cookie {

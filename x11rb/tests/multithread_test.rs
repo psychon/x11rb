@@ -164,7 +164,8 @@ mod fake_stream {
                 let mut inner = self.inner.lock().unwrap();
                 loop {
                     if inner.read.pending.is_empty() {
-                        match inner.read.recv.try_recv() {
+                        let recv_result = inner.read.recv.try_recv();
+                        match recv_result {
                             Ok(packet) => {
                                 inner.read.pending.extend(packet.to_raw());
                                 return Ok(());
@@ -188,7 +189,8 @@ mod fake_stream {
         ) -> std::io::Result<usize> {
             let mut inner = self.inner.lock().unwrap();
             if inner.read.pending.is_empty() {
-                match inner.read.recv.try_recv() {
+                let recv_result = inner.read.recv.try_recv();
+                match recv_result {
                     Ok(packet) => inner.read.pending.extend(packet.to_raw()),
                     Err(std::sync::mpsc::TryRecvError::Empty) => {
                         return Err(Error::new(ErrorKind::WouldBlock, "Would block"));

@@ -282,7 +282,8 @@ impl<S: Stream> RustConnection<S> {
         let mut inner = self.inner.lock().unwrap();
 
         loop {
-            match inner.inner.send_request(kind) {
+            let send_result = inner.inner.send_request(kind);
+            match send_result {
                 Some(seqno) => {
                     // Now actually send the buffers
                     let _inner = self.write_all_vectored(inner, bufs, fds)?;
@@ -395,7 +396,8 @@ impl<S: Stream> RustConnection<S> {
         // n.b. notgull: inner guard is held
         while inner.write_buffer.needs_flush() {
             self.stream.poll(PollMode::ReadAndWritable)?;
-            match inner.write_buffer.flush(&self.stream) {
+            let flush_result = inner.write_buffer.flush(&self.stream);
+            match flush_result {
                 // Flush completed
                 Ok(()) => break,
                 Err(ref e) if e.kind() == std::io::ErrorKind::WouldBlock => {
@@ -594,7 +596,8 @@ impl<S: Stream> RequestConnection for RustConnection<S> {
         let mut inner = self.inner.lock().unwrap();
         inner = self.flush_impl(inner)?;
         loop {
-            match inner.inner.poll_for_reply(sequence) {
+            let poll_result = inner.inner.poll_for_reply(sequence);
+            match poll_result {
                 PollReply::TryAgain => {}
                 PollReply::NoReply => return Ok(None),
                 PollReply::Reply(buffer) => return Ok(Some(buffer)),
@@ -615,7 +618,8 @@ impl<S: Stream> RequestConnection for RustConnection<S> {
         // Ensure the request is sent
         inner = self.flush_impl(inner)?;
         loop {
-            match inner.inner.poll_check_for_reply_or_error(sequence) {
+            let poll_result = inner.inner.poll_check_for_reply_or_error(sequence);
+            match poll_result {
                 PollReply::TryAgain => {}
                 PollReply::NoReply => return Ok(None),
                 PollReply::Reply(buffer) => return Ok(Some(buffer)),
@@ -647,7 +651,8 @@ impl<S: Stream> RequestConnection for RustConnection<S> {
         let mut max_bytes = self.maximum_request_bytes.lock().unwrap();
         self.prefetch_maximum_request_bytes_impl(&mut max_bytes);
         use MaxRequestBytes::*;
-        match *max_bytes {
+        let max_bytes = &mut *max_bytes;
+        match max_bytes {
             Unknown => unreachable!("We just prefetched this"),
             Requested(seqno) => {
                 let length = seqno
@@ -668,7 +673,7 @@ impl<S: Stream> RequestConnection for RustConnection<S> {
                 *max_bytes = Known(length);
                 length
             }
-            Known(length) => length,
+            Known(length) => *length,
         }
     }
 
