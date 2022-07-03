@@ -412,7 +412,7 @@ mod float_tests {
 
     #[test]
     fn test_f32_round_trips() {
-        for f in [0f32, 1., std::f32::consts::PI, 42., 1337., 1e7] {
+        for &f in &[0f32, 1., std::f32::consts::PI, 42., 1337., 1e7] {
             test_round_trip(f);
             test_round_trip(-f);
         }
@@ -420,7 +420,7 @@ mod float_tests {
 
     #[test]
     fn test_f64_round_trips() {
-        for f in [0f64, 1., std::f64::consts::PI, 42., 1337., 1e7] {
+        for &f in &[0f64, 1., std::f64::consts::PI, 42., 1337., 1e7] {
             test_round_trip(f);
             test_round_trip(-f);
         }
