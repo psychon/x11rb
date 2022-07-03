@@ -131,7 +131,7 @@ mod tests {
     use alloc::{vec, vec::Vec};
 
     fn test_packets(packets: Vec<Vec<u8>>) {
-        let mut reader = PacketReader::new();
+        let mut reader = PacketReader::default();
         for mut packet in packets {
             let original_packet = packet.clone();
 
