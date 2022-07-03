@@ -69,6 +69,53 @@ impl X11Error {
     }
 }
 
+#[cfg(test)]
+mod tryparse_x11error_test {
+    use super::{ErrorKind, ExtInfoProvider, ParseError, X11Error};
+    use crate::x11_utils::ExtensionInformation;
+
+    struct Provider;
+
+    impl ExtInfoProvider for Provider {
+        fn get_from_major_opcode(&self, major_opcode: u8) -> Option<(&str, ExtensionInformation)> {
+            assert_eq!(major_opcode, 10);
+            None
+        }
+        fn get_from_event_code(&self, _event_code: u8) -> Option<(&str, ExtensionInformation)> {
+            unimplemented!()
+        }
+        fn get_from_error_code(&self, _error_code: u8) -> Option<(&str, ExtensionInformation)> {
+            unimplemented!()
+        }
+    }
+
+    #[test]
+    fn try_parse_error() {
+        let input = [
+            0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0,
+        ];
+        let error = X11Error::try_parse(&input, &Provider);
+        let expected = X11Error {
+            error_kind: ErrorKind::Request,
+            error_code: 1,
+            sequence: u16::from_ne_bytes([2, 3]),
+            bad_value: u32::from_ne_bytes([4, 5, 6, 7]),
+            minor_opcode: u16::from_ne_bytes([8, 9]),
+            major_opcode: 10,
+            extension_name: None,
+            request_name: Some("UnmapWindow"),
+        };
+        assert_eq!(error, Ok(expected));
+    }
+
+    #[test]
+    fn reject_invalid_response_type() {
+        let result = X11Error::try_parse(&[1; 32], &Provider);
+        assert_eq!(Err(ParseError::InvalidValue), result);
+    }
+}
+
 impl From<&X11Error> for [u8; 32] {
     fn from(input: &X11Error) -> Self {
         let sequence_bytes = input.sequence.serialize();
