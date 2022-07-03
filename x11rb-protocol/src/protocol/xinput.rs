@@ -178,6 +178,64 @@ impl TryParse for GetExtensionVersionReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for GetExtensionVersionReply {
+    type Bytes = [u8; 32];
+    fn serialize(&self) -> [u8; 32] {
+        let response_type_bytes = &[1];
+        let xi_reply_type_bytes = self.xi_reply_type.serialize();
+        let sequence_bytes = self.sequence.serialize();
+        let length_bytes = self.length.serialize();
+        let server_major_bytes = self.server_major.serialize();
+        let server_minor_bytes = self.server_minor.serialize();
+        let present_bytes = self.present.serialize();
+        [
+            response_type_bytes[0],
+            xi_reply_type_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            length_bytes[0],
+            length_bytes[1],
+            length_bytes[2],
+            length_bytes[3],
+            server_major_bytes[0],
+            server_major_bytes[1],
+            server_minor_bytes[0],
+            server_minor_bytes[1],
+            present_bytes[0],
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        self.xi_reply_type.serialize_into(bytes);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.server_major.serialize_into(bytes);
+        self.server_minor.serialize_into(bytes);
+        self.present.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 19]);
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -800,7 +858,7 @@ impl InputInfoInfo {
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, class_id: u8) {
-        assert_eq!(self.switch_expr(), class_id, "switch `info` has an inconsistent discriminant");
+        let _ = class_id;
         match self {
             InputInfoInfo::Key(key) => key.serialize_into(bytes),
             InputInfoInfo::Button(button) => button.serialize_into(bytes),
@@ -977,6 +1035,31 @@ impl TryParse for ListInputDevicesReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for ListInputDevicesReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        self.xi_reply_type.serialize_into(bytes);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        let devices_len = u8::try_from(self.devices.len()).expect("`devices` has too many elements");
+        devices_len.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 23]);
+        self.devices.serialize_into(bytes);
+        assert_eq!(self.infos.len(), usize::try_from(self.devices.iter().fold(0u32, |acc, x| acc.checked_add(u32::from(x.num_class_info)).unwrap())).unwrap(), "`infos` has an incorrect length");
+        self.infos.serialize_into(bytes);
+        assert_eq!(self.names.len(), usize::try_from(devices_len).unwrap(), "`names` has an incorrect length");
+        self.names.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 3][..(4 - (bytes.len() % 4)) % 4]);
+    }
+}
 impl ListInputDevicesReply {
     /// Get the value of the `devices_len` field.
     ///
@@ -1113,6 +1196,27 @@ impl TryParse for OpenDeviceReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for OpenDeviceReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        self.xi_reply_type.serialize_into(bytes);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        let num_classes = u8::try_from(self.class_info.len()).expect("`class_info` has too many elements");
+        num_classes.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 23]);
+        self.class_info.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 3][..(4 - (bytes.len() % 4)) % 4]);
     }
 }
 impl OpenDeviceReply {
@@ -1271,6 +1375,60 @@ impl TryParse for SetDeviceModeReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for SetDeviceModeReply {
+    type Bytes = [u8; 32];
+    fn serialize(&self) -> [u8; 32] {
+        let response_type_bytes = &[1];
+        let xi_reply_type_bytes = self.xi_reply_type.serialize();
+        let sequence_bytes = self.sequence.serialize();
+        let length_bytes = self.length.serialize();
+        let status_bytes = u8::from(self.status).serialize();
+        [
+            response_type_bytes[0],
+            xi_reply_type_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            length_bytes[0],
+            length_bytes[1],
+            length_bytes[2],
+            length_bytes[3],
+            status_bytes[0],
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        self.xi_reply_type.serialize_into(bytes);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        u8::from(self.status).serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 23]);
     }
 }
 
@@ -1432,6 +1590,29 @@ impl TryParse for GetSelectedExtensionEventsReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for GetSelectedExtensionEventsReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        self.xi_reply_type.serialize_into(bytes);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        let num_this_classes = u16::try_from(self.this_classes.len()).expect("`this_classes` has too many elements");
+        num_this_classes.serialize_into(bytes);
+        let num_all_classes = u16::try_from(self.all_classes.len()).expect("`all_classes` has too many elements");
+        num_all_classes.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 20]);
+        self.this_classes.serialize_into(bytes);
+        self.all_classes.serialize_into(bytes);
     }
 }
 impl GetSelectedExtensionEventsReply {
@@ -1685,6 +1866,26 @@ impl TryParse for GetDeviceDontPropagateListReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for GetDeviceDontPropagateListReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        self.xi_reply_type.serialize_into(bytes);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        let num_classes = u16::try_from(self.classes.len()).expect("`classes` has too many elements");
+        num_classes.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 22]);
+        self.classes.serialize_into(bytes);
+    }
+}
 impl GetDeviceDontPropagateListReply {
     /// Get the value of the `num_classes` field.
     ///
@@ -1840,6 +2041,30 @@ impl TryParse for GetDeviceMotionEventsReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for GetDeviceMotionEventsReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        self.xi_reply_type.serialize_into(bytes);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        let num_events = u32::try_from(self.events.len()).expect("`events` has too many elements");
+        num_events.serialize_into(bytes);
+        self.num_axes.serialize_into(bytes);
+        u8::from(self.device_mode).serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 18]);
+        for element in self.events.iter() {
+            element.serialize_into(bytes, self.num_axes);
+        }
+    }
+}
 impl GetDeviceMotionEventsReply {
     /// Get the value of the `num_events` field.
     ///
@@ -1939,6 +2164,60 @@ impl TryParse for ChangeKeyboardDeviceReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for ChangeKeyboardDeviceReply {
+    type Bytes = [u8; 32];
+    fn serialize(&self) -> [u8; 32] {
+        let response_type_bytes = &[1];
+        let xi_reply_type_bytes = self.xi_reply_type.serialize();
+        let sequence_bytes = self.sequence.serialize();
+        let length_bytes = self.length.serialize();
+        let status_bytes = u8::from(self.status).serialize();
+        [
+            response_type_bytes[0],
+            xi_reply_type_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            length_bytes[0],
+            length_bytes[1],
+            length_bytes[2],
+            length_bytes[3],
+            status_bytes[0],
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        self.xi_reply_type.serialize_into(bytes);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        u8::from(self.status).serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 23]);
+    }
+}
 
 /// Opcode for the ChangePointerDevice request
 pub const CHANGE_POINTER_DEVICE_REQUEST: u8 = 12;
@@ -2029,6 +2308,60 @@ impl TryParse for ChangePointerDeviceReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for ChangePointerDeviceReply {
+    type Bytes = [u8; 32];
+    fn serialize(&self) -> [u8; 32] {
+        let response_type_bytes = &[1];
+        let xi_reply_type_bytes = self.xi_reply_type.serialize();
+        let sequence_bytes = self.sequence.serialize();
+        let length_bytes = self.length.serialize();
+        let status_bytes = u8::from(self.status).serialize();
+        [
+            response_type_bytes[0],
+            xi_reply_type_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            length_bytes[0],
+            length_bytes[1],
+            length_bytes[2],
+            length_bytes[3],
+            status_bytes[0],
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        self.xi_reply_type.serialize_into(bytes);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        u8::from(self.status).serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 23]);
     }
 }
 
@@ -2169,6 +2502,60 @@ impl TryParse for GrabDeviceReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for GrabDeviceReply {
+    type Bytes = [u8; 32];
+    fn serialize(&self) -> [u8; 32] {
+        let response_type_bytes = &[1];
+        let xi_reply_type_bytes = self.xi_reply_type.serialize();
+        let sequence_bytes = self.sequence.serialize();
+        let length_bytes = self.length.serialize();
+        let status_bytes = u8::from(self.status).serialize();
+        [
+            response_type_bytes[0],
+            xi_reply_type_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            length_bytes[0],
+            length_bytes[1],
+            length_bytes[2],
+            length_bytes[3],
+            status_bytes[0],
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        self.xi_reply_type.serialize_into(bytes);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        u8::from(self.status).serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 23]);
     }
 }
 
@@ -2905,6 +3292,64 @@ impl TryParse for GetDeviceFocusReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for GetDeviceFocusReply {
+    type Bytes = [u8; 32];
+    fn serialize(&self) -> [u8; 32] {
+        let response_type_bytes = &[1];
+        let xi_reply_type_bytes = self.xi_reply_type.serialize();
+        let sequence_bytes = self.sequence.serialize();
+        let length_bytes = self.length.serialize();
+        let focus_bytes = self.focus.serialize();
+        let time_bytes = self.time.serialize();
+        let revert_to_bytes = u8::from(self.revert_to).serialize();
+        [
+            response_type_bytes[0],
+            xi_reply_type_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            length_bytes[0],
+            length_bytes[1],
+            length_bytes[2],
+            length_bytes[3],
+            focus_bytes[0],
+            focus_bytes[1],
+            focus_bytes[2],
+            focus_bytes[3],
+            time_bytes[0],
+            time_bytes[1],
+            time_bytes[2],
+            time_bytes[3],
+            revert_to_bytes[0],
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        self.xi_reply_type.serialize_into(bytes);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.focus.serialize_into(bytes);
+        self.time.serialize_into(bytes);
+        u8::from(self.revert_to).serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 15]);
     }
 }
 
@@ -3885,7 +4330,7 @@ impl FeedbackStateData {
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, class_id: u8) {
-        assert_eq!(self.switch_expr(), class_id, "switch `data` has an inconsistent discriminant");
+        let _ = class_id;
         match self {
             FeedbackStateData::Keyboard(keyboard) => keyboard.serialize_into(bytes),
             FeedbackStateData::Pointer(pointer) => pointer.serialize_into(bytes),
@@ -4026,6 +4471,26 @@ impl TryParse for GetFeedbackControlReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for GetFeedbackControlReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        self.xi_reply_type.serialize_into(bytes);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        let num_feedbacks = u16::try_from(self.feedbacks.len()).expect("`feedbacks` has too many elements");
+        num_feedbacks.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 22]);
+        self.feedbacks.serialize_into(bytes);
     }
 }
 impl GetFeedbackControlReply {
@@ -4777,7 +5242,7 @@ impl FeedbackCtlData {
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, class_id: u8) {
-        assert_eq!(self.switch_expr(), class_id, "switch `data` has an inconsistent discriminant");
+        let _ = class_id;
         match self {
             FeedbackCtlData::Keyboard(keyboard) => keyboard.serialize_into(bytes),
             FeedbackCtlData::Pointer(pointer) => pointer.serialize_into(bytes),
@@ -5083,6 +5548,26 @@ impl TryParse for GetDeviceKeyMappingReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for GetDeviceKeyMappingReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        self.xi_reply_type.serialize_into(bytes);
+        self.sequence.serialize_into(bytes);
+        let length = u32::try_from(self.keysyms.len()).expect("`keysyms` has too many elements");
+        length.serialize_into(bytes);
+        self.keysyms_per_keycode.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 23]);
+        self.keysyms.serialize_into(bytes);
+    }
+}
 impl GetDeviceKeyMappingReply {
     /// Get the value of the `length` field.
     ///
@@ -5266,6 +5751,27 @@ impl TryParse for GetDeviceModifierMappingReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for GetDeviceModifierMappingReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        self.xi_reply_type.serialize_into(bytes);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        assert_eq!(self.keymaps.len() % 8, 0, "`keymaps` has an incorrect length, must be a multiple of 8");
+        let keycodes_per_modifier = u8::try_from(self.keymaps.len() / 8).expect("`keymaps` has too many elements");
+        keycodes_per_modifier.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 23]);
+        bytes.extend_from_slice(&self.keymaps);
+    }
+}
 impl GetDeviceModifierMappingReply {
     /// Get the value of the `keycodes_per_modifier` field.
     ///
@@ -5383,6 +5889,60 @@ impl TryParse for SetDeviceModifierMappingReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for SetDeviceModifierMappingReply {
+    type Bytes = [u8; 32];
+    fn serialize(&self) -> [u8; 32] {
+        let response_type_bytes = &[1];
+        let xi_reply_type_bytes = self.xi_reply_type.serialize();
+        let sequence_bytes = self.sequence.serialize();
+        let length_bytes = self.length.serialize();
+        let status_bytes = u8::from(self.status).serialize();
+        [
+            response_type_bytes[0],
+            xi_reply_type_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            length_bytes[0],
+            length_bytes[1],
+            length_bytes[2],
+            length_bytes[3],
+            status_bytes[0],
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        self.xi_reply_type.serialize_into(bytes);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        u8::from(self.status).serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 23]);
+    }
+}
 
 /// Opcode for the GetDeviceButtonMapping request
 pub const GET_DEVICE_BUTTON_MAPPING_REQUEST: u8 = 28;
@@ -5471,6 +6031,27 @@ impl TryParse for GetDeviceButtonMappingReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for GetDeviceButtonMappingReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        self.xi_reply_type.serialize_into(bytes);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        let map_size = u8::try_from(self.map.len()).expect("`map` has too many elements");
+        map_size.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 23]);
+        bytes.extend_from_slice(&self.map);
+        bytes.extend_from_slice(&[0; 3][..(4 - (bytes.len() % 4)) % 4]);
     }
 }
 impl GetDeviceButtonMappingReply {
@@ -5586,6 +6167,60 @@ impl TryParse for SetDeviceButtonMappingReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for SetDeviceButtonMappingReply {
+    type Bytes = [u8; 32];
+    fn serialize(&self) -> [u8; 32] {
+        let response_type_bytes = &[1];
+        let xi_reply_type_bytes = self.xi_reply_type.serialize();
+        let sequence_bytes = self.sequence.serialize();
+        let length_bytes = self.length.serialize();
+        let status_bytes = u8::from(self.status).serialize();
+        [
+            response_type_bytes[0],
+            xi_reply_type_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            length_bytes[0],
+            length_bytes[1],
+            length_bytes[2],
+            length_bytes[3],
+            status_bytes[0],
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        self.xi_reply_type.serialize_into(bytes);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        u8::from(self.status).serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 23]);
     }
 }
 
@@ -6100,7 +6735,7 @@ impl InputStateData {
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, class_id: u8) {
-        assert_eq!(self.switch_expr(), class_id, "switch `data` has an inconsistent discriminant");
+        let _ = class_id;
         match self {
             InputStateData::Key(key) => key.serialize_into(bytes),
             InputStateData::Button(button) => button.serialize_into(bytes),
@@ -6232,6 +6867,26 @@ impl TryParse for QueryDeviceStateReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for QueryDeviceStateReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        self.xi_reply_type.serialize_into(bytes);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        let num_classes = u8::try_from(self.classes.len()).expect("`classes` has too many elements");
+        num_classes.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 23]);
+        self.classes.serialize_into(bytes);
     }
 }
 impl QueryDeviceStateReply {
@@ -6418,6 +7073,60 @@ impl TryParse for SetDeviceValuatorsReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for SetDeviceValuatorsReply {
+    type Bytes = [u8; 32];
+    fn serialize(&self) -> [u8; 32] {
+        let response_type_bytes = &[1];
+        let xi_reply_type_bytes = self.xi_reply_type.serialize();
+        let sequence_bytes = self.sequence.serialize();
+        let length_bytes = self.length.serialize();
+        let status_bytes = u8::from(self.status).serialize();
+        [
+            response_type_bytes[0],
+            xi_reply_type_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            length_bytes[0],
+            length_bytes[1],
+            length_bytes[2],
+            length_bytes[3],
+            status_bytes[0],
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        self.xi_reply_type.serialize_into(bytes);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        u8::from(self.status).serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 23]);
     }
 }
 
@@ -7146,7 +7855,7 @@ impl DeviceStateData {
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, control_id: u16) {
-        assert_eq!(self.switch_expr(), control_id, "switch `data` has an inconsistent discriminant");
+        let _ = control_id;
         match self {
             DeviceStateData::Resolution(resolution) => resolution.serialize_into(bytes),
             DeviceStateData::AbsCalib(abs_calib) => abs_calib.serialize_into(bytes),
@@ -7292,6 +8001,25 @@ impl TryParse for GetDeviceControlReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for GetDeviceControlReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        self.xi_reply_type.serialize_into(bytes);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.status.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 23]);
+        self.control.serialize_into(bytes);
     }
 }
 
@@ -7948,7 +8676,7 @@ impl DeviceCtlData {
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, control_id: u16) {
-        assert_eq!(self.switch_expr(), control_id, "switch `data` has an inconsistent discriminant");
+        let _ = control_id;
         match self {
             DeviceCtlData::Resolution(resolution) => resolution.serialize_into(bytes),
             DeviceCtlData::AbsCalib(abs_calib) => abs_calib.serialize_into(bytes),
@@ -8101,6 +8829,60 @@ impl TryParse for ChangeDeviceControlReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for ChangeDeviceControlReply {
+    type Bytes = [u8; 32];
+    fn serialize(&self) -> [u8; 32] {
+        let response_type_bytes = &[1];
+        let xi_reply_type_bytes = self.xi_reply_type.serialize();
+        let sequence_bytes = self.sequence.serialize();
+        let length_bytes = self.length.serialize();
+        let status_bytes = self.status.serialize();
+        [
+            response_type_bytes[0],
+            xi_reply_type_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            length_bytes[0],
+            length_bytes[1],
+            length_bytes[2],
+            length_bytes[3],
+            status_bytes[0],
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        self.xi_reply_type.serialize_into(bytes);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.status.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 23]);
+    }
+}
 
 /// Opcode for the ListDeviceProperties request
 pub const LIST_DEVICE_PROPERTIES_REQUEST: u8 = 36;
@@ -8183,6 +8965,26 @@ impl TryParse for ListDevicePropertiesReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for ListDevicePropertiesReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        self.xi_reply_type.serialize_into(bytes);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        let num_atoms = u16::try_from(self.atoms.len()).expect("`atoms` has too many elements");
+        num_atoms.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 22]);
+        self.atoms.serialize_into(bytes);
     }
 }
 impl ListDevicePropertiesReply {
@@ -8349,7 +9151,8 @@ impl ChangeDevicePropertyAux {
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, format: u8, num_items: u32) {
-        assert_eq!(self.switch_expr(), format, "switch `items` has an inconsistent discriminant");
+        let _ = format;
+        let _ = num_items;
         match self {
             ChangeDevicePropertyAux::Data8(data8) => {
                 assert_eq!(data8.len(), usize::try_from(num_items).unwrap(), "`data8` has an incorrect length");
@@ -8716,6 +9519,45 @@ impl GetDevicePropertyItems {
         }
     }
 }
+impl GetDevicePropertyItems {
+    #[allow(dead_code)]
+    fn serialize(&self, format: u8, num_items: u32) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result, format, num_items);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>, format: u8, num_items: u32) {
+        let _ = format;
+        let _ = num_items;
+        match self {
+            GetDevicePropertyItems::Data8(data8) => {
+                assert_eq!(data8.len(), usize::try_from(num_items).unwrap(), "`data8` has an incorrect length");
+                bytes.extend_from_slice(&data8);
+                bytes.extend_from_slice(&[0; 3][..(4 - (bytes.len() % 4)) % 4]);
+            }
+            GetDevicePropertyItems::Data16(data16) => {
+                assert_eq!(data16.len(), usize::try_from(num_items).unwrap(), "`data16` has an incorrect length");
+                data16.serialize_into(bytes);
+                bytes.extend_from_slice(&[0; 3][..(4 - (bytes.len() % 4)) % 4]);
+            }
+            GetDevicePropertyItems::Data32(data32) => {
+                assert_eq!(data32.len(), usize::try_from(num_items).unwrap(), "`data32` has an incorrect length");
+                data32.serialize_into(bytes);
+            }
+            GetDevicePropertyItems::InvalidValue(_) => panic!("attempted to serialize invalid switch case"),
+        }
+    }
+}
+impl GetDevicePropertyItems {
+    fn switch_expr(&self) -> u8 {
+        match self {
+            GetDevicePropertyItems::Data8(_) => u8::from(PropertyFormat::M8_BITS),
+            GetDevicePropertyItems::Data16(_) => u8::from(PropertyFormat::M16_BITS),
+            GetDevicePropertyItems::Data32(_) => u8::from(PropertyFormat::M32_BITS),
+            GetDevicePropertyItems::InvalidValue(switch_expr) => *switch_expr,
+        }
+    }
+}
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -8751,6 +9593,30 @@ impl TryParse for GetDevicePropertyReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for GetDevicePropertyReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        self.xi_reply_type.serialize_into(bytes);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.type_.serialize_into(bytes);
+        self.bytes_after.serialize_into(bytes);
+        self.num_items.serialize_into(bytes);
+        let format: u8 = self.items.switch_expr();
+        format.serialize_into(bytes);
+        self.device_id.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 10]);
+        self.items.serialize_into(bytes, format, self.num_items);
     }
 }
 
@@ -9025,6 +9891,35 @@ impl TryParse for XIQueryPointerReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for XIQueryPointerReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(56);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.root.serialize_into(bytes);
+        self.child.serialize_into(bytes);
+        self.root_x.serialize_into(bytes);
+        self.root_y.serialize_into(bytes);
+        self.win_x.serialize_into(bytes);
+        self.win_y.serialize_into(bytes);
+        self.same_screen.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 1]);
+        let buttons_len = u16::try_from(self.buttons.len()).expect("`buttons` has too many elements");
+        buttons_len.serialize_into(bytes);
+        self.mods.serialize_into(bytes);
+        self.group.serialize_into(bytes);
+        self.buttons.serialize_into(bytes);
     }
 }
 impl XIQueryPointerReply {
@@ -9807,7 +10702,7 @@ impl HierarchyChangeData {
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, type_: u16) {
-        assert_eq!(self.switch_expr(), type_, "switch `data` has an inconsistent discriminant");
+        let _ = type_;
         match self {
             HierarchyChangeData::AddMaster(add_master) => add_master.serialize_into(bytes),
             HierarchyChangeData::RemoveMaster(remove_master) => remove_master.serialize_into(bytes),
@@ -10069,6 +10964,62 @@ impl TryParse for XIGetClientPointerReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for XIGetClientPointerReply {
+    type Bytes = [u8; 32];
+    fn serialize(&self) -> [u8; 32] {
+        let response_type_bytes = &[1];
+        let sequence_bytes = self.sequence.serialize();
+        let length_bytes = self.length.serialize();
+        let set_bytes = self.set.serialize();
+        let deviceid_bytes = self.deviceid.serialize();
+        [
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            length_bytes[0],
+            length_bytes[1],
+            length_bytes[2],
+            length_bytes[3],
+            set_bytes[0],
+            0,
+            deviceid_bytes[0],
+            deviceid_bytes[1],
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.set.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 1]);
+        self.deviceid.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 20]);
     }
 }
 
@@ -10373,6 +11324,61 @@ impl TryParse for XIQueryVersionReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for XIQueryVersionReply {
+    type Bytes = [u8; 32];
+    fn serialize(&self) -> [u8; 32] {
+        let response_type_bytes = &[1];
+        let sequence_bytes = self.sequence.serialize();
+        let length_bytes = self.length.serialize();
+        let major_version_bytes = self.major_version.serialize();
+        let minor_version_bytes = self.minor_version.serialize();
+        [
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            length_bytes[0],
+            length_bytes[1],
+            length_bytes[2],
+            length_bytes[3],
+            major_version_bytes[0],
+            major_version_bytes[1],
+            minor_version_bytes[0],
+            minor_version_bytes[1],
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.major_version.serialize_into(bytes);
+        self.minor_version.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 20]);
     }
 }
 
@@ -11375,7 +12381,7 @@ impl DeviceClassData {
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, type_: u16) {
-        assert_eq!(self.switch_expr(), type_, "switch `data` has an inconsistent discriminant");
+        let _ = type_;
         match self {
             DeviceClassData::Key(key) => key.serialize_into(bytes),
             DeviceClassData::Button(button) => button.serialize_into(bytes),
@@ -11599,6 +12605,26 @@ impl TryParse for XIQueryDeviceReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for XIQueryDeviceReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        let num_infos = u16::try_from(self.infos.len()).expect("`infos` has too many elements");
+        num_infos.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 22]);
+        self.infos.serialize_into(bytes);
+    }
+}
 impl XIQueryDeviceReply {
     /// Get the value of the `num_infos` field.
     ///
@@ -11764,6 +12790,59 @@ impl TryParse for XIGetFocusReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for XIGetFocusReply {
+    type Bytes = [u8; 32];
+    fn serialize(&self) -> [u8; 32] {
+        let response_type_bytes = &[1];
+        let sequence_bytes = self.sequence.serialize();
+        let length_bytes = self.length.serialize();
+        let focus_bytes = self.focus.serialize();
+        [
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            length_bytes[0],
+            length_bytes[1],
+            length_bytes[2],
+            length_bytes[3],
+            focus_bytes[0],
+            focus_bytes[1],
+            focus_bytes[2],
+            focus_bytes[3],
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.focus.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 20]);
     }
 }
 
@@ -11984,6 +13063,59 @@ impl TryParse for XIGrabDeviceReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for XIGrabDeviceReply {
+    type Bytes = [u8; 32];
+    fn serialize(&self) -> [u8; 32] {
+        let response_type_bytes = &[1];
+        let sequence_bytes = self.sequence.serialize();
+        let length_bytes = self.length.serialize();
+        let status_bytes = u8::from(self.status).serialize();
+        [
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            length_bytes[0],
+            length_bytes[1],
+            length_bytes[2],
+            length_bytes[3],
+            status_bytes[0],
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        u8::from(self.status).serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 23]);
     }
 }
 
@@ -12591,6 +13723,26 @@ impl TryParse for XIPassiveGrabDeviceReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for XIPassiveGrabDeviceReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        let num_modifiers = u16::try_from(self.modifiers.len()).expect("`modifiers` has too many elements");
+        num_modifiers.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 22]);
+        self.modifiers.serialize_into(bytes);
+    }
+}
 impl XIPassiveGrabDeviceReply {
     /// Get the value of the `num_modifiers` field.
     ///
@@ -12788,6 +13940,26 @@ impl TryParse for XIListPropertiesReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for XIListPropertiesReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        let num_properties = u16::try_from(self.properties.len()).expect("`properties` has too many elements");
+        num_properties.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 22]);
+        self.properties.serialize_into(bytes);
+    }
+}
 impl XIListPropertiesReply {
     /// Get the value of the `num_properties` field.
     ///
@@ -12891,7 +14063,8 @@ impl XIChangePropertyAux {
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, format: u8, num_items: u32) {
-        assert_eq!(self.switch_expr(), format, "switch `items` has an inconsistent discriminant");
+        let _ = format;
+        let _ = num_items;
         match self {
             XIChangePropertyAux::Data8(data8) => {
                 assert_eq!(data8.len(), usize::try_from(num_items).unwrap(), "`data8` has an incorrect length");
@@ -13257,6 +14430,45 @@ impl XIGetPropertyItems {
         }
     }
 }
+impl XIGetPropertyItems {
+    #[allow(dead_code)]
+    fn serialize(&self, format: u8, num_items: u32) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result, format, num_items);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>, format: u8, num_items: u32) {
+        let _ = format;
+        let _ = num_items;
+        match self {
+            XIGetPropertyItems::Data8(data8) => {
+                assert_eq!(data8.len(), usize::try_from(num_items).unwrap(), "`data8` has an incorrect length");
+                bytes.extend_from_slice(&data8);
+                bytes.extend_from_slice(&[0; 3][..(4 - (bytes.len() % 4)) % 4]);
+            }
+            XIGetPropertyItems::Data16(data16) => {
+                assert_eq!(data16.len(), usize::try_from(num_items).unwrap(), "`data16` has an incorrect length");
+                data16.serialize_into(bytes);
+                bytes.extend_from_slice(&[0; 3][..(4 - (bytes.len() % 4)) % 4]);
+            }
+            XIGetPropertyItems::Data32(data32) => {
+                assert_eq!(data32.len(), usize::try_from(num_items).unwrap(), "`data32` has an incorrect length");
+                data32.serialize_into(bytes);
+            }
+            XIGetPropertyItems::InvalidValue(_) => panic!("attempted to serialize invalid switch case"),
+        }
+    }
+}
+impl XIGetPropertyItems {
+    fn switch_expr(&self) -> u8 {
+        match self {
+            XIGetPropertyItems::Data8(_) => u8::from(PropertyFormat::M8_BITS),
+            XIGetPropertyItems::Data16(_) => u8::from(PropertyFormat::M16_BITS),
+            XIGetPropertyItems::Data32(_) => u8::from(PropertyFormat::M32_BITS),
+            XIGetPropertyItems::InvalidValue(switch_expr) => *switch_expr,
+        }
+    }
+}
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -13289,6 +14501,29 @@ impl TryParse for XIGetPropertyReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for XIGetPropertyReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.type_.serialize_into(bytes);
+        self.bytes_after.serialize_into(bytes);
+        self.num_items.serialize_into(bytes);
+        let format: u8 = self.items.switch_expr();
+        format.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 11]);
+        self.items.serialize_into(bytes, format, self.num_items);
     }
 }
 
@@ -13371,6 +14606,26 @@ impl TryParse for XIGetSelectedEventsReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for XIGetSelectedEventsReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        let num_masks = u16::try_from(self.masks.len()).expect("`masks` has too many elements");
+        num_masks.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 22]);
+        self.masks.serialize_into(bytes);
     }
 }
 impl XIGetSelectedEventsReply {
@@ -13544,6 +14799,67 @@ impl TryParse for DeviceValuatorEvent {
         Ok((result, remaining))
     }
 }
+impl Serialize for DeviceValuatorEvent {
+    type Bytes = [u8; 32];
+    fn serialize(&self) -> [u8; 32] {
+        let response_type_bytes = self.response_type.serialize();
+        let device_id_bytes = self.device_id.serialize();
+        let sequence_bytes = self.sequence.serialize();
+        let device_state_bytes = self.device_state.serialize();
+        let num_valuators_bytes = self.num_valuators.serialize();
+        let first_valuator_bytes = self.first_valuator.serialize();
+        let valuators_0_bytes = self.valuators[0].serialize();
+        let valuators_1_bytes = self.valuators[1].serialize();
+        let valuators_2_bytes = self.valuators[2].serialize();
+        let valuators_3_bytes = self.valuators[3].serialize();
+        let valuators_4_bytes = self.valuators[4].serialize();
+        let valuators_5_bytes = self.valuators[5].serialize();
+        [
+            response_type_bytes[0],
+            device_id_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            device_state_bytes[0],
+            device_state_bytes[1],
+            num_valuators_bytes[0],
+            first_valuator_bytes[0],
+            valuators_0_bytes[0],
+            valuators_0_bytes[1],
+            valuators_0_bytes[2],
+            valuators_0_bytes[3],
+            valuators_1_bytes[0],
+            valuators_1_bytes[1],
+            valuators_1_bytes[2],
+            valuators_1_bytes[3],
+            valuators_2_bytes[0],
+            valuators_2_bytes[1],
+            valuators_2_bytes[2],
+            valuators_2_bytes[3],
+            valuators_3_bytes[0],
+            valuators_3_bytes[1],
+            valuators_3_bytes[2],
+            valuators_3_bytes[3],
+            valuators_4_bytes[0],
+            valuators_4_bytes[1],
+            valuators_4_bytes[2],
+            valuators_4_bytes[3],
+            valuators_5_bytes[0],
+            valuators_5_bytes[1],
+            valuators_5_bytes[2],
+            valuators_5_bytes[3],
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        self.response_type.serialize_into(bytes);
+        self.device_id.serialize_into(bytes);
+        self.sequence.serialize_into(bytes);
+        self.device_state.serialize_into(bytes);
+        self.num_valuators.serialize_into(bytes);
+        self.first_valuator.serialize_into(bytes);
+        self.valuators.serialize_into(bytes);
+    }
+}
 impl From<&DeviceValuatorEvent> for [u8; 32] {
     fn from(input: &DeviceValuatorEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -13702,6 +15018,76 @@ impl TryParse for DeviceKeyPressEvent {
         Ok((result, remaining))
     }
 }
+impl Serialize for DeviceKeyPressEvent {
+    type Bytes = [u8; 32];
+    fn serialize(&self) -> [u8; 32] {
+        let response_type_bytes = self.response_type.serialize();
+        let detail_bytes = self.detail.serialize();
+        let sequence_bytes = self.sequence.serialize();
+        let time_bytes = self.time.serialize();
+        let root_bytes = self.root.serialize();
+        let event_bytes = self.event.serialize();
+        let child_bytes = self.child.serialize();
+        let root_x_bytes = self.root_x.serialize();
+        let root_y_bytes = self.root_y.serialize();
+        let event_x_bytes = self.event_x.serialize();
+        let event_y_bytes = self.event_y.serialize();
+        let state_bytes = self.state.serialize();
+        let same_screen_bytes = self.same_screen.serialize();
+        let device_id_bytes = self.device_id.serialize();
+        [
+            response_type_bytes[0],
+            detail_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            time_bytes[0],
+            time_bytes[1],
+            time_bytes[2],
+            time_bytes[3],
+            root_bytes[0],
+            root_bytes[1],
+            root_bytes[2],
+            root_bytes[3],
+            event_bytes[0],
+            event_bytes[1],
+            event_bytes[2],
+            event_bytes[3],
+            child_bytes[0],
+            child_bytes[1],
+            child_bytes[2],
+            child_bytes[3],
+            root_x_bytes[0],
+            root_x_bytes[1],
+            root_y_bytes[0],
+            root_y_bytes[1],
+            event_x_bytes[0],
+            event_x_bytes[1],
+            event_y_bytes[0],
+            event_y_bytes[1],
+            state_bytes[0],
+            state_bytes[1],
+            same_screen_bytes[0],
+            device_id_bytes[0],
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        self.response_type.serialize_into(bytes);
+        self.detail.serialize_into(bytes);
+        self.sequence.serialize_into(bytes);
+        self.time.serialize_into(bytes);
+        self.root.serialize_into(bytes);
+        self.event.serialize_into(bytes);
+        self.child.serialize_into(bytes);
+        self.root_x.serialize_into(bytes);
+        self.root_y.serialize_into(bytes);
+        self.event_x.serialize_into(bytes);
+        self.event_y.serialize_into(bytes);
+        self.state.serialize_into(bytes);
+        self.same_screen.serialize_into(bytes);
+        self.device_id.serialize_into(bytes);
+    }
+}
 impl From<&DeviceKeyPressEvent> for [u8; 32] {
     fn from(input: &DeviceKeyPressEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -13807,6 +15193,63 @@ impl TryParse for DeviceFocusInEvent {
         let remaining = initial_value.get(32..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for DeviceFocusInEvent {
+    type Bytes = [u8; 32];
+    fn serialize(&self) -> [u8; 32] {
+        let response_type_bytes = self.response_type.serialize();
+        let detail_bytes = u8::from(self.detail).serialize();
+        let sequence_bytes = self.sequence.serialize();
+        let time_bytes = self.time.serialize();
+        let window_bytes = self.window.serialize();
+        let mode_bytes = u8::from(self.mode).serialize();
+        let device_id_bytes = self.device_id.serialize();
+        [
+            response_type_bytes[0],
+            detail_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            time_bytes[0],
+            time_bytes[1],
+            time_bytes[2],
+            time_bytes[3],
+            window_bytes[0],
+            window_bytes[1],
+            window_bytes[2],
+            window_bytes[3],
+            mode_bytes[0],
+            device_id_bytes[0],
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        self.response_type.serialize_into(bytes);
+        u8::from(self.detail).serialize_into(bytes);
+        self.sequence.serialize_into(bytes);
+        self.time.serialize_into(bytes);
+        self.window.serialize_into(bytes);
+        u8::from(self.mode).serialize_into(bytes);
+        self.device_id.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 18]);
     }
 }
 impl From<&DeviceFocusInEvent> for [u8; 32] {
@@ -13985,6 +15428,70 @@ impl TryParse for DeviceStateNotifyEvent {
         Ok((result, remaining))
     }
 }
+impl Serialize for DeviceStateNotifyEvent {
+    type Bytes = [u8; 32];
+    fn serialize(&self) -> [u8; 32] {
+        let response_type_bytes = self.response_type.serialize();
+        let device_id_bytes = self.device_id.serialize();
+        let sequence_bytes = self.sequence.serialize();
+        let time_bytes = self.time.serialize();
+        let num_keys_bytes = self.num_keys.serialize();
+        let num_buttons_bytes = self.num_buttons.serialize();
+        let num_valuators_bytes = self.num_valuators.serialize();
+        let classes_reported_bytes = self.classes_reported.serialize();
+        let valuators_0_bytes = self.valuators[0].serialize();
+        let valuators_1_bytes = self.valuators[1].serialize();
+        let valuators_2_bytes = self.valuators[2].serialize();
+        [
+            response_type_bytes[0],
+            device_id_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            time_bytes[0],
+            time_bytes[1],
+            time_bytes[2],
+            time_bytes[3],
+            num_keys_bytes[0],
+            num_buttons_bytes[0],
+            num_valuators_bytes[0],
+            classes_reported_bytes[0],
+            self.buttons[0],
+            self.buttons[1],
+            self.buttons[2],
+            self.buttons[3],
+            self.keys[0],
+            self.keys[1],
+            self.keys[2],
+            self.keys[3],
+            valuators_0_bytes[0],
+            valuators_0_bytes[1],
+            valuators_0_bytes[2],
+            valuators_0_bytes[3],
+            valuators_1_bytes[0],
+            valuators_1_bytes[1],
+            valuators_1_bytes[2],
+            valuators_1_bytes[3],
+            valuators_2_bytes[0],
+            valuators_2_bytes[1],
+            valuators_2_bytes[2],
+            valuators_2_bytes[3],
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        self.response_type.serialize_into(bytes);
+        self.device_id.serialize_into(bytes);
+        self.sequence.serialize_into(bytes);
+        self.time.serialize_into(bytes);
+        self.num_keys.serialize_into(bytes);
+        self.num_buttons.serialize_into(bytes);
+        self.num_valuators.serialize_into(bytes);
+        self.classes_reported.serialize_into(bytes);
+        bytes.extend_from_slice(&self.buttons);
+        bytes.extend_from_slice(&self.keys);
+        self.valuators.serialize_into(bytes);
+    }
+}
 impl From<&DeviceStateNotifyEvent> for [u8; 32] {
     fn from(input: &DeviceStateNotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -14071,6 +15578,64 @@ impl TryParse for DeviceMappingNotifyEvent {
         let remaining = initial_value.get(32..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for DeviceMappingNotifyEvent {
+    type Bytes = [u8; 32];
+    fn serialize(&self) -> [u8; 32] {
+        let response_type_bytes = self.response_type.serialize();
+        let device_id_bytes = self.device_id.serialize();
+        let sequence_bytes = self.sequence.serialize();
+        let request_bytes = u8::from(self.request).serialize();
+        let first_keycode_bytes = self.first_keycode.serialize();
+        let count_bytes = self.count.serialize();
+        let time_bytes = self.time.serialize();
+        [
+            response_type_bytes[0],
+            device_id_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            request_bytes[0],
+            first_keycode_bytes[0],
+            count_bytes[0],
+            0,
+            time_bytes[0],
+            time_bytes[1],
+            time_bytes[2],
+            time_bytes[3],
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        self.response_type.serialize_into(bytes);
+        self.device_id.serialize_into(bytes);
+        self.sequence.serialize_into(bytes);
+        u8::from(self.request).serialize_into(bytes);
+        self.first_keycode.serialize_into(bytes);
+        self.count.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 1]);
+        self.time.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 20]);
     }
 }
 impl From<&DeviceMappingNotifyEvent> for [u8; 32] {
@@ -14211,6 +15776,59 @@ impl TryParse for ChangeDeviceNotifyEvent {
         Ok((result, remaining))
     }
 }
+impl Serialize for ChangeDeviceNotifyEvent {
+    type Bytes = [u8; 32];
+    fn serialize(&self) -> [u8; 32] {
+        let response_type_bytes = self.response_type.serialize();
+        let device_id_bytes = self.device_id.serialize();
+        let sequence_bytes = self.sequence.serialize();
+        let time_bytes = self.time.serialize();
+        let request_bytes = u8::from(self.request).serialize();
+        [
+            response_type_bytes[0],
+            device_id_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            time_bytes[0],
+            time_bytes[1],
+            time_bytes[2],
+            time_bytes[3],
+            request_bytes[0],
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        self.response_type.serialize_into(bytes);
+        self.device_id.serialize_into(bytes);
+        self.sequence.serialize_into(bytes);
+        self.time.serialize_into(bytes);
+        u8::from(self.request).serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 23]);
+    }
+}
 impl From<&ChangeDeviceNotifyEvent> for [u8; 32] {
     fn from(input: &ChangeDeviceNotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -14285,6 +15903,55 @@ impl TryParse for DeviceKeyStateNotifyEvent {
         Ok((result, remaining))
     }
 }
+impl Serialize for DeviceKeyStateNotifyEvent {
+    type Bytes = [u8; 32];
+    fn serialize(&self) -> [u8; 32] {
+        let response_type_bytes = self.response_type.serialize();
+        let device_id_bytes = self.device_id.serialize();
+        let sequence_bytes = self.sequence.serialize();
+        [
+            response_type_bytes[0],
+            device_id_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            self.keys[0],
+            self.keys[1],
+            self.keys[2],
+            self.keys[3],
+            self.keys[4],
+            self.keys[5],
+            self.keys[6],
+            self.keys[7],
+            self.keys[8],
+            self.keys[9],
+            self.keys[10],
+            self.keys[11],
+            self.keys[12],
+            self.keys[13],
+            self.keys[14],
+            self.keys[15],
+            self.keys[16],
+            self.keys[17],
+            self.keys[18],
+            self.keys[19],
+            self.keys[20],
+            self.keys[21],
+            self.keys[22],
+            self.keys[23],
+            self.keys[24],
+            self.keys[25],
+            self.keys[26],
+            self.keys[27],
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        self.response_type.serialize_into(bytes);
+        self.device_id.serialize_into(bytes);
+        self.sequence.serialize_into(bytes);
+        bytes.extend_from_slice(&self.keys);
+    }
+}
 impl From<&DeviceKeyStateNotifyEvent> for [u8; 32] {
     fn from(input: &DeviceKeyStateNotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -14355,6 +16022,55 @@ impl TryParse for DeviceButtonStateNotifyEvent {
         let remaining = initial_value.get(32..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for DeviceButtonStateNotifyEvent {
+    type Bytes = [u8; 32];
+    fn serialize(&self) -> [u8; 32] {
+        let response_type_bytes = self.response_type.serialize();
+        let device_id_bytes = self.device_id.serialize();
+        let sequence_bytes = self.sequence.serialize();
+        [
+            response_type_bytes[0],
+            device_id_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            self.buttons[0],
+            self.buttons[1],
+            self.buttons[2],
+            self.buttons[3],
+            self.buttons[4],
+            self.buttons[5],
+            self.buttons[6],
+            self.buttons[7],
+            self.buttons[8],
+            self.buttons[9],
+            self.buttons[10],
+            self.buttons[11],
+            self.buttons[12],
+            self.buttons[13],
+            self.buttons[14],
+            self.buttons[15],
+            self.buttons[16],
+            self.buttons[17],
+            self.buttons[18],
+            self.buttons[19],
+            self.buttons[20],
+            self.buttons[21],
+            self.buttons[22],
+            self.buttons[23],
+            self.buttons[24],
+            self.buttons[25],
+            self.buttons[26],
+            self.buttons[27],
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        self.response_type.serialize_into(bytes);
+        self.device_id.serialize_into(bytes);
+        self.sequence.serialize_into(bytes);
+        bytes.extend_from_slice(&self.buttons);
     }
 }
 impl From<&DeviceButtonStateNotifyEvent> for [u8; 32] {
@@ -14502,6 +16218,62 @@ impl TryParse for DevicePresenceNotifyEvent {
         Ok((result, remaining))
     }
 }
+impl Serialize for DevicePresenceNotifyEvent {
+    type Bytes = [u8; 32];
+    fn serialize(&self) -> [u8; 32] {
+        let response_type_bytes = self.response_type.serialize();
+        let sequence_bytes = self.sequence.serialize();
+        let time_bytes = self.time.serialize();
+        let devchange_bytes = u8::from(self.devchange).serialize();
+        let device_id_bytes = self.device_id.serialize();
+        let control_bytes = self.control.serialize();
+        [
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            time_bytes[0],
+            time_bytes[1],
+            time_bytes[2],
+            time_bytes[3],
+            devchange_bytes[0],
+            device_id_bytes[0],
+            control_bytes[0],
+            control_bytes[1],
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        self.response_type.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.time.serialize_into(bytes);
+        u8::from(self.devchange).serialize_into(bytes);
+        self.device_id.serialize_into(bytes);
+        self.control.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 20]);
+    }
+}
 impl From<&DevicePresenceNotifyEvent> for [u8; 32] {
     fn from(input: &DevicePresenceNotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -14580,6 +16352,61 @@ impl TryParse for DevicePropertyNotifyEvent {
         let remaining = initial_value.get(32..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for DevicePropertyNotifyEvent {
+    type Bytes = [u8; 32];
+    fn serialize(&self) -> [u8; 32] {
+        let response_type_bytes = self.response_type.serialize();
+        let state_bytes = u8::from(self.state).serialize();
+        let sequence_bytes = self.sequence.serialize();
+        let time_bytes = self.time.serialize();
+        let property_bytes = self.property.serialize();
+        let device_id_bytes = self.device_id.serialize();
+        [
+            response_type_bytes[0],
+            state_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            time_bytes[0],
+            time_bytes[1],
+            time_bytes[2],
+            time_bytes[3],
+            property_bytes[0],
+            property_bytes[1],
+            property_bytes[2],
+            property_bytes[3],
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            device_id_bytes[0],
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        self.response_type.serialize_into(bytes);
+        u8::from(self.state).serialize_into(bytes);
+        self.sequence.serialize_into(bytes);
+        self.time.serialize_into(bytes);
+        self.property.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 19]);
+        self.device_id.serialize_into(bytes);
     }
 }
 impl From<&DevicePropertyNotifyEvent> for [u8; 32] {
@@ -14730,6 +16557,30 @@ impl TryParse for DeviceChangedEvent {
         Ok((result, remaining))
     }
 }
+impl Serialize for DeviceChangedEvent {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        self.response_type.serialize_into(bytes);
+        self.extension.serialize_into(bytes);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.event_type.serialize_into(bytes);
+        self.deviceid.serialize_into(bytes);
+        self.time.serialize_into(bytes);
+        let num_classes = u16::try_from(self.classes.len()).expect("`classes` has too many elements");
+        num_classes.serialize_into(bytes);
+        self.sourceid.serialize_into(bytes);
+        u8::from(self.reason).serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 11]);
+        self.classes.serialize_into(bytes);
+    }
+}
 impl DeviceChangedEvent {
     /// Get the value of the `num_classes` field.
     ///
@@ -14853,6 +16704,45 @@ impl TryParse for KeyPressEvent {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for KeyPressEvent {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(80);
+        self.response_type.serialize_into(bytes);
+        self.extension.serialize_into(bytes);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.event_type.serialize_into(bytes);
+        self.deviceid.serialize_into(bytes);
+        self.time.serialize_into(bytes);
+        self.detail.serialize_into(bytes);
+        self.root.serialize_into(bytes);
+        self.event.serialize_into(bytes);
+        self.child.serialize_into(bytes);
+        self.root_x.serialize_into(bytes);
+        self.root_y.serialize_into(bytes);
+        self.event_x.serialize_into(bytes);
+        self.event_y.serialize_into(bytes);
+        let buttons_len = u16::try_from(self.button_mask.len()).expect("`button_mask` has too many elements");
+        buttons_len.serialize_into(bytes);
+        let valuators_len = u16::try_from(self.valuator_mask.len()).expect("`valuator_mask` has too many elements");
+        valuators_len.serialize_into(bytes);
+        self.sourceid.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 2]);
+        self.flags.serialize_into(bytes);
+        self.mods.serialize_into(bytes);
+        self.group.serialize_into(bytes);
+        self.button_mask.serialize_into(bytes);
+        self.valuator_mask.serialize_into(bytes);
+        assert_eq!(self.axisvalues.len(), usize::try_from(self.valuator_mask.iter().fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).unwrap())).unwrap(), "`axisvalues` has an incorrect length");
+        self.axisvalues.serialize_into(bytes);
     }
 }
 impl KeyPressEvent {
@@ -14995,6 +16885,45 @@ impl TryParse for ButtonPressEvent {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for ButtonPressEvent {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(80);
+        self.response_type.serialize_into(bytes);
+        self.extension.serialize_into(bytes);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.event_type.serialize_into(bytes);
+        self.deviceid.serialize_into(bytes);
+        self.time.serialize_into(bytes);
+        self.detail.serialize_into(bytes);
+        self.root.serialize_into(bytes);
+        self.event.serialize_into(bytes);
+        self.child.serialize_into(bytes);
+        self.root_x.serialize_into(bytes);
+        self.root_y.serialize_into(bytes);
+        self.event_x.serialize_into(bytes);
+        self.event_y.serialize_into(bytes);
+        let buttons_len = u16::try_from(self.button_mask.len()).expect("`button_mask` has too many elements");
+        buttons_len.serialize_into(bytes);
+        let valuators_len = u16::try_from(self.valuator_mask.len()).expect("`valuator_mask` has too many elements");
+        valuators_len.serialize_into(bytes);
+        self.sourceid.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 2]);
+        self.flags.serialize_into(bytes);
+        self.mods.serialize_into(bytes);
+        self.group.serialize_into(bytes);
+        self.button_mask.serialize_into(bytes);
+        self.valuator_mask.serialize_into(bytes);
+        assert_eq!(self.axisvalues.len(), usize::try_from(self.valuator_mask.iter().fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).unwrap())).unwrap(), "`axisvalues` has an incorrect length");
+        self.axisvalues.serialize_into(bytes);
     }
 }
 impl ButtonPressEvent {
@@ -15235,6 +17164,41 @@ impl TryParse for EnterEvent {
         Ok((result, remaining))
     }
 }
+impl Serialize for EnterEvent {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(72);
+        self.response_type.serialize_into(bytes);
+        self.extension.serialize_into(bytes);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.event_type.serialize_into(bytes);
+        self.deviceid.serialize_into(bytes);
+        self.time.serialize_into(bytes);
+        self.sourceid.serialize_into(bytes);
+        u8::from(self.mode).serialize_into(bytes);
+        u8::from(self.detail).serialize_into(bytes);
+        self.root.serialize_into(bytes);
+        self.event.serialize_into(bytes);
+        self.child.serialize_into(bytes);
+        self.root_x.serialize_into(bytes);
+        self.root_y.serialize_into(bytes);
+        self.event_x.serialize_into(bytes);
+        self.event_y.serialize_into(bytes);
+        self.same_screen.serialize_into(bytes);
+        self.focus.serialize_into(bytes);
+        let buttons_len = u16::try_from(self.buttons.len()).expect("`buttons` has too many elements");
+        buttons_len.serialize_into(bytes);
+        self.mods.serialize_into(bytes);
+        self.group.serialize_into(bytes);
+        self.buttons.serialize_into(bytes);
+    }
+}
 impl EnterEvent {
     /// Get the value of the `buttons_len` field.
     ///
@@ -15427,6 +17391,29 @@ impl TryParse for HierarchyEvent {
         Ok((result, remaining))
     }
 }
+impl Serialize for HierarchyEvent {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        self.response_type.serialize_into(bytes);
+        self.extension.serialize_into(bytes);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.event_type.serialize_into(bytes);
+        self.deviceid.serialize_into(bytes);
+        self.time.serialize_into(bytes);
+        self.flags.serialize_into(bytes);
+        let num_infos = u16::try_from(self.infos.len()).expect("`infos` has too many elements");
+        num_infos.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 10]);
+        self.infos.serialize_into(bytes);
+    }
+}
 impl HierarchyEvent {
     /// Get the value of the `num_infos` field.
     ///
@@ -15540,6 +17527,67 @@ impl TryParse for PropertyEvent {
         Ok((result, remaining))
     }
 }
+impl Serialize for PropertyEvent {
+    type Bytes = [u8; 32];
+    fn serialize(&self) -> [u8; 32] {
+        let response_type_bytes = self.response_type.serialize();
+        let extension_bytes = self.extension.serialize();
+        let sequence_bytes = self.sequence.serialize();
+        let length_bytes = self.length.serialize();
+        let event_type_bytes = self.event_type.serialize();
+        let deviceid_bytes = self.deviceid.serialize();
+        let time_bytes = self.time.serialize();
+        let property_bytes = self.property.serialize();
+        let what_bytes = u8::from(self.what).serialize();
+        [
+            response_type_bytes[0],
+            extension_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            length_bytes[0],
+            length_bytes[1],
+            length_bytes[2],
+            length_bytes[3],
+            event_type_bytes[0],
+            event_type_bytes[1],
+            deviceid_bytes[0],
+            deviceid_bytes[1],
+            time_bytes[0],
+            time_bytes[1],
+            time_bytes[2],
+            time_bytes[3],
+            property_bytes[0],
+            property_bytes[1],
+            property_bytes[2],
+            property_bytes[3],
+            what_bytes[0],
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        self.response_type.serialize_into(bytes);
+        self.extension.serialize_into(bytes);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.event_type.serialize_into(bytes);
+        self.deviceid.serialize_into(bytes);
+        self.time.serialize_into(bytes);
+        self.property.serialize_into(bytes);
+        u8::from(self.what).serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 11]);
+    }
+}
 
 /// Opcode for the RawKeyPress event
 pub const RAW_KEY_PRESS_EVENT: u16 = 13;
@@ -15583,6 +17631,35 @@ impl TryParse for RawKeyPressEvent {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for RawKeyPressEvent {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        self.response_type.serialize_into(bytes);
+        self.extension.serialize_into(bytes);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.event_type.serialize_into(bytes);
+        self.deviceid.serialize_into(bytes);
+        self.time.serialize_into(bytes);
+        self.detail.serialize_into(bytes);
+        self.sourceid.serialize_into(bytes);
+        let valuators_len = u16::try_from(self.valuator_mask.len()).expect("`valuator_mask` has too many elements");
+        valuators_len.serialize_into(bytes);
+        self.flags.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 4]);
+        self.valuator_mask.serialize_into(bytes);
+        assert_eq!(self.axisvalues.len(), usize::try_from(self.valuator_mask.iter().fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).unwrap())).unwrap(), "`axisvalues` has an incorrect length");
+        self.axisvalues.serialize_into(bytes);
+        assert_eq!(self.axisvalues_raw.len(), usize::try_from(self.valuator_mask.iter().fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).unwrap())).unwrap(), "`axisvalues_raw` has an incorrect length");
+        self.axisvalues_raw.serialize_into(bytes);
     }
 }
 impl RawKeyPressEvent {
@@ -15647,6 +17724,35 @@ impl TryParse for RawButtonPressEvent {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for RawButtonPressEvent {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        self.response_type.serialize_into(bytes);
+        self.extension.serialize_into(bytes);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.event_type.serialize_into(bytes);
+        self.deviceid.serialize_into(bytes);
+        self.time.serialize_into(bytes);
+        self.detail.serialize_into(bytes);
+        self.sourceid.serialize_into(bytes);
+        let valuators_len = u16::try_from(self.valuator_mask.len()).expect("`valuator_mask` has too many elements");
+        valuators_len.serialize_into(bytes);
+        self.flags.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 4]);
+        self.valuator_mask.serialize_into(bytes);
+        assert_eq!(self.axisvalues.len(), usize::try_from(self.valuator_mask.iter().fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).unwrap())).unwrap(), "`axisvalues` has an incorrect length");
+        self.axisvalues.serialize_into(bytes);
+        assert_eq!(self.axisvalues_raw.len(), usize::try_from(self.valuator_mask.iter().fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).unwrap())).unwrap(), "`axisvalues_raw` has an incorrect length");
+        self.axisvalues_raw.serialize_into(bytes);
     }
 }
 impl RawButtonPressEvent {
@@ -15784,6 +17890,45 @@ impl TryParse for TouchBeginEvent {
         Ok((result, remaining))
     }
 }
+impl Serialize for TouchBeginEvent {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(80);
+        self.response_type.serialize_into(bytes);
+        self.extension.serialize_into(bytes);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.event_type.serialize_into(bytes);
+        self.deviceid.serialize_into(bytes);
+        self.time.serialize_into(bytes);
+        self.detail.serialize_into(bytes);
+        self.root.serialize_into(bytes);
+        self.event.serialize_into(bytes);
+        self.child.serialize_into(bytes);
+        self.root_x.serialize_into(bytes);
+        self.root_y.serialize_into(bytes);
+        self.event_x.serialize_into(bytes);
+        self.event_y.serialize_into(bytes);
+        let buttons_len = u16::try_from(self.button_mask.len()).expect("`button_mask` has too many elements");
+        buttons_len.serialize_into(bytes);
+        let valuators_len = u16::try_from(self.valuator_mask.len()).expect("`valuator_mask` has too many elements");
+        valuators_len.serialize_into(bytes);
+        self.sourceid.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 2]);
+        self.flags.serialize_into(bytes);
+        self.mods.serialize_into(bytes);
+        self.group.serialize_into(bytes);
+        self.button_mask.serialize_into(bytes);
+        self.valuator_mask.serialize_into(bytes);
+        assert_eq!(self.axisvalues.len(), usize::try_from(self.valuator_mask.iter().fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).unwrap())).unwrap(), "`axisvalues` has an incorrect length");
+        self.axisvalues.serialize_into(bytes);
+    }
+}
 impl TouchBeginEvent {
     /// Get the value of the `buttons_len` field.
     ///
@@ -15911,6 +18056,92 @@ impl TryParse for TouchOwnershipEvent {
         Ok((result, remaining))
     }
 }
+impl Serialize for TouchOwnershipEvent {
+    type Bytes = [u8; 48];
+    fn serialize(&self) -> [u8; 48] {
+        let response_type_bytes = self.response_type.serialize();
+        let extension_bytes = self.extension.serialize();
+        let sequence_bytes = self.sequence.serialize();
+        let length_bytes = self.length.serialize();
+        let event_type_bytes = self.event_type.serialize();
+        let deviceid_bytes = self.deviceid.serialize();
+        let time_bytes = self.time.serialize();
+        let touchid_bytes = self.touchid.serialize();
+        let root_bytes = self.root.serialize();
+        let event_bytes = self.event.serialize();
+        let child_bytes = self.child.serialize();
+        let sourceid_bytes = self.sourceid.serialize();
+        let flags_bytes = u32::from(self.flags).serialize();
+        [
+            response_type_bytes[0],
+            extension_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            length_bytes[0],
+            length_bytes[1],
+            length_bytes[2],
+            length_bytes[3],
+            event_type_bytes[0],
+            event_type_bytes[1],
+            deviceid_bytes[0],
+            deviceid_bytes[1],
+            time_bytes[0],
+            time_bytes[1],
+            time_bytes[2],
+            time_bytes[3],
+            touchid_bytes[0],
+            touchid_bytes[1],
+            touchid_bytes[2],
+            touchid_bytes[3],
+            root_bytes[0],
+            root_bytes[1],
+            root_bytes[2],
+            root_bytes[3],
+            event_bytes[0],
+            event_bytes[1],
+            event_bytes[2],
+            event_bytes[3],
+            child_bytes[0],
+            child_bytes[1],
+            child_bytes[2],
+            child_bytes[3],
+            sourceid_bytes[0],
+            sourceid_bytes[1],
+            0,
+            0,
+            flags_bytes[0],
+            flags_bytes[1],
+            flags_bytes[2],
+            flags_bytes[3],
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(48);
+        self.response_type.serialize_into(bytes);
+        self.extension.serialize_into(bytes);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.event_type.serialize_into(bytes);
+        self.deviceid.serialize_into(bytes);
+        self.time.serialize_into(bytes);
+        self.touchid.serialize_into(bytes);
+        self.root.serialize_into(bytes);
+        self.event.serialize_into(bytes);
+        self.child.serialize_into(bytes);
+        self.sourceid.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 2]);
+        u32::from(self.flags).serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 8]);
+    }
+}
 
 /// Opcode for the RawTouchBegin event
 pub const RAW_TOUCH_BEGIN_EVENT: u16 = 22;
@@ -15954,6 +18185,35 @@ impl TryParse for RawTouchBeginEvent {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for RawTouchBeginEvent {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        self.response_type.serialize_into(bytes);
+        self.extension.serialize_into(bytes);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.event_type.serialize_into(bytes);
+        self.deviceid.serialize_into(bytes);
+        self.time.serialize_into(bytes);
+        self.detail.serialize_into(bytes);
+        self.sourceid.serialize_into(bytes);
+        let valuators_len = u16::try_from(self.valuator_mask.len()).expect("`valuator_mask` has too many elements");
+        valuators_len.serialize_into(bytes);
+        self.flags.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 4]);
+        self.valuator_mask.serialize_into(bytes);
+        assert_eq!(self.axisvalues.len(), usize::try_from(self.valuator_mask.iter().fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).unwrap())).unwrap(), "`axisvalues` has an incorrect length");
+        self.axisvalues.serialize_into(bytes);
+        assert_eq!(self.axisvalues_raw.len(), usize::try_from(self.valuator_mask.iter().fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).unwrap())).unwrap(), "`axisvalues_raw` has an incorrect length");
+        self.axisvalues_raw.serialize_into(bytes);
     }
 }
 impl RawTouchBeginEvent {
@@ -16091,6 +18351,121 @@ impl TryParse for BarrierHitEvent {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for BarrierHitEvent {
+    type Bytes = [u8; 68];
+    fn serialize(&self) -> [u8; 68] {
+        let response_type_bytes = self.response_type.serialize();
+        let extension_bytes = self.extension.serialize();
+        let sequence_bytes = self.sequence.serialize();
+        let length_bytes = self.length.serialize();
+        let event_type_bytes = self.event_type.serialize();
+        let deviceid_bytes = self.deviceid.serialize();
+        let time_bytes = self.time.serialize();
+        let eventid_bytes = self.eventid.serialize();
+        let root_bytes = self.root.serialize();
+        let event_bytes = self.event.serialize();
+        let barrier_bytes = self.barrier.serialize();
+        let dtime_bytes = self.dtime.serialize();
+        let flags_bytes = self.flags.serialize();
+        let sourceid_bytes = self.sourceid.serialize();
+        let root_x_bytes = self.root_x.serialize();
+        let root_y_bytes = self.root_y.serialize();
+        let dx_bytes = self.dx.serialize();
+        let dy_bytes = self.dy.serialize();
+        [
+            response_type_bytes[0],
+            extension_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            length_bytes[0],
+            length_bytes[1],
+            length_bytes[2],
+            length_bytes[3],
+            event_type_bytes[0],
+            event_type_bytes[1],
+            deviceid_bytes[0],
+            deviceid_bytes[1],
+            time_bytes[0],
+            time_bytes[1],
+            time_bytes[2],
+            time_bytes[3],
+            eventid_bytes[0],
+            eventid_bytes[1],
+            eventid_bytes[2],
+            eventid_bytes[3],
+            root_bytes[0],
+            root_bytes[1],
+            root_bytes[2],
+            root_bytes[3],
+            event_bytes[0],
+            event_bytes[1],
+            event_bytes[2],
+            event_bytes[3],
+            barrier_bytes[0],
+            barrier_bytes[1],
+            barrier_bytes[2],
+            barrier_bytes[3],
+            dtime_bytes[0],
+            dtime_bytes[1],
+            dtime_bytes[2],
+            dtime_bytes[3],
+            flags_bytes[0],
+            flags_bytes[1],
+            flags_bytes[2],
+            flags_bytes[3],
+            sourceid_bytes[0],
+            sourceid_bytes[1],
+            0,
+            0,
+            root_x_bytes[0],
+            root_x_bytes[1],
+            root_x_bytes[2],
+            root_x_bytes[3],
+            root_y_bytes[0],
+            root_y_bytes[1],
+            root_y_bytes[2],
+            root_y_bytes[3],
+            dx_bytes[0],
+            dx_bytes[1],
+            dx_bytes[2],
+            dx_bytes[3],
+            dx_bytes[4],
+            dx_bytes[5],
+            dx_bytes[6],
+            dx_bytes[7],
+            dy_bytes[0],
+            dy_bytes[1],
+            dy_bytes[2],
+            dy_bytes[3],
+            dy_bytes[4],
+            dy_bytes[5],
+            dy_bytes[6],
+            dy_bytes[7],
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(68);
+        self.response_type.serialize_into(bytes);
+        self.extension.serialize_into(bytes);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.event_type.serialize_into(bytes);
+        self.deviceid.serialize_into(bytes);
+        self.time.serialize_into(bytes);
+        self.eventid.serialize_into(bytes);
+        self.root.serialize_into(bytes);
+        self.event.serialize_into(bytes);
+        self.barrier.serialize_into(bytes);
+        self.dtime.serialize_into(bytes);
+        self.flags.serialize_into(bytes);
+        self.sourceid.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 2]);
+        self.root_x.serialize_into(bytes);
+        self.root_y.serialize_into(bytes);
+        self.dx.serialize_into(bytes);
+        self.dy.serialize_into(bytes);
     }
 }
 

@@ -118,6 +118,61 @@ impl TryParse for QueryVersionReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for QueryVersionReply {
+    type Bytes = [u8; 32];
+    fn serialize(&self) -> [u8; 32] {
+        let response_type_bytes = &[1];
+        let sequence_bytes = self.sequence.serialize();
+        let length_bytes = self.length.serialize();
+        let server_major_version_bytes = self.server_major_version.serialize();
+        let server_minor_version_bytes = self.server_minor_version.serialize();
+        [
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            length_bytes[0],
+            length_bytes[1],
+            length_bytes[2],
+            length_bytes[3],
+            server_major_version_bytes[0],
+            server_major_version_bytes[1],
+            server_minor_version_bytes[0],
+            server_minor_version_bytes[1],
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.server_major_version.serialize_into(bytes);
+        self.server_minor_version.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 20]);
+    }
+}
 
 /// Opcode for the Start request
 pub const START_REQUEST: u8 = 1;
@@ -197,6 +252,57 @@ impl TryParse for StartReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for StartReply {
+    type Bytes = [u8; 32];
+    fn serialize(&self) -> [u8; 32] {
+        let response_type_bytes = &[1];
+        let sequence_bytes = self.sequence.serialize();
+        let length_bytes = self.length.serialize();
+        [
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            length_bytes[0],
+            length_bytes[1],
+            length_bytes[2],
+            length_bytes[3],
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 24]);
+    }
+}
 
 /// Opcode for the End request
 pub const END_REQUEST: u8 = 2;
@@ -274,6 +380,57 @@ impl TryParse for EndReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for EndReply {
+    type Bytes = [u8; 32];
+    fn serialize(&self) -> [u8; 32] {
+        let response_type_bytes = &[1];
+        let sequence_bytes = self.sequence.serialize();
+        let length_bytes = self.length.serialize();
+        [
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            length_bytes[0],
+            length_bytes[1],
+            length_bytes[2],
+            length_bytes[3],
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 24]);
     }
 }
 
@@ -582,6 +739,57 @@ impl TryParse for SendReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for SendReply {
+    type Bytes = [u8; 32];
+    fn serialize(&self) -> [u8; 32] {
+        let response_type_bytes = &[1];
+        let sequence_bytes = self.sequence.serialize();
+        let length_bytes = self.length.serialize();
+        [
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            length_bytes[0],
+            length_bytes[1],
+            length_bytes[2],
+            length_bytes[3],
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 24]);
+    }
+}
 
 /// Opcode for the SelectInput request
 pub const SELECT_INPUT_REQUEST: u8 = 4;
@@ -659,6 +867,57 @@ impl TryParse for SelectInputReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for SelectInputReply {
+    type Bytes = [u8; 32];
+    fn serialize(&self) -> [u8; 32] {
+        let response_type_bytes = &[1];
+        let sequence_bytes = self.sequence.serialize();
+        let length_bytes = self.length.serialize();
+        [
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            length_bytes[0],
+            length_bytes[1],
+            length_bytes[2],
+            length_bytes[3],
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 24]);
     }
 }
 

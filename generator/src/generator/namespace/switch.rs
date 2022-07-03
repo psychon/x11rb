@@ -808,7 +808,24 @@ fn emit_variable_size_switch_serialize(
             ext_params_arg_defs
         );
         out.indented(|out| {
-            serialize::emit_assert_for_switch_serialize(generator, switch, switch_expr_type, out);
+            // TODO: emit an assertion checking that the switch case has
+            // been set properly
+            //
+            // omitted here because some expressions do not have a
+            // `switch_expr()` function
+            let _ = switch_expr_type;
+
+            // eat the parameters for now
+            if !external_params.is_empty() {
+                for external_param in external_params.iter() {
+                    outln!(
+                        out,
+                        "let _ = {};",
+                        to_rust_variable_name(&external_param.name)
+                    );
+                }
+            }
+
             if switch.kind == xcbdefs::SwitchKind::BitCase {
                 for (case, case_info) in switch.cases.iter().zip(case_infos.iter()) {
                     match case_info {

@@ -119,6 +119,37 @@ impl TryParse for GetVersionReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for GetVersionReply {
+    type Bytes = [u8; 10];
+    fn serialize(&self) -> [u8; 10] {
+        let response_type_bytes = &[1];
+        let major_version_bytes = self.major_version.serialize();
+        let sequence_bytes = self.sequence.serialize();
+        let length_bytes = self.length.serialize();
+        let minor_version_bytes = self.minor_version.serialize();
+        [
+            response_type_bytes[0],
+            major_version_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            length_bytes[0],
+            length_bytes[1],
+            length_bytes[2],
+            length_bytes[3],
+            minor_version_bytes[0],
+            minor_version_bytes[1],
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(10);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        self.major_version.serialize_into(bytes);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.minor_version.serialize_into(bytes);
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -275,6 +306,33 @@ impl TryParse for CompareCursorReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for CompareCursorReply {
+    type Bytes = [u8; 8];
+    fn serialize(&self) -> [u8; 8] {
+        let response_type_bytes = &[1];
+        let same_bytes = self.same.serialize();
+        let sequence_bytes = self.sequence.serialize();
+        let length_bytes = self.length.serialize();
+        [
+            response_type_bytes[0],
+            same_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            length_bytes[0],
+            length_bytes[1],
+            length_bytes[2],
+            length_bytes[3],
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(8);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        self.same.serialize_into(bytes);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
     }
 }
 

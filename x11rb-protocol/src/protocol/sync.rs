@@ -568,6 +568,61 @@ impl TryParse for InitializeReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for InitializeReply {
+    type Bytes = [u8; 32];
+    fn serialize(&self) -> [u8; 32] {
+        let response_type_bytes = &[1];
+        let sequence_bytes = self.sequence.serialize();
+        let length_bytes = self.length.serialize();
+        let major_version_bytes = self.major_version.serialize();
+        let minor_version_bytes = self.minor_version.serialize();
+        [
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            length_bytes[0],
+            length_bytes[1],
+            length_bytes[2],
+            length_bytes[3],
+            major_version_bytes[0],
+            minor_version_bytes[0],
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.major_version.serialize_into(bytes);
+        self.minor_version.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 22]);
+    }
+}
 
 /// Opcode for the ListSystemCounters request
 pub const LIST_SYSTEM_COUNTERS_REQUEST: u8 = 1;
@@ -639,6 +694,26 @@ impl TryParse for ListSystemCountersReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for ListSystemCountersReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        let counters_len = u32::try_from(self.counters.len()).expect("`counters` has too many elements");
+        counters_len.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 20]);
+        self.counters.serialize_into(bytes);
     }
 }
 impl ListSystemCountersReply {
@@ -852,6 +927,42 @@ impl TryParse for QueryCounterReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for QueryCounterReply {
+    type Bytes = [u8; 16];
+    fn serialize(&self) -> [u8; 16] {
+        let response_type_bytes = &[1];
+        let sequence_bytes = self.sequence.serialize();
+        let length_bytes = self.length.serialize();
+        let counter_value_bytes = self.counter_value.serialize();
+        [
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            length_bytes[0],
+            length_bytes[1],
+            length_bytes[2],
+            length_bytes[3],
+            counter_value_bytes[0],
+            counter_value_bytes[1],
+            counter_value_bytes[2],
+            counter_value_bytes[3],
+            counter_value_bytes[4],
+            counter_value_bytes[5],
+            counter_value_bytes[6],
+            counter_value_bytes[7],
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(16);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.counter_value.serialize_into(bytes);
     }
 }
 
@@ -1127,7 +1238,7 @@ impl CreateAlarmAux {
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, value_mask: u32) {
-        assert_eq!(self.switch_expr(), value_mask, "switch `value_list` has an inconsistent discriminant");
+        let _ = value_mask;
         if let Some(counter) = self.counter {
             counter.serialize_into(bytes);
         }
@@ -1366,7 +1477,7 @@ impl ChangeAlarmAux {
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, value_mask: u32) {
-        assert_eq!(self.switch_expr(), value_mask, "switch `value_list` has an inconsistent discriminant");
+        let _ = value_mask;
         if let Some(counter) = self.counter {
             counter.serialize_into(bytes);
         }
@@ -1668,6 +1779,73 @@ impl TryParse for QueryAlarmReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for QueryAlarmReply {
+    type Bytes = [u8; 40];
+    fn serialize(&self) -> [u8; 40] {
+        let response_type_bytes = &[1];
+        let sequence_bytes = self.sequence.serialize();
+        let length_bytes = self.length.serialize();
+        let trigger_bytes = self.trigger.serialize();
+        let delta_bytes = self.delta.serialize();
+        let events_bytes = self.events.serialize();
+        let state_bytes = u8::from(self.state).serialize();
+        [
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            length_bytes[0],
+            length_bytes[1],
+            length_bytes[2],
+            length_bytes[3],
+            trigger_bytes[0],
+            trigger_bytes[1],
+            trigger_bytes[2],
+            trigger_bytes[3],
+            trigger_bytes[4],
+            trigger_bytes[5],
+            trigger_bytes[6],
+            trigger_bytes[7],
+            trigger_bytes[8],
+            trigger_bytes[9],
+            trigger_bytes[10],
+            trigger_bytes[11],
+            trigger_bytes[12],
+            trigger_bytes[13],
+            trigger_bytes[14],
+            trigger_bytes[15],
+            trigger_bytes[16],
+            trigger_bytes[17],
+            trigger_bytes[18],
+            trigger_bytes[19],
+            delta_bytes[0],
+            delta_bytes[1],
+            delta_bytes[2],
+            delta_bytes[3],
+            delta_bytes[4],
+            delta_bytes[5],
+            delta_bytes[6],
+            delta_bytes[7],
+            events_bytes[0],
+            state_bytes[0],
+            0,
+            0,
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(40);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.trigger.serialize_into(bytes);
+        self.delta.serialize_into(bytes);
+        self.events.serialize_into(bytes);
+        u8::from(self.state).serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 2]);
+    }
+}
 
 /// Opcode for the SetPriority request
 pub const SET_PRIORITY_REQUEST: u8 = 12;
@@ -1807,6 +1985,38 @@ impl TryParse for GetPriorityReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for GetPriorityReply {
+    type Bytes = [u8; 12];
+    fn serialize(&self) -> [u8; 12] {
+        let response_type_bytes = &[1];
+        let sequence_bytes = self.sequence.serialize();
+        let length_bytes = self.length.serialize();
+        let priority_bytes = self.priority.serialize();
+        [
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            length_bytes[0],
+            length_bytes[1],
+            length_bytes[2],
+            length_bytes[3],
+            priority_bytes[0],
+            priority_bytes[1],
+            priority_bytes[2],
+            priority_bytes[3],
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(12);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.priority.serialize_into(bytes);
     }
 }
 
@@ -2118,6 +2328,59 @@ impl TryParse for QueryFenceReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for QueryFenceReply {
+    type Bytes = [u8; 32];
+    fn serialize(&self) -> [u8; 32] {
+        let response_type_bytes = &[1];
+        let sequence_bytes = self.sequence.serialize();
+        let length_bytes = self.length.serialize();
+        let triggered_bytes = self.triggered.serialize();
+        [
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            length_bytes[0],
+            length_bytes[1],
+            length_bytes[2],
+            length_bytes[3],
+            triggered_bytes[0],
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.triggered.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 23]);
+    }
+}
 
 /// Opcode for the AwaitFence request
 pub const AWAIT_FENCE_REQUEST: u8 = 19;
@@ -2219,6 +2482,67 @@ impl TryParse for CounterNotifyEvent {
         Ok((result, remaining))
     }
 }
+impl Serialize for CounterNotifyEvent {
+    type Bytes = [u8; 32];
+    fn serialize(&self) -> [u8; 32] {
+        let response_type_bytes = self.response_type.serialize();
+        let kind_bytes = self.kind.serialize();
+        let sequence_bytes = self.sequence.serialize();
+        let counter_bytes = self.counter.serialize();
+        let wait_value_bytes = self.wait_value.serialize();
+        let counter_value_bytes = self.counter_value.serialize();
+        let timestamp_bytes = self.timestamp.serialize();
+        let count_bytes = self.count.serialize();
+        let destroyed_bytes = self.destroyed.serialize();
+        [
+            response_type_bytes[0],
+            kind_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            counter_bytes[0],
+            counter_bytes[1],
+            counter_bytes[2],
+            counter_bytes[3],
+            wait_value_bytes[0],
+            wait_value_bytes[1],
+            wait_value_bytes[2],
+            wait_value_bytes[3],
+            wait_value_bytes[4],
+            wait_value_bytes[5],
+            wait_value_bytes[6],
+            wait_value_bytes[7],
+            counter_value_bytes[0],
+            counter_value_bytes[1],
+            counter_value_bytes[2],
+            counter_value_bytes[3],
+            counter_value_bytes[4],
+            counter_value_bytes[5],
+            counter_value_bytes[6],
+            counter_value_bytes[7],
+            timestamp_bytes[0],
+            timestamp_bytes[1],
+            timestamp_bytes[2],
+            timestamp_bytes[3],
+            count_bytes[0],
+            count_bytes[1],
+            destroyed_bytes[0],
+            0,
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        self.response_type.serialize_into(bytes);
+        self.kind.serialize_into(bytes);
+        self.sequence.serialize_into(bytes);
+        self.counter.serialize_into(bytes);
+        self.wait_value.serialize_into(bytes);
+        self.counter_value.serialize_into(bytes);
+        self.timestamp.serialize_into(bytes);
+        self.count.serialize_into(bytes);
+        self.destroyed.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 1]);
+    }
+}
 impl From<&CounterNotifyEvent> for [u8; 32] {
     fn from(input: &CounterNotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -2304,6 +2628,65 @@ impl TryParse for AlarmNotifyEvent {
         let remaining = initial_value.get(32..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for AlarmNotifyEvent {
+    type Bytes = [u8; 32];
+    fn serialize(&self) -> [u8; 32] {
+        let response_type_bytes = self.response_type.serialize();
+        let kind_bytes = self.kind.serialize();
+        let sequence_bytes = self.sequence.serialize();
+        let alarm_bytes = self.alarm.serialize();
+        let counter_value_bytes = self.counter_value.serialize();
+        let alarm_value_bytes = self.alarm_value.serialize();
+        let timestamp_bytes = self.timestamp.serialize();
+        let state_bytes = u8::from(self.state).serialize();
+        [
+            response_type_bytes[0],
+            kind_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            alarm_bytes[0],
+            alarm_bytes[1],
+            alarm_bytes[2],
+            alarm_bytes[3],
+            counter_value_bytes[0],
+            counter_value_bytes[1],
+            counter_value_bytes[2],
+            counter_value_bytes[3],
+            counter_value_bytes[4],
+            counter_value_bytes[5],
+            counter_value_bytes[6],
+            counter_value_bytes[7],
+            alarm_value_bytes[0],
+            alarm_value_bytes[1],
+            alarm_value_bytes[2],
+            alarm_value_bytes[3],
+            alarm_value_bytes[4],
+            alarm_value_bytes[5],
+            alarm_value_bytes[6],
+            alarm_value_bytes[7],
+            timestamp_bytes[0],
+            timestamp_bytes[1],
+            timestamp_bytes[2],
+            timestamp_bytes[3],
+            state_bytes[0],
+            0,
+            0,
+            0,
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        self.response_type.serialize_into(bytes);
+        self.kind.serialize_into(bytes);
+        self.sequence.serialize_into(bytes);
+        self.alarm.serialize_into(bytes);
+        self.counter_value.serialize_into(bytes);
+        self.alarm_value.serialize_into(bytes);
+        self.timestamp.serialize_into(bytes);
+        u8::from(self.state).serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 3]);
     }
 }
 impl From<&AlarmNotifyEvent> for [u8; 32] {

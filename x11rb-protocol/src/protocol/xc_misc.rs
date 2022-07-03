@@ -117,6 +117,40 @@ impl TryParse for GetVersionReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for GetVersionReply {
+    type Bytes = [u8; 12];
+    fn serialize(&self) -> [u8; 12] {
+        let response_type_bytes = &[1];
+        let sequence_bytes = self.sequence.serialize();
+        let length_bytes = self.length.serialize();
+        let server_major_version_bytes = self.server_major_version.serialize();
+        let server_minor_version_bytes = self.server_minor_version.serialize();
+        [
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            length_bytes[0],
+            length_bytes[1],
+            length_bytes[2],
+            length_bytes[3],
+            server_major_version_bytes[0],
+            server_major_version_bytes[1],
+            server_minor_version_bytes[0],
+            server_minor_version_bytes[1],
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(12);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.server_major_version.serialize_into(bytes);
+        self.server_minor_version.serialize_into(bytes);
+    }
+}
 
 /// Opcode for the GetXIDRange request
 pub const GET_XID_RANGE_REQUEST: u8 = 1;
@@ -188,6 +222,44 @@ impl TryParse for GetXIDRangeReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for GetXIDRangeReply {
+    type Bytes = [u8; 16];
+    fn serialize(&self) -> [u8; 16] {
+        let response_type_bytes = &[1];
+        let sequence_bytes = self.sequence.serialize();
+        let length_bytes = self.length.serialize();
+        let start_id_bytes = self.start_id.serialize();
+        let count_bytes = self.count.serialize();
+        [
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            length_bytes[0],
+            length_bytes[1],
+            length_bytes[2],
+            length_bytes[3],
+            start_id_bytes[0],
+            start_id_bytes[1],
+            start_id_bytes[2],
+            start_id_bytes[3],
+            count_bytes[0],
+            count_bytes[1],
+            count_bytes[2],
+            count_bytes[3],
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(16);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.start_id.serialize_into(bytes);
+        self.count.serialize_into(bytes);
     }
 }
 
@@ -270,6 +342,26 @@ impl TryParse for GetXIDListReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for GetXIDListReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        let ids_len = u32::try_from(self.ids.len()).expect("`ids` has too many elements");
+        ids_len.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 20]);
+        self.ids.serialize_into(bytes);
     }
 }
 impl GetXIDListReply {

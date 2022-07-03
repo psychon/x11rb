@@ -151,6 +151,46 @@ impl TryParse for QueryVersionReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for QueryVersionReply {
+    type Bytes = [u8; 16];
+    fn serialize(&self) -> [u8; 16] {
+        let response_type_bytes = &[1];
+        let sequence_bytes = self.sequence.serialize();
+        let length_bytes = self.length.serialize();
+        let dri_major_version_bytes = self.dri_major_version.serialize();
+        let dri_minor_version_bytes = self.dri_minor_version.serialize();
+        let dri_minor_patch_bytes = self.dri_minor_patch.serialize();
+        [
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            length_bytes[0],
+            length_bytes[1],
+            length_bytes[2],
+            length_bytes[3],
+            dri_major_version_bytes[0],
+            dri_major_version_bytes[1],
+            dri_minor_version_bytes[0],
+            dri_minor_version_bytes[1],
+            dri_minor_patch_bytes[0],
+            dri_minor_patch_bytes[1],
+            dri_minor_patch_bytes[2],
+            dri_minor_patch_bytes[3],
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(16);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.dri_major_version.serialize_into(bytes);
+        self.dri_minor_version.serialize_into(bytes);
+        self.dri_minor_patch.serialize_into(bytes);
+    }
+}
 
 /// Opcode for the QueryDirectRenderingCapable request
 pub const QUERY_DIRECT_RENDERING_CAPABLE_REQUEST: u8 = 1;
@@ -229,6 +269,35 @@ impl TryParse for QueryDirectRenderingCapableReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for QueryDirectRenderingCapableReply {
+    type Bytes = [u8; 9];
+    fn serialize(&self) -> [u8; 9] {
+        let response_type_bytes = &[1];
+        let sequence_bytes = self.sequence.serialize();
+        let length_bytes = self.length.serialize();
+        let is_capable_bytes = self.is_capable.serialize();
+        [
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            length_bytes[0],
+            length_bytes[1],
+            length_bytes[2],
+            length_bytes[3],
+            is_capable_bytes[0],
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(9);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.is_capable.serialize_into(bytes);
     }
 }
 
@@ -316,6 +385,28 @@ impl TryParse for OpenConnectionReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for OpenConnectionReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.sarea_handle_low.serialize_into(bytes);
+        self.sarea_handle_high.serialize_into(bytes);
+        let bus_id_len = u32::try_from(self.bus_id.len()).expect("`bus_id` has too many elements");
+        bus_id_len.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 12]);
+        bytes.extend_from_slice(&self.bus_id);
     }
 }
 impl OpenConnectionReply {
@@ -475,6 +566,29 @@ impl TryParse for GetClientDriverNameReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for GetClientDriverNameReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.client_driver_major_version.serialize_into(bytes);
+        self.client_driver_minor_version.serialize_into(bytes);
+        self.client_driver_patch_version.serialize_into(bytes);
+        let client_driver_name_len = u32::try_from(self.client_driver_name.len()).expect("`client_driver_name` has too many elements");
+        client_driver_name_len.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 8]);
+        bytes.extend_from_slice(&self.client_driver_name);
+    }
+}
 impl GetClientDriverNameReply {
     /// Get the value of the `client_driver_name_len` field.
     ///
@@ -584,6 +698,38 @@ impl TryParse for CreateContextReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for CreateContextReply {
+    type Bytes = [u8; 12];
+    fn serialize(&self) -> [u8; 12] {
+        let response_type_bytes = &[1];
+        let sequence_bytes = self.sequence.serialize();
+        let length_bytes = self.length.serialize();
+        let hw_context_bytes = self.hw_context.serialize();
+        [
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            length_bytes[0],
+            length_bytes[1],
+            length_bytes[2],
+            length_bytes[3],
+            hw_context_bytes[0],
+            hw_context_bytes[1],
+            hw_context_bytes[2],
+            hw_context_bytes[3],
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(12);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.hw_context.serialize_into(bytes);
     }
 }
 
@@ -733,6 +879,38 @@ impl TryParse for CreateDrawableReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for CreateDrawableReply {
+    type Bytes = [u8; 12];
+    fn serialize(&self) -> [u8; 12] {
+        let response_type_bytes = &[1];
+        let sequence_bytes = self.sequence.serialize();
+        let length_bytes = self.length.serialize();
+        let hw_drawable_handle_bytes = self.hw_drawable_handle.serialize();
+        [
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            length_bytes[0],
+            length_bytes[1],
+            length_bytes[2],
+            length_bytes[3],
+            hw_drawable_handle_bytes[0],
+            hw_drawable_handle_bytes[1],
+            hw_drawable_handle_bytes[2],
+            hw_drawable_handle_bytes[3],
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(12);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.hw_drawable_handle.serialize_into(bytes);
     }
 }
 
@@ -904,6 +1082,36 @@ impl TryParse for GetDrawableInfoReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for GetDrawableInfoReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(36);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.drawable_table_index.serialize_into(bytes);
+        self.drawable_table_stamp.serialize_into(bytes);
+        self.drawable_origin_x.serialize_into(bytes);
+        self.drawable_origin_y.serialize_into(bytes);
+        self.drawable_size_w.serialize_into(bytes);
+        self.drawable_size_h.serialize_into(bytes);
+        let num_clip_rects = u32::try_from(self.clip_rects.len()).expect("`clip_rects` has too many elements");
+        num_clip_rects.serialize_into(bytes);
+        self.back_x.serialize_into(bytes);
+        self.back_y.serialize_into(bytes);
+        let num_back_clip_rects = u32::try_from(self.back_clip_rects.len()).expect("`back_clip_rects` has too many elements");
+        num_back_clip_rects.serialize_into(bytes);
+        self.clip_rects.serialize_into(bytes);
+        self.back_clip_rects.serialize_into(bytes);
+    }
+}
 impl GetDrawableInfoReply {
     /// Get the value of the `num_clip_rects` field.
     ///
@@ -1023,6 +1231,30 @@ impl TryParse for GetDeviceInfoReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for GetDeviceInfoReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.framebuffer_handle_low.serialize_into(bytes);
+        self.framebuffer_handle_high.serialize_into(bytes);
+        self.framebuffer_origin_offset.serialize_into(bytes);
+        self.framebuffer_size.serialize_into(bytes);
+        self.framebuffer_stride.serialize_into(bytes);
+        let device_private_size = u32::try_from(self.device_private.len()).expect("`device_private` has too many elements");
+        device_private_size.serialize_into(bytes);
+        self.device_private.serialize_into(bytes);
+    }
+}
 impl GetDeviceInfoReply {
     /// Get the value of the `device_private_size` field.
     ///
@@ -1124,6 +1356,38 @@ impl TryParse for AuthConnectionReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for AuthConnectionReply {
+    type Bytes = [u8; 12];
+    fn serialize(&self) -> [u8; 12] {
+        let response_type_bytes = &[1];
+        let sequence_bytes = self.sequence.serialize();
+        let length_bytes = self.length.serialize();
+        let authenticated_bytes = self.authenticated.serialize();
+        [
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            length_bytes[0],
+            length_bytes[1],
+            length_bytes[2],
+            length_bytes[3],
+            authenticated_bytes[0],
+            authenticated_bytes[1],
+            authenticated_bytes[2],
+            authenticated_bytes[3],
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(12);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.authenticated.serialize_into(bytes);
     }
 }
 

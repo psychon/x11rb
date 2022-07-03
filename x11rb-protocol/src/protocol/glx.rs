@@ -139,6 +139,74 @@ impl TryParse for PbufferClobberEvent {
         Ok((result, remaining))
     }
 }
+impl Serialize for PbufferClobberEvent {
+    type Bytes = [u8; 32];
+    fn serialize(&self) -> [u8; 32] {
+        let response_type_bytes = self.response_type.serialize();
+        let sequence_bytes = self.sequence.serialize();
+        let event_type_bytes = self.event_type.serialize();
+        let draw_type_bytes = self.draw_type.serialize();
+        let drawable_bytes = self.drawable.serialize();
+        let b_mask_bytes = self.b_mask.serialize();
+        let aux_buffer_bytes = self.aux_buffer.serialize();
+        let x_bytes = self.x.serialize();
+        let y_bytes = self.y.serialize();
+        let width_bytes = self.width.serialize();
+        let height_bytes = self.height.serialize();
+        let count_bytes = self.count.serialize();
+        [
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            event_type_bytes[0],
+            event_type_bytes[1],
+            draw_type_bytes[0],
+            draw_type_bytes[1],
+            drawable_bytes[0],
+            drawable_bytes[1],
+            drawable_bytes[2],
+            drawable_bytes[3],
+            b_mask_bytes[0],
+            b_mask_bytes[1],
+            b_mask_bytes[2],
+            b_mask_bytes[3],
+            aux_buffer_bytes[0],
+            aux_buffer_bytes[1],
+            x_bytes[0],
+            x_bytes[1],
+            y_bytes[0],
+            y_bytes[1],
+            width_bytes[0],
+            width_bytes[1],
+            height_bytes[0],
+            height_bytes[1],
+            count_bytes[0],
+            count_bytes[1],
+            0,
+            0,
+            0,
+            0,
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        self.response_type.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.event_type.serialize_into(bytes);
+        self.draw_type.serialize_into(bytes);
+        self.drawable.serialize_into(bytes);
+        self.b_mask.serialize_into(bytes);
+        self.aux_buffer.serialize_into(bytes);
+        self.x.serialize_into(bytes);
+        self.y.serialize_into(bytes);
+        self.width.serialize_into(bytes);
+        self.height.serialize_into(bytes);
+        self.count.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 4]);
+    }
+}
 impl From<&PbufferClobberEvent> for [u8; 32] {
     fn from(input: &PbufferClobberEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -229,6 +297,68 @@ impl TryParse for BufferSwapCompleteEvent {
         let remaining = initial_value.get(32..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for BufferSwapCompleteEvent {
+    type Bytes = [u8; 32];
+    fn serialize(&self) -> [u8; 32] {
+        let response_type_bytes = self.response_type.serialize();
+        let sequence_bytes = self.sequence.serialize();
+        let event_type_bytes = self.event_type.serialize();
+        let drawable_bytes = self.drawable.serialize();
+        let ust_hi_bytes = self.ust_hi.serialize();
+        let ust_lo_bytes = self.ust_lo.serialize();
+        let msc_hi_bytes = self.msc_hi.serialize();
+        let msc_lo_bytes = self.msc_lo.serialize();
+        let sbc_bytes = self.sbc.serialize();
+        [
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            event_type_bytes[0],
+            event_type_bytes[1],
+            0,
+            0,
+            drawable_bytes[0],
+            drawable_bytes[1],
+            drawable_bytes[2],
+            drawable_bytes[3],
+            ust_hi_bytes[0],
+            ust_hi_bytes[1],
+            ust_hi_bytes[2],
+            ust_hi_bytes[3],
+            ust_lo_bytes[0],
+            ust_lo_bytes[1],
+            ust_lo_bytes[2],
+            ust_lo_bytes[3],
+            msc_hi_bytes[0],
+            msc_hi_bytes[1],
+            msc_hi_bytes[2],
+            msc_hi_bytes[3],
+            msc_lo_bytes[0],
+            msc_lo_bytes[1],
+            msc_lo_bytes[2],
+            msc_lo_bytes[3],
+            sbc_bytes[0],
+            sbc_bytes[1],
+            sbc_bytes[2],
+            sbc_bytes[3],
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        self.response_type.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.event_type.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 2]);
+        self.drawable.serialize_into(bytes);
+        self.ust_hi.serialize_into(bytes);
+        self.ust_lo.serialize_into(bytes);
+        self.msc_hi.serialize_into(bytes);
+        self.msc_lo.serialize_into(bytes);
+        self.sbc.serialize_into(bytes);
     }
 }
 impl From<&BufferSwapCompleteEvent> for [u8; 32] {
@@ -778,6 +908,59 @@ impl TryParse for MakeCurrentReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for MakeCurrentReply {
+    type Bytes = [u8; 32];
+    fn serialize(&self) -> [u8; 32] {
+        let response_type_bytes = &[1];
+        let sequence_bytes = self.sequence.serialize();
+        let length_bytes = self.length.serialize();
+        let context_tag_bytes = self.context_tag.serialize();
+        [
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            length_bytes[0],
+            length_bytes[1],
+            length_bytes[2],
+            length_bytes[3],
+            context_tag_bytes[0],
+            context_tag_bytes[1],
+            context_tag_bytes[2],
+            context_tag_bytes[3],
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.context_tag.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 20]);
+    }
+}
 
 /// Opcode for the IsDirect request
 pub const IS_DIRECT_REQUEST: u8 = 6;
@@ -857,6 +1040,59 @@ impl TryParse for IsDirectReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for IsDirectReply {
+    type Bytes = [u8; 32];
+    fn serialize(&self) -> [u8; 32] {
+        let response_type_bytes = &[1];
+        let sequence_bytes = self.sequence.serialize();
+        let length_bytes = self.length.serialize();
+        let is_direct_bytes = self.is_direct.serialize();
+        [
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            length_bytes[0],
+            length_bytes[1],
+            length_bytes[2],
+            length_bytes[3],
+            is_direct_bytes[0],
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.is_direct.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 23]);
     }
 }
 
@@ -948,6 +1184,61 @@ impl TryParse for QueryVersionReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for QueryVersionReply {
+    type Bytes = [u8; 32];
+    fn serialize(&self) -> [u8; 32] {
+        let response_type_bytes = &[1];
+        let sequence_bytes = self.sequence.serialize();
+        let length_bytes = self.length.serialize();
+        let major_version_bytes = self.major_version.serialize();
+        let minor_version_bytes = self.minor_version.serialize();
+        [
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            length_bytes[0],
+            length_bytes[1],
+            length_bytes[2],
+            length_bytes[3],
+            major_version_bytes[0],
+            major_version_bytes[1],
+            major_version_bytes[2],
+            major_version_bytes[3],
+            minor_version_bytes[0],
+            minor_version_bytes[1],
+            minor_version_bytes[2],
+            minor_version_bytes[3],
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.major_version.serialize_into(bytes);
+        self.minor_version.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 16]);
     }
 }
 
@@ -1525,6 +1816,27 @@ impl TryParse for GetVisualConfigsReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for GetVisualConfigsReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        let length = u32::try_from(self.property_list.len()).expect("`property_list` has too many elements");
+        length.serialize_into(bytes);
+        self.num_visuals.serialize_into(bytes);
+        self.num_properties.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 16]);
+        self.property_list.serialize_into(bytes);
+    }
+}
 impl GetVisualConfigsReply {
     /// Get the value of the `length` field.
     ///
@@ -1775,6 +2087,27 @@ impl TryParse for VendorPrivateWithReplyReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for VendorPrivateWithReplyReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(36);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        assert_eq!(self.data2.len() % 4, 0, "`data2` has an incorrect length, must be a multiple of 4");
+        let length = u32::try_from(self.data2.len() / 4).expect("`data2` has too many elements");
+        length.serialize_into(bytes);
+        self.retval.serialize_into(bytes);
+        bytes.extend_from_slice(&self.data1);
+        bytes.extend_from_slice(&self.data2);
+    }
+}
 impl VendorPrivateWithReplyReply {
     /// Get the value of the `length` field.
     ///
@@ -1873,6 +2206,60 @@ impl TryParse for QueryExtensionsStringReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for QueryExtensionsStringReply {
+    type Bytes = [u8; 32];
+    fn serialize(&self) -> [u8; 32] {
+        let response_type_bytes = &[1];
+        let sequence_bytes = self.sequence.serialize();
+        let length_bytes = self.length.serialize();
+        let n_bytes = self.n.serialize();
+        [
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            length_bytes[0],
+            length_bytes[1],
+            length_bytes[2],
+            length_bytes[3],
+            0,
+            0,
+            0,
+            0,
+            n_bytes[0],
+            n_bytes[1],
+            n_bytes[2],
+            n_bytes[3],
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 4]);
+        self.n.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 16]);
+    }
+}
 
 /// Opcode for the QueryServerString request
 pub const QUERY_SERVER_STRING_REQUEST: u8 = 19;
@@ -1963,6 +2350,27 @@ impl TryParse for QueryServerStringReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for QueryServerStringReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 4]);
+        let str_len = u32::try_from(self.string.len()).expect("`string` has too many elements");
+        str_len.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 16]);
+        bytes.extend_from_slice(&self.string);
     }
 }
 impl QueryServerStringReply {
@@ -2144,6 +2552,27 @@ impl TryParse for GetFBConfigsReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for GetFBConfigsReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        let length = u32::try_from(self.property_list.len()).expect("`property_list` has too many elements");
+        length.serialize_into(bytes);
+        self.num_fb_configs.serialize_into(bytes);
+        self.num_properties.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 16]);
+        self.property_list.serialize_into(bytes);
     }
 }
 impl GetFBConfigsReply {
@@ -2492,6 +2921,27 @@ impl TryParse for QueryContextReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for QueryContextReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        assert_eq!(self.attribs.len() % 2, 0, "`attribs` has an incorrect length, must be a multiple of 2");
+        let num_attribs = u32::try_from(self.attribs.len() / 2).expect("`attribs` has too many elements");
+        num_attribs.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 20]);
+        self.attribs.serialize_into(bytes);
+    }
+}
 impl QueryContextReply {
     /// Get the value of the `num_attribs` field.
     ///
@@ -2611,6 +3061,59 @@ impl TryParse for MakeContextCurrentReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for MakeContextCurrentReply {
+    type Bytes = [u8; 32];
+    fn serialize(&self) -> [u8; 32] {
+        let response_type_bytes = &[1];
+        let sequence_bytes = self.sequence.serialize();
+        let length_bytes = self.length.serialize();
+        let context_tag_bytes = self.context_tag.serialize();
+        [
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            length_bytes[0],
+            length_bytes[1],
+            length_bytes[2],
+            length_bytes[3],
+            context_tag_bytes[0],
+            context_tag_bytes[1],
+            context_tag_bytes[2],
+            context_tag_bytes[3],
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.context_tag.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 20]);
     }
 }
 
@@ -2839,6 +3342,27 @@ impl TryParse for GetDrawableAttributesReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for GetDrawableAttributesReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        assert_eq!(self.attribs.len() % 2, 0, "`attribs` has an incorrect length, must be a multiple of 2");
+        let num_attribs = u32::try_from(self.attribs.len() / 2).expect("`attribs` has too many elements");
+        num_attribs.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 20]);
+        self.attribs.serialize_into(bytes);
     }
 }
 impl GetDrawableAttributesReply {
@@ -3694,6 +4218,38 @@ impl TryParse for GenListsReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for GenListsReply {
+    type Bytes = [u8; 12];
+    fn serialize(&self) -> [u8; 12] {
+        let response_type_bytes = &[1];
+        let sequence_bytes = self.sequence.serialize();
+        let length_bytes = self.length.serialize();
+        let ret_val_bytes = self.ret_val.serialize();
+        [
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            length_bytes[0],
+            length_bytes[1],
+            length_bytes[2],
+            length_bytes[3],
+            ret_val_bytes[0],
+            ret_val_bytes[1],
+            ret_val_bytes[2],
+            ret_val_bytes[3],
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(12);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.ret_val.serialize_into(bytes);
+    }
+}
 
 /// Opcode for the FeedbackBuffer request
 pub const FEEDBACK_BUFFER_REQUEST: u8 = 105;
@@ -3918,6 +4474,28 @@ impl TryParse for RenderModeReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for RenderModeReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.ret_val.serialize_into(bytes);
+        let n = u32::try_from(self.data.len()).expect("`data` has too many elements");
+        n.serialize_into(bytes);
+        self.new_mode.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 12]);
+        self.data.serialize_into(bytes);
+    }
+}
 impl RenderModeReply {
     /// Get the value of the `n` field.
     ///
@@ -4064,6 +4642,32 @@ impl TryParse for FinishReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for FinishReply {
+    type Bytes = [u8; 8];
+    fn serialize(&self) -> [u8; 8] {
+        let response_type_bytes = &[1];
+        let sequence_bytes = self.sequence.serialize();
+        let length_bytes = self.length.serialize();
+        [
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            length_bytes[0],
+            length_bytes[1],
+            length_bytes[2],
+            length_bytes[3],
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(8);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
     }
 }
 
@@ -4345,6 +4949,26 @@ impl TryParse for ReadPixelsReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for ReadPixelsReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        assert_eq!(self.data.len() % 4, 0, "`data` has an incorrect length, must be a multiple of 4");
+        let length = u32::try_from(self.data.len() / 4).expect("`data` has too many elements");
+        length.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 24]);
+        bytes.extend_from_slice(&self.data);
+    }
+}
 impl ReadPixelsReply {
     /// Get the value of the `length` field.
     ///
@@ -4454,6 +5078,28 @@ impl TryParse for GetBooleanvReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for GetBooleanvReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 4]);
+        let n = u32::try_from(self.data.len()).expect("`data` has too many elements");
+        n.serialize_into(bytes);
+        self.datum.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 15]);
+        self.data.serialize_into(bytes);
+    }
+}
 impl GetBooleanvReply {
     /// Get the value of the `n` field.
     ///
@@ -4555,6 +5201,25 @@ impl TryParse for GetClipPlaneReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for GetClipPlaneReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        let length = u32::try_from(self.data.len()).ok().and_then(|len| len.checked_mul(2)).expect("`data` has too many elements");
+        length.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 24]);
+        self.data.serialize_into(bytes);
     }
 }
 impl GetClipPlaneReply {
@@ -4666,6 +5331,28 @@ impl TryParse for GetDoublevReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for GetDoublevReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 4]);
+        let n = u32::try_from(self.data.len()).expect("`data` has too many elements");
+        n.serialize_into(bytes);
+        self.datum.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 8]);
+        self.data.serialize_into(bytes);
+    }
+}
 impl GetDoublevReply {
     /// Get the value of the `n` field.
     ///
@@ -4761,6 +5448,38 @@ impl TryParse for GetErrorReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for GetErrorReply {
+    type Bytes = [u8; 12];
+    fn serialize(&self) -> [u8; 12] {
+        let response_type_bytes = &[1];
+        let sequence_bytes = self.sequence.serialize();
+        let length_bytes = self.length.serialize();
+        let error_bytes = self.error.serialize();
+        [
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            length_bytes[0],
+            length_bytes[1],
+            length_bytes[2],
+            length_bytes[3],
+            error_bytes[0],
+            error_bytes[1],
+            error_bytes[2],
+            error_bytes[3],
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(12);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.error.serialize_into(bytes);
+    }
+}
 
 /// Opcode for the GetFloatv request
 pub const GET_FLOATV_REQUEST: u8 = 116;
@@ -4852,6 +5571,28 @@ impl TryParse for GetFloatvReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for GetFloatvReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 4]);
+        let n = u32::try_from(self.data.len()).expect("`data` has too many elements");
+        n.serialize_into(bytes);
+        self.datum.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 12]);
+        self.data.serialize_into(bytes);
     }
 }
 impl GetFloatvReply {
@@ -4960,6 +5701,28 @@ impl TryParse for GetIntegervReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for GetIntegervReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 4]);
+        let n = u32::try_from(self.data.len()).expect("`data` has too many elements");
+        n.serialize_into(bytes);
+        self.datum.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 12]);
+        self.data.serialize_into(bytes);
     }
 }
 impl GetIntegervReply {
@@ -5078,6 +5841,28 @@ impl TryParse for GetLightfvReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for GetLightfvReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 4]);
+        let n = u32::try_from(self.data.len()).expect("`data` has too many elements");
+        n.serialize_into(bytes);
+        self.datum.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 12]);
+        self.data.serialize_into(bytes);
+    }
+}
 impl GetLightfvReply {
     /// Get the value of the `n` field.
     ///
@@ -5192,6 +5977,28 @@ impl TryParse for GetLightivReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for GetLightivReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 4]);
+        let n = u32::try_from(self.data.len()).expect("`data` has too many elements");
+        n.serialize_into(bytes);
+        self.datum.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 12]);
+        self.data.serialize_into(bytes);
     }
 }
 impl GetLightivReply {
@@ -5310,6 +6117,28 @@ impl TryParse for GetMapdvReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for GetMapdvReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 4]);
+        let n = u32::try_from(self.data.len()).expect("`data` has too many elements");
+        n.serialize_into(bytes);
+        self.datum.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 8]);
+        self.data.serialize_into(bytes);
+    }
+}
 impl GetMapdvReply {
     /// Get the value of the `n` field.
     ///
@@ -5424,6 +6253,28 @@ impl TryParse for GetMapfvReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for GetMapfvReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 4]);
+        let n = u32::try_from(self.data.len()).expect("`data` has too many elements");
+        n.serialize_into(bytes);
+        self.datum.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 12]);
+        self.data.serialize_into(bytes);
     }
 }
 impl GetMapfvReply {
@@ -5542,6 +6393,28 @@ impl TryParse for GetMapivReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for GetMapivReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 4]);
+        let n = u32::try_from(self.data.len()).expect("`data` has too many elements");
+        n.serialize_into(bytes);
+        self.datum.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 12]);
+        self.data.serialize_into(bytes);
+    }
+}
 impl GetMapivReply {
     /// Get the value of the `n` field.
     ///
@@ -5656,6 +6529,28 @@ impl TryParse for GetMaterialfvReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for GetMaterialfvReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 4]);
+        let n = u32::try_from(self.data.len()).expect("`data` has too many elements");
+        n.serialize_into(bytes);
+        self.datum.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 12]);
+        self.data.serialize_into(bytes);
     }
 }
 impl GetMaterialfvReply {
@@ -5774,6 +6669,28 @@ impl TryParse for GetMaterialivReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for GetMaterialivReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 4]);
+        let n = u32::try_from(self.data.len()).expect("`data` has too many elements");
+        n.serialize_into(bytes);
+        self.datum.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 12]);
+        self.data.serialize_into(bytes);
+    }
+}
 impl GetMaterialivReply {
     /// Get the value of the `n` field.
     ///
@@ -5880,6 +6797,28 @@ impl TryParse for GetPixelMapfvReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for GetPixelMapfvReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 4]);
+        let n = u32::try_from(self.data.len()).expect("`data` has too many elements");
+        n.serialize_into(bytes);
+        self.datum.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 12]);
+        self.data.serialize_into(bytes);
     }
 }
 impl GetPixelMapfvReply {
@@ -5990,6 +6929,28 @@ impl TryParse for GetPixelMapuivReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for GetPixelMapuivReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 4]);
+        let n = u32::try_from(self.data.len()).expect("`data` has too many elements");
+        n.serialize_into(bytes);
+        self.datum.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 12]);
+        self.data.serialize_into(bytes);
+    }
+}
 impl GetPixelMapuivReply {
     /// Get the value of the `n` field.
     ///
@@ -6098,6 +7059,28 @@ impl TryParse for GetPixelMapusvReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for GetPixelMapusvReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(34);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 4]);
+        let n = u32::try_from(self.data.len()).expect("`data` has too many elements");
+        n.serialize_into(bytes);
+        self.datum.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 16]);
+        self.data.serialize_into(bytes);
+    }
+}
 impl GetPixelMapusvReply {
     /// Get the value of the `n` field.
     ///
@@ -6200,6 +7183,26 @@ impl TryParse for GetPolygonStippleReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for GetPolygonStippleReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        assert_eq!(self.data.len() % 4, 0, "`data` has an incorrect length, must be a multiple of 4");
+        let length = u32::try_from(self.data.len() / 4).expect("`data` has too many elements");
+        length.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 24]);
+        bytes.extend_from_slice(&self.data);
     }
 }
 impl GetPolygonStippleReply {
@@ -6308,6 +7311,27 @@ impl TryParse for GetStringReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for GetStringReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 4]);
+        let n = u32::try_from(self.string.len()).expect("`string` has too many elements");
+        n.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 16]);
+        bytes.extend_from_slice(&self.string);
     }
 }
 impl GetStringReply {
@@ -6426,6 +7450,28 @@ impl TryParse for GetTexEnvfvReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for GetTexEnvfvReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 4]);
+        let n = u32::try_from(self.data.len()).expect("`data` has too many elements");
+        n.serialize_into(bytes);
+        self.datum.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 12]);
+        self.data.serialize_into(bytes);
+    }
+}
 impl GetTexEnvfvReply {
     /// Get the value of the `n` field.
     ///
@@ -6540,6 +7586,28 @@ impl TryParse for GetTexEnvivReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for GetTexEnvivReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 4]);
+        let n = u32::try_from(self.data.len()).expect("`data` has too many elements");
+        n.serialize_into(bytes);
+        self.datum.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 12]);
+        self.data.serialize_into(bytes);
     }
 }
 impl GetTexEnvivReply {
@@ -6658,6 +7726,28 @@ impl TryParse for GetTexGendvReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for GetTexGendvReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 4]);
+        let n = u32::try_from(self.data.len()).expect("`data` has too many elements");
+        n.serialize_into(bytes);
+        self.datum.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 8]);
+        self.data.serialize_into(bytes);
+    }
+}
 impl GetTexGendvReply {
     /// Get the value of the `n` field.
     ///
@@ -6774,6 +7864,28 @@ impl TryParse for GetTexGenfvReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for GetTexGenfvReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 4]);
+        let n = u32::try_from(self.data.len()).expect("`data` has too many elements");
+        n.serialize_into(bytes);
+        self.datum.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 12]);
+        self.data.serialize_into(bytes);
+    }
+}
 impl GetTexGenfvReply {
     /// Get the value of the `n` field.
     ///
@@ -6888,6 +8000,28 @@ impl TryParse for GetTexGenivReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for GetTexGenivReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 4]);
+        let n = u32::try_from(self.data.len()).expect("`data` has too many elements");
+        n.serialize_into(bytes);
+        self.datum.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 12]);
+        self.data.serialize_into(bytes);
     }
 }
 impl GetTexGenivReply {
@@ -7033,6 +8167,30 @@ impl TryParse for GetTexImageReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for GetTexImageReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        assert_eq!(self.data.len() % 4, 0, "`data` has an incorrect length, must be a multiple of 4");
+        let length = u32::try_from(self.data.len() / 4).expect("`data` has too many elements");
+        length.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 8]);
+        self.width.serialize_into(bytes);
+        self.height.serialize_into(bytes);
+        self.depth.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 4]);
+        bytes.extend_from_slice(&self.data);
+    }
+}
 impl GetTexImageReply {
     /// Get the value of the `length` field.
     ///
@@ -7150,6 +8308,28 @@ impl TryParse for GetTexParameterfvReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for GetTexParameterfvReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 4]);
+        let n = u32::try_from(self.data.len()).expect("`data` has too many elements");
+        n.serialize_into(bytes);
+        self.datum.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 12]);
+        self.data.serialize_into(bytes);
+    }
+}
 impl GetTexParameterfvReply {
     /// Get the value of the `n` field.
     ///
@@ -7264,6 +8444,28 @@ impl TryParse for GetTexParameterivReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for GetTexParameterivReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 4]);
+        let n = u32::try_from(self.data.len()).expect("`data` has too many elements");
+        n.serialize_into(bytes);
+        self.datum.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 12]);
+        self.data.serialize_into(bytes);
     }
 }
 impl GetTexParameterivReply {
@@ -7390,6 +8592,28 @@ impl TryParse for GetTexLevelParameterfvReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for GetTexLevelParameterfvReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 4]);
+        let n = u32::try_from(self.data.len()).expect("`data` has too many elements");
+        n.serialize_into(bytes);
+        self.datum.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 12]);
+        self.data.serialize_into(bytes);
+    }
+}
 impl GetTexLevelParameterfvReply {
     /// Get the value of the `n` field.
     ///
@@ -7514,6 +8738,28 @@ impl TryParse for GetTexLevelParameterivReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for GetTexLevelParameterivReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 4]);
+        let n = u32::try_from(self.data.len()).expect("`data` has too many elements");
+        n.serialize_into(bytes);
+        self.datum.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 12]);
+        self.data.serialize_into(bytes);
+    }
+}
 impl GetTexLevelParameterivReply {
     /// Get the value of the `n` field.
     ///
@@ -7617,6 +8863,38 @@ impl TryParse for IsEnabledReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for IsEnabledReply {
+    type Bytes = [u8; 12];
+    fn serialize(&self) -> [u8; 12] {
+        let response_type_bytes = &[1];
+        let sequence_bytes = self.sequence.serialize();
+        let length_bytes = self.length.serialize();
+        let ret_val_bytes = self.ret_val.serialize();
+        [
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            length_bytes[0],
+            length_bytes[1],
+            length_bytes[2],
+            length_bytes[3],
+            ret_val_bytes[0],
+            ret_val_bytes[1],
+            ret_val_bytes[2],
+            ret_val_bytes[3],
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(12);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.ret_val.serialize_into(bytes);
+    }
+}
 
 /// Opcode for the IsList request
 pub const IS_LIST_REQUEST: u8 = 141;
@@ -7703,6 +8981,38 @@ impl TryParse for IsListReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for IsListReply {
+    type Bytes = [u8; 12];
+    fn serialize(&self) -> [u8; 12] {
+        let response_type_bytes = &[1];
+        let sequence_bytes = self.sequence.serialize();
+        let length_bytes = self.length.serialize();
+        let ret_val_bytes = self.ret_val.serialize();
+        [
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            length_bytes[0],
+            length_bytes[1],
+            length_bytes[2],
+            length_bytes[3],
+            ret_val_bytes[0],
+            ret_val_bytes[1],
+            ret_val_bytes[2],
+            ret_val_bytes[3],
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(12);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.ret_val.serialize_into(bytes);
     }
 }
 
@@ -7859,6 +9169,27 @@ impl TryParse for AreTexturesResidentReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for AreTexturesResidentReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        assert_eq!(self.data.len() % 4, 0, "`data` has an incorrect length, must be a multiple of 4");
+        let length = u32::try_from(self.data.len() / 4).expect("`data` has too many elements");
+        length.serialize_into(bytes);
+        self.ret_val.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 20]);
+        self.data.serialize_into(bytes);
     }
 }
 impl AreTexturesResidentReply {
@@ -8039,6 +9370,25 @@ impl TryParse for GenTexturesReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for GenTexturesReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        let length = u32::try_from(self.data.len()).expect("`data` has too many elements");
+        length.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 24]);
+        self.data.serialize_into(bytes);
+    }
+}
 impl GenTexturesReply {
     /// Get the value of the `length` field.
     ///
@@ -8140,6 +9490,38 @@ impl TryParse for IsTextureReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for IsTextureReply {
+    type Bytes = [u8; 12];
+    fn serialize(&self) -> [u8; 12] {
+        let response_type_bytes = &[1];
+        let sequence_bytes = self.sequence.serialize();
+        let length_bytes = self.length.serialize();
+        let ret_val_bytes = self.ret_val.serialize();
+        [
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            length_bytes[0],
+            length_bytes[1],
+            length_bytes[2],
+            length_bytes[3],
+            ret_val_bytes[0],
+            ret_val_bytes[1],
+            ret_val_bytes[2],
+            ret_val_bytes[3],
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(12);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.ret_val.serialize_into(bytes);
     }
 }
 
@@ -8256,6 +9638,28 @@ impl TryParse for GetColorTableReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for GetColorTableReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        assert_eq!(self.data.len() % 4, 0, "`data` has an incorrect length, must be a multiple of 4");
+        let length = u32::try_from(self.data.len() / 4).expect("`data` has too many elements");
+        length.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 8]);
+        self.width.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 12]);
+        bytes.extend_from_slice(&self.data);
     }
 }
 impl GetColorTableReply {
@@ -8375,6 +9779,28 @@ impl TryParse for GetColorTableParameterfvReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for GetColorTableParameterfvReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 4]);
+        let n = u32::try_from(self.data.len()).expect("`data` has too many elements");
+        n.serialize_into(bytes);
+        self.datum.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 12]);
+        self.data.serialize_into(bytes);
+    }
+}
 impl GetColorTableParameterfvReply {
     /// Get the value of the `n` field.
     ///
@@ -8489,6 +9915,28 @@ impl TryParse for GetColorTableParameterivReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for GetColorTableParameterivReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 4]);
+        let n = u32::try_from(self.data.len()).expect("`data` has too many elements");
+        n.serialize_into(bytes);
+        self.datum.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 12]);
+        self.data.serialize_into(bytes);
     }
 }
 impl GetColorTableParameterivReply {
@@ -8624,6 +10072,29 @@ impl TryParse for GetConvolutionFilterReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for GetConvolutionFilterReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        assert_eq!(self.data.len() % 4, 0, "`data` has an incorrect length, must be a multiple of 4");
+        let length = u32::try_from(self.data.len() / 4).expect("`data` has too many elements");
+        length.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 8]);
+        self.width.serialize_into(bytes);
+        self.height.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 8]);
+        bytes.extend_from_slice(&self.data);
+    }
+}
 impl GetConvolutionFilterReply {
     /// Get the value of the `length` field.
     ///
@@ -8741,6 +10212,28 @@ impl TryParse for GetConvolutionParameterfvReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for GetConvolutionParameterfvReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 4]);
+        let n = u32::try_from(self.data.len()).expect("`data` has too many elements");
+        n.serialize_into(bytes);
+        self.datum.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 12]);
+        self.data.serialize_into(bytes);
+    }
+}
 impl GetConvolutionParameterfvReply {
     /// Get the value of the `n` field.
     ///
@@ -8855,6 +10348,28 @@ impl TryParse for GetConvolutionParameterivReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for GetConvolutionParameterivReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 4]);
+        let n = u32::try_from(self.data.len()).expect("`data` has too many elements");
+        n.serialize_into(bytes);
+        self.datum.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 12]);
+        self.data.serialize_into(bytes);
     }
 }
 impl GetConvolutionParameterivReply {
@@ -8988,6 +10503,29 @@ impl TryParse for GetSeparableFilterReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for GetSeparableFilterReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        assert_eq!(self.rows_and_cols.len() % 4, 0, "`rows_and_cols` has an incorrect length, must be a multiple of 4");
+        let length = u32::try_from(self.rows_and_cols.len() / 4).expect("`rows_and_cols` has too many elements");
+        length.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 8]);
+        self.row_w.serialize_into(bytes);
+        self.col_h.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 8]);
+        bytes.extend_from_slice(&self.rows_and_cols);
     }
 }
 impl GetSeparableFilterReply {
@@ -9126,6 +10664,28 @@ impl TryParse for GetHistogramReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for GetHistogramReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        assert_eq!(self.data.len() % 4, 0, "`data` has an incorrect length, must be a multiple of 4");
+        let length = u32::try_from(self.data.len() / 4).expect("`data` has too many elements");
+        length.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 8]);
+        self.width.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 12]);
+        bytes.extend_from_slice(&self.data);
+    }
+}
 impl GetHistogramReply {
     /// Get the value of the `length` field.
     ///
@@ -9243,6 +10803,28 @@ impl TryParse for GetHistogramParameterfvReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for GetHistogramParameterfvReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 4]);
+        let n = u32::try_from(self.data.len()).expect("`data` has too many elements");
+        n.serialize_into(bytes);
+        self.datum.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 12]);
+        self.data.serialize_into(bytes);
+    }
+}
 impl GetHistogramParameterfvReply {
     /// Get the value of the `n` field.
     ///
@@ -9357,6 +10939,28 @@ impl TryParse for GetHistogramParameterivReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for GetHistogramParameterivReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 4]);
+        let n = u32::try_from(self.data.len()).expect("`data` has too many elements");
+        n.serialize_into(bytes);
+        self.datum.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 12]);
+        self.data.serialize_into(bytes);
     }
 }
 impl GetHistogramParameterivReply {
@@ -9491,6 +11095,26 @@ impl TryParse for GetMinmaxReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for GetMinmaxReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        assert_eq!(self.data.len() % 4, 0, "`data` has an incorrect length, must be a multiple of 4");
+        let length = u32::try_from(self.data.len() / 4).expect("`data` has too many elements");
+        length.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 24]);
+        bytes.extend_from_slice(&self.data);
+    }
+}
 impl GetMinmaxReply {
     /// Get the value of the `length` field.
     ///
@@ -9606,6 +11230,28 @@ impl TryParse for GetMinmaxParameterfvReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for GetMinmaxParameterfvReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 4]);
+        let n = u32::try_from(self.data.len()).expect("`data` has too many elements");
+        n.serialize_into(bytes);
+        self.datum.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 12]);
+        self.data.serialize_into(bytes);
     }
 }
 impl GetMinmaxParameterfvReply {
@@ -9724,6 +11370,28 @@ impl TryParse for GetMinmaxParameterivReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for GetMinmaxParameterivReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 4]);
+        let n = u32::try_from(self.data.len()).expect("`data` has too many elements");
+        n.serialize_into(bytes);
+        self.datum.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 12]);
+        self.data.serialize_into(bytes);
+    }
+}
 impl GetMinmaxParameterivReply {
     /// Get the value of the `n` field.
     ///
@@ -9837,6 +11505,28 @@ impl TryParse for GetCompressedTexImageARBReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for GetCompressedTexImageARBReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        assert_eq!(self.data.len() % 4, 0, "`data` has an incorrect length, must be a multiple of 4");
+        let length = u32::try_from(self.data.len() / 4).expect("`data` has too many elements");
+        length.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 8]);
+        self.size.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 12]);
+        bytes.extend_from_slice(&self.data);
     }
 }
 impl GetCompressedTexImageARBReply {
@@ -10017,6 +11707,25 @@ impl TryParse for GenQueriesARBReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for GenQueriesARBReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        let length = u32::try_from(self.data.len()).expect("`data` has too many elements");
+        length.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 24]);
+        self.data.serialize_into(bytes);
+    }
+}
 impl GenQueriesARBReply {
     /// Get the value of the `length` field.
     ///
@@ -10120,6 +11829,38 @@ impl TryParse for IsQueryARBReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for IsQueryARBReply {
+    type Bytes = [u8; 12];
+    fn serialize(&self) -> [u8; 12] {
+        let response_type_bytes = &[1];
+        let sequence_bytes = self.sequence.serialize();
+        let length_bytes = self.length.serialize();
+        let ret_val_bytes = self.ret_val.serialize();
+        [
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            length_bytes[0],
+            length_bytes[1],
+            length_bytes[2],
+            length_bytes[3],
+            ret_val_bytes[0],
+            ret_val_bytes[1],
+            ret_val_bytes[2],
+            ret_val_bytes[3],
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(12);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.ret_val.serialize_into(bytes);
+    }
+}
 
 /// Opcode for the GetQueryivARB request
 pub const GET_QUERYIV_ARB_REQUEST: u8 = 164;
@@ -10219,6 +11960,28 @@ impl TryParse for GetQueryivARBReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for GetQueryivARBReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 4]);
+        let n = u32::try_from(self.data.len()).expect("`data` has too many elements");
+        n.serialize_into(bytes);
+        self.datum.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 12]);
+        self.data.serialize_into(bytes);
     }
 }
 impl GetQueryivARBReply {
@@ -10337,6 +12100,28 @@ impl TryParse for GetQueryObjectivARBReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for GetQueryObjectivARBReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 4]);
+        let n = u32::try_from(self.data.len()).expect("`data` has too many elements");
+        n.serialize_into(bytes);
+        self.datum.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 12]);
+        self.data.serialize_into(bytes);
+    }
+}
 impl GetQueryObjectivARBReply {
     /// Get the value of the `n` field.
     ///
@@ -10451,6 +12236,28 @@ impl TryParse for GetQueryObjectuivARBReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for GetQueryObjectuivARBReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 4]);
+        let n = u32::try_from(self.data.len()).expect("`data` has too many elements");
+        n.serialize_into(bytes);
+        self.datum.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 12]);
+        self.data.serialize_into(bytes);
     }
 }
 impl GetQueryObjectuivARBReply {

@@ -477,6 +477,40 @@ impl TryParse for QueryVersionReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for QueryVersionReply {
+    type Bytes = [u8; 12];
+    fn serialize(&self) -> [u8; 12] {
+        let response_type_bytes = &[1];
+        let sequence_bytes = self.sequence.serialize();
+        let length_bytes = self.length.serialize();
+        let server_major_bytes = self.server_major.serialize();
+        let server_minor_bytes = self.server_minor.serialize();
+        [
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            length_bytes[0],
+            length_bytes[1],
+            length_bytes[2],
+            length_bytes[3],
+            server_major_bytes[0],
+            server_major_bytes[1],
+            server_minor_bytes[0],
+            server_minor_bytes[1],
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(12);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.server_major.serialize_into(bytes);
+        self.server_minor.serialize_into(bytes);
+    }
+}
 
 /// Opcode for the QueryClients request
 pub const QUERY_CLIENTS_REQUEST: u8 = 1;
@@ -548,6 +582,26 @@ impl TryParse for QueryClientsReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for QueryClientsReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        let num_clients = u32::try_from(self.clients.len()).expect("`clients` has too many elements");
+        num_clients.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 20]);
+        self.clients.serialize_into(bytes);
     }
 }
 impl QueryClientsReply {
@@ -647,6 +701,26 @@ impl TryParse for QueryClientResourcesReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for QueryClientResourcesReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        let num_types = u32::try_from(self.types.len()).expect("`types` has too many elements");
+        num_types.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 20]);
+        self.types.serialize_into(bytes);
+    }
+}
 impl QueryClientResourcesReply {
     /// Get the value of the `num_types` field.
     ///
@@ -744,6 +818,44 @@ impl TryParse for QueryClientPixmapBytesReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for QueryClientPixmapBytesReply {
+    type Bytes = [u8; 16];
+    fn serialize(&self) -> [u8; 16] {
+        let response_type_bytes = &[1];
+        let sequence_bytes = self.sequence.serialize();
+        let length_bytes = self.length.serialize();
+        let bytes_bytes = self.bytes.serialize();
+        let bytes_overflow_bytes = self.bytes_overflow.serialize();
+        [
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            length_bytes[0],
+            length_bytes[1],
+            length_bytes[2],
+            length_bytes[3],
+            bytes_bytes[0],
+            bytes_bytes[1],
+            bytes_bytes[2],
+            bytes_bytes[3],
+            bytes_overflow_bytes[0],
+            bytes_overflow_bytes[1],
+            bytes_overflow_bytes[2],
+            bytes_overflow_bytes[3],
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(16);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.bytes.serialize_into(bytes);
+        self.bytes_overflow.serialize_into(bytes);
+    }
+}
 
 /// Opcode for the QueryClientIds request
 pub const QUERY_CLIENT_IDS_REQUEST: u8 = 4;
@@ -836,6 +948,26 @@ impl TryParse for QueryClientIdsReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for QueryClientIdsReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        let num_ids = u32::try_from(self.ids.len()).expect("`ids` has too many elements");
+        num_ids.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 20]);
+        self.ids.serialize_into(bytes);
     }
 }
 impl QueryClientIdsReply {
@@ -954,6 +1086,26 @@ impl TryParse for QueryResourceBytesReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for QueryResourceBytesReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        let num_sizes = u32::try_from(self.sizes.len()).expect("`sizes` has too many elements");
+        num_sizes.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 20]);
+        self.sizes.serialize_into(bytes);
     }
 }
 impl QueryResourceBytesReply {

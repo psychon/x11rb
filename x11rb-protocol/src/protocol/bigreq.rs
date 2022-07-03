@@ -102,4 +102,36 @@ impl TryParse for EnableReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for EnableReply {
+    type Bytes = [u8; 12];
+    fn serialize(&self) -> [u8; 12] {
+        let response_type_bytes = &[1];
+        let sequence_bytes = self.sequence.serialize();
+        let length_bytes = self.length.serialize();
+        let maximum_request_length_bytes = self.maximum_request_length.serialize();
+        [
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            length_bytes[0],
+            length_bytes[1],
+            length_bytes[2],
+            length_bytes[3],
+            maximum_request_length_bytes[0],
+            maximum_request_length_bytes[1],
+            maximum_request_length_bytes[2],
+            maximum_request_length_bytes[3],
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(12);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.maximum_request_length.serialize_into(bytes);
+    }
+}
 

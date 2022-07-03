@@ -193,6 +193,44 @@ impl TryParse for QueryVersionReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for QueryVersionReply {
+    type Bytes = [u8; 16];
+    fn serialize(&self) -> [u8; 16] {
+        let response_type_bytes = &[1];
+        let sequence_bytes = self.sequence.serialize();
+        let length_bytes = self.length.serialize();
+        let major_bytes = self.major.serialize();
+        let minor_bytes = self.minor.serialize();
+        [
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            length_bytes[0],
+            length_bytes[1],
+            length_bytes[2],
+            length_bytes[3],
+            major_bytes[0],
+            major_bytes[1],
+            major_bytes[2],
+            major_bytes[3],
+            minor_bytes[0],
+            minor_bytes[1],
+            minor_bytes[2],
+            minor_bytes[3],
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(16);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.major.serialize_into(bytes);
+        self.minor.serialize_into(bytes);
+    }
+}
 
 /// Opcode for the ListSurfaceTypes request
 pub const LIST_SURFACE_TYPES_REQUEST: u8 = 1;
@@ -273,6 +311,26 @@ impl TryParse for ListSurfaceTypesReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for ListSurfaceTypesReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        let num = u32::try_from(self.surfaces.len()).expect("`surfaces` has too many elements");
+        num.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 20]);
+        self.surfaces.serialize_into(bytes);
     }
 }
 impl ListSurfaceTypesReply {
@@ -410,6 +468,28 @@ impl TryParse for CreateContextReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for CreateContextReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(36);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        let length = u32::try_from(self.priv_data.len()).expect("`priv_data` has too many elements");
+        length.serialize_into(bytes);
+        self.width_actual.serialize_into(bytes);
+        self.height_actual.serialize_into(bytes);
+        self.flags_return.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 20]);
+        self.priv_data.serialize_into(bytes);
     }
 }
 impl CreateContextReply {
@@ -566,6 +646,25 @@ impl TryParse for CreateSurfaceReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for CreateSurfaceReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        let length = u32::try_from(self.priv_data.len()).expect("`priv_data` has too many elements");
+        length.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 24]);
+        self.priv_data.serialize_into(bytes);
     }
 }
 impl CreateSurfaceReply {
@@ -755,6 +854,30 @@ impl TryParse for CreateSubpictureReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for CreateSubpictureReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        let length = u32::try_from(self.priv_data.len()).expect("`priv_data` has too many elements");
+        length.serialize_into(bytes);
+        self.width_actual.serialize_into(bytes);
+        self.height_actual.serialize_into(bytes);
+        self.num_palette_entries.serialize_into(bytes);
+        self.entry_bytes.serialize_into(bytes);
+        bytes.extend_from_slice(&self.component_order);
+        bytes.extend_from_slice(&[0; 12]);
+        self.priv_data.serialize_into(bytes);
+    }
+}
 impl CreateSubpictureReply {
     /// Get the value of the `length` field.
     ///
@@ -911,6 +1034,26 @@ impl TryParse for ListSubpictureTypesReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for ListSubpictureTypesReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        let num = u32::try_from(self.types.len()).expect("`types` has too many elements");
+        num.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 20]);
+        self.types.serialize_into(bytes);
     }
 }
 impl ListSubpictureTypesReply {

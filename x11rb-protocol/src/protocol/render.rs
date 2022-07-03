@@ -1347,6 +1347,61 @@ impl TryParse for QueryVersionReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for QueryVersionReply {
+    type Bytes = [u8; 32];
+    fn serialize(&self) -> [u8; 32] {
+        let response_type_bytes = &[1];
+        let sequence_bytes = self.sequence.serialize();
+        let length_bytes = self.length.serialize();
+        let major_version_bytes = self.major_version.serialize();
+        let minor_version_bytes = self.minor_version.serialize();
+        [
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            length_bytes[0],
+            length_bytes[1],
+            length_bytes[2],
+            length_bytes[3],
+            major_version_bytes[0],
+            major_version_bytes[1],
+            major_version_bytes[2],
+            major_version_bytes[3],
+            minor_version_bytes[0],
+            minor_version_bytes[1],
+            minor_version_bytes[2],
+            minor_version_bytes[3],
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.major_version.serialize_into(bytes);
+        self.minor_version.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 16]);
+    }
+}
 
 /// Opcode for the QueryPictFormats request
 pub const QUERY_PICT_FORMATS_REQUEST: u8 = 1;
@@ -1436,6 +1491,36 @@ impl TryParse for QueryPictFormatsReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for QueryPictFormatsReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        let num_formats = u32::try_from(self.formats.len()).expect("`formats` has too many elements");
+        num_formats.serialize_into(bytes);
+        let num_screens = u32::try_from(self.screens.len()).expect("`screens` has too many elements");
+        num_screens.serialize_into(bytes);
+        self.num_depths.serialize_into(bytes);
+        self.num_visuals.serialize_into(bytes);
+        let num_subpixel = u32::try_from(self.subpixels.len()).expect("`subpixels` has too many elements");
+        num_subpixel.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 4]);
+        self.formats.serialize_into(bytes);
+        self.screens.serialize_into(bytes);
+        for element in self.subpixels.iter().copied() {
+            u32::from(element).serialize_into(bytes);
+        }
     }
 }
 impl QueryPictFormatsReply {
@@ -1559,6 +1644,26 @@ impl TryParse for QueryPictIndexValuesReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for QueryPictIndexValuesReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        let num_values = u32::try_from(self.values.len()).expect("`values` has too many elements");
+        num_values.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 20]);
+        self.values.serialize_into(bytes);
     }
 }
 impl QueryPictIndexValuesReply {
@@ -1719,7 +1824,7 @@ impl CreatePictureAux {
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, value_mask: u32) {
-        assert_eq!(self.switch_expr(), value_mask, "switch `value_list` has an inconsistent discriminant");
+        let _ = value_mask;
         if let Some(repeat) = self.repeat {
             u32::from(repeat).serialize_into(bytes);
         }
@@ -2125,7 +2230,7 @@ impl ChangePictureAux {
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, value_mask: u32) {
-        assert_eq!(self.switch_expr(), value_mask, "switch `value_list` has an inconsistent discriminant");
+        let _ = value_mask;
         if let Some(repeat) = self.repeat {
             u32::from(repeat).serialize_into(bytes);
         }
@@ -4235,6 +4340,29 @@ impl TryParse for QueryFiltersReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for QueryFiltersReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        let num_aliases = u32::try_from(self.aliases.len()).expect("`aliases` has too many elements");
+        num_aliases.serialize_into(bytes);
+        let num_filters = u32::try_from(self.filters.len()).expect("`filters` has too many elements");
+        num_filters.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 16]);
+        self.aliases.serialize_into(bytes);
+        self.filters.serialize_into(bytes);
     }
 }
 impl QueryFiltersReply {

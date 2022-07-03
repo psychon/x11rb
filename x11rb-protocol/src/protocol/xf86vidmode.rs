@@ -423,6 +423,40 @@ impl TryParse for QueryVersionReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for QueryVersionReply {
+    type Bytes = [u8; 12];
+    fn serialize(&self) -> [u8; 12] {
+        let response_type_bytes = &[1];
+        let sequence_bytes = self.sequence.serialize();
+        let length_bytes = self.length.serialize();
+        let major_version_bytes = self.major_version.serialize();
+        let minor_version_bytes = self.minor_version.serialize();
+        [
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            length_bytes[0],
+            length_bytes[1],
+            length_bytes[2],
+            length_bytes[3],
+            major_version_bytes[0],
+            major_version_bytes[1],
+            minor_version_bytes[0],
+            minor_version_bytes[1],
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(12);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.major_version.serialize_into(bytes);
+        self.minor_version.serialize_into(bytes);
+    }
+}
 
 /// Opcode for the GetModeLine request
 pub const GET_MODE_LINE_REQUEST: u8 = 1;
@@ -528,6 +562,38 @@ impl TryParse for GetModeLineReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for GetModeLineReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(52);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.dotclock.serialize_into(bytes);
+        self.hdisplay.serialize_into(bytes);
+        self.hsyncstart.serialize_into(bytes);
+        self.hsyncend.serialize_into(bytes);
+        self.htotal.serialize_into(bytes);
+        self.hskew.serialize_into(bytes);
+        self.vdisplay.serialize_into(bytes);
+        self.vsyncstart.serialize_into(bytes);
+        self.vsyncend.serialize_into(bytes);
+        self.vtotal.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 2]);
+        self.flags.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 12]);
+        let privsize = u32::try_from(self.private.len()).expect("`private` has too many elements");
+        privsize.serialize_into(bytes);
+        bytes.extend_from_slice(&self.private);
     }
 }
 impl GetModeLineReply {
@@ -860,6 +926,37 @@ impl TryParse for GetMonitorReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for GetMonitorReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        let vendor_length = u8::try_from(self.vendor.len()).expect("`vendor` has too many elements");
+        vendor_length.serialize_into(bytes);
+        let model_length = u8::try_from(self.model.len()).expect("`model` has too many elements");
+        model_length.serialize_into(bytes);
+        let num_hsync = u8::try_from(self.hsync.len()).expect("`hsync` has too many elements");
+        num_hsync.serialize_into(bytes);
+        let num_vsync = u8::try_from(self.vsync.len()).expect("`vsync` has too many elements");
+        num_vsync.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 20]);
+        self.hsync.serialize_into(bytes);
+        self.vsync.serialize_into(bytes);
+        bytes.extend_from_slice(&self.vendor);
+        assert_eq!(self.alignment_pad.len(), usize::try_from((u32::from(vendor_length).checked_add(3u32).unwrap() & (!3u32)).checked_sub(u32::from(vendor_length)).unwrap()).unwrap(), "`alignment_pad` has an incorrect length");
+        bytes.extend_from_slice(&self.alignment_pad);
+        bytes.extend_from_slice(&self.model);
+    }
+}
 impl GetMonitorReply {
     /// Get the value of the `vendor_length` field.
     ///
@@ -1052,6 +1149,26 @@ impl TryParse for GetAllModeLinesReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for GetAllModeLinesReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        let modecount = u32::try_from(self.modeinfo.len()).expect("`modeinfo` has too many elements");
+        modecount.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 20]);
+        self.modeinfo.serialize_into(bytes);
     }
 }
 impl GetAllModeLinesReply {
@@ -1704,6 +1821,59 @@ impl TryParse for ValidateModeLineReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for ValidateModeLineReply {
+    type Bytes = [u8; 32];
+    fn serialize(&self) -> [u8; 32] {
+        let response_type_bytes = &[1];
+        let sequence_bytes = self.sequence.serialize();
+        let length_bytes = self.length.serialize();
+        let status_bytes = self.status.serialize();
+        [
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            length_bytes[0],
+            length_bytes[1],
+            length_bytes[2],
+            length_bytes[3],
+            status_bytes[0],
+            status_bytes[1],
+            status_bytes[2],
+            status_bytes[3],
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.status.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 20]);
+    }
+}
 
 /// Opcode for the SwitchToMode request
 pub const SWITCH_TO_MODE_REQUEST: u8 = 10;
@@ -1958,6 +2128,61 @@ impl TryParse for GetViewPortReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for GetViewPortReply {
+    type Bytes = [u8; 32];
+    fn serialize(&self) -> [u8; 32] {
+        let response_type_bytes = &[1];
+        let sequence_bytes = self.sequence.serialize();
+        let length_bytes = self.length.serialize();
+        let x_bytes = self.x.serialize();
+        let y_bytes = self.y.serialize();
+        [
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            length_bytes[0],
+            length_bytes[1],
+            length_bytes[2],
+            length_bytes[3],
+            x_bytes[0],
+            x_bytes[1],
+            x_bytes[2],
+            x_bytes[3],
+            y_bytes[0],
+            y_bytes[1],
+            y_bytes[2],
+            y_bytes[3],
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.x.serialize_into(bytes);
+        self.y.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 16]);
+    }
+}
 
 /// Opcode for the SetViewPort request
 pub const SET_VIEW_PORT_REQUEST: u8 = 12;
@@ -2114,6 +2339,28 @@ impl TryParse for GetDotClocksReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for GetDotClocksReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.flags.serialize_into(bytes);
+        self.clocks.serialize_into(bytes);
+        self.maxclocks.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 12]);
+        assert_eq!(self.clock.len(), usize::try_from(1u32.checked_sub(self.flags & 1u32).unwrap().checked_mul(self.clocks).unwrap()).unwrap(), "`clock` has an incorrect length");
+        self.clock.serialize_into(bytes);
     }
 }
 
@@ -2374,6 +2621,63 @@ impl TryParse for GetGammaReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for GetGammaReply {
+    type Bytes = [u8; 32];
+    fn serialize(&self) -> [u8; 32] {
+        let response_type_bytes = &[1];
+        let sequence_bytes = self.sequence.serialize();
+        let length_bytes = self.length.serialize();
+        let red_bytes = self.red.serialize();
+        let green_bytes = self.green.serialize();
+        let blue_bytes = self.blue.serialize();
+        [
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            length_bytes[0],
+            length_bytes[1],
+            length_bytes[2],
+            length_bytes[3],
+            red_bytes[0],
+            red_bytes[1],
+            red_bytes[2],
+            red_bytes[3],
+            green_bytes[0],
+            green_bytes[1],
+            green_bytes[2],
+            green_bytes[3],
+            blue_bytes[0],
+            blue_bytes[1],
+            blue_bytes[2],
+            blue_bytes[3],
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.red.serialize_into(bytes);
+        self.green.serialize_into(bytes);
+        self.blue.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 12]);
+    }
+}
 
 /// Opcode for the GetGammaRamp request
 pub const GET_GAMMA_RAMP_REQUEST: u8 = 17;
@@ -2463,6 +2767,30 @@ impl TryParse for GetGammaRampReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for GetGammaRampReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.size.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 22]);
+        assert_eq!(self.red.len(), usize::try_from(u32::from(self.size).checked_add(1u32).unwrap() & (!1u32)).unwrap(), "`red` has an incorrect length");
+        self.red.serialize_into(bytes);
+        assert_eq!(self.green.len(), usize::try_from(u32::from(self.size).checked_add(1u32).unwrap() & (!1u32)).unwrap(), "`green` has an incorrect length");
+        self.green.serialize_into(bytes);
+        assert_eq!(self.blue.len(), usize::try_from(u32::from(self.size).checked_add(1u32).unwrap() & (!1u32)).unwrap(), "`blue` has an incorrect length");
+        self.blue.serialize_into(bytes);
     }
 }
 
@@ -2634,6 +2962,59 @@ impl TryParse for GetGammaRampSizeReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for GetGammaRampSizeReply {
+    type Bytes = [u8; 32];
+    fn serialize(&self) -> [u8; 32] {
+        let response_type_bytes = &[1];
+        let sequence_bytes = self.sequence.serialize();
+        let length_bytes = self.length.serialize();
+        let size_bytes = self.size.serialize();
+        [
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            length_bytes[0],
+            length_bytes[1],
+            length_bytes[2],
+            length_bytes[3],
+            size_bytes[0],
+            size_bytes[1],
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.size.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 22]);
+    }
+}
 
 /// Opcode for the GetPermissions request
 pub const GET_PERMISSIONS_REQUEST: u8 = 20;
@@ -2714,6 +3095,59 @@ impl TryParse for GetPermissionsReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for GetPermissionsReply {
+    type Bytes = [u8; 32];
+    fn serialize(&self) -> [u8; 32] {
+        let response_type_bytes = &[1];
+        let sequence_bytes = self.sequence.serialize();
+        let length_bytes = self.length.serialize();
+        let permissions_bytes = self.permissions.serialize();
+        [
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            length_bytes[0],
+            length_bytes[1],
+            length_bytes[2],
+            length_bytes[3],
+            permissions_bytes[0],
+            permissions_bytes[1],
+            permissions_bytes[2],
+            permissions_bytes[3],
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.permissions.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 20]);
     }
 }
 
