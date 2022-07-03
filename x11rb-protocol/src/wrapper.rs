@@ -47,3 +47,44 @@ where
 }
 
 impl<T: TryParse> core::iter::FusedIterator for PropertyIterator<'_, T> {}
+
+#[cfg(test)]
+mod tests {
+    use super::PropertyIterator;
+    use alloc::vec::Vec;
+
+    #[test]
+    fn test_parse_u8() {
+        let input = [0u8, 1, 2, 3, 4, 5];
+        let output = PropertyIterator::new(&input).collect::<Vec<u8>>();
+        assert_eq!(&input[..], output);
+    }
+
+    #[test]
+    fn test_parse_u32() {
+        let expected = [0u32, 1, 2, 3, 4, 5];
+        let input = {
+            let mut input = Vec::new();
+            for value in &expected {
+                input.extend_from_slice(&value.to_ne_bytes());
+            }
+            input
+        };
+
+        let output = PropertyIterator::new(&input).collect::<Vec<u32>>();
+        assert_eq!(&expected[..], output);
+    }
+
+    #[test]
+    fn test_size_hint() {
+        let hint = PropertyIterator::<u32>::new(&[0; 0]).size_hint();
+        assert_eq!(hint, (0, Some(0)));
+
+        let hint = PropertyIterator::<u32>::new(&[0; 8]).size_hint();
+        assert_eq!(hint, (2, Some(2)));
+
+        // In this case, the data is not an exact multiple of the element size
+        let hint = PropertyIterator::<u32>::new(&[0; 30]).size_hint();
+        assert_eq!(hint, (7, Some(7)));
+    }
+}

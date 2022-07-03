@@ -11,7 +11,7 @@ const MINIMAL_PACKET_LENGTH: usize = 32;
 
 /// A wrapper around a buffer used to read X11 packets.
 pub struct PacketReader {
-    /// A paritally-read packet.
+    /// A partially-read packet.
     pending_packet: Vec<u8>,
 
     /// The point at which the packet is already read.
@@ -131,7 +131,7 @@ mod tests {
     use alloc::{vec, vec::Vec};
 
     fn test_packets(packets: Vec<Vec<u8>>) {
-        let mut reader = PacketReader::new();
+        let mut reader = PacketReader::default();
         for mut packet in packets {
             let original_packet = packet.clone();
 
@@ -149,6 +149,18 @@ mod tests {
         }
     }
 
+    fn make_reply_with_length(len: usize) -> Vec<u8> {
+        let mut packet = vec![0; len];
+        let len = (len - 32) / 4;
+
+        // write "len" to bytes 4..8 in the packet
+        let len_bytes = (len as u32).to_ne_bytes();
+        packet[4..8].copy_from_slice(&len_bytes);
+        packet[0] = 1;
+
+        packet
+    }
+
     #[test]
     fn fixed_size_packet() {
         // packet with a fixed size
@@ -159,15 +171,7 @@ mod tests {
     #[test]
     fn variable_size_packet() {
         // packet with a variable size
-        let mut len = 1200;
-        let mut packet = vec![0; len];
-        len = (len - 32) / 4;
-
-        // write "len" to bytes 4..8 in the packet
-        let len_bytes = (len as u32).to_ne_bytes();
-        packet[4..8].copy_from_slice(&len_bytes);
-        packet[0] = 1;
-
+        let packet = make_reply_with_length(1200);
         test_packets(vec![packet]);
     }
 
@@ -205,7 +209,7 @@ mod tests {
     }
 
     #[test]
-    fn text_many_size_packets_mixed() {
+    fn test_many_size_packets_mixed() {
         let mut packets = vec![];
         for i in 0..100 {
             // on odds, do a varsize packet
@@ -231,5 +235,39 @@ mod tests {
             packets.push(packet);
         }
         test_packets(packets);
+    }
+
+    #[test]
+    fn test_debug_fixed_size_packet() {
+        // The debug output includes the length of the packet of the packet and how much was
+        // already read
+        let mut reader = PacketReader::new();
+        assert_eq!(std::format!("{:?}", reader), "PacketReader(0/32)");
+
+        let _ = reader.advance(15);
+        assert_eq!(std::format!("{:?}", reader), "PacketReader(15/32)");
+
+        let _ = reader.advance(15);
+        assert_eq!(std::format!("{:?}", reader), "PacketReader(30/32)");
+
+        let _ = reader.advance(2);
+        assert_eq!(std::format!("{:?}", reader), "PacketReader(0/32)");
+    }
+
+    #[test]
+    fn test_debug_variable_size_packet() {
+        let packet = make_reply_with_length(1200);
+        let mut reader = PacketReader::new();
+
+        let first_len = 32;
+        let second_len = 3;
+
+        reader.buffer()[..first_len].copy_from_slice(&packet[..first_len]);
+        let _ = reader.advance(first_len);
+
+        reader.buffer()[..second_len].copy_from_slice(&packet[..second_len]);
+        let _ = reader.advance(second_len);
+
+        assert_eq!(std::format!("{:?}", reader), "PacketReader(35/1200)");
     }
 }

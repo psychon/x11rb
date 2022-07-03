@@ -69,6 +69,53 @@ impl X11Error {
     }
 }
 
+#[cfg(test)]
+mod tryparse_x11error_test {
+    use super::{ErrorKind, ExtInfoProvider, ParseError, X11Error};
+    use crate::x11_utils::ExtensionInformation;
+
+    struct Provider;
+
+    impl ExtInfoProvider for Provider {
+        fn get_from_major_opcode(&self, major_opcode: u8) -> Option<(&str, ExtensionInformation)> {
+            assert_eq!(major_opcode, 10);
+            None
+        }
+        fn get_from_event_code(&self, _event_code: u8) -> Option<(&str, ExtensionInformation)> {
+            unimplemented!()
+        }
+        fn get_from_error_code(&self, _error_code: u8) -> Option<(&str, ExtensionInformation)> {
+            unimplemented!()
+        }
+    }
+
+    #[test]
+    fn try_parse_error() {
+        let input = [
+            0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0,
+        ];
+        let error = X11Error::try_parse(&input, &Provider);
+        let expected = X11Error {
+            error_kind: ErrorKind::Request,
+            error_code: 1,
+            sequence: u16::from_ne_bytes([2, 3]),
+            bad_value: u32::from_ne_bytes([4, 5, 6, 7]),
+            minor_opcode: u16::from_ne_bytes([8, 9]),
+            major_opcode: 10,
+            extension_name: None,
+            request_name: Some("UnmapWindow"),
+        };
+        assert_eq!(error, Ok(expected));
+    }
+
+    #[test]
+    fn reject_invalid_response_type() {
+        let result = X11Error::try_parse(&[1; 32], &Provider);
+        assert_eq!(Err(ParseError::InvalidValue), result);
+    }
+}
+
 impl From<&X11Error> for [u8; 32] {
     fn from(input: &X11Error) -> Self {
         let sequence_bytes = input.sequence.serialize();
@@ -113,6 +160,30 @@ impl From<&X11Error> for [u8; 32] {
 impl From<X11Error> for [u8; 32] {
     fn from(input: X11Error) -> Self {
         Self::from(&input)
+    }
+}
+
+#[cfg(test)]
+mod serialise_x11error_test {
+    use super::{ErrorKind, X11Error};
+
+    #[test]
+    fn test_serialise() {
+        let error = X11Error {
+            error_kind: ErrorKind::Request,
+            error_code: 1,
+            sequence: u16::from_ne_bytes([2, 3]),
+            bad_value: u32::from_ne_bytes([4, 5, 6, 7]),
+            minor_opcode: u16::from_ne_bytes([8, 9]),
+            major_opcode: 10,
+            extension_name: None,
+            request_name: None,
+        };
+        let expected = [
+            0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0,
+        ];
+        assert_eq!(expected, <[u8; 32]>::from(error));
     }
 }
 
@@ -318,6 +389,56 @@ implement_serialize!(i64: 8);
 
 forward_float!(f32: u32);
 forward_float!(f64: u64);
+
+#[cfg(test)]
+mod float_tests {
+    use super::{Serialize, TryParse};
+
+    fn test_round_trip<F>(value: F)
+    where
+        F: TryParse + Serialize + PartialEq + core::fmt::Debug + Copy,
+        <F as Serialize>::Bytes: AsRef<[u8]>,
+    {
+        let empty = &[][..];
+
+        // Test using serialize()
+        assert_eq!(Ok((value, empty)), F::try_parse(value.serialize().as_ref()));
+
+        // Test using serialize_into()
+        let mut output = alloc::vec::Vec::new();
+        value.serialize_into(&mut output);
+        assert_eq!(Ok((value, empty)), F::try_parse(&output));
+    }
+
+    #[test]
+    fn test_f32_round_trips() {
+        for &f in &[0f32, 1., std::f32::consts::PI, 42., 1337., 1e7] {
+            test_round_trip(f);
+            test_round_trip(-f);
+        }
+    }
+
+    #[test]
+    fn test_f64_round_trips() {
+        for &f in &[0f64, 1., std::f64::consts::PI, 42., 1337., 1e7] {
+            test_round_trip(f);
+            test_round_trip(-f);
+        }
+    }
+
+    #[test]
+    fn test_parse_known_value() {
+        let bytes = 0x42280000u32.to_ne_bytes();
+        let value = f32::try_parse(&bytes);
+        let empty = &[][..];
+        assert_eq!(Ok((42., empty)), value);
+    }
+
+    #[test]
+    fn test_serialize_known_value() {
+        assert_eq!(0x42280000u32.to_ne_bytes(), 42f32.serialize());
+    }
+}
 
 impl TryParse for bool {
     fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
