@@ -11,7 +11,7 @@ const MINIMAL_PACKET_LENGTH: usize = 32;
 
 /// A wrapper around a buffer used to read X11 packets.
 pub struct PacketReader {
-    /// A paritally-read packet.
+    /// A partially-read packet.
     pending_packet: Vec<u8>,
 
     /// The point at which the packet is already read.
@@ -205,7 +205,7 @@ mod tests {
     }
 
     #[test]
-    fn text_many_size_packets_mixed() {
+    fn test_many_size_packets_mixed() {
         let mut packets = vec![];
         for i in 0..100 {
             // on odds, do a varsize packet
