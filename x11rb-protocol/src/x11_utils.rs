@@ -116,6 +116,30 @@ impl From<X11Error> for [u8; 32] {
     }
 }
 
+#[cfg(test)]
+mod serialise_x11error_test {
+    use super::{ErrorKind, X11Error};
+
+    #[test]
+    fn test_serialise() {
+        let error = X11Error {
+            error_kind: ErrorKind::Request,
+            error_code: 1,
+            sequence: u16::from_ne_bytes([2, 3]),
+            bad_value: u32::from_ne_bytes([4, 5, 6, 7]),
+            minor_opcode: u16::from_ne_bytes([8, 9]),
+            major_opcode: 10,
+            extension_name: None,
+            request_name: None,
+        };
+        let expected = [
+            0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0,
+        ];
+        assert_eq!(expected, <[u8; 32]>::from(error));
+    }
+}
+
 /// Information about a X11 extension.
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub struct ExtensionInformation {
