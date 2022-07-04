@@ -123,6 +123,44 @@ impl TryParse for QueryVersionReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for QueryVersionReply {
+    type Bytes = [u8; 16];
+    fn serialize(&self) -> [u8; 16] {
+        let response_type_bytes = &[1];
+        let sequence_bytes = self.sequence.serialize();
+        let length_bytes = self.length.serialize();
+        let major_version_bytes = self.major_version.serialize();
+        let minor_version_bytes = self.minor_version.serialize();
+        [
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            length_bytes[0],
+            length_bytes[1],
+            length_bytes[2],
+            length_bytes[3],
+            major_version_bytes[0],
+            major_version_bytes[1],
+            major_version_bytes[2],
+            major_version_bytes[3],
+            minor_version_bytes[0],
+            minor_version_bytes[1],
+            minor_version_bytes[2],
+            minor_version_bytes[3],
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(16);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.major_version.serialize_into(bytes);
+        self.minor_version.serialize_into(bytes);
+    }
+}
 
 /// Opcode for the Open request
 pub const OPEN_REQUEST: u8 = 1;
@@ -211,6 +249,58 @@ impl TryParseFd for OpenReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for OpenReply {
+    type Bytes = [u8; 32];
+    fn serialize(&self) -> [u8; 32] {
+        let response_type_bytes = &[1];
+        let nfd_bytes = self.nfd.serialize();
+        let sequence_bytes = self.sequence.serialize();
+        let length_bytes = self.length.serialize();
+        [
+            response_type_bytes[0],
+            nfd_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            length_bytes[0],
+            length_bytes[1],
+            length_bytes[2],
+            length_bytes[3],
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        self.nfd.serialize_into(bytes);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 24]);
     }
 }
 
@@ -407,6 +497,70 @@ impl TryParseFd for BufferFromPixmapReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for BufferFromPixmapReply {
+    type Bytes = [u8; 32];
+    fn serialize(&self) -> [u8; 32] {
+        let response_type_bytes = &[1];
+        let nfd_bytes = self.nfd.serialize();
+        let sequence_bytes = self.sequence.serialize();
+        let length_bytes = self.length.serialize();
+        let size_bytes = self.size.serialize();
+        let width_bytes = self.width.serialize();
+        let height_bytes = self.height.serialize();
+        let stride_bytes = self.stride.serialize();
+        let depth_bytes = self.depth.serialize();
+        let bpp_bytes = self.bpp.serialize();
+        [
+            response_type_bytes[0],
+            nfd_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            length_bytes[0],
+            length_bytes[1],
+            length_bytes[2],
+            length_bytes[3],
+            size_bytes[0],
+            size_bytes[1],
+            size_bytes[2],
+            size_bytes[3],
+            width_bytes[0],
+            width_bytes[1],
+            height_bytes[0],
+            height_bytes[1],
+            stride_bytes[0],
+            stride_bytes[1],
+            depth_bytes[0],
+            bpp_bytes[0],
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        self.nfd.serialize_into(bytes);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.size.serialize_into(bytes);
+        self.width.serialize_into(bytes);
+        self.height.serialize_into(bytes);
+        self.stride.serialize_into(bytes);
+        self.depth.serialize_into(bytes);
+        self.bpp.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 12]);
+    }
+}
 
 /// Opcode for the FenceFromFD request
 pub const FENCE_FROM_FD_REQUEST: u8 = 4;
@@ -570,6 +724,58 @@ impl TryParseFd for FDFromFenceReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for FDFromFenceReply {
+    type Bytes = [u8; 32];
+    fn serialize(&self) -> [u8; 32] {
+        let response_type_bytes = &[1];
+        let nfd_bytes = self.nfd.serialize();
+        let sequence_bytes = self.sequence.serialize();
+        let length_bytes = self.length.serialize();
+        [
+            response_type_bytes[0],
+            nfd_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            length_bytes[0],
+            length_bytes[1],
+            length_bytes[2],
+            length_bytes[3],
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        self.nfd.serialize_into(bytes);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 24]);
+    }
+}
 
 /// Opcode for the GetSupportedModifiers request
 pub const GET_SUPPORTED_MODIFIERS_REQUEST: u8 = 6;
@@ -666,6 +872,29 @@ impl TryParse for GetSupportedModifiersReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for GetSupportedModifiersReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        let num_window_modifiers = u32::try_from(self.window_modifiers.len()).expect("`window_modifiers` has too many elements");
+        num_window_modifiers.serialize_into(bytes);
+        let num_screen_modifiers = u32::try_from(self.screen_modifiers.len()).expect("`screen_modifiers` has too many elements");
+        num_screen_modifiers.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 16]);
+        self.window_modifiers.serialize_into(bytes);
+        self.screen_modifiers.serialize_into(bytes);
     }
 }
 impl GetSupportedModifiersReply {
@@ -967,6 +1196,34 @@ impl TryParseFd for BuffersFromPixmapReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for BuffersFromPixmapReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        let nfd = u8::try_from(self.strides.len()).expect("`strides` has too many elements");
+        nfd.serialize_into(bytes);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.width.serialize_into(bytes);
+        self.height.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 4]);
+        self.modifier.serialize_into(bytes);
+        self.depth.serialize_into(bytes);
+        self.bpp.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 6]);
+        self.strides.serialize_into(bytes);
+        assert_eq!(self.offsets.len(), usize::try_from(nfd).unwrap(), "`offsets` has an incorrect length");
+        self.offsets.serialize_into(bytes);
+        assert_eq!(self.buffers.len(), usize::try_from(nfd).unwrap(), "`buffers` has an incorrect length");
     }
 }
 impl BuffersFromPixmapReply {

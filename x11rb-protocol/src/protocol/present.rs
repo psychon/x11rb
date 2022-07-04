@@ -547,6 +547,44 @@ impl TryParse for QueryVersionReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for QueryVersionReply {
+    type Bytes = [u8; 16];
+    fn serialize(&self) -> [u8; 16] {
+        let response_type_bytes = &[1];
+        let sequence_bytes = self.sequence.serialize();
+        let length_bytes = self.length.serialize();
+        let major_version_bytes = self.major_version.serialize();
+        let minor_version_bytes = self.minor_version.serialize();
+        [
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            length_bytes[0],
+            length_bytes[1],
+            length_bytes[2],
+            length_bytes[3],
+            major_version_bytes[0],
+            major_version_bytes[1],
+            major_version_bytes[2],
+            major_version_bytes[3],
+            minor_version_bytes[0],
+            minor_version_bytes[1],
+            minor_version_bytes[2],
+            minor_version_bytes[3],
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(16);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.major_version.serialize_into(bytes);
+        self.minor_version.serialize_into(bytes);
+    }
+}
 
 /// Opcode for the Pixmap request
 pub const PIXMAP_REQUEST: u8 = 1;
@@ -1004,6 +1042,38 @@ impl TryParse for QueryCapabilitiesReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for QueryCapabilitiesReply {
+    type Bytes = [u8; 12];
+    fn serialize(&self) -> [u8; 12] {
+        let response_type_bytes = &[1];
+        let sequence_bytes = self.sequence.serialize();
+        let length_bytes = self.length.serialize();
+        let capabilities_bytes = self.capabilities.serialize();
+        [
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            length_bytes[0],
+            length_bytes[1],
+            length_bytes[2],
+            length_bytes[3],
+            capabilities_bytes[0],
+            capabilities_bytes[1],
+            capabilities_bytes[2],
+            capabilities_bytes[3],
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(12);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.capabilities.serialize_into(bytes);
+    }
+}
 
 /// Opcode for the Generic event
 pub const GENERIC_EVENT: u8 = 0;
@@ -1032,6 +1102,45 @@ impl TryParse for GenericEvent {
         let remaining = initial_value.get(32..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for GenericEvent {
+    type Bytes = [u8; 16];
+    fn serialize(&self) -> [u8; 16] {
+        let response_type_bytes = self.response_type.serialize();
+        let extension_bytes = self.extension.serialize();
+        let sequence_bytes = self.sequence.serialize();
+        let length_bytes = self.length.serialize();
+        let evtype_bytes = self.evtype.serialize();
+        let event_bytes = self.event.serialize();
+        [
+            response_type_bytes[0],
+            extension_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            length_bytes[0],
+            length_bytes[1],
+            length_bytes[2],
+            length_bytes[3],
+            evtype_bytes[0],
+            evtype_bytes[1],
+            0,
+            0,
+            event_bytes[0],
+            event_bytes[1],
+            event_bytes[2],
+            event_bytes[3],
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(16);
+        self.response_type.serialize_into(bytes);
+        self.extension.serialize_into(bytes);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.evtype.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 2]);
+        self.event.serialize_into(bytes);
     }
 }
 impl From<&GenericEvent> for [u8; 32] {
@@ -1134,6 +1243,89 @@ impl TryParse for ConfigureNotifyEvent {
         Ok((result, remaining))
     }
 }
+impl Serialize for ConfigureNotifyEvent {
+    type Bytes = [u8; 40];
+    fn serialize(&self) -> [u8; 40] {
+        let response_type_bytes = self.response_type.serialize();
+        let extension_bytes = self.extension.serialize();
+        let sequence_bytes = self.sequence.serialize();
+        let length_bytes = self.length.serialize();
+        let event_type_bytes = self.event_type.serialize();
+        let event_bytes = self.event.serialize();
+        let window_bytes = self.window.serialize();
+        let x_bytes = self.x.serialize();
+        let y_bytes = self.y.serialize();
+        let width_bytes = self.width.serialize();
+        let height_bytes = self.height.serialize();
+        let off_x_bytes = self.off_x.serialize();
+        let off_y_bytes = self.off_y.serialize();
+        let pixmap_width_bytes = self.pixmap_width.serialize();
+        let pixmap_height_bytes = self.pixmap_height.serialize();
+        let pixmap_flags_bytes = self.pixmap_flags.serialize();
+        [
+            response_type_bytes[0],
+            extension_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            length_bytes[0],
+            length_bytes[1],
+            length_bytes[2],
+            length_bytes[3],
+            event_type_bytes[0],
+            event_type_bytes[1],
+            0,
+            0,
+            event_bytes[0],
+            event_bytes[1],
+            event_bytes[2],
+            event_bytes[3],
+            window_bytes[0],
+            window_bytes[1],
+            window_bytes[2],
+            window_bytes[3],
+            x_bytes[0],
+            x_bytes[1],
+            y_bytes[0],
+            y_bytes[1],
+            width_bytes[0],
+            width_bytes[1],
+            height_bytes[0],
+            height_bytes[1],
+            off_x_bytes[0],
+            off_x_bytes[1],
+            off_y_bytes[0],
+            off_y_bytes[1],
+            pixmap_width_bytes[0],
+            pixmap_width_bytes[1],
+            pixmap_height_bytes[0],
+            pixmap_height_bytes[1],
+            pixmap_flags_bytes[0],
+            pixmap_flags_bytes[1],
+            pixmap_flags_bytes[2],
+            pixmap_flags_bytes[3],
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(40);
+        self.response_type.serialize_into(bytes);
+        self.extension.serialize_into(bytes);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.event_type.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 2]);
+        self.event.serialize_into(bytes);
+        self.window.serialize_into(bytes);
+        self.x.serialize_into(bytes);
+        self.y.serialize_into(bytes);
+        self.width.serialize_into(bytes);
+        self.height.serialize_into(bytes);
+        self.off_x.serialize_into(bytes);
+        self.off_y.serialize_into(bytes);
+        self.pixmap_width.serialize_into(bytes);
+        self.pixmap_height.serialize_into(bytes);
+        self.pixmap_flags.serialize_into(bytes);
+    }
+}
 
 /// Opcode for the CompleteNotify event
 pub const COMPLETE_NOTIFY_EVENT: u16 = 1;
@@ -1177,6 +1369,80 @@ impl TryParse for CompleteNotifyEvent {
         Ok((result, remaining))
     }
 }
+impl Serialize for CompleteNotifyEvent {
+    type Bytes = [u8; 40];
+    fn serialize(&self) -> [u8; 40] {
+        let response_type_bytes = self.response_type.serialize();
+        let extension_bytes = self.extension.serialize();
+        let sequence_bytes = self.sequence.serialize();
+        let length_bytes = self.length.serialize();
+        let event_type_bytes = self.event_type.serialize();
+        let kind_bytes = u8::from(self.kind).serialize();
+        let mode_bytes = u8::from(self.mode).serialize();
+        let event_bytes = self.event.serialize();
+        let window_bytes = self.window.serialize();
+        let serial_bytes = self.serial.serialize();
+        let ust_bytes = self.ust.serialize();
+        let msc_bytes = self.msc.serialize();
+        [
+            response_type_bytes[0],
+            extension_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            length_bytes[0],
+            length_bytes[1],
+            length_bytes[2],
+            length_bytes[3],
+            event_type_bytes[0],
+            event_type_bytes[1],
+            kind_bytes[0],
+            mode_bytes[0],
+            event_bytes[0],
+            event_bytes[1],
+            event_bytes[2],
+            event_bytes[3],
+            window_bytes[0],
+            window_bytes[1],
+            window_bytes[2],
+            window_bytes[3],
+            serial_bytes[0],
+            serial_bytes[1],
+            serial_bytes[2],
+            serial_bytes[3],
+            ust_bytes[0],
+            ust_bytes[1],
+            ust_bytes[2],
+            ust_bytes[3],
+            ust_bytes[4],
+            ust_bytes[5],
+            ust_bytes[6],
+            ust_bytes[7],
+            msc_bytes[0],
+            msc_bytes[1],
+            msc_bytes[2],
+            msc_bytes[3],
+            msc_bytes[4],
+            msc_bytes[5],
+            msc_bytes[6],
+            msc_bytes[7],
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(40);
+        self.response_type.serialize_into(bytes);
+        self.extension.serialize_into(bytes);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.event_type.serialize_into(bytes);
+        u8::from(self.kind).serialize_into(bytes);
+        u8::from(self.mode).serialize_into(bytes);
+        self.event.serialize_into(bytes);
+        self.window.serialize_into(bytes);
+        self.serial.serialize_into(bytes);
+        self.ust.serialize_into(bytes);
+        self.msc.serialize_into(bytes);
+    }
+}
 
 /// Opcode for the IdleNotify event
 pub const IDLE_NOTIFY_EVENT: u16 = 2;
@@ -1213,6 +1479,69 @@ impl TryParse for IdleNotifyEvent {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for IdleNotifyEvent {
+    type Bytes = [u8; 32];
+    fn serialize(&self) -> [u8; 32] {
+        let response_type_bytes = self.response_type.serialize();
+        let extension_bytes = self.extension.serialize();
+        let sequence_bytes = self.sequence.serialize();
+        let length_bytes = self.length.serialize();
+        let event_type_bytes = self.event_type.serialize();
+        let event_bytes = self.event.serialize();
+        let window_bytes = self.window.serialize();
+        let serial_bytes = self.serial.serialize();
+        let pixmap_bytes = self.pixmap.serialize();
+        let idle_fence_bytes = self.idle_fence.serialize();
+        [
+            response_type_bytes[0],
+            extension_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            length_bytes[0],
+            length_bytes[1],
+            length_bytes[2],
+            length_bytes[3],
+            event_type_bytes[0],
+            event_type_bytes[1],
+            0,
+            0,
+            event_bytes[0],
+            event_bytes[1],
+            event_bytes[2],
+            event_bytes[3],
+            window_bytes[0],
+            window_bytes[1],
+            window_bytes[2],
+            window_bytes[3],
+            serial_bytes[0],
+            serial_bytes[1],
+            serial_bytes[2],
+            serial_bytes[3],
+            pixmap_bytes[0],
+            pixmap_bytes[1],
+            pixmap_bytes[2],
+            pixmap_bytes[3],
+            idle_fence_bytes[0],
+            idle_fence_bytes[1],
+            idle_fence_bytes[2],
+            idle_fence_bytes[3],
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        self.response_type.serialize_into(bytes);
+        self.extension.serialize_into(bytes);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.event_type.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 2]);
+        self.event.serialize_into(bytes);
+        self.window.serialize_into(bytes);
+        self.serial.serialize_into(bytes);
+        self.pixmap.serialize_into(bytes);
+        self.idle_fence.serialize_into(bytes);
     }
 }
 
@@ -1289,6 +1618,47 @@ impl TryParse for RedirectNotifyEvent {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for RedirectNotifyEvent {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(104);
+        self.response_type.serialize_into(bytes);
+        self.extension.serialize_into(bytes);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.event_type.serialize_into(bytes);
+        self.update_window.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 1]);
+        self.event.serialize_into(bytes);
+        self.event_window.serialize_into(bytes);
+        self.window.serialize_into(bytes);
+        self.pixmap.serialize_into(bytes);
+        self.serial.serialize_into(bytes);
+        self.valid_region.serialize_into(bytes);
+        self.update_region.serialize_into(bytes);
+        self.valid_rect.serialize_into(bytes);
+        self.update_rect.serialize_into(bytes);
+        self.x_off.serialize_into(bytes);
+        self.y_off.serialize_into(bytes);
+        self.target_crtc.serialize_into(bytes);
+        self.wait_fence.serialize_into(bytes);
+        self.idle_fence.serialize_into(bytes);
+        self.options.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 4]);
+        self.target_msc.serialize_into(bytes);
+        self.divisor.serialize_into(bytes);
+        self.remainder.serialize_into(bytes);
+        self.notifies.serialize_into(bytes);
+        let notifies_len_bytes = u32::try_from(self.notifies.len()).unwrap();
+        let notifies_len_bytes = notifies_len_bytes.to_ne_bytes();
+        bytes.extend_from_slice(&notifies_len_bytes);
     }
 }
 

@@ -119,6 +119,40 @@ impl TryParse for QueryVersionReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for QueryVersionReply {
+    type Bytes = [u8; 12];
+    fn serialize(&self) -> [u8; 12] {
+        let response_type_bytes = &[1];
+        let sequence_bytes = self.sequence.serialize();
+        let length_bytes = self.length.serialize();
+        let server_major_bytes = self.server_major.serialize();
+        let server_minor_bytes = self.server_minor.serialize();
+        [
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            length_bytes[0],
+            length_bytes[1],
+            length_bytes[2],
+            length_bytes[3],
+            server_major_bytes[0],
+            server_major_bytes[1],
+            server_minor_bytes[0],
+            server_minor_bytes[1],
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(12);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.server_major.serialize_into(bytes);
+        self.server_minor.serialize_into(bytes);
+    }
+}
 
 /// Opcode for the SetDeviceCreateContext request
 pub const SET_DEVICE_CREATE_CONTEXT_REQUEST: u8 = 1;
@@ -255,6 +289,26 @@ impl TryParse for GetDeviceCreateContextReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for GetDeviceCreateContextReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        let context_len = u32::try_from(self.context.len()).expect("`context` has too many elements");
+        context_len.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 20]);
+        bytes.extend_from_slice(&self.context);
     }
 }
 impl GetDeviceCreateContextReply {
@@ -428,6 +482,26 @@ impl TryParse for GetDeviceContextReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for GetDeviceContextReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        let context_len = u32::try_from(self.context.len()).expect("`context` has too many elements");
+        context_len.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 20]);
+        bytes.extend_from_slice(&self.context);
+    }
+}
 impl GetDeviceContextReply {
     /// Get the value of the `context_len` field.
     ///
@@ -581,6 +655,26 @@ impl TryParse for GetWindowCreateContextReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for GetWindowCreateContextReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        let context_len = u32::try_from(self.context.len()).expect("`context` has too many elements");
+        context_len.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 20]);
+        bytes.extend_from_slice(&self.context);
+    }
+}
 impl GetWindowCreateContextReply {
     /// Get the value of the `context_len` field.
     ///
@@ -677,6 +771,26 @@ impl TryParse for GetWindowContextReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for GetWindowContextReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        let context_len = u32::try_from(self.context.len()).expect("`context` has too many elements");
+        context_len.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 20]);
+        bytes.extend_from_slice(&self.context);
     }
 }
 impl GetWindowContextReply {
@@ -910,6 +1024,26 @@ impl TryParse for GetPropertyCreateContextReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for GetPropertyCreateContextReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        let context_len = u32::try_from(self.context.len()).expect("`context` has too many elements");
+        context_len.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 20]);
+        bytes.extend_from_slice(&self.context);
+    }
+}
 impl GetPropertyCreateContextReply {
     /// Get the value of the `context_len` field.
     ///
@@ -1063,6 +1197,26 @@ impl TryParse for GetPropertyUseContextReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for GetPropertyUseContextReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        let context_len = u32::try_from(self.context.len()).expect("`context` has too many elements");
+        context_len.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 20]);
+        bytes.extend_from_slice(&self.context);
+    }
+}
 impl GetPropertyUseContextReply {
     /// Get the value of the `context_len` field.
     ///
@@ -1167,6 +1321,26 @@ impl TryParse for GetPropertyContextReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for GetPropertyContextReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        let context_len = u32::try_from(self.context.len()).expect("`context` has too many elements");
+        context_len.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 20]);
+        bytes.extend_from_slice(&self.context);
     }
 }
 impl GetPropertyContextReply {
@@ -1275,6 +1449,26 @@ impl TryParse for GetPropertyDataContextReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for GetPropertyDataContextReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        let context_len = u32::try_from(self.context.len()).expect("`context` has too many elements");
+        context_len.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 20]);
+        bytes.extend_from_slice(&self.context);
+    }
+}
 impl GetPropertyDataContextReply {
     /// Get the value of the `context_len` field.
     ///
@@ -1370,6 +1564,26 @@ impl TryParse for ListPropertiesReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for ListPropertiesReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        let properties_len = u32::try_from(self.properties.len()).expect("`properties` has too many elements");
+        properties_len.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 20]);
+        self.properties.serialize_into(bytes);
     }
 }
 impl ListPropertiesReply {
@@ -1525,6 +1739,26 @@ impl TryParse for GetSelectionCreateContextReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for GetSelectionCreateContextReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        let context_len = u32::try_from(self.context.len()).expect("`context` has too many elements");
+        context_len.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 20]);
+        bytes.extend_from_slice(&self.context);
+    }
+}
 impl GetSelectionCreateContextReply {
     /// Get the value of the `context_len` field.
     ///
@@ -1678,6 +1912,26 @@ impl TryParse for GetSelectionUseContextReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for GetSelectionUseContextReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        let context_len = u32::try_from(self.context.len()).expect("`context` has too many elements");
+        context_len.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 20]);
+        bytes.extend_from_slice(&self.context);
+    }
+}
 impl GetSelectionUseContextReply {
     /// Get the value of the `context_len` field.
     ///
@@ -1774,6 +2028,26 @@ impl TryParse for GetSelectionContextReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for GetSelectionContextReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        let context_len = u32::try_from(self.context.len()).expect("`context` has too many elements");
+        context_len.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 20]);
+        bytes.extend_from_slice(&self.context);
     }
 }
 impl GetSelectionContextReply {
@@ -1874,6 +2148,26 @@ impl TryParse for GetSelectionDataContextReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for GetSelectionDataContextReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        let context_len = u32::try_from(self.context.len()).expect("`context` has too many elements");
+        context_len.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 20]);
+        bytes.extend_from_slice(&self.context);
+    }
+}
 impl GetSelectionDataContextReply {
     /// Get the value of the `context_len` field.
     ///
@@ -1960,6 +2254,26 @@ impl TryParse for ListSelectionsReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for ListSelectionsReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        let selections_len = u32::try_from(self.selections.len()).expect("`selections` has too many elements");
+        selections_len.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 20]);
+        self.selections.serialize_into(bytes);
     }
 }
 impl ListSelectionsReply {
@@ -2058,6 +2372,26 @@ impl TryParse for GetClientContextReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for GetClientContextReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        let context_len = u32::try_from(self.context.len()).expect("`context` has too many elements");
+        context_len.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 20]);
+        bytes.extend_from_slice(&self.context);
     }
 }
 impl GetClientContextReply {

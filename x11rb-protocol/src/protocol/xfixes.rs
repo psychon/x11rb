@@ -128,6 +128,61 @@ impl TryParse for QueryVersionReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for QueryVersionReply {
+    type Bytes = [u8; 32];
+    fn serialize(&self) -> [u8; 32] {
+        let response_type_bytes = &[1];
+        let sequence_bytes = self.sequence.serialize();
+        let length_bytes = self.length.serialize();
+        let major_version_bytes = self.major_version.serialize();
+        let minor_version_bytes = self.minor_version.serialize();
+        [
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            length_bytes[0],
+            length_bytes[1],
+            length_bytes[2],
+            length_bytes[3],
+            major_version_bytes[0],
+            major_version_bytes[1],
+            major_version_bytes[2],
+            major_version_bytes[3],
+            minor_version_bytes[0],
+            minor_version_bytes[1],
+            minor_version_bytes[2],
+            minor_version_bytes[3],
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.major_version.serialize_into(bytes);
+        self.minor_version.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 16]);
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -536,6 +591,65 @@ impl TryParse for SelectionNotifyEvent {
         Ok((result, remaining))
     }
 }
+impl Serialize for SelectionNotifyEvent {
+    type Bytes = [u8; 32];
+    fn serialize(&self) -> [u8; 32] {
+        let response_type_bytes = self.response_type.serialize();
+        let subtype_bytes = u8::from(self.subtype).serialize();
+        let sequence_bytes = self.sequence.serialize();
+        let window_bytes = self.window.serialize();
+        let owner_bytes = self.owner.serialize();
+        let selection_bytes = self.selection.serialize();
+        let timestamp_bytes = self.timestamp.serialize();
+        let selection_timestamp_bytes = self.selection_timestamp.serialize();
+        [
+            response_type_bytes[0],
+            subtype_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            window_bytes[0],
+            window_bytes[1],
+            window_bytes[2],
+            window_bytes[3],
+            owner_bytes[0],
+            owner_bytes[1],
+            owner_bytes[2],
+            owner_bytes[3],
+            selection_bytes[0],
+            selection_bytes[1],
+            selection_bytes[2],
+            selection_bytes[3],
+            timestamp_bytes[0],
+            timestamp_bytes[1],
+            timestamp_bytes[2],
+            timestamp_bytes[3],
+            selection_timestamp_bytes[0],
+            selection_timestamp_bytes[1],
+            selection_timestamp_bytes[2],
+            selection_timestamp_bytes[3],
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        self.response_type.serialize_into(bytes);
+        u8::from(self.subtype).serialize_into(bytes);
+        self.sequence.serialize_into(bytes);
+        self.window.serialize_into(bytes);
+        self.owner.serialize_into(bytes);
+        self.selection.serialize_into(bytes);
+        self.timestamp.serialize_into(bytes);
+        self.selection_timestamp.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 8]);
+    }
+}
 impl From<&SelectionNotifyEvent> for [u8; 32] {
     fn from(input: &SelectionNotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -804,6 +918,63 @@ impl TryParse for CursorNotifyEvent {
         Ok((result, remaining))
     }
 }
+impl Serialize for CursorNotifyEvent {
+    type Bytes = [u8; 32];
+    fn serialize(&self) -> [u8; 32] {
+        let response_type_bytes = self.response_type.serialize();
+        let subtype_bytes = u8::from(self.subtype).serialize();
+        let sequence_bytes = self.sequence.serialize();
+        let window_bytes = self.window.serialize();
+        let cursor_serial_bytes = self.cursor_serial.serialize();
+        let timestamp_bytes = self.timestamp.serialize();
+        let name_bytes = self.name.serialize();
+        [
+            response_type_bytes[0],
+            subtype_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            window_bytes[0],
+            window_bytes[1],
+            window_bytes[2],
+            window_bytes[3],
+            cursor_serial_bytes[0],
+            cursor_serial_bytes[1],
+            cursor_serial_bytes[2],
+            cursor_serial_bytes[3],
+            timestamp_bytes[0],
+            timestamp_bytes[1],
+            timestamp_bytes[2],
+            timestamp_bytes[3],
+            name_bytes[0],
+            name_bytes[1],
+            name_bytes[2],
+            name_bytes[3],
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        self.response_type.serialize_into(bytes);
+        u8::from(self.subtype).serialize_into(bytes);
+        self.sequence.serialize_into(bytes);
+        self.window.serialize_into(bytes);
+        self.cursor_serial.serialize_into(bytes);
+        self.timestamp.serialize_into(bytes);
+        self.name.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 12]);
+    }
+}
 impl From<&CursorNotifyEvent> for [u8; 32] {
     fn from(input: &CursorNotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -999,6 +1170,32 @@ impl TryParse for GetCursorImageReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for GetCursorImageReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.x.serialize_into(bytes);
+        self.y.serialize_into(bytes);
+        self.width.serialize_into(bytes);
+        self.height.serialize_into(bytes);
+        self.xhot.serialize_into(bytes);
+        self.yhot.serialize_into(bytes);
+        self.cursor_serial.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 8]);
+        assert_eq!(self.cursor_image.len(), usize::try_from(u32::from(self.width).checked_mul(u32::from(self.height)).unwrap()).unwrap(), "`cursor_image` has an incorrect length");
+        self.cursor_image.serialize_into(bytes);
     }
 }
 
@@ -2067,6 +2264,26 @@ impl TryParse for FetchRegionReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for FetchRegionReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        let length = u32::try_from(self.rectangles.len()).ok().and_then(|len| len.checked_mul(2)).expect("`rectangles` has too many elements");
+        length.serialize_into(bytes);
+        self.extents.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 16]);
+        self.rectangles.serialize_into(bytes);
+    }
+}
 impl FetchRegionReply {
     /// Get the value of the `length` field.
     ///
@@ -2471,6 +2688,27 @@ impl TryParse for GetCursorNameReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for GetCursorNameReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.atom.serialize_into(bytes);
+        let nbytes = u16::try_from(self.name.len()).expect("`name` has too many elements");
+        nbytes.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 18]);
+        bytes.extend_from_slice(&self.name);
+    }
+}
 impl GetCursorNameReply {
     /// Get the value of the `nbytes` field.
     ///
@@ -2576,6 +2814,36 @@ impl TryParse for GetCursorImageAndNameReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for GetCursorImageAndNameReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.x.serialize_into(bytes);
+        self.y.serialize_into(bytes);
+        self.width.serialize_into(bytes);
+        self.height.serialize_into(bytes);
+        self.xhot.serialize_into(bytes);
+        self.yhot.serialize_into(bytes);
+        self.cursor_serial.serialize_into(bytes);
+        self.cursor_atom.serialize_into(bytes);
+        let nbytes = u16::try_from(self.name.len()).expect("`name` has too many elements");
+        nbytes.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 2]);
+        assert_eq!(self.cursor_image.len(), usize::try_from(u32::from(self.width).checked_mul(u32::from(self.height)).unwrap()).unwrap(), "`cursor_image` has an incorrect length");
+        self.cursor_image.serialize_into(bytes);
+        bytes.extend_from_slice(&self.name);
     }
 }
 impl GetCursorImageAndNameReply {

@@ -194,6 +194,61 @@ impl TryParse for QueryVersionReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for QueryVersionReply {
+    type Bytes = [u8; 32];
+    fn serialize(&self) -> [u8; 32] {
+        let response_type_bytes = &[1];
+        let sequence_bytes = self.sequence.serialize();
+        let length_bytes = self.length.serialize();
+        let major_version_bytes = self.major_version.serialize();
+        let minor_version_bytes = self.minor_version.serialize();
+        [
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            length_bytes[0],
+            length_bytes[1],
+            length_bytes[2],
+            length_bytes[3],
+            major_version_bytes[0],
+            major_version_bytes[1],
+            major_version_bytes[2],
+            major_version_bytes[3],
+            minor_version_bytes[0],
+            minor_version_bytes[1],
+            minor_version_bytes[2],
+            minor_version_bytes[3],
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.major_version.serialize_into(bytes);
+        self.minor_version.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 16]);
+    }
+}
 
 /// Opcode for the Create request
 pub const CREATE_REQUEST: u8 = 1;
@@ -480,6 +535,64 @@ impl TryParse for NotifyEvent {
         let remaining = initial_value.get(32..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for NotifyEvent {
+    type Bytes = [u8; 32];
+    fn serialize(&self) -> [u8; 32] {
+        let response_type_bytes = self.response_type.serialize();
+        let level_bytes = u8::from(self.level).serialize();
+        let sequence_bytes = self.sequence.serialize();
+        let drawable_bytes = self.drawable.serialize();
+        let damage_bytes = self.damage.serialize();
+        let timestamp_bytes = self.timestamp.serialize();
+        let area_bytes = self.area.serialize();
+        let geometry_bytes = self.geometry.serialize();
+        [
+            response_type_bytes[0],
+            level_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            drawable_bytes[0],
+            drawable_bytes[1],
+            drawable_bytes[2],
+            drawable_bytes[3],
+            damage_bytes[0],
+            damage_bytes[1],
+            damage_bytes[2],
+            damage_bytes[3],
+            timestamp_bytes[0],
+            timestamp_bytes[1],
+            timestamp_bytes[2],
+            timestamp_bytes[3],
+            area_bytes[0],
+            area_bytes[1],
+            area_bytes[2],
+            area_bytes[3],
+            area_bytes[4],
+            area_bytes[5],
+            area_bytes[6],
+            area_bytes[7],
+            geometry_bytes[0],
+            geometry_bytes[1],
+            geometry_bytes[2],
+            geometry_bytes[3],
+            geometry_bytes[4],
+            geometry_bytes[5],
+            geometry_bytes[6],
+            geometry_bytes[7],
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        self.response_type.serialize_into(bytes);
+        u8::from(self.level).serialize_into(bytes);
+        self.sequence.serialize_into(bytes);
+        self.drawable.serialize_into(bytes);
+        self.damage.serialize_into(bytes);
+        self.timestamp.serialize_into(bytes);
+        self.area.serialize_into(bytes);
+        self.geometry.serialize_into(bytes);
     }
 }
 impl From<&NotifyEvent> for [u8; 32] {

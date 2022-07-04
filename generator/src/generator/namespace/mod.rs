@@ -211,7 +211,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             false,
             true,
             size_constraint,
-            false,
+            true,
             true,
             event_full_def.doc.as_ref(),
             out,

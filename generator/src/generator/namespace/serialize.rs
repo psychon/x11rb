@@ -129,9 +129,29 @@ pub(super) fn emit_field_serialize(
             result_bytes.push(format!("{}[{}]", bytes_name, 0));
             Some(bytes_name)
         }
-        // the remaining field types are only used in request and replies,
-        // which do not implement serialize
-        _ => unreachable!(),
+        xcbdefs::FieldDef::Fd(..) | xcbdefs::FieldDef::FdList(..) => {
+            // fds are handled elsewhere
+            None
+        }
+        xcbdefs::FieldDef::VirtualLen(field) => {
+            // convert list length to bytes
+            let rfield_name = to_rust_variable_name(&field.name);
+            let bytes_name = postfix_var_name(&rfield_name, "bytes");
+            outln!(
+                out,
+                "let {} = u32::try_from(self.{}.len()).unwrap();",
+                bytes_name,
+                field.list_name
+            );
+            outln!(out, "let {0} = {0}.to_ne_bytes();", bytes_name);
+
+            for i in 0..4 {
+                result_bytes.push(format!("{}[{}]", bytes_name, i));
+            }
+
+            Some(bytes_name)
+        }
+        field => unreachable!("unknown field: {:?}", field),
     }
 }
 
@@ -206,11 +226,22 @@ pub(super) fn emit_field_serialize_into(
                     bytes_name
                 );
             } else {
-                outln!(
+                out!(
                     out,
-                    "for element in {}.iter() {{",
+                    "for element in {}.iter()",
                     wrap_field_ref(&list_field.name)
                 );
+
+                // enum conversions expected the value and not a reference
+                if generator
+                    .use_enum_type_in_field(&list_field.element_type)
+                    .is_some()
+                {
+                    out!(out, ".copied()");
+                }
+
+                outln!(out, " {{");
+
                 out.indented(|out| {
                     emit_value_serialize_into(
                         generator,
@@ -227,7 +258,13 @@ pub(super) fn emit_field_serialize_into(
         xcbdefs::FieldDef::Switch(switch_field) => {
             let ext_params_args = generator.ext_params_to_call_args(
                 true,
-                to_rust_variable_name,
+                |name| {
+                    if deducible_fields.contains_key(name) {
+                        to_rust_variable_name(name)
+                    } else {
+                        wrap_field_ref(&to_rust_variable_name(name))
+                    }
+                },
                 &*switch_field.external_params.borrow(),
             );
             outln!(
@@ -238,9 +275,36 @@ pub(super) fn emit_field_serialize_into(
                 ext_params_args,
             );
         }
-        // the remaining field types are only used in request and replies,
-        // which do not implement serialize
-        _ => unreachable!(),
+        xcbdefs::FieldDef::Expr(xcbdefs::ExprField {
+            name,
+            type_,
+            expr: xcbdefs::Expression::Value(v),
+        }) => {
+            let field_size = type_.type_.get_resolved().size().unwrap();
+            assert!(field_size == 1 && u8::try_from(*v).is_ok());
+            let rust_field_name = to_rust_variable_name(name);
+            let bytes_name2 = postfix_var_name(&rust_field_name, "bytes");
+
+            outln!(out, "let {} = &[{}];", bytes_name2, v);
+            outln!(out, "{}.push({}[{}]);", bytes_name, bytes_name2, 0);
+        }
+        xcbdefs::FieldDef::Fd(..) | xcbdefs::FieldDef::FdList(..) => {
+            // fds are handled elsewhere
+        }
+        xcbdefs::FieldDef::VirtualLen(field) => {
+            // convert list length to bytes
+            let rfield_name = to_rust_variable_name(&field.name);
+            let rbytes_name = postfix_var_name(&rfield_name, "bytes");
+            outln!(
+                out,
+                "let {} = u32::try_from(self.{}.len()).unwrap();",
+                rbytes_name,
+                field.list_name
+            );
+            outln!(out, "let {0} = {0}.to_ne_bytes();", rbytes_name);
+            outln!(out, "{}.extend_from_slice(&{});", bytes_name, rbytes_name);
+        }
+        field => unreachable!("Unknown field: {:?}", field),
     }
 }
 
@@ -409,6 +473,28 @@ pub(super) fn emit_value_serialize_into(
             );
         }
     } else {
+        // if the type has external parameters, make sure to keep
+        // them in mind when serializing
+        let ty = type_.type_.get_resolved();
+
+        if let xcbdefs::TypeRef::Struct(s) = ty {
+            let item = s.upgrade().expect("not resolved?");
+            let externals = item.external_params.borrow();
+            if !externals.is_empty() {
+                // we have external paramaters
+                // normally we'd need to use wrap_field_ref here, but we don't need to
+                // since this is only used in one case IIRC
+                let ext_args = generator.ext_params_to_call_args(
+                    true,
+                    |name| format!("self.{}", to_rust_variable_name(name)),
+                    &externals,
+                );
+                outln!(out, "{}.serialize_into({}{});", value, bytes_var, ext_args,);
+
+                return;
+            }
+        }
+
         outln!(out, "{}.serialize_into({});", value, bytes_var);
     }
 }

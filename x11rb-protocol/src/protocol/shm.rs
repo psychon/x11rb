@@ -68,6 +68,52 @@ impl TryParse for CompletionEvent {
         Ok((result, remaining))
     }
 }
+impl Serialize for CompletionEvent {
+    type Bytes = [u8; 20];
+    fn serialize(&self) -> [u8; 20] {
+        let response_type_bytes = self.response_type.serialize();
+        let sequence_bytes = self.sequence.serialize();
+        let drawable_bytes = self.drawable.serialize();
+        let minor_event_bytes = self.minor_event.serialize();
+        let major_event_bytes = self.major_event.serialize();
+        let shmseg_bytes = self.shmseg.serialize();
+        let offset_bytes = self.offset.serialize();
+        [
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            drawable_bytes[0],
+            drawable_bytes[1],
+            drawable_bytes[2],
+            drawable_bytes[3],
+            minor_event_bytes[0],
+            minor_event_bytes[1],
+            major_event_bytes[0],
+            0,
+            shmseg_bytes[0],
+            shmseg_bytes[1],
+            shmseg_bytes[2],
+            shmseg_bytes[3],
+            offset_bytes[0],
+            offset_bytes[1],
+            offset_bytes[2],
+            offset_bytes[3],
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(20);
+        self.response_type.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.drawable.serialize_into(bytes);
+        self.minor_event.serialize_into(bytes);
+        self.major_event.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 1]);
+        self.shmseg.serialize_into(bytes);
+        self.offset.serialize_into(bytes);
+    }
+}
 impl From<&CompletionEvent> for [u8; 32] {
     fn from(input: &CompletionEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -201,6 +247,68 @@ impl TryParse for QueryVersionReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for QueryVersionReply {
+    type Bytes = [u8; 32];
+    fn serialize(&self) -> [u8; 32] {
+        let response_type_bytes = &[1];
+        let shared_pixmaps_bytes = self.shared_pixmaps.serialize();
+        let sequence_bytes = self.sequence.serialize();
+        let length_bytes = self.length.serialize();
+        let major_version_bytes = self.major_version.serialize();
+        let minor_version_bytes = self.minor_version.serialize();
+        let uid_bytes = self.uid.serialize();
+        let gid_bytes = self.gid.serialize();
+        let pixmap_format_bytes = self.pixmap_format.serialize();
+        [
+            response_type_bytes[0],
+            shared_pixmaps_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            length_bytes[0],
+            length_bytes[1],
+            length_bytes[2],
+            length_bytes[3],
+            major_version_bytes[0],
+            major_version_bytes[1],
+            minor_version_bytes[0],
+            minor_version_bytes[1],
+            uid_bytes[0],
+            uid_bytes[1],
+            gid_bytes[0],
+            gid_bytes[1],
+            pixmap_format_bytes[0],
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        self.shared_pixmaps.serialize_into(bytes);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.major_version.serialize_into(bytes);
+        self.minor_version.serialize_into(bytes);
+        self.uid.serialize_into(bytes);
+        self.gid.serialize_into(bytes);
+        self.pixmap_format.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 15]);
     }
 }
 
@@ -608,6 +716,45 @@ impl TryParse for GetImageReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for GetImageReply {
+    type Bytes = [u8; 16];
+    fn serialize(&self) -> [u8; 16] {
+        let response_type_bytes = &[1];
+        let depth_bytes = self.depth.serialize();
+        let sequence_bytes = self.sequence.serialize();
+        let length_bytes = self.length.serialize();
+        let visual_bytes = self.visual.serialize();
+        let size_bytes = self.size.serialize();
+        [
+            response_type_bytes[0],
+            depth_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            length_bytes[0],
+            length_bytes[1],
+            length_bytes[2],
+            length_bytes[3],
+            visual_bytes[0],
+            visual_bytes[1],
+            visual_bytes[2],
+            visual_bytes[3],
+            size_bytes[0],
+            size_bytes[1],
+            size_bytes[2],
+            size_bytes[3],
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(16);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        self.depth.serialize_into(bytes);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.visual.serialize_into(bytes);
+        self.size.serialize_into(bytes);
+    }
+}
 
 /// Opcode for the CreatePixmap request
 pub const CREATE_PIXMAP_REQUEST: u8 = 5;
@@ -868,6 +1015,58 @@ impl TryParseFd for CreateSegmentReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for CreateSegmentReply {
+    type Bytes = [u8; 32];
+    fn serialize(&self) -> [u8; 32] {
+        let response_type_bytes = &[1];
+        let nfd_bytes = self.nfd.serialize();
+        let sequence_bytes = self.sequence.serialize();
+        let length_bytes = self.length.serialize();
+        [
+            response_type_bytes[0],
+            nfd_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            length_bytes[0],
+            length_bytes[1],
+            length_bytes[2],
+            length_bytes[3],
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        self.nfd.serialize_into(bytes);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 24]);
     }
 }
 

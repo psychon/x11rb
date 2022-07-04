@@ -475,6 +475,40 @@ impl TryParse for QueryVersionReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for QueryVersionReply {
+    type Bytes = [u8; 12];
+    fn serialize(&self) -> [u8; 12] {
+        let response_type_bytes = &[1];
+        let sequence_bytes = self.sequence.serialize();
+        let length_bytes = self.length.serialize();
+        let major_version_bytes = self.major_version.serialize();
+        let minor_version_bytes = self.minor_version.serialize();
+        [
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            length_bytes[0],
+            length_bytes[1],
+            length_bytes[2],
+            length_bytes[3],
+            major_version_bytes[0],
+            major_version_bytes[1],
+            minor_version_bytes[0],
+            minor_version_bytes[1],
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(12);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.major_version.serialize_into(bytes);
+        self.minor_version.serialize_into(bytes);
+    }
+}
 
 /// Opcode for the CreateContext request
 pub const CREATE_CONTEXT_REQUEST: u8 = 1;
@@ -829,6 +863,28 @@ impl TryParse for GetContextReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for GetContextReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        self.enabled.serialize_into(bytes);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.element_header.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 3]);
+        let num_intercepted_clients = u32::try_from(self.intercepted_clients.len()).expect("`intercepted_clients` has too many elements");
+        num_intercepted_clients.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 16]);
+        self.intercepted_clients.serialize_into(bytes);
+    }
+}
 impl GetContextReply {
     /// Get the value of the `num_intercepted_clients` field.
     ///
@@ -935,6 +991,32 @@ impl TryParse for EnableContextReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for EnableContextReply {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        self.category.serialize_into(bytes);
+        self.sequence.serialize_into(bytes);
+        assert_eq!(self.data.len() % 4, 0, "`data` has an incorrect length, must be a multiple of 4");
+        let length = u32::try_from(self.data.len() / 4).expect("`data` has too many elements");
+        length.serialize_into(bytes);
+        self.element_header.serialize_into(bytes);
+        self.client_swapped.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 2]);
+        self.xid_base.serialize_into(bytes);
+        self.server_time.serialize_into(bytes);
+        self.rec_sequence_num.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 8]);
+        bytes.extend_from_slice(&self.data);
     }
 }
 impl EnableContextReply {

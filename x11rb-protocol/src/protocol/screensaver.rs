@@ -305,6 +305,61 @@ impl TryParse for QueryVersionReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for QueryVersionReply {
+    type Bytes = [u8; 32];
+    fn serialize(&self) -> [u8; 32] {
+        let response_type_bytes = &[1];
+        let sequence_bytes = self.sequence.serialize();
+        let length_bytes = self.length.serialize();
+        let server_major_version_bytes = self.server_major_version.serialize();
+        let server_minor_version_bytes = self.server_minor_version.serialize();
+        [
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            length_bytes[0],
+            length_bytes[1],
+            length_bytes[2],
+            length_bytes[3],
+            server_major_version_bytes[0],
+            server_major_version_bytes[1],
+            server_minor_version_bytes[0],
+            server_minor_version_bytes[1],
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.server_major_version.serialize_into(bytes);
+        self.server_minor_version.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 20]);
+    }
+}
 
 /// Opcode for the QueryInfo request
 pub const QUERY_INFO_REQUEST: u8 = 1;
@@ -394,6 +449,68 @@ impl TryParse for QueryInfoReply {
         let remaining = initial_value.get(32 + length as usize * 4..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for QueryInfoReply {
+    type Bytes = [u8; 32];
+    fn serialize(&self) -> [u8; 32] {
+        let response_type_bytes = &[1];
+        let state_bytes = self.state.serialize();
+        let sequence_bytes = self.sequence.serialize();
+        let length_bytes = self.length.serialize();
+        let saver_window_bytes = self.saver_window.serialize();
+        let ms_until_server_bytes = self.ms_until_server.serialize();
+        let ms_since_user_input_bytes = self.ms_since_user_input.serialize();
+        let event_mask_bytes = self.event_mask.serialize();
+        let kind_bytes = u8::from(self.kind).serialize();
+        [
+            response_type_bytes[0],
+            state_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            length_bytes[0],
+            length_bytes[1],
+            length_bytes[2],
+            length_bytes[3],
+            saver_window_bytes[0],
+            saver_window_bytes[1],
+            saver_window_bytes[2],
+            saver_window_bytes[3],
+            ms_until_server_bytes[0],
+            ms_until_server_bytes[1],
+            ms_until_server_bytes[2],
+            ms_until_server_bytes[3],
+            ms_since_user_input_bytes[0],
+            ms_since_user_input_bytes[1],
+            ms_since_user_input_bytes[2],
+            ms_since_user_input_bytes[3],
+            event_mask_bytes[0],
+            event_mask_bytes[1],
+            event_mask_bytes[2],
+            event_mask_bytes[3],
+            kind_bytes[0],
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        self.state.serialize_into(bytes);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.saver_window.serialize_into(bytes);
+        self.ms_until_server.serialize_into(bytes);
+        self.ms_since_user_input.serialize_into(bytes);
+        self.event_mask.serialize_into(bytes);
+        u8::from(self.kind).serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 7]);
     }
 }
 
@@ -617,7 +734,7 @@ impl SetAttributesAux {
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, value_mask: u32) {
-        assert_eq!(self.switch_expr(), value_mask, "switch `value_list` has an inconsistent discriminant");
+        let _ = value_mask;
         if let Some(background_pixmap) = self.background_pixmap {
             background_pixmap.serialize_into(bytes);
         }
@@ -1083,6 +1200,65 @@ impl TryParse for NotifyEvent {
         let remaining = initial_value.get(32..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for NotifyEvent {
+    type Bytes = [u8; 32];
+    fn serialize(&self) -> [u8; 32] {
+        let response_type_bytes = self.response_type.serialize();
+        let state_bytes = u8::from(self.state).serialize();
+        let sequence_bytes = self.sequence.serialize();
+        let time_bytes = self.time.serialize();
+        let root_bytes = self.root.serialize();
+        let window_bytes = self.window.serialize();
+        let kind_bytes = u8::from(self.kind).serialize();
+        let forced_bytes = self.forced.serialize();
+        [
+            response_type_bytes[0],
+            state_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            time_bytes[0],
+            time_bytes[1],
+            time_bytes[2],
+            time_bytes[3],
+            root_bytes[0],
+            root_bytes[1],
+            root_bytes[2],
+            root_bytes[3],
+            window_bytes[0],
+            window_bytes[1],
+            window_bytes[2],
+            window_bytes[3],
+            kind_bytes[0],
+            forced_bytes[0],
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        self.response_type.serialize_into(bytes);
+        u8::from(self.state).serialize_into(bytes);
+        self.sequence.serialize_into(bytes);
+        self.time.serialize_into(bytes);
+        self.root.serialize_into(bytes);
+        self.window.serialize_into(bytes);
+        u8::from(self.kind).serialize_into(bytes);
+        self.forced.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 14]);
     }
 }
 impl From<&NotifyEvent> for [u8; 32] {

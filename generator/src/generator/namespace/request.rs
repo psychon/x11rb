@@ -276,8 +276,8 @@ pub(super) fn generate_request(
             false,
             true,
             StructSizeConstraint::EmbeddedLength { minimum: 32 },
-            false,
-            false,
+            true,
+            true,
             reply.doc.as_ref(),
             proto_out,
         );
