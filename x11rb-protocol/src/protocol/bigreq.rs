@@ -134,4 +134,29 @@ impl Serialize for EnableReply {
         self.maximum_request_length.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod enable_reply {
+    use super::EnableReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for EnableReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                maximum_request_length: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(3005088084005562368);
+        let value = EnableReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 

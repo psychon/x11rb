@@ -114,6 +114,35 @@ impl Serialize for CompletionEvent {
         self.offset.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod completion_event {
+    use super::CompletionEvent;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for CompletionEvent {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                response_type: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                drawable: GenRandom::generate(rng),
+                minor_event: GenRandom::generate(rng),
+                major_event: GenRandom::generate(rng),
+                shmseg: GenRandom::generate(rng),
+                offset: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(3094962741219467264);
+        let value = CompletionEvent::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 impl From<&CompletionEvent> for [u8; 32] {
     fn from(input: &CompletionEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -309,6 +338,36 @@ impl Serialize for QueryVersionReply {
         self.gid.serialize_into(bytes);
         self.pixmap_format.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 15]);
+    }
+}
+#[cfg(test)]
+mod query_version_reply {
+    use super::QueryVersionReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for QueryVersionReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                shared_pixmaps: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                major_version: GenRandom::generate(rng),
+                minor_version: GenRandom::generate(rng),
+                uid: GenRandom::generate(rng),
+                gid: GenRandom::generate(rng),
+                pixmap_format: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(228006558612858880);
+        let value = QueryVersionReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -755,6 +814,33 @@ impl Serialize for GetImageReply {
         self.size.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod get_image_reply {
+    use super::GetImageReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetImageReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                depth: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                visual: GenRandom::generate(rng),
+                size: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(2818075533431943680);
+        let value = GetImageReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the CreatePixmap request
 pub const CREATE_PIXMAP_REQUEST: u8 = 5;
@@ -1067,6 +1153,32 @@ impl Serialize for CreateSegmentReply {
         self.sequence.serialize_into(bytes);
         self.length.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 24]);
+    }
+}
+#[cfg(test)]
+mod create_segment_reply {
+    use super::CreateSegmentReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for CreateSegmentReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                nfd: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                shm_fd: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(13151268826066493440);
+        let value = CreateSegmentReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 

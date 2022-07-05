@@ -207,6 +207,40 @@ impl Serialize for PbufferClobberEvent {
         bytes.extend_from_slice(&[0; 4]);
     }
 }
+#[cfg(test)]
+mod pbuffer_clobber_event {
+    use super::PbufferClobberEvent;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for PbufferClobberEvent {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                response_type: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                event_type: GenRandom::generate(rng),
+                draw_type: GenRandom::generate(rng),
+                drawable: GenRandom::generate(rng),
+                b_mask: GenRandom::generate(rng),
+                aux_buffer: GenRandom::generate(rng),
+                x: GenRandom::generate(rng),
+                y: GenRandom::generate(rng),
+                width: GenRandom::generate(rng),
+                height: GenRandom::generate(rng),
+                count: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(12924686000395780096);
+        let value = PbufferClobberEvent::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 impl From<&PbufferClobberEvent> for [u8; 32] {
     fn from(input: &PbufferClobberEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -361,6 +395,37 @@ impl Serialize for BufferSwapCompleteEvent {
         self.sbc.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod buffer_swap_complete_event {
+    use super::BufferSwapCompleteEvent;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for BufferSwapCompleteEvent {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                response_type: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                event_type: GenRandom::generate(rng),
+                drawable: GenRandom::generate(rng),
+                ust_hi: GenRandom::generate(rng),
+                ust_lo: GenRandom::generate(rng),
+                msc_hi: GenRandom::generate(rng),
+                msc_lo: GenRandom::generate(rng),
+                sbc: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(10394221322546708480);
+        let value = BufferSwapCompleteEvent::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 impl From<&BufferSwapCompleteEvent> for [u8; 32] {
     fn from(input: &BufferSwapCompleteEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -466,6 +531,17 @@ impl core::fmt::Debug for PBCET  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for PBCET {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::DAMAGED.0,
+            Self::SAVED.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -517,6 +593,17 @@ impl core::fmt::Debug for PBCDT  {
             (Self::PBUFFER.0.into(), "PBUFFER", "Pbuffer"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for PBCDT {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::WINDOW.0,
+            Self::PBUFFER.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
     }
 }
 
@@ -961,6 +1048,31 @@ impl Serialize for MakeCurrentReply {
         bytes.extend_from_slice(&[0; 20]);
     }
 }
+#[cfg(test)]
+mod make_current_reply {
+    use super::MakeCurrentReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for MakeCurrentReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                context_tag: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(8779459665928466432);
+        let value = MakeCurrentReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the IsDirect request
 pub const IS_DIRECT_REQUEST: u8 = 6;
@@ -1093,6 +1205,31 @@ impl Serialize for IsDirectReply {
         self.length.serialize_into(bytes);
         self.is_direct.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 23]);
+    }
+}
+#[cfg(test)]
+mod is_direct_reply {
+    use super::IsDirectReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for IsDirectReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                is_direct: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(16479873601393463296);
+        let value = IsDirectReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -1239,6 +1376,32 @@ impl Serialize for QueryVersionReply {
         self.major_version.serialize_into(bytes);
         self.minor_version.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 16]);
+    }
+}
+#[cfg(test)]
+mod query_version_reply {
+    use super::QueryVersionReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for QueryVersionReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                major_version: GenRandom::generate(rng),
+                minor_version: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(228006558612858880);
+        let value = QueryVersionReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -1507,6 +1670,36 @@ impl core::fmt::Debug for GC  {
             (Self::GL_ALL_ATTRIB_BITS.0, "GL_ALL_ATTRIB_BITS", "GL_ALL_ATTRIB_BITS"),
         ];
         pretty_print_enum(fmt, self.0, &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for GC {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::GL_CURRENT_BIT.0,
+            Self::GL_POINT_BIT.0,
+            Self::GL_LINE_BIT.0,
+            Self::GL_POLYGON_BIT.0,
+            Self::GL_POLYGON_STIPPLE_BIT.0,
+            Self::GL_PIXEL_MODE_BIT.0,
+            Self::GL_LIGHTING_BIT.0,
+            Self::GL_FOG_BIT.0,
+            Self::GL_DEPTH_BUFFER_BIT.0,
+            Self::GL_ACCUM_BUFFER_BIT.0,
+            Self::GL_STENCIL_BUFFER_BIT.0,
+            Self::GL_VIEWPORT_BIT.0,
+            Self::GL_TRANSFORM_BIT.0,
+            Self::GL_ENABLE_BIT.0,
+            Self::GL_COLOR_BUFFER_BIT.0,
+            Self::GL_HINT_BIT.0,
+            Self::GL_EVAL_BIT.0,
+            Self::GL_LIST_BIT.0,
+            Self::GL_TEXTURE_BIT.0,
+            Self::GL_SCISSOR_BIT.0,
+            Self::GL_ALL_ATTRIB_BITS.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
     }
 }
 
@@ -1852,6 +2045,32 @@ impl GetVisualConfigsReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod get_visual_configs_reply {
+    use super::GetVisualConfigsReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetVisualConfigsReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                num_visuals: GenRandom::generate(rng),
+                num_properties: GenRandom::generate(rng),
+                property_list: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(1832434775087726592);
+        let value = GetVisualConfigsReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the DestroyGLXPixmap request
 pub const DESTROY_GLX_PIXMAP_REQUEST: u8 = 15;
@@ -2124,6 +2343,32 @@ impl VendorPrivateWithReplyReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod vendor_private_with_reply_reply {
+    use super::VendorPrivateWithReplyReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for VendorPrivateWithReplyReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                retval: GenRandom::generate(rng),
+                data1: GenRandom::generate(rng),
+                data2: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(5259099213848903680);
+        let value = VendorPrivateWithReplyReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the QueryExtensionsString request
 pub const QUERY_EXTENSIONS_STRING_REQUEST: u8 = 18;
@@ -2260,6 +2505,31 @@ impl Serialize for QueryExtensionsStringReply {
         bytes.extend_from_slice(&[0; 16]);
     }
 }
+#[cfg(test)]
+mod query_extensions_string_reply {
+    use super::QueryExtensionsStringReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for QueryExtensionsStringReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                n: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(3847882290182488064);
+        let value = QueryExtensionsStringReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the QueryServerString request
 pub const QUERY_SERVER_STRING_REQUEST: u8 = 19;
@@ -2386,6 +2656,31 @@ impl QueryServerStringReply {
     pub fn str_len(&self) -> u32 {
         self.string.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod query_server_string_reply {
+    use super::QueryServerStringReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for QueryServerStringReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                string: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(9003271042815459328);
+        let value = QueryServerStringReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -2588,6 +2883,32 @@ impl GetFBConfigsReply {
     pub fn length(&self) -> u32 {
         self.property_list.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod get_fb_configs_reply {
+    use super::GetFBConfigsReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetFBConfigsReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                num_fb_configs: GenRandom::generate(rng),
+                num_properties: GenRandom::generate(rng),
+                property_list: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(12656405130490159104);
+        let value = GetFBConfigsReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -2958,6 +3279,31 @@ impl QueryContextReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod query_context_reply {
+    use super::QueryContextReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for QueryContextReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                attribs: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(7141503560154939392);
+        let value = QueryContextReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the MakeContextCurrent request
 pub const MAKE_CONTEXT_CURRENT_REQUEST: u8 = 26;
@@ -3114,6 +3460,31 @@ impl Serialize for MakeContextCurrentReply {
         self.length.serialize_into(bytes);
         self.context_tag.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 20]);
+    }
+}
+#[cfg(test)]
+mod make_context_current_reply {
+    use super::MakeContextCurrentReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for MakeContextCurrentReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                context_tag: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(9967291892132478976);
+        let value = MakeContextCurrentReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -3379,6 +3750,31 @@ impl GetDrawableAttributesReply {
         self.attribs.len()
             .checked_div(2).unwrap()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod get_drawable_attributes_reply {
+    use super::GetDrawableAttributesReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetDrawableAttributesReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                attribs: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(6160761388919685120);
+        let value = GetDrawableAttributesReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -4250,6 +4646,31 @@ impl Serialize for GenListsReply {
         self.ret_val.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod gen_lists_reply {
+    use super::GenListsReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GenListsReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                ret_val: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(6363658479379296256);
+        let value = GenListsReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the FeedbackBuffer request
 pub const FEEDBACK_BUFFER_REQUEST: u8 = 105;
@@ -4511,6 +4932,33 @@ impl RenderModeReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod render_mode_reply {
+    use super::RenderModeReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for RenderModeReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                ret_val: GenRandom::generate(rng),
+                new_mode: GenRandom::generate(rng),
+                data: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(5941499723003478016);
+        let value = RenderModeReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -4564,6 +5012,18 @@ impl core::fmt::Debug for RM  {
             (Self::GL_SELECT.0.into(), "GL_SELECT", "GL_SELECT"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for RM {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::GL_RENDER.0,
+            Self::GL_FEEDBACK.0,
+            Self::GL_SELECT.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
     }
 }
 
@@ -4668,6 +5128,30 @@ impl Serialize for FinishReply {
         bytes.extend_from_slice(&[0; 1]);
         self.sequence.serialize_into(bytes);
         self.length.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod finish_reply {
+    use super::FinishReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for FinishReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(3324270677610672128);
+        let value = FinishReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -4985,6 +5469,30 @@ impl ReadPixelsReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod read_pixels_reply {
+    use super::ReadPixelsReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for ReadPixelsReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                data: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(18126840124226928640);
+        let value = ReadPixelsReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the GetBooleanv request
 pub const GET_BOOLEANV_REQUEST: u8 = 112;
@@ -5115,6 +5623,32 @@ impl GetBooleanvReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod get_booleanv_reply {
+    use super::GetBooleanvReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetBooleanvReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                datum: GenRandom::generate(rng),
+                data: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(11459871985999233024);
+        let value = GetBooleanvReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the GetClipPlane request
 pub const GET_CLIP_PLANE_REQUEST: u8 = 113;
@@ -5236,6 +5770,30 @@ impl GetClipPlaneReply {
         self.data.len()
             .checked_mul(2).unwrap()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod get_clip_plane_reply {
+    use super::GetClipPlaneReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetClipPlaneReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                data: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(16826379829401092096);
+        let value = GetClipPlaneReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -5368,6 +5926,32 @@ impl GetDoublevReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod get_doublev_reply {
+    use super::GetDoublevReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetDoublevReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                datum: GenRandom::generate(rng),
+                data: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(101928068251418624);
+        let value = GetDoublevReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the GetError request
 pub const GET_ERROR_REQUEST: u8 = 115;
@@ -5478,6 +6062,31 @@ impl Serialize for GetErrorReply {
         self.sequence.serialize_into(bytes);
         self.length.serialize_into(bytes);
         self.error.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod get_error_reply {
+    use super::GetErrorReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetErrorReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                error: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(1160541281073844224);
+        let value = GetErrorReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -5610,6 +6219,32 @@ impl GetFloatvReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod get_floatv_reply {
+    use super::GetFloatvReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetFloatvReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                datum: GenRandom::generate(rng),
+                data: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(15829631814565888);
+        let value = GetFloatvReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the GetIntegerv request
 pub const GET_INTEGERV_REQUEST: u8 = 117;
@@ -5738,6 +6373,32 @@ impl GetIntegervReply {
     pub fn n(&self) -> u32 {
         self.data.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod get_integerv_reply {
+    use super::GetIntegervReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetIntegervReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                datum: GenRandom::generate(rng),
+                data: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(3682935519726551040);
+        let value = GetIntegervReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -5878,6 +6539,32 @@ impl GetLightfvReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod get_lightfv_reply {
+    use super::GetLightfvReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetLightfvReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                datum: GenRandom::generate(rng),
+                data: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(17352592232192671744);
+        let value = GetLightfvReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the GetLightiv request
 pub const GET_LIGHTIV_REQUEST: u8 = 119;
@@ -6014,6 +6701,32 @@ impl GetLightivReply {
     pub fn n(&self) -> u32 {
         self.data.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod get_lightiv_reply {
+    use super::GetLightivReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetLightivReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                datum: GenRandom::generate(rng),
+                data: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(11352347036536143872);
+        let value = GetLightivReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -6154,6 +6867,32 @@ impl GetMapdvReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod get_mapdv_reply {
+    use super::GetMapdvReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetMapdvReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                datum: GenRandom::generate(rng),
+                data: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(11152702160938401792);
+        let value = GetMapdvReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the GetMapfv request
 pub const GET_MAPFV_REQUEST: u8 = 121;
@@ -6290,6 +7029,32 @@ impl GetMapfvReply {
     pub fn n(&self) -> u32 {
         self.data.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod get_mapfv_reply {
+    use super::GetMapfvReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetMapfvReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                datum: GenRandom::generate(rng),
+                data: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(6948537626466877440);
+        let value = GetMapfvReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -6430,6 +7195,32 @@ impl GetMapivReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod get_mapiv_reply {
+    use super::GetMapivReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetMapivReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                datum: GenRandom::generate(rng),
+                data: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(9865662861614366720);
+        let value = GetMapivReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the GetMaterialfv request
 pub const GET_MATERIALFV_REQUEST: u8 = 123;
@@ -6566,6 +7357,32 @@ impl GetMaterialfvReply {
     pub fn n(&self) -> u32 {
         self.data.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod get_materialfv_reply {
+    use super::GetMaterialfvReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetMaterialfvReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                datum: GenRandom::generate(rng),
+                data: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(14587591306169090048);
+        let value = GetMaterialfvReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -6706,6 +7523,32 @@ impl GetMaterialivReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod get_materialiv_reply {
+    use super::GetMaterialivReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetMaterialivReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                datum: GenRandom::generate(rng),
+                data: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(14474086813006135296);
+        let value = GetMaterialivReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the GetPixelMapfv request
 pub const GET_PIXEL_MAPFV_REQUEST: u8 = 125;
@@ -6834,6 +7677,32 @@ impl GetPixelMapfvReply {
     pub fn n(&self) -> u32 {
         self.data.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod get_pixel_mapfv_reply {
+    use super::GetPixelMapfvReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetPixelMapfvReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                datum: GenRandom::generate(rng),
+                data: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(9186480597281800192);
+        let value = GetPixelMapfvReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -6966,6 +7835,32 @@ impl GetPixelMapuivReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod get_pixel_mapuiv_reply {
+    use super::GetPixelMapuivReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetPixelMapuivReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                datum: GenRandom::generate(rng),
+                data: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(8849258375133790208);
+        let value = GetPixelMapuivReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the GetPixelMapusv request
 pub const GET_PIXEL_MAPUSV_REQUEST: u8 = 127;
@@ -7096,6 +7991,32 @@ impl GetPixelMapusvReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod get_pixel_mapusv_reply {
+    use super::GetPixelMapusvReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetPixelMapusvReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                datum: GenRandom::generate(rng),
+                data: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(3543130195814776832);
+        let value = GetPixelMapusvReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the GetPolygonStipple request
 pub const GET_POLYGON_STIPPLE_REQUEST: u8 = 128;
@@ -7219,6 +8140,30 @@ impl GetPolygonStippleReply {
         self.data.len()
             .checked_div(4).unwrap()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod get_polygon_stipple_reply {
+    use super::GetPolygonStippleReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetPolygonStippleReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                data: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(15814776368253632512);
+        let value = GetPolygonStippleReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -7347,6 +8292,31 @@ impl GetStringReply {
     pub fn n(&self) -> u32 {
         self.string.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod get_string_reply {
+    use super::GetStringReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetStringReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                string: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(2605158336947953664);
+        let value = GetStringReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -7487,6 +8457,32 @@ impl GetTexEnvfvReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod get_tex_envfv_reply {
+    use super::GetTexEnvfvReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetTexEnvfvReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                datum: GenRandom::generate(rng),
+                data: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(10922631212501827584);
+        let value = GetTexEnvfvReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the GetTexEnviv request
 pub const GET_TEX_ENVIV_REQUEST: u8 = 131;
@@ -7623,6 +8619,32 @@ impl GetTexEnvivReply {
     pub fn n(&self) -> u32 {
         self.data.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod get_tex_enviv_reply {
+    use super::GetTexEnvivReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetTexEnvivReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                datum: GenRandom::generate(rng),
+                data: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(935410442267131904);
+        let value = GetTexEnvivReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -7763,6 +8785,32 @@ impl GetTexGendvReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod get_tex_gendv_reply {
+    use super::GetTexGendvReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetTexGendvReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                datum: GenRandom::generate(rng),
+                data: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(3644709683030917120);
+        let value = GetTexGendvReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the GetTexGenfv request
 pub const GET_TEX_GENFV_REQUEST: u8 = 133;
@@ -7901,6 +8949,32 @@ impl GetTexGenfvReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod get_tex_genfv_reply {
+    use super::GetTexGenfvReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetTexGenfvReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                datum: GenRandom::generate(rng),
+                data: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(5562278284062490624);
+        let value = GetTexGenfvReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the GetTexGeniv request
 pub const GET_TEX_GENIV_REQUEST: u8 = 134;
@@ -8037,6 +9111,32 @@ impl GetTexGenivReply {
     pub fn n(&self) -> u32 {
         self.data.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod get_tex_geniv_reply {
+    use super::GetTexGenivReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetTexGenivReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                datum: GenRandom::generate(rng),
+                data: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(17662003222464626688);
+        let value = GetTexGenivReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -8207,6 +9307,33 @@ impl GetTexImageReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod get_tex_image_reply {
+    use super::GetTexImageReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetTexImageReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                width: GenRandom::generate(rng),
+                height: GenRandom::generate(rng),
+                depth: GenRandom::generate(rng),
+                data: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(4233292346658897920);
+        let value = GetTexImageReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the GetTexParameterfv request
 pub const GET_TEX_PARAMETERFV_REQUEST: u8 = 136;
@@ -8345,6 +9472,32 @@ impl GetTexParameterfvReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod get_tex_parameterfv_reply {
+    use super::GetTexParameterfvReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetTexParameterfvReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                datum: GenRandom::generate(rng),
+                data: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(14868383753658433536);
+        let value = GetTexParameterfvReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the GetTexParameteriv request
 pub const GET_TEX_PARAMETERIV_REQUEST: u8 = 137;
@@ -8481,6 +9634,32 @@ impl GetTexParameterivReply {
     pub fn n(&self) -> u32 {
         self.data.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod get_tex_parameteriv_reply {
+    use super::GetTexParameterivReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetTexParameterivReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                datum: GenRandom::generate(rng),
+                data: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(1741906751038423040);
+        let value = GetTexParameterivReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -8629,6 +9808,32 @@ impl GetTexLevelParameterfvReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod get_tex_level_parameterfv_reply {
+    use super::GetTexLevelParameterfvReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetTexLevelParameterfvReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                datum: GenRandom::generate(rng),
+                data: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(17586942387026919424);
+        let value = GetTexLevelParameterfvReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the GetTexLevelParameteriv request
 pub const GET_TEX_LEVEL_PARAMETERIV_REQUEST: u8 = 139;
@@ -8775,6 +9980,32 @@ impl GetTexLevelParameterivReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod get_tex_level_parameteriv_reply {
+    use super::GetTexLevelParameterivReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetTexLevelParameterivReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                datum: GenRandom::generate(rng),
+                data: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(742563917271662592);
+        let value = GetTexLevelParameterivReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the IsEnabled request
 pub const IS_ENABLED_REQUEST: u8 = 140;
@@ -8895,6 +10126,31 @@ impl Serialize for IsEnabledReply {
         self.ret_val.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod is_enabled_reply {
+    use super::IsEnabledReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for IsEnabledReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                ret_val: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(13173746225038483456);
+        let value = IsEnabledReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the IsList request
 pub const IS_LIST_REQUEST: u8 = 141;
@@ -9013,6 +10269,31 @@ impl Serialize for IsListReply {
         self.sequence.serialize_into(bytes);
         self.length.serialize_into(bytes);
         self.ret_val.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod is_list_reply {
+    use super::IsListReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for IsListReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                ret_val: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(4587942290356369408);
+        let value = IsListReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -9206,6 +10487,31 @@ impl AreTexturesResidentReply {
         self.data.len()
             .checked_div(4).unwrap()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod are_textures_resident_reply {
+    use super::AreTexturesResidentReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for AreTexturesResidentReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                ret_val: GenRandom::generate(rng),
+                data: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(7851241948319842304);
+        let value = AreTexturesResidentReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -9404,6 +10710,30 @@ impl GenTexturesReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod gen_textures_reply {
+    use super::GenTexturesReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GenTexturesReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                data: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(10289315535470788608);
+        let value = GenTexturesReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the IsTexture request
 pub const IS_TEXTURE_REQUEST: u8 = 146;
@@ -9522,6 +10852,31 @@ impl Serialize for IsTextureReply {
         self.sequence.serialize_into(bytes);
         self.length.serialize_into(bytes);
         self.ret_val.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod is_texture_reply {
+    use super::IsTextureReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for IsTextureReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                ret_val: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(5628353883641511936);
+        let value = IsTextureReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -9678,6 +11033,31 @@ impl GetColorTableReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod get_color_table_reply {
+    use super::GetColorTableReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetColorTableReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                width: GenRandom::generate(rng),
+                data: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(12860743954894290944);
+        let value = GetColorTableReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the GetColorTableParameterfv request
 pub const GET_COLOR_TABLE_PARAMETERFV_REQUEST: u8 = 148;
@@ -9816,6 +11196,32 @@ impl GetColorTableParameterfvReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod get_color_table_parameterfv_reply {
+    use super::GetColorTableParameterfvReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetColorTableParameterfvReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                datum: GenRandom::generate(rng),
+                data: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(12676518370661629952);
+        let value = GetColorTableParameterfvReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the GetColorTableParameteriv request
 pub const GET_COLOR_TABLE_PARAMETERIV_REQUEST: u8 = 149;
@@ -9952,6 +11358,32 @@ impl GetColorTableParameterivReply {
     pub fn n(&self) -> u32 {
         self.data.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod get_color_table_parameteriv_reply {
+    use super::GetColorTableParameterivReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetColorTableParameterivReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                datum: GenRandom::generate(rng),
+                data: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(2198331220557824000);
+        let value = GetColorTableParameterivReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -10111,6 +11543,32 @@ impl GetConvolutionFilterReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod get_convolution_filter_reply {
+    use super::GetConvolutionFilterReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetConvolutionFilterReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                width: GenRandom::generate(rng),
+                height: GenRandom::generate(rng),
+                data: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(13075852885286191104);
+        let value = GetConvolutionFilterReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the GetConvolutionParameterfv request
 pub const GET_CONVOLUTION_PARAMETERFV_REQUEST: u8 = 151;
@@ -10249,6 +11707,32 @@ impl GetConvolutionParameterfvReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod get_convolution_parameterfv_reply {
+    use super::GetConvolutionParameterfvReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetConvolutionParameterfvReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                datum: GenRandom::generate(rng),
+                data: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(7455216085902557184);
+        let value = GetConvolutionParameterfvReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the GetConvolutionParameteriv request
 pub const GET_CONVOLUTION_PARAMETERIV_REQUEST: u8 = 152;
@@ -10385,6 +11869,32 @@ impl GetConvolutionParameterivReply {
     pub fn n(&self) -> u32 {
         self.data.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod get_convolution_parameteriv_reply {
+    use super::GetConvolutionParameterivReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetConvolutionParameterivReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                datum: GenRandom::generate(rng),
+                data: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(11472346221251657728);
+        let value = GetConvolutionParameterivReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -10542,6 +12052,32 @@ impl GetSeparableFilterReply {
         self.rows_and_cols.len()
             .checked_div(4).unwrap()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod get_separable_filter_reply {
+    use super::GetSeparableFilterReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetSeparableFilterReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                row_w: GenRandom::generate(rng),
+                col_h: GenRandom::generate(rng),
+                rows_and_cols: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(1902977498816184320);
+        let value = GetSeparableFilterReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -10702,6 +12238,31 @@ impl GetHistogramReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod get_histogram_reply {
+    use super::GetHistogramReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetHistogramReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                width: GenRandom::generate(rng),
+                data: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(7209322977286324224);
+        let value = GetHistogramReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the GetHistogramParameterfv request
 pub const GET_HISTOGRAM_PARAMETERFV_REQUEST: u8 = 155;
@@ -10840,6 +12401,32 @@ impl GetHistogramParameterfvReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod get_histogram_parameterfv_reply {
+    use super::GetHistogramParameterfvReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetHistogramParameterfvReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                datum: GenRandom::generate(rng),
+                data: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(15312439383227891712);
+        let value = GetHistogramParameterfvReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the GetHistogramParameteriv request
 pub const GET_HISTOGRAM_PARAMETERIV_REQUEST: u8 = 156;
@@ -10976,6 +12563,32 @@ impl GetHistogramParameterivReply {
     pub fn n(&self) -> u32 {
         self.data.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod get_histogram_parameteriv_reply {
+    use super::GetHistogramParameterivReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetHistogramParameterivReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                datum: GenRandom::generate(rng),
+                data: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(9252189692013576192);
+        let value = GetHistogramParameterivReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -11131,6 +12744,30 @@ impl GetMinmaxReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod get_minmax_reply {
+    use super::GetMinmaxReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetMinmaxReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                data: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(4948184665918005248);
+        let value = GetMinmaxReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the GetMinmaxParameterfv request
 pub const GET_MINMAX_PARAMETERFV_REQUEST: u8 = 158;
@@ -11267,6 +12904,32 @@ impl GetMinmaxParameterfvReply {
     pub fn n(&self) -> u32 {
         self.data.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod get_minmax_parameterfv_reply {
+    use super::GetMinmaxParameterfvReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetMinmaxParameterfvReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                datum: GenRandom::generate(rng),
+                data: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(7591657877379481600);
+        let value = GetMinmaxParameterfvReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -11407,6 +13070,32 @@ impl GetMinmaxParameterivReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod get_minmax_parameteriv_reply {
+    use super::GetMinmaxParameterivReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetMinmaxParameterivReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                datum: GenRandom::generate(rng),
+                data: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(17580865265736876032);
+        let value = GetMinmaxParameterivReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the GetCompressedTexImageARB request
 pub const GET_COMPRESSED_TEX_IMAGE_ARB_REQUEST: u8 = 160;
@@ -11543,6 +13232,31 @@ impl GetCompressedTexImageARBReply {
         self.data.len()
             .checked_div(4).unwrap()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod get_compressed_tex_image_arb_reply {
+    use super::GetCompressedTexImageARBReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetCompressedTexImageARBReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                size: GenRandom::generate(rng),
+                data: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(12441866542432387072);
+        let value = GetCompressedTexImageARBReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -11741,6 +13455,30 @@ impl GenQueriesARBReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod gen_queries_arb_reply {
+    use super::GenQueriesARBReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GenQueriesARBReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                data: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(3471532714765801472);
+        let value = GenQueriesARBReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the IsQueryARB request
 pub const IS_QUERY_ARB_REQUEST: u8 = 163;
@@ -11859,6 +13597,31 @@ impl Serialize for IsQueryARBReply {
         self.sequence.serialize_into(bytes);
         self.length.serialize_into(bytes);
         self.ret_val.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod is_query_arb_reply {
+    use super::IsQueryARBReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for IsQueryARBReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                ret_val: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(13638606248364518400);
+        let value = IsQueryARBReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -11999,6 +13762,32 @@ impl GetQueryivARBReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod get_queryiv_arb_reply {
+    use super::GetQueryivARBReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetQueryivARBReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                datum: GenRandom::generate(rng),
+                data: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(2220234867625336832);
+        let value = GetQueryivARBReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the GetQueryObjectivARB request
 pub const GET_QUERY_OBJECTIV_ARB_REQUEST: u8 = 165;
@@ -12137,6 +13926,32 @@ impl GetQueryObjectivARBReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod get_query_objectiv_arb_reply {
+    use super::GetQueryObjectivARBReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetQueryObjectivARBReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                datum: GenRandom::generate(rng),
+                data: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(9769312490701324288);
+        let value = GetQueryObjectivARBReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the GetQueryObjectuivARB request
 pub const GET_QUERY_OBJECTUIV_ARB_REQUEST: u8 = 166;
@@ -12273,6 +14088,32 @@ impl GetQueryObjectuivARBReply {
     pub fn n(&self) -> u32 {
         self.data.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod get_query_objectuiv_arb_reply {
+    use super::GetQueryObjectuivARBReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetQueryObjectuivARBReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                datum: GenRandom::generate(rng),
+                data: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(17758172915772293120);
+        let value = GetQueryObjectuivARBReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 

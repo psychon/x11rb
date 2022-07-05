@@ -78,6 +78,32 @@ impl Serialize for ScreenInfo {
         self.height.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod screen_info {
+    use super::ScreenInfo;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for ScreenInfo {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                x_org: GenRandom::generate(rng),
+                y_org: GenRandom::generate(rng),
+                width: GenRandom::generate(rng),
+                height: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(3329827934502880720);
+        let value = ScreenInfo::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the QueryVersion request
 pub const QUERY_VERSION_REQUEST: u8 = 0;
@@ -198,6 +224,32 @@ impl Serialize for QueryVersionReply {
         self.minor.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod query_version_reply {
+    use super::QueryVersionReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for QueryVersionReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                major: GenRandom::generate(rng),
+                minor: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(228006558612858880);
+        let value = QueryVersionReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the GetState request
 pub const GET_STATE_REQUEST: u8 = 1;
@@ -312,6 +364,32 @@ impl Serialize for GetStateReply {
         self.window.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod get_state_reply {
+    use super::GetStateReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetStateReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                state: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                window: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(14648255750109405184);
+        let value = GetStateReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the GetScreenCount request
 pub const GET_SCREEN_COUNT_REQUEST: u8 = 2;
@@ -424,6 +502,32 @@ impl Serialize for GetScreenCountReply {
         self.sequence.serialize_into(bytes);
         self.length.serialize_into(bytes);
         self.window.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod get_screen_count_reply {
+    use super::GetScreenCountReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetScreenCountReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                screen_count: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                window: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(13155290115969957888);
+        let value = GetScreenCountReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -570,6 +674,34 @@ impl Serialize for GetScreenSizeReply {
         self.screen.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod get_screen_size_reply {
+    use super::GetScreenSizeReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetScreenSizeReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                width: GenRandom::generate(rng),
+                height: GenRandom::generate(rng),
+                window: GenRandom::generate(rng),
+                screen: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(3651589685717839872);
+        let value = GetScreenSizeReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the IsActive request
 pub const IS_ACTIVE_REQUEST: u8 = 4;
@@ -671,6 +803,31 @@ impl Serialize for IsActiveReply {
         self.sequence.serialize_into(bytes);
         self.length.serialize_into(bytes);
         self.state.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod is_active_reply {
+    use super::IsActiveReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for IsActiveReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                state: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(15529797723769162752);
+        let value = IsActiveReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -779,6 +936,31 @@ impl QueryScreensReply {
     pub fn number(&self) -> u32 {
         self.screen_info.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod query_screens_reply {
+    use super::QueryScreensReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for QueryScreensReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                screen_info: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(12389443631667532800);
+        let value = QueryScreensReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 

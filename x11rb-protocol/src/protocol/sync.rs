@@ -96,6 +96,18 @@ impl core::fmt::Debug for ALARMSTATE  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for ALARMSTATE {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::ACTIVE.0,
+            Self::INACTIVE.0,
+            Self::DESTROYED.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 pub type Counter = u32;
 
@@ -151,6 +163,19 @@ impl core::fmt::Debug for TESTTYPE  {
         pretty_print_enum(fmt, self.0, &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for TESTTYPE {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::POSITIVE_TRANSITION.0,
+            Self::NEGATIVE_TRANSITION.0,
+            Self::POSITIVE_COMPARISON.0,
+            Self::NEGATIVE_COMPARISON.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -196,6 +221,17 @@ impl core::fmt::Debug for VALUETYPE  {
             (Self::RELATIVE.0, "RELATIVE", "Relative"),
         ];
         pretty_print_enum(fmt, self.0, &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for VALUETYPE {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::ABSOLUTE.0,
+            Self::RELATIVE.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
     }
 }
 
@@ -266,6 +302,21 @@ impl core::fmt::Debug for CA  {
     }
 }
 bitmask_binop!(CA, u8);
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for CA {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::COUNTER.0,
+            Self::VALUE_TYPE.0,
+            Self::VALUE.0,
+            Self::TEST_TYPE.0,
+            Self::DELTA.0,
+            Self::EVENTS.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -301,6 +352,30 @@ impl Serialize for Int64 {
         bytes.reserve(8);
         self.hi.serialize_into(bytes);
         self.lo.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod int64 {
+    use super::Int64;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for Int64 {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                hi: GenRandom::generate(rng),
+                lo: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(2615595840);
+        let value = Int64::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -357,6 +432,31 @@ impl Systemcounter {
     pub fn name_len(&self) -> u16 {
         self.name.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod systemcounter {
+    use super::Systemcounter;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for Systemcounter {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                counter: GenRandom::generate(rng),
+                resolution: GenRandom::generate(rng),
+                name: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(4192408027026438336);
+        let value = Systemcounter::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -418,6 +518,32 @@ impl Serialize for Trigger {
         u32::from(self.test_type).serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod trigger {
+    use super::Trigger;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for Trigger {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                counter: GenRandom::generate(rng),
+                wait_type: GenRandom::generate(rng),
+                wait_value: GenRandom::generate(rng),
+                test_type: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(122821419102480);
+        let value = Trigger::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -473,6 +599,30 @@ impl Serialize for Waitcondition {
         bytes.reserve(28);
         self.trigger.serialize_into(bytes);
         self.event_threshold.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod waitcondition {
+    use super::Waitcondition;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for Waitcondition {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                trigger: GenRandom::generate(rng),
+                event_threshold: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(7278544525087812864);
+        let value = Waitcondition::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -623,6 +773,32 @@ impl Serialize for InitializeReply {
         bytes.extend_from_slice(&[0; 22]);
     }
 }
+#[cfg(test)]
+mod initialize_reply {
+    use super::InitializeReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for InitializeReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                major_version: GenRandom::generate(rng),
+                minor_version: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(11992088235683815424);
+        let value = InitializeReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the ListSystemCounters request
 pub const LIST_SYSTEM_COUNTERS_REQUEST: u8 = 1;
@@ -729,6 +905,31 @@ impl ListSystemCountersReply {
     pub fn counters_len(&self) -> u32 {
         self.counters.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod list_system_counters_reply {
+    use super::ListSystemCountersReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for ListSystemCountersReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                counters: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(4084746914294792192);
+        let value = ListSystemCountersReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -963,6 +1164,31 @@ impl Serialize for QueryCounterReply {
         self.sequence.serialize_into(bytes);
         self.length.serialize_into(bytes);
         self.counter_value.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod query_counter_reply {
+    use super::QueryCounterReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for QueryCounterReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                counter_value: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(17807595901668061184);
+        let value = QueryCounterReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -1283,6 +1509,93 @@ impl CreateAlarmAux {
         expr_value
     }
 }
+#[cfg(test)]
+mod create_alarm_aux {
+    use super::CreateAlarmAux;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for CreateAlarmAux {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                counter: GenRandom::generate(rng),
+                value_type: GenRandom::generate(rng),
+                value: GenRandom::generate(rng),
+                test_type: GenRandom::generate(rng),
+                delta: GenRandom::generate(rng),
+                events: GenRandom::generate(rng),
+            }
+        }
+    }
+    fn generate_values(rng: &Rng) -> alloc::vec::Vec<CreateAlarmAux> {
+        alloc::vec![
+            CreateAlarmAux {
+                counter: None,
+                value_type: None,
+                value: None,
+                test_type: None,
+                delta: None,
+                events: None,
+            },
+            CreateAlarmAux {
+                counter: Some(GenRandom::generate(rng)),
+                value_type: Some(GenRandom::generate(rng)),
+                value: Some(GenRandom::generate(rng)),
+                test_type: Some(GenRandom::generate(rng)),
+                delta: Some(GenRandom::generate(rng)),
+                events: Some(GenRandom::generate(rng)),
+            },
+            CreateAlarmAux {
+                counter: Some(GenRandom::generate(rng)),
+                value_type: None,
+                value: None,
+                test_type: None,
+                delta: None,
+                events: None,
+            },
+            CreateAlarmAux {
+                counter: None,
+                value_type: Some(GenRandom::generate(rng)),
+                value: None,
+                test_type: None,
+                delta: None,
+                events: None,
+            },
+            CreateAlarmAux {
+                counter: None,
+                value_type: None,
+                value: Some(GenRandom::generate(rng)),
+                test_type: None,
+                delta: None,
+                events: None,
+            },
+            CreateAlarmAux {
+                counter: None,
+                value_type: None,
+                value: None,
+                test_type: Some(GenRandom::generate(rng)),
+                delta: None,
+                events: None,
+            },
+            CreateAlarmAux {
+                counter: None,
+                value_type: None,
+                value: None,
+                test_type: None,
+                delta: Some(GenRandom::generate(rng)),
+                events: None,
+            },
+            CreateAlarmAux {
+                counter: None,
+                value_type: None,
+                value: None,
+                test_type: None,
+                delta: None,
+                events: Some(GenRandom::generate(rng)),
+            },
+        ]
+    }
+}
 impl CreateAlarmAux {
     /// Create a new instance with all fields unset / not present.
     pub fn new() -> Self {
@@ -1520,6 +1833,93 @@ impl ChangeAlarmAux {
             expr_value |= u32::from(CA::EVENTS);
         }
         expr_value
+    }
+}
+#[cfg(test)]
+mod change_alarm_aux {
+    use super::ChangeAlarmAux;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for ChangeAlarmAux {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                counter: GenRandom::generate(rng),
+                value_type: GenRandom::generate(rng),
+                value: GenRandom::generate(rng),
+                test_type: GenRandom::generate(rng),
+                delta: GenRandom::generate(rng),
+                events: GenRandom::generate(rng),
+            }
+        }
+    }
+    fn generate_values(rng: &Rng) -> alloc::vec::Vec<ChangeAlarmAux> {
+        alloc::vec![
+            ChangeAlarmAux {
+                counter: None,
+                value_type: None,
+                value: None,
+                test_type: None,
+                delta: None,
+                events: None,
+            },
+            ChangeAlarmAux {
+                counter: Some(GenRandom::generate(rng)),
+                value_type: Some(GenRandom::generate(rng)),
+                value: Some(GenRandom::generate(rng)),
+                test_type: Some(GenRandom::generate(rng)),
+                delta: Some(GenRandom::generate(rng)),
+                events: Some(GenRandom::generate(rng)),
+            },
+            ChangeAlarmAux {
+                counter: Some(GenRandom::generate(rng)),
+                value_type: None,
+                value: None,
+                test_type: None,
+                delta: None,
+                events: None,
+            },
+            ChangeAlarmAux {
+                counter: None,
+                value_type: Some(GenRandom::generate(rng)),
+                value: None,
+                test_type: None,
+                delta: None,
+                events: None,
+            },
+            ChangeAlarmAux {
+                counter: None,
+                value_type: None,
+                value: Some(GenRandom::generate(rng)),
+                test_type: None,
+                delta: None,
+                events: None,
+            },
+            ChangeAlarmAux {
+                counter: None,
+                value_type: None,
+                value: None,
+                test_type: Some(GenRandom::generate(rng)),
+                delta: None,
+                events: None,
+            },
+            ChangeAlarmAux {
+                counter: None,
+                value_type: None,
+                value: None,
+                test_type: None,
+                delta: Some(GenRandom::generate(rng)),
+                events: None,
+            },
+            ChangeAlarmAux {
+                counter: None,
+                value_type: None,
+                value: None,
+                test_type: None,
+                delta: None,
+                events: Some(GenRandom::generate(rng)),
+            },
+        ]
     }
 }
 impl ChangeAlarmAux {
@@ -1846,6 +2246,34 @@ impl Serialize for QueryAlarmReply {
         bytes.extend_from_slice(&[0; 2]);
     }
 }
+#[cfg(test)]
+mod query_alarm_reply {
+    use super::QueryAlarmReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for QueryAlarmReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                trigger: GenRandom::generate(rng),
+                delta: GenRandom::generate(rng),
+                events: GenRandom::generate(rng),
+                state: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(4763213810316900352);
+        let value = QueryAlarmReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the SetPriority request
 pub const SET_PRIORITY_REQUEST: u8 = 12;
@@ -2017,6 +2445,31 @@ impl Serialize for GetPriorityReply {
         self.sequence.serialize_into(bytes);
         self.length.serialize_into(bytes);
         self.priority.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod get_priority_reply {
+    use super::GetPriorityReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetPriorityReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                priority: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(418989959247167488);
+        let value = GetPriorityReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -2381,6 +2834,31 @@ impl Serialize for QueryFenceReply {
         bytes.extend_from_slice(&[0; 23]);
     }
 }
+#[cfg(test)]
+mod query_fence_reply {
+    use super::QueryFenceReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for QueryFenceReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                triggered: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(3736833576887254016);
+        let value = QueryFenceReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the AwaitFence request
 pub const AWAIT_FENCE_REQUEST: u8 = 19;
@@ -2543,6 +3021,37 @@ impl Serialize for CounterNotifyEvent {
         bytes.extend_from_slice(&[0; 1]);
     }
 }
+#[cfg(test)]
+mod counter_notify_event {
+    use super::CounterNotifyEvent;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for CounterNotifyEvent {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                response_type: GenRandom::generate(rng),
+                kind: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                counter: GenRandom::generate(rng),
+                wait_value: GenRandom::generate(rng),
+                counter_value: GenRandom::generate(rng),
+                timestamp: GenRandom::generate(rng),
+                count: GenRandom::generate(rng),
+                destroyed: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(4770692995991932928);
+        let value = CounterNotifyEvent::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 impl From<&CounterNotifyEvent> for [u8; 32] {
     fn from(input: &CounterNotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -2687,6 +3196,36 @@ impl Serialize for AlarmNotifyEvent {
         self.timestamp.serialize_into(bytes);
         u8::from(self.state).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 3]);
+    }
+}
+#[cfg(test)]
+mod alarm_notify_event {
+    use super::AlarmNotifyEvent;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for AlarmNotifyEvent {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                response_type: GenRandom::generate(rng),
+                kind: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                alarm: GenRandom::generate(rng),
+                counter_value: GenRandom::generate(rng),
+                alarm_value: GenRandom::generate(rng),
+                timestamp: GenRandom::generate(rng),
+                state: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(4213081467844773888);
+        let value = AlarmNotifyEvent::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 impl From<&AlarmNotifyEvent> for [u8; 32] {

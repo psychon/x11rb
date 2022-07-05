@@ -92,6 +92,17 @@ impl core::fmt::Debug for PictType  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for PictType {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::INDEXED.0,
+            Self::DIRECT.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -147,6 +158,16 @@ impl core::fmt::Debug for PictureEnum  {
             (Self::NONE.0.into(), "NONE", "None"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for PictureEnum {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::NONE.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
     }
 }
 
@@ -310,6 +331,68 @@ impl core::fmt::Debug for PictOp  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for PictOp {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::CLEAR.0,
+            Self::SRC.0,
+            Self::DST.0,
+            Self::OVER.0,
+            Self::OVER_REVERSE.0,
+            Self::IN.0,
+            Self::IN_REVERSE.0,
+            Self::OUT.0,
+            Self::OUT_REVERSE.0,
+            Self::ATOP.0,
+            Self::ATOP_REVERSE.0,
+            Self::XOR.0,
+            Self::ADD.0,
+            Self::SATURATE.0,
+            Self::DISJOINT_CLEAR.0,
+            Self::DISJOINT_SRC.0,
+            Self::DISJOINT_DST.0,
+            Self::DISJOINT_OVER.0,
+            Self::DISJOINT_OVER_REVERSE.0,
+            Self::DISJOINT_IN.0,
+            Self::DISJOINT_IN_REVERSE.0,
+            Self::DISJOINT_OUT.0,
+            Self::DISJOINT_OUT_REVERSE.0,
+            Self::DISJOINT_ATOP.0,
+            Self::DISJOINT_ATOP_REVERSE.0,
+            Self::DISJOINT_XOR.0,
+            Self::CONJOINT_CLEAR.0,
+            Self::CONJOINT_SRC.0,
+            Self::CONJOINT_DST.0,
+            Self::CONJOINT_OVER.0,
+            Self::CONJOINT_OVER_REVERSE.0,
+            Self::CONJOINT_IN.0,
+            Self::CONJOINT_IN_REVERSE.0,
+            Self::CONJOINT_OUT.0,
+            Self::CONJOINT_OUT_REVERSE.0,
+            Self::CONJOINT_ATOP.0,
+            Self::CONJOINT_ATOP_REVERSE.0,
+            Self::CONJOINT_XOR.0,
+            Self::MULTIPLY.0,
+            Self::SCREEN.0,
+            Self::OVERLAY.0,
+            Self::DARKEN.0,
+            Self::LIGHTEN.0,
+            Self::COLOR_DODGE.0,
+            Self::COLOR_BURN.0,
+            Self::HARD_LIGHT.0,
+            Self::SOFT_LIGHT.0,
+            Self::DIFFERENCE.0,
+            Self::EXCLUSION.0,
+            Self::HSL_HUE.0,
+            Self::HSL_SATURATION.0,
+            Self::HSL_COLOR.0,
+            Self::HSL_LUMINOSITY.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -357,6 +440,17 @@ impl core::fmt::Debug for PolyEdge  {
         pretty_print_enum(fmt, self.0, &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for PolyEdge {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::SHARP.0,
+            Self::SMOOTH.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -402,6 +496,17 @@ impl core::fmt::Debug for PolyMode  {
             (Self::IMPRECISE.0, "IMPRECISE", "Imprecise"),
         ];
         pretty_print_enum(fmt, self.0, &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for PolyMode {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::PRECISE.0,
+            Self::IMPRECISE.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
     }
 }
 
@@ -480,6 +585,28 @@ impl core::fmt::Debug for CP  {
     }
 }
 bitmask_binop!(CP, u16);
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for CP {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::REPEAT.0,
+            Self::ALPHA_MAP.0,
+            Self::ALPHA_X_ORIGIN.0,
+            Self::ALPHA_Y_ORIGIN.0,
+            Self::CLIP_X_ORIGIN.0,
+            Self::CLIP_Y_ORIGIN.0,
+            Self::CLIP_MASK.0,
+            Self::GRAPHICS_EXPOSURE.0,
+            Self::SUBWINDOW_MODE.0,
+            Self::POLY_EDGE.0,
+            Self::POLY_MODE.0,
+            Self::DITHER.0,
+            Self::COMPONENT_ALPHA.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -535,6 +662,21 @@ impl core::fmt::Debug for SubPixel  {
         pretty_print_enum(fmt, self.0, &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for SubPixel {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::UNKNOWN.0,
+            Self::HORIZONTAL_RGB.0,
+            Self::HORIZONTAL_BGR.0,
+            Self::VERTICAL_RGB.0,
+            Self::VERTICAL_BGR.0,
+            Self::NONE.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -584,6 +726,19 @@ impl core::fmt::Debug for Repeat  {
             (Self::REFLECT.0, "REFLECT", "Reflect"),
         ];
         pretty_print_enum(fmt, self.0, &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for Repeat {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::NONE.0,
+            Self::NORMAL.0,
+            Self::PAD.0,
+            Self::REFLECT.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
     }
 }
 
@@ -680,6 +835,36 @@ impl Serialize for Directformat {
         self.alpha_mask.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod directformat {
+    use super::Directformat;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for Directformat {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                red_shift: GenRandom::generate(rng),
+                red_mask: GenRandom::generate(rng),
+                green_shift: GenRandom::generate(rng),
+                green_mask: GenRandom::generate(rng),
+                blue_shift: GenRandom::generate(rng),
+                blue_mask: GenRandom::generate(rng),
+                alpha_shift: GenRandom::generate(rng),
+                alpha_mask: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(2076806109003075072);
+        let value = Directformat::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -752,6 +937,33 @@ impl Serialize for Pictforminfo {
         self.colormap.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod pictforminfo {
+    use super::Pictforminfo;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for Pictforminfo {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                id: GenRandom::generate(rng),
+                type_: GenRandom::generate(rng),
+                depth: GenRandom::generate(rng),
+                direct: GenRandom::generate(rng),
+                colormap: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(4885331802167247872);
+        let value = Pictforminfo::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -787,6 +999,30 @@ impl Serialize for Pictvisual {
         bytes.reserve(8);
         self.visual.serialize_into(bytes);
         self.format.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod pictvisual {
+    use super::Pictvisual;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for Pictvisual {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                visual: GenRandom::generate(rng),
+                format: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(2449455497644755456);
+        let value = Pictvisual::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -839,6 +1075,30 @@ impl Pictdepth {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod pictdepth {
+    use super::Pictdepth;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for Pictdepth {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                depth: GenRandom::generate(rng),
+                visuals: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(1316446441390080000);
+        let value = Pictdepth::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -883,6 +1143,30 @@ impl Pictscreen {
     pub fn num_depths(&self) -> u32 {
         self.depths.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod pictscreen {
+    use super::Pictscreen;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for Pictscreen {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                fallback: GenRandom::generate(rng),
+                depths: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(11362913244415378688);
+        let value = Pictscreen::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -938,6 +1222,33 @@ impl Serialize for Indexvalue {
         self.alpha.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod indexvalue {
+    use super::Indexvalue;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for Indexvalue {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                pixel: GenRandom::generate(rng),
+                red: GenRandom::generate(rng),
+                green: GenRandom::generate(rng),
+                blue: GenRandom::generate(rng),
+                alpha: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(13041133186437298688);
+        let value = Indexvalue::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -983,6 +1294,32 @@ impl Serialize for Color {
         self.alpha.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod color {
+    use super::Color;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for Color {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                red: GenRandom::generate(rng),
+                green: GenRandom::generate(rng),
+                blue: GenRandom::generate(rng),
+                alpha: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(10163642184);
+        let value = Color::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -1018,6 +1355,30 @@ impl Serialize for Pointfix {
         bytes.reserve(8);
         self.x.serialize_into(bytes);
         self.y.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod pointfix {
+    use super::Pointfix;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for Pointfix {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                x: GenRandom::generate(rng),
+                y: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(15290569324800000);
+        let value = Pointfix::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -1063,6 +1424,30 @@ impl Serialize for Linefix {
         bytes.reserve(16);
         self.p1.serialize_into(bytes);
         self.p2.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod linefix {
+    use super::Linefix;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for Linefix {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                p1: GenRandom::generate(rng),
+                p2: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(113943004560000);
+        let value = Linefix::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -1120,6 +1505,31 @@ impl Serialize for Triangle {
         self.p1.serialize_into(bytes);
         self.p2.serialize_into(bytes);
         self.p3.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod triangle {
+    use super::Triangle;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for Triangle {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                p1: GenRandom::generate(rng),
+                p2: GenRandom::generate(rng),
+                p3: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(12053695325918400);
+        let value = Triangle::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -1199,6 +1609,32 @@ impl Serialize for Trapezoid {
         self.right.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod trapezoid {
+    use super::Trapezoid;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for Trapezoid {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                top: GenRandom::generate(rng),
+                bottom: GenRandom::generate(rng),
+                left: GenRandom::generate(rng),
+                right: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(1494057722500224000);
+        let value = Trapezoid::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -1254,6 +1690,34 @@ impl Serialize for Glyphinfo {
         self.y.serialize_into(bytes);
         self.x_off.serialize_into(bytes);
         self.y_off.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod glyphinfo {
+    use super::Glyphinfo;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for Glyphinfo {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                width: GenRandom::generate(rng),
+                height: GenRandom::generate(rng),
+                x: GenRandom::generate(rng),
+                y: GenRandom::generate(rng),
+                x_off: GenRandom::generate(rng),
+                y_off: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(1413266196332390400);
+        let value = Glyphinfo::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -1400,6 +1864,32 @@ impl Serialize for QueryVersionReply {
         self.major_version.serialize_into(bytes);
         self.minor_version.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 16]);
+    }
+}
+#[cfg(test)]
+mod query_version_reply {
+    use super::QueryVersionReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for QueryVersionReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                major_version: GenRandom::generate(rng),
+                minor_version: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(228006558612858880);
+        let value = QueryVersionReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -1564,6 +2054,35 @@ impl QueryPictFormatsReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod query_pict_formats_reply {
+    use super::QueryPictFormatsReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for QueryPictFormatsReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                num_depths: GenRandom::generate(rng),
+                num_visuals: GenRandom::generate(rng),
+                formats: GenRandom::generate(rng),
+                screens: GenRandom::generate(rng),
+                subpixels: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(12172518173946675200);
+        let value = QueryPictFormatsReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the QueryPictIndexValues request
 pub const QUERY_PICT_INDEX_VALUES_REQUEST: u8 = 2;
@@ -1679,6 +2198,31 @@ impl QueryPictIndexValuesReply {
     pub fn num_values(&self) -> u32 {
         self.values.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod query_pict_index_values_reply {
+    use super::QueryPictIndexValuesReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for QueryPictIndexValuesReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                values: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(9084443105716862976);
+        let value = QueryPictIndexValuesReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -1909,6 +2453,261 @@ impl CreatePictureAux {
             expr_value |= u32::from(CP::COMPONENT_ALPHA);
         }
         expr_value
+    }
+}
+#[cfg(test)]
+mod create_picture_aux {
+    use super::CreatePictureAux;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for CreatePictureAux {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                repeat: GenRandom::generate(rng),
+                alphamap: GenRandom::generate(rng),
+                alphaxorigin: GenRandom::generate(rng),
+                alphayorigin: GenRandom::generate(rng),
+                clipxorigin: GenRandom::generate(rng),
+                clipyorigin: GenRandom::generate(rng),
+                clipmask: GenRandom::generate(rng),
+                graphicsexposure: GenRandom::generate(rng),
+                subwindowmode: GenRandom::generate(rng),
+                polyedge: GenRandom::generate(rng),
+                polymode: GenRandom::generate(rng),
+                dither: GenRandom::generate(rng),
+                componentalpha: GenRandom::generate(rng),
+            }
+        }
+    }
+    fn generate_values(rng: &Rng) -> alloc::vec::Vec<CreatePictureAux> {
+        alloc::vec![
+            CreatePictureAux {
+                repeat: None,
+                alphamap: None,
+                alphaxorigin: None,
+                alphayorigin: None,
+                clipxorigin: None,
+                clipyorigin: None,
+                clipmask: None,
+                graphicsexposure: None,
+                subwindowmode: None,
+                polyedge: None,
+                polymode: None,
+                dither: None,
+                componentalpha: None,
+            },
+            CreatePictureAux {
+                repeat: Some(GenRandom::generate(rng)),
+                alphamap: Some(GenRandom::generate(rng)),
+                alphaxorigin: Some(GenRandom::generate(rng)),
+                alphayorigin: Some(GenRandom::generate(rng)),
+                clipxorigin: Some(GenRandom::generate(rng)),
+                clipyorigin: Some(GenRandom::generate(rng)),
+                clipmask: Some(GenRandom::generate(rng)),
+                graphicsexposure: Some(GenRandom::generate(rng)),
+                subwindowmode: Some(GenRandom::generate(rng)),
+                polyedge: Some(GenRandom::generate(rng)),
+                polymode: Some(GenRandom::generate(rng)),
+                dither: Some(GenRandom::generate(rng)),
+                componentalpha: Some(GenRandom::generate(rng)),
+            },
+            CreatePictureAux {
+                repeat: Some(GenRandom::generate(rng)),
+                alphamap: None,
+                alphaxorigin: None,
+                alphayorigin: None,
+                clipxorigin: None,
+                clipyorigin: None,
+                clipmask: None,
+                graphicsexposure: None,
+                subwindowmode: None,
+                polyedge: None,
+                polymode: None,
+                dither: None,
+                componentalpha: None,
+            },
+            CreatePictureAux {
+                repeat: None,
+                alphamap: Some(GenRandom::generate(rng)),
+                alphaxorigin: None,
+                alphayorigin: None,
+                clipxorigin: None,
+                clipyorigin: None,
+                clipmask: None,
+                graphicsexposure: None,
+                subwindowmode: None,
+                polyedge: None,
+                polymode: None,
+                dither: None,
+                componentalpha: None,
+            },
+            CreatePictureAux {
+                repeat: None,
+                alphamap: None,
+                alphaxorigin: Some(GenRandom::generate(rng)),
+                alphayorigin: None,
+                clipxorigin: None,
+                clipyorigin: None,
+                clipmask: None,
+                graphicsexposure: None,
+                subwindowmode: None,
+                polyedge: None,
+                polymode: None,
+                dither: None,
+                componentalpha: None,
+            },
+            CreatePictureAux {
+                repeat: None,
+                alphamap: None,
+                alphaxorigin: None,
+                alphayorigin: Some(GenRandom::generate(rng)),
+                clipxorigin: None,
+                clipyorigin: None,
+                clipmask: None,
+                graphicsexposure: None,
+                subwindowmode: None,
+                polyedge: None,
+                polymode: None,
+                dither: None,
+                componentalpha: None,
+            },
+            CreatePictureAux {
+                repeat: None,
+                alphamap: None,
+                alphaxorigin: None,
+                alphayorigin: None,
+                clipxorigin: Some(GenRandom::generate(rng)),
+                clipyorigin: None,
+                clipmask: None,
+                graphicsexposure: None,
+                subwindowmode: None,
+                polyedge: None,
+                polymode: None,
+                dither: None,
+                componentalpha: None,
+            },
+            CreatePictureAux {
+                repeat: None,
+                alphamap: None,
+                alphaxorigin: None,
+                alphayorigin: None,
+                clipxorigin: None,
+                clipyorigin: Some(GenRandom::generate(rng)),
+                clipmask: None,
+                graphicsexposure: None,
+                subwindowmode: None,
+                polyedge: None,
+                polymode: None,
+                dither: None,
+                componentalpha: None,
+            },
+            CreatePictureAux {
+                repeat: None,
+                alphamap: None,
+                alphaxorigin: None,
+                alphayorigin: None,
+                clipxorigin: None,
+                clipyorigin: None,
+                clipmask: Some(GenRandom::generate(rng)),
+                graphicsexposure: None,
+                subwindowmode: None,
+                polyedge: None,
+                polymode: None,
+                dither: None,
+                componentalpha: None,
+            },
+            CreatePictureAux {
+                repeat: None,
+                alphamap: None,
+                alphaxorigin: None,
+                alphayorigin: None,
+                clipxorigin: None,
+                clipyorigin: None,
+                clipmask: None,
+                graphicsexposure: Some(GenRandom::generate(rng)),
+                subwindowmode: None,
+                polyedge: None,
+                polymode: None,
+                dither: None,
+                componentalpha: None,
+            },
+            CreatePictureAux {
+                repeat: None,
+                alphamap: None,
+                alphaxorigin: None,
+                alphayorigin: None,
+                clipxorigin: None,
+                clipyorigin: None,
+                clipmask: None,
+                graphicsexposure: None,
+                subwindowmode: Some(GenRandom::generate(rng)),
+                polyedge: None,
+                polymode: None,
+                dither: None,
+                componentalpha: None,
+            },
+            CreatePictureAux {
+                repeat: None,
+                alphamap: None,
+                alphaxorigin: None,
+                alphayorigin: None,
+                clipxorigin: None,
+                clipyorigin: None,
+                clipmask: None,
+                graphicsexposure: None,
+                subwindowmode: None,
+                polyedge: Some(GenRandom::generate(rng)),
+                polymode: None,
+                dither: None,
+                componentalpha: None,
+            },
+            CreatePictureAux {
+                repeat: None,
+                alphamap: None,
+                alphaxorigin: None,
+                alphayorigin: None,
+                clipxorigin: None,
+                clipyorigin: None,
+                clipmask: None,
+                graphicsexposure: None,
+                subwindowmode: None,
+                polyedge: None,
+                polymode: Some(GenRandom::generate(rng)),
+                dither: None,
+                componentalpha: None,
+            },
+            CreatePictureAux {
+                repeat: None,
+                alphamap: None,
+                alphaxorigin: None,
+                alphayorigin: None,
+                clipxorigin: None,
+                clipyorigin: None,
+                clipmask: None,
+                graphicsexposure: None,
+                subwindowmode: None,
+                polyedge: None,
+                polymode: None,
+                dither: Some(GenRandom::generate(rng)),
+                componentalpha: None,
+            },
+            CreatePictureAux {
+                repeat: None,
+                alphamap: None,
+                alphaxorigin: None,
+                alphayorigin: None,
+                clipxorigin: None,
+                clipyorigin: None,
+                clipmask: None,
+                graphicsexposure: None,
+                subwindowmode: None,
+                polyedge: None,
+                polymode: None,
+                dither: None,
+                componentalpha: Some(GenRandom::generate(rng)),
+            },
+        ]
     }
 }
 impl CreatePictureAux {
@@ -2315,6 +3114,261 @@ impl ChangePictureAux {
             expr_value |= u32::from(CP::COMPONENT_ALPHA);
         }
         expr_value
+    }
+}
+#[cfg(test)]
+mod change_picture_aux {
+    use super::ChangePictureAux;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for ChangePictureAux {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                repeat: GenRandom::generate(rng),
+                alphamap: GenRandom::generate(rng),
+                alphaxorigin: GenRandom::generate(rng),
+                alphayorigin: GenRandom::generate(rng),
+                clipxorigin: GenRandom::generate(rng),
+                clipyorigin: GenRandom::generate(rng),
+                clipmask: GenRandom::generate(rng),
+                graphicsexposure: GenRandom::generate(rng),
+                subwindowmode: GenRandom::generate(rng),
+                polyedge: GenRandom::generate(rng),
+                polymode: GenRandom::generate(rng),
+                dither: GenRandom::generate(rng),
+                componentalpha: GenRandom::generate(rng),
+            }
+        }
+    }
+    fn generate_values(rng: &Rng) -> alloc::vec::Vec<ChangePictureAux> {
+        alloc::vec![
+            ChangePictureAux {
+                repeat: None,
+                alphamap: None,
+                alphaxorigin: None,
+                alphayorigin: None,
+                clipxorigin: None,
+                clipyorigin: None,
+                clipmask: None,
+                graphicsexposure: None,
+                subwindowmode: None,
+                polyedge: None,
+                polymode: None,
+                dither: None,
+                componentalpha: None,
+            },
+            ChangePictureAux {
+                repeat: Some(GenRandom::generate(rng)),
+                alphamap: Some(GenRandom::generate(rng)),
+                alphaxorigin: Some(GenRandom::generate(rng)),
+                alphayorigin: Some(GenRandom::generate(rng)),
+                clipxorigin: Some(GenRandom::generate(rng)),
+                clipyorigin: Some(GenRandom::generate(rng)),
+                clipmask: Some(GenRandom::generate(rng)),
+                graphicsexposure: Some(GenRandom::generate(rng)),
+                subwindowmode: Some(GenRandom::generate(rng)),
+                polyedge: Some(GenRandom::generate(rng)),
+                polymode: Some(GenRandom::generate(rng)),
+                dither: Some(GenRandom::generate(rng)),
+                componentalpha: Some(GenRandom::generate(rng)),
+            },
+            ChangePictureAux {
+                repeat: Some(GenRandom::generate(rng)),
+                alphamap: None,
+                alphaxorigin: None,
+                alphayorigin: None,
+                clipxorigin: None,
+                clipyorigin: None,
+                clipmask: None,
+                graphicsexposure: None,
+                subwindowmode: None,
+                polyedge: None,
+                polymode: None,
+                dither: None,
+                componentalpha: None,
+            },
+            ChangePictureAux {
+                repeat: None,
+                alphamap: Some(GenRandom::generate(rng)),
+                alphaxorigin: None,
+                alphayorigin: None,
+                clipxorigin: None,
+                clipyorigin: None,
+                clipmask: None,
+                graphicsexposure: None,
+                subwindowmode: None,
+                polyedge: None,
+                polymode: None,
+                dither: None,
+                componentalpha: None,
+            },
+            ChangePictureAux {
+                repeat: None,
+                alphamap: None,
+                alphaxorigin: Some(GenRandom::generate(rng)),
+                alphayorigin: None,
+                clipxorigin: None,
+                clipyorigin: None,
+                clipmask: None,
+                graphicsexposure: None,
+                subwindowmode: None,
+                polyedge: None,
+                polymode: None,
+                dither: None,
+                componentalpha: None,
+            },
+            ChangePictureAux {
+                repeat: None,
+                alphamap: None,
+                alphaxorigin: None,
+                alphayorigin: Some(GenRandom::generate(rng)),
+                clipxorigin: None,
+                clipyorigin: None,
+                clipmask: None,
+                graphicsexposure: None,
+                subwindowmode: None,
+                polyedge: None,
+                polymode: None,
+                dither: None,
+                componentalpha: None,
+            },
+            ChangePictureAux {
+                repeat: None,
+                alphamap: None,
+                alphaxorigin: None,
+                alphayorigin: None,
+                clipxorigin: Some(GenRandom::generate(rng)),
+                clipyorigin: None,
+                clipmask: None,
+                graphicsexposure: None,
+                subwindowmode: None,
+                polyedge: None,
+                polymode: None,
+                dither: None,
+                componentalpha: None,
+            },
+            ChangePictureAux {
+                repeat: None,
+                alphamap: None,
+                alphaxorigin: None,
+                alphayorigin: None,
+                clipxorigin: None,
+                clipyorigin: Some(GenRandom::generate(rng)),
+                clipmask: None,
+                graphicsexposure: None,
+                subwindowmode: None,
+                polyedge: None,
+                polymode: None,
+                dither: None,
+                componentalpha: None,
+            },
+            ChangePictureAux {
+                repeat: None,
+                alphamap: None,
+                alphaxorigin: None,
+                alphayorigin: None,
+                clipxorigin: None,
+                clipyorigin: None,
+                clipmask: Some(GenRandom::generate(rng)),
+                graphicsexposure: None,
+                subwindowmode: None,
+                polyedge: None,
+                polymode: None,
+                dither: None,
+                componentalpha: None,
+            },
+            ChangePictureAux {
+                repeat: None,
+                alphamap: None,
+                alphaxorigin: None,
+                alphayorigin: None,
+                clipxorigin: None,
+                clipyorigin: None,
+                clipmask: None,
+                graphicsexposure: Some(GenRandom::generate(rng)),
+                subwindowmode: None,
+                polyedge: None,
+                polymode: None,
+                dither: None,
+                componentalpha: None,
+            },
+            ChangePictureAux {
+                repeat: None,
+                alphamap: None,
+                alphaxorigin: None,
+                alphayorigin: None,
+                clipxorigin: None,
+                clipyorigin: None,
+                clipmask: None,
+                graphicsexposure: None,
+                subwindowmode: Some(GenRandom::generate(rng)),
+                polyedge: None,
+                polymode: None,
+                dither: None,
+                componentalpha: None,
+            },
+            ChangePictureAux {
+                repeat: None,
+                alphamap: None,
+                alphaxorigin: None,
+                alphayorigin: None,
+                clipxorigin: None,
+                clipyorigin: None,
+                clipmask: None,
+                graphicsexposure: None,
+                subwindowmode: None,
+                polyedge: Some(GenRandom::generate(rng)),
+                polymode: None,
+                dither: None,
+                componentalpha: None,
+            },
+            ChangePictureAux {
+                repeat: None,
+                alphamap: None,
+                alphaxorigin: None,
+                alphayorigin: None,
+                clipxorigin: None,
+                clipyorigin: None,
+                clipmask: None,
+                graphicsexposure: None,
+                subwindowmode: None,
+                polyedge: None,
+                polymode: Some(GenRandom::generate(rng)),
+                dither: None,
+                componentalpha: None,
+            },
+            ChangePictureAux {
+                repeat: None,
+                alphamap: None,
+                alphaxorigin: None,
+                alphayorigin: None,
+                clipxorigin: None,
+                clipyorigin: None,
+                clipmask: None,
+                graphicsexposure: None,
+                subwindowmode: None,
+                polyedge: None,
+                polymode: None,
+                dither: Some(GenRandom::generate(rng)),
+                componentalpha: None,
+            },
+            ChangePictureAux {
+                repeat: None,
+                alphamap: None,
+                alphaxorigin: None,
+                alphayorigin: None,
+                clipxorigin: None,
+                clipyorigin: None,
+                clipmask: None,
+                graphicsexposure: None,
+                subwindowmode: None,
+                polyedge: None,
+                polymode: None,
+                dither: None,
+                componentalpha: Some(GenRandom::generate(rng)),
+            },
+        ]
     }
 }
 impl ChangePictureAux {
@@ -4164,6 +5218,37 @@ impl Serialize for Transform {
         self.matrix33.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod transform {
+    use super::Transform;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for Transform {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                matrix11: GenRandom::generate(rng),
+                matrix12: GenRandom::generate(rng),
+                matrix13: GenRandom::generate(rng),
+                matrix21: GenRandom::generate(rng),
+                matrix22: GenRandom::generate(rng),
+                matrix23: GenRandom::generate(rng),
+                matrix31: GenRandom::generate(rng),
+                matrix32: GenRandom::generate(rng),
+                matrix33: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(1653106741599297600);
+        let value = Transform::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the SetPictureTransform request
 pub const SET_PICTURE_TRANSFORM_REQUEST: u8 = 28;
@@ -4393,6 +5478,32 @@ impl QueryFiltersReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod query_filters_reply {
+    use super::QueryFiltersReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for QueryFiltersReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                aliases: GenRandom::generate(rng),
+                filters: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(13206753124217176064);
+        let value = QueryFiltersReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the SetPictureFilter request
 pub const SET_PICTURE_FILTER_REQUEST: u8 = 30;
@@ -4523,6 +5634,30 @@ impl Serialize for Animcursorelt {
         self.delay.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod animcursorelt {
+    use super::Animcursorelt;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for Animcursorelt {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                cursor: GenRandom::generate(rng),
+                delay: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(9552766240168749440);
+        let value = Animcursorelt::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the CreateAnimCursor request
 pub const CREATE_ANIM_CURSOR_REQUEST: u8 = 31;
@@ -4642,6 +5777,31 @@ impl Serialize for Spanfix {
         self.y.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod spanfix {
+    use super::Spanfix;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for Spanfix {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                l: GenRandom::generate(rng),
+                r: GenRandom::generate(rng),
+                y: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(127476828864000);
+        let value = Spanfix::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -4693,6 +5853,30 @@ impl Serialize for Trap {
         bytes.reserve(24);
         self.top.serialize_into(bytes);
         self.bot.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod trap {
+    use super::Trap;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for Trap {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                top: GenRandom::generate(rng),
+                bot: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(104033664);
+        let value = Trap::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 

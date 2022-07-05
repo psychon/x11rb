@@ -98,6 +98,26 @@ impl core::fmt::Debug for Attachment  {
         pretty_print_enum(fmt, self.0, &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for Attachment {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::BUFFER_FRONT_LEFT.0,
+            Self::BUFFER_BACK_LEFT.0,
+            Self::BUFFER_FRONT_RIGHT.0,
+            Self::BUFFER_BACK_RIGHT.0,
+            Self::BUFFER_DEPTH.0,
+            Self::BUFFER_STENCIL.0,
+            Self::BUFFER_ACCUM.0,
+            Self::BUFFER_FAKE_FRONT_LEFT.0,
+            Self::BUFFER_FAKE_FRONT_RIGHT.0,
+            Self::BUFFER_DEPTH_STENCIL.0,
+            Self::BUFFER_HIZ.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -143,6 +163,17 @@ impl core::fmt::Debug for DriverType  {
             (Self::VDPAU.0, "VDPAU", "VDPAU"),
         ];
         pretty_print_enum(fmt, self.0, &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for DriverType {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::DRI.0,
+            Self::VDPAU.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
     }
 }
 
@@ -198,6 +229,18 @@ impl core::fmt::Debug for EventType  {
             (Self::FLIP_COMPLETE.0.into(), "FLIP_COMPLETE", "FlipComplete"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for EventType {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::EXCHANGE_COMPLETE.0,
+            Self::BLIT_COMPLETE.0,
+            Self::FLIP_COMPLETE.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
     }
 }
 
@@ -262,6 +305,33 @@ impl Serialize for DRI2Buffer {
         self.flags.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod dr_i2_buffer {
+    use super::DRI2Buffer;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for DRI2Buffer {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                attachment: GenRandom::generate(rng),
+                name: GenRandom::generate(rng),
+                pitch: GenRandom::generate(rng),
+                cpp: GenRandom::generate(rng),
+                flags: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(379860262403965184);
+        let value = DRI2Buffer::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -298,6 +368,30 @@ impl Serialize for AttachFormat {
         bytes.reserve(8);
         u32::from(self.attachment).serialize_into(bytes);
         self.format.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod attach_format {
+    use super::AttachFormat;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for AttachFormat {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                attachment: GenRandom::generate(rng),
+                format: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(12421972386010765312);
+        let value = AttachFormat::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -426,6 +520,32 @@ impl Serialize for QueryVersionReply {
         self.length.serialize_into(bytes);
         self.major_version.serialize_into(bytes);
         self.minor_version.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod query_version_reply {
+    use super::QueryVersionReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for QueryVersionReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                major_version: GenRandom::generate(rng),
+                minor_version: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(228006558612858880);
+        let value = QueryVersionReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -580,6 +700,33 @@ impl ConnectReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod connect_reply {
+    use super::ConnectReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for ConnectReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                driver_name: GenRandom::generate(rng),
+                alignment_pad: GenRandom::generate(rng),
+                device_name: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(14235222724088346624);
+        let value = ConnectReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the Authenticate request
 pub const AUTHENTICATE_REQUEST: u8 = 2;
@@ -698,6 +845,31 @@ impl Serialize for AuthenticateReply {
         self.sequence.serialize_into(bytes);
         self.length.serialize_into(bytes);
         self.authenticated.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod authenticate_reply {
+    use super::AuthenticateReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for AuthenticateReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                authenticated: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(11164283661714587648);
+        let value = AuthenticateReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -959,6 +1131,33 @@ impl GetBuffersReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod get_buffers_reply {
+    use super::GetBuffersReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetBuffersReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                width: GenRandom::generate(rng),
+                height: GenRandom::generate(rng),
+                buffers: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(12894143586951077888);
+        let value = GetBuffersReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the CopyRegion request
 pub const COPY_REGION_REQUEST: u8 = 6;
@@ -1085,6 +1284,30 @@ impl Serialize for CopyRegionReply {
         bytes.extend_from_slice(&[0; 1]);
         self.sequence.serialize_into(bytes);
         self.length.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod copy_region_reply {
+    use super::CopyRegionReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for CopyRegionReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(15560834799737774080);
+        let value = CopyRegionReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -1238,6 +1461,33 @@ impl GetBuffersWithFormatReply {
     pub fn count(&self) -> u32 {
         self.buffers.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod get_buffers_with_format_reply {
+    use super::GetBuffersWithFormatReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetBuffersWithFormatReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                width: GenRandom::generate(rng),
+                height: GenRandom::generate(rng),
+                buffers: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(6181452535522394112);
+        let value = GetBuffersWithFormatReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -1408,6 +1658,32 @@ impl Serialize for SwapBuffersReply {
         self.swap_lo.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod swap_buffers_reply {
+    use super::SwapBuffersReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for SwapBuffersReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                swap_hi: GenRandom::generate(rng),
+                swap_lo: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(11804842909117743104);
+        let value = SwapBuffersReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the GetMSC request
 pub const GET_MSC_REQUEST: u8 = 9;
@@ -1558,6 +1834,36 @@ impl Serialize for GetMSCReply {
         self.msc_lo.serialize_into(bytes);
         self.sbc_hi.serialize_into(bytes);
         self.sbc_lo.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod get_msc_reply {
+    use super::GetMSCReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetMSCReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                ust_hi: GenRandom::generate(rng),
+                ust_lo: GenRandom::generate(rng),
+                msc_hi: GenRandom::generate(rng),
+                msc_lo: GenRandom::generate(rng),
+                sbc_hi: GenRandom::generate(rng),
+                sbc_lo: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(1074826422103426560);
+        let value = GetMSCReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -1760,6 +2066,36 @@ impl Serialize for WaitMSCReply {
         self.sbc_lo.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod wait_msc_reply {
+    use super::WaitMSCReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for WaitMSCReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                ust_hi: GenRandom::generate(rng),
+                ust_lo: GenRandom::generate(rng),
+                msc_hi: GenRandom::generate(rng),
+                msc_lo: GenRandom::generate(rng),
+                sbc_hi: GenRandom::generate(rng),
+                sbc_lo: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(13810276237603986944);
+        let value = WaitMSCReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the WaitSBC request
 pub const WAIT_SBC_REQUEST: u8 = 11;
@@ -1926,6 +2262,36 @@ impl Serialize for WaitSBCReply {
         self.msc_lo.serialize_into(bytes);
         self.sbc_hi.serialize_into(bytes);
         self.sbc_lo.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod wait_sbc_reply {
+    use super::WaitSBCReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for WaitSBCReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                ust_hi: GenRandom::generate(rng),
+                ust_lo: GenRandom::generate(rng),
+                msc_hi: GenRandom::generate(rng),
+                msc_lo: GenRandom::generate(rng),
+                sbc_hi: GenRandom::generate(rng),
+                sbc_lo: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(1296383018683673600);
+        let value = WaitSBCReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -2119,6 +2485,33 @@ impl Serialize for GetParamReply {
         self.value_lo.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod get_param_reply {
+    use super::GetParamReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetParamReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                is_param_recognized: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                value_hi: GenRandom::generate(rng),
+                value_lo: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(8709731326315708416);
+        let value = GetParamReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the BufferSwapComplete event
 pub const BUFFER_SWAP_COMPLETE_EVENT: u8 = 0;
@@ -2217,6 +2610,37 @@ impl Serialize for BufferSwapCompleteEvent {
         self.msc_hi.serialize_into(bytes);
         self.msc_lo.serialize_into(bytes);
         self.sbc.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod buffer_swap_complete_event {
+    use super::BufferSwapCompleteEvent;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for BufferSwapCompleteEvent {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                response_type: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                event_type: GenRandom::generate(rng),
+                drawable: GenRandom::generate(rng),
+                ust_hi: GenRandom::generate(rng),
+                ust_lo: GenRandom::generate(rng),
+                msc_hi: GenRandom::generate(rng),
+                msc_lo: GenRandom::generate(rng),
+                sbc: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(10394221322546708480);
+        let value = BufferSwapCompleteEvent::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 impl From<&BufferSwapCompleteEvent> for [u8; 32] {
@@ -2318,6 +2742,31 @@ impl Serialize for InvalidateBuffersEvent {
         bytes.extend_from_slice(&[0; 1]);
         self.sequence.serialize_into(bytes);
         self.drawable.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod invalidate_buffers_event {
+    use super::InvalidateBuffersEvent;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for InvalidateBuffersEvent {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                response_type: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                drawable: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(7007415101422370816);
+        let value = InvalidateBuffersEvent::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 impl From<&InvalidateBuffersEvent> for [u8; 32] {

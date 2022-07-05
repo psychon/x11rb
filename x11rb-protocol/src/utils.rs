@@ -9,7 +9,24 @@
 //! that it can appear in interfaces, but it is not actually possible to construct an instance of
 //! `RawFdContainer`.
 
-#[cfg(all(feature = "std", unix))]
+#[cfg(test)]
+mod raw_fd_container {
+    /// Wrapper for testing only.
+    #[derive(Debug, Hash, PartialEq, Eq)]
+    pub struct RawFdContainer(pub(crate) ());
+
+    impl crate::x11_utils::GenRandom for RawFdContainer {
+        fn generate(rng: &fastrand::Rng) -> Self {
+            Self(())
+        }
+    }
+
+    impl Drop for RawFdContainer {
+        fn drop(&mut self) {}
+    }
+}
+
+#[cfg(all(not(test), feature = "std", unix))]
 mod raw_fd_container {
     use std::mem::forget;
     use std::os::unix::io::{AsRawFd, IntoRawFd, RawFd};
@@ -77,7 +94,7 @@ mod raw_fd_container {
     }
 }
 
-#[cfg(not(all(feature = "std", unix)))]
+#[cfg(all(not(all(feature = "std", unix)), not(test)))]
 mod raw_fd_container {
     use core::convert::Infallible;
 

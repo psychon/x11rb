@@ -120,6 +120,37 @@ impl Serialize for SurfaceInfo {
         self.flags.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod surface_info {
+    use super::SurfaceInfo;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for SurfaceInfo {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                id: GenRandom::generate(rng),
+                chroma_format: GenRandom::generate(rng),
+                pad0: GenRandom::generate(rng),
+                max_width: GenRandom::generate(rng),
+                max_height: GenRandom::generate(rng),
+                subpicture_max_width: GenRandom::generate(rng),
+                subpicture_max_height: GenRandom::generate(rng),
+                mc_type: GenRandom::generate(rng),
+                flags: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(14376176360093836816);
+        let value = SurfaceInfo::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the QueryVersion request
 pub const QUERY_VERSION_REQUEST: u8 = 0;
@@ -229,6 +260,32 @@ impl Serialize for QueryVersionReply {
         self.length.serialize_into(bytes);
         self.major.serialize_into(bytes);
         self.minor.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod query_version_reply {
+    use super::QueryVersionReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for QueryVersionReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                major: GenRandom::generate(rng),
+                minor: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(228006558612858880);
+        let value = QueryVersionReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -346,6 +403,31 @@ impl ListSurfaceTypesReply {
     pub fn num(&self) -> u32 {
         self.surfaces.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod list_surface_types_reply {
+    use super::ListSurfaceTypesReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for ListSurfaceTypesReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                surfaces: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(10295129861300682752);
+        let value = ListSurfaceTypesReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -505,6 +587,33 @@ impl CreateContextReply {
     pub fn length(&self) -> u32 {
         self.priv_data.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod create_context_reply {
+    use super::CreateContextReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for CreateContextReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                width_actual: GenRandom::generate(rng),
+                height_actual: GenRandom::generate(rng),
+                flags_return: GenRandom::generate(rng),
+                priv_data: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(12715276395427397632);
+        let value = CreateContextReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -680,6 +789,30 @@ impl CreateSurfaceReply {
     pub fn length(&self) -> u32 {
         self.priv_data.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod create_surface_reply {
+    use super::CreateSurfaceReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for CreateSurfaceReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                priv_data: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(6382011910992875520);
+        let value = CreateSurfaceReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -893,6 +1026,35 @@ impl CreateSubpictureReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod create_subpicture_reply {
+    use super::CreateSubpictureReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for CreateSubpictureReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                width_actual: GenRandom::generate(rng),
+                height_actual: GenRandom::generate(rng),
+                num_palette_entries: GenRandom::generate(rng),
+                entry_bytes: GenRandom::generate(rng),
+                component_order: GenRandom::generate(rng),
+                priv_data: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(1967213201389256704);
+        let value = CreateSubpictureReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the DestroySubpicture request
 pub const DESTROY_SUBPICTURE_REQUEST: u8 = 7;
@@ -1069,6 +1231,31 @@ impl ListSubpictureTypesReply {
     pub fn num(&self) -> u32 {
         self.types.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod list_subpicture_types_reply {
+    use super::ListSubpictureTypesReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for ListSubpictureTypesReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                types: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(7884516058520879104);
+        let value = ListSubpictureTypesReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 

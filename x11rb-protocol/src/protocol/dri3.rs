@@ -161,6 +161,32 @@ impl Serialize for QueryVersionReply {
         self.minor_version.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod query_version_reply {
+    use super::QueryVersionReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for QueryVersionReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                major_version: GenRandom::generate(rng),
+                minor_version: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(228006558612858880);
+        let value = QueryVersionReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the Open request
 pub const OPEN_REQUEST: u8 = 1;
@@ -301,6 +327,32 @@ impl Serialize for OpenReply {
         self.sequence.serialize_into(bytes);
         self.length.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 24]);
+    }
+}
+#[cfg(test)]
+mod open_reply {
+    use super::OpenReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for OpenReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                nfd: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                device_fd: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(1191575451824271360);
+        let value = OpenReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -561,6 +613,38 @@ impl Serialize for BufferFromPixmapReply {
         bytes.extend_from_slice(&[0; 12]);
     }
 }
+#[cfg(test)]
+mod buffer_from_pixmap_reply {
+    use super::BufferFromPixmapReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for BufferFromPixmapReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                nfd: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                size: GenRandom::generate(rng),
+                width: GenRandom::generate(rng),
+                height: GenRandom::generate(rng),
+                stride: GenRandom::generate(rng),
+                depth: GenRandom::generate(rng),
+                bpp: GenRandom::generate(rng),
+                pixmap_fd: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(5854329304099323904);
+        let value = BufferFromPixmapReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the FenceFromFD request
 pub const FENCE_FROM_FD_REQUEST: u8 = 4;
@@ -776,6 +860,32 @@ impl Serialize for FDFromFenceReply {
         bytes.extend_from_slice(&[0; 24]);
     }
 }
+#[cfg(test)]
+mod fd_from_fence_reply {
+    use super::FDFromFenceReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for FDFromFenceReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                nfd: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                fence_fd: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(6467912807943847936);
+        let value = FDFromFenceReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the GetSupportedModifiers request
 pub const GET_SUPPORTED_MODIFIERS_REQUEST: u8 = 6;
@@ -923,6 +1033,32 @@ impl GetSupportedModifiersReply {
     pub fn num_screen_modifiers(&self) -> u32 {
         self.screen_modifiers.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod get_supported_modifiers_reply {
+    use super::GetSupportedModifiersReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetSupportedModifiersReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                window_modifiers: GenRandom::generate(rng),
+                screen_modifiers: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(9326546413468778496);
+        let value = GetSupportedModifiersReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -1239,6 +1375,38 @@ impl BuffersFromPixmapReply {
     pub fn nfd(&self) -> u8 {
         self.strides.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod buffers_from_pixmap_reply {
+    use super::BuffersFromPixmapReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for BuffersFromPixmapReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                width: GenRandom::generate(rng),
+                height: GenRandom::generate(rng),
+                modifier: GenRandom::generate(rng),
+                depth: GenRandom::generate(rng),
+                bpp: GenRandom::generate(rng),
+                strides: GenRandom::generate(rng),
+                offsets: GenRandom::generate(rng),
+                buffers: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(9165083317878390784);
+        let value = BuffersFromPixmapReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 

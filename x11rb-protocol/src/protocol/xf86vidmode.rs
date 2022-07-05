@@ -111,6 +111,28 @@ impl core::fmt::Debug for ModeFlag  {
     }
 }
 bitmask_binop!(ModeFlag, u16);
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for ModeFlag {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::POSITIVE_H_SYNC.0,
+            Self::NEGATIVE_H_SYNC.0,
+            Self::POSITIVE_V_SYNC.0,
+            Self::NEGATIVE_V_SYNC.0,
+            Self::INTERLACE.0,
+            Self::COMPOSITE_SYNC.0,
+            Self::POSITIVE_C_SYNC.0,
+            Self::NEGATIVE_C_SYNC.0,
+            Self::H_SKEW.0,
+            Self::BROADCAST.0,
+            Self::PIXMUX.0,
+            Self::DOUBLE_CLOCK.0,
+            Self::HALF_CLOCK.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -169,6 +191,16 @@ impl core::fmt::Debug for ClockFlag  {
     }
 }
 bitmask_binop!(ClockFlag, u8);
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for ClockFlag {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::PROGRAMABLE.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -229,6 +261,17 @@ impl core::fmt::Debug for Permission  {
     }
 }
 bitmask_binop!(Permission, u8);
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for Permission {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::READ.0,
+            Self::WRITE.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -350,6 +393,40 @@ impl Serialize for ModeInfo {
         self.privsize.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod mode_info {
+    use super::ModeInfo;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for ModeInfo {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                dotclock: GenRandom::generate(rng),
+                hdisplay: GenRandom::generate(rng),
+                hsyncstart: GenRandom::generate(rng),
+                hsyncend: GenRandom::generate(rng),
+                htotal: GenRandom::generate(rng),
+                hskew: GenRandom::generate(rng),
+                vdisplay: GenRandom::generate(rng),
+                vsyncstart: GenRandom::generate(rng),
+                vsyncend: GenRandom::generate(rng),
+                vtotal: GenRandom::generate(rng),
+                flags: GenRandom::generate(rng),
+                privsize: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(7848267074802000);
+        let value = ModeInfo::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the QueryVersion request
 pub const QUERY_VERSION_REQUEST: u8 = 0;
@@ -455,6 +532,32 @@ impl Serialize for QueryVersionReply {
         self.length.serialize_into(bytes);
         self.major_version.serialize_into(bytes);
         self.minor_version.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod query_version_reply {
+    use super::QueryVersionReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for QueryVersionReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                major_version: GenRandom::generate(rng),
+                minor_version: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(228006558612858880);
+        let value = QueryVersionReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -609,6 +712,42 @@ impl GetModeLineReply {
     pub fn privsize(&self) -> u32 {
         self.private.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod get_mode_line_reply {
+    use super::GetModeLineReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetModeLineReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                dotclock: GenRandom::generate(rng),
+                hdisplay: GenRandom::generate(rng),
+                hsyncstart: GenRandom::generate(rng),
+                hsyncend: GenRandom::generate(rng),
+                htotal: GenRandom::generate(rng),
+                hskew: GenRandom::generate(rng),
+                vdisplay: GenRandom::generate(rng),
+                vsyncstart: GenRandom::generate(rng),
+                vsyncend: GenRandom::generate(rng),
+                vtotal: GenRandom::generate(rng),
+                flags: GenRandom::generate(rng),
+                private: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(2184250611016679424);
+        let value = GetModeLineReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -1011,6 +1150,35 @@ impl GetMonitorReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod get_monitor_reply {
+    use super::GetMonitorReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetMonitorReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                hsync: GenRandom::generate(rng),
+                vsync: GenRandom::generate(rng),
+                vendor: GenRandom::generate(rng),
+                alignment_pad: GenRandom::generate(rng),
+                model: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(7341643942587998208);
+        let value = GetMonitorReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the LockModeSwitch request
 pub const LOCK_MODE_SWITCH_REQUEST: u8 = 5;
@@ -1184,6 +1352,31 @@ impl GetAllModeLinesReply {
     pub fn modecount(&self) -> u32 {
         self.modeinfo.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod get_all_mode_lines_reply {
+    use super::GetAllModeLinesReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetAllModeLinesReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                modeinfo: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(7848664740097949696);
+        let value = GetAllModeLinesReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -1874,6 +2067,31 @@ impl Serialize for ValidateModeLineReply {
         bytes.extend_from_slice(&[0; 20]);
     }
 }
+#[cfg(test)]
+mod validate_mode_line_reply {
+    use super::ValidateModeLineReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for ValidateModeLineReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                status: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(5331966193986699264);
+        let value = ValidateModeLineReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the SwitchToMode request
 pub const SWITCH_TO_MODE_REQUEST: u8 = 10;
@@ -2183,6 +2401,32 @@ impl Serialize for GetViewPortReply {
         bytes.extend_from_slice(&[0; 16]);
     }
 }
+#[cfg(test)]
+mod get_view_port_reply {
+    use super::GetViewPortReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetViewPortReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                x: GenRandom::generate(rng),
+                y: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(1896108784973119488);
+        let value = GetViewPortReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the SetViewPort request
 pub const SET_VIEW_PORT_REQUEST: u8 = 12;
@@ -2361,6 +2605,34 @@ impl Serialize for GetDotClocksReply {
         bytes.extend_from_slice(&[0; 12]);
         assert_eq!(self.clock.len(), usize::try_from(1u32.checked_sub(self.flags & 1u32).unwrap().checked_mul(self.clocks).unwrap()).unwrap(), "`clock` has an incorrect length");
         self.clock.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod get_dot_clocks_reply {
+    use super::GetDotClocksReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetDotClocksReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                flags: GenRandom::generate(rng),
+                clocks: GenRandom::generate(rng),
+                maxclocks: GenRandom::generate(rng),
+                clock: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(13645542808826183680);
+        let value = GetDotClocksReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -2678,6 +2950,33 @@ impl Serialize for GetGammaReply {
         bytes.extend_from_slice(&[0; 12]);
     }
 }
+#[cfg(test)]
+mod get_gamma_reply {
+    use super::GetGammaReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetGammaReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                red: GenRandom::generate(rng),
+                green: GenRandom::generate(rng),
+                blue: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(14714941998383723008);
+        let value = GetGammaReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the GetGammaRamp request
 pub const GET_GAMMA_RAMP_REQUEST: u8 = 17;
@@ -2791,6 +3090,34 @@ impl Serialize for GetGammaRampReply {
         self.green.serialize_into(bytes);
         assert_eq!(self.blue.len(), usize::try_from(u32::from(self.size).checked_add(1u32).unwrap() & (!1u32)).unwrap(), "`blue` has an incorrect length");
         self.blue.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod get_gamma_ramp_reply {
+    use super::GetGammaRampReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetGammaRampReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                size: GenRandom::generate(rng),
+                red: GenRandom::generate(rng),
+                green: GenRandom::generate(rng),
+                blue: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(8563914185891561472);
+        let value = GetGammaRampReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -3015,6 +3342,31 @@ impl Serialize for GetGammaRampSizeReply {
         bytes.extend_from_slice(&[0; 22]);
     }
 }
+#[cfg(test)]
+mod get_gamma_ramp_size_reply {
+    use super::GetGammaRampSizeReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetGammaRampSizeReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                size: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(7551992111947350016);
+        let value = GetGammaRampSizeReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the GetPermissions request
 pub const GET_PERMISSIONS_REQUEST: u8 = 20;
@@ -3148,6 +3500,31 @@ impl Serialize for GetPermissionsReply {
         self.length.serialize_into(bytes);
         self.permissions.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 20]);
+    }
+}
+#[cfg(test)]
+mod get_permissions_reply {
+    use super::GetPermissionsReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetPermissionsReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                permissions: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(15376471438258110464);
+        let value = GetPermissionsReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 

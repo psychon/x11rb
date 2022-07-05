@@ -151,6 +151,32 @@ impl Serialize for GetVersionReply {
         self.server_minor_version.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod get_version_reply {
+    use super::GetVersionReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetVersionReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                server_major_version: GenRandom::generate(rng),
+                server_minor_version: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(9599721421829025792);
+        let value = GetVersionReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the Capable request
 pub const CAPABLE_REQUEST: u8 = 1;
@@ -274,6 +300,31 @@ impl Serialize for CapableReply {
         self.length.serialize_into(bytes);
         self.capable.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 23]);
+    }
+}
+#[cfg(test)]
+mod capable_reply {
+    use super::CapableReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for CapableReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                capable: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(7372458239518359552);
+        let value = CapableReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -407,6 +458,33 @@ impl Serialize for GetTimeoutsReply {
         self.suspend_timeout.serialize_into(bytes);
         self.off_timeout.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 18]);
+    }
+}
+#[cfg(test)]
+mod get_timeouts_reply {
+    use super::GetTimeoutsReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetTimeoutsReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                standby_timeout: GenRandom::generate(rng),
+                suspend_timeout: GenRandom::generate(rng),
+                off_timeout: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(1315101722752573440);
+        let value = GetTimeoutsReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -619,6 +697,19 @@ impl core::fmt::Debug for DPMSMode  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for DPMSMode {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::ON.0,
+            Self::STANDBY.0,
+            Self::SUSPEND.0,
+            Self::OFF.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 /// Opcode for the ForceLevel request
 pub const FORCE_LEVEL_REQUEST: u8 = 6;
@@ -801,6 +892,32 @@ impl Serialize for InfoReply {
         u16::from(self.power_level).serialize_into(bytes);
         self.state.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 21]);
+    }
+}
+#[cfg(test)]
+mod info_reply {
+    use super::InfoReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for InfoReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                power_level: GenRandom::generate(rng),
+                state: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(1102049420337169920);
+        let value = InfoReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 

@@ -70,6 +70,30 @@ impl Serialize for Client {
         self.resource_mask.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod client {
+    use super::Client;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for Client {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                resource_base: GenRandom::generate(rng),
+                resource_mask: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(979174072800);
+        let value = Client::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -105,6 +129,30 @@ impl Serialize for Type {
         bytes.reserve(8);
         self.resource_type.serialize_into(bytes);
         self.count.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod type_ {
+    use super::Type;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for Type {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                resource_type: GenRandom::generate(rng),
+                count: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(114975168);
+        let value = Type::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -167,6 +215,17 @@ impl core::fmt::Debug for ClientIdMask  {
     }
 }
 bitmask_binop!(ClientIdMask, u8);
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for ClientIdMask {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::CLIENT_XID.0,
+            Self::LOCAL_CLIENT_PID.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -202,6 +261,30 @@ impl Serialize for ClientIdSpec {
         bytes.reserve(8);
         self.client.serialize_into(bytes);
         self.mask.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod client_id_spec {
+    use super::ClientIdSpec;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for ClientIdSpec {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                client: GenRandom::generate(rng),
+                mask: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(12530355946013206528);
+        let value = ClientIdSpec::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -251,6 +334,30 @@ impl ClientIdValue {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod client_id_value {
+    use super::ClientIdValue;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for ClientIdValue {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                spec: GenRandom::generate(rng),
+                value: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(8805440661720562688);
+        let value = ClientIdValue::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -286,6 +393,30 @@ impl Serialize for ResourceIdSpec {
         bytes.reserve(8);
         self.resource.serialize_into(bytes);
         self.type_.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod resource_id_spec {
+    use super::ResourceIdSpec;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for ResourceIdSpec {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                resource: GenRandom::generate(rng),
+                type_: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(15530378358007093504);
+        let value = ResourceIdSpec::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -345,6 +476,32 @@ impl Serialize for ResourceSizeSpec {
         self.use_count.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod resource_size_spec {
+    use super::ResourceSizeSpec;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for ResourceSizeSpec {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                spec: GenRandom::generate(rng),
+                bytes: GenRandom::generate(rng),
+                ref_count: GenRandom::generate(rng),
+                use_count: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(10417732137083490688);
+        let value = ResourceSizeSpec::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -389,6 +546,30 @@ impl ResourceSizeValue {
     pub fn num_cross_references(&self) -> u32 {
         self.cross_references.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod resource_size_value {
+    use super::ResourceSizeValue;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for ResourceSizeValue {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                size: GenRandom::generate(rng),
+                cross_references: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(18258518244292863552);
+        let value = ResourceSizeValue::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -511,6 +692,32 @@ impl Serialize for QueryVersionReply {
         self.server_minor.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod query_version_reply {
+    use super::QueryVersionReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for QueryVersionReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                server_major: GenRandom::generate(rng),
+                server_minor: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(228006558612858880);
+        let value = QueryVersionReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the QueryClients request
 pub const QUERY_CLIENTS_REQUEST: u8 = 1;
@@ -617,6 +824,31 @@ impl QueryClientsReply {
     pub fn num_clients(&self) -> u32 {
         self.clients.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod query_clients_reply {
+    use super::QueryClientsReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for QueryClientsReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                clients: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(11341914187745370112);
+        let value = QueryClientsReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -734,6 +966,31 @@ impl QueryClientResourcesReply {
     pub fn num_types(&self) -> u32 {
         self.types.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod query_client_resources_reply {
+    use super::QueryClientResourcesReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for QueryClientResourcesReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                types: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(12134460664815255552);
+        let value = QueryClientResourcesReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -854,6 +1111,32 @@ impl Serialize for QueryClientPixmapBytesReply {
         self.length.serialize_into(bytes);
         self.bytes.serialize_into(bytes);
         self.bytes_overflow.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod query_client_pixmap_bytes_reply {
+    use super::QueryClientPixmapBytesReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for QueryClientPixmapBytesReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                bytes: GenRandom::generate(rng),
+                bytes_overflow: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(5089116049379426304);
+        let value = QueryClientPixmapBytesReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -983,6 +1266,31 @@ impl QueryClientIdsReply {
     pub fn num_ids(&self) -> u32 {
         self.ids.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod query_client_ids_reply {
+    use super::QueryClientIdsReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for QueryClientIdsReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                ids: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(6986167732734164992);
+        let value = QueryClientIdsReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -1121,6 +1429,31 @@ impl QueryResourceBytesReply {
     pub fn num_sizes(&self) -> u32 {
         self.sizes.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod query_resource_bytes_reply {
+    use super::QueryResourceBytesReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for QueryResourceBytesReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                sizes: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(2190470301737426944);
+        let value = QueryResourceBytesReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 

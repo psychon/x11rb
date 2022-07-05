@@ -151,6 +151,32 @@ impl Serialize for GetVersionReply {
         self.server_minor_version.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod get_version_reply {
+    use super::GetVersionReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetVersionReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                server_major_version: GenRandom::generate(rng),
+                server_minor_version: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(9599721421829025792);
+        let value = GetVersionReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the GetXIDRange request
 pub const GET_XID_RANGE_REQUEST: u8 = 1;
@@ -260,6 +286,32 @@ impl Serialize for GetXIDRangeReply {
         self.length.serialize_into(bytes);
         self.start_id.serialize_into(bytes);
         self.count.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod get_xid_range_reply {
+    use super::GetXIDRangeReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetXIDRangeReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                start_id: GenRandom::generate(rng),
+                count: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(18351954276512759808);
+        let value = GetXIDRangeReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -377,6 +429,31 @@ impl GetXIDListReply {
     pub fn ids_len(&self) -> u32 {
         self.ids.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod get_xid_list_reply {
+    use super::GetXIDListReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetXIDListReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                ids: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(17409119318918299648);
+        let value = GetXIDListReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 

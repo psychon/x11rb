@@ -102,6 +102,19 @@ impl core::fmt::Debug for EventEnum  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for EventEnum {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::CONFIGURE_NOTIFY.0,
+            Self::COMPLETE_NOTIFY.0,
+            Self::IDLE_NOTIFY.0,
+            Self::REDIRECT_NOTIFY.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -168,6 +181,20 @@ impl core::fmt::Debug for EventMask  {
     }
 }
 bitmask_binop!(EventMask, u8);
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for EventMask {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::NO_EVENT.0,
+            Self::CONFIGURE_NOTIFY.0,
+            Self::COMPLETE_NOTIFY.0,
+            Self::IDLE_NOTIFY.0,
+            Self::REDIRECT_NOTIFY.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -234,6 +261,20 @@ impl core::fmt::Debug for Option  {
     }
 }
 bitmask_binop!(Option, u8);
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for Option {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::NONE.0,
+            Self::ASYNC.0,
+            Self::COPY.0,
+            Self::UST.0,
+            Self::SUBOPTIMAL.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -298,6 +339,19 @@ impl core::fmt::Debug for Capability  {
     }
 }
 bitmask_binop!(Capability, u8);
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for Capability {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::NONE.0,
+            Self::ASYNC.0,
+            Self::FENCE.0,
+            Self::UST.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -355,6 +409,17 @@ impl core::fmt::Debug for CompleteKind  {
             (Self::NOTIFY_MSC.0.into(), "NOTIFY_MSC", "NotifyMSC"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for CompleteKind {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::PIXMAP.0,
+            Self::NOTIFY_MSC.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
     }
 }
 
@@ -420,6 +485,19 @@ impl core::fmt::Debug for CompleteMode  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for CompleteMode {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::COPY.0,
+            Self::FLIP.0,
+            Self::SKIP.0,
+            Self::SUBOPTIMAL_COPY.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -455,6 +533,30 @@ impl Serialize for Notify {
         bytes.reserve(8);
         self.window.serialize_into(bytes);
         self.serial.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod notify {
+    use super::Notify;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for Notify {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                window: GenRandom::generate(rng),
+                serial: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(1301518698480);
+        let value = Notify::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -583,6 +685,32 @@ impl Serialize for QueryVersionReply {
         self.length.serialize_into(bytes);
         self.major_version.serialize_into(bytes);
         self.minor_version.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod query_version_reply {
+    use super::QueryVersionReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for QueryVersionReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                major_version: GenRandom::generate(rng),
+                minor_version: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(228006558612858880);
+        let value = QueryVersionReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -1074,6 +1202,31 @@ impl Serialize for QueryCapabilitiesReply {
         self.capabilities.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod query_capabilities_reply {
+    use super::QueryCapabilitiesReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for QueryCapabilitiesReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                capabilities: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(918851382164455424);
+        let value = QueryCapabilitiesReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the Generic event
 pub const GENERIC_EVENT: u8 = 0;
@@ -1141,6 +1294,34 @@ impl Serialize for GenericEvent {
         self.evtype.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 2]);
         self.event.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod generic_event {
+    use super::GenericEvent;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GenericEvent {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                response_type: GenRandom::generate(rng),
+                extension: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                evtype: GenRandom::generate(rng),
+                event: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(18255100881975221952);
+        let value = GenericEvent::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 impl From<&GenericEvent> for [u8; 32] {
@@ -1326,6 +1507,44 @@ impl Serialize for ConfigureNotifyEvent {
         self.pixmap_flags.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod configure_notify_event {
+    use super::ConfigureNotifyEvent;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for ConfigureNotifyEvent {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                response_type: GenRandom::generate(rng),
+                extension: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                event_type: GenRandom::generate(rng),
+                event: GenRandom::generate(rng),
+                window: GenRandom::generate(rng),
+                x: GenRandom::generate(rng),
+                y: GenRandom::generate(rng),
+                width: GenRandom::generate(rng),
+                height: GenRandom::generate(rng),
+                off_x: GenRandom::generate(rng),
+                off_y: GenRandom::generate(rng),
+                pixmap_width: GenRandom::generate(rng),
+                pixmap_height: GenRandom::generate(rng),
+                pixmap_flags: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(15146050197514553344);
+        let value = ConfigureNotifyEvent::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the CompleteNotify event
 pub const COMPLETE_NOTIFY_EVENT: u16 = 1;
@@ -1443,6 +1662,40 @@ impl Serialize for CompleteNotifyEvent {
         self.msc.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod complete_notify_event {
+    use super::CompleteNotifyEvent;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for CompleteNotifyEvent {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                response_type: GenRandom::generate(rng),
+                extension: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                event_type: GenRandom::generate(rng),
+                kind: GenRandom::generate(rng),
+                mode: GenRandom::generate(rng),
+                event: GenRandom::generate(rng),
+                window: GenRandom::generate(rng),
+                serial: GenRandom::generate(rng),
+                ust: GenRandom::generate(rng),
+                msc: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(12602805382820593664);
+        let value = CompleteNotifyEvent::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the IdleNotify event
 pub const IDLE_NOTIFY_EVENT: u16 = 2;
@@ -1542,6 +1795,38 @@ impl Serialize for IdleNotifyEvent {
         self.serial.serialize_into(bytes);
         self.pixmap.serialize_into(bytes);
         self.idle_fence.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod idle_notify_event {
+    use super::IdleNotifyEvent;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for IdleNotifyEvent {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                response_type: GenRandom::generate(rng),
+                extension: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                event_type: GenRandom::generate(rng),
+                event: GenRandom::generate(rng),
+                window: GenRandom::generate(rng),
+                serial: GenRandom::generate(rng),
+                pixmap: GenRandom::generate(rng),
+                idle_fence: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(8275840152583573504);
+        let value = IdleNotifyEvent::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -1659,6 +1944,53 @@ impl Serialize for RedirectNotifyEvent {
         let notifies_len_bytes = u32::try_from(self.notifies.len()).unwrap();
         let notifies_len_bytes = notifies_len_bytes.to_ne_bytes();
         bytes.extend_from_slice(&notifies_len_bytes);
+    }
+}
+#[cfg(test)]
+mod redirect_notify_event {
+    use super::RedirectNotifyEvent;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for RedirectNotifyEvent {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                response_type: GenRandom::generate(rng),
+                extension: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                event_type: GenRandom::generate(rng),
+                update_window: GenRandom::generate(rng),
+                event: GenRandom::generate(rng),
+                event_window: GenRandom::generate(rng),
+                window: GenRandom::generate(rng),
+                pixmap: GenRandom::generate(rng),
+                serial: GenRandom::generate(rng),
+                valid_region: GenRandom::generate(rng),
+                update_region: GenRandom::generate(rng),
+                valid_rect: GenRandom::generate(rng),
+                update_rect: GenRandom::generate(rng),
+                x_off: GenRandom::generate(rng),
+                y_off: GenRandom::generate(rng),
+                target_crtc: GenRandom::generate(rng),
+                wait_fence: GenRandom::generate(rng),
+                idle_fence: GenRandom::generate(rng),
+                options: GenRandom::generate(rng),
+                target_msc: GenRandom::generate(rng),
+                divisor: GenRandom::generate(rng),
+                remainder: GenRandom::generate(rng),
+                notifies: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(13330728928329089024);
+        let value = RedirectNotifyEvent::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 

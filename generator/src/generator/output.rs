@@ -19,12 +19,12 @@ impl Output {
     }
 
     #[inline]
-    fn incr_indent(&mut self) {
+    pub(super) fn incr_indent(&mut self) {
         self.indent += 1;
     }
 
     #[inline]
-    fn decr_indent(&mut self) {
+    pub(super) fn decr_indent(&mut self) {
         self.indent -= 1;
     }
 

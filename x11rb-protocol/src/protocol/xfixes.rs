@@ -183,6 +183,32 @@ impl Serialize for QueryVersionReply {
         bytes.extend_from_slice(&[0; 16]);
     }
 }
+#[cfg(test)]
+mod query_version_reply {
+    use super::QueryVersionReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for QueryVersionReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                major_version: GenRandom::generate(rng),
+                minor_version: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(228006558612858880);
+        let value = QueryVersionReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -240,6 +266,17 @@ impl core::fmt::Debug for SaveSetMode  {
             (Self::DELETE.0.into(), "DELETE", "Delete"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for SaveSetMode {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::INSERT.0,
+            Self::DELETE.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
     }
 }
 
@@ -301,6 +338,17 @@ impl core::fmt::Debug for SaveSetTarget  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for SaveSetTarget {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::NEAREST.0,
+            Self::ROOT.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -358,6 +406,17 @@ impl core::fmt::Debug for SaveSetMapping  {
             (Self::UNMAP.0.into(), "UNMAP", "Unmap"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for SaveSetMapping {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::MAP.0,
+            Self::UNMAP.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
     }
 }
 
@@ -494,6 +553,18 @@ impl core::fmt::Debug for SelectionEvent  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for SelectionEvent {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::SET_SELECTION_OWNER.0,
+            Self::SELECTION_WINDOW_DESTROY.0,
+            Self::SELECTION_CLIENT_CLOSE.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -556,6 +627,18 @@ impl core::fmt::Debug for SelectionEventMask  {
     }
 }
 bitmask_binop!(SelectionEventMask, u8);
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for SelectionEventMask {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::SET_SELECTION_OWNER.0,
+            Self::SELECTION_WINDOW_DESTROY.0,
+            Self::SELECTION_CLIENT_CLOSE.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 /// Opcode for the SelectionNotify event
 pub const SELECTION_NOTIFY_EVENT: u8 = 0;
@@ -648,6 +731,36 @@ impl Serialize for SelectionNotifyEvent {
         self.timestamp.serialize_into(bytes);
         self.selection_timestamp.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 8]);
+    }
+}
+#[cfg(test)]
+mod selection_notify_event {
+    use super::SelectionNotifyEvent;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for SelectionNotifyEvent {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                response_type: GenRandom::generate(rng),
+                subtype: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                window: GenRandom::generate(rng),
+                owner: GenRandom::generate(rng),
+                selection: GenRandom::generate(rng),
+                timestamp: GenRandom::generate(rng),
+                selection_timestamp: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(10942616926495842304);
+        let value = SelectionNotifyEvent::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 impl From<&SelectionNotifyEvent> for [u8; 32] {
@@ -827,6 +940,16 @@ impl core::fmt::Debug for CursorNotify  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for CursorNotify {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::DISPLAY_CURSOR.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -885,6 +1008,16 @@ impl core::fmt::Debug for CursorNotifyMask  {
     }
 }
 bitmask_binop!(CursorNotifyMask, u8);
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for CursorNotifyMask {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::DISPLAY_CURSOR.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 /// Opcode for the CursorNotify event
 pub const CURSOR_NOTIFY_EVENT: u8 = 1;
@@ -973,6 +1106,35 @@ impl Serialize for CursorNotifyEvent {
         self.timestamp.serialize_into(bytes);
         self.name.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 12]);
+    }
+}
+#[cfg(test)]
+mod cursor_notify_event {
+    use super::CursorNotifyEvent;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for CursorNotifyEvent {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                response_type: GenRandom::generate(rng),
+                subtype: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                window: GenRandom::generate(rng),
+                cursor_serial: GenRandom::generate(rng),
+                timestamp: GenRandom::generate(rng),
+                name: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(14842739939850843136);
+        let value = CursorNotifyEvent::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 impl From<&CursorNotifyEvent> for [u8; 32] {
@@ -1198,6 +1360,38 @@ impl Serialize for GetCursorImageReply {
         self.cursor_image.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod get_cursor_image_reply {
+    use super::GetCursorImageReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetCursorImageReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                x: GenRandom::generate(rng),
+                y: GenRandom::generate(rng),
+                width: GenRandom::generate(rng),
+                height: GenRandom::generate(rng),
+                xhot: GenRandom::generate(rng),
+                yhot: GenRandom::generate(rng),
+                cursor_serial: GenRandom::generate(rng),
+                cursor_image: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(3397547910108862464);
+        let value = GetCursorImageReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 pub type Region = u32;
 
@@ -1258,6 +1452,16 @@ impl core::fmt::Debug for RegionEnum  {
             (Self::NONE.0.into(), "NONE", "None"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for RegionEnum {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::NONE.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
     }
 }
 
@@ -2300,6 +2504,31 @@ impl FetchRegionReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod fetch_region_reply {
+    use super::FetchRegionReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for FetchRegionReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                extents: GenRandom::generate(rng),
+                rectangles: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(12239822329583730688);
+        let value = FetchRegionReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the SetGCClipRegion request
 pub const SET_GC_CLIP_REGION_REQUEST: u8 = 20;
@@ -2724,6 +2953,32 @@ impl GetCursorNameReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod get_cursor_name_reply {
+    use super::GetCursorNameReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetCursorNameReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                atom: GenRandom::generate(rng),
+                name: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(148099343580147712);
+        let value = GetCursorNameReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the GetCursorImageAndName request
 pub const GET_CURSOR_IMAGE_AND_NAME_REQUEST: u8 = 25;
@@ -2859,6 +3114,40 @@ impl GetCursorImageAndNameReply {
     pub fn nbytes(&self) -> u16 {
         self.name.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod get_cursor_image_and_name_reply {
+    use super::GetCursorImageAndNameReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetCursorImageAndNameReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                x: GenRandom::generate(rng),
+                y: GenRandom::generate(rng),
+                width: GenRandom::generate(rng),
+                height: GenRandom::generate(rng),
+                xhot: GenRandom::generate(rng),
+                yhot: GenRandom::generate(rng),
+                cursor_serial: GenRandom::generate(rng),
+                cursor_atom: GenRandom::generate(rng),
+                cursor_image: GenRandom::generate(rng),
+                name: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(1092039385405292544);
+        let value = GetCursorImageAndNameReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -3253,6 +3542,19 @@ impl core::fmt::Debug for BarrierDirections  {
     }
 }
 bitmask_binop!(BarrierDirections, u8);
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for BarrierDirections {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::POSITIVE_X.0,
+            Self::POSITIVE_Y.0,
+            Self::NEGATIVE_X.0,
+            Self::NEGATIVE_Y.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 /// Opcode for the CreatePointerBarrier request
 pub const CREATE_POINTER_BARRIER_REQUEST: u8 = 31;

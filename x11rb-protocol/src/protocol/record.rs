@@ -64,6 +64,30 @@ impl Serialize for Range8 {
         self.last.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod range8 {
+    use super::Range8;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for Range8 {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                first: GenRandom::generate(rng),
+                last: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(509712045920);
+        let value = Range8::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -95,6 +119,30 @@ impl Serialize for Range16 {
         bytes.reserve(4);
         self.first.serialize_into(bytes);
         self.last.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod range16 {
+    use super::Range16;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for Range16 {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                first: GenRandom::generate(rng),
+                last: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(24083894169720);
+        let value = Range16::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -130,6 +178,30 @@ impl Serialize for ExtRange {
         bytes.reserve(6);
         self.major.serialize_into(bytes);
         self.minor.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod ext_range {
+    use super::ExtRange;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for ExtRange {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                major: GenRandom::generate(rng),
+                minor: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(8742289747593600);
+        let value = ExtRange::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -213,6 +285,37 @@ impl Serialize for Range {
         self.client_died.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod range {
+    use super::Range;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for Range {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                core_requests: GenRandom::generate(rng),
+                core_replies: GenRandom::generate(rng),
+                ext_requests: GenRandom::generate(rng),
+                ext_replies: GenRandom::generate(rng),
+                delivered_events: GenRandom::generate(rng),
+                device_events: GenRandom::generate(rng),
+                errors: GenRandom::generate(rng),
+                client_started: GenRandom::generate(rng),
+                client_died: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(9102000820);
+        let value = Range::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 pub type ElementHeader = u8;
 
@@ -277,6 +380,18 @@ impl core::fmt::Debug for HType  {
     }
 }
 bitmask_binop!(HType, u8);
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for HType {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::FROM_SERVER_TIME.0,
+            Self::FROM_CLIENT_TIME.0,
+            Self::FROM_CLIENT_SEQUENCE.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 pub type ClientSpec = u32;
 
@@ -340,6 +455,18 @@ impl core::fmt::Debug for CS  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for CS {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::CURRENT_CLIENTS.0,
+            Self::FUTURE_CLIENTS.0,
+            Self::ALL_CLIENTS.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -384,6 +511,30 @@ impl ClientInfo {
     pub fn num_ranges(&self) -> u32 {
         self.ranges.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod client_info {
+    use super::ClientInfo;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for ClientInfo {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                client_resource: GenRandom::generate(rng),
+                ranges: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(15235280788661841536);
+        let value = ClientInfo::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -507,6 +658,32 @@ impl Serialize for QueryVersionReply {
         self.length.serialize_into(bytes);
         self.major_version.serialize_into(bytes);
         self.minor_version.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod query_version_reply {
+    use super::QueryVersionReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for QueryVersionReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                major_version: GenRandom::generate(rng),
+                minor_version: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(228006558612858880);
+        let value = QueryVersionReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -900,6 +1077,33 @@ impl GetContextReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod get_context_reply {
+    use super::GetContextReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetContextReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                enabled: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                element_header: GenRandom::generate(rng),
+                intercepted_clients: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(4878348302733410304);
+        let value = GetContextReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the EnableContext request
 pub const ENABLE_CONTEXT_REQUEST: u8 = 5;
@@ -1033,6 +1237,36 @@ impl EnableContextReply {
         self.data.len()
             .checked_div(4).unwrap()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod enable_context_reply {
+    use super::EnableContextReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for EnableContextReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                category: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                element_header: GenRandom::generate(rng),
+                client_swapped: GenRandom::generate(rng),
+                xid_base: GenRandom::generate(rng),
+                server_time: GenRandom::generate(rng),
+                rec_sequence_num: GenRandom::generate(rng),
+                data: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(12526573378395963392);
+        let value = EnableContextReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 

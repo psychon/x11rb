@@ -94,6 +94,18 @@ impl core::fmt::Debug for Const  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for Const {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::MAX_LEGAL_KEY_CODE.0,
+            Self::PER_KEY_BIT_ARRAY_SIZE.0,
+            Self::KEY_NAME_LENGTH.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -168,6 +180,27 @@ impl core::fmt::Debug for EventType  {
     }
 }
 bitmask_binop!(EventType, u16);
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for EventType {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::NEW_KEYBOARD_NOTIFY.0,
+            Self::MAP_NOTIFY.0,
+            Self::STATE_NOTIFY.0,
+            Self::CONTROLS_NOTIFY.0,
+            Self::INDICATOR_STATE_NOTIFY.0,
+            Self::INDICATOR_MAP_NOTIFY.0,
+            Self::NAMES_NOTIFY.0,
+            Self::COMPAT_MAP_NOTIFY.0,
+            Self::BELL_NOTIFY.0,
+            Self::ACTION_MESSAGE.0,
+            Self::ACCESS_X_NOTIFY.0,
+            Self::EXTENSION_DEVICE_NOTIFY.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -230,6 +263,18 @@ impl core::fmt::Debug for NKNDetail  {
     }
 }
 bitmask_binop!(NKNDetail, u8);
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for NKNDetail {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::KEYCODES.0,
+            Self::GEOMETRY.0,
+            Self::DEVICE_ID.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -300,6 +345,22 @@ impl core::fmt::Debug for AXNDetail  {
     }
 }
 bitmask_binop!(AXNDetail, u8);
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for AXNDetail {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::SK_PRESS.0,
+            Self::SK_ACCEPT.0,
+            Self::SK_REJECT.0,
+            Self::SK_RELEASE.0,
+            Self::BK_ACCEPT.0,
+            Self::BK_REJECT.0,
+            Self::AXK_WARNING.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -372,6 +433,23 @@ impl core::fmt::Debug for MapPart  {
     }
 }
 bitmask_binop!(MapPart, u8);
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for MapPart {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::KEY_TYPES.0,
+            Self::KEY_SYMS.0,
+            Self::MODIFIER_MAP.0,
+            Self::EXPLICIT_COMPONENTS.0,
+            Self::KEY_ACTIONS.0,
+            Self::KEY_BEHAVIORS.0,
+            Self::VIRTUAL_MODS.0,
+            Self::VIRTUAL_MOD_MAP.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -432,6 +510,17 @@ impl core::fmt::Debug for SetMapFlags  {
     }
 }
 bitmask_binop!(SetMapFlags, u8);
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for SetMapFlags {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::RESIZE_TYPES.0,
+            Self::RECOMPUTE_ACTIONS.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -510,6 +599,29 @@ impl core::fmt::Debug for StatePart  {
     }
 }
 bitmask_binop!(StatePart, u16);
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for StatePart {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::MODIFIER_STATE.0,
+            Self::MODIFIER_BASE.0,
+            Self::MODIFIER_LATCH.0,
+            Self::MODIFIER_LOCK.0,
+            Self::GROUP_STATE.0,
+            Self::GROUP_BASE.0,
+            Self::GROUP_LATCH.0,
+            Self::GROUP_LOCK.0,
+            Self::COMPAT_STATE.0,
+            Self::GRAB_MODS.0,
+            Self::COMPAT_GRAB_MODS.0,
+            Self::LOOKUP_MODS.0,
+            Self::COMPAT_LOOKUP_MODS.0,
+            Self::POINTER_BUTTONS.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -586,6 +698,28 @@ impl core::fmt::Debug for BoolCtrl  {
     }
 }
 bitmask_binop!(BoolCtrl, u16);
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for BoolCtrl {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::REPEAT_KEYS.0,
+            Self::SLOW_KEYS.0,
+            Self::BOUNCE_KEYS.0,
+            Self::STICKY_KEYS.0,
+            Self::MOUSE_KEYS.0,
+            Self::MOUSE_KEYS_ACCEL.0,
+            Self::ACCESS_X_KEYS.0,
+            Self::ACCESS_X_TIMEOUT_MASK.0,
+            Self::ACCESS_X_FEEDBACK_MASK.0,
+            Self::AUDIBLE_BELL_MASK.0,
+            Self::OVERLAY1_MASK.0,
+            Self::OVERLAY2_MASK.0,
+            Self::IGNORE_GROUP_LOCK_MASK.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -640,6 +774,20 @@ impl core::fmt::Debug for Control  {
     }
 }
 bitmask_binop!(Control, u32);
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for Control {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::GROUPS_WRAP.0,
+            Self::INTERNAL_MODS.0,
+            Self::IGNORE_LOCK_MODS.0,
+            Self::PER_KEY_REPEAT.0,
+            Self::CONTROLS_ENABLED.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -714,6 +862,27 @@ impl core::fmt::Debug for AXOption  {
     }
 }
 bitmask_binop!(AXOption, u16);
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for AXOption {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::SK_PRESS_FB.0,
+            Self::SK_ACCEPT_FB.0,
+            Self::FEATURE_FB.0,
+            Self::SLOW_WARN_FB.0,
+            Self::INDICATOR_FB.0,
+            Self::STICKY_KEYS_FB.0,
+            Self::TWO_KEYS.0,
+            Self::LATCH_TO_LOCK.0,
+            Self::SK_RELEASE_FB.0,
+            Self::SK_REJECT_FB.0,
+            Self::BK_REJECT_FB.0,
+            Self::DUMB_BELL.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 pub type DeviceSpec = u16;
 
@@ -767,6 +936,17 @@ impl core::fmt::Debug for LedClassResult  {
             (Self::LED_FEEDBACK_CLASS.0.into(), "LED_FEEDBACK_CLASS", "LedFeedbackClass"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for LedClassResult {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::KBD_FEEDBACK_CLASS.0,
+            Self::LED_FEEDBACK_CLASS.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
     }
 }
 
@@ -824,6 +1004,19 @@ impl core::fmt::Debug for LedClass  {
             (Self::ALL_XI_CLASSES.0.into(), "ALL_XI_CLASSES", "AllXIClasses"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for LedClass {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::KBD_FEEDBACK_CLASS.0,
+            Self::LED_FEEDBACK_CLASS.0,
+            Self::DFLT_XI_CLASS.0,
+            Self::ALL_XI_CLASSES.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
     }
 }
 
@@ -887,6 +1080,17 @@ impl core::fmt::Debug for BellClassResult  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for BellClassResult {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::KBD_FEEDBACK_CLASS.0,
+            Self::BELL_FEEDBACK_CLASS.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -940,6 +1144,18 @@ impl core::fmt::Debug for BellClass  {
             (Self::DFLT_XI_CLASS.0.into(), "DFLT_XI_CLASS", "DfltXIClass"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for BellClass {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::KBD_FEEDBACK_CLASS.0,
+            Self::BELL_FEEDBACK_CLASS.0,
+            Self::DFLT_XI_CLASS.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
     }
 }
 
@@ -1007,6 +1223,22 @@ impl core::fmt::Debug for ID  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for ID {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::USE_CORE_KBD.0,
+            Self::USE_CORE_PTR.0,
+            Self::DFLT_XI_CLASS.0,
+            Self::DFLT_XI_ID.0,
+            Self::ALL_XI_CLASS.0,
+            Self::ALL_XI_ID.0,
+            Self::XI_NONE.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 pub type IDSpec = u16;
 
@@ -1072,6 +1304,19 @@ impl core::fmt::Debug for Group  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for Group {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::M1.0,
+            Self::M2.0,
+            Self::M3.0,
+            Self::M4.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -1129,6 +1374,17 @@ impl core::fmt::Debug for Groups  {
             (Self::ALL.0.into(), "ALL", "All"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for Groups {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::ANY.0,
+            Self::ALL.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
     }
 }
 
@@ -1195,6 +1451,19 @@ impl core::fmt::Debug for SetOfGroup  {
     }
 }
 bitmask_binop!(SetOfGroup, u8);
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for SetOfGroup {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::GROUP1.0,
+            Self::GROUP2.0,
+            Self::GROUP3.0,
+            Self::GROUP4.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -1253,6 +1522,16 @@ impl core::fmt::Debug for SetOfGroups  {
     }
 }
 bitmask_binop!(SetOfGroups, u8);
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for SetOfGroups {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::ANY.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -1315,6 +1594,18 @@ impl core::fmt::Debug for GroupsWrap  {
     }
 }
 bitmask_binop!(GroupsWrap, u8);
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for GroupsWrap {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::WRAP_INTO_RANGE.0,
+            Self::CLAMP_INTO_RANGE.0,
+            Self::REDIRECT_INTO_RANGE.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -1387,6 +1678,23 @@ impl core::fmt::Debug for VModsHigh  {
     }
 }
 bitmask_binop!(VModsHigh, u8);
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for VModsHigh {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::M15.0,
+            Self::M14.0,
+            Self::M13.0,
+            Self::M12.0,
+            Self::M11.0,
+            Self::M10.0,
+            Self::M9.0,
+            Self::M8.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -1459,6 +1767,23 @@ impl core::fmt::Debug for VModsLow  {
     }
 }
 bitmask_binop!(VModsLow, u8);
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for VModsLow {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::M7.0,
+            Self::M6.0,
+            Self::M5.0,
+            Self::M4.0,
+            Self::M3.0,
+            Self::M2.0,
+            Self::M1.0,
+            Self::M0.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -1541,6 +1866,31 @@ impl core::fmt::Debug for VMod  {
     }
 }
 bitmask_binop!(VMod, u16);
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for VMod {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::M15.0,
+            Self::M14.0,
+            Self::M13.0,
+            Self::M12.0,
+            Self::M11.0,
+            Self::M10.0,
+            Self::M9.0,
+            Self::M8.0,
+            Self::M7.0,
+            Self::M6.0,
+            Self::M5.0,
+            Self::M4.0,
+            Self::M3.0,
+            Self::M2.0,
+            Self::M1.0,
+            Self::M0.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -1613,6 +1963,23 @@ impl core::fmt::Debug for Explicit  {
     }
 }
 bitmask_binop!(Explicit, u8);
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for Explicit {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::V_MOD_MAP.0,
+            Self::BEHAVIOR.0,
+            Self::AUTO_REPEAT.0,
+            Self::INTERPRET.0,
+            Self::KEY_TYPE4.0,
+            Self::KEY_TYPE3.0,
+            Self::KEY_TYPE2.0,
+            Self::KEY_TYPE1.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -1678,6 +2045,20 @@ impl core::fmt::Debug for SymInterpretMatch  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for SymInterpretMatch {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::NONE_OF.0,
+            Self::ANY_OF_OR_NONE.0,
+            Self::ANY_OF.0,
+            Self::ALL_OF.0,
+            Self::EXACTLY.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -1735,6 +2116,17 @@ impl core::fmt::Debug for SymInterpMatch  {
             (Self::OP_MASK.0.into(), "OP_MASK", "OpMask"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for SymInterpMatch {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::LEVEL_ONE_ONLY.0,
+            Self::OP_MASK.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
     }
 }
 
@@ -1799,6 +2191,18 @@ impl core::fmt::Debug for IMFlag  {
     }
 }
 bitmask_binop!(IMFlag, u8);
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for IMFlag {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::NO_EXPLICIT.0,
+            Self::NO_AUTOMATIC.0,
+            Self::LED_DRIVES_KB.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -1865,6 +2269,20 @@ impl core::fmt::Debug for IMModsWhich  {
     }
 }
 bitmask_binop!(IMModsWhich, u8);
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for IMModsWhich {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::USE_COMPAT.0,
+            Self::USE_EFFECTIVE.0,
+            Self::USE_LOCKED.0,
+            Self::USE_LATCHED.0,
+            Self::USE_BASE.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -1931,6 +2349,20 @@ impl core::fmt::Debug for IMGroupsWhich  {
     }
 }
 bitmask_binop!(IMGroupsWhich, u8);
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for IMGroupsWhich {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::USE_COMPAT.0,
+            Self::USE_EFFECTIVE.0,
+            Self::USE_LOCKED.0,
+            Self::USE_LATCHED.0,
+            Self::USE_BASE.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -2000,6 +2432,36 @@ impl Serialize for IndicatorMap {
         self.ctrls.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod indicator_map {
+    use super::IndicatorMap;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for IndicatorMap {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                flags: GenRandom::generate(rng),
+                which_groups: GenRandom::generate(rng),
+                groups: GenRandom::generate(rng),
+                which_mods: GenRandom::generate(rng),
+                mods: GenRandom::generate(rng),
+                real_mods: GenRandom::generate(rng),
+                vmods: GenRandom::generate(rng),
+                ctrls: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(4161468266499544064);
+        let value = IndicatorMap::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -2060,6 +2522,17 @@ impl core::fmt::Debug for CMDetail  {
     }
 }
 bitmask_binop!(CMDetail, u8);
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for CMDetail {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::SYM_INTERP.0,
+            Self::GROUP_COMPAT.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -2138,6 +2611,29 @@ impl core::fmt::Debug for NameDetail  {
     }
 }
 bitmask_binop!(NameDetail, u16);
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for NameDetail {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::KEYCODES.0,
+            Self::GEOMETRY.0,
+            Self::SYMBOLS.0,
+            Self::PHYS_SYMBOLS.0,
+            Self::TYPES.0,
+            Self::COMPAT.0,
+            Self::KEY_TYPE_NAMES.0,
+            Self::KT_LEVEL_NAMES.0,
+            Self::INDICATOR_NAMES.0,
+            Self::KEY_NAMES.0,
+            Self::KEY_ALIASES.0,
+            Self::VIRTUAL_MOD_NAMES.0,
+            Self::GROUP_NAMES.0,
+            Self::RG_NAMES.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -2210,6 +2706,23 @@ impl core::fmt::Debug for GBNDetail  {
     }
 }
 bitmask_binop!(GBNDetail, u8);
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for GBNDetail {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::TYPES.0,
+            Self::COMPAT_MAP.0,
+            Self::CLIENT_SYMBOLS.0,
+            Self::SERVER_SYMBOLS.0,
+            Self::INDICATOR_MAPS.0,
+            Self::KEY_NAMES.0,
+            Self::GEOMETRY.0,
+            Self::OTHER_NAMES.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -2276,6 +2789,20 @@ impl core::fmt::Debug for XIFeature  {
     }
 }
 bitmask_binop!(XIFeature, u8);
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for XIFeature {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::KEYBOARDS.0,
+            Self::BUTTON_ACTIONS.0,
+            Self::INDICATOR_NAMES.0,
+            Self::INDICATOR_MAPS.0,
+            Self::INDICATOR_STATE.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -2342,6 +2869,20 @@ impl core::fmt::Debug for PerClientFlag  {
     }
 }
 bitmask_binop!(PerClientFlag, u8);
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for PerClientFlag {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::DETECTABLE_AUTO_REPEAT.0,
+            Self::GRABS_USE_XKB_STATE.0,
+            Self::AUTO_RESET_CONTROLS.0,
+            Self::LOOKUP_STATE_WHEN_GRABBED.0,
+            Self::SEND_EVENT_USES_XKB_STATE.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -2379,6 +2920,31 @@ impl Serialize for ModDef {
         self.vmods.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod mod_def {
+    use super::ModDef;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for ModDef {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                mask: GenRandom::generate(rng),
+                real_mods: GenRandom::generate(rng),
+                vmods: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(598748119200);
+        let value = ModDef::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -2406,6 +2972,29 @@ impl Serialize for KeyName {
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(4);
         bytes.extend_from_slice(&self.name);
+    }
+}
+#[cfg(test)]
+mod key_name {
+    use super::KeyName;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for KeyName {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                name: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(76345284208050);
+        let value = KeyName::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -2443,6 +3032,30 @@ impl Serialize for KeyAlias {
         bytes.reserve(8);
         bytes.extend_from_slice(&self.real);
         bytes.extend_from_slice(&self.alias);
+    }
+}
+#[cfg(test)]
+mod key_alias {
+    use super::KeyAlias;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for KeyAlias {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                real: GenRandom::generate(rng),
+                alias: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(7536400909537500);
+        let value = KeyAlias::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -2491,6 +3104,30 @@ impl CountedString16 {
     pub fn length(&self) -> u16 {
         self.string.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod counted_string16 {
+    use super::CountedString16;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for CountedString16 {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                string: GenRandom::generate(rng),
+                alignment_pad: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(13377406521861524480);
+        let value = CountedString16::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -2542,6 +3179,33 @@ impl Serialize for KTMapEntry {
         self.mods_mods.serialize_into(bytes);
         self.mods_vmods.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 2]);
+    }
+}
+#[cfg(test)]
+mod kt_map_entry {
+    use super::KTMapEntry;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for KTMapEntry {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                active: GenRandom::generate(rng),
+                mods_mask: GenRandom::generate(rng),
+                level: GenRandom::generate(rng),
+                mods_mods: GenRandom::generate(rng),
+                mods_vmods: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(8664342807446449152);
+        let value = KTMapEntry::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -2608,6 +3272,35 @@ impl KeyType {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod key_type {
+    use super::KeyType;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for KeyType {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                mods_mask: GenRandom::generate(rng),
+                mods_mods: GenRandom::generate(rng),
+                mods_vmods: GenRandom::generate(rng),
+                num_levels: GenRandom::generate(rng),
+                has_preserve: GenRandom::generate(rng),
+                map: GenRandom::generate(rng),
+                preserve: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(105383364609600);
+        let value = KeyType::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -2661,6 +3354,32 @@ impl KeySymMap {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod key_sym_map {
+    use super::KeySymMap;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for KeySymMap {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                kt_index: GenRandom::generate(rng),
+                group_info: GenRandom::generate(rng),
+                width: GenRandom::generate(rng),
+                syms: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(839341023678049200);
+        let value = KeySymMap::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -2692,6 +3411,30 @@ impl Serialize for CommonBehavior {
         self.data.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod common_behavior {
+    use super::CommonBehavior;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for CommonBehavior {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                type_: GenRandom::generate(rng),
+                data: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(12727810161338239104);
+        let value = CommonBehavior::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -2719,6 +3462,29 @@ impl Serialize for DefaultBehavior {
         bytes.reserve(2);
         self.type_.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 1]);
+    }
+}
+#[cfg(test)]
+mod default_behavior {
+    use super::DefaultBehavior;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for DefaultBehavior {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                type_: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(16656873463793524736);
+        let value = DefaultBehavior::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -2754,6 +3520,30 @@ impl Serialize for RadioGroupBehavior {
         self.group.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod radio_group_behavior {
+    use super::RadioGroupBehavior;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for RadioGroupBehavior {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                type_: GenRandom::generate(rng),
+                group: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(1496730901451259904);
+        let value = RadioGroupBehavior::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -2783,6 +3573,30 @@ impl Serialize for OverlayBehavior {
         bytes.reserve(2);
         self.type_.serialize_into(bytes);
         self.key.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod overlay_behavior {
+    use super::OverlayBehavior;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for OverlayBehavior {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                type_: GenRandom::generate(rng),
+                key: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(11259478240243547136);
+        let value = OverlayBehavior::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -2938,6 +3752,12 @@ impl From<u8> for Behavior {
         Self(value)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for Behavior {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        Self(crate::x11_utils::GenRandom::generate(rng))
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -3011,6 +3831,24 @@ impl core::fmt::Debug for BehaviorType  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for BehaviorType {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::DEFAULT.0,
+            Self::LOCK.0,
+            Self::RADIO_GROUP.0,
+            Self::OVERLAY1.0,
+            Self::OVERLAY2.0,
+            Self::PERMAMENT_LOCK.0,
+            Self::PERMAMENT_RADIO_GROUP.0,
+            Self::PERMAMENT_OVERLAY1.0,
+            Self::PERMAMENT_OVERLAY2.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -3046,6 +3884,30 @@ impl Serialize for SetBehavior {
         bytes.extend_from_slice(&[0; 1]);
     }
 }
+#[cfg(test)]
+mod set_behavior {
+    use super::SetBehavior;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for SetBehavior {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                keycode: GenRandom::generate(rng),
+                behavior: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(14490863801681698560);
+        let value = SetBehavior::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -3077,6 +3939,30 @@ impl Serialize for SetExplicit {
         self.explicit.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod set_explicit {
+    use super::SetExplicit;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for SetExplicit {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                keycode: GenRandom::generate(rng),
+                explicit: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(8661687126943424512);
+        let value = SetExplicit::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -3106,6 +3992,30 @@ impl Serialize for KeyModMap {
         bytes.reserve(2);
         self.keycode.serialize_into(bytes);
         self.mods.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod key_mod_map {
+    use super::KeyModMap;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for KeyModMap {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                keycode: GenRandom::generate(rng),
+                mods: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(655333234922520000);
+        let value = KeyModMap::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -3143,6 +4053,30 @@ impl Serialize for KeyVModMap {
         self.vmods.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod key_v_mod_map {
+    use super::KeyVModMap;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for KeyVModMap {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                keycode: GenRandom::generate(rng),
+                vmods: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(1018425982208065152);
+        let value = KeyVModMap::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -3178,6 +4112,31 @@ impl Serialize for KTSetMapEntry {
         self.level.serialize_into(bytes);
         self.real_mods.serialize_into(bytes);
         self.virtual_mods.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod kt_set_map_entry {
+    use super::KTSetMapEntry;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for KTSetMapEntry {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                level: GenRandom::generate(rng),
+                real_mods: GenRandom::generate(rng),
+                virtual_mods: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(9872357140212682752);
+        let value = KTSetMapEntry::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -3244,6 +4203,35 @@ impl SetKeyType {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod set_key_type {
+    use super::SetKeyType;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for SetKeyType {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                mask: GenRandom::generate(rng),
+                real_mods: GenRandom::generate(rng),
+                virtual_mods: GenRandom::generate(rng),
+                num_levels: GenRandom::generate(rng),
+                preserve: GenRandom::generate(rng),
+                entries: GenRandom::generate(rng),
+                preserve_entries: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(10244014112036350720);
+        let value = SetKeyType::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 pub type String8 = u8;
 
@@ -3292,6 +4280,30 @@ impl Outline {
     pub fn n_points(&self) -> u8 {
         self.points.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod outline {
+    use super::Outline;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for Outline {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                corner_radius: GenRandom::generate(rng),
+                points: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(135082178431200);
+        let value = Outline::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -3348,6 +4360,32 @@ impl Shape {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod shape {
+    use super::Shape;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for Shape {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                name: GenRandom::generate(rng),
+                primary_ndx: GenRandom::generate(rng),
+                approx_ndx: GenRandom::generate(rng),
+                outlines: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(9471582848);
+        let value = Shape::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -3393,6 +4431,32 @@ impl Serialize for Key {
         self.color_ndx.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod key {
+    use super::Key;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for Key {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                name: GenRandom::generate(rng),
+                gap: GenRandom::generate(rng),
+                shape_ndx: GenRandom::generate(rng),
+                color_ndx: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(916575);
+        let value = Key::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -3428,6 +4492,30 @@ impl Serialize for OverlayKey {
         bytes.reserve(8);
         bytes.extend_from_slice(&self.over);
         bytes.extend_from_slice(&self.under);
+    }
+}
+#[cfg(test)]
+mod overlay_key {
+    use super::OverlayKey;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for OverlayKey {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                over: GenRandom::generate(rng),
+                under: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(14024628757451069904);
+        let value = OverlayKey::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -3478,6 +4566,30 @@ impl OverlayRow {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod overlay_row {
+    use super::OverlayRow;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for OverlayRow {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                row_under: GenRandom::generate(rng),
+                keys: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(18239701162069016672);
+        let value = OverlayRow::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -3524,6 +4636,30 @@ impl Overlay {
     pub fn n_rows(&self) -> u8 {
         self.rows.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod overlay {
+    use super::Overlay;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for Overlay {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                name: GenRandom::generate(rng),
+                rows: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(136055525406768);
+        let value = Overlay::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -3578,6 +4714,32 @@ impl Row {
     pub fn n_keys(&self) -> u8 {
         self.keys.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod row {
+    use super::Row;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for Row {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                top: GenRandom::generate(rng),
+                left: GenRandom::generate(rng),
+                vertical: GenRandom::generate(rng),
+                keys: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(1083138);
+        let value = Row::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -3645,6 +4807,20 @@ impl core::fmt::Debug for DoodadType  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for DoodadType {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::OUTLINE.0,
+            Self::SOLID.0,
+            Self::TEXT.0,
+            Self::INDICATOR.0,
+            Self::LOGO.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -3698,6 +4874,30 @@ impl Listing {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod listing {
+    use super::Listing;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for Listing {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                flags: GenRandom::generate(rng),
+                string: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(126642049380000);
+        let value = Listing::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -3745,6 +4945,36 @@ impl Serialize for DeviceLedInfo {
         self.names.serialize_into(bytes);
         assert_eq!(self.maps.len(), usize::try_from(self.maps_present.count_ones()).unwrap(), "`maps` has an incorrect length");
         self.maps.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod device_led_info {
+    use super::DeviceLedInfo;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for DeviceLedInfo {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                led_class: GenRandom::generate(rng),
+                led_id: GenRandom::generate(rng),
+                names_present: GenRandom::generate(rng),
+                maps_present: GenRandom::generate(rng),
+                phys_indicators: GenRandom::generate(rng),
+                state: GenRandom::generate(rng),
+                names: GenRandom::generate(rng),
+                maps: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(3896685635954182656);
+        let value = DeviceLedInfo::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -3806,6 +5036,18 @@ impl core::fmt::Debug for Error  {
             (Self::BAD_ID.0.into(), "BAD_ID", "BadId"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for Error {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::BAD_DEVICE.0,
+            Self::BAD_CLASS.0,
+            Self::BAD_ID.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
     }
 }
 
@@ -3875,6 +5117,19 @@ impl core::fmt::Debug for SA  {
     }
 }
 bitmask_binop!(SA, u8);
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for SA {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::CLEAR_LOCKS.0,
+            Self::LATCH_TO_LOCK.0,
+            Self::USE_MOD_MAP_MODS.0,
+            Self::GROUP_ABSOLUTE.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -3972,6 +5227,36 @@ impl core::fmt::Debug for SAType  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for SAType {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::NO_ACTION.0,
+            Self::SET_MODS.0,
+            Self::LATCH_MODS.0,
+            Self::LOCK_MODS.0,
+            Self::SET_GROUP.0,
+            Self::LATCH_GROUP.0,
+            Self::LOCK_GROUP.0,
+            Self::MOVE_PTR.0,
+            Self::PTR_BTN.0,
+            Self::LOCK_PTR_BTN.0,
+            Self::SET_PTR_DFLT.0,
+            Self::ISO_LOCK.0,
+            Self::TERMINATE.0,
+            Self::SWITCH_SCREEN.0,
+            Self::SET_CONTROLS.0,
+            Self::LOCK_CONTROLS.0,
+            Self::ACTION_MESSAGE.0,
+            Self::REDIRECT_KEY.0,
+            Self::DEVICE_BTN.0,
+            Self::LOCK_DEVICE_BTN.0,
+            Self::DEVICE_VALUATOR.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -4006,6 +5291,29 @@ impl Serialize for SANoAction {
         bytes.reserve(8);
         u8::from(self.type_).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 7]);
+    }
+}
+#[cfg(test)]
+mod sa_no_action {
+    use super::SANoAction;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for SANoAction {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                type_: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(7807851021197026768);
+        let value = SANoAction::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -4064,6 +5372,34 @@ impl Serialize for SASetMods {
         bytes.extend_from_slice(&[0; 2]);
     }
 }
+#[cfg(test)]
+mod sa_set_mods {
+    use super::SASetMods;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for SASetMods {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                type_: GenRandom::generate(rng),
+                flags: GenRandom::generate(rng),
+                mask: GenRandom::generate(rng),
+                real_mods: GenRandom::generate(rng),
+                vmods_high: GenRandom::generate(rng),
+                vmods_low: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(515656443231930000);
+        let value = SASetMods::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 pub type SALatchMods = SASetMods;
 
@@ -4110,6 +5446,31 @@ impl Serialize for SASetGroup {
         self.flags.serialize_into(bytes);
         self.group.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 5]);
+    }
+}
+#[cfg(test)]
+mod sa_set_group {
+    use super::SASetGroup;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for SASetGroup {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                type_: GenRandom::generate(rng),
+                flags: GenRandom::generate(rng),
+                group: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(6424273129416957312);
+        let value = SASetGroup::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -4178,6 +5539,18 @@ impl core::fmt::Debug for SAMovePtrFlag  {
     }
 }
 bitmask_binop!(SAMovePtrFlag, u8);
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for SAMovePtrFlag {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::NO_ACCELERATION.0,
+            Self::MOVE_ABSOLUTE_X.0,
+            Self::MOVE_ABSOLUTE_Y.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -4234,6 +5607,34 @@ impl Serialize for SAMovePtr {
         bytes.extend_from_slice(&[0; 2]);
     }
 }
+#[cfg(test)]
+mod sa_move_ptr {
+    use super::SAMovePtr;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for SAMovePtr {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                type_: GenRandom::generate(rng),
+                flags: GenRandom::generate(rng),
+                x_high: GenRandom::generate(rng),
+                x_low: GenRandom::generate(rng),
+                y_high: GenRandom::generate(rng),
+                y_low: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(581381705551046400);
+        let value = SAMovePtr::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -4282,6 +5683,32 @@ impl Serialize for SAPtrBtn {
         bytes.extend_from_slice(&[0; 4]);
     }
 }
+#[cfg(test)]
+mod sa_ptr_btn {
+    use super::SAPtrBtn;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for SAPtrBtn {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                type_: GenRandom::generate(rng),
+                flags: GenRandom::generate(rng),
+                count: GenRandom::generate(rng),
+                button: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(4806610009344000);
+        let value = SAPtrBtn::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -4326,6 +5753,31 @@ impl Serialize for SALockPtrBtn {
         bytes.extend_from_slice(&[0; 1]);
         self.button.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 4]);
+    }
+}
+#[cfg(test)]
+mod sa_lock_ptr_btn {
+    use super::SALockPtrBtn;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for SALockPtrBtn {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                type_: GenRandom::generate(rng),
+                flags: GenRandom::generate(rng),
+                button: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(16928665030448685056);
+        let value = SALockPtrBtn::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -4388,6 +5840,17 @@ impl core::fmt::Debug for SASetPtrDfltFlag  {
     }
 }
 bitmask_binop!(SASetPtrDfltFlag, u8);
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for SASetPtrDfltFlag {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::DFLT_BTN_ABSOLUTE.0,
+            Self::AFFECT_DFLT_BUTTON.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -4434,6 +5897,32 @@ impl Serialize for SASetPtrDflt {
         self.affect.serialize_into(bytes);
         self.value.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 4]);
+    }
+}
+#[cfg(test)]
+mod sa_set_ptr_dflt {
+    use super::SASetPtrDflt;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for SASetPtrDflt {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                type_: GenRandom::generate(rng),
+                flags: GenRandom::generate(rng),
+                affect: GenRandom::generate(rng),
+                value: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(892592106586832896);
+        let value = SASetPtrDflt::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -4502,6 +5991,20 @@ impl core::fmt::Debug for SAIsoLockFlag  {
     }
 }
 bitmask_binop!(SAIsoLockFlag, u8);
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for SAIsoLockFlag {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::NO_LOCK.0,
+            Self::NO_UNLOCK.0,
+            Self::USE_MOD_MAP_MODS.0,
+            Self::GROUP_ABSOLUTE.0,
+            Self::ISO_DFLT_IS_GROUP.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -4566,6 +6069,19 @@ impl core::fmt::Debug for SAIsoLockNoAffect  {
     }
 }
 bitmask_binop!(SAIsoLockNoAffect, u8);
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for SAIsoLockNoAffect {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::CTRLS.0,
+            Self::PTR.0,
+            Self::GROUP.0,
+            Self::MODS.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -4628,6 +6144,36 @@ impl Serialize for SAIsoLock {
         self.vmods_low.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod sa_iso_lock {
+    use super::SAIsoLock;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for SAIsoLock {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                type_: GenRandom::generate(rng),
+                flags: GenRandom::generate(rng),
+                mask: GenRandom::generate(rng),
+                real_mods: GenRandom::generate(rng),
+                group: GenRandom::generate(rng),
+                affect: GenRandom::generate(rng),
+                vmods_high: GenRandom::generate(rng),
+                vmods_low: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(449252674904018700);
+        let value = SAIsoLock::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -4662,6 +6208,29 @@ impl Serialize for SATerminate {
         bytes.reserve(8);
         u8::from(self.type_).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 7]);
+    }
+}
+#[cfg(test)]
+mod sa_terminate {
+    use super::SATerminate;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for SATerminate {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                type_: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(12974823384284355136);
+        let value = SATerminate::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -4724,6 +6293,17 @@ impl core::fmt::Debug for SwitchScreenFlag  {
     }
 }
 bitmask_binop!(SwitchScreenFlag, u8);
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for SwitchScreenFlag {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::APPLICATION.0,
+            Self::ABSOLUTE.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -4766,6 +6346,31 @@ impl Serialize for SASwitchScreen {
         self.flags.serialize_into(bytes);
         self.new_screen.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 5]);
+    }
+}
+#[cfg(test)]
+mod sa_switch_screen {
+    use super::SASwitchScreen;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for SASwitchScreen {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                type_: GenRandom::generate(rng),
+                flags: GenRandom::generate(rng),
+                new_screen: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(7503600375762809216);
+        let value = SASwitchScreen::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -4834,6 +6439,20 @@ impl core::fmt::Debug for BoolCtrlsHigh  {
     }
 }
 bitmask_binop!(BoolCtrlsHigh, u8);
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for BoolCtrlsHigh {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::ACCESS_X_FEEDBACK.0,
+            Self::AUDIBLE_BELL.0,
+            Self::OVERLAY1.0,
+            Self::OVERLAY2.0,
+            Self::IGNORE_GROUP_LOCK.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -4906,6 +6525,23 @@ impl core::fmt::Debug for BoolCtrlsLow  {
     }
 }
 bitmask_binop!(BoolCtrlsLow, u8);
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for BoolCtrlsLow {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::REPEAT_KEYS.0,
+            Self::SLOW_KEYS.0,
+            Self::BOUNCE_KEYS.0,
+            Self::STICKY_KEYS.0,
+            Self::MOUSE_KEYS.0,
+            Self::MOUSE_KEYS_ACCEL.0,
+            Self::ACCESS_X_KEYS.0,
+            Self::ACCESS_X_TIMEOUT.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -4950,6 +6586,31 @@ impl Serialize for SASetControls {
         self.bool_ctrls_high.serialize_into(bytes);
         self.bool_ctrls_low.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 2]);
+    }
+}
+#[cfg(test)]
+mod sa_set_controls {
+    use super::SASetControls;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for SASetControls {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                type_: GenRandom::generate(rng),
+                bool_ctrls_high: GenRandom::generate(rng),
+                bool_ctrls_low: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(2790199047960412416);
+        let value = SASetControls::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -5016,6 +6677,18 @@ impl core::fmt::Debug for ActionMessageFlag  {
     }
 }
 bitmask_binop!(ActionMessageFlag, u8);
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for ActionMessageFlag {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::ON_PRESS.0,
+            Self::ON_RELEASE.0,
+            Self::GEN_KEY_EVENT.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -5056,6 +6729,31 @@ impl Serialize for SAActionMessage {
         u8::from(self.type_).serialize_into(bytes);
         self.flags.serialize_into(bytes);
         bytes.extend_from_slice(&self.message);
+    }
+}
+#[cfg(test)]
+mod sa_action_message {
+    use super::SAActionMessage;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for SAActionMessage {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                type_: GenRandom::generate(rng),
+                flags: GenRandom::generate(rng),
+                message: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(17813053499972775352);
+        let value = SAActionMessage::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -5120,6 +6818,36 @@ impl Serialize for SARedirectKey {
         self.vmods_low.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod sa_redirect_key {
+    use super::SARedirectKey;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for SARedirectKey {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                type_: GenRandom::generate(rng),
+                newkey: GenRandom::generate(rng),
+                mask: GenRandom::generate(rng),
+                real_modifiers: GenRandom::generate(rng),
+                vmods_mask_high: GenRandom::generate(rng),
+                vmods_mask_low: GenRandom::generate(rng),
+                vmods_high: GenRandom::generate(rng),
+                vmods_low: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(3434080499120803008);
+        let value = SARedirectKey::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -5170,6 +6898,33 @@ impl Serialize for SADeviceBtn {
         self.button.serialize_into(bytes);
         self.device.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 3]);
+    }
+}
+#[cfg(test)]
+mod sa_device_btn {
+    use super::SADeviceBtn;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for SADeviceBtn {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                type_: GenRandom::generate(rng),
+                flags: GenRandom::generate(rng),
+                count: GenRandom::generate(rng),
+                button: GenRandom::generate(rng),
+                device: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(10473557590147248256);
+        let value = SADeviceBtn::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -5232,6 +6987,17 @@ impl core::fmt::Debug for LockDeviceFlags  {
     }
 }
 bitmask_binop!(LockDeviceFlags, u8);
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for LockDeviceFlags {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::NO_LOCK.0,
+            Self::NO_UNLOCK.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -5280,6 +7046,32 @@ impl Serialize for SALockDeviceBtn {
         self.button.serialize_into(bytes);
         self.device.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 3]);
+    }
+}
+#[cfg(test)]
+mod sa_lock_device_btn {
+    use super::SALockDeviceBtn;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for SALockDeviceBtn {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                type_: GenRandom::generate(rng),
+                flags: GenRandom::generate(rng),
+                button: GenRandom::generate(rng),
+                device: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(12511635021339032064);
+        let value = SALockDeviceBtn::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -5349,6 +7141,21 @@ impl core::fmt::Debug for SAValWhat  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for SAValWhat {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::IGNORE_VAL.0,
+            Self::SET_VAL_MIN.0,
+            Self::SET_VAL_CENTER.0,
+            Self::SET_VAL_MAX.0,
+            Self::SET_VAL_RELATIVE.0,
+            Self::SET_VAL_ABSOLUTE.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -5413,6 +7220,36 @@ impl Serialize for SADeviceValuator {
         self.val2value.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod sa_device_valuator {
+    use super::SADeviceValuator;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for SADeviceValuator {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                type_: GenRandom::generate(rng),
+                device: GenRandom::generate(rng),
+                val1what: GenRandom::generate(rng),
+                val1index: GenRandom::generate(rng),
+                val1value: GenRandom::generate(rng),
+                val2what: GenRandom::generate(rng),
+                val2index: GenRandom::generate(rng),
+                val2value: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(170636727429642752);
+        let value = SADeviceValuator::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -5449,6 +7286,30 @@ impl Serialize for SIAction {
         bytes.reserve(8);
         u8::from(self.type_).serialize_into(bytes);
         bytes.extend_from_slice(&self.data);
+    }
+}
+#[cfg(test)]
+mod si_action {
+    use super::SIAction;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for SIAction {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                type_: GenRandom::generate(rng),
+                data: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(5798457201537000);
+        let value = SIAction::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -5510,6 +7371,34 @@ impl Serialize for SymInterpret {
         self.virtual_mod.serialize_into(bytes);
         self.flags.serialize_into(bytes);
         self.action.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod sym_interpret {
+    use super::SymInterpret;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for SymInterpret {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sym: GenRandom::generate(rng),
+                mods: GenRandom::generate(rng),
+                match_: GenRandom::generate(rng),
+                virtual_mod: GenRandom::generate(rng),
+                flags: GenRandom::generate(rng),
+                action: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(13564024859944695808);
+        let value = SymInterpret::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -5826,6 +7715,12 @@ impl From<SAType> for Action {
         Self(value)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for Action {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        Self(crate::x11_utils::GenRandom::generate(rng))
+    }
+}
 
 /// Opcode for the UseExtension request
 pub const USE_EXTENSION_REQUEST: u8 = 0;
@@ -5970,6 +7865,33 @@ impl Serialize for UseExtensionReply {
         bytes.extend_from_slice(&[0; 20]);
     }
 }
+#[cfg(test)]
+mod use_extension_reply {
+    use super::UseExtensionReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for UseExtensionReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                supported: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                server_major: GenRandom::generate(rng),
+                server_minor: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(15909383041101545472);
+        let value = UseExtensionReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -6003,6 +7925,30 @@ impl Serialize for SelectEventsAuxBitcase1 {
         self.new_keyboard_details.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod select_events_aux_bitcase1 {
+    use super::SelectEventsAuxBitcase1;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for SelectEventsAuxBitcase1 {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                affect_new_keyboard: GenRandom::generate(rng),
+                new_keyboard_details: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(17030939227855765504);
+        let value = SelectEventsAuxBitcase1::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SelectEventsAuxBitcase2 {
@@ -6033,6 +7979,30 @@ impl Serialize for SelectEventsAuxBitcase2 {
         bytes.reserve(4);
         self.affect_state.serialize_into(bytes);
         self.state_details.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod select_events_aux_bitcase2 {
+    use super::SelectEventsAuxBitcase2;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for SelectEventsAuxBitcase2 {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                affect_state: GenRandom::generate(rng),
+                state_details: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(7213976967400620032);
+        let value = SelectEventsAuxBitcase2::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -6071,6 +8041,30 @@ impl Serialize for SelectEventsAuxBitcase3 {
         self.ctrl_details.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod select_events_aux_bitcase3 {
+    use super::SelectEventsAuxBitcase3;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for SelectEventsAuxBitcase3 {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                affect_ctrls: GenRandom::generate(rng),
+                ctrl_details: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(15843758780655026176);
+        let value = SelectEventsAuxBitcase3::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SelectEventsAuxBitcase4 {
@@ -6105,6 +8099,30 @@ impl Serialize for SelectEventsAuxBitcase4 {
         bytes.reserve(8);
         self.affect_indicator_state.serialize_into(bytes);
         self.indicator_state_details.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod select_events_aux_bitcase4 {
+    use super::SelectEventsAuxBitcase4;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for SelectEventsAuxBitcase4 {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                affect_indicator_state: GenRandom::generate(rng),
+                indicator_state_details: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(6026796520199880704);
+        let value = SelectEventsAuxBitcase4::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -6143,6 +8161,30 @@ impl Serialize for SelectEventsAuxBitcase5 {
         self.indicator_map_details.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod select_events_aux_bitcase5 {
+    use super::SelectEventsAuxBitcase5;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for SelectEventsAuxBitcase5 {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                affect_indicator_map: GenRandom::generate(rng),
+                indicator_map_details: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(14656578333454286848);
+        let value = SelectEventsAuxBitcase5::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SelectEventsAuxBitcase6 {
@@ -6175,6 +8217,30 @@ impl Serialize for SelectEventsAuxBitcase6 {
         self.names_details.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod select_events_aux_bitcase6 {
+    use super::SelectEventsAuxBitcase6;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for SelectEventsAuxBitcase6 {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                affect_names: GenRandom::generate(rng),
+                names_details: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(4839616072999141376);
+        let value = SelectEventsAuxBitcase6::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SelectEventsAuxBitcase7 {
@@ -6203,6 +8269,30 @@ impl Serialize for SelectEventsAuxBitcase7 {
         bytes.reserve(2);
         self.affect_compat.serialize_into(bytes);
         self.compat_details.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod select_events_aux_bitcase7 {
+    use super::SelectEventsAuxBitcase7;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for SelectEventsAuxBitcase7 {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                affect_compat: GenRandom::generate(rng),
+                compat_details: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(13469397886253547520);
+        let value = SelectEventsAuxBitcase7::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -6235,6 +8325,30 @@ impl Serialize for SelectEventsAuxBitcase8 {
         self.bell_details.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod select_events_aux_bitcase8 {
+    use super::SelectEventsAuxBitcase8;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for SelectEventsAuxBitcase8 {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                affect_bell: GenRandom::generate(rng),
+                bell_details: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(3652435625798402048);
+        let value = SelectEventsAuxBitcase8::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SelectEventsAuxBitcase9 {
@@ -6263,6 +8377,30 @@ impl Serialize for SelectEventsAuxBitcase9 {
         bytes.reserve(2);
         self.affect_msg_details.serialize_into(bytes);
         self.msg_details.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod select_events_aux_bitcase9 {
+    use super::SelectEventsAuxBitcase9;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for SelectEventsAuxBitcase9 {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                affect_msg_details: GenRandom::generate(rng),
+                msg_details: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(12282217439052808192);
+        let value = SelectEventsAuxBitcase9::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -6297,6 +8435,30 @@ impl Serialize for SelectEventsAuxBitcase10 {
         self.access_x_details.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod select_events_aux_bitcase10 {
+    use super::SelectEventsAuxBitcase10;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for SelectEventsAuxBitcase10 {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                affect_access_x: GenRandom::generate(rng),
+                access_x_details: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(5828343693856473088);
+        let value = SelectEventsAuxBitcase10::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SelectEventsAuxBitcase11 {
@@ -6327,6 +8489,30 @@ impl Serialize for SelectEventsAuxBitcase11 {
         bytes.reserve(4);
         self.affect_ext_dev.serialize_into(bytes);
         self.extdev_details.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod select_events_aux_bitcase11 {
+    use super::SelectEventsAuxBitcase11;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for SelectEventsAuxBitcase11 {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                affect_ext_dev: GenRandom::generate(rng),
+                extdev_details: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(4412538848002686976);
+        let value = SelectEventsAuxBitcase11::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 /// Auxiliary and optional information for the `select_events` function
@@ -6513,6 +8699,203 @@ impl SelectEventsAux {
             expr_value |= u16::from(EventType::EXTENSION_DEVICE_NOTIFY);
         }
         expr_value
+    }
+}
+#[cfg(test)]
+mod select_events_aux {
+    use super::SelectEventsAux;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for SelectEventsAux {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                bitcase1: GenRandom::generate(rng),
+                bitcase2: GenRandom::generate(rng),
+                bitcase3: GenRandom::generate(rng),
+                bitcase4: GenRandom::generate(rng),
+                bitcase5: GenRandom::generate(rng),
+                bitcase6: GenRandom::generate(rng),
+                bitcase7: GenRandom::generate(rng),
+                bitcase8: GenRandom::generate(rng),
+                bitcase9: GenRandom::generate(rng),
+                bitcase10: GenRandom::generate(rng),
+                bitcase11: GenRandom::generate(rng),
+            }
+        }
+    }
+    fn generate_values(rng: &Rng) -> alloc::vec::Vec<SelectEventsAux> {
+        alloc::vec![
+            SelectEventsAux {
+                bitcase1: None,
+                bitcase2: None,
+                bitcase3: None,
+                bitcase4: None,
+                bitcase5: None,
+                bitcase6: None,
+                bitcase7: None,
+                bitcase8: None,
+                bitcase9: None,
+                bitcase10: None,
+                bitcase11: None,
+            },
+            SelectEventsAux {
+                bitcase1: Some(GenRandom::generate(rng)),
+                bitcase2: Some(GenRandom::generate(rng)),
+                bitcase3: Some(GenRandom::generate(rng)),
+                bitcase4: Some(GenRandom::generate(rng)),
+                bitcase5: Some(GenRandom::generate(rng)),
+                bitcase6: Some(GenRandom::generate(rng)),
+                bitcase7: Some(GenRandom::generate(rng)),
+                bitcase8: Some(GenRandom::generate(rng)),
+                bitcase9: Some(GenRandom::generate(rng)),
+                bitcase10: Some(GenRandom::generate(rng)),
+                bitcase11: Some(GenRandom::generate(rng)),
+            },
+            SelectEventsAux {
+                bitcase1: Some(GenRandom::generate(rng)),
+                bitcase2: None,
+                bitcase3: None,
+                bitcase4: None,
+                bitcase5: None,
+                bitcase6: None,
+                bitcase7: None,
+                bitcase8: None,
+                bitcase9: None,
+                bitcase10: None,
+                bitcase11: None,
+            },
+            SelectEventsAux {
+                bitcase1: None,
+                bitcase2: Some(GenRandom::generate(rng)),
+                bitcase3: None,
+                bitcase4: None,
+                bitcase5: None,
+                bitcase6: None,
+                bitcase7: None,
+                bitcase8: None,
+                bitcase9: None,
+                bitcase10: None,
+                bitcase11: None,
+            },
+            SelectEventsAux {
+                bitcase1: None,
+                bitcase2: None,
+                bitcase3: Some(GenRandom::generate(rng)),
+                bitcase4: None,
+                bitcase5: None,
+                bitcase6: None,
+                bitcase7: None,
+                bitcase8: None,
+                bitcase9: None,
+                bitcase10: None,
+                bitcase11: None,
+            },
+            SelectEventsAux {
+                bitcase1: None,
+                bitcase2: None,
+                bitcase3: None,
+                bitcase4: Some(GenRandom::generate(rng)),
+                bitcase5: None,
+                bitcase6: None,
+                bitcase7: None,
+                bitcase8: None,
+                bitcase9: None,
+                bitcase10: None,
+                bitcase11: None,
+            },
+            SelectEventsAux {
+                bitcase1: None,
+                bitcase2: None,
+                bitcase3: None,
+                bitcase4: None,
+                bitcase5: Some(GenRandom::generate(rng)),
+                bitcase6: None,
+                bitcase7: None,
+                bitcase8: None,
+                bitcase9: None,
+                bitcase10: None,
+                bitcase11: None,
+            },
+            SelectEventsAux {
+                bitcase1: None,
+                bitcase2: None,
+                bitcase3: None,
+                bitcase4: None,
+                bitcase5: None,
+                bitcase6: Some(GenRandom::generate(rng)),
+                bitcase7: None,
+                bitcase8: None,
+                bitcase9: None,
+                bitcase10: None,
+                bitcase11: None,
+            },
+            SelectEventsAux {
+                bitcase1: None,
+                bitcase2: None,
+                bitcase3: None,
+                bitcase4: None,
+                bitcase5: None,
+                bitcase6: None,
+                bitcase7: Some(GenRandom::generate(rng)),
+                bitcase8: None,
+                bitcase9: None,
+                bitcase10: None,
+                bitcase11: None,
+            },
+            SelectEventsAux {
+                bitcase1: None,
+                bitcase2: None,
+                bitcase3: None,
+                bitcase4: None,
+                bitcase5: None,
+                bitcase6: None,
+                bitcase7: None,
+                bitcase8: Some(GenRandom::generate(rng)),
+                bitcase9: None,
+                bitcase10: None,
+                bitcase11: None,
+            },
+            SelectEventsAux {
+                bitcase1: None,
+                bitcase2: None,
+                bitcase3: None,
+                bitcase4: None,
+                bitcase5: None,
+                bitcase6: None,
+                bitcase7: None,
+                bitcase8: None,
+                bitcase9: Some(GenRandom::generate(rng)),
+                bitcase10: None,
+                bitcase11: None,
+            },
+            SelectEventsAux {
+                bitcase1: None,
+                bitcase2: None,
+                bitcase3: None,
+                bitcase4: None,
+                bitcase5: None,
+                bitcase6: None,
+                bitcase7: None,
+                bitcase8: None,
+                bitcase9: None,
+                bitcase10: Some(GenRandom::generate(rng)),
+                bitcase11: None,
+            },
+            SelectEventsAux {
+                bitcase1: None,
+                bitcase2: None,
+                bitcase3: None,
+                bitcase4: None,
+                bitcase5: None,
+                bitcase6: None,
+                bitcase7: None,
+                bitcase8: None,
+                bitcase9: None,
+                bitcase10: None,
+                bitcase11: Some(GenRandom::generate(rng)),
+            },
+        ]
     }
 }
 impl SelectEventsAux {
@@ -6989,6 +9372,45 @@ impl Serialize for GetStateReply {
         bytes.extend_from_slice(&[0; 6]);
     }
 }
+#[cfg(test)]
+mod get_state_reply {
+    use super::GetStateReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetStateReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                device_id: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                mods: GenRandom::generate(rng),
+                base_mods: GenRandom::generate(rng),
+                latched_mods: GenRandom::generate(rng),
+                locked_mods: GenRandom::generate(rng),
+                group: GenRandom::generate(rng),
+                locked_group: GenRandom::generate(rng),
+                base_group: GenRandom::generate(rng),
+                latched_group: GenRandom::generate(rng),
+                compat_state: GenRandom::generate(rng),
+                grab_mods: GenRandom::generate(rng),
+                compat_grab_mods: GenRandom::generate(rng),
+                lookup_mods: GenRandom::generate(rng),
+                compat_lookup_mods: GenRandom::generate(rng),
+                ptr_btn_state: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(14648255750109405184);
+        let value = GetStateReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the LatchLockState request
 pub const LATCH_LOCK_STATE_REQUEST: u8 = 5;
@@ -7378,6 +9800,57 @@ impl Serialize for GetControlsReply {
         self.access_x_timeout_values.serialize_into(bytes);
         self.enabled_controls.serialize_into(bytes);
         bytes.extend_from_slice(&self.per_key_repeat);
+    }
+}
+#[cfg(test)]
+mod get_controls_reply {
+    use super::GetControlsReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetControlsReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                device_id: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                mouse_keys_dflt_btn: GenRandom::generate(rng),
+                num_groups: GenRandom::generate(rng),
+                groups_wrap: GenRandom::generate(rng),
+                internal_mods_mask: GenRandom::generate(rng),
+                ignore_lock_mods_mask: GenRandom::generate(rng),
+                internal_mods_real_mods: GenRandom::generate(rng),
+                ignore_lock_mods_real_mods: GenRandom::generate(rng),
+                internal_mods_vmods: GenRandom::generate(rng),
+                ignore_lock_mods_vmods: GenRandom::generate(rng),
+                repeat_delay: GenRandom::generate(rng),
+                repeat_interval: GenRandom::generate(rng),
+                slow_keys_delay: GenRandom::generate(rng),
+                debounce_delay: GenRandom::generate(rng),
+                mouse_keys_delay: GenRandom::generate(rng),
+                mouse_keys_interval: GenRandom::generate(rng),
+                mouse_keys_time_to_max: GenRandom::generate(rng),
+                mouse_keys_max_speed: GenRandom::generate(rng),
+                mouse_keys_curve: GenRandom::generate(rng),
+                access_x_option: GenRandom::generate(rng),
+                access_x_timeout: GenRandom::generate(rng),
+                access_x_timeout_options_mask: GenRandom::generate(rng),
+                access_x_timeout_options_values: GenRandom::generate(rng),
+                access_x_timeout_mask: GenRandom::generate(rng),
+                access_x_timeout_values: GenRandom::generate(rng),
+                enabled_controls: GenRandom::generate(rng),
+                per_key_repeat: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(443756268157370368);
+        let value = GetControlsReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -7825,6 +10298,30 @@ impl GetMapMapBitcase3 {
         self.acts_rtrn_acts.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod get_map_map_bitcase3 {
+    use super::GetMapMapBitcase3;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetMapMapBitcase3 {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                acts_rtrn_count: GenRandom::generate(rng),
+                acts_rtrn_acts: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(10970178143673098240);
+        let value = GetMapMapBitcase3::generate(&rng);
+        let left = value.serialize(GenRandom::generate(&rng), GenRandom::generate(&rng));
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right, GenRandom::generate(&rng), GenRandom::generate(&rng));
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 #[derive(Debug, Clone, Default)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetMapMap {
@@ -8008,6 +10505,131 @@ impl GetMapMap {
         expr_value
     }
 }
+#[cfg(test)]
+mod get_map_map {
+    use super::GetMapMap;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetMapMap {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                types_rtrn: GenRandom::generate(rng),
+                syms_rtrn: GenRandom::generate(rng),
+                bitcase3: GenRandom::generate(rng),
+                behaviors_rtrn: GenRandom::generate(rng),
+                vmods_rtrn: GenRandom::generate(rng),
+                explicit_rtrn: GenRandom::generate(rng),
+                modmap_rtrn: GenRandom::generate(rng),
+                vmodmap_rtrn: GenRandom::generate(rng),
+            }
+        }
+    }
+    fn generate_values(rng: &Rng) -> alloc::vec::Vec<GetMapMap> {
+        alloc::vec![
+            GetMapMap {
+                types_rtrn: None,
+                syms_rtrn: None,
+                bitcase3: None,
+                behaviors_rtrn: None,
+                vmods_rtrn: None,
+                explicit_rtrn: None,
+                modmap_rtrn: None,
+                vmodmap_rtrn: None,
+            },
+            GetMapMap {
+                types_rtrn: Some(GenRandom::generate(rng)),
+                syms_rtrn: Some(GenRandom::generate(rng)),
+                bitcase3: Some(GenRandom::generate(rng)),
+                behaviors_rtrn: Some(GenRandom::generate(rng)),
+                vmods_rtrn: Some(GenRandom::generate(rng)),
+                explicit_rtrn: Some(GenRandom::generate(rng)),
+                modmap_rtrn: Some(GenRandom::generate(rng)),
+                vmodmap_rtrn: Some(GenRandom::generate(rng)),
+            },
+            GetMapMap {
+                types_rtrn: Some(GenRandom::generate(rng)),
+                syms_rtrn: None,
+                bitcase3: None,
+                behaviors_rtrn: None,
+                vmods_rtrn: None,
+                explicit_rtrn: None,
+                modmap_rtrn: None,
+                vmodmap_rtrn: None,
+            },
+            GetMapMap {
+                types_rtrn: None,
+                syms_rtrn: Some(GenRandom::generate(rng)),
+                bitcase3: None,
+                behaviors_rtrn: None,
+                vmods_rtrn: None,
+                explicit_rtrn: None,
+                modmap_rtrn: None,
+                vmodmap_rtrn: None,
+            },
+            GetMapMap {
+                types_rtrn: None,
+                syms_rtrn: None,
+                bitcase3: Some(GenRandom::generate(rng)),
+                behaviors_rtrn: None,
+                vmods_rtrn: None,
+                explicit_rtrn: None,
+                modmap_rtrn: None,
+                vmodmap_rtrn: None,
+            },
+            GetMapMap {
+                types_rtrn: None,
+                syms_rtrn: None,
+                bitcase3: None,
+                behaviors_rtrn: Some(GenRandom::generate(rng)),
+                vmods_rtrn: None,
+                explicit_rtrn: None,
+                modmap_rtrn: None,
+                vmodmap_rtrn: None,
+            },
+            GetMapMap {
+                types_rtrn: None,
+                syms_rtrn: None,
+                bitcase3: None,
+                behaviors_rtrn: None,
+                vmods_rtrn: Some(GenRandom::generate(rng)),
+                explicit_rtrn: None,
+                modmap_rtrn: None,
+                vmodmap_rtrn: None,
+            },
+            GetMapMap {
+                types_rtrn: None,
+                syms_rtrn: None,
+                bitcase3: None,
+                behaviors_rtrn: None,
+                vmods_rtrn: None,
+                explicit_rtrn: Some(GenRandom::generate(rng)),
+                modmap_rtrn: None,
+                vmodmap_rtrn: None,
+            },
+            GetMapMap {
+                types_rtrn: None,
+                syms_rtrn: None,
+                bitcase3: None,
+                behaviors_rtrn: None,
+                vmods_rtrn: None,
+                explicit_rtrn: None,
+                modmap_rtrn: Some(GenRandom::generate(rng)),
+                vmodmap_rtrn: None,
+            },
+            GetMapMap {
+                types_rtrn: None,
+                syms_rtrn: None,
+                bitcase3: None,
+                behaviors_rtrn: None,
+                vmods_rtrn: None,
+                explicit_rtrn: None,
+                modmap_rtrn: None,
+                vmodmap_rtrn: Some(GenRandom::generate(rng)),
+            },
+        ]
+    }
+}
 
 #[derive(Debug, Clone)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -8131,6 +10753,56 @@ impl Serialize for GetMapReply {
         self.map.serialize_into(bytes, present, self.n_types, self.n_key_syms, self.n_key_actions, self.total_actions, self.total_key_behaviors, self.virtual_mods, self.total_key_explicit, self.total_mod_map_keys, self.total_v_mod_map_keys);
     }
 }
+#[cfg(test)]
+mod get_map_reply {
+    use super::GetMapReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetMapReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                device_id: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                min_key_code: GenRandom::generate(rng),
+                max_key_code: GenRandom::generate(rng),
+                first_type: GenRandom::generate(rng),
+                n_types: GenRandom::generate(rng),
+                total_types: GenRandom::generate(rng),
+                first_key_sym: GenRandom::generate(rng),
+                total_syms: GenRandom::generate(rng),
+                n_key_syms: GenRandom::generate(rng),
+                first_key_action: GenRandom::generate(rng),
+                total_actions: GenRandom::generate(rng),
+                n_key_actions: GenRandom::generate(rng),
+                first_key_behavior: GenRandom::generate(rng),
+                n_key_behaviors: GenRandom::generate(rng),
+                total_key_behaviors: GenRandom::generate(rng),
+                first_key_explicit: GenRandom::generate(rng),
+                n_key_explicit: GenRandom::generate(rng),
+                total_key_explicit: GenRandom::generate(rng),
+                first_mod_map_key: GenRandom::generate(rng),
+                n_mod_map_keys: GenRandom::generate(rng),
+                total_mod_map_keys: GenRandom::generate(rng),
+                first_v_mod_map_key: GenRandom::generate(rng),
+                n_v_mod_map_keys: GenRandom::generate(rng),
+                total_v_mod_map_keys: GenRandom::generate(rng),
+                virtual_mods: GenRandom::generate(rng),
+                map: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(4750200101533097984);
+        let value = GetMapReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 #[derive(Debug, Clone)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -8165,6 +10837,30 @@ impl SetMapAuxBitcase3 {
         bytes.extend_from_slice(&[0; 3][..(4 - (bytes.len() % 4)) % 4]);
         assert_eq!(self.actions.len(), usize::try_from(total_actions).unwrap(), "`actions` has an incorrect length");
         self.actions.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod set_map_aux_bitcase3 {
+    use super::SetMapAuxBitcase3;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for SetMapAuxBitcase3 {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                actions_count: GenRandom::generate(rng),
+                actions: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(13174304718843809792);
+        let value = SetMapAuxBitcase3::generate(&rng);
+        let left = value.serialize(GenRandom::generate(&rng), GenRandom::generate(&rng));
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right, GenRandom::generate(&rng), GenRandom::generate(&rng));
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 /// Auxiliary and optional information for the `set_map` function
@@ -8337,6 +11033,131 @@ impl SetMapAux {
             expr_value |= u16::from(MapPart::VIRTUAL_MOD_MAP);
         }
         expr_value
+    }
+}
+#[cfg(test)]
+mod set_map_aux {
+    use super::SetMapAux;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for SetMapAux {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                types: GenRandom::generate(rng),
+                syms: GenRandom::generate(rng),
+                bitcase3: GenRandom::generate(rng),
+                behaviors: GenRandom::generate(rng),
+                vmods: GenRandom::generate(rng),
+                explicit: GenRandom::generate(rng),
+                modmap: GenRandom::generate(rng),
+                vmodmap: GenRandom::generate(rng),
+            }
+        }
+    }
+    fn generate_values(rng: &Rng) -> alloc::vec::Vec<SetMapAux> {
+        alloc::vec![
+            SetMapAux {
+                types: None,
+                syms: None,
+                bitcase3: None,
+                behaviors: None,
+                vmods: None,
+                explicit: None,
+                modmap: None,
+                vmodmap: None,
+            },
+            SetMapAux {
+                types: Some(GenRandom::generate(rng)),
+                syms: Some(GenRandom::generate(rng)),
+                bitcase3: Some(GenRandom::generate(rng)),
+                behaviors: Some(GenRandom::generate(rng)),
+                vmods: Some(GenRandom::generate(rng)),
+                explicit: Some(GenRandom::generate(rng)),
+                modmap: Some(GenRandom::generate(rng)),
+                vmodmap: Some(GenRandom::generate(rng)),
+            },
+            SetMapAux {
+                types: Some(GenRandom::generate(rng)),
+                syms: None,
+                bitcase3: None,
+                behaviors: None,
+                vmods: None,
+                explicit: None,
+                modmap: None,
+                vmodmap: None,
+            },
+            SetMapAux {
+                types: None,
+                syms: Some(GenRandom::generate(rng)),
+                bitcase3: None,
+                behaviors: None,
+                vmods: None,
+                explicit: None,
+                modmap: None,
+                vmodmap: None,
+            },
+            SetMapAux {
+                types: None,
+                syms: None,
+                bitcase3: Some(GenRandom::generate(rng)),
+                behaviors: None,
+                vmods: None,
+                explicit: None,
+                modmap: None,
+                vmodmap: None,
+            },
+            SetMapAux {
+                types: None,
+                syms: None,
+                bitcase3: None,
+                behaviors: Some(GenRandom::generate(rng)),
+                vmods: None,
+                explicit: None,
+                modmap: None,
+                vmodmap: None,
+            },
+            SetMapAux {
+                types: None,
+                syms: None,
+                bitcase3: None,
+                behaviors: None,
+                vmods: Some(GenRandom::generate(rng)),
+                explicit: None,
+                modmap: None,
+                vmodmap: None,
+            },
+            SetMapAux {
+                types: None,
+                syms: None,
+                bitcase3: None,
+                behaviors: None,
+                vmods: None,
+                explicit: Some(GenRandom::generate(rng)),
+                modmap: None,
+                vmodmap: None,
+            },
+            SetMapAux {
+                types: None,
+                syms: None,
+                bitcase3: None,
+                behaviors: None,
+                vmods: None,
+                explicit: None,
+                modmap: Some(GenRandom::generate(rng)),
+                vmodmap: None,
+            },
+            SetMapAux {
+                types: None,
+                syms: None,
+                bitcase3: None,
+                behaviors: None,
+                vmods: None,
+                explicit: None,
+                modmap: None,
+                vmodmap: Some(GenRandom::generate(rng)),
+            },
+        ]
     }
 }
 impl SetMapAux {
@@ -8764,6 +11585,36 @@ impl GetCompatMapReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod get_compat_map_reply {
+    use super::GetCompatMapReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetCompatMapReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                device_id: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                groups_rtrn: GenRandom::generate(rng),
+                first_si_rtrn: GenRandom::generate(rng),
+                n_total_si: GenRandom::generate(rng),
+                si_rtrn: GenRandom::generate(rng),
+                group_rtrn: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(5571820866095284224);
+        let value = GetCompatMapReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the SetCompatMap request
 pub const SET_COMPAT_MAP_REQUEST: u8 = 11;
@@ -9008,6 +11859,32 @@ impl Serialize for GetIndicatorStateReply {
         bytes.extend_from_slice(&[0; 20]);
     }
 }
+#[cfg(test)]
+mod get_indicator_state_reply {
+    use super::GetIndicatorStateReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetIndicatorStateReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                device_id: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                state: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(15127033217187053568);
+        let value = GetIndicatorStateReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the GetIndicatorMap request
 pub const GET_INDICATOR_MAP_REQUEST: u8 = 13;
@@ -9125,6 +12002,35 @@ impl Serialize for GetIndicatorMapReply {
         bytes.extend_from_slice(&[0; 15]);
         assert_eq!(self.maps.len(), usize::try_from(self.which.count_ones()).unwrap(), "`maps` has an incorrect length");
         self.maps.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod get_indicator_map_reply {
+    use super::GetIndicatorMapReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetIndicatorMapReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                device_id: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                which: GenRandom::generate(rng),
+                real_indicators: GenRandom::generate(rng),
+                n_indicators: GenRandom::generate(rng),
+                maps: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(6270147714501574656);
+        let value = GetIndicatorMapReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -9415,6 +12321,45 @@ impl Serialize for GetNamedIndicatorReply {
         bytes.extend_from_slice(&[0; 3]);
     }
 }
+#[cfg(test)]
+mod get_named_indicator_reply {
+    use super::GetNamedIndicatorReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetNamedIndicatorReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                device_id: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                indicator: GenRandom::generate(rng),
+                found: GenRandom::generate(rng),
+                on: GenRandom::generate(rng),
+                real_indicator: GenRandom::generate(rng),
+                ndx: GenRandom::generate(rng),
+                map_flags: GenRandom::generate(rng),
+                map_which_groups: GenRandom::generate(rng),
+                map_groups: GenRandom::generate(rng),
+                map_which_mods: GenRandom::generate(rng),
+                map_mods: GenRandom::generate(rng),
+                map_real_mods: GenRandom::generate(rng),
+                map_vmod: GenRandom::generate(rng),
+                map_ctrls: GenRandom::generate(rng),
+                supported: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(2857081044071088128);
+        let value = GetNamedIndicatorReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the SetNamedIndicator request
 pub const SET_NAMED_INDICATOR_REQUEST: u8 = 16;
@@ -9648,6 +12593,30 @@ impl GetNamesValueListBitcase8 {
         bytes.extend_from_slice(&[0; 3][..(4 - (bytes.len() % 4)) % 4]);
         assert_eq!(self.kt_level_names.len(), usize::try_from(self.n_levels_per_type.iter().fold(0u32, |acc, x| acc.checked_add(u32::from(*x)).unwrap())).unwrap(), "`kt_level_names` has an incorrect length");
         self.kt_level_names.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod get_names_value_list_bitcase8 {
+    use super::GetNamesValueListBitcase8;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetNamesValueListBitcase8 {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                n_levels_per_type: GenRandom::generate(rng),
+                kt_level_names: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(1551566229316108288);
+        let value = GetNamesValueListBitcase8::generate(&rng);
+        let left = value.serialize(GenRandom::generate(&rng));
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right, GenRandom::generate(&rng));
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
@@ -9902,6 +12871,293 @@ impl GetNamesValueList {
         expr_value
     }
 }
+#[cfg(test)]
+mod get_names_value_list {
+    use super::GetNamesValueList;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetNamesValueList {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                keycodes_name: GenRandom::generate(rng),
+                geometry_name: GenRandom::generate(rng),
+                symbols_name: GenRandom::generate(rng),
+                phys_symbols_name: GenRandom::generate(rng),
+                types_name: GenRandom::generate(rng),
+                compat_name: GenRandom::generate(rng),
+                type_names: GenRandom::generate(rng),
+                bitcase8: GenRandom::generate(rng),
+                indicator_names: GenRandom::generate(rng),
+                virtual_mod_names: GenRandom::generate(rng),
+                groups: GenRandom::generate(rng),
+                key_names: GenRandom::generate(rng),
+                key_aliases: GenRandom::generate(rng),
+                radio_group_names: GenRandom::generate(rng),
+            }
+        }
+    }
+    fn generate_values(rng: &Rng) -> alloc::vec::Vec<GetNamesValueList> {
+        alloc::vec![
+            GetNamesValueList {
+                keycodes_name: None,
+                geometry_name: None,
+                symbols_name: None,
+                phys_symbols_name: None,
+                types_name: None,
+                compat_name: None,
+                type_names: None,
+                bitcase8: None,
+                indicator_names: None,
+                virtual_mod_names: None,
+                groups: None,
+                key_names: None,
+                key_aliases: None,
+                radio_group_names: None,
+            },
+            GetNamesValueList {
+                keycodes_name: Some(GenRandom::generate(rng)),
+                geometry_name: Some(GenRandom::generate(rng)),
+                symbols_name: Some(GenRandom::generate(rng)),
+                phys_symbols_name: Some(GenRandom::generate(rng)),
+                types_name: Some(GenRandom::generate(rng)),
+                compat_name: Some(GenRandom::generate(rng)),
+                type_names: Some(GenRandom::generate(rng)),
+                bitcase8: Some(GenRandom::generate(rng)),
+                indicator_names: Some(GenRandom::generate(rng)),
+                virtual_mod_names: Some(GenRandom::generate(rng)),
+                groups: Some(GenRandom::generate(rng)),
+                key_names: Some(GenRandom::generate(rng)),
+                key_aliases: Some(GenRandom::generate(rng)),
+                radio_group_names: Some(GenRandom::generate(rng)),
+            },
+            GetNamesValueList {
+                keycodes_name: Some(GenRandom::generate(rng)),
+                geometry_name: None,
+                symbols_name: None,
+                phys_symbols_name: None,
+                types_name: None,
+                compat_name: None,
+                type_names: None,
+                bitcase8: None,
+                indicator_names: None,
+                virtual_mod_names: None,
+                groups: None,
+                key_names: None,
+                key_aliases: None,
+                radio_group_names: None,
+            },
+            GetNamesValueList {
+                keycodes_name: None,
+                geometry_name: Some(GenRandom::generate(rng)),
+                symbols_name: None,
+                phys_symbols_name: None,
+                types_name: None,
+                compat_name: None,
+                type_names: None,
+                bitcase8: None,
+                indicator_names: None,
+                virtual_mod_names: None,
+                groups: None,
+                key_names: None,
+                key_aliases: None,
+                radio_group_names: None,
+            },
+            GetNamesValueList {
+                keycodes_name: None,
+                geometry_name: None,
+                symbols_name: Some(GenRandom::generate(rng)),
+                phys_symbols_name: None,
+                types_name: None,
+                compat_name: None,
+                type_names: None,
+                bitcase8: None,
+                indicator_names: None,
+                virtual_mod_names: None,
+                groups: None,
+                key_names: None,
+                key_aliases: None,
+                radio_group_names: None,
+            },
+            GetNamesValueList {
+                keycodes_name: None,
+                geometry_name: None,
+                symbols_name: None,
+                phys_symbols_name: Some(GenRandom::generate(rng)),
+                types_name: None,
+                compat_name: None,
+                type_names: None,
+                bitcase8: None,
+                indicator_names: None,
+                virtual_mod_names: None,
+                groups: None,
+                key_names: None,
+                key_aliases: None,
+                radio_group_names: None,
+            },
+            GetNamesValueList {
+                keycodes_name: None,
+                geometry_name: None,
+                symbols_name: None,
+                phys_symbols_name: None,
+                types_name: Some(GenRandom::generate(rng)),
+                compat_name: None,
+                type_names: None,
+                bitcase8: None,
+                indicator_names: None,
+                virtual_mod_names: None,
+                groups: None,
+                key_names: None,
+                key_aliases: None,
+                radio_group_names: None,
+            },
+            GetNamesValueList {
+                keycodes_name: None,
+                geometry_name: None,
+                symbols_name: None,
+                phys_symbols_name: None,
+                types_name: None,
+                compat_name: Some(GenRandom::generate(rng)),
+                type_names: None,
+                bitcase8: None,
+                indicator_names: None,
+                virtual_mod_names: None,
+                groups: None,
+                key_names: None,
+                key_aliases: None,
+                radio_group_names: None,
+            },
+            GetNamesValueList {
+                keycodes_name: None,
+                geometry_name: None,
+                symbols_name: None,
+                phys_symbols_name: None,
+                types_name: None,
+                compat_name: None,
+                type_names: Some(GenRandom::generate(rng)),
+                bitcase8: None,
+                indicator_names: None,
+                virtual_mod_names: None,
+                groups: None,
+                key_names: None,
+                key_aliases: None,
+                radio_group_names: None,
+            },
+            GetNamesValueList {
+                keycodes_name: None,
+                geometry_name: None,
+                symbols_name: None,
+                phys_symbols_name: None,
+                types_name: None,
+                compat_name: None,
+                type_names: None,
+                bitcase8: Some(GenRandom::generate(rng)),
+                indicator_names: None,
+                virtual_mod_names: None,
+                groups: None,
+                key_names: None,
+                key_aliases: None,
+                radio_group_names: None,
+            },
+            GetNamesValueList {
+                keycodes_name: None,
+                geometry_name: None,
+                symbols_name: None,
+                phys_symbols_name: None,
+                types_name: None,
+                compat_name: None,
+                type_names: None,
+                bitcase8: None,
+                indicator_names: Some(GenRandom::generate(rng)),
+                virtual_mod_names: None,
+                groups: None,
+                key_names: None,
+                key_aliases: None,
+                radio_group_names: None,
+            },
+            GetNamesValueList {
+                keycodes_name: None,
+                geometry_name: None,
+                symbols_name: None,
+                phys_symbols_name: None,
+                types_name: None,
+                compat_name: None,
+                type_names: None,
+                bitcase8: None,
+                indicator_names: None,
+                virtual_mod_names: Some(GenRandom::generate(rng)),
+                groups: None,
+                key_names: None,
+                key_aliases: None,
+                radio_group_names: None,
+            },
+            GetNamesValueList {
+                keycodes_name: None,
+                geometry_name: None,
+                symbols_name: None,
+                phys_symbols_name: None,
+                types_name: None,
+                compat_name: None,
+                type_names: None,
+                bitcase8: None,
+                indicator_names: None,
+                virtual_mod_names: None,
+                groups: Some(GenRandom::generate(rng)),
+                key_names: None,
+                key_aliases: None,
+                radio_group_names: None,
+            },
+            GetNamesValueList {
+                keycodes_name: None,
+                geometry_name: None,
+                symbols_name: None,
+                phys_symbols_name: None,
+                types_name: None,
+                compat_name: None,
+                type_names: None,
+                bitcase8: None,
+                indicator_names: None,
+                virtual_mod_names: None,
+                groups: None,
+                key_names: Some(GenRandom::generate(rng)),
+                key_aliases: None,
+                radio_group_names: None,
+            },
+            GetNamesValueList {
+                keycodes_name: None,
+                geometry_name: None,
+                symbols_name: None,
+                phys_symbols_name: None,
+                types_name: None,
+                compat_name: None,
+                type_names: None,
+                bitcase8: None,
+                indicator_names: None,
+                virtual_mod_names: None,
+                groups: None,
+                key_names: None,
+                key_aliases: Some(GenRandom::generate(rng)),
+                radio_group_names: None,
+            },
+            GetNamesValueList {
+                keycodes_name: None,
+                geometry_name: None,
+                symbols_name: None,
+                phys_symbols_name: None,
+                types_name: None,
+                compat_name: None,
+                type_names: None,
+                bitcase8: None,
+                indicator_names: None,
+                virtual_mod_names: None,
+                groups: None,
+                key_names: None,
+                key_aliases: None,
+                radio_group_names: Some(GenRandom::generate(rng)),
+            },
+        ]
+    }
+}
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -9984,6 +13240,43 @@ impl Serialize for GetNamesReply {
         self.value_list.serialize_into(bytes, which, self.n_types, self.indicators, self.virtual_mods, self.group_names, self.n_keys, self.n_key_aliases, self.n_radio_groups);
     }
 }
+#[cfg(test)]
+mod get_names_reply {
+    use super::GetNamesReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetNamesReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                device_id: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                min_key_code: GenRandom::generate(rng),
+                max_key_code: GenRandom::generate(rng),
+                n_types: GenRandom::generate(rng),
+                group_names: GenRandom::generate(rng),
+                virtual_mods: GenRandom::generate(rng),
+                first_key: GenRandom::generate(rng),
+                n_keys: GenRandom::generate(rng),
+                indicators: GenRandom::generate(rng),
+                n_radio_groups: GenRandom::generate(rng),
+                n_key_aliases: GenRandom::generate(rng),
+                n_kt_levels: GenRandom::generate(rng),
+                value_list: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(16492234581377584128);
+        let value = GetNamesReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -10018,6 +13311,30 @@ impl SetNamesAuxBitcase8 {
         bytes.extend_from_slice(&[0; 3][..(4 - (bytes.len() % 4)) % 4]);
         assert_eq!(self.kt_level_names.len(), usize::try_from(self.n_levels_per_type.iter().fold(0u32, |acc, x| acc.checked_add(u32::from(*x)).unwrap())).unwrap(), "`kt_level_names` has an incorrect length");
         self.kt_level_names.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod set_names_aux_bitcase8 {
+    use super::SetNamesAuxBitcase8;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for SetNamesAuxBitcase8 {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                n_levels_per_type: GenRandom::generate(rng),
+                kt_level_names: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(15606512036205834240);
+        let value = SetNamesAuxBitcase8::generate(&rng);
+        let left = value.serialize(GenRandom::generate(&rng));
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right, GenRandom::generate(&rng));
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 /// Auxiliary and optional information for the `set_names` function
@@ -10271,6 +13588,293 @@ impl SetNamesAux {
             expr_value |= u32::from(NameDetail::RG_NAMES);
         }
         expr_value
+    }
+}
+#[cfg(test)]
+mod set_names_aux {
+    use super::SetNamesAux;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for SetNamesAux {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                keycodes_name: GenRandom::generate(rng),
+                geometry_name: GenRandom::generate(rng),
+                symbols_name: GenRandom::generate(rng),
+                phys_symbols_name: GenRandom::generate(rng),
+                types_name: GenRandom::generate(rng),
+                compat_name: GenRandom::generate(rng),
+                type_names: GenRandom::generate(rng),
+                bitcase8: GenRandom::generate(rng),
+                indicator_names: GenRandom::generate(rng),
+                virtual_mod_names: GenRandom::generate(rng),
+                groups: GenRandom::generate(rng),
+                key_names: GenRandom::generate(rng),
+                key_aliases: GenRandom::generate(rng),
+                radio_group_names: GenRandom::generate(rng),
+            }
+        }
+    }
+    fn generate_values(rng: &Rng) -> alloc::vec::Vec<SetNamesAux> {
+        alloc::vec![
+            SetNamesAux {
+                keycodes_name: None,
+                geometry_name: None,
+                symbols_name: None,
+                phys_symbols_name: None,
+                types_name: None,
+                compat_name: None,
+                type_names: None,
+                bitcase8: None,
+                indicator_names: None,
+                virtual_mod_names: None,
+                groups: None,
+                key_names: None,
+                key_aliases: None,
+                radio_group_names: None,
+            },
+            SetNamesAux {
+                keycodes_name: Some(GenRandom::generate(rng)),
+                geometry_name: Some(GenRandom::generate(rng)),
+                symbols_name: Some(GenRandom::generate(rng)),
+                phys_symbols_name: Some(GenRandom::generate(rng)),
+                types_name: Some(GenRandom::generate(rng)),
+                compat_name: Some(GenRandom::generate(rng)),
+                type_names: Some(GenRandom::generate(rng)),
+                bitcase8: Some(GenRandom::generate(rng)),
+                indicator_names: Some(GenRandom::generate(rng)),
+                virtual_mod_names: Some(GenRandom::generate(rng)),
+                groups: Some(GenRandom::generate(rng)),
+                key_names: Some(GenRandom::generate(rng)),
+                key_aliases: Some(GenRandom::generate(rng)),
+                radio_group_names: Some(GenRandom::generate(rng)),
+            },
+            SetNamesAux {
+                keycodes_name: Some(GenRandom::generate(rng)),
+                geometry_name: None,
+                symbols_name: None,
+                phys_symbols_name: None,
+                types_name: None,
+                compat_name: None,
+                type_names: None,
+                bitcase8: None,
+                indicator_names: None,
+                virtual_mod_names: None,
+                groups: None,
+                key_names: None,
+                key_aliases: None,
+                radio_group_names: None,
+            },
+            SetNamesAux {
+                keycodes_name: None,
+                geometry_name: Some(GenRandom::generate(rng)),
+                symbols_name: None,
+                phys_symbols_name: None,
+                types_name: None,
+                compat_name: None,
+                type_names: None,
+                bitcase8: None,
+                indicator_names: None,
+                virtual_mod_names: None,
+                groups: None,
+                key_names: None,
+                key_aliases: None,
+                radio_group_names: None,
+            },
+            SetNamesAux {
+                keycodes_name: None,
+                geometry_name: None,
+                symbols_name: Some(GenRandom::generate(rng)),
+                phys_symbols_name: None,
+                types_name: None,
+                compat_name: None,
+                type_names: None,
+                bitcase8: None,
+                indicator_names: None,
+                virtual_mod_names: None,
+                groups: None,
+                key_names: None,
+                key_aliases: None,
+                radio_group_names: None,
+            },
+            SetNamesAux {
+                keycodes_name: None,
+                geometry_name: None,
+                symbols_name: None,
+                phys_symbols_name: Some(GenRandom::generate(rng)),
+                types_name: None,
+                compat_name: None,
+                type_names: None,
+                bitcase8: None,
+                indicator_names: None,
+                virtual_mod_names: None,
+                groups: None,
+                key_names: None,
+                key_aliases: None,
+                radio_group_names: None,
+            },
+            SetNamesAux {
+                keycodes_name: None,
+                geometry_name: None,
+                symbols_name: None,
+                phys_symbols_name: None,
+                types_name: Some(GenRandom::generate(rng)),
+                compat_name: None,
+                type_names: None,
+                bitcase8: None,
+                indicator_names: None,
+                virtual_mod_names: None,
+                groups: None,
+                key_names: None,
+                key_aliases: None,
+                radio_group_names: None,
+            },
+            SetNamesAux {
+                keycodes_name: None,
+                geometry_name: None,
+                symbols_name: None,
+                phys_symbols_name: None,
+                types_name: None,
+                compat_name: Some(GenRandom::generate(rng)),
+                type_names: None,
+                bitcase8: None,
+                indicator_names: None,
+                virtual_mod_names: None,
+                groups: None,
+                key_names: None,
+                key_aliases: None,
+                radio_group_names: None,
+            },
+            SetNamesAux {
+                keycodes_name: None,
+                geometry_name: None,
+                symbols_name: None,
+                phys_symbols_name: None,
+                types_name: None,
+                compat_name: None,
+                type_names: Some(GenRandom::generate(rng)),
+                bitcase8: None,
+                indicator_names: None,
+                virtual_mod_names: None,
+                groups: None,
+                key_names: None,
+                key_aliases: None,
+                radio_group_names: None,
+            },
+            SetNamesAux {
+                keycodes_name: None,
+                geometry_name: None,
+                symbols_name: None,
+                phys_symbols_name: None,
+                types_name: None,
+                compat_name: None,
+                type_names: None,
+                bitcase8: Some(GenRandom::generate(rng)),
+                indicator_names: None,
+                virtual_mod_names: None,
+                groups: None,
+                key_names: None,
+                key_aliases: None,
+                radio_group_names: None,
+            },
+            SetNamesAux {
+                keycodes_name: None,
+                geometry_name: None,
+                symbols_name: None,
+                phys_symbols_name: None,
+                types_name: None,
+                compat_name: None,
+                type_names: None,
+                bitcase8: None,
+                indicator_names: Some(GenRandom::generate(rng)),
+                virtual_mod_names: None,
+                groups: None,
+                key_names: None,
+                key_aliases: None,
+                radio_group_names: None,
+            },
+            SetNamesAux {
+                keycodes_name: None,
+                geometry_name: None,
+                symbols_name: None,
+                phys_symbols_name: None,
+                types_name: None,
+                compat_name: None,
+                type_names: None,
+                bitcase8: None,
+                indicator_names: None,
+                virtual_mod_names: Some(GenRandom::generate(rng)),
+                groups: None,
+                key_names: None,
+                key_aliases: None,
+                radio_group_names: None,
+            },
+            SetNamesAux {
+                keycodes_name: None,
+                geometry_name: None,
+                symbols_name: None,
+                phys_symbols_name: None,
+                types_name: None,
+                compat_name: None,
+                type_names: None,
+                bitcase8: None,
+                indicator_names: None,
+                virtual_mod_names: None,
+                groups: Some(GenRandom::generate(rng)),
+                key_names: None,
+                key_aliases: None,
+                radio_group_names: None,
+            },
+            SetNamesAux {
+                keycodes_name: None,
+                geometry_name: None,
+                symbols_name: None,
+                phys_symbols_name: None,
+                types_name: None,
+                compat_name: None,
+                type_names: None,
+                bitcase8: None,
+                indicator_names: None,
+                virtual_mod_names: None,
+                groups: None,
+                key_names: Some(GenRandom::generate(rng)),
+                key_aliases: None,
+                radio_group_names: None,
+            },
+            SetNamesAux {
+                keycodes_name: None,
+                geometry_name: None,
+                symbols_name: None,
+                phys_symbols_name: None,
+                types_name: None,
+                compat_name: None,
+                type_names: None,
+                bitcase8: None,
+                indicator_names: None,
+                virtual_mod_names: None,
+                groups: None,
+                key_names: None,
+                key_aliases: Some(GenRandom::generate(rng)),
+                radio_group_names: None,
+            },
+            SetNamesAux {
+                keycodes_name: None,
+                geometry_name: None,
+                symbols_name: None,
+                phys_symbols_name: None,
+                types_name: None,
+                compat_name: None,
+                type_names: None,
+                bitcase8: None,
+                indicator_names: None,
+                virtual_mod_names: None,
+                groups: None,
+                key_names: None,
+                key_aliases: None,
+                radio_group_names: Some(GenRandom::generate(rng)),
+            },
+        ]
     }
 }
 impl SetNamesAux {
@@ -10703,6 +14307,35 @@ impl Serialize for PerClientFlagsReply {
         bytes.extend_from_slice(&[0; 8]);
     }
 }
+#[cfg(test)]
+mod per_client_flags_reply {
+    use super::PerClientFlagsReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for PerClientFlagsReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                device_id: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                supported: GenRandom::generate(rng),
+                value: GenRandom::generate(rng),
+                auto_ctrls: GenRandom::generate(rng),
+                auto_ctrls_values: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(3515350516512063488);
+        let value = PerClientFlagsReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the ListComponents request
 pub const LIST_COMPONENTS_REQUEST: u8 = 22;
@@ -10923,6 +14556,38 @@ impl ListComponentsReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod list_components_reply {
+    use super::ListComponentsReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for ListComponentsReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                device_id: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                extra: GenRandom::generate(rng),
+                keymaps: GenRandom::generate(rng),
+                keycodes: GenRandom::generate(rng),
+                types: GenRandom::generate(rng),
+                compat_maps: GenRandom::generate(rng),
+                symbols: GenRandom::generate(rng),
+                geometries: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(1266511971326885888);
+        let value = ListComponentsReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the GetKbdByName request
 pub const GET_KBD_BY_NAME_REQUEST: u8 = 23;
@@ -11028,6 +14693,30 @@ impl GetKbdByNameRepliesTypesMapBitcase3 {
         bytes.extend_from_slice(&[0; 3][..(4 - (bytes.len() % 4)) % 4]);
         assert_eq!(self.acts_rtrn_acts.len(), usize::try_from(total_actions).unwrap(), "`acts_rtrn_acts` has an incorrect length");
         self.acts_rtrn_acts.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod get_kbd_by_name_replies_types_map_bitcase3 {
+    use super::GetKbdByNameRepliesTypesMapBitcase3;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetKbdByNameRepliesTypesMapBitcase3 {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                acts_rtrn_count: GenRandom::generate(rng),
+                acts_rtrn_acts: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(16266522027966332928);
+        let value = GetKbdByNameRepliesTypesMapBitcase3::generate(&rng);
+        let left = value.serialize(GenRandom::generate(&rng), GenRandom::generate(&rng));
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right, GenRandom::generate(&rng), GenRandom::generate(&rng));
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 #[derive(Debug, Clone, Default)]
@@ -11213,6 +14902,131 @@ impl GetKbdByNameRepliesTypesMap {
         expr_value
     }
 }
+#[cfg(test)]
+mod get_kbd_by_name_replies_types_map {
+    use super::GetKbdByNameRepliesTypesMap;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetKbdByNameRepliesTypesMap {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                types_rtrn: GenRandom::generate(rng),
+                syms_rtrn: GenRandom::generate(rng),
+                bitcase3: GenRandom::generate(rng),
+                behaviors_rtrn: GenRandom::generate(rng),
+                vmods_rtrn: GenRandom::generate(rng),
+                explicit_rtrn: GenRandom::generate(rng),
+                modmap_rtrn: GenRandom::generate(rng),
+                vmodmap_rtrn: GenRandom::generate(rng),
+            }
+        }
+    }
+    fn generate_values(rng: &Rng) -> alloc::vec::Vec<GetKbdByNameRepliesTypesMap> {
+        alloc::vec![
+            GetKbdByNameRepliesTypesMap {
+                types_rtrn: None,
+                syms_rtrn: None,
+                bitcase3: None,
+                behaviors_rtrn: None,
+                vmods_rtrn: None,
+                explicit_rtrn: None,
+                modmap_rtrn: None,
+                vmodmap_rtrn: None,
+            },
+            GetKbdByNameRepliesTypesMap {
+                types_rtrn: Some(GenRandom::generate(rng)),
+                syms_rtrn: Some(GenRandom::generate(rng)),
+                bitcase3: Some(GenRandom::generate(rng)),
+                behaviors_rtrn: Some(GenRandom::generate(rng)),
+                vmods_rtrn: Some(GenRandom::generate(rng)),
+                explicit_rtrn: Some(GenRandom::generate(rng)),
+                modmap_rtrn: Some(GenRandom::generate(rng)),
+                vmodmap_rtrn: Some(GenRandom::generate(rng)),
+            },
+            GetKbdByNameRepliesTypesMap {
+                types_rtrn: Some(GenRandom::generate(rng)),
+                syms_rtrn: None,
+                bitcase3: None,
+                behaviors_rtrn: None,
+                vmods_rtrn: None,
+                explicit_rtrn: None,
+                modmap_rtrn: None,
+                vmodmap_rtrn: None,
+            },
+            GetKbdByNameRepliesTypesMap {
+                types_rtrn: None,
+                syms_rtrn: Some(GenRandom::generate(rng)),
+                bitcase3: None,
+                behaviors_rtrn: None,
+                vmods_rtrn: None,
+                explicit_rtrn: None,
+                modmap_rtrn: None,
+                vmodmap_rtrn: None,
+            },
+            GetKbdByNameRepliesTypesMap {
+                types_rtrn: None,
+                syms_rtrn: None,
+                bitcase3: Some(GenRandom::generate(rng)),
+                behaviors_rtrn: None,
+                vmods_rtrn: None,
+                explicit_rtrn: None,
+                modmap_rtrn: None,
+                vmodmap_rtrn: None,
+            },
+            GetKbdByNameRepliesTypesMap {
+                types_rtrn: None,
+                syms_rtrn: None,
+                bitcase3: None,
+                behaviors_rtrn: Some(GenRandom::generate(rng)),
+                vmods_rtrn: None,
+                explicit_rtrn: None,
+                modmap_rtrn: None,
+                vmodmap_rtrn: None,
+            },
+            GetKbdByNameRepliesTypesMap {
+                types_rtrn: None,
+                syms_rtrn: None,
+                bitcase3: None,
+                behaviors_rtrn: None,
+                vmods_rtrn: Some(GenRandom::generate(rng)),
+                explicit_rtrn: None,
+                modmap_rtrn: None,
+                vmodmap_rtrn: None,
+            },
+            GetKbdByNameRepliesTypesMap {
+                types_rtrn: None,
+                syms_rtrn: None,
+                bitcase3: None,
+                behaviors_rtrn: None,
+                vmods_rtrn: None,
+                explicit_rtrn: Some(GenRandom::generate(rng)),
+                modmap_rtrn: None,
+                vmodmap_rtrn: None,
+            },
+            GetKbdByNameRepliesTypesMap {
+                types_rtrn: None,
+                syms_rtrn: None,
+                bitcase3: None,
+                behaviors_rtrn: None,
+                vmods_rtrn: None,
+                explicit_rtrn: None,
+                modmap_rtrn: Some(GenRandom::generate(rng)),
+                vmodmap_rtrn: None,
+            },
+            GetKbdByNameRepliesTypesMap {
+                types_rtrn: None,
+                syms_rtrn: None,
+                bitcase3: None,
+                behaviors_rtrn: None,
+                vmods_rtrn: None,
+                explicit_rtrn: None,
+                modmap_rtrn: None,
+                vmodmap_rtrn: Some(GenRandom::generate(rng)),
+            },
+        ]
+    }
+}
 
 #[derive(Debug, Clone)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -11329,6 +15143,57 @@ impl Serialize for GetKbdByNameRepliesTypes {
         self.map.serialize_into(bytes, present, self.n_types, self.n_key_syms, self.n_key_actions, self.total_actions, self.total_key_behaviors, self.virtual_mods, self.total_key_explicit, self.total_mod_map_keys, self.total_v_mod_map_keys);
     }
 }
+#[cfg(test)]
+mod get_kbd_by_name_replies_types {
+    use super::GetKbdByNameRepliesTypes;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetKbdByNameRepliesTypes {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                getmap_type: GenRandom::generate(rng),
+                type_device_id: GenRandom::generate(rng),
+                getmap_sequence: GenRandom::generate(rng),
+                getmap_length: GenRandom::generate(rng),
+                type_min_key_code: GenRandom::generate(rng),
+                type_max_key_code: GenRandom::generate(rng),
+                first_type: GenRandom::generate(rng),
+                n_types: GenRandom::generate(rng),
+                total_types: GenRandom::generate(rng),
+                first_key_sym: GenRandom::generate(rng),
+                total_syms: GenRandom::generate(rng),
+                n_key_syms: GenRandom::generate(rng),
+                first_key_action: GenRandom::generate(rng),
+                total_actions: GenRandom::generate(rng),
+                n_key_actions: GenRandom::generate(rng),
+                first_key_behavior: GenRandom::generate(rng),
+                n_key_behaviors: GenRandom::generate(rng),
+                total_key_behaviors: GenRandom::generate(rng),
+                first_key_explicit: GenRandom::generate(rng),
+                n_key_explicit: GenRandom::generate(rng),
+                total_key_explicit: GenRandom::generate(rng),
+                first_mod_map_key: GenRandom::generate(rng),
+                n_mod_map_keys: GenRandom::generate(rng),
+                total_mod_map_keys: GenRandom::generate(rng),
+                first_v_mod_map_key: GenRandom::generate(rng),
+                n_v_mod_map_keys: GenRandom::generate(rng),
+                total_v_mod_map_keys: GenRandom::generate(rng),
+                virtual_mods: GenRandom::generate(rng),
+                map: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(14421295736762138624);
+        let value = GetKbdByNameRepliesTypes::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetKbdByNameRepliesCompatMap {
@@ -11400,6 +15265,37 @@ impl GetKbdByNameRepliesCompatMap {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod get_kbd_by_name_replies_compat_map {
+    use super::GetKbdByNameRepliesCompatMap;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetKbdByNameRepliesCompatMap {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                compatmap_type: GenRandom::generate(rng),
+                compat_device_id: GenRandom::generate(rng),
+                compatmap_sequence: GenRandom::generate(rng),
+                compatmap_length: GenRandom::generate(rng),
+                groups_rtrn: GenRandom::generate(rng),
+                first_si_rtrn: GenRandom::generate(rng),
+                n_total_si: GenRandom::generate(rng),
+                si_rtrn: GenRandom::generate(rng),
+                group_rtrn: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(11497942788511629312);
+        let value = GetKbdByNameRepliesCompatMap::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetKbdByNameRepliesIndicatorMaps {
@@ -11462,6 +15358,35 @@ impl GetKbdByNameRepliesIndicatorMaps {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod get_kbd_by_name_replies_indicator_maps {
+    use super::GetKbdByNameRepliesIndicatorMaps;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetKbdByNameRepliesIndicatorMaps {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                indicatormap_type: GenRandom::generate(rng),
+                indicator_device_id: GenRandom::generate(rng),
+                indicatormap_sequence: GenRandom::generate(rng),
+                indicatormap_length: GenRandom::generate(rng),
+                which: GenRandom::generate(rng),
+                real_indicators: GenRandom::generate(rng),
+                maps: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(5831319552641728512);
+        let value = GetKbdByNameRepliesIndicatorMaps::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetKbdByNameRepliesKeyNamesValueListBitcase8 {
@@ -11495,6 +15420,30 @@ impl GetKbdByNameRepliesKeyNamesValueListBitcase8 {
         bytes.extend_from_slice(&[0; 3][..(4 - (bytes.len() % 4)) % 4]);
         assert_eq!(self.kt_level_names.len(), usize::try_from(self.n_levels_per_type.iter().fold(0u32, |acc, x| acc.checked_add(u32::from(*x)).unwrap())).unwrap(), "`kt_level_names` has an incorrect length");
         self.kt_level_names.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod get_kbd_by_name_replies_key_names_value_list_bitcase8 {
+    use super::GetKbdByNameRepliesKeyNamesValueListBitcase8;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetKbdByNameRepliesKeyNamesValueListBitcase8 {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                n_levels_per_type: GenRandom::generate(rng),
+                kt_level_names: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(6194461073416912896);
+        let value = GetKbdByNameRepliesKeyNamesValueListBitcase8::generate(&rng);
+        let left = value.serialize(GenRandom::generate(&rng));
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right, GenRandom::generate(&rng));
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
@@ -11749,6 +15698,293 @@ impl GetKbdByNameRepliesKeyNamesValueList {
         expr_value
     }
 }
+#[cfg(test)]
+mod get_kbd_by_name_replies_key_names_value_list {
+    use super::GetKbdByNameRepliesKeyNamesValueList;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetKbdByNameRepliesKeyNamesValueList {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                keycodes_name: GenRandom::generate(rng),
+                geometry_name: GenRandom::generate(rng),
+                symbols_name: GenRandom::generate(rng),
+                phys_symbols_name: GenRandom::generate(rng),
+                types_name: GenRandom::generate(rng),
+                compat_name: GenRandom::generate(rng),
+                type_names: GenRandom::generate(rng),
+                bitcase8: GenRandom::generate(rng),
+                indicator_names: GenRandom::generate(rng),
+                virtual_mod_names: GenRandom::generate(rng),
+                groups: GenRandom::generate(rng),
+                key_names: GenRandom::generate(rng),
+                key_aliases: GenRandom::generate(rng),
+                radio_group_names: GenRandom::generate(rng),
+            }
+        }
+    }
+    fn generate_values(rng: &Rng) -> alloc::vec::Vec<GetKbdByNameRepliesKeyNamesValueList> {
+        alloc::vec![
+            GetKbdByNameRepliesKeyNamesValueList {
+                keycodes_name: None,
+                geometry_name: None,
+                symbols_name: None,
+                phys_symbols_name: None,
+                types_name: None,
+                compat_name: None,
+                type_names: None,
+                bitcase8: None,
+                indicator_names: None,
+                virtual_mod_names: None,
+                groups: None,
+                key_names: None,
+                key_aliases: None,
+                radio_group_names: None,
+            },
+            GetKbdByNameRepliesKeyNamesValueList {
+                keycodes_name: Some(GenRandom::generate(rng)),
+                geometry_name: Some(GenRandom::generate(rng)),
+                symbols_name: Some(GenRandom::generate(rng)),
+                phys_symbols_name: Some(GenRandom::generate(rng)),
+                types_name: Some(GenRandom::generate(rng)),
+                compat_name: Some(GenRandom::generate(rng)),
+                type_names: Some(GenRandom::generate(rng)),
+                bitcase8: Some(GenRandom::generate(rng)),
+                indicator_names: Some(GenRandom::generate(rng)),
+                virtual_mod_names: Some(GenRandom::generate(rng)),
+                groups: Some(GenRandom::generate(rng)),
+                key_names: Some(GenRandom::generate(rng)),
+                key_aliases: Some(GenRandom::generate(rng)),
+                radio_group_names: Some(GenRandom::generate(rng)),
+            },
+            GetKbdByNameRepliesKeyNamesValueList {
+                keycodes_name: Some(GenRandom::generate(rng)),
+                geometry_name: None,
+                symbols_name: None,
+                phys_symbols_name: None,
+                types_name: None,
+                compat_name: None,
+                type_names: None,
+                bitcase8: None,
+                indicator_names: None,
+                virtual_mod_names: None,
+                groups: None,
+                key_names: None,
+                key_aliases: None,
+                radio_group_names: None,
+            },
+            GetKbdByNameRepliesKeyNamesValueList {
+                keycodes_name: None,
+                geometry_name: Some(GenRandom::generate(rng)),
+                symbols_name: None,
+                phys_symbols_name: None,
+                types_name: None,
+                compat_name: None,
+                type_names: None,
+                bitcase8: None,
+                indicator_names: None,
+                virtual_mod_names: None,
+                groups: None,
+                key_names: None,
+                key_aliases: None,
+                radio_group_names: None,
+            },
+            GetKbdByNameRepliesKeyNamesValueList {
+                keycodes_name: None,
+                geometry_name: None,
+                symbols_name: Some(GenRandom::generate(rng)),
+                phys_symbols_name: None,
+                types_name: None,
+                compat_name: None,
+                type_names: None,
+                bitcase8: None,
+                indicator_names: None,
+                virtual_mod_names: None,
+                groups: None,
+                key_names: None,
+                key_aliases: None,
+                radio_group_names: None,
+            },
+            GetKbdByNameRepliesKeyNamesValueList {
+                keycodes_name: None,
+                geometry_name: None,
+                symbols_name: None,
+                phys_symbols_name: Some(GenRandom::generate(rng)),
+                types_name: None,
+                compat_name: None,
+                type_names: None,
+                bitcase8: None,
+                indicator_names: None,
+                virtual_mod_names: None,
+                groups: None,
+                key_names: None,
+                key_aliases: None,
+                radio_group_names: None,
+            },
+            GetKbdByNameRepliesKeyNamesValueList {
+                keycodes_name: None,
+                geometry_name: None,
+                symbols_name: None,
+                phys_symbols_name: None,
+                types_name: Some(GenRandom::generate(rng)),
+                compat_name: None,
+                type_names: None,
+                bitcase8: None,
+                indicator_names: None,
+                virtual_mod_names: None,
+                groups: None,
+                key_names: None,
+                key_aliases: None,
+                radio_group_names: None,
+            },
+            GetKbdByNameRepliesKeyNamesValueList {
+                keycodes_name: None,
+                geometry_name: None,
+                symbols_name: None,
+                phys_symbols_name: None,
+                types_name: None,
+                compat_name: Some(GenRandom::generate(rng)),
+                type_names: None,
+                bitcase8: None,
+                indicator_names: None,
+                virtual_mod_names: None,
+                groups: None,
+                key_names: None,
+                key_aliases: None,
+                radio_group_names: None,
+            },
+            GetKbdByNameRepliesKeyNamesValueList {
+                keycodes_name: None,
+                geometry_name: None,
+                symbols_name: None,
+                phys_symbols_name: None,
+                types_name: None,
+                compat_name: None,
+                type_names: Some(GenRandom::generate(rng)),
+                bitcase8: None,
+                indicator_names: None,
+                virtual_mod_names: None,
+                groups: None,
+                key_names: None,
+                key_aliases: None,
+                radio_group_names: None,
+            },
+            GetKbdByNameRepliesKeyNamesValueList {
+                keycodes_name: None,
+                geometry_name: None,
+                symbols_name: None,
+                phys_symbols_name: None,
+                types_name: None,
+                compat_name: None,
+                type_names: None,
+                bitcase8: Some(GenRandom::generate(rng)),
+                indicator_names: None,
+                virtual_mod_names: None,
+                groups: None,
+                key_names: None,
+                key_aliases: None,
+                radio_group_names: None,
+            },
+            GetKbdByNameRepliesKeyNamesValueList {
+                keycodes_name: None,
+                geometry_name: None,
+                symbols_name: None,
+                phys_symbols_name: None,
+                types_name: None,
+                compat_name: None,
+                type_names: None,
+                bitcase8: None,
+                indicator_names: Some(GenRandom::generate(rng)),
+                virtual_mod_names: None,
+                groups: None,
+                key_names: None,
+                key_aliases: None,
+                radio_group_names: None,
+            },
+            GetKbdByNameRepliesKeyNamesValueList {
+                keycodes_name: None,
+                geometry_name: None,
+                symbols_name: None,
+                phys_symbols_name: None,
+                types_name: None,
+                compat_name: None,
+                type_names: None,
+                bitcase8: None,
+                indicator_names: None,
+                virtual_mod_names: Some(GenRandom::generate(rng)),
+                groups: None,
+                key_names: None,
+                key_aliases: None,
+                radio_group_names: None,
+            },
+            GetKbdByNameRepliesKeyNamesValueList {
+                keycodes_name: None,
+                geometry_name: None,
+                symbols_name: None,
+                phys_symbols_name: None,
+                types_name: None,
+                compat_name: None,
+                type_names: None,
+                bitcase8: None,
+                indicator_names: None,
+                virtual_mod_names: None,
+                groups: Some(GenRandom::generate(rng)),
+                key_names: None,
+                key_aliases: None,
+                radio_group_names: None,
+            },
+            GetKbdByNameRepliesKeyNamesValueList {
+                keycodes_name: None,
+                geometry_name: None,
+                symbols_name: None,
+                phys_symbols_name: None,
+                types_name: None,
+                compat_name: None,
+                type_names: None,
+                bitcase8: None,
+                indicator_names: None,
+                virtual_mod_names: None,
+                groups: None,
+                key_names: Some(GenRandom::generate(rng)),
+                key_aliases: None,
+                radio_group_names: None,
+            },
+            GetKbdByNameRepliesKeyNamesValueList {
+                keycodes_name: None,
+                geometry_name: None,
+                symbols_name: None,
+                phys_symbols_name: None,
+                types_name: None,
+                compat_name: None,
+                type_names: None,
+                bitcase8: None,
+                indicator_names: None,
+                virtual_mod_names: None,
+                groups: None,
+                key_names: None,
+                key_aliases: Some(GenRandom::generate(rng)),
+                radio_group_names: None,
+            },
+            GetKbdByNameRepliesKeyNamesValueList {
+                keycodes_name: None,
+                geometry_name: None,
+                symbols_name: None,
+                phys_symbols_name: None,
+                types_name: None,
+                compat_name: None,
+                type_names: None,
+                bitcase8: None,
+                indicator_names: None,
+                virtual_mod_names: None,
+                groups: None,
+                key_names: None,
+                key_aliases: None,
+                radio_group_names: Some(GenRandom::generate(rng)),
+            },
+        ]
+    }
+}
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -11824,6 +16060,44 @@ impl Serialize for GetKbdByNameRepliesKeyNames {
         self.value_list.serialize_into(bytes, which, self.n_types, self.indicators, self.virtual_mods, self.group_names, self.n_keys, self.n_key_aliases, self.n_radio_groups);
     }
 }
+#[cfg(test)]
+mod get_kbd_by_name_replies_key_names {
+    use super::GetKbdByNameRepliesKeyNames;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetKbdByNameRepliesKeyNames {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                keyname_type: GenRandom::generate(rng),
+                key_device_id: GenRandom::generate(rng),
+                keyname_sequence: GenRandom::generate(rng),
+                keyname_length: GenRandom::generate(rng),
+                key_min_key_code: GenRandom::generate(rng),
+                key_max_key_code: GenRandom::generate(rng),
+                n_types: GenRandom::generate(rng),
+                group_names: GenRandom::generate(rng),
+                virtual_mods: GenRandom::generate(rng),
+                first_key: GenRandom::generate(rng),
+                n_keys: GenRandom::generate(rng),
+                indicators: GenRandom::generate(rng),
+                n_radio_groups: GenRandom::generate(rng),
+                n_key_aliases: GenRandom::generate(rng),
+                n_kt_levels: GenRandom::generate(rng),
+                value_list: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(15809492023416422400);
+        let value = GetKbdByNameRepliesKeyNames::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetKbdByNameRepliesGeometry {
@@ -11896,6 +16170,45 @@ impl Serialize for GetKbdByNameRepliesGeometry {
         self.base_color_ndx.serialize_into(bytes);
         self.label_color_ndx.serialize_into(bytes);
         self.label_font.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod get_kbd_by_name_replies_geometry {
+    use super::GetKbdByNameRepliesGeometry;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetKbdByNameRepliesGeometry {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                geometry_type: GenRandom::generate(rng),
+                geometry_device_id: GenRandom::generate(rng),
+                geometry_sequence: GenRandom::generate(rng),
+                geometry_length: GenRandom::generate(rng),
+                name: GenRandom::generate(rng),
+                geometry_found: GenRandom::generate(rng),
+                width_mm: GenRandom::generate(rng),
+                height_mm: GenRandom::generate(rng),
+                n_properties: GenRandom::generate(rng),
+                n_colors: GenRandom::generate(rng),
+                n_shapes: GenRandom::generate(rng),
+                n_sections: GenRandom::generate(rng),
+                n_doodads: GenRandom::generate(rng),
+                n_key_aliases: GenRandom::generate(rng),
+                base_color_ndx: GenRandom::generate(rng),
+                label_color_ndx: GenRandom::generate(rng),
+                label_font: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(10844035225830948864);
+        let value = GetKbdByNameRepliesGeometry::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 #[derive(Debug, Clone, Default)]
@@ -11976,6 +16289,77 @@ impl GetKbdByNameReplies {
         }
     }
 }
+#[cfg(test)]
+mod get_kbd_by_name_replies {
+    use super::GetKbdByNameReplies;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetKbdByNameReplies {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                types: GenRandom::generate(rng),
+                compat_map: GenRandom::generate(rng),
+                indicator_maps: GenRandom::generate(rng),
+                key_names: GenRandom::generate(rng),
+                geometry: GenRandom::generate(rng),
+            }
+        }
+    }
+    fn generate_values(rng: &Rng) -> alloc::vec::Vec<GetKbdByNameReplies> {
+        alloc::vec![
+            GetKbdByNameReplies {
+                types: None,
+                compat_map: None,
+                indicator_maps: None,
+                key_names: None,
+                geometry: None,
+            },
+            GetKbdByNameReplies {
+                types: Some(GenRandom::generate(rng)),
+                compat_map: Some(GenRandom::generate(rng)),
+                indicator_maps: Some(GenRandom::generate(rng)),
+                key_names: Some(GenRandom::generate(rng)),
+                geometry: Some(GenRandom::generate(rng)),
+            },
+            GetKbdByNameReplies {
+                types: Some(GenRandom::generate(rng)),
+                compat_map: None,
+                indicator_maps: None,
+                key_names: None,
+                geometry: None,
+            },
+            GetKbdByNameReplies {
+                types: None,
+                compat_map: Some(GenRandom::generate(rng)),
+                indicator_maps: None,
+                key_names: None,
+                geometry: None,
+            },
+            GetKbdByNameReplies {
+                types: None,
+                compat_map: None,
+                indicator_maps: Some(GenRandom::generate(rng)),
+                key_names: None,
+                geometry: None,
+            },
+            GetKbdByNameReplies {
+                types: None,
+                compat_map: None,
+                indicator_maps: None,
+                key_names: Some(GenRandom::generate(rng)),
+                geometry: None,
+            },
+            GetKbdByNameReplies {
+                types: None,
+                compat_map: None,
+                indicator_maps: None,
+                key_names: None,
+                geometry: Some(GenRandom::generate(rng)),
+            },
+        ]
+    }
+}
 
 #[derive(Debug, Clone)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -12038,6 +16422,38 @@ impl Serialize for GetKbdByNameReply {
         self.reported.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 16]);
         self.replies.serialize_into(bytes, self.reported);
+    }
+}
+#[cfg(test)]
+mod get_kbd_by_name_reply {
+    use super::GetKbdByNameReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetKbdByNameReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                device_id: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                min_key_code: GenRandom::generate(rng),
+                max_key_code: GenRandom::generate(rng),
+                loaded: GenRandom::generate(rng),
+                new_keyboard: GenRandom::generate(rng),
+                found: GenRandom::generate(rng),
+                reported: GenRandom::generate(rng),
+                replies: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(7657184646147784704);
+        let value = GetKbdByNameReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -12268,6 +16684,45 @@ impl GetDeviceInfoReply {
     pub fn name_len(&self) -> u16 {
         self.name.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod get_device_info_reply {
+    use super::GetDeviceInfoReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetDeviceInfoReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                device_id: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                present: GenRandom::generate(rng),
+                supported: GenRandom::generate(rng),
+                unsupported: GenRandom::generate(rng),
+                first_btn_wanted: GenRandom::generate(rng),
+                n_btns_wanted: GenRandom::generate(rng),
+                first_btn_rtrn: GenRandom::generate(rng),
+                total_btns: GenRandom::generate(rng),
+                has_own_state: GenRandom::generate(rng),
+                dflt_kbd_fb: GenRandom::generate(rng),
+                dflt_led_fb: GenRandom::generate(rng),
+                dev_type: GenRandom::generate(rng),
+                name: GenRandom::generate(rng),
+                btn_actions: GenRandom::generate(rng),
+                leds: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(14540489366069919744);
+        let value = GetDeviceInfoReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -12557,6 +17012,34 @@ impl Serialize for SetDebuggingFlagsReply {
         bytes.extend_from_slice(&[0; 8]);
     }
 }
+#[cfg(test)]
+mod set_debugging_flags_reply {
+    use super::SetDebuggingFlagsReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for SetDebuggingFlagsReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                current_flags: GenRandom::generate(rng),
+                current_ctrls: GenRandom::generate(rng),
+                supported_flags: GenRandom::generate(rng),
+                supported_ctrls: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(7168302427057094656);
+        let value = SetDebuggingFlagsReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the NewKeyboardNotify event
 pub const NEW_KEYBOARD_NOTIFY_EVENT: u8 = 0;
@@ -12668,6 +17151,41 @@ impl Serialize for NewKeyboardNotifyEvent {
         self.request_minor.serialize_into(bytes);
         self.changed.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 14]);
+    }
+}
+#[cfg(test)]
+mod new_keyboard_notify_event {
+    use super::NewKeyboardNotifyEvent;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for NewKeyboardNotifyEvent {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                response_type: GenRandom::generate(rng),
+                xkb_type: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                time: GenRandom::generate(rng),
+                device_id: GenRandom::generate(rng),
+                old_device_id: GenRandom::generate(rng),
+                min_key_code: GenRandom::generate(rng),
+                max_key_code: GenRandom::generate(rng),
+                old_min_key_code: GenRandom::generate(rng),
+                old_max_key_code: GenRandom::generate(rng),
+                request_major: GenRandom::generate(rng),
+                request_minor: GenRandom::generate(rng),
+                changed: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(18205659109767995392);
+        let value = NewKeyboardNotifyEvent::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 impl From<&NewKeyboardNotifyEvent> for [u8; 32] {
@@ -12881,6 +17399,52 @@ impl Serialize for MapNotifyEvent {
         self.n_v_mod_map_keys.serialize_into(bytes);
         self.virtual_mods.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 2]);
+    }
+}
+#[cfg(test)]
+mod map_notify_event {
+    use super::MapNotifyEvent;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for MapNotifyEvent {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                response_type: GenRandom::generate(rng),
+                xkb_type: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                time: GenRandom::generate(rng),
+                device_id: GenRandom::generate(rng),
+                ptr_btn_actions: GenRandom::generate(rng),
+                changed: GenRandom::generate(rng),
+                min_key_code: GenRandom::generate(rng),
+                max_key_code: GenRandom::generate(rng),
+                first_type: GenRandom::generate(rng),
+                n_types: GenRandom::generate(rng),
+                first_key_sym: GenRandom::generate(rng),
+                n_key_syms: GenRandom::generate(rng),
+                first_key_act: GenRandom::generate(rng),
+                n_key_acts: GenRandom::generate(rng),
+                first_key_behavior: GenRandom::generate(rng),
+                n_key_behavior: GenRandom::generate(rng),
+                first_key_explicit: GenRandom::generate(rng),
+                n_key_explicit: GenRandom::generate(rng),
+                first_mod_map_key: GenRandom::generate(rng),
+                n_mod_map_keys: GenRandom::generate(rng),
+                first_v_mod_map_key: GenRandom::generate(rng),
+                n_v_mod_map_keys: GenRandom::generate(rng),
+                virtual_mods: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(1522486517264109568);
+        let value = MapNotifyEvent::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 impl From<&MapNotifyEvent> for [u8; 32] {
@@ -13107,6 +17671,52 @@ impl Serialize for StateNotifyEvent {
         self.request_minor.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod state_notify_event {
+    use super::StateNotifyEvent;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for StateNotifyEvent {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                response_type: GenRandom::generate(rng),
+                xkb_type: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                time: GenRandom::generate(rng),
+                device_id: GenRandom::generate(rng),
+                mods: GenRandom::generate(rng),
+                base_mods: GenRandom::generate(rng),
+                latched_mods: GenRandom::generate(rng),
+                locked_mods: GenRandom::generate(rng),
+                group: GenRandom::generate(rng),
+                base_group: GenRandom::generate(rng),
+                latched_group: GenRandom::generate(rng),
+                locked_group: GenRandom::generate(rng),
+                compat_state: GenRandom::generate(rng),
+                grab_mods: GenRandom::generate(rng),
+                compat_grab_mods: GenRandom::generate(rng),
+                lookup_mods: GenRandom::generate(rng),
+                compat_loockup_mods: GenRandom::generate(rng),
+                ptr_btn_state: GenRandom::generate(rng),
+                changed: GenRandom::generate(rng),
+                keycode: GenRandom::generate(rng),
+                event_type: GenRandom::generate(rng),
+                request_major: GenRandom::generate(rng),
+                request_minor: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(1927679676635910144);
+        let value = StateNotifyEvent::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 impl From<&StateNotifyEvent> for [u8; 32] {
     fn from(input: &StateNotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -13289,6 +17899,41 @@ impl Serialize for ControlsNotifyEvent {
         bytes.extend_from_slice(&[0; 4]);
     }
 }
+#[cfg(test)]
+mod controls_notify_event {
+    use super::ControlsNotifyEvent;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for ControlsNotifyEvent {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                response_type: GenRandom::generate(rng),
+                xkb_type: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                time: GenRandom::generate(rng),
+                device_id: GenRandom::generate(rng),
+                num_groups: GenRandom::generate(rng),
+                changed_controls: GenRandom::generate(rng),
+                enabled_controls: GenRandom::generate(rng),
+                enabled_control_changes: GenRandom::generate(rng),
+                keycode: GenRandom::generate(rng),
+                event_type: GenRandom::generate(rng),
+                request_major: GenRandom::generate(rng),
+                request_minor: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(202011472256155648);
+        let value = ControlsNotifyEvent::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 impl From<&ControlsNotifyEvent> for [u8; 32] {
     fn from(input: &ControlsNotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -13436,6 +18081,35 @@ impl Serialize for IndicatorStateNotifyEvent {
         bytes.extend_from_slice(&[0; 12]);
     }
 }
+#[cfg(test)]
+mod indicator_state_notify_event {
+    use super::IndicatorStateNotifyEvent;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for IndicatorStateNotifyEvent {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                response_type: GenRandom::generate(rng),
+                xkb_type: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                time: GenRandom::generate(rng),
+                device_id: GenRandom::generate(rng),
+                state: GenRandom::generate(rng),
+                state_changed: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(11449664861971939328);
+        let value = IndicatorStateNotifyEvent::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 impl From<&IndicatorStateNotifyEvent> for [u8; 32] {
     fn from(input: &IndicatorStateNotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -13575,6 +18249,35 @@ impl Serialize for IndicatorMapNotifyEvent {
         self.state.serialize_into(bytes);
         self.map_changed.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 12]);
+    }
+}
+#[cfg(test)]
+mod indicator_map_notify_event {
+    use super::IndicatorMapNotifyEvent;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for IndicatorMapNotifyEvent {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                response_type: GenRandom::generate(rng),
+                xkb_type: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                time: GenRandom::generate(rng),
+                device_id: GenRandom::generate(rng),
+                state: GenRandom::generate(rng),
+                map_changed: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(3616350360092540928);
+        let value = IndicatorMapNotifyEvent::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 impl From<&IndicatorMapNotifyEvent> for [u8; 32] {
@@ -13760,6 +18463,45 @@ impl Serialize for NamesNotifyEvent {
         bytes.extend_from_slice(&[0; 4]);
     }
 }
+#[cfg(test)]
+mod names_notify_event {
+    use super::NamesNotifyEvent;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for NamesNotifyEvent {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                response_type: GenRandom::generate(rng),
+                xkb_type: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                time: GenRandom::generate(rng),
+                device_id: GenRandom::generate(rng),
+                changed: GenRandom::generate(rng),
+                first_type: GenRandom::generate(rng),
+                n_types: GenRandom::generate(rng),
+                first_level_name: GenRandom::generate(rng),
+                n_level_names: GenRandom::generate(rng),
+                n_radio_groups: GenRandom::generate(rng),
+                n_key_aliases: GenRandom::generate(rng),
+                changed_group_names: GenRandom::generate(rng),
+                changed_virtual_mods: GenRandom::generate(rng),
+                first_key: GenRandom::generate(rng),
+                n_keys: GenRandom::generate(rng),
+                changed_indicators: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(7816975872705140224);
+        let value = NamesNotifyEvent::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 impl From<&NamesNotifyEvent> for [u8; 32] {
     fn from(input: &NamesNotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -13915,6 +18657,37 @@ impl Serialize for CompatMapNotifyEvent {
         self.n_si.serialize_into(bytes);
         self.n_total_si.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 16]);
+    }
+}
+#[cfg(test)]
+mod compat_map_notify_event {
+    use super::CompatMapNotifyEvent;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for CompatMapNotifyEvent {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                response_type: GenRandom::generate(rng),
+                xkb_type: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                time: GenRandom::generate(rng),
+                device_id: GenRandom::generate(rng),
+                changed_groups: GenRandom::generate(rng),
+                first_si: GenRandom::generate(rng),
+                n_si: GenRandom::generate(rng),
+                n_total_si: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(12266224562617450496);
+        let value = CompatMapNotifyEvent::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 impl From<&CompatMapNotifyEvent> for [u8; 32] {
@@ -14083,6 +18856,41 @@ impl Serialize for BellNotifyEvent {
         bytes.extend_from_slice(&[0; 7]);
     }
 }
+#[cfg(test)]
+mod bell_notify_event {
+    use super::BellNotifyEvent;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for BellNotifyEvent {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                response_type: GenRandom::generate(rng),
+                xkb_type: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                time: GenRandom::generate(rng),
+                device_id: GenRandom::generate(rng),
+                bell_class: GenRandom::generate(rng),
+                bell_id: GenRandom::generate(rng),
+                percent: GenRandom::generate(rng),
+                pitch: GenRandom::generate(rng),
+                duration: GenRandom::generate(rng),
+                name: GenRandom::generate(rng),
+                window: GenRandom::generate(rng),
+                event_only: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(17602400037993603072);
+        let value = BellNotifyEvent::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 impl From<&BellNotifyEvent> for [u8; 32] {
     fn from(input: &BellNotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -14245,6 +19053,39 @@ impl Serialize for ActionMessageEvent {
         bytes.extend_from_slice(&[0; 10]);
     }
 }
+#[cfg(test)]
+mod action_message_event {
+    use super::ActionMessageEvent;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for ActionMessageEvent {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                response_type: GenRandom::generate(rng),
+                xkb_type: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                time: GenRandom::generate(rng),
+                device_id: GenRandom::generate(rng),
+                keycode: GenRandom::generate(rng),
+                press: GenRandom::generate(rng),
+                key_event_follows: GenRandom::generate(rng),
+                mods: GenRandom::generate(rng),
+                group: GenRandom::generate(rng),
+                message: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(678391577023811200);
+        let value = ActionMessageEvent::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 impl From<&ActionMessageEvent> for [u8; 32] {
     fn from(input: &ActionMessageEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -14393,6 +19234,37 @@ impl Serialize for AccessXNotifyEvent {
         self.slow_keys_delay.serialize_into(bytes);
         self.debounce_delay.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 16]);
+    }
+}
+#[cfg(test)]
+mod access_x_notify_event {
+    use super::AccessXNotifyEvent;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for AccessXNotifyEvent {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                response_type: GenRandom::generate(rng),
+                xkb_type: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                time: GenRandom::generate(rng),
+                device_id: GenRandom::generate(rng),
+                keycode: GenRandom::generate(rng),
+                detailt: GenRandom::generate(rng),
+                slow_keys_delay: GenRandom::generate(rng),
+                debounce_delay: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(250731064920459264);
+        let value = AccessXNotifyEvent::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 impl From<&AccessXNotifyEvent> for [u8; 32] {
@@ -14565,6 +19437,42 @@ impl Serialize for ExtensionDeviceNotifyEvent {
         self.supported.serialize_into(bytes);
         self.unsupported.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 2]);
+    }
+}
+#[cfg(test)]
+mod extension_device_notify_event {
+    use super::ExtensionDeviceNotifyEvent;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for ExtensionDeviceNotifyEvent {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                response_type: GenRandom::generate(rng),
+                xkb_type: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                time: GenRandom::generate(rng),
+                device_id: GenRandom::generate(rng),
+                reason: GenRandom::generate(rng),
+                led_class: GenRandom::generate(rng),
+                led_id: GenRandom::generate(rng),
+                leds_defined: GenRandom::generate(rng),
+                led_state: GenRandom::generate(rng),
+                first_button: GenRandom::generate(rng),
+                n_buttons: GenRandom::generate(rng),
+                supported: GenRandom::generate(rng),
+                unsupported: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(5919800854682271744);
+        let value = ExtensionDeviceNotifyEvent::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 impl From<&ExtensionDeviceNotifyEvent> for [u8; 32] {

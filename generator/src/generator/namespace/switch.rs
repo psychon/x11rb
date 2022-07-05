@@ -2,6 +2,8 @@ use std::collections::HashMap;
 
 use xcbgen::defs as xcbdefs;
 
+use crate::generator::namespace::test_framework::{TestFramework, TestFrameworkType};
+
 use super::{
     expr_to_str, expr_type, gather_deducible_fields, parse, serialize, struct_type,
     to_rust_type_name, to_rust_variable_name, CaseInfo, DeducibleField, Derives, FieldContainer,
@@ -356,6 +358,24 @@ pub(super) fn emit_switch_type(
             outln!(out, "}}");
         });
         outln!(out, "}}");
+    }
+
+    // emit the testing framework
+    let externs = switch.external_params.borrow();
+    if generate_serialize {
+        let tf = TestFramework {
+            generator,
+            name,
+            variant: TestFrameworkType::Switch {
+                switch_case: switch,
+                case_info: &case_infos,
+            },
+            externals: &*externs,
+        };
+        tf.open(out);
+        tf.gen_random(out);
+        //tf.gen_check_serialize(out);
+        tf.close(out);
     }
 
     case_infos

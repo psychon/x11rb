@@ -109,6 +109,30 @@ impl Printer {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod printer {
+    use super::Printer;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for Printer {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                name: GenRandom::generate(rng),
+                description: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(140689289664000);
+        let value = Printer::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 pub type Pcontext = u32;
 
@@ -182,6 +206,17 @@ impl core::fmt::Debug for GetDoc  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for GetDoc {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::FINISHED.0,
+            Self::SECOND_CONSUMER.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -244,6 +279,18 @@ impl core::fmt::Debug for EvMask  {
     }
 }
 bitmask_binop!(EvMask, u8);
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for EvMask {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::NO_EVENT_MASK.0,
+            Self::PRINT_MASK.0,
+            Self::ATTRIBUTE_MASK.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -309,6 +356,21 @@ impl core::fmt::Debug for Detail  {
             (Self::END_PAGE_NOTIFY.0.into(), "END_PAGE_NOTIFY", "EndPageNotify"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for Detail {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::START_JOB_NOTIFY.0,
+            Self::END_JOB_NOTIFY.0,
+            Self::START_DOC_NOTIFY.0,
+            Self::END_DOC_NOTIFY.0,
+            Self::START_PAGE_NOTIFY.0,
+            Self::END_PAGE_NOTIFY.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
     }
 }
 
@@ -378,6 +440,22 @@ impl core::fmt::Debug for Attr  {
             (Self::SPOOLER_ATTR.0.into(), "SPOOLER_ATTR", "SpoolerAttr"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for Attr {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::JOB_ATTR.0,
+            Self::DOC_ATTR.0,
+            Self::PAGE_ATTR.0,
+            Self::PRINTER_ATTR.0,
+            Self::SERVER_ATTR.0,
+            Self::MEDIUM_ATTR.0,
+            Self::SPOOLER_ATTR.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
     }
 }
 
@@ -485,6 +563,32 @@ impl Serialize for PrintQueryVersionReply {
         self.length.serialize_into(bytes);
         self.major_version.serialize_into(bytes);
         self.minor_version.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod print_query_version_reply {
+    use super::PrintQueryVersionReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for PrintQueryVersionReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                major_version: GenRandom::generate(rng),
+                minor_version: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(1382126709378646016);
+        let value = PrintQueryVersionReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -625,6 +729,31 @@ impl PrintGetPrinterListReply {
     pub fn list_count(&self) -> u32 {
         self.printers.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod print_get_printer_list_reply {
+    use super::PrintGetPrinterListReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for PrintGetPrinterListReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                printers: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(7720509824395378688);
+        let value = PrintGetPrinterListReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -912,6 +1041,31 @@ impl Serialize for PrintGetContextReply {
         self.context.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod print_get_context_reply {
+    use super::PrintGetContextReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for PrintGetContextReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                context: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(2876588070075891712);
+        let value = PrintGetContextReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the PrintDestroyContext request
 pub const PRINT_DESTROY_CONTEXT_REQUEST: u8 = 5;
@@ -1066,6 +1220,31 @@ impl Serialize for PrintGetScreenOfContextReply {
         self.sequence.serialize_into(bytes);
         self.length.serialize_into(bytes);
         self.root.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod print_get_screen_of_context_reply {
+    use super::PrintGetScreenOfContextReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for PrintGetScreenOfContextReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                root: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(13306293628570697728);
+        let value = PrintGetScreenOfContextReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -1505,6 +1684,33 @@ impl PrintGetDocumentDataReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod print_get_document_data_reply {
+    use super::PrintGetDocumentDataReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for PrintGetDocumentDataReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                status_code: GenRandom::generate(rng),
+                finished_flag: GenRandom::generate(rng),
+                data: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(5186844896283066368);
+        let value = PrintGetDocumentDataReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the PrintStartPage request
 pub const PRINT_START_PAGE_REQUEST: u8 = 13;
@@ -1793,6 +1999,32 @@ impl Serialize for PrintInputSelectedReply {
         self.all_events_mask.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod print_input_selected_reply {
+    use super::PrintInputSelectedReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for PrintInputSelectedReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                event_mask: GenRandom::generate(rng),
+                all_events_mask: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(7800903035395244032);
+        let value = PrintInputSelectedReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the PrintGetAttributes request
 pub const PRINT_GET_ATTRIBUTES_REQUEST: u8 = 17;
@@ -1918,6 +2150,31 @@ impl PrintGetAttributesReply {
     pub fn string_len(&self) -> u32 {
         self.attributes.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod print_get_attributes_reply {
+    use super::PrintGetAttributesReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for PrintGetAttributesReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                attributes: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(15628938286746042368);
+        let value = PrintGetAttributesReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -2066,6 +2323,31 @@ impl PrintGetOneAttributesReply {
     pub fn value_len(&self) -> u32 {
         self.value.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod print_get_one_attributes_reply {
+    use super::PrintGetOneAttributesReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for PrintGetOneAttributesReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                value: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(13463546310862831616);
+        let value = PrintGetOneAttributesReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -2298,6 +2580,36 @@ impl Serialize for PrintGetPageDimensionsReply {
         self.reproducible_height.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod print_get_page_dimensions_reply {
+    use super::PrintGetPageDimensionsReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for PrintGetPageDimensionsReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                width: GenRandom::generate(rng),
+                height: GenRandom::generate(rng),
+                offset_x: GenRandom::generate(rng),
+                offset_y: GenRandom::generate(rng),
+                reproducible_width: GenRandom::generate(rng),
+                reproducible_height: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(8856465512700313600);
+        let value = PrintGetPageDimensionsReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the PrintQueryScreens request
 pub const PRINT_QUERY_SCREENS_REQUEST: u8 = 22;
@@ -2404,6 +2716,31 @@ impl PrintQueryScreensReply {
     pub fn list_count(&self) -> u32 {
         self.roots.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod print_query_screens_reply {
+    use super::PrintQueryScreensReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for PrintQueryScreensReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                roots: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(4427596401912578048);
+        let value = PrintQueryScreensReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -2526,6 +2863,32 @@ impl Serialize for PrintSetImageResolutionReply {
         self.previous_resolutions.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod print_set_image_resolution_reply {
+    use super::PrintSetImageResolutionReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for PrintSetImageResolutionReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                status: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                previous_resolutions: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(3477867709499179008);
+        let value = PrintSetImageResolutionReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the PrintGetImageResolution request
 pub const PRINT_GET_IMAGE_RESOLUTION_REQUEST: u8 = 24;
@@ -2636,6 +2999,31 @@ impl Serialize for PrintGetImageResolutionReply {
         self.image_resolution.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod print_get_image_resolution_reply {
+    use super::PrintGetImageResolutionReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for PrintGetImageResolutionReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                image_resolution: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(13420790106491453440);
+        let value = PrintGetImageResolutionReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the Notify event
 pub const NOTIFY_EVENT: u8 = 0;
@@ -2690,6 +3078,33 @@ impl Serialize for NotifyEvent {
         self.sequence.serialize_into(bytes);
         self.context.serialize_into(bytes);
         self.cancel.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod notify_event {
+    use super::NotifyEvent;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for NotifyEvent {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                response_type: GenRandom::generate(rng),
+                detail: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                context: GenRandom::generate(rng),
+                cancel: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(6354312054748245760);
+        let value = NotifyEvent::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 impl From<&NotifyEvent> for [u8; 32] {
@@ -2790,6 +3205,32 @@ impl Serialize for AttributNotifyEvent {
         self.detail.serialize_into(bytes);
         self.sequence.serialize_into(bytes);
         self.context.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod attribut_notify_event {
+    use super::AttributNotifyEvent;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for AttributNotifyEvent {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                response_type: GenRandom::generate(rng),
+                detail: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                context: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(9470005140960772096);
+        let value = AttributNotifyEvent::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 impl From<&AttributNotifyEvent> for [u8; 32] {

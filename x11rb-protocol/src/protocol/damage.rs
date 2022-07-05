@@ -100,6 +100,19 @@ impl core::fmt::Debug for ReportLevel  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for ReportLevel {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::RAW_RECTANGLES.0,
+            Self::DELTA_RECTANGLES.0,
+            Self::BOUNDING_BOX.0,
+            Self::NON_EMPTY.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 /// Opcode for the BadDamage error
 pub const BAD_DAMAGE_ERROR: u8 = 0;
@@ -247,6 +260,32 @@ impl Serialize for QueryVersionReply {
         self.major_version.serialize_into(bytes);
         self.minor_version.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 16]);
+    }
+}
+#[cfg(test)]
+mod query_version_reply {
+    use super::QueryVersionReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for QueryVersionReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                major_version: GenRandom::generate(rng),
+                minor_version: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(228006558612858880);
+        let value = QueryVersionReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -593,6 +632,36 @@ impl Serialize for NotifyEvent {
         self.timestamp.serialize_into(bytes);
         self.area.serialize_into(bytes);
         self.geometry.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod notify_event {
+    use super::NotifyEvent;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for NotifyEvent {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                response_type: GenRandom::generate(rng),
+                level: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                drawable: GenRandom::generate(rng),
+                damage: GenRandom::generate(rng),
+                timestamp: GenRandom::generate(rng),
+                area: GenRandom::generate(rng),
+                geometry: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(6354312054748245760);
+        let value = NotifyEvent::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 impl From<&NotifyEvent> for [u8; 32] {

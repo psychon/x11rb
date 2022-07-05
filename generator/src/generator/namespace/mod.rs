@@ -19,6 +19,7 @@ mod resource_wrapper;
 mod serialize;
 mod struct_type;
 mod switch;
+pub(super) mod test_framework;
 
 use expr_to_str::{expr_to_str, expr_type};
 
@@ -546,6 +547,18 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             outln!(out, "}}");
         }
 
+        // add a GenRandom impl
+        outln!(out, "#[cfg(test)]");
+        outln!(out, "impl crate::x11_utils::GenRandom for {} {{", rust_name);
+        out.indented(|out| {
+            outln!(out, "fn generate(rng: &fastrand::Rng) -> Self {{");
+            out.indented(|out| {
+                outln!(out, "Self(crate::x11_utils::GenRandom::generate(rng))");
+            });
+            outln!(out, "}}");
+        });
+        outln!(out, "}}");
+
         outln!(out, "");
     }
 
@@ -828,16 +841,16 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             });
 
         outln!(out, "impl core::fmt::Debug for {}  {{", rust_name);
+        let into = match global_enum_size {
+            32 => "",
+            _ => ".into()",
+        };
         out.indented(|out| {
             outln!(
                 out,
                 "fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {{"
             );
             out.indented(|out| {
-                let into = match global_enum_size {
-                    32 => "",
-                    _ => ".into()",
-                };
                 outln!(out, "let variants = [");
                 for enum_item in enum_def.items.iter() {
                     let rust_item_name = ename_to_rust(&enum_item.name);
@@ -865,6 +878,30 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         if ok_for_bitmask {
             outln!(out, "bitmask_binop!({}, {});", rust_name, raw_type);
         }
+
+        // implement GenRandom for usage in the test framework
+        outln!(out, "#[cfg(test)]");
+        outln!(out, "impl crate::x11_utils::GenRandom for {} {{", rust_name);
+        out.indented(|out| {
+            outln!(out, "fn generate(rng: &fastrand::Rng) -> Self {{");
+            out.indented(|out| {
+                // generate a list of possible values
+                outln!(out, "let possible_values = &[");
+                out.indented(|out| {
+                    for enum_item in enum_def.items.iter() {
+                        let rust_item_name = ename_to_rust(&enum_item.name);
+                        outln!(out, "Self::{}.0,", rust_item_name);
+                    }
+                });
+                outln!(out, "];");
+
+                // randomly index into it
+                outln!(out, "let index = rng.usize(..possible_values.len());");
+                outln!(out, "Self(possible_values[index])");
+            });
+            outln!(out, "}}");
+        });
+        outln!(out, "}}");
 
         outln!(out, "");
     }

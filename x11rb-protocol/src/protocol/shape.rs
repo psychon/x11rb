@@ -102,6 +102,20 @@ impl core::fmt::Debug for SO  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for SO {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::SET.0,
+            Self::UNION.0,
+            Self::INTERSECT.0,
+            Self::SUBTRACT.0,
+            Self::INVERT.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -161,6 +175,18 @@ impl core::fmt::Debug for SK  {
             (Self::INPUT.0.into(), "INPUT", "Input"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for SK {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::BOUNDING.0,
+            Self::CLIP.0,
+            Self::INPUT.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
     }
 }
 
@@ -263,6 +289,38 @@ impl Serialize for NotifyEvent {
         self.server_time.serialize_into(bytes);
         self.shaped.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 11]);
+    }
+}
+#[cfg(test)]
+mod notify_event {
+    use super::NotifyEvent;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for NotifyEvent {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                response_type: GenRandom::generate(rng),
+                shape_kind: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                affected_window: GenRandom::generate(rng),
+                extents_x: GenRandom::generate(rng),
+                extents_y: GenRandom::generate(rng),
+                extents_width: GenRandom::generate(rng),
+                extents_height: GenRandom::generate(rng),
+                server_time: GenRandom::generate(rng),
+                shaped: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(6354312054748245760);
+        let value = NotifyEvent::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 impl From<&NotifyEvent> for [u8; 32] {
@@ -423,6 +481,32 @@ impl Serialize for QueryVersionReply {
         self.length.serialize_into(bytes);
         self.major_version.serialize_into(bytes);
         self.minor_version.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod query_version_reply {
+    use super::QueryVersionReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for QueryVersionReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                major_version: GenRandom::generate(rng),
+                minor_version: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(228006558612858880);
+        let value = QueryVersionReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -958,6 +1042,40 @@ impl Serialize for QueryExtentsReply {
         self.clip_shape_extents_height.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod query_extents_reply {
+    use super::QueryExtentsReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for QueryExtentsReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                bounding_shaped: GenRandom::generate(rng),
+                clip_shaped: GenRandom::generate(rng),
+                bounding_shape_extents_x: GenRandom::generate(rng),
+                bounding_shape_extents_y: GenRandom::generate(rng),
+                bounding_shape_extents_width: GenRandom::generate(rng),
+                bounding_shape_extents_height: GenRandom::generate(rng),
+                clip_shape_extents_x: GenRandom::generate(rng),
+                clip_shape_extents_y: GenRandom::generate(rng),
+                clip_shape_extents_width: GenRandom::generate(rng),
+                clip_shape_extents_height: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(930074221196017664);
+        let value = QueryExtentsReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the SelectInput request
 pub const SELECT_INPUT_REQUEST: u8 = 6;
@@ -1126,6 +1244,31 @@ impl Serialize for InputSelectedReply {
         self.length.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod input_selected_reply {
+    use super::InputSelectedReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for InputSelectedReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                enabled: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(12700885000412725248);
+        let value = InputSelectedReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the GetRectangles request
 pub const GET_RECTANGLES_REQUEST: u8 = 8;
@@ -1253,6 +1396,32 @@ impl GetRectanglesReply {
     pub fn rectangles_len(&self) -> u32 {
         self.rectangles.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod get_rectangles_reply {
+    use super::GetRectanglesReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetRectanglesReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                ordering: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                rectangles: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(11020389429243052032);
+        let value = GetRectanglesReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 

@@ -80,6 +80,30 @@ impl Serialize for Fp3232 {
         self.frac.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod fp3232 {
+    use super::Fp3232;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for Fp3232 {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                integral: GenRandom::generate(rng),
+                frac: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(50979600000);
+        let value = Fp3232::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the GetExtensionVersion request
 pub const GET_EXTENSION_VERSION_REQUEST: u8 = 1;
@@ -236,6 +260,34 @@ impl Serialize for GetExtensionVersionReply {
         bytes.extend_from_slice(&[0; 19]);
     }
 }
+#[cfg(test)]
+mod get_extension_version_reply {
+    use super::GetExtensionVersionReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetExtensionVersionReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                xi_reply_type: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                server_major: GenRandom::generate(rng),
+                server_minor: GenRandom::generate(rng),
+                present: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(943893896866824192);
+        let value = GetExtensionVersionReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -299,6 +351,20 @@ impl core::fmt::Debug for DeviceUse  {
             (Self::IS_X_EXTENSION_POINTER.0.into(), "IS_X_EXTENSION_POINTER", "IsXExtensionPointer"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for DeviceUse {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::IS_X_POINTER.0,
+            Self::IS_X_KEYBOARD.0,
+            Self::IS_X_EXTENSION_DEVICE.0,
+            Self::IS_X_EXTENSION_KEYBOARD.0,
+            Self::IS_X_EXTENSION_POINTER.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
     }
 }
 
@@ -370,6 +436,22 @@ impl core::fmt::Debug for InputClass  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for InputClass {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::KEY.0,
+            Self::BUTTON.0,
+            Self::VALUATOR.0,
+            Self::FEEDBACK.0,
+            Self::PROXIMITY.0,
+            Self::FOCUS.0,
+            Self::OTHER.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -429,6 +511,17 @@ impl core::fmt::Debug for ValuatorMode  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for ValuatorMode {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::RELATIVE.0,
+            Self::ABSOLUTE.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -475,6 +568,32 @@ impl Serialize for DeviceInfo {
         self.num_class_info.serialize_into(bytes);
         u8::from(self.device_use).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 1]);
+    }
+}
+#[cfg(test)]
+mod device_info {
+    use super::DeviceInfo;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for DeviceInfo {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                device_type: GenRandom::generate(rng),
+                device_id: GenRandom::generate(rng),
+                num_class_info: GenRandom::generate(rng),
+                device_use: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(3569531762545610336);
+        let value = DeviceInfo::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -529,6 +648,33 @@ impl Serialize for KeyInfo {
         bytes.extend_from_slice(&[0; 2]);
     }
 }
+#[cfg(test)]
+mod key_info {
+    use super::KeyInfo;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for KeyInfo {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                class_id: GenRandom::generate(rng),
+                len: GenRandom::generate(rng),
+                min_keycode: GenRandom::generate(rng),
+                max_keycode: GenRandom::generate(rng),
+                num_keys: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(83331021064500);
+        let value = KeyInfo::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -565,6 +711,31 @@ impl Serialize for ButtonInfo {
         u8::from(self.class_id).serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.num_buttons.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod button_info {
+    use super::ButtonInfo;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for ButtonInfo {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                class_id: GenRandom::generate(rng),
+                len: GenRandom::generate(rng),
+                num_buttons: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(4664897331351285504);
+        let value = ButtonInfo::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -610,6 +781,31 @@ impl Serialize for AxisInfo {
         self.resolution.serialize_into(bytes);
         self.minimum.serialize_into(bytes);
         self.maximum.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod axis_info {
+    use super::AxisInfo;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for AxisInfo {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                resolution: GenRandom::generate(rng),
+                minimum: GenRandom::generate(rng),
+                maximum: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(8562891437100000);
+        let value = AxisInfo::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -669,6 +865,33 @@ impl ValuatorInfo {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod valuator_info {
+    use super::ValuatorInfo;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for ValuatorInfo {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                class_id: GenRandom::generate(rng),
+                len: GenRandom::generate(rng),
+                mode: GenRandom::generate(rng),
+                motion_size: GenRandom::generate(rng),
+                axes: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(2233853750468803840);
+        let value = ValuatorInfo::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -710,6 +933,31 @@ impl Serialize for InputInfoInfoKey {
         bytes.extend_from_slice(&[0; 2]);
     }
 }
+#[cfg(test)]
+mod input_info_info_key {
+    use super::InputInfoInfoKey;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for InputInfoInfoKey {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                min_keycode: GenRandom::generate(rng),
+                max_keycode: GenRandom::generate(rng),
+                num_keys: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(14688433154476308480);
+        let value = InputInfoInfoKey::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct InputInfoInfoButton {
@@ -734,6 +982,29 @@ impl Serialize for InputInfoInfoButton {
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(2);
         self.num_buttons.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod input_info_info_button {
+    use super::InputInfoInfoButton;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for InputInfoInfoButton {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                num_buttons: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(463264665377046528);
+        let value = InputInfoInfoButton::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -783,6 +1054,31 @@ impl InputInfoInfoValuator {
     pub fn axes_len(&self) -> u8 {
         self.axes.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod input_info_info_valuator {
+    use super::InputInfoInfoValuator;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for InputInfoInfoValuator {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                mode: GenRandom::generate(rng),
+                motion_size: GenRandom::generate(rng),
+                axes: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(14608188777479143424);
+        let value = InputInfoInfoValuator::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -877,6 +1173,29 @@ impl InputInfoInfo {
         }
     }
 }
+#[cfg(test)]
+mod input_info_info {
+    use super::InputInfoInfo;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for InputInfoInfo {
+        fn generate(rng: &Rng) -> Self {
+            match rng.usize(..3) {
+                0 => Self::Key(GenRandom::generate(rng)),
+                1 => Self::Button(GenRandom::generate(rng)),
+                _ => Self::Valuator(GenRandom::generate(rng)),
+            }
+        }
+    }
+    fn generate_values(rng: &Rng) -> alloc::vec::Vec<InputInfoInfo> {
+        alloc::vec![
+            InputInfoInfo::Key(GenRandom::generate(rng)),
+            InputInfoInfo::Button(GenRandom::generate(rng)),
+            InputInfoInfo::Valuator(GenRandom::generate(rng)),
+        ]
+    }
+}
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -906,6 +1225,30 @@ impl Serialize for InputInfo {
         class_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.info.serialize_into(bytes, class_id);
+    }
+}
+#[cfg(test)]
+mod input_info {
+    use super::InputInfo;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for InputInfo {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                len: GenRandom::generate(rng),
+                info: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(1109726903071987200);
+        let value = InputInfo::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -950,6 +1293,29 @@ impl DeviceName {
     pub fn len(&self) -> u8 {
         self.string.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod device_name {
+    use super::DeviceName;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for DeviceName {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                string: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(15531389385572380272);
+        let value = DeviceName::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -1075,6 +1441,34 @@ impl ListInputDevicesReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod list_input_devices_reply {
+    use super::ListInputDevicesReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for ListInputDevicesReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                xi_reply_type: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                devices: GenRandom::generate(rng),
+                infos: GenRandom::generate(rng),
+                names: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(3227960779179294720);
+        let value = ListInputDevicesReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 pub type EventTypeBase = u8;
 
@@ -1107,6 +1501,30 @@ impl Serialize for InputClassInfo {
         bytes.reserve(2);
         u8::from(self.class_id).serialize_into(bytes);
         self.event_type_base.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod input_class_info {
+    use super::InputClassInfo;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for InputClassInfo {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                class_id: GenRandom::generate(rng),
+                event_type_base: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(10612553281813059584);
+        let value = InputClassInfo::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -1232,6 +1650,32 @@ impl OpenDeviceReply {
     pub fn num_classes(&self) -> u8 {
         self.class_info.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod open_device_reply {
+    use super::OpenDeviceReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for OpenDeviceReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                xi_reply_type: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                class_info: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(2777447594204168192);
+        let value = OpenDeviceReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -1429,6 +1873,32 @@ impl Serialize for SetDeviceModeReply {
         self.length.serialize_into(bytes);
         u8::from(self.status).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 23]);
+    }
+}
+#[cfg(test)]
+mod set_device_mode_reply {
+    use super::SetDeviceModeReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for SetDeviceModeReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                xi_reply_type: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                status: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(10542920688995745792);
+        let value = SetDeviceModeReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -1643,6 +2113,33 @@ impl GetSelectedExtensionEventsReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod get_selected_extension_events_reply {
+    use super::GetSelectedExtensionEventsReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetSelectedExtensionEventsReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                xi_reply_type: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                this_classes: GenRandom::generate(rng),
+                all_classes: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(8369154605514227712);
+        let value = GetSelectedExtensionEventsReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -1700,6 +2197,17 @@ impl core::fmt::Debug for PropagateMode  {
             (Self::DELETE_FROM_LIST.0.into(), "DELETE_FROM_LIST", "DeleteFromList"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for PropagateMode {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::ADD_TO_LIST.0,
+            Self::DELETE_FROM_LIST.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
     }
 }
 
@@ -1901,6 +2409,32 @@ impl GetDeviceDontPropagateListReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod get_device_dont_propagate_list_reply {
+    use super::GetDeviceDontPropagateListReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetDeviceDontPropagateListReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                xi_reply_type: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                classes: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(4984399178680500224);
+        let value = GetDeviceDontPropagateListReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -1927,6 +2461,30 @@ impl DeviceTimeCoord {
         self.time.serialize_into(bytes);
         assert_eq!(self.axisvalues.len(), usize::try_from(num_axes).unwrap(), "`axisvalues` has an incorrect length");
         self.axisvalues.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod device_time_coord {
+    use super::DeviceTimeCoord;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for DeviceTimeCoord {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                time: GenRandom::generate(rng),
+                axisvalues: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(1971480954127386368);
+        let value = DeviceTimeCoord::generate(&rng);
+        let left = value.serialize(GenRandom::generate(&rng));
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right, GenRandom::generate(&rng));
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -2080,6 +2638,34 @@ impl GetDeviceMotionEventsReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod get_device_motion_events_reply {
+    use super::GetDeviceMotionEventsReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetDeviceMotionEventsReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                xi_reply_type: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                num_axes: GenRandom::generate(rng),
+                device_mode: GenRandom::generate(rng),
+                events: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(2051627056346169344);
+        let value = GetDeviceMotionEventsReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the ChangeKeyboardDevice request
 pub const CHANGE_KEYBOARD_DEVICE_REQUEST: u8 = 11;
@@ -2216,6 +2802,32 @@ impl Serialize for ChangeKeyboardDeviceReply {
         self.length.serialize_into(bytes);
         u8::from(self.status).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 23]);
+    }
+}
+#[cfg(test)]
+mod change_keyboard_device_reply {
+    use super::ChangeKeyboardDeviceReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for ChangeKeyboardDeviceReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                xi_reply_type: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                status: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(4793584832704413696);
+        let value = ChangeKeyboardDeviceReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -2362,6 +2974,32 @@ impl Serialize for ChangePointerDeviceReply {
         self.length.serialize_into(bytes);
         u8::from(self.status).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 23]);
+    }
+}
+#[cfg(test)]
+mod change_pointer_device_reply {
+    use super::ChangePointerDeviceReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for ChangePointerDeviceReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                xi_reply_type: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                status: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(5263867155522256896);
+        let value = ChangePointerDeviceReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -2558,6 +3196,32 @@ impl Serialize for GrabDeviceReply {
         bytes.extend_from_slice(&[0; 23]);
     }
 }
+#[cfg(test)]
+mod grab_device_reply {
+    use super::GrabDeviceReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GrabDeviceReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                xi_reply_type: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                status: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(6281887498973409280);
+        let value = GrabDeviceReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the UngrabDevice request
 pub const UNGRAB_DEVICE_REQUEST: u8 = 14;
@@ -2675,6 +3339,16 @@ impl core::fmt::Debug for ModifierDevice  {
             (Self::USE_X_KEYBOARD.0.into(), "USE_X_KEYBOARD", "UseXKeyboard"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for ModifierDevice {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::USE_X_KEYBOARD.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
     }
 }
 
@@ -3139,6 +3813,21 @@ impl core::fmt::Debug for DeviceInputMode  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for DeviceInputMode {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::ASYNC_THIS_DEVICE.0,
+            Self::SYNC_THIS_DEVICE.0,
+            Self::REPLAY_THIS_DEVICE.0,
+            Self::ASYNC_OTHER_DEVICES.0,
+            Self::ASYNC_ALL.0,
+            Self::SYNC_ALL.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 /// Opcode for the AllowDeviceEvents request
 pub const ALLOW_DEVICE_EVENTS_REQUEST: u8 = 19;
@@ -3352,6 +4041,34 @@ impl Serialize for GetDeviceFocusReply {
         bytes.extend_from_slice(&[0; 15]);
     }
 }
+#[cfg(test)]
+mod get_device_focus_reply {
+    use super::GetDeviceFocusReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetDeviceFocusReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                xi_reply_type: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                focus: GenRandom::generate(rng),
+                time: GenRandom::generate(rng),
+                revert_to: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(7562862494836318208);
+        let value = GetDeviceFocusReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the SetDeviceFocus request
 pub const SET_DEVICE_FOCUS_REQUEST: u8 = 21;
@@ -3494,6 +4211,21 @@ impl core::fmt::Debug for FeedbackClass  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for FeedbackClass {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::KEYBOARD.0,
+            Self::POINTER.0,
+            Self::STRING.0,
+            Self::INTEGER.0,
+            Self::LED.0,
+            Self::BELL.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -3614,6 +4346,39 @@ impl Serialize for KbdFeedbackState {
         bytes.extend_from_slice(&self.auto_repeats);
     }
 }
+#[cfg(test)]
+mod kbd_feedback_state {
+    use super::KbdFeedbackState;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for KbdFeedbackState {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                class_id: GenRandom::generate(rng),
+                feedback_id: GenRandom::generate(rng),
+                len: GenRandom::generate(rng),
+                pitch: GenRandom::generate(rng),
+                duration: GenRandom::generate(rng),
+                led_mask: GenRandom::generate(rng),
+                led_values: GenRandom::generate(rng),
+                global_auto_repeat: GenRandom::generate(rng),
+                click: GenRandom::generate(rng),
+                percent: GenRandom::generate(rng),
+                auto_repeats: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(18134747517575067648);
+        let value = KbdFeedbackState::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -3672,6 +4437,34 @@ impl Serialize for PtrFeedbackState {
         self.accel_num.serialize_into(bytes);
         self.accel_denom.serialize_into(bytes);
         self.threshold.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod ptr_feedback_state {
+    use super::PtrFeedbackState;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for PtrFeedbackState {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                class_id: GenRandom::generate(rng),
+                feedback_id: GenRandom::generate(rng),
+                len: GenRandom::generate(rng),
+                accel_num: GenRandom::generate(rng),
+                accel_denom: GenRandom::generate(rng),
+                threshold: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(11426114325511045120);
+        let value = PtrFeedbackState::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -3736,6 +4529,34 @@ impl Serialize for IntegerFeedbackState {
         self.max_value.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod integer_feedback_state {
+    use super::IntegerFeedbackState;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for IntegerFeedbackState {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                class_id: GenRandom::generate(rng),
+                feedback_id: GenRandom::generate(rng),
+                len: GenRandom::generate(rng),
+                resolution: GenRandom::generate(rng),
+                min_value: GenRandom::generate(rng),
+                max_value: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(7607233837219745792);
+        let value = IntegerFeedbackState::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -3790,6 +4611,33 @@ impl StringFeedbackState {
     pub fn num_keysyms(&self) -> u16 {
         self.keysyms.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod string_feedback_state {
+    use super::StringFeedbackState;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for StringFeedbackState {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                class_id: GenRandom::generate(rng),
+                feedback_id: GenRandom::generate(rng),
+                len: GenRandom::generate(rng),
+                max_symbols: GenRandom::generate(rng),
+                keysyms: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(11663386592670396416);
+        let value = StringFeedbackState::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -3852,6 +4700,34 @@ impl Serialize for BellFeedbackState {
         self.duration.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod bell_feedback_state {
+    use super::BellFeedbackState;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for BellFeedbackState {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                class_id: GenRandom::generate(rng),
+                feedback_id: GenRandom::generate(rng),
+                len: GenRandom::generate(rng),
+                percent: GenRandom::generate(rng),
+                pitch: GenRandom::generate(rng),
+                duration: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(6808983993224929280);
+        let value = BellFeedbackState::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -3904,6 +4780,33 @@ impl Serialize for LedFeedbackState {
         self.len.serialize_into(bytes);
         self.led_mask.serialize_into(bytes);
         self.led_values.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod led_feedback_state {
+    use super::LedFeedbackState;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for LedFeedbackState {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                class_id: GenRandom::generate(rng),
+                feedback_id: GenRandom::generate(rng),
+                len: GenRandom::generate(rng),
+                led_mask: GenRandom::generate(rng),
+                led_values: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(1425978475994689536);
+        let value = LedFeedbackState::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -4009,6 +4912,36 @@ impl Serialize for FeedbackStateDataKeyboard {
         bytes.extend_from_slice(&self.auto_repeats);
     }
 }
+#[cfg(test)]
+mod feedback_state_data_keyboard {
+    use super::FeedbackStateDataKeyboard;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for FeedbackStateDataKeyboard {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                pitch: GenRandom::generate(rng),
+                duration: GenRandom::generate(rng),
+                led_mask: GenRandom::generate(rng),
+                led_values: GenRandom::generate(rng),
+                global_auto_repeat: GenRandom::generate(rng),
+                click: GenRandom::generate(rng),
+                percent: GenRandom::generate(rng),
+                auto_repeats: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(13870198378932011008);
+        let value = FeedbackStateDataKeyboard::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct FeedbackStateDataPointer {
@@ -4049,6 +4982,31 @@ impl Serialize for FeedbackStateDataPointer {
         self.accel_num.serialize_into(bytes);
         self.accel_denom.serialize_into(bytes);
         self.threshold.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod feedback_state_data_pointer {
+    use super::FeedbackStateDataPointer;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for FeedbackStateDataPointer {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                accel_num: GenRandom::generate(rng),
+                accel_denom: GenRandom::generate(rng),
+                threshold: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(12102824518948487168);
+        let value = FeedbackStateDataPointer::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -4096,6 +5054,30 @@ impl FeedbackStateDataString {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod feedback_state_data_string {
+    use super::FeedbackStateDataString;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for FeedbackStateDataString {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                max_symbols: GenRandom::generate(rng),
+                keysyms: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(11327280702552473600);
+        let value = FeedbackStateDataString::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct FeedbackStateDataInteger {
@@ -4140,6 +5122,31 @@ impl Serialize for FeedbackStateDataInteger {
         self.max_value.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod feedback_state_data_integer {
+    use super::FeedbackStateDataInteger;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for FeedbackStateDataInteger {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                resolution: GenRandom::generate(rng),
+                min_value: GenRandom::generate(rng),
+                max_value: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(17533989062234669056);
+        let value = FeedbackStateDataInteger::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct FeedbackStateDataLed {
@@ -4174,6 +5181,30 @@ impl Serialize for FeedbackStateDataLed {
         bytes.reserve(8);
         self.led_mask.serialize_into(bytes);
         self.led_values.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod feedback_state_data_led {
+    use super::FeedbackStateDataLed;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for FeedbackStateDataLed {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                led_mask: GenRandom::generate(rng),
+                led_values: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(17222583355082997760);
+        let value = FeedbackStateDataLed::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -4216,6 +5247,31 @@ impl Serialize for FeedbackStateDataBell {
         bytes.extend_from_slice(&[0; 3]);
         self.pitch.serialize_into(bytes);
         self.duration.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod feedback_state_data_bell {
+    use super::FeedbackStateDataBell;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for FeedbackStateDataBell {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                percent: GenRandom::generate(rng),
+                pitch: GenRandom::generate(rng),
+                duration: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(8973437668175773696);
+        let value = FeedbackStateDataBell::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -4355,6 +5411,35 @@ impl FeedbackStateData {
         }
     }
 }
+#[cfg(test)]
+mod feedback_state_data {
+    use super::FeedbackStateData;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for FeedbackStateData {
+        fn generate(rng: &Rng) -> Self {
+            match rng.usize(..6) {
+                0 => Self::Keyboard(GenRandom::generate(rng)),
+                1 => Self::Pointer(GenRandom::generate(rng)),
+                2 => Self::String(GenRandom::generate(rng)),
+                3 => Self::Integer(GenRandom::generate(rng)),
+                4 => Self::Led(GenRandom::generate(rng)),
+                _ => Self::Bell(GenRandom::generate(rng)),
+            }
+        }
+    }
+    fn generate_values(rng: &Rng) -> alloc::vec::Vec<FeedbackStateData> {
+        alloc::vec![
+            FeedbackStateData::Keyboard(GenRandom::generate(rng)),
+            FeedbackStateData::Pointer(GenRandom::generate(rng)),
+            FeedbackStateData::String(GenRandom::generate(rng)),
+            FeedbackStateData::Integer(GenRandom::generate(rng)),
+            FeedbackStateData::Led(GenRandom::generate(rng)),
+            FeedbackStateData::Bell(GenRandom::generate(rng)),
+        ]
+    }
+}
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -4387,6 +5472,31 @@ impl Serialize for FeedbackState {
         self.feedback_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.data.serialize_into(bytes, class_id);
+    }
+}
+#[cfg(test)]
+mod feedback_state {
+    use super::FeedbackState;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for FeedbackState {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                feedback_id: GenRandom::generate(rng),
+                len: GenRandom::generate(rng),
+                data: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(15352158019596502272);
+        let value = FeedbackState::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -4508,6 +5618,32 @@ impl GetFeedbackControlReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod get_feedback_control_reply {
+    use super::GetFeedbackControlReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetFeedbackControlReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                xi_reply_type: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                feedbacks: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(431505973022556160);
+        let value = GetFeedbackControlReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -4594,6 +5730,39 @@ impl Serialize for KbdFeedbackCtl {
         self.led_values.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod kbd_feedback_ctl {
+    use super::KbdFeedbackCtl;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for KbdFeedbackCtl {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                class_id: GenRandom::generate(rng),
+                feedback_id: GenRandom::generate(rng),
+                len: GenRandom::generate(rng),
+                key: GenRandom::generate(rng),
+                auto_repeat_mode: GenRandom::generate(rng),
+                key_click_percent: GenRandom::generate(rng),
+                bell_percent: GenRandom::generate(rng),
+                bell_pitch: GenRandom::generate(rng),
+                bell_duration: GenRandom::generate(rng),
+                led_mask: GenRandom::generate(rng),
+                led_values: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(2719339621092141056);
+        let value = KbdFeedbackCtl::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -4654,6 +5823,34 @@ impl Serialize for PtrFeedbackCtl {
         self.threshold.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod ptr_feedback_ctl {
+    use super::PtrFeedbackCtl;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for PtrFeedbackCtl {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                class_id: GenRandom::generate(rng),
+                feedback_id: GenRandom::generate(rng),
+                len: GenRandom::generate(rng),
+                num: GenRandom::generate(rng),
+                denom: GenRandom::generate(rng),
+                threshold: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(131361231505162240);
+        let value = PtrFeedbackCtl::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -4698,6 +5895,32 @@ impl Serialize for IntegerFeedbackCtl {
         self.feedback_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.int_to_display.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod integer_feedback_ctl {
+    use super::IntegerFeedbackCtl;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for IntegerFeedbackCtl {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                class_id: GenRandom::generate(rng),
+                feedback_id: GenRandom::generate(rng),
+                len: GenRandom::generate(rng),
+                int_to_display: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(11489901166412115968);
+        let value = IntegerFeedbackCtl::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -4753,6 +5976,32 @@ impl StringFeedbackCtl {
     pub fn num_keysyms(&self) -> u16 {
         self.keysyms.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod string_feedback_ctl {
+    use super::StringFeedbackCtl;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for StringFeedbackCtl {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                class_id: GenRandom::generate(rng),
+                feedback_id: GenRandom::generate(rng),
+                len: GenRandom::generate(rng),
+                keysyms: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(5726236037369368576);
+        let value = StringFeedbackCtl::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -4815,6 +6064,34 @@ impl Serialize for BellFeedbackCtl {
         self.duration.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod bell_feedback_ctl {
+    use super::BellFeedbackCtl;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for BellFeedbackCtl {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                class_id: GenRandom::generate(rng),
+                feedback_id: GenRandom::generate(rng),
+                len: GenRandom::generate(rng),
+                percent: GenRandom::generate(rng),
+                pitch: GenRandom::generate(rng),
+                duration: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(715639192905670656);
+        let value = BellFeedbackCtl::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -4867,6 +6144,33 @@ impl Serialize for LedFeedbackCtl {
         self.len.serialize_into(bytes);
         self.led_mask.serialize_into(bytes);
         self.led_values.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod led_feedback_ctl {
+    use super::LedFeedbackCtl;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for LedFeedbackCtl {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                class_id: GenRandom::generate(rng),
+                feedback_id: GenRandom::generate(rng),
+                len: GenRandom::generate(rng),
+                led_mask: GenRandom::generate(rng),
+                led_values: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(17481898756125822976);
+        let value = LedFeedbackCtl::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -4938,6 +6242,36 @@ impl Serialize for FeedbackCtlDataKeyboard {
         self.led_values.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod feedback_ctl_data_keyboard {
+    use super::FeedbackCtlDataKeyboard;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for FeedbackCtlDataKeyboard {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                key: GenRandom::generate(rng),
+                auto_repeat_mode: GenRandom::generate(rng),
+                key_click_percent: GenRandom::generate(rng),
+                bell_percent: GenRandom::generate(rng),
+                bell_pitch: GenRandom::generate(rng),
+                bell_duration: GenRandom::generate(rng),
+                led_mask: GenRandom::generate(rng),
+                led_values: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(14515145313484472320);
+        let value = FeedbackCtlDataKeyboard::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct FeedbackCtlDataPointer {
@@ -4978,6 +6312,31 @@ impl Serialize for FeedbackCtlDataPointer {
         self.num.serialize_into(bytes);
         self.denom.serialize_into(bytes);
         self.threshold.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod feedback_ctl_data_pointer {
+    use super::FeedbackCtlDataPointer;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for FeedbackCtlDataPointer {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                num: GenRandom::generate(rng),
+                denom: GenRandom::generate(rng),
+                threshold: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(13793741976084938752);
+        let value = FeedbackCtlDataPointer::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -5024,6 +6383,29 @@ impl FeedbackCtlDataString {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod feedback_ctl_data_string {
+    use super::FeedbackCtlDataString;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for FeedbackCtlDataString {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                keysyms: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(1399931206702530560);
+        let value = FeedbackCtlDataString::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct FeedbackCtlDataInteger {
@@ -5050,6 +6432,29 @@ impl Serialize for FeedbackCtlDataInteger {
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(4);
         self.int_to_display.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod feedback_ctl_data_integer {
+    use super::FeedbackCtlDataInteger;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for FeedbackCtlDataInteger {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                int_to_display: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(8675258848572276736);
+        let value = FeedbackCtlDataInteger::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -5086,6 +6491,30 @@ impl Serialize for FeedbackCtlDataLed {
         bytes.reserve(8);
         self.led_mask.serialize_into(bytes);
         self.led_values.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod feedback_ctl_data_led {
+    use super::FeedbackCtlDataLed;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for FeedbackCtlDataLed {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                led_mask: GenRandom::generate(rng),
+                led_values: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(4871789613682589696);
+        let value = FeedbackCtlDataLed::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -5128,6 +6557,31 @@ impl Serialize for FeedbackCtlDataBell {
         bytes.extend_from_slice(&[0; 3]);
         self.pitch.serialize_into(bytes);
         self.duration.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod feedback_ctl_data_bell {
+    use super::FeedbackCtlDataBell;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for FeedbackCtlDataBell {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                percent: GenRandom::generate(rng),
+                pitch: GenRandom::generate(rng),
+                duration: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(13511527296311099392);
+        let value = FeedbackCtlDataBell::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -5267,6 +6721,35 @@ impl FeedbackCtlData {
         }
     }
 }
+#[cfg(test)]
+mod feedback_ctl_data {
+    use super::FeedbackCtlData;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for FeedbackCtlData {
+        fn generate(rng: &Rng) -> Self {
+            match rng.usize(..6) {
+                0 => Self::Keyboard(GenRandom::generate(rng)),
+                1 => Self::Pointer(GenRandom::generate(rng)),
+                2 => Self::String(GenRandom::generate(rng)),
+                3 => Self::Integer(GenRandom::generate(rng)),
+                4 => Self::Led(GenRandom::generate(rng)),
+                _ => Self::Bell(GenRandom::generate(rng)),
+            }
+        }
+    }
+    fn generate_values(rng: &Rng) -> alloc::vec::Vec<FeedbackCtlData> {
+        alloc::vec![
+            FeedbackCtlData::Keyboard(GenRandom::generate(rng)),
+            FeedbackCtlData::Pointer(GenRandom::generate(rng)),
+            FeedbackCtlData::String(GenRandom::generate(rng)),
+            FeedbackCtlData::Integer(GenRandom::generate(rng)),
+            FeedbackCtlData::Led(GenRandom::generate(rng)),
+            FeedbackCtlData::Bell(GenRandom::generate(rng)),
+        ]
+    }
+}
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -5299,6 +6782,31 @@ impl Serialize for FeedbackCtl {
         self.feedback_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.data.serialize_into(bytes, class_id);
+    }
+}
+#[cfg(test)]
+mod feedback_ctl {
+    use super::FeedbackCtl;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for FeedbackCtl {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                feedback_id: GenRandom::generate(rng),
+                len: GenRandom::generate(rng),
+                data: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(3426680917958477568);
+        let value = FeedbackCtl::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -5383,6 +6891,28 @@ impl core::fmt::Debug for ChangeFeedbackControlMask  {
     }
 }
 bitmask_binop!(ChangeFeedbackControlMask, u8);
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for ChangeFeedbackControlMask {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::KEY_CLICK_PERCENT.0,
+            Self::PERCENT.0,
+            Self::PITCH.0,
+            Self::DURATION.0,
+            Self::LED.0,
+            Self::LED_MODE.0,
+            Self::KEY.0,
+            Self::AUTO_REPEAT_MODE.0,
+            Self::STRING.0,
+            Self::INTEGER.0,
+            Self::ACCEL_NUM.0,
+            Self::ACCEL_DENOM.0,
+            Self::THRESHOLD.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 /// Opcode for the ChangeFeedbackControl request
 pub const CHANGE_FEEDBACK_CONTROL_REQUEST: u8 = 23;
@@ -5581,6 +7111,32 @@ impl GetDeviceKeyMappingReply {
     pub fn length(&self) -> u32 {
         self.keysyms.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod get_device_key_mapping_reply {
+    use super::GetDeviceKeyMappingReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetDeviceKeyMappingReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                xi_reply_type: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                keysyms_per_keycode: GenRandom::generate(rng),
+                keysyms: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(981399017275523072);
+        let value = GetDeviceKeyMappingReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -5788,6 +7344,32 @@ impl GetDeviceModifierMappingReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod get_device_modifier_mapping_reply {
+    use super::GetDeviceModifierMappingReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetDeviceModifierMappingReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                xi_reply_type: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                keymaps: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(14933561739831148544);
+        let value = GetDeviceModifierMappingReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the SetDeviceModifierMapping request
 pub const SET_DEVICE_MODIFIER_MAPPING_REQUEST: u8 = 27;
@@ -5943,6 +7525,32 @@ impl Serialize for SetDeviceModifierMappingReply {
         bytes.extend_from_slice(&[0; 23]);
     }
 }
+#[cfg(test)]
+mod set_device_modifier_mapping_reply {
+    use super::SetDeviceModifierMappingReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for SetDeviceModifierMappingReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                xi_reply_type: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                status: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(7324825430018490368);
+        let value = SetDeviceModifierMappingReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the GetDeviceButtonMapping request
 pub const GET_DEVICE_BUTTON_MAPPING_REQUEST: u8 = 28;
@@ -6067,6 +7675,32 @@ impl GetDeviceButtonMappingReply {
     pub fn map_size(&self) -> u8 {
         self.map.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod get_device_button_mapping_reply {
+    use super::GetDeviceButtonMappingReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetDeviceButtonMappingReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                xi_reply_type: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                map: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(12570339239020986368);
+        let value = GetDeviceButtonMappingReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -6223,6 +7857,32 @@ impl Serialize for SetDeviceButtonMappingReply {
         bytes.extend_from_slice(&[0; 23]);
     }
 }
+#[cfg(test)]
+mod set_device_button_mapping_reply {
+    use super::SetDeviceButtonMappingReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for SetDeviceButtonMappingReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                xi_reply_type: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                status: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(1704238776806539264);
+        let value = SetDeviceButtonMappingReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -6297,6 +7957,32 @@ impl Serialize for KeyState {
         self.num_keys.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 1]);
         bytes.extend_from_slice(&self.keys);
+    }
+}
+#[cfg(test)]
+mod key_state {
+    use super::KeyState;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for KeyState {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                class_id: GenRandom::generate(rng),
+                len: GenRandom::generate(rng),
+                num_keys: GenRandom::generate(rng),
+                keys: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(10028943540013200);
+        let value = KeyState::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -6375,6 +8061,32 @@ impl Serialize for ButtonState {
         bytes.extend_from_slice(&self.buttons);
     }
 }
+#[cfg(test)]
+mod button_state {
+    use super::ButtonState;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for ButtonState {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                class_id: GenRandom::generate(rng),
+                len: GenRandom::generate(rng),
+                num_buttons: GenRandom::generate(rng),
+                buttons: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(9939090486152793088);
+        let value = ButtonState::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -6435,6 +8147,17 @@ impl core::fmt::Debug for ValuatorStateModeMask  {
     }
 }
 bitmask_binop!(ValuatorStateModeMask, u8);
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for ValuatorStateModeMask {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::DEVICE_MODE_ABSOLUTE.0,
+            Self::OUT_OF_PROXIMITY.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -6486,6 +8209,32 @@ impl ValuatorState {
     pub fn num_valuators(&self) -> u8 {
         self.valuators.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod valuator_state {
+    use super::ValuatorState;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for ValuatorState {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                class_id: GenRandom::generate(rng),
+                len: GenRandom::generate(rng),
+                mode: GenRandom::generate(rng),
+                valuators: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(612676600527971328);
+        let value = ValuatorState::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -6553,6 +8302,30 @@ impl Serialize for InputStateDataKey {
         bytes.extend_from_slice(&self.keys);
     }
 }
+#[cfg(test)]
+mod input_state_data_key {
+    use super::InputStateDataKey;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for InputStateDataKey {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                num_keys: GenRandom::generate(rng),
+                keys: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(5527058776040833024);
+        let value = InputStateDataKey::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct InputStateDataButton {
@@ -6617,6 +8390,30 @@ impl Serialize for InputStateDataButton {
         bytes.extend_from_slice(&self.buttons);
     }
 }
+#[cfg(test)]
+mod input_state_data_button {
+    use super::InputStateDataButton;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for InputStateDataButton {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                num_buttons: GenRandom::generate(rng),
+                buttons: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(13038358670073659392);
+        let value = InputStateDataButton::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct InputStateDataValuator {
@@ -6660,6 +8457,30 @@ impl InputStateDataValuator {
     pub fn num_valuators(&self) -> u8 {
         self.valuators.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod input_state_data_valuator {
+    use super::InputStateDataValuator;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for InputStateDataValuator {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                mode: GenRandom::generate(rng),
+                valuators: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(14305108348161228800);
+        let value = InputStateDataValuator::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -6754,6 +8575,29 @@ impl InputStateData {
         }
     }
 }
+#[cfg(test)]
+mod input_state_data {
+    use super::InputStateData;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for InputStateData {
+        fn generate(rng: &Rng) -> Self {
+            match rng.usize(..3) {
+                0 => Self::Key(GenRandom::generate(rng)),
+                1 => Self::Button(GenRandom::generate(rng)),
+                _ => Self::Valuator(GenRandom::generate(rng)),
+            }
+        }
+    }
+    fn generate_values(rng: &Rng) -> alloc::vec::Vec<InputStateData> {
+        alloc::vec![
+            InputStateData::Key(GenRandom::generate(rng)),
+            InputStateData::Button(GenRandom::generate(rng)),
+            InputStateData::Valuator(GenRandom::generate(rng)),
+        ]
+    }
+}
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -6783,6 +8627,30 @@ impl Serialize for InputState {
         class_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.data.serialize_into(bytes, class_id);
+    }
+}
+#[cfg(test)]
+mod input_state {
+    use super::InputState;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for InputState {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                len: GenRandom::generate(rng),
+                data: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(4429158771651934208);
+        let value = InputState::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -6902,6 +8770,32 @@ impl QueryDeviceStateReply {
     pub fn num_classes(&self) -> u8 {
         self.classes.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod query_device_state_reply {
+    use super::QueryDeviceStateReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for QueryDeviceStateReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                xi_reply_type: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                classes: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(4631255388678750208);
+        let value = QueryDeviceStateReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -7129,6 +9023,32 @@ impl Serialize for SetDeviceValuatorsReply {
         bytes.extend_from_slice(&[0; 23]);
     }
 }
+#[cfg(test)]
+mod set_device_valuators_reply {
+    use super::SetDeviceValuatorsReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for SetDeviceValuatorsReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                xi_reply_type: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                status: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(14904814533756059648);
+        let value = SetDeviceValuatorsReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -7188,6 +9108,20 @@ impl core::fmt::Debug for DeviceControl  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for DeviceControl {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::RESOLUTION.0,
+            Self::ABSCALIB.0,
+            Self::CORE.0,
+            Self::ENABLE.0,
+            Self::ABSAREA.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -7244,6 +9178,33 @@ impl DeviceResolutionState {
     pub fn num_valuators(&self) -> u32 {
         self.resolution_values.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod device_resolution_state {
+    use super::DeviceResolutionState;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for DeviceResolutionState {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                control_id: GenRandom::generate(rng),
+                len: GenRandom::generate(rng),
+                resolution_values: GenRandom::generate(rng),
+                resolution_min: GenRandom::generate(rng),
+                resolution_max: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(5372691805322125312);
+        let value = DeviceResolutionState::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -7344,6 +9305,38 @@ impl Serialize for DeviceAbsCalibState {
         self.button_threshold.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod device_abs_calib_state {
+    use super::DeviceAbsCalibState;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for DeviceAbsCalibState {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                control_id: GenRandom::generate(rng),
+                len: GenRandom::generate(rng),
+                min_x: GenRandom::generate(rng),
+                max_x: GenRandom::generate(rng),
+                min_y: GenRandom::generate(rng),
+                max_y: GenRandom::generate(rng),
+                flip_x: GenRandom::generate(rng),
+                flip_y: GenRandom::generate(rng),
+                rotation: GenRandom::generate(rng),
+                button_threshold: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(954135656690378752);
+        let value = DeviceAbsCalibState::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -7426,6 +9419,36 @@ impl Serialize for DeviceAbsAreaState {
         self.following.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod device_abs_area_state {
+    use super::DeviceAbsAreaState;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for DeviceAbsAreaState {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                control_id: GenRandom::generate(rng),
+                len: GenRandom::generate(rng),
+                offset_x: GenRandom::generate(rng),
+                offset_y: GenRandom::generate(rng),
+                width: GenRandom::generate(rng),
+                height: GenRandom::generate(rng),
+                screen: GenRandom::generate(rng),
+                following: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(18038828767116059136);
+        let value = DeviceAbsAreaState::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -7474,6 +9497,32 @@ impl Serialize for DeviceCoreState {
         bytes.extend_from_slice(&[0; 2]);
     }
 }
+#[cfg(test)]
+mod device_core_state {
+    use super::DeviceCoreState;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for DeviceCoreState {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                control_id: GenRandom::generate(rng),
+                len: GenRandom::generate(rng),
+                status: GenRandom::generate(rng),
+                iscore: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(10067687606458982144);
+        let value = DeviceCoreState::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -7516,6 +9565,31 @@ impl Serialize for DeviceEnableState {
         self.len.serialize_into(bytes);
         self.enable.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 3]);
+    }
+}
+#[cfg(test)]
+mod device_enable_state {
+    use super::DeviceEnableState;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for DeviceEnableState {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                control_id: GenRandom::generate(rng),
+                len: GenRandom::generate(rng),
+                enable: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(502957766914152448);
+        let value = DeviceEnableState::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -7566,6 +9640,31 @@ impl DeviceStateDataResolution {
     pub fn num_valuators(&self) -> u32 {
         self.resolution_values.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod device_state_data_resolution {
+    use super::DeviceStateDataResolution;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for DeviceStateDataResolution {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                resolution_values: GenRandom::generate(rng),
+                resolution_min: GenRandom::generate(rng),
+                resolution_max: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(11239051915084038144);
+        let value = DeviceStateDataResolution::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -7652,6 +9751,36 @@ impl Serialize for DeviceStateDataAbsCalib {
         self.button_threshold.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod device_state_data_abs_calib {
+    use super::DeviceStateDataAbsCalib;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for DeviceStateDataAbsCalib {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                min_x: GenRandom::generate(rng),
+                max_x: GenRandom::generate(rng),
+                min_y: GenRandom::generate(rng),
+                max_y: GenRandom::generate(rng),
+                flip_x: GenRandom::generate(rng),
+                flip_y: GenRandom::generate(rng),
+                rotation: GenRandom::generate(rng),
+                button_threshold: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(13661908997385781248);
+        let value = DeviceStateDataAbsCalib::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DeviceStateDataCore {
@@ -7684,6 +9813,30 @@ impl Serialize for DeviceStateDataCore {
         self.status.serialize_into(bytes);
         self.iscore.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 2]);
+    }
+}
+#[cfg(test)]
+mod device_state_data_core {
+    use super::DeviceStateDataCore;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for DeviceStateDataCore {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                status: GenRandom::generate(rng),
+                iscore: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(3881827076722864128);
+        let value = DeviceStateDataCore::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -7752,6 +9905,34 @@ impl Serialize for DeviceStateDataAbsArea {
         self.height.serialize_into(bytes);
         self.screen.serialize_into(bytes);
         self.following.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod device_state_data_abs_area {
+    use super::DeviceStateDataAbsArea;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for DeviceStateDataAbsArea {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                offset_x: GenRandom::generate(rng),
+                offset_y: GenRandom::generate(rng),
+                width: GenRandom::generate(rng),
+                height: GenRandom::generate(rng),
+                screen: GenRandom::generate(rng),
+                following: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(4489045204152328192);
+        let value = DeviceStateDataAbsArea::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -7882,6 +10063,33 @@ impl DeviceStateData {
         }
     }
 }
+#[cfg(test)]
+mod device_state_data {
+    use super::DeviceStateData;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for DeviceStateData {
+        fn generate(rng: &Rng) -> Self {
+            match rng.usize(..5) {
+                0 => Self::Resolution(GenRandom::generate(rng)),
+                1 => Self::AbsCalib(GenRandom::generate(rng)),
+                2 => Self::Core(GenRandom::generate(rng)),
+                3 => Self::Enable(GenRandom::generate(rng)),
+                _ => Self::AbsArea(GenRandom::generate(rng)),
+            }
+        }
+    }
+    fn generate_values(rng: &Rng) -> alloc::vec::Vec<DeviceStateData> {
+        alloc::vec![
+            DeviceStateData::Resolution(GenRandom::generate(rng)),
+            DeviceStateData::AbsCalib(GenRandom::generate(rng)),
+            DeviceStateData::Core(GenRandom::generate(rng)),
+            DeviceStateData::Enable(GenRandom::generate(rng)),
+            DeviceStateData::AbsArea(GenRandom::generate(rng)),
+        ]
+    }
+}
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -7911,6 +10119,30 @@ impl Serialize for DeviceState {
         control_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.data.serialize_into(bytes, control_id);
+    }
+}
+#[cfg(test)]
+mod device_state {
+    use super::DeviceState;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for DeviceState {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                len: GenRandom::generate(rng),
+                data: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(12747932063375596416);
+        let value = DeviceState::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -8022,6 +10254,33 @@ impl Serialize for GetDeviceControlReply {
         self.control.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod get_device_control_reply {
+    use super::GetDeviceControlReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetDeviceControlReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                xi_reply_type: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                status: GenRandom::generate(rng),
+                control: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(11541465192518123520);
+        let value = GetDeviceControlReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -8075,6 +10334,32 @@ impl DeviceResolutionCtl {
     pub fn num_valuators(&self) -> u8 {
         self.resolution_values.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod device_resolution_ctl {
+    use super::DeviceResolutionCtl;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for DeviceResolutionCtl {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                control_id: GenRandom::generate(rng),
+                len: GenRandom::generate(rng),
+                first_valuator: GenRandom::generate(rng),
+                resolution_values: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(15286755877133017088);
+        let value = DeviceResolutionCtl::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -8175,6 +10460,38 @@ impl Serialize for DeviceAbsCalibCtl {
         self.button_threshold.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod device_abs_calib_ctl {
+    use super::DeviceAbsCalibCtl;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for DeviceAbsCalibCtl {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                control_id: GenRandom::generate(rng),
+                len: GenRandom::generate(rng),
+                min_x: GenRandom::generate(rng),
+                max_x: GenRandom::generate(rng),
+                min_y: GenRandom::generate(rng),
+                max_y: GenRandom::generate(rng),
+                flip_x: GenRandom::generate(rng),
+                flip_y: GenRandom::generate(rng),
+                rotation: GenRandom::generate(rng),
+                button_threshold: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(3509212396161267712);
+        let value = DeviceAbsCalibCtl::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -8257,6 +10574,36 @@ impl Serialize for DeviceAbsAreaCtrl {
         self.following.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod device_abs_area_ctrl {
+    use super::DeviceAbsAreaCtrl;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for DeviceAbsAreaCtrl {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                control_id: GenRandom::generate(rng),
+                len: GenRandom::generate(rng),
+                offset_x: GenRandom::generate(rng),
+                offset_y: GenRandom::generate(rng),
+                width: GenRandom::generate(rng),
+                height: GenRandom::generate(rng),
+                screen: GenRandom::generate(rng),
+                following: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(1432943217556016128);
+        let value = DeviceAbsAreaCtrl::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -8301,6 +10648,31 @@ impl Serialize for DeviceCoreCtrl {
         bytes.extend_from_slice(&[0; 3]);
     }
 }
+#[cfg(test)]
+mod device_core_ctrl {
+    use super::DeviceCoreCtrl;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for DeviceCoreCtrl {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                control_id: GenRandom::generate(rng),
+                len: GenRandom::generate(rng),
+                status: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(9451725583311682048);
+        let value = DeviceCoreCtrl::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -8343,6 +10715,31 @@ impl Serialize for DeviceEnableCtrl {
         self.len.serialize_into(bytes);
         self.enable.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 3]);
+    }
+}
+#[cfg(test)]
+mod device_enable_ctrl {
+    use super::DeviceEnableCtrl;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for DeviceEnableCtrl {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                control_id: GenRandom::generate(rng),
+                len: GenRandom::generate(rng),
+                enable: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(5707698105144479744);
+        let value = DeviceEnableCtrl::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -8391,6 +10788,30 @@ impl DeviceCtlDataResolution {
     pub fn num_valuators(&self) -> u8 {
         self.resolution_values.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod device_ctl_data_resolution {
+    use super::DeviceCtlDataResolution;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for DeviceCtlDataResolution {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                first_valuator: GenRandom::generate(rng),
+                resolution_values: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(9941447136651902976);
+        let value = DeviceCtlDataResolution::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -8477,6 +10898,36 @@ impl Serialize for DeviceCtlDataAbsCalib {
         self.button_threshold.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod device_ctl_data_abs_calib {
+    use super::DeviceCtlDataAbsCalib;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for DeviceCtlDataAbsCalib {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                min_x: GenRandom::generate(rng),
+                max_x: GenRandom::generate(rng),
+                min_y: GenRandom::generate(rng),
+                max_y: GenRandom::generate(rng),
+                flip_x: GenRandom::generate(rng),
+                flip_y: GenRandom::generate(rng),
+                rotation: GenRandom::generate(rng),
+                button_threshold: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(14972916642182955008);
+        let value = DeviceCtlDataAbsCalib::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DeviceCtlDataCore {
@@ -8505,6 +10956,29 @@ impl Serialize for DeviceCtlDataCore {
         bytes.reserve(4);
         self.status.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 3]);
+    }
+}
+#[cfg(test)]
+mod device_ctl_data_core {
+    use super::DeviceCtlDataCore;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for DeviceCtlDataCore {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                status: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(1008983116064362496);
+        let value = DeviceCtlDataCore::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -8573,6 +11047,34 @@ impl Serialize for DeviceCtlDataAbsArea {
         self.height.serialize_into(bytes);
         self.screen.serialize_into(bytes);
         self.following.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod device_ctl_data_abs_area {
+    use super::DeviceCtlDataAbsArea;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for DeviceCtlDataAbsArea {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                offset_x: GenRandom::generate(rng),
+                offset_y: GenRandom::generate(rng),
+                width: GenRandom::generate(rng),
+                height: GenRandom::generate(rng),
+                screen: GenRandom::generate(rng),
+                following: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(10309047854618501120);
+        let value = DeviceCtlDataAbsArea::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -8703,6 +11205,33 @@ impl DeviceCtlData {
         }
     }
 }
+#[cfg(test)]
+mod device_ctl_data {
+    use super::DeviceCtlData;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for DeviceCtlData {
+        fn generate(rng: &Rng) -> Self {
+            match rng.usize(..5) {
+                0 => Self::Resolution(GenRandom::generate(rng)),
+                1 => Self::AbsCalib(GenRandom::generate(rng)),
+                2 => Self::Core(GenRandom::generate(rng)),
+                3 => Self::Enable(GenRandom::generate(rng)),
+                _ => Self::AbsArea(GenRandom::generate(rng)),
+            }
+        }
+    }
+    fn generate_values(rng: &Rng) -> alloc::vec::Vec<DeviceCtlData> {
+        alloc::vec![
+            DeviceCtlData::Resolution(GenRandom::generate(rng)),
+            DeviceCtlData::AbsCalib(GenRandom::generate(rng)),
+            DeviceCtlData::Core(GenRandom::generate(rng)),
+            DeviceCtlData::Enable(GenRandom::generate(rng)),
+            DeviceCtlData::AbsArea(GenRandom::generate(rng)),
+        ]
+    }
+}
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -8732,6 +11261,30 @@ impl Serialize for DeviceCtl {
         control_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.data.serialize_into(bytes, control_id);
+    }
+}
+#[cfg(test)]
+mod device_ctl {
+    use super::DeviceCtl;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for DeviceCtl {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                len: GenRandom::generate(rng),
+                data: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(714191551897380480);
+        let value = DeviceCtl::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -8883,6 +11436,32 @@ impl Serialize for ChangeDeviceControlReply {
         bytes.extend_from_slice(&[0; 23]);
     }
 }
+#[cfg(test)]
+mod change_device_control_reply {
+    use super::ChangeDeviceControlReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for ChangeDeviceControlReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                xi_reply_type: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                status: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(10658840133124489216);
+        let value = ChangeDeviceControlReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the ListDeviceProperties request
 pub const LIST_DEVICE_PROPERTIES_REQUEST: u8 = 36;
@@ -9002,6 +11581,32 @@ impl ListDevicePropertiesReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod list_device_properties_reply {
+    use super::ListDevicePropertiesReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for ListDevicePropertiesReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                xi_reply_type: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                atoms: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(15993096344826806272);
+        let value = ListDevicePropertiesReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -9061,6 +11666,18 @@ impl core::fmt::Debug for PropertyFormat  {
             (Self::M32_BITS.0.into(), "M32_BITS", "M32Bits"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for PropertyFormat {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::M8_BITS.0,
+            Self::M16_BITS.0,
+            Self::M32_BITS.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
     }
 }
 
@@ -9180,6 +11797,29 @@ impl ChangeDevicePropertyAux {
             ChangeDevicePropertyAux::Data32(_) => u8::from(PropertyFormat::M32_BITS),
             ChangeDevicePropertyAux::InvalidValue(switch_expr) => *switch_expr,
         }
+    }
+}
+#[cfg(test)]
+mod change_device_property_aux {
+    use super::ChangeDevicePropertyAux;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for ChangeDevicePropertyAux {
+        fn generate(rng: &Rng) -> Self {
+            match rng.usize(..3) {
+                0 => Self::Data8(GenRandom::generate(rng)),
+                1 => Self::Data16(GenRandom::generate(rng)),
+                _ => Self::Data32(GenRandom::generate(rng)),
+            }
+        }
+    }
+    fn generate_values(rng: &Rng) -> alloc::vec::Vec<ChangeDevicePropertyAux> {
+        alloc::vec![
+            ChangeDevicePropertyAux::Data8(GenRandom::generate(rng)),
+            ChangeDevicePropertyAux::Data16(GenRandom::generate(rng)),
+            ChangeDevicePropertyAux::Data32(GenRandom::generate(rng)),
+        ]
     }
 }
 
@@ -9558,6 +12198,29 @@ impl GetDevicePropertyItems {
         }
     }
 }
+#[cfg(test)]
+mod get_device_property_items {
+    use super::GetDevicePropertyItems;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetDevicePropertyItems {
+        fn generate(rng: &Rng) -> Self {
+            match rng.usize(..3) {
+                0 => Self::Data8(GenRandom::generate(rng)),
+                1 => Self::Data16(GenRandom::generate(rng)),
+                _ => Self::Data32(GenRandom::generate(rng)),
+            }
+        }
+    }
+    fn generate_values(rng: &Rng) -> alloc::vec::Vec<GetDevicePropertyItems> {
+        alloc::vec![
+            GetDevicePropertyItems::Data8(GenRandom::generate(rng)),
+            GetDevicePropertyItems::Data16(GenRandom::generate(rng)),
+            GetDevicePropertyItems::Data32(GenRandom::generate(rng)),
+        ]
+    }
+}
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -9617,6 +12280,36 @@ impl Serialize for GetDevicePropertyReply {
         self.device_id.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 10]);
         self.items.serialize_into(bytes, format, self.num_items);
+    }
+}
+#[cfg(test)]
+mod get_device_property_reply {
+    use super::GetDevicePropertyReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetDevicePropertyReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                xi_reply_type: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                type_: GenRandom::generate(rng),
+                bytes_after: GenRandom::generate(rng),
+                num_items: GenRandom::generate(rng),
+                device_id: GenRandom::generate(rng),
+                items: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(5555853434759938048);
+        let value = GetDevicePropertyReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -9690,6 +12383,17 @@ impl core::fmt::Debug for Device  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for Device {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::ALL.0,
+            Self::ALL_MASTER.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -9729,6 +12433,32 @@ impl Serialize for GroupInfo {
         self.latched.serialize_into(bytes);
         self.locked.serialize_into(bytes);
         self.effective.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod group_info {
+    use super::GroupInfo;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GroupInfo {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                base: GenRandom::generate(rng),
+                latched: GenRandom::generate(rng),
+                locked: GenRandom::generate(rng),
+                effective: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(1070357259881669760);
+        let value = GroupInfo::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -9782,6 +12512,32 @@ impl Serialize for ModifierInfo {
         self.latched.serialize_into(bytes);
         self.locked.serialize_into(bytes);
         self.effective.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod modifier_info {
+    use super::ModifierInfo;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for ModifierInfo {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                base: GenRandom::generate(rng),
+                latched: GenRandom::generate(rng),
+                locked: GenRandom::generate(rng),
+                effective: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(15320974152793160128);
+        let value = ModifierInfo::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -9935,6 +12691,40 @@ impl XIQueryPointerReply {
     pub fn buttons_len(&self) -> u16 {
         self.buttons.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod xi_query_pointer_reply {
+    use super::XIQueryPointerReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for XIQueryPointerReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                root: GenRandom::generate(rng),
+                child: GenRandom::generate(rng),
+                root_x: GenRandom::generate(rng),
+                root_y: GenRandom::generate(rng),
+                win_x: GenRandom::generate(rng),
+                win_y: GenRandom::generate(rng),
+                same_screen: GenRandom::generate(rng),
+                mods: GenRandom::generate(rng),
+                group: GenRandom::generate(rng),
+                buttons: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(2281982500122656768);
+        let value = XIQueryPointerReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -10178,6 +12968,19 @@ impl core::fmt::Debug for HierarchyChangeType  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for HierarchyChangeType {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::ADD_MASTER.0,
+            Self::REMOVE_MASTER.0,
+            Self::ATTACH_SLAVE.0,
+            Self::DETACH_SLAVE.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -10235,6 +13038,17 @@ impl core::fmt::Debug for ChangeMode  {
             (Self::FLOAT.0.into(), "FLOAT", "Float"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for ChangeMode {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::ATTACH.0,
+            Self::FLOAT.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
     }
 }
 
@@ -10300,6 +13114,33 @@ impl AddMaster {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod add_master {
+    use super::AddMaster;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for AddMaster {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                type_: GenRandom::generate(rng),
+                len: GenRandom::generate(rng),
+                send_core: GenRandom::generate(rng),
+                enable: GenRandom::generate(rng),
+                name: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(745689230286000000);
+        let value = AddMaster::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -10361,6 +13202,34 @@ impl Serialize for RemoveMaster {
         self.return_keyboard.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod remove_master {
+    use super::RemoveMaster;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for RemoveMaster {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                type_: GenRandom::generate(rng),
+                len: GenRandom::generate(rng),
+                deviceid: GenRandom::generate(rng),
+                return_mode: GenRandom::generate(rng),
+                return_pointer: GenRandom::generate(rng),
+                return_keyboard: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(16717092684521509856);
+        let value = RemoveMaster::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -10407,6 +13276,32 @@ impl Serialize for AttachSlave {
         self.master.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod attach_slave {
+    use super::AttachSlave;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for AttachSlave {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                type_: GenRandom::generate(rng),
+                len: GenRandom::generate(rng),
+                deviceid: GenRandom::generate(rng),
+                master: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(13137531740200494080);
+        let value = AttachSlave::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -10449,6 +13344,31 @@ impl Serialize for DetachSlave {
         self.len.serialize_into(bytes);
         self.deviceid.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 2]);
+    }
+}
+#[cfg(test)]
+mod detach_slave {
+    use super::DetachSlave;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for DetachSlave {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                type_: GenRandom::generate(rng),
+                len: GenRandom::generate(rng),
+                deviceid: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(18034017678315209728);
+        let value = DetachSlave::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -10507,6 +13427,31 @@ impl HierarchyChangeDataAddMaster {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod hierarchy_change_data_add_master {
+    use super::HierarchyChangeDataAddMaster;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for HierarchyChangeDataAddMaster {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                send_core: GenRandom::generate(rng),
+                enable: GenRandom::generate(rng),
+                name: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(2437369091569221632);
+        let value = HierarchyChangeDataAddMaster::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct HierarchyChangeDataRemoveMaster {
@@ -10554,6 +13499,32 @@ impl Serialize for HierarchyChangeDataRemoveMaster {
         self.return_keyboard.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod hierarchy_change_data_remove_master {
+    use super::HierarchyChangeDataRemoveMaster;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for HierarchyChangeDataRemoveMaster {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                deviceid: GenRandom::generate(rng),
+                return_mode: GenRandom::generate(rng),
+                return_pointer: GenRandom::generate(rng),
+                return_keyboard: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(9958354662981632000);
+        let value = HierarchyChangeDataRemoveMaster::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct HierarchyChangeDataAttachSlave {
@@ -10586,6 +13557,30 @@ impl Serialize for HierarchyChangeDataAttachSlave {
         self.master.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod hierarchy_change_data_attach_slave {
+    use super::HierarchyChangeDataAttachSlave;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for HierarchyChangeDataAttachSlave {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                deviceid: GenRandom::generate(rng),
+                master: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(14361225236953694208);
+        let value = HierarchyChangeDataAttachSlave::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct HierarchyChangeDataDetachSlave {
@@ -10614,6 +13609,29 @@ impl Serialize for HierarchyChangeDataDetachSlave {
         bytes.reserve(4);
         self.deviceid.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 2]);
+    }
+}
+#[cfg(test)]
+mod hierarchy_change_data_detach_slave {
+    use super::HierarchyChangeDataDetachSlave;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for HierarchyChangeDataDetachSlave {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                deviceid: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(11750380126167105536);
+        let value = HierarchyChangeDataDetachSlave::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -10723,6 +13741,31 @@ impl HierarchyChangeData {
         }
     }
 }
+#[cfg(test)]
+mod hierarchy_change_data {
+    use super::HierarchyChangeData;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for HierarchyChangeData {
+        fn generate(rng: &Rng) -> Self {
+            match rng.usize(..4) {
+                0 => Self::AddMaster(GenRandom::generate(rng)),
+                1 => Self::RemoveMaster(GenRandom::generate(rng)),
+                2 => Self::AttachSlave(GenRandom::generate(rng)),
+                _ => Self::DetachSlave(GenRandom::generate(rng)),
+            }
+        }
+    }
+    fn generate_values(rng: &Rng) -> alloc::vec::Vec<HierarchyChangeData> {
+        alloc::vec![
+            HierarchyChangeData::AddMaster(GenRandom::generate(rng)),
+            HierarchyChangeData::RemoveMaster(GenRandom::generate(rng)),
+            HierarchyChangeData::AttachSlave(GenRandom::generate(rng)),
+            HierarchyChangeData::DetachSlave(GenRandom::generate(rng)),
+        ]
+    }
+}
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -10752,6 +13795,30 @@ impl Serialize for HierarchyChange {
         type_.serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.data.serialize_into(bytes, type_);
+    }
+}
+#[cfg(test)]
+mod hierarchy_change {
+    use super::HierarchyChange;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for HierarchyChange {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                len: GenRandom::generate(rng),
+                data: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(14652501235968118784);
+        let value = HierarchyChange::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -11022,6 +14089,32 @@ impl Serialize for XIGetClientPointerReply {
         bytes.extend_from_slice(&[0; 20]);
     }
 }
+#[cfg(test)]
+mod xi_get_client_pointer_reply {
+    use super::XIGetClientPointerReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for XIGetClientPointerReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                set: GenRandom::generate(rng),
+                deviceid: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(2207258019937386496);
+        let value = XIGetClientPointerReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -11118,6 +14211,41 @@ impl core::fmt::Debug for XIEventMask  {
     }
 }
 bitmask_binop!(XIEventMask, u32);
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for XIEventMask {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::DEVICE_CHANGED.0,
+            Self::KEY_PRESS.0,
+            Self::KEY_RELEASE.0,
+            Self::BUTTON_PRESS.0,
+            Self::BUTTON_RELEASE.0,
+            Self::MOTION.0,
+            Self::ENTER.0,
+            Self::LEAVE.0,
+            Self::FOCUS_IN.0,
+            Self::FOCUS_OUT.0,
+            Self::HIERARCHY.0,
+            Self::PROPERTY.0,
+            Self::RAW_KEY_PRESS.0,
+            Self::RAW_KEY_RELEASE.0,
+            Self::RAW_BUTTON_PRESS.0,
+            Self::RAW_BUTTON_RELEASE.0,
+            Self::RAW_MOTION.0,
+            Self::TOUCH_BEGIN.0,
+            Self::TOUCH_UPDATE.0,
+            Self::TOUCH_END.0,
+            Self::TOUCH_OWNERSHIP.0,
+            Self::RAW_TOUCH_BEGIN.0,
+            Self::RAW_TOUCH_UPDATE.0,
+            Self::RAW_TOUCH_END.0,
+            Self::BARRIER_HIT.0,
+            Self::BARRIER_LEAVE.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -11162,6 +14290,30 @@ impl EventMask {
     pub fn mask_len(&self) -> u16 {
         self.mask.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod event_mask {
+    use super::EventMask;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for EventMask {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                deviceid: GenRandom::generate(rng),
+                mask: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(964377842940296400);
+        let value = EventMask::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -11381,6 +14533,32 @@ impl Serialize for XIQueryVersionReply {
         bytes.extend_from_slice(&[0; 20]);
     }
 }
+#[cfg(test)]
+mod xi_query_version_reply {
+    use super::XIQueryVersionReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for XIQueryVersionReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                major_version: GenRandom::generate(rng),
+                minor_version: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(7421350705950867456);
+        let value = XIQueryVersionReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -11440,6 +14618,20 @@ impl core::fmt::Debug for DeviceClassType  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for DeviceClassType {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::KEY.0,
+            Self::BUTTON.0,
+            Self::VALUATOR.0,
+            Self::SCROLL.0,
+            Self::TOUCH.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -11497,6 +14689,20 @@ impl core::fmt::Debug for DeviceType  {
             (Self::FLOATING_SLAVE.0.into(), "FLOATING_SLAVE", "FloatingSlave"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for DeviceType {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::MASTER_POINTER.0,
+            Self::MASTER_KEYBOARD.0,
+            Self::SLAVE_POINTER.0,
+            Self::SLAVE_KEYBOARD.0,
+            Self::FLOATING_SLAVE.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
     }
 }
 
@@ -11559,6 +14765,17 @@ impl core::fmt::Debug for ScrollFlags  {
     }
 }
 bitmask_binop!(ScrollFlags, u8);
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for ScrollFlags {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::NO_EMULATION.0,
+            Self::PREFERRED.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -11610,6 +14827,17 @@ impl core::fmt::Debug for ScrollType  {
             (Self::HORIZONTAL.0.into(), "HORIZONTAL", "Horizontal"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for ScrollType {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::VERTICAL.0,
+            Self::HORIZONTAL.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
     }
 }
 
@@ -11671,6 +14899,17 @@ impl core::fmt::Debug for TouchMode  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for TouchMode {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::DIRECT.0,
+            Self::DEPENDENT.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -11728,6 +14967,33 @@ impl ButtonClass {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod button_class {
+    use super::ButtonClass;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for ButtonClass {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                type_: GenRandom::generate(rng),
+                len: GenRandom::generate(rng),
+                sourceid: GenRandom::generate(rng),
+                state: GenRandom::generate(rng),
+                labels: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(7780349420175092992);
+        let value = ButtonClass::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -11779,6 +15045,32 @@ impl KeyClass {
     pub fn num_keys(&self) -> u16 {
         self.keys.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod key_class {
+    use super::KeyClass;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for KeyClass {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                type_: GenRandom::generate(rng),
+                len: GenRandom::generate(rng),
+                sourceid: GenRandom::generate(rng),
+                keys: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(8508127327177500);
+        let value = KeyClass::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -11858,6 +15150,35 @@ impl Serialize for ScrollClass {
         self.increment.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod scroll_class {
+    use super::ScrollClass;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for ScrollClass {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                type_: GenRandom::generate(rng),
+                len: GenRandom::generate(rng),
+                sourceid: GenRandom::generate(rng),
+                number: GenRandom::generate(rng),
+                scroll_type: GenRandom::generate(rng),
+                flags: GenRandom::generate(rng),
+                increment: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(5313910774664992640);
+        let value = ScrollClass::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -11907,6 +15228,33 @@ impl Serialize for TouchClass {
         self.sourceid.serialize_into(bytes);
         u8::from(self.mode).serialize_into(bytes);
         self.num_touches.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod touch_class {
+    use super::TouchClass;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for TouchClass {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                type_: GenRandom::generate(rng),
+                len: GenRandom::generate(rng),
+                sourceid: GenRandom::generate(rng),
+                mode: GenRandom::generate(rng),
+                num_touches: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(12027459104568507520);
+        let value = TouchClass::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -12018,6 +15366,38 @@ impl Serialize for ValuatorClass {
         bytes.extend_from_slice(&[0; 3]);
     }
 }
+#[cfg(test)]
+mod valuator_class {
+    use super::ValuatorClass;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for ValuatorClass {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                type_: GenRandom::generate(rng),
+                len: GenRandom::generate(rng),
+                sourceid: GenRandom::generate(rng),
+                number: GenRandom::generate(rng),
+                label: GenRandom::generate(rng),
+                min: GenRandom::generate(rng),
+                max: GenRandom::generate(rng),
+                value: GenRandom::generate(rng),
+                resolution: GenRandom::generate(rng),
+                mode: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(1142443798316963584);
+        let value = ValuatorClass::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -12058,6 +15438,29 @@ impl DeviceClassDataKey {
     pub fn num_keys(&self) -> u16 {
         self.keys.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod device_class_data_key {
+    use super::DeviceClassDataKey;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for DeviceClassDataKey {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                keys: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(2224012988422829568);
+        let value = DeviceClassDataKey::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -12103,6 +15506,30 @@ impl DeviceClassDataButton {
     pub fn num_buttons(&self) -> u16 {
         self.labels.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod device_class_data_button {
+    use super::DeviceClassDataButton;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for DeviceClassDataButton {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                state: GenRandom::generate(rng),
+                labels: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(6702323549547560960);
+        let value = DeviceClassDataButton::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -12194,6 +15621,35 @@ impl Serialize for DeviceClassDataValuator {
         bytes.extend_from_slice(&[0; 3]);
     }
 }
+#[cfg(test)]
+mod device_class_data_valuator {
+    use super::DeviceClassDataValuator;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for DeviceClassDataValuator {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                number: GenRandom::generate(rng),
+                label: GenRandom::generate(rng),
+                min: GenRandom::generate(rng),
+                max: GenRandom::generate(rng),
+                value: GenRandom::generate(rng),
+                resolution: GenRandom::generate(rng),
+                mode: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(5230139036893806592);
+        let value = DeviceClassDataValuator::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DeviceClassDataScroll {
@@ -12251,6 +15707,32 @@ impl Serialize for DeviceClassDataScroll {
         self.increment.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod device_class_data_scroll {
+    use super::DeviceClassDataScroll;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for DeviceClassDataScroll {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                number: GenRandom::generate(rng),
+                scroll_type: GenRandom::generate(rng),
+                flags: GenRandom::generate(rng),
+                increment: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(17180849776415522816);
+        let value = DeviceClassDataScroll::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DeviceClassDataTouch {
@@ -12280,6 +15762,30 @@ impl Serialize for DeviceClassDataTouch {
         bytes.reserve(2);
         u8::from(self.mode).serialize_into(bytes);
         self.num_touches.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod device_class_data_touch {
+    use super::DeviceClassDataTouch;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for DeviceClassDataTouch {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                mode: GenRandom::generate(rng),
+                num_touches: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(1907799378990022656);
+        let value = DeviceClassDataTouch::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -12404,6 +15910,33 @@ impl DeviceClassData {
         }
     }
 }
+#[cfg(test)]
+mod device_class_data {
+    use super::DeviceClassData;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for DeviceClassData {
+        fn generate(rng: &Rng) -> Self {
+            match rng.usize(..5) {
+                0 => Self::Key(GenRandom::generate(rng)),
+                1 => Self::Button(GenRandom::generate(rng)),
+                2 => Self::Valuator(GenRandom::generate(rng)),
+                3 => Self::Scroll(GenRandom::generate(rng)),
+                _ => Self::Touch(GenRandom::generate(rng)),
+            }
+        }
+    }
+    fn generate_values(rng: &Rng) -> alloc::vec::Vec<DeviceClassData> {
+        alloc::vec![
+            DeviceClassData::Key(GenRandom::generate(rng)),
+            DeviceClassData::Button(GenRandom::generate(rng)),
+            DeviceClassData::Valuator(GenRandom::generate(rng)),
+            DeviceClassData::Scroll(GenRandom::generate(rng)),
+            DeviceClassData::Touch(GenRandom::generate(rng)),
+        ]
+    }
+}
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -12436,6 +15969,31 @@ impl Serialize for DeviceClass {
         self.len.serialize_into(bytes);
         self.sourceid.serialize_into(bytes);
         self.data.serialize_into(bytes, type_);
+    }
+}
+#[cfg(test)]
+mod device_class {
+    use super::DeviceClass;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for DeviceClass {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                len: GenRandom::generate(rng),
+                sourceid: GenRandom::generate(rng),
+                data: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(2920929234700824352);
+        let value = DeviceClass::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -12520,6 +16078,34 @@ impl XIDeviceInfo {
     pub fn name_len(&self) -> u16 {
         self.name.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod xi_device_info {
+    use super::XIDeviceInfo;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for XIDeviceInfo {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                deviceid: GenRandom::generate(rng),
+                type_: GenRandom::generate(rng),
+                attachment: GenRandom::generate(rng),
+                enabled: GenRandom::generate(rng),
+                name: GenRandom::generate(rng),
+                classes: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(1369158972028139776);
+        let value = XIDeviceInfo::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -12638,6 +16224,31 @@ impl XIQueryDeviceReply {
     pub fn num_infos(&self) -> u16 {
         self.infos.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod xi_query_device_reply {
+    use super::XIQueryDeviceReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for XIQueryDeviceReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                infos: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(8468985576548384768);
+        let value = XIQueryDeviceReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -12845,6 +16456,31 @@ impl Serialize for XIGetFocusReply {
         bytes.extend_from_slice(&[0; 20]);
     }
 }
+#[cfg(test)]
+mod xi_get_focus_reply {
+    use super::XIGetFocusReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for XIGetFocusReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                focus: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(2029643296113401856);
+        let value = XIGetFocusReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -12914,6 +16550,17 @@ impl core::fmt::Debug for GrabOwner  {
             (Self::OWNER.0.into(), "OWNER", "Owner"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for GrabOwner {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::NO_OWNER.0,
+            Self::OWNER.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
     }
 }
 
@@ -13118,6 +16765,31 @@ impl Serialize for XIGrabDeviceReply {
         bytes.extend_from_slice(&[0; 23]);
     }
 }
+#[cfg(test)]
+mod xi_grab_device_reply {
+    use super::XIGrabDeviceReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for XIGrabDeviceReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                status: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(11816004202391830528);
+        let value = XIGrabDeviceReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the XIUngrabDevice request
 pub const XI_UNGRAB_DEVICE_REQUEST: u8 = 52;
@@ -13249,6 +16921,23 @@ impl core::fmt::Debug for EventMode  {
             (Self::REJECT_TOUCH.0.into(), "REJECT_TOUCH", "RejectTouch"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for EventMode {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::ASYNC_DEVICE.0,
+            Self::SYNC_DEVICE.0,
+            Self::REPLAY_DEVICE.0,
+            Self::ASYNC_PAIRED_DEVICE.0,
+            Self::ASYNC_PAIR.0,
+            Self::SYNC_PAIR.0,
+            Self::ACCEPT_TOUCH.0,
+            Self::REJECT_TOUCH.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
     }
 }
 
@@ -13395,6 +17084,18 @@ impl core::fmt::Debug for GrabMode22  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for GrabMode22 {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::SYNC.0,
+            Self::ASYNC.0,
+            Self::TOUCH.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -13460,6 +17161,20 @@ impl core::fmt::Debug for GrabType  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for GrabType {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::BUTTON.0,
+            Self::KEYCODE.0,
+            Self::ENTER.0,
+            Self::FOCUS_IN.0,
+            Self::TOUCH_BEGIN.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -13506,6 +17221,16 @@ impl core::fmt::Debug for ModifierMask  {
     }
 }
 bitmask_binop!(ModifierMask, u32);
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for ModifierMask {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::ANY.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -13544,6 +17269,30 @@ impl Serialize for GrabModifierInfo {
         self.modifiers.serialize_into(bytes);
         u8::from(self.status).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 3]);
+    }
+}
+#[cfg(test)]
+mod grab_modifier_info {
+    use super::GrabModifierInfo;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GrabModifierInfo {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                modifiers: GenRandom::generate(rng),
+                status: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(13050813650016786688);
+        let value = GrabModifierInfo::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -13756,6 +17505,31 @@ impl XIPassiveGrabDeviceReply {
     pub fn num_modifiers(&self) -> u16 {
         self.modifiers.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod xi_passive_grab_device_reply {
+    use super::XIPassiveGrabDeviceReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for XIPassiveGrabDeviceReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                modifiers: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(12173974932621885440);
+        let value = XIPassiveGrabDeviceReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -13975,6 +17749,31 @@ impl XIListPropertiesReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod xi_list_properties_reply {
+    use super::XIListPropertiesReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for XIListPropertiesReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                properties: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(17411590907165147136);
+        let value = XIListPropertiesReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -14092,6 +17891,29 @@ impl XIChangePropertyAux {
             XIChangePropertyAux::Data32(_) => u8::from(PropertyFormat::M32_BITS),
             XIChangePropertyAux::InvalidValue(switch_expr) => *switch_expr,
         }
+    }
+}
+#[cfg(test)]
+mod xi_change_property_aux {
+    use super::XIChangePropertyAux;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for XIChangePropertyAux {
+        fn generate(rng: &Rng) -> Self {
+            match rng.usize(..3) {
+                0 => Self::Data8(GenRandom::generate(rng)),
+                1 => Self::Data16(GenRandom::generate(rng)),
+                _ => Self::Data32(GenRandom::generate(rng)),
+            }
+        }
+    }
+    fn generate_values(rng: &Rng) -> alloc::vec::Vec<XIChangePropertyAux> {
+        alloc::vec![
+            XIChangePropertyAux::Data8(GenRandom::generate(rng)),
+            XIChangePropertyAux::Data16(GenRandom::generate(rng)),
+            XIChangePropertyAux::Data32(GenRandom::generate(rng)),
+        ]
     }
 }
 
@@ -14469,6 +18291,29 @@ impl XIGetPropertyItems {
         }
     }
 }
+#[cfg(test)]
+mod xi_get_property_items {
+    use super::XIGetPropertyItems;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for XIGetPropertyItems {
+        fn generate(rng: &Rng) -> Self {
+            match rng.usize(..3) {
+                0 => Self::Data8(GenRandom::generate(rng)),
+                1 => Self::Data16(GenRandom::generate(rng)),
+                _ => Self::Data32(GenRandom::generate(rng)),
+            }
+        }
+    }
+    fn generate_values(rng: &Rng) -> alloc::vec::Vec<XIGetPropertyItems> {
+        alloc::vec![
+            XIGetPropertyItems::Data8(GenRandom::generate(rng)),
+            XIGetPropertyItems::Data16(GenRandom::generate(rng)),
+            XIGetPropertyItems::Data32(GenRandom::generate(rng)),
+        ]
+    }
+}
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -14524,6 +18369,34 @@ impl Serialize for XIGetPropertyReply {
         format.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 11]);
         self.items.serialize_into(bytes, format, self.num_items);
+    }
+}
+#[cfg(test)]
+mod xi_get_property_reply {
+    use super::XIGetPropertyReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for XIGetPropertyReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                type_: GenRandom::generate(rng),
+                bytes_after: GenRandom::generate(rng),
+                num_items: GenRandom::generate(rng),
+                items: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(2704719749954142208);
+        let value = XIGetPropertyReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -14643,6 +18516,31 @@ impl XIGetSelectedEventsReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod xi_get_selected_events_reply {
+    use super::XIGetSelectedEventsReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for XIGetSelectedEventsReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                masks: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(11444888129673101312);
+        let value = XIGetSelectedEventsReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -14688,6 +18586,31 @@ impl Serialize for BarrierReleasePointerInfo {
         bytes.extend_from_slice(&[0; 2]);
         self.barrier.serialize_into(bytes);
         self.eventid.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod barrier_release_pointer_info {
+    use super::BarrierReleasePointerInfo;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for BarrierReleasePointerInfo {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                deviceid: GenRandom::generate(rng),
+                barrier: GenRandom::generate(rng),
+                eventid: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(169789029248532480);
+        let value = BarrierReleasePointerInfo::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -14860,6 +18783,35 @@ impl Serialize for DeviceValuatorEvent {
         self.valuators.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod device_valuator_event {
+    use super::DeviceValuatorEvent;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for DeviceValuatorEvent {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                response_type: GenRandom::generate(rng),
+                device_id: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                device_state: GenRandom::generate(rng),
+                num_valuators: GenRandom::generate(rng),
+                first_valuator: GenRandom::generate(rng),
+                valuators: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(1718806423994884096);
+        let value = DeviceValuatorEvent::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 impl From<&DeviceValuatorEvent> for [u8; 32] {
     fn from(input: &DeviceValuatorEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -14973,6 +18925,16 @@ impl core::fmt::Debug for MoreEventsMask  {
     }
 }
 bitmask_binop!(MoreEventsMask, u8);
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for MoreEventsMask {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::MORE_EVENTS.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 /// Opcode for the DeviceKeyPress event
 pub const DEVICE_KEY_PRESS_EVENT: u8 = 1;
@@ -15086,6 +19048,42 @@ impl Serialize for DeviceKeyPressEvent {
         self.state.serialize_into(bytes);
         self.same_screen.serialize_into(bytes);
         self.device_id.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod device_key_press_event {
+    use super::DeviceKeyPressEvent;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for DeviceKeyPressEvent {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                response_type: GenRandom::generate(rng),
+                detail: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                time: GenRandom::generate(rng),
+                root: GenRandom::generate(rng),
+                event: GenRandom::generate(rng),
+                child: GenRandom::generate(rng),
+                root_x: GenRandom::generate(rng),
+                root_y: GenRandom::generate(rng),
+                event_x: GenRandom::generate(rng),
+                event_y: GenRandom::generate(rng),
+                state: GenRandom::generate(rng),
+                same_screen: GenRandom::generate(rng),
+                device_id: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(726094504554491904);
+        let value = DeviceKeyPressEvent::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 impl From<&DeviceKeyPressEvent> for [u8; 32] {
@@ -15252,6 +19250,35 @@ impl Serialize for DeviceFocusInEvent {
         bytes.extend_from_slice(&[0; 18]);
     }
 }
+#[cfg(test)]
+mod device_focus_in_event {
+    use super::DeviceFocusInEvent;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for DeviceFocusInEvent {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                response_type: GenRandom::generate(rng),
+                detail: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                time: GenRandom::generate(rng),
+                window: GenRandom::generate(rng),
+                mode: GenRandom::generate(rng),
+                device_id: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(5443457177368555008);
+        let value = DeviceFocusInEvent::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 impl From<&DeviceFocusInEvent> for [u8; 32] {
     fn from(input: &DeviceFocusInEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -15380,6 +19407,20 @@ impl core::fmt::Debug for ClassesReportedMask  {
     }
 }
 bitmask_binop!(ClassesReportedMask, u8);
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for ClassesReportedMask {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::OUT_OF_PROXIMITY.0,
+            Self::DEVICE_MODE_ABSOLUTE.0,
+            Self::REPORTING_VALUATORS.0,
+            Self::REPORTING_BUTTONS.0,
+            Self::REPORTING_KEYS.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 /// Opcode for the DeviceStateNotify event
 pub const DEVICE_STATE_NOTIFY_EVENT: u8 = 10;
@@ -15490,6 +19531,39 @@ impl Serialize for DeviceStateNotifyEvent {
         bytes.extend_from_slice(&self.buttons);
         bytes.extend_from_slice(&self.keys);
         self.valuators.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod device_state_notify_event {
+    use super::DeviceStateNotifyEvent;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for DeviceStateNotifyEvent {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                response_type: GenRandom::generate(rng),
+                device_id: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                time: GenRandom::generate(rng),
+                num_keys: GenRandom::generate(rng),
+                num_buttons: GenRandom::generate(rng),
+                num_valuators: GenRandom::generate(rng),
+                classes_reported: GenRandom::generate(rng),
+                buttons: GenRandom::generate(rng),
+                keys: GenRandom::generate(rng),
+                valuators: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(10988796715819892736);
+        let value = DeviceStateNotifyEvent::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 impl From<&DeviceStateNotifyEvent> for [u8; 32] {
@@ -15638,6 +19712,35 @@ impl Serialize for DeviceMappingNotifyEvent {
         bytes.extend_from_slice(&[0; 20]);
     }
 }
+#[cfg(test)]
+mod device_mapping_notify_event {
+    use super::DeviceMappingNotifyEvent;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for DeviceMappingNotifyEvent {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                response_type: GenRandom::generate(rng),
+                device_id: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                request: GenRandom::generate(rng),
+                first_keycode: GenRandom::generate(rng),
+                count: GenRandom::generate(rng),
+                time: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(1599943193488523264);
+        let value = DeviceMappingNotifyEvent::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 impl From<&DeviceMappingNotifyEvent> for [u8; 32] {
     fn from(input: &DeviceMappingNotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -15747,6 +19850,17 @@ impl core::fmt::Debug for ChangeDevice  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for ChangeDevice {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::NEW_POINTER.0,
+            Self::NEW_KEYBOARD.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 /// Opcode for the ChangeDeviceNotify event
 pub const CHANGE_DEVICE_NOTIFY_EVENT: u8 = 12;
@@ -15827,6 +19941,33 @@ impl Serialize for ChangeDeviceNotifyEvent {
         self.time.serialize_into(bytes);
         u8::from(self.request).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 23]);
+    }
+}
+#[cfg(test)]
+mod change_device_notify_event {
+    use super::ChangeDeviceNotifyEvent;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for ChangeDeviceNotifyEvent {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                response_type: GenRandom::generate(rng),
+                device_id: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                time: GenRandom::generate(rng),
+                request: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(9866718034532925440);
+        let value = ChangeDeviceNotifyEvent::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 impl From<&ChangeDeviceNotifyEvent> for [u8; 32] {
@@ -15952,6 +20093,32 @@ impl Serialize for DeviceKeyStateNotifyEvent {
         bytes.extend_from_slice(&self.keys);
     }
 }
+#[cfg(test)]
+mod device_key_state_notify_event {
+    use super::DeviceKeyStateNotifyEvent;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for DeviceKeyStateNotifyEvent {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                response_type: GenRandom::generate(rng),
+                device_id: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                keys: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(4958348687035301888);
+        let value = DeviceKeyStateNotifyEvent::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 impl From<&DeviceKeyStateNotifyEvent> for [u8; 32] {
     fn from(input: &DeviceKeyStateNotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -16073,6 +20240,32 @@ impl Serialize for DeviceButtonStateNotifyEvent {
         bytes.extend_from_slice(&self.buttons);
     }
 }
+#[cfg(test)]
+mod device_button_state_notify_event {
+    use super::DeviceButtonStateNotifyEvent;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for DeviceButtonStateNotifyEvent {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                response_type: GenRandom::generate(rng),
+                device_id: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                buttons: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(8436103572204027904);
+        let value = DeviceButtonStateNotifyEvent::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 impl From<&DeviceButtonStateNotifyEvent> for [u8; 32] {
     fn from(input: &DeviceButtonStateNotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -16186,6 +20379,21 @@ impl core::fmt::Debug for DeviceChange  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for DeviceChange {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::ADDED.0,
+            Self::REMOVED.0,
+            Self::ENABLED.0,
+            Self::DISABLED.0,
+            Self::UNRECOVERABLE.0,
+            Self::CONTROL_CHANGED.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 /// Opcode for the DevicePresenceNotify event
 pub const DEVICE_PRESENCE_NOTIFY_EVENT: u8 = 15;
@@ -16272,6 +20480,34 @@ impl Serialize for DevicePresenceNotifyEvent {
         self.device_id.serialize_into(bytes);
         self.control.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 20]);
+    }
+}
+#[cfg(test)]
+mod device_presence_notify_event {
+    use super::DevicePresenceNotifyEvent;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for DevicePresenceNotifyEvent {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                response_type: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                time: GenRandom::generate(rng),
+                devchange: GenRandom::generate(rng),
+                device_id: GenRandom::generate(rng),
+                control: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(10616172630236069888);
+        let value = DevicePresenceNotifyEvent::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 impl From<&DevicePresenceNotifyEvent> for [u8; 32] {
@@ -16409,6 +20645,34 @@ impl Serialize for DevicePropertyNotifyEvent {
         self.device_id.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod device_property_notify_event {
+    use super::DevicePropertyNotifyEvent;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for DevicePropertyNotifyEvent {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                response_type: GenRandom::generate(rng),
+                state: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                time: GenRandom::generate(rng),
+                property: GenRandom::generate(rng),
+                device_id: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(12694692425680027648);
+        let value = DevicePropertyNotifyEvent::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 impl From<&DevicePropertyNotifyEvent> for [u8; 32] {
     fn from(input: &DevicePropertyNotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -16517,6 +20781,17 @@ impl core::fmt::Debug for ChangeReason  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for ChangeReason {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::SLAVE_SWITCH.0,
+            Self::DEVICE_CHANGE.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 /// Opcode for the DeviceChanged event
 pub const DEVICE_CHANGED_EVENT: u16 = 1;
@@ -16596,6 +20871,38 @@ impl DeviceChangedEvent {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod device_changed_event {
+    use super::DeviceChangedEvent;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for DeviceChangedEvent {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                response_type: GenRandom::generate(rng),
+                extension: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                event_type: GenRandom::generate(rng),
+                deviceid: GenRandom::generate(rng),
+                time: GenRandom::generate(rng),
+                sourceid: GenRandom::generate(rng),
+                reason: GenRandom::generate(rng),
+                classes: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(11666426160395804672);
+        let value = DeviceChangedEvent::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -16642,6 +20949,16 @@ impl core::fmt::Debug for KeyEventFlags  {
     }
 }
 bitmask_binop!(KeyEventFlags, u32);
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for KeyEventFlags {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::KEY_REPEAT.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 /// Opcode for the KeyPress event
 pub const KEY_PRESS_EVENT: u16 = 2;
@@ -16773,6 +21090,50 @@ impl KeyPressEvent {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod key_press_event {
+    use super::KeyPressEvent;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for KeyPressEvent {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                response_type: GenRandom::generate(rng),
+                extension: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                event_type: GenRandom::generate(rng),
+                deviceid: GenRandom::generate(rng),
+                time: GenRandom::generate(rng),
+                detail: GenRandom::generate(rng),
+                root: GenRandom::generate(rng),
+                event: GenRandom::generate(rng),
+                child: GenRandom::generate(rng),
+                root_x: GenRandom::generate(rng),
+                root_y: GenRandom::generate(rng),
+                event_x: GenRandom::generate(rng),
+                event_y: GenRandom::generate(rng),
+                sourceid: GenRandom::generate(rng),
+                flags: GenRandom::generate(rng),
+                mods: GenRandom::generate(rng),
+                group: GenRandom::generate(rng),
+                button_mask: GenRandom::generate(rng),
+                valuator_mask: GenRandom::generate(rng),
+                axisvalues: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(3605300988613783040);
+        let value = KeyPressEvent::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the KeyRelease event
 pub const KEY_RELEASE_EVENT: u16 = 3;
@@ -16823,6 +21184,16 @@ impl core::fmt::Debug for PointerEventFlags  {
     }
 }
 bitmask_binop!(PointerEventFlags, u32);
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for PointerEventFlags {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::POINTER_EMULATED.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 /// Opcode for the ButtonPress event
 pub const BUTTON_PRESS_EVENT: u16 = 4;
@@ -16954,6 +21325,50 @@ impl ButtonPressEvent {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod button_press_event {
+    use super::ButtonPressEvent;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for ButtonPressEvent {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                response_type: GenRandom::generate(rng),
+                extension: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                event_type: GenRandom::generate(rng),
+                deviceid: GenRandom::generate(rng),
+                time: GenRandom::generate(rng),
+                detail: GenRandom::generate(rng),
+                root: GenRandom::generate(rng),
+                event: GenRandom::generate(rng),
+                child: GenRandom::generate(rng),
+                root_x: GenRandom::generate(rng),
+                root_y: GenRandom::generate(rng),
+                event_x: GenRandom::generate(rng),
+                event_y: GenRandom::generate(rng),
+                sourceid: GenRandom::generate(rng),
+                flags: GenRandom::generate(rng),
+                mods: GenRandom::generate(rng),
+                group: GenRandom::generate(rng),
+                button_mask: GenRandom::generate(rng),
+                valuator_mask: GenRandom::generate(rng),
+                axisvalues: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(13647151740139503616);
+        let value = ButtonPressEvent::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the ButtonRelease event
 pub const BUTTON_RELEASE_EVENT: u16 = 5;
@@ -17029,6 +21444,21 @@ impl core::fmt::Debug for NotifyMode  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for NotifyMode {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::NORMAL.0,
+            Self::GRAB.0,
+            Self::UNGRAB.0,
+            Self::WHILE_GRABBED.0,
+            Self::PASSIVE_GRAB.0,
+            Self::PASSIVE_UNGRAB.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -17098,6 +21528,23 @@ impl core::fmt::Debug for NotifyDetail  {
             (Self::NONE.0.into(), "NONE", "None"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for NotifyDetail {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::ANCESTOR.0,
+            Self::VIRTUAL.0,
+            Self::INFERIOR.0,
+            Self::NONLINEAR.0,
+            Self::NONLINEAR_VIRTUAL.0,
+            Self::POINTER.0,
+            Self::POINTER_ROOT.0,
+            Self::NONE.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
     }
 }
 
@@ -17214,6 +21661,50 @@ impl EnterEvent {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod enter_event {
+    use super::EnterEvent;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for EnterEvent {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                response_type: GenRandom::generate(rng),
+                extension: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                event_type: GenRandom::generate(rng),
+                deviceid: GenRandom::generate(rng),
+                time: GenRandom::generate(rng),
+                sourceid: GenRandom::generate(rng),
+                mode: GenRandom::generate(rng),
+                detail: GenRandom::generate(rng),
+                root: GenRandom::generate(rng),
+                event: GenRandom::generate(rng),
+                child: GenRandom::generate(rng),
+                root_x: GenRandom::generate(rng),
+                root_y: GenRandom::generate(rng),
+                event_x: GenRandom::generate(rng),
+                event_y: GenRandom::generate(rng),
+                same_screen: GenRandom::generate(rng),
+                focus: GenRandom::generate(rng),
+                mods: GenRandom::generate(rng),
+                group: GenRandom::generate(rng),
+                buttons: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(14138723337778789120);
+        let value = EnterEvent::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the Leave event
 pub const LEAVE_EVENT: u16 = 8;
@@ -17298,6 +21789,23 @@ impl core::fmt::Debug for HierarchyMask  {
     }
 }
 bitmask_binop!(HierarchyMask, u8);
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for HierarchyMask {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::MASTER_ADDED.0,
+            Self::MASTER_REMOVED.0,
+            Self::SLAVE_ADDED.0,
+            Self::SLAVE_REMOVED.0,
+            Self::SLAVE_ATTACHED.0,
+            Self::SLAVE_DETACHED.0,
+            Self::DEVICE_ENABLED.0,
+            Self::DEVICE_DISABLED.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -17352,6 +21860,33 @@ impl Serialize for HierarchyInfo {
         self.enabled.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 2]);
         self.flags.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod hierarchy_info {
+    use super::HierarchyInfo;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for HierarchyInfo {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                deviceid: GenRandom::generate(rng),
+                attachment: GenRandom::generate(rng),
+                type_: GenRandom::generate(rng),
+                enabled: GenRandom::generate(rng),
+                flags: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(2280645545909863424);
+        let value = HierarchyInfo::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -17429,6 +21964,37 @@ impl HierarchyEvent {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod hierarchy_event {
+    use super::HierarchyEvent;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for HierarchyEvent {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                response_type: GenRandom::generate(rng),
+                extension: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                event_type: GenRandom::generate(rng),
+                deviceid: GenRandom::generate(rng),
+                time: GenRandom::generate(rng),
+                flags: GenRandom::generate(rng),
+                infos: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(8139899991617548288);
+        let value = HierarchyEvent::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -17488,6 +22054,18 @@ impl core::fmt::Debug for PropertyFlag  {
             (Self::MODIFIED.0.into(), "MODIFIED", "Modified"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for PropertyFlag {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::DELETED.0,
+            Self::CREATED.0,
+            Self::MODIFIED.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
     }
 }
 
@@ -17588,6 +22166,37 @@ impl Serialize for PropertyEvent {
         bytes.extend_from_slice(&[0; 11]);
     }
 }
+#[cfg(test)]
+mod property_event {
+    use super::PropertyEvent;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for PropertyEvent {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                response_type: GenRandom::generate(rng),
+                extension: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                event_type: GenRandom::generate(rng),
+                deviceid: GenRandom::generate(rng),
+                time: GenRandom::generate(rng),
+                property: GenRandom::generate(rng),
+                what: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(12000850040323375104);
+        let value = PropertyEvent::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the RawKeyPress event
 pub const RAW_KEY_PRESS_EVENT: u16 = 13;
@@ -17675,6 +22284,41 @@ impl RawKeyPressEvent {
     pub fn valuators_len(&self) -> u16 {
         self.valuator_mask.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod raw_key_press_event {
+    use super::RawKeyPressEvent;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for RawKeyPressEvent {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                response_type: GenRandom::generate(rng),
+                extension: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                event_type: GenRandom::generate(rng),
+                deviceid: GenRandom::generate(rng),
+                time: GenRandom::generate(rng),
+                detail: GenRandom::generate(rng),
+                sourceid: GenRandom::generate(rng),
+                flags: GenRandom::generate(rng),
+                valuator_mask: GenRandom::generate(rng),
+                axisvalues: GenRandom::generate(rng),
+                axisvalues_raw: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(11043864972233171968);
+        let value = RawKeyPressEvent::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -17770,6 +22414,41 @@ impl RawButtonPressEvent {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod raw_button_press_event {
+    use super::RawButtonPressEvent;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for RawButtonPressEvent {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                response_type: GenRandom::generate(rng),
+                extension: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                event_type: GenRandom::generate(rng),
+                deviceid: GenRandom::generate(rng),
+                time: GenRandom::generate(rng),
+                detail: GenRandom::generate(rng),
+                sourceid: GenRandom::generate(rng),
+                flags: GenRandom::generate(rng),
+                valuator_mask: GenRandom::generate(rng),
+                axisvalues: GenRandom::generate(rng),
+                axisvalues_raw: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(14516884022861430784);
+        let value = RawButtonPressEvent::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the RawButtonRelease event
 pub const RAW_BUTTON_RELEASE_EVENT: u16 = 16;
@@ -17826,6 +22505,17 @@ impl core::fmt::Debug for TouchEventFlags  {
     }
 }
 bitmask_binop!(TouchEventFlags, u32);
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for TouchEventFlags {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::TOUCH_PENDING_END.0,
+            Self::TOUCH_EMULATING_POINTER.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 /// Opcode for the TouchBegin event
 pub const TOUCH_BEGIN_EVENT: u16 = 18;
@@ -17957,6 +22647,50 @@ impl TouchBeginEvent {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod touch_begin_event {
+    use super::TouchBeginEvent;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for TouchBeginEvent {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                response_type: GenRandom::generate(rng),
+                extension: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                event_type: GenRandom::generate(rng),
+                deviceid: GenRandom::generate(rng),
+                time: GenRandom::generate(rng),
+                detail: GenRandom::generate(rng),
+                root: GenRandom::generate(rng),
+                event: GenRandom::generate(rng),
+                child: GenRandom::generate(rng),
+                root_x: GenRandom::generate(rng),
+                root_y: GenRandom::generate(rng),
+                event_x: GenRandom::generate(rng),
+                event_y: GenRandom::generate(rng),
+                sourceid: GenRandom::generate(rng),
+                flags: GenRandom::generate(rng),
+                mods: GenRandom::generate(rng),
+                group: GenRandom::generate(rng),
+                button_mask: GenRandom::generate(rng),
+                valuator_mask: GenRandom::generate(rng),
+                axisvalues: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(12845195065756411904);
+        let value = TouchBeginEvent::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the TouchUpdate event
 pub const TOUCH_UPDATE_EVENT: u16 = 19;
@@ -18008,6 +22742,16 @@ impl core::fmt::Debug for TouchOwnershipFlags  {
             (Self::NONE.0, "NONE", "None"),
         ];
         pretty_print_enum(fmt, self.0, &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for TouchOwnershipFlags {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::NONE.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
     }
 }
 
@@ -18142,6 +22886,41 @@ impl Serialize for TouchOwnershipEvent {
         bytes.extend_from_slice(&[0; 8]);
     }
 }
+#[cfg(test)]
+mod touch_ownership_event {
+    use super::TouchOwnershipEvent;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for TouchOwnershipEvent {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                response_type: GenRandom::generate(rng),
+                extension: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                event_type: GenRandom::generate(rng),
+                deviceid: GenRandom::generate(rng),
+                time: GenRandom::generate(rng),
+                touchid: GenRandom::generate(rng),
+                root: GenRandom::generate(rng),
+                event: GenRandom::generate(rng),
+                child: GenRandom::generate(rng),
+                sourceid: GenRandom::generate(rng),
+                flags: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(17925002372647223296);
+        let value = TouchOwnershipEvent::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the RawTouchBegin event
 pub const RAW_TOUCH_BEGIN_EVENT: u16 = 22;
@@ -18231,6 +23010,41 @@ impl RawTouchBeginEvent {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod raw_touch_begin_event {
+    use super::RawTouchBeginEvent;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for RawTouchBeginEvent {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                response_type: GenRandom::generate(rng),
+                extension: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                event_type: GenRandom::generate(rng),
+                deviceid: GenRandom::generate(rng),
+                time: GenRandom::generate(rng),
+                detail: GenRandom::generate(rng),
+                sourceid: GenRandom::generate(rng),
+                flags: GenRandom::generate(rng),
+                valuator_mask: GenRandom::generate(rng),
+                axisvalues: GenRandom::generate(rng),
+                axisvalues_raw: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(6745595966935085056);
+        let value = RawTouchBeginEvent::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the RawTouchUpdate event
 pub const RAW_TOUCH_UPDATE_EVENT: u16 = 23;
@@ -18299,6 +23113,17 @@ impl core::fmt::Debug for BarrierFlags  {
     }
 }
 bitmask_binop!(BarrierFlags, u8);
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for BarrierFlags {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::POINTER_RELEASED.0,
+            Self::DEVICE_IS_GRABBED.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 /// Opcode for the BarrierHit event
 pub const BARRIER_HIT_EVENT: u16 = 25;
@@ -18466,6 +23291,46 @@ impl Serialize for BarrierHitEvent {
         self.root_y.serialize_into(bytes);
         self.dx.serialize_into(bytes);
         self.dy.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod barrier_hit_event {
+    use super::BarrierHitEvent;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for BarrierHitEvent {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                response_type: GenRandom::generate(rng),
+                extension: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                event_type: GenRandom::generate(rng),
+                deviceid: GenRandom::generate(rng),
+                time: GenRandom::generate(rng),
+                eventid: GenRandom::generate(rng),
+                root: GenRandom::generate(rng),
+                event: GenRandom::generate(rng),
+                barrier: GenRandom::generate(rng),
+                dtime: GenRandom::generate(rng),
+                flags: GenRandom::generate(rng),
+                sourceid: GenRandom::generate(rng),
+                root_x: GenRandom::generate(rng),
+                root_y: GenRandom::generate(rng),
+                dx: GenRandom::generate(rng),
+                dy: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(11876715904131145728);
+        let value = BarrierHitEvent::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 

@@ -670,3 +670,102 @@ pub fn parse_request_header(
         finally_remaining,
     ))
 }
+
+#[cfg(test)]
+mod gen_random {
+    use alloc::{borrow::Cow, vec::Vec};
+    use core::iter;
+    use fastrand::Rng;
+
+    /// Generate a randomized version of this type.
+    ///
+    /// This is used to create pseudorandom values for use in
+    /// testing apparati.
+    pub(crate) trait GenRandom: Sized {
+        /// Generate a random value of this type.
+        fn generate(rng: &Rng) -> Self;
+    }
+
+    macro_rules! impl_genrandom_primitive {
+        ($($ty: ident, ($($args: tt)*))*) => {
+            $(
+                impl GenRandom for $ty {
+                    fn generate(rng: &Rng) -> Self {
+                        rng.$ty ( $($args)* )
+                    }
+                }
+            )*
+        };
+    }
+
+    impl_genrandom_primitive! {
+        u8, (..)
+        u16, (..)
+        u32, (..)
+        u64, (..)
+        usize, (..)
+        i8, (..)
+        i16, (..)
+        i32, (..)
+        i64, (..)
+        isize, (..)
+        bool, ()
+        f32, ()
+        f64, ()
+    }
+
+    macro_rules! impl_genrandom_array {
+        ($($num: expr)*) => {
+            $(
+                impl<T: Default + GenRandom> GenRandom for [T; $num] {
+                    fn generate(rng: &Rng) -> Self {
+                        let mut result: [T; $num] = Default::default();
+                        for i in 0..$num {
+                            result[i] = T::generate(rng);
+                        }
+                        result
+                    }
+                }
+            )*
+        }
+    }
+
+    impl_genrandom_array! {
+        0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15
+        16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32
+    }
+
+    impl<T: GenRandom> GenRandom for Vec<T> {
+        fn generate(rng: &Rng) -> Self {
+            iter::repeat_with(|| T::generate(rng))
+                .take(rng.u16(..) as usize)
+                .collect()
+        }
+    }
+
+    impl<T: GenRandom + Clone> GenRandom for Cow<'_, T> {
+        fn generate(rng: &Rng) -> Self {
+            Cow::Owned(T::generate(rng))
+        }
+    }
+
+    impl<T: GenRandom + Clone> GenRandom for Cow<'_, [T]> {
+        fn generate(rng: &Rng) -> Self {
+            let items: Vec<T> = GenRandom::generate(rng);
+            items.into()
+        }
+    }
+
+    impl<T: GenRandom> GenRandom for Option<T> {
+        fn generate(rng: &Rng) -> Self {
+            if rng.bool() {
+                Some(T::generate(rng))
+            } else {
+                None
+            }
+        }
+    }
+}
+
+#[cfg(test)]
+pub(crate) use gen_random::GenRandom;

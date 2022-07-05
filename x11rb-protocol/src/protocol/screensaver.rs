@@ -94,6 +94,18 @@ impl core::fmt::Debug for Kind  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for Kind {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::BLANKED.0,
+            Self::INTERNAL.0,
+            Self::EXTERNAL.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -154,6 +166,17 @@ impl core::fmt::Debug for Event  {
     }
 }
 bitmask_binop!(Event, u8);
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for Event {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::NOTIFY_MASK.0,
+            Self::CYCLE_MASK.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -215,6 +238,19 @@ impl core::fmt::Debug for State  {
             (Self::DISABLED.0.into(), "DISABLED", "Disabled"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for State {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::OFF.0,
+            Self::ON.0,
+            Self::CYCLE.0,
+            Self::DISABLED.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
     }
 }
 
@@ -358,6 +394,32 @@ impl Serialize for QueryVersionReply {
         self.server_major_version.serialize_into(bytes);
         self.server_minor_version.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 20]);
+    }
+}
+#[cfg(test)]
+mod query_version_reply {
+    use super::QueryVersionReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for QueryVersionReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                server_major_version: GenRandom::generate(rng),
+                server_minor_version: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(228006558612858880);
+        let value = QueryVersionReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -511,6 +573,36 @@ impl Serialize for QueryInfoReply {
         self.event_mask.serialize_into(bytes);
         u8::from(self.kind).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 7]);
+    }
+}
+#[cfg(test)]
+mod query_info_reply {
+    use super::QueryInfoReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for QueryInfoReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                state: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                saver_window: GenRandom::generate(rng),
+                ms_until_server: GenRandom::generate(rng),
+                ms_since_user_input: GenRandom::generate(rng),
+                event_mask: GenRandom::generate(rng),
+                kind: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(12794945204365782016);
+        let value = QueryInfoReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -831,6 +923,327 @@ impl SetAttributesAux {
             expr_value |= u32::from(xproto::CW::CURSOR);
         }
         expr_value
+    }
+}
+#[cfg(test)]
+mod set_attributes_aux {
+    use super::SetAttributesAux;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for SetAttributesAux {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                background_pixmap: GenRandom::generate(rng),
+                background_pixel: GenRandom::generate(rng),
+                border_pixmap: GenRandom::generate(rng),
+                border_pixel: GenRandom::generate(rng),
+                bit_gravity: GenRandom::generate(rng),
+                win_gravity: GenRandom::generate(rng),
+                backing_store: GenRandom::generate(rng),
+                backing_planes: GenRandom::generate(rng),
+                backing_pixel: GenRandom::generate(rng),
+                override_redirect: GenRandom::generate(rng),
+                save_under: GenRandom::generate(rng),
+                event_mask: GenRandom::generate(rng),
+                do_not_propogate_mask: GenRandom::generate(rng),
+                colormap: GenRandom::generate(rng),
+                cursor: GenRandom::generate(rng),
+            }
+        }
+    }
+    fn generate_values(rng: &Rng) -> alloc::vec::Vec<SetAttributesAux> {
+        alloc::vec![
+            SetAttributesAux {
+                background_pixmap: None,
+                background_pixel: None,
+                border_pixmap: None,
+                border_pixel: None,
+                bit_gravity: None,
+                win_gravity: None,
+                backing_store: None,
+                backing_planes: None,
+                backing_pixel: None,
+                override_redirect: None,
+                save_under: None,
+                event_mask: None,
+                do_not_propogate_mask: None,
+                colormap: None,
+                cursor: None,
+            },
+            SetAttributesAux {
+                background_pixmap: Some(GenRandom::generate(rng)),
+                background_pixel: Some(GenRandom::generate(rng)),
+                border_pixmap: Some(GenRandom::generate(rng)),
+                border_pixel: Some(GenRandom::generate(rng)),
+                bit_gravity: Some(GenRandom::generate(rng)),
+                win_gravity: Some(GenRandom::generate(rng)),
+                backing_store: Some(GenRandom::generate(rng)),
+                backing_planes: Some(GenRandom::generate(rng)),
+                backing_pixel: Some(GenRandom::generate(rng)),
+                override_redirect: Some(GenRandom::generate(rng)),
+                save_under: Some(GenRandom::generate(rng)),
+                event_mask: Some(GenRandom::generate(rng)),
+                do_not_propogate_mask: Some(GenRandom::generate(rng)),
+                colormap: Some(GenRandom::generate(rng)),
+                cursor: Some(GenRandom::generate(rng)),
+            },
+            SetAttributesAux {
+                background_pixmap: Some(GenRandom::generate(rng)),
+                background_pixel: None,
+                border_pixmap: None,
+                border_pixel: None,
+                bit_gravity: None,
+                win_gravity: None,
+                backing_store: None,
+                backing_planes: None,
+                backing_pixel: None,
+                override_redirect: None,
+                save_under: None,
+                event_mask: None,
+                do_not_propogate_mask: None,
+                colormap: None,
+                cursor: None,
+            },
+            SetAttributesAux {
+                background_pixmap: None,
+                background_pixel: Some(GenRandom::generate(rng)),
+                border_pixmap: None,
+                border_pixel: None,
+                bit_gravity: None,
+                win_gravity: None,
+                backing_store: None,
+                backing_planes: None,
+                backing_pixel: None,
+                override_redirect: None,
+                save_under: None,
+                event_mask: None,
+                do_not_propogate_mask: None,
+                colormap: None,
+                cursor: None,
+            },
+            SetAttributesAux {
+                background_pixmap: None,
+                background_pixel: None,
+                border_pixmap: Some(GenRandom::generate(rng)),
+                border_pixel: None,
+                bit_gravity: None,
+                win_gravity: None,
+                backing_store: None,
+                backing_planes: None,
+                backing_pixel: None,
+                override_redirect: None,
+                save_under: None,
+                event_mask: None,
+                do_not_propogate_mask: None,
+                colormap: None,
+                cursor: None,
+            },
+            SetAttributesAux {
+                background_pixmap: None,
+                background_pixel: None,
+                border_pixmap: None,
+                border_pixel: Some(GenRandom::generate(rng)),
+                bit_gravity: None,
+                win_gravity: None,
+                backing_store: None,
+                backing_planes: None,
+                backing_pixel: None,
+                override_redirect: None,
+                save_under: None,
+                event_mask: None,
+                do_not_propogate_mask: None,
+                colormap: None,
+                cursor: None,
+            },
+            SetAttributesAux {
+                background_pixmap: None,
+                background_pixel: None,
+                border_pixmap: None,
+                border_pixel: None,
+                bit_gravity: Some(GenRandom::generate(rng)),
+                win_gravity: None,
+                backing_store: None,
+                backing_planes: None,
+                backing_pixel: None,
+                override_redirect: None,
+                save_under: None,
+                event_mask: None,
+                do_not_propogate_mask: None,
+                colormap: None,
+                cursor: None,
+            },
+            SetAttributesAux {
+                background_pixmap: None,
+                background_pixel: None,
+                border_pixmap: None,
+                border_pixel: None,
+                bit_gravity: None,
+                win_gravity: Some(GenRandom::generate(rng)),
+                backing_store: None,
+                backing_planes: None,
+                backing_pixel: None,
+                override_redirect: None,
+                save_under: None,
+                event_mask: None,
+                do_not_propogate_mask: None,
+                colormap: None,
+                cursor: None,
+            },
+            SetAttributesAux {
+                background_pixmap: None,
+                background_pixel: None,
+                border_pixmap: None,
+                border_pixel: None,
+                bit_gravity: None,
+                win_gravity: None,
+                backing_store: Some(GenRandom::generate(rng)),
+                backing_planes: None,
+                backing_pixel: None,
+                override_redirect: None,
+                save_under: None,
+                event_mask: None,
+                do_not_propogate_mask: None,
+                colormap: None,
+                cursor: None,
+            },
+            SetAttributesAux {
+                background_pixmap: None,
+                background_pixel: None,
+                border_pixmap: None,
+                border_pixel: None,
+                bit_gravity: None,
+                win_gravity: None,
+                backing_store: None,
+                backing_planes: Some(GenRandom::generate(rng)),
+                backing_pixel: None,
+                override_redirect: None,
+                save_under: None,
+                event_mask: None,
+                do_not_propogate_mask: None,
+                colormap: None,
+                cursor: None,
+            },
+            SetAttributesAux {
+                background_pixmap: None,
+                background_pixel: None,
+                border_pixmap: None,
+                border_pixel: None,
+                bit_gravity: None,
+                win_gravity: None,
+                backing_store: None,
+                backing_planes: None,
+                backing_pixel: Some(GenRandom::generate(rng)),
+                override_redirect: None,
+                save_under: None,
+                event_mask: None,
+                do_not_propogate_mask: None,
+                colormap: None,
+                cursor: None,
+            },
+            SetAttributesAux {
+                background_pixmap: None,
+                background_pixel: None,
+                border_pixmap: None,
+                border_pixel: None,
+                bit_gravity: None,
+                win_gravity: None,
+                backing_store: None,
+                backing_planes: None,
+                backing_pixel: None,
+                override_redirect: Some(GenRandom::generate(rng)),
+                save_under: None,
+                event_mask: None,
+                do_not_propogate_mask: None,
+                colormap: None,
+                cursor: None,
+            },
+            SetAttributesAux {
+                background_pixmap: None,
+                background_pixel: None,
+                border_pixmap: None,
+                border_pixel: None,
+                bit_gravity: None,
+                win_gravity: None,
+                backing_store: None,
+                backing_planes: None,
+                backing_pixel: None,
+                override_redirect: None,
+                save_under: Some(GenRandom::generate(rng)),
+                event_mask: None,
+                do_not_propogate_mask: None,
+                colormap: None,
+                cursor: None,
+            },
+            SetAttributesAux {
+                background_pixmap: None,
+                background_pixel: None,
+                border_pixmap: None,
+                border_pixel: None,
+                bit_gravity: None,
+                win_gravity: None,
+                backing_store: None,
+                backing_planes: None,
+                backing_pixel: None,
+                override_redirect: None,
+                save_under: None,
+                event_mask: Some(GenRandom::generate(rng)),
+                do_not_propogate_mask: None,
+                colormap: None,
+                cursor: None,
+            },
+            SetAttributesAux {
+                background_pixmap: None,
+                background_pixel: None,
+                border_pixmap: None,
+                border_pixel: None,
+                bit_gravity: None,
+                win_gravity: None,
+                backing_store: None,
+                backing_planes: None,
+                backing_pixel: None,
+                override_redirect: None,
+                save_under: None,
+                event_mask: None,
+                do_not_propogate_mask: Some(GenRandom::generate(rng)),
+                colormap: None,
+                cursor: None,
+            },
+            SetAttributesAux {
+                background_pixmap: None,
+                background_pixel: None,
+                border_pixmap: None,
+                border_pixel: None,
+                bit_gravity: None,
+                win_gravity: None,
+                backing_store: None,
+                backing_planes: None,
+                backing_pixel: None,
+                override_redirect: None,
+                save_under: None,
+                event_mask: None,
+                do_not_propogate_mask: None,
+                colormap: Some(GenRandom::generate(rng)),
+                cursor: None,
+            },
+            SetAttributesAux {
+                background_pixmap: None,
+                background_pixel: None,
+                border_pixmap: None,
+                border_pixel: None,
+                bit_gravity: None,
+                win_gravity: None,
+                backing_store: None,
+                backing_planes: None,
+                backing_pixel: None,
+                override_redirect: None,
+                save_under: None,
+                event_mask: None,
+                do_not_propogate_mask: None,
+                colormap: None,
+                cursor: Some(GenRandom::generate(rng)),
+            },
+        ]
     }
 }
 impl SetAttributesAux {
@@ -1259,6 +1672,36 @@ impl Serialize for NotifyEvent {
         u8::from(self.kind).serialize_into(bytes);
         self.forced.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 14]);
+    }
+}
+#[cfg(test)]
+mod notify_event {
+    use super::NotifyEvent;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for NotifyEvent {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                response_type: GenRandom::generate(rng),
+                state: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                time: GenRandom::generate(rng),
+                root: GenRandom::generate(rng),
+                window: GenRandom::generate(rng),
+                kind: GenRandom::generate(rng),
+                forced: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(6354312054748245760);
+        let value = NotifyEvent::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 impl From<&NotifyEvent> for [u8; 32] {

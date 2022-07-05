@@ -56,6 +56,30 @@ impl Serialize for Char2b {
         self.byte2.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod char2b {
+    use super::Char2b;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for Char2b {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                byte1: GenRandom::generate(rng),
+                byte2: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(377555505600);
+        let value = Char2b::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 pub type Window = u32;
 
@@ -121,6 +145,30 @@ impl Serialize for Point {
         self.y.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod point {
+    use super::Point;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for Point {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                x: GenRandom::generate(rng),
+                y: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(11897424000);
+        let value = Point::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -164,6 +212,32 @@ impl Serialize for Rectangle {
         self.y.serialize_into(bytes);
         self.width.serialize_into(bytes);
         self.height.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod rectangle {
+    use super::Rectangle;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for Rectangle {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                x: GenRandom::generate(rng),
+                y: GenRandom::generate(rng),
+                width: GenRandom::generate(rng),
+                height: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(1140184632863327040);
+        let value = Rectangle::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -223,6 +297,34 @@ impl Serialize for Arc {
         self.angle2.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod arc {
+    use super::Arc;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for Arc {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                x: GenRandom::generate(rng),
+                y: GenRandom::generate(rng),
+                width: GenRandom::generate(rng),
+                height: GenRandom::generate(rng),
+                angle1: GenRandom::generate(rng),
+                angle2: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(733590);
+        let value = Arc::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -264,6 +366,31 @@ impl Serialize for Format {
         self.bits_per_pixel.serialize_into(bytes);
         self.scanline_pad.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 5]);
+    }
+}
+#[cfg(test)]
+mod format {
+    use super::Format;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for Format {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                depth: GenRandom::generate(rng),
+                bits_per_pixel: GenRandom::generate(rng),
+                scanline_pad: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(1086380825040);
+        let value = Format::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -331,6 +458,21 @@ impl core::fmt::Debug for VisualClass  {
             (Self::DIRECT_COLOR.0.into(), "DIRECT_COLOR", "DirectColor"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for VisualClass {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::STATIC_GRAY.0,
+            Self::GRAY_SCALE.0,
+            Self::STATIC_COLOR.0,
+            Self::PSEUDO_COLOR.0,
+            Self::TRUE_COLOR.0,
+            Self::DIRECT_COLOR.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
     }
 }
 
@@ -409,6 +551,35 @@ impl Serialize for Visualtype {
         bytes.extend_from_slice(&[0; 4]);
     }
 }
+#[cfg(test)]
+mod visualtype {
+    use super::Visualtype;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for Visualtype {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                visual_id: GenRandom::generate(rng),
+                class: GenRandom::generate(rng),
+                bits_per_rgb_value: GenRandom::generate(rng),
+                colormap_entries: GenRandom::generate(rng),
+                red_mask: GenRandom::generate(rng),
+                green_mask: GenRandom::generate(rng),
+                blue_mask: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(17624827415796400640);
+        let value = Visualtype::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -457,6 +628,30 @@ impl Depth {
     pub fn visuals_len(&self) -> u16 {
         self.visuals.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod depth {
+    use super::Depth;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for Depth {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                depth: GenRandom::generate(rng),
+                visuals: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(9279821824);
+        let value = Depth::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -555,6 +750,41 @@ impl core::fmt::Debug for EventMask  {
     }
 }
 bitmask_binop!(EventMask, u32);
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for EventMask {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::NO_EVENT.0,
+            Self::KEY_PRESS.0,
+            Self::KEY_RELEASE.0,
+            Self::BUTTON_PRESS.0,
+            Self::BUTTON_RELEASE.0,
+            Self::ENTER_WINDOW.0,
+            Self::LEAVE_WINDOW.0,
+            Self::POINTER_MOTION.0,
+            Self::POINTER_MOTION_HINT.0,
+            Self::BUTTON1_MOTION.0,
+            Self::BUTTON2_MOTION.0,
+            Self::BUTTON3_MOTION.0,
+            Self::BUTTON4_MOTION.0,
+            Self::BUTTON5_MOTION.0,
+            Self::BUTTON_MOTION.0,
+            Self::KEYMAP_STATE.0,
+            Self::EXPOSURE.0,
+            Self::VISIBILITY_CHANGE.0,
+            Self::STRUCTURE_NOTIFY.0,
+            Self::RESIZE_REDIRECT.0,
+            Self::SUBSTRUCTURE_NOTIFY.0,
+            Self::SUBSTRUCTURE_REDIRECT.0,
+            Self::FOCUS_CHANGE.0,
+            Self::PROPERTY_CHANGE.0,
+            Self::COLOR_MAP_CHANGE.0,
+            Self::OWNER_GRAB_BUTTON.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -602,6 +832,18 @@ impl core::fmt::Debug for BackingStore  {
             (Self::ALWAYS.0, "ALWAYS", "Always"),
         ];
         pretty_print_enum(fmt, self.0, &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for BackingStore {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::NOT_USEFUL.0,
+            Self::WHEN_MAPPED.0,
+            Self::ALWAYS.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
     }
 }
 
@@ -693,6 +935,44 @@ impl Screen {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod screen {
+    use super::Screen;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for Screen {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                root: GenRandom::generate(rng),
+                default_colormap: GenRandom::generate(rng),
+                white_pixel: GenRandom::generate(rng),
+                black_pixel: GenRandom::generate(rng),
+                current_input_masks: GenRandom::generate(rng),
+                width_in_pixels: GenRandom::generate(rng),
+                height_in_pixels: GenRandom::generate(rng),
+                width_in_millimeters: GenRandom::generate(rng),
+                height_in_millimeters: GenRandom::generate(rng),
+                min_installed_maps: GenRandom::generate(rng),
+                max_installed_maps: GenRandom::generate(rng),
+                root_visual: GenRandom::generate(rng),
+                backing_stores: GenRandom::generate(rng),
+                save_unders: GenRandom::generate(rng),
+                root_depth: GenRandom::generate(rng),
+                allowed_depths: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(1051123077180);
+        let value = Screen::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -781,6 +1061,33 @@ impl SetupRequest {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod setup_request {
+    use super::SetupRequest;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for SetupRequest {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                byte_order: GenRandom::generate(rng),
+                protocol_major_version: GenRandom::generate(rng),
+                protocol_minor_version: GenRandom::generate(rng),
+                authorization_protocol_name: GenRandom::generate(rng),
+                authorization_protocol_data: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(6711478534792435200);
+        let value = SetupRequest::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -837,6 +1144,33 @@ impl SetupFailed {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod setup_failed {
+    use super::SetupFailed;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for SetupFailed {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                status: GenRandom::generate(rng),
+                protocol_major_version: GenRandom::generate(rng),
+                protocol_minor_version: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                reason: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(3913328071691102208);
+        let value = SetupFailed::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -886,6 +1220,30 @@ impl SetupAuthenticate {
         self.reason.len()
             .checked_div(4).unwrap()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod setup_authenticate {
+    use super::SetupAuthenticate;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for SetupAuthenticate {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                status: GenRandom::generate(rng),
+                reason: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(9994834684256780288);
+        let value = SetupAuthenticate::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -945,6 +1303,17 @@ impl core::fmt::Debug for ImageOrder  {
             (Self::MSB_FIRST.0.into(), "MSB_FIRST", "MSBFirst"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for ImageOrder {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::LSB_FIRST.0,
+            Self::MSB_FIRST.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
     }
 }
 
@@ -1086,6 +1455,46 @@ impl Setup {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod setup {
+    use super::Setup;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for Setup {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                status: GenRandom::generate(rng),
+                protocol_major_version: GenRandom::generate(rng),
+                protocol_minor_version: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                release_number: GenRandom::generate(rng),
+                resource_id_base: GenRandom::generate(rng),
+                resource_id_mask: GenRandom::generate(rng),
+                motion_buffer_size: GenRandom::generate(rng),
+                maximum_request_length: GenRandom::generate(rng),
+                image_byte_order: GenRandom::generate(rng),
+                bitmap_format_bit_order: GenRandom::generate(rng),
+                bitmap_format_scanline_unit: GenRandom::generate(rng),
+                bitmap_format_scanline_pad: GenRandom::generate(rng),
+                min_keycode: GenRandom::generate(rng),
+                max_keycode: GenRandom::generate(rng),
+                vendor: GenRandom::generate(rng),
+                pixmap_formats: GenRandom::generate(rng),
+                roots: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(12742696512);
+        let value = Setup::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -1154,6 +1563,24 @@ impl core::fmt::Debug for ModMask  {
     }
 }
 bitmask_binop!(ModMask, u16);
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for ModMask {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::SHIFT.0,
+            Self::LOCK.0,
+            Self::CONTROL.0,
+            Self::M1.0,
+            Self::M2.0,
+            Self::M3.0,
+            Self::M4.0,
+            Self::M5.0,
+            Self::ANY.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -1230,6 +1657,28 @@ impl core::fmt::Debug for KeyButMask  {
     }
 }
 bitmask_binop!(KeyButMask, u16);
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for KeyButMask {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::SHIFT.0,
+            Self::LOCK.0,
+            Self::CONTROL.0,
+            Self::MOD1.0,
+            Self::MOD2.0,
+            Self::MOD3.0,
+            Self::MOD4.0,
+            Self::MOD5.0,
+            Self::BUTTON1.0,
+            Self::BUTTON2.0,
+            Self::BUTTON3.0,
+            Self::BUTTON4.0,
+            Self::BUTTON5.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -1285,6 +1734,16 @@ impl core::fmt::Debug for WindowEnum  {
             (Self::NONE.0.into(), "NONE", "None"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for WindowEnum {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::NONE.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
     }
 }
 
@@ -1424,6 +1883,41 @@ impl Serialize for KeyPressEvent {
         bytes.extend_from_slice(&[0; 1]);
     }
 }
+#[cfg(test)]
+mod key_press_event {
+    use super::KeyPressEvent;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for KeyPressEvent {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                response_type: GenRandom::generate(rng),
+                detail: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                time: GenRandom::generate(rng),
+                root: GenRandom::generate(rng),
+                event: GenRandom::generate(rng),
+                child: GenRandom::generate(rng),
+                root_x: GenRandom::generate(rng),
+                root_y: GenRandom::generate(rng),
+                event_x: GenRandom::generate(rng),
+                event_y: GenRandom::generate(rng),
+                state: GenRandom::generate(rng),
+                same_screen: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(3605300988613783040);
+        let value = KeyPressEvent::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 impl From<&KeyPressEvent> for [u8; 32] {
     fn from(input: &KeyPressEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -1546,6 +2040,21 @@ impl core::fmt::Debug for ButtonMask  {
     }
 }
 bitmask_binop!(ButtonMask, u16);
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for ButtonMask {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::M1.0,
+            Self::M2.0,
+            Self::M3.0,
+            Self::M4.0,
+            Self::M5.0,
+            Self::ANY.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 /// Opcode for the ButtonPress event
 pub const BUTTON_PRESS_EVENT: u8 = 4;
@@ -1683,6 +2192,41 @@ impl Serialize for ButtonPressEvent {
         bytes.extend_from_slice(&[0; 1]);
     }
 }
+#[cfg(test)]
+mod button_press_event {
+    use super::ButtonPressEvent;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for ButtonPressEvent {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                response_type: GenRandom::generate(rng),
+                detail: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                time: GenRandom::generate(rng),
+                root: GenRandom::generate(rng),
+                event: GenRandom::generate(rng),
+                child: GenRandom::generate(rng),
+                root_x: GenRandom::generate(rng),
+                root_y: GenRandom::generate(rng),
+                event_x: GenRandom::generate(rng),
+                event_y: GenRandom::generate(rng),
+                state: GenRandom::generate(rng),
+                same_screen: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(13647151740139503616);
+        let value = ButtonPressEvent::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 impl From<&ButtonPressEvent> for [u8; 32] {
     fn from(input: &ButtonPressEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -1800,6 +2344,17 @@ impl core::fmt::Debug for Motion  {
             (Self::HINT.0.into(), "HINT", "Hint"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for Motion {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::NORMAL.0,
+            Self::HINT.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
     }
 }
 
@@ -1940,6 +2495,41 @@ impl Serialize for MotionNotifyEvent {
         bytes.extend_from_slice(&[0; 1]);
     }
 }
+#[cfg(test)]
+mod motion_notify_event {
+    use super::MotionNotifyEvent;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for MotionNotifyEvent {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                response_type: GenRandom::generate(rng),
+                detail: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                time: GenRandom::generate(rng),
+                root: GenRandom::generate(rng),
+                event: GenRandom::generate(rng),
+                child: GenRandom::generate(rng),
+                root_x: GenRandom::generate(rng),
+                root_y: GenRandom::generate(rng),
+                event_x: GenRandom::generate(rng),
+                event_y: GenRandom::generate(rng),
+                state: GenRandom::generate(rng),
+                same_screen: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(6688505816804149248);
+        let value = MotionNotifyEvent::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 impl From<&MotionNotifyEvent> for [u8; 32] {
     fn from(input: &MotionNotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -2067,6 +2657,23 @@ impl core::fmt::Debug for NotifyDetail  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for NotifyDetail {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::ANCESTOR.0,
+            Self::VIRTUAL.0,
+            Self::INFERIOR.0,
+            Self::NONLINEAR.0,
+            Self::NONLINEAR_VIRTUAL.0,
+            Self::POINTER.0,
+            Self::POINTER_ROOT.0,
+            Self::NONE.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -2128,6 +2735,19 @@ impl core::fmt::Debug for NotifyMode  {
             (Self::WHILE_GRABBED.0.into(), "WHILE_GRABBED", "WhileGrabbed"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for NotifyMode {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::NORMAL.0,
+            Self::GRAB.0,
+            Self::UNGRAB.0,
+            Self::WHILE_GRABBED.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
     }
 }
 
@@ -2262,6 +2882,42 @@ impl Serialize for EnterNotifyEvent {
         self.same_screen_focus.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod enter_notify_event {
+    use super::EnterNotifyEvent;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for EnterNotifyEvent {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                response_type: GenRandom::generate(rng),
+                detail: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                time: GenRandom::generate(rng),
+                root: GenRandom::generate(rng),
+                event: GenRandom::generate(rng),
+                child: GenRandom::generate(rng),
+                root_x: GenRandom::generate(rng),
+                root_y: GenRandom::generate(rng),
+                event_x: GenRandom::generate(rng),
+                event_y: GenRandom::generate(rng),
+                state: GenRandom::generate(rng),
+                mode: GenRandom::generate(rng),
+                same_screen_focus: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(11943255913241006080);
+        let value = EnterNotifyEvent::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 impl From<&EnterNotifyEvent> for [u8; 32] {
     fn from(input: &EnterNotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -2394,6 +3050,33 @@ impl Serialize for FocusInEvent {
         bytes.extend_from_slice(&[0; 3]);
     }
 }
+#[cfg(test)]
+mod focus_in_event {
+    use super::FocusInEvent;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for FocusInEvent {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                response_type: GenRandom::generate(rng),
+                detail: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                event: GenRandom::generate(rng),
+                mode: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(14752963089814193600);
+        let value = FocusInEvent::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 impl From<&FocusInEvent> for [u8; 32] {
     fn from(input: &FocusInEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -2512,6 +3195,30 @@ impl Serialize for KeymapNotifyEvent {
         bytes.reserve(32);
         self.response_type.serialize_into(bytes);
         bytes.extend_from_slice(&self.keys);
+    }
+}
+#[cfg(test)]
+mod keymap_notify_event {
+    use super::KeymapNotifyEvent;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for KeymapNotifyEvent {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                response_type: GenRandom::generate(rng),
+                keys: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(14002169918843432960);
+        let value = KeymapNotifyEvent::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 impl From<&KeymapNotifyEvent> for [u8; 32] {
@@ -2654,6 +3361,36 @@ impl Serialize for ExposeEvent {
         self.height.serialize_into(bytes);
         self.count.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 2]);
+    }
+}
+#[cfg(test)]
+mod expose_event {
+    use super::ExposeEvent;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for ExposeEvent {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                response_type: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                window: GenRandom::generate(rng),
+                x: GenRandom::generate(rng),
+                y: GenRandom::generate(rng),
+                width: GenRandom::generate(rng),
+                height: GenRandom::generate(rng),
+                count: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(1879375370075269120);
+        let value = ExposeEvent::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 impl From<&ExposeEvent> for [u8; 32] {
@@ -2803,6 +3540,38 @@ impl Serialize for GraphicsExposureEvent {
         bytes.extend_from_slice(&[0; 3]);
     }
 }
+#[cfg(test)]
+mod graphics_exposure_event {
+    use super::GraphicsExposureEvent;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GraphicsExposureEvent {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                response_type: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                drawable: GenRandom::generate(rng),
+                x: GenRandom::generate(rng),
+                y: GenRandom::generate(rng),
+                width: GenRandom::generate(rng),
+                height: GenRandom::generate(rng),
+                minor_opcode: GenRandom::generate(rng),
+                count: GenRandom::generate(rng),
+                major_opcode: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(5965741074202755072);
+        let value = GraphicsExposureEvent::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 impl From<&GraphicsExposureEvent> for [u8; 32] {
     fn from(input: &GraphicsExposureEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -2920,6 +3689,33 @@ impl Serialize for NoExposureEvent {
         bytes.extend_from_slice(&[0; 1]);
     }
 }
+#[cfg(test)]
+mod no_exposure_event {
+    use super::NoExposureEvent;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for NoExposureEvent {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                response_type: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                drawable: GenRandom::generate(rng),
+                minor_opcode: GenRandom::generate(rng),
+                major_opcode: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(10122128443497390080);
+        let value = NoExposureEvent::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 impl From<&NoExposureEvent> for [u8; 32] {
     fn from(input: &NoExposureEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -3030,6 +3826,18 @@ impl core::fmt::Debug for Visibility  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for Visibility {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::UNOBSCURED.0,
+            Self::PARTIALLY_OBSCURED.0,
+            Self::FULLY_OBSCURED.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 /// Opcode for the VisibilityNotify event
 pub const VISIBILITY_NOTIFY_EVENT: u8 = 15;
@@ -3088,6 +3896,32 @@ impl Serialize for VisibilityNotifyEvent {
         self.window.serialize_into(bytes);
         u8::from(self.state).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 3]);
+    }
+}
+#[cfg(test)]
+mod visibility_notify_event {
+    use super::VisibilityNotifyEvent;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for VisibilityNotifyEvent {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                response_type: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                window: GenRandom::generate(rng),
+                state: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(6979394589814046720);
+        let value = VisibilityNotifyEvent::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 impl From<&VisibilityNotifyEvent> for [u8; 32] {
@@ -3233,6 +4067,38 @@ impl Serialize for CreateNotifyEvent {
         bytes.extend_from_slice(&[0; 1]);
     }
 }
+#[cfg(test)]
+mod create_notify_event {
+    use super::CreateNotifyEvent;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for CreateNotifyEvent {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                response_type: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                parent: GenRandom::generate(rng),
+                window: GenRandom::generate(rng),
+                x: GenRandom::generate(rng),
+                y: GenRandom::generate(rng),
+                width: GenRandom::generate(rng),
+                height: GenRandom::generate(rng),
+                border_width: GenRandom::generate(rng),
+                override_redirect: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(3128854793822750720);
+        let value = CreateNotifyEvent::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 impl From<&CreateNotifyEvent> for [u8; 32] {
     fn from(input: &CreateNotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -3353,6 +4219,32 @@ impl Serialize for DestroyNotifyEvent {
         self.sequence.serialize_into(bytes);
         self.event.serialize_into(bytes);
         self.window.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod destroy_notify_event {
+    use super::DestroyNotifyEvent;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for DestroyNotifyEvent {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                response_type: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                event: GenRandom::generate(rng),
+                window: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(6395171065169207296);
+        let value = DestroyNotifyEvent::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 impl From<&DestroyNotifyEvent> for [u8; 32] {
@@ -3483,6 +4375,33 @@ impl Serialize for UnmapNotifyEvent {
         bytes.extend_from_slice(&[0; 3]);
     }
 }
+#[cfg(test)]
+mod unmap_notify_event {
+    use super::UnmapNotifyEvent;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for UnmapNotifyEvent {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                response_type: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                event: GenRandom::generate(rng),
+                window: GenRandom::generate(rng),
+                from_configure: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(15257765329295368192);
+        let value = UnmapNotifyEvent::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 impl From<&UnmapNotifyEvent> for [u8; 32] {
     fn from(input: &UnmapNotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -3611,6 +4530,33 @@ impl Serialize for MapNotifyEvent {
         bytes.extend_from_slice(&[0; 3]);
     }
 }
+#[cfg(test)]
+mod map_notify_event {
+    use super::MapNotifyEvent;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for MapNotifyEvent {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                response_type: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                event: GenRandom::generate(rng),
+                window: GenRandom::generate(rng),
+                override_redirect: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(1522486517264109568);
+        let value = MapNotifyEvent::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 impl From<&MapNotifyEvent> for [u8; 32] {
     fn from(input: &MapNotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -3725,6 +4671,32 @@ impl Serialize for MapRequestEvent {
         self.sequence.serialize_into(bytes);
         self.parent.serialize_into(bytes);
         self.window.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod map_request_event {
+    use super::MapRequestEvent;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for MapRequestEvent {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                response_type: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                parent: GenRandom::generate(rng),
+                window: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(16889530728294385664);
+        let value = MapRequestEvent::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 impl From<&MapRequestEvent> for [u8; 32] {
@@ -3860,6 +4832,36 @@ impl Serialize for ReparentNotifyEvent {
         self.y.serialize_into(bytes);
         self.override_redirect.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 3]);
+    }
+}
+#[cfg(test)]
+mod reparent_notify_event {
+    use super::ReparentNotifyEvent;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for ReparentNotifyEvent {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                response_type: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                event: GenRandom::generate(rng),
+                window: GenRandom::generate(rng),
+                parent: GenRandom::generate(rng),
+                x: GenRandom::generate(rng),
+                y: GenRandom::generate(rng),
+                override_redirect: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(9477099876458561536);
+        let value = ReparentNotifyEvent::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 impl From<&ReparentNotifyEvent> for [u8; 32] {
@@ -4039,6 +5041,39 @@ impl Serialize for ConfigureNotifyEvent {
         bytes.extend_from_slice(&[0; 1]);
     }
 }
+#[cfg(test)]
+mod configure_notify_event {
+    use super::ConfigureNotifyEvent;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for ConfigureNotifyEvent {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                response_type: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                event: GenRandom::generate(rng),
+                window: GenRandom::generate(rng),
+                above_sibling: GenRandom::generate(rng),
+                x: GenRandom::generate(rng),
+                y: GenRandom::generate(rng),
+                width: GenRandom::generate(rng),
+                height: GenRandom::generate(rng),
+                border_width: GenRandom::generate(rng),
+                override_redirect: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(15146050197514553344);
+        let value = ConfigureNotifyEvent::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 impl From<&ConfigureNotifyEvent> for [u8; 32] {
     fn from(input: &ConfigureNotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -4198,6 +5233,40 @@ impl Serialize for ConfigureRequestEvent {
         self.value_mask.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod configure_request_event {
+    use super::ConfigureRequestEvent;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for ConfigureRequestEvent {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                response_type: GenRandom::generate(rng),
+                stack_mode: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                parent: GenRandom::generate(rng),
+                window: GenRandom::generate(rng),
+                sibling: GenRandom::generate(rng),
+                x: GenRandom::generate(rng),
+                y: GenRandom::generate(rng),
+                width: GenRandom::generate(rng),
+                height: GenRandom::generate(rng),
+                border_width: GenRandom::generate(rng),
+                value_mask: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(15777714805559292928);
+        let value = ConfigureRequestEvent::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 impl From<&ConfigureRequestEvent> for [u8; 32] {
     fn from(input: &ConfigureRequestEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -4323,6 +5392,34 @@ impl Serialize for GravityNotifyEvent {
         self.y.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod gravity_notify_event {
+    use super::GravityNotifyEvent;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GravityNotifyEvent {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                response_type: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                event: GenRandom::generate(rng),
+                window: GenRandom::generate(rng),
+                x: GenRandom::generate(rng),
+                y: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(17398517945941815296);
+        let value = GravityNotifyEvent::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 impl From<&GravityNotifyEvent> for [u8; 32] {
     fn from(input: &GravityNotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -4432,6 +5529,33 @@ impl Serialize for ResizeRequestEvent {
         self.window.serialize_into(bytes);
         self.width.serialize_into(bytes);
         self.height.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod resize_request_event {
+    use super::ResizeRequestEvent;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for ResizeRequestEvent {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                response_type: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                window: GenRandom::generate(rng),
+                width: GenRandom::generate(rng),
+                height: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(2284888831424797184);
+        let value = ResizeRequestEvent::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 impl From<&ResizeRequestEvent> for [u8; 32] {
@@ -4546,6 +5670,17 @@ impl core::fmt::Debug for Place  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for Place {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::ON_TOP.0,
+            Self::ON_BOTTOM.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 /// Opcode for the CirculateNotify event
 pub const CIRCULATE_NOTIFY_EVENT: u8 = 26;
@@ -4630,6 +5765,33 @@ impl Serialize for CirculateNotifyEvent {
         bytes.extend_from_slice(&[0; 4]);
         u8::from(self.place).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 3]);
+    }
+}
+#[cfg(test)]
+mod circulate_notify_event {
+    use super::CirculateNotifyEvent;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for CirculateNotifyEvent {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                response_type: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                event: GenRandom::generate(rng),
+                window: GenRandom::generate(rng),
+                place: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(4475830633271271424);
+        let value = CirculateNotifyEvent::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 impl From<&CirculateNotifyEvent> for [u8; 32] {
@@ -4744,6 +5906,17 @@ impl core::fmt::Debug for Property  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for Property {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::NEW_VALUE.0,
+            Self::DELETE.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 /// Opcode for the PropertyNotify event
 pub const PROPERTY_NOTIFY_EVENT: u8 = 28;
@@ -4830,6 +6003,34 @@ impl Serialize for PropertyNotifyEvent {
         self.time.serialize_into(bytes);
         u8::from(self.state).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 3]);
+    }
+}
+#[cfg(test)]
+mod property_notify_event {
+    use super::PropertyNotifyEvent;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for PropertyNotifyEvent {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                response_type: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                window: GenRandom::generate(rng),
+                atom: GenRandom::generate(rng),
+                time: GenRandom::generate(rng),
+                state: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(1216729967102001152);
+        let value = PropertyNotifyEvent::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 impl From<&PropertyNotifyEvent> for [u8; 32] {
@@ -4947,6 +6148,33 @@ impl Serialize for SelectionClearEvent {
         self.selection.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod selection_clear_event {
+    use super::SelectionClearEvent;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for SelectionClearEvent {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                response_type: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                time: GenRandom::generate(rng),
+                owner: GenRandom::generate(rng),
+                selection: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(8478964078643392512);
+        let value = SelectionClearEvent::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 impl From<&SelectionClearEvent> for [u8; 32] {
     fn from(input: &SelectionClearEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -5051,6 +6279,16 @@ impl core::fmt::Debug for Time  {
             (Self::CURRENT_TIME.0.into(), "CURRENT_TIME", "CurrentTime"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for Time {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::CURRENT_TIME.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
     }
 }
 
@@ -5248,6 +6486,85 @@ impl core::fmt::Debug for AtomEnum  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for AtomEnum {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::NONE.0,
+            Self::ANY.0,
+            Self::PRIMARY.0,
+            Self::SECONDARY.0,
+            Self::ARC.0,
+            Self::ATOM.0,
+            Self::BITMAP.0,
+            Self::CARDINAL.0,
+            Self::COLORMAP.0,
+            Self::CURSOR.0,
+            Self::CUT_BUFFE_R0.0,
+            Self::CUT_BUFFE_R1.0,
+            Self::CUT_BUFFE_R2.0,
+            Self::CUT_BUFFE_R3.0,
+            Self::CUT_BUFFE_R4.0,
+            Self::CUT_BUFFE_R5.0,
+            Self::CUT_BUFFE_R6.0,
+            Self::CUT_BUFFE_R7.0,
+            Self::DRAWABLE.0,
+            Self::FONT.0,
+            Self::INTEGER.0,
+            Self::PIXMAP.0,
+            Self::POINT.0,
+            Self::RECTANGLE.0,
+            Self::RESOURCE_MANAGER.0,
+            Self::RGB_COLOR_MAP.0,
+            Self::RGB_BEST_MAP.0,
+            Self::RGB_BLUE_MAP.0,
+            Self::RGB_DEFAULT_MAP.0,
+            Self::RGB_GRAY_MAP.0,
+            Self::RGB_GREEN_MAP.0,
+            Self::RGB_RED_MAP.0,
+            Self::STRING.0,
+            Self::VISUALID.0,
+            Self::WINDOW.0,
+            Self::WM_COMMAND.0,
+            Self::WM_HINTS.0,
+            Self::WM_CLIENT_MACHINE.0,
+            Self::WM_ICON_NAME.0,
+            Self::WM_ICON_SIZE.0,
+            Self::WM_NAME.0,
+            Self::WM_NORMAL_HINTS.0,
+            Self::WM_SIZE_HINTS.0,
+            Self::WM_ZOOM_HINTS.0,
+            Self::MIN_SPACE.0,
+            Self::NORM_SPACE.0,
+            Self::MAX_SPACE.0,
+            Self::END_SPACE.0,
+            Self::SUPERSCRIPT_X.0,
+            Self::SUPERSCRIPT_Y.0,
+            Self::SUBSCRIPT_X.0,
+            Self::SUBSCRIPT_Y.0,
+            Self::UNDERLINE_POSITION.0,
+            Self::UNDERLINE_THICKNESS.0,
+            Self::STRIKEOUT_ASCENT.0,
+            Self::STRIKEOUT_DESCENT.0,
+            Self::ITALIC_ANGLE.0,
+            Self::X_HEIGHT.0,
+            Self::QUAD_WIDTH.0,
+            Self::WEIGHT.0,
+            Self::POINT_SIZE.0,
+            Self::RESOLUTION.0,
+            Self::COPYRIGHT.0,
+            Self::NOTICE.0,
+            Self::FONT_NAME.0,
+            Self::FAMILY_NAME.0,
+            Self::FULL_NAME.0,
+            Self::CAP_HEIGHT.0,
+            Self::WM_CLASS.0,
+            Self::WM_TRANSIENT_FOR.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 /// Opcode for the SelectionRequest event
 pub const SELECTION_REQUEST_EVENT: u8 = 30;
@@ -5335,6 +6652,36 @@ impl Serialize for SelectionRequestEvent {
         self.selection.serialize_into(bytes);
         self.target.serialize_into(bytes);
         self.property.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod selection_request_event {
+    use super::SelectionRequestEvent;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for SelectionRequestEvent {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                response_type: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                time: GenRandom::generate(rng),
+                owner: GenRandom::generate(rng),
+                requestor: GenRandom::generate(rng),
+                selection: GenRandom::generate(rng),
+                target: GenRandom::generate(rng),
+                property: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(2821745570697891840);
+        let value = SelectionRequestEvent::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 impl From<&SelectionRequestEvent> for [u8; 32] {
@@ -5470,6 +6817,35 @@ impl Serialize for SelectionNotifyEvent {
         self.property.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod selection_notify_event {
+    use super::SelectionNotifyEvent;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for SelectionNotifyEvent {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                response_type: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                time: GenRandom::generate(rng),
+                requestor: GenRandom::generate(rng),
+                selection: GenRandom::generate(rng),
+                target: GenRandom::generate(rng),
+                property: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(10942616926495842304);
+        let value = SelectionNotifyEvent::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 impl From<&SelectionNotifyEvent> for [u8; 32] {
     fn from(input: &SelectionNotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -5584,6 +6960,17 @@ impl core::fmt::Debug for ColormapState  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for ColormapState {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::UNINSTALLED.0,
+            Self::INSTALLED.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -5639,6 +7026,16 @@ impl core::fmt::Debug for ColormapEnum  {
             (Self::NONE.0.into(), "NONE", "None"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for ColormapEnum {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::NONE.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
     }
 }
 
@@ -5724,6 +7121,34 @@ impl Serialize for ColormapNotifyEvent {
         self.new.serialize_into(bytes);
         u8::from(self.state).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 2]);
+    }
+}
+#[cfg(test)]
+mod colormap_notify_event {
+    use super::ColormapNotifyEvent;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for ColormapNotifyEvent {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                response_type: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                window: GenRandom::generate(rng),
+                colormap: GenRandom::generate(rng),
+                new: GenRandom::generate(rng),
+                state: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(3178461586220023808);
+        let value = ColormapNotifyEvent::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 impl From<&ColormapNotifyEvent> for [u8; 32] {
@@ -5932,6 +7357,12 @@ impl From<[u32; 5]> for ClientMessageData {
         Self(value)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for ClientMessageData {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        Self(crate::x11_utils::GenRandom::generate(rng))
+    }
+}
 
 /// Opcode for the ClientMessage event
 pub const CLIENT_MESSAGE_EVENT: u8 = 33;
@@ -6030,6 +7461,34 @@ impl Serialize for ClientMessageEvent {
         self.window.serialize_into(bytes);
         self.type_.serialize_into(bytes);
         self.data.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod client_message_event {
+    use super::ClientMessageEvent;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for ClientMessageEvent {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                response_type: GenRandom::generate(rng),
+                format: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                window: GenRandom::generate(rng),
+                type_: GenRandom::generate(rng),
+                data: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(4260737068376672768);
+        let value = ClientMessageEvent::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 impl From<&ClientMessageEvent> for [u8; 32] {
@@ -6162,6 +7621,18 @@ impl core::fmt::Debug for Mapping  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for Mapping {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::MODIFIER.0,
+            Self::KEYBOARD.0,
+            Self::POINTER.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 /// Opcode for the MappingNotify event
 pub const MAPPING_NOTIFY_EVENT: u8 = 34;
@@ -6227,6 +7698,33 @@ impl Serialize for MappingNotifyEvent {
         self.first_keycode.serialize_into(bytes);
         self.count.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 1]);
+    }
+}
+#[cfg(test)]
+mod mapping_notify_event {
+    use super::MappingNotifyEvent;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for MappingNotifyEvent {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                response_type: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                request: GenRandom::generate(rng),
+                first_keycode: GenRandom::generate(rng),
+                count: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(8050657948899606528);
+        let value = MappingNotifyEvent::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 impl From<&MappingNotifyEvent> for [u8; 32] {
@@ -6366,6 +7864,33 @@ impl Serialize for GeGenericEvent {
         bytes.extend_from_slice(&[0; 22]);
     }
 }
+#[cfg(test)]
+mod ge_generic_event {
+    use super::GeGenericEvent;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GeGenericEvent {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                response_type: GenRandom::generate(rng),
+                extension: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                event_type: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(9232477601338350656);
+        let value = GeGenericEvent::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the Request error
 pub const REQUEST_ERROR: u8 = 1;
@@ -6470,6 +7995,18 @@ impl core::fmt::Debug for WindowClass  {
             (Self::INPUT_ONLY.0.into(), "INPUT_ONLY", "InputOnly"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for WindowClass {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::COPY_FROM_PARENT.0,
+            Self::INPUT_OUTPUT.0,
+            Self::INPUT_ONLY.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
     }
 }
 
@@ -6622,6 +8159,30 @@ impl core::fmt::Debug for CW  {
     }
 }
 bitmask_binop!(CW, u16);
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for CW {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::BACK_PIXMAP.0,
+            Self::BACK_PIXEL.0,
+            Self::BORDER_PIXMAP.0,
+            Self::BORDER_PIXEL.0,
+            Self::BIT_GRAVITY.0,
+            Self::WIN_GRAVITY.0,
+            Self::BACKING_STORE.0,
+            Self::BACKING_PLANES.0,
+            Self::BACKING_PIXEL.0,
+            Self::OVERRIDE_REDIRECT.0,
+            Self::SAVE_UNDER.0,
+            Self::EVENT_MASK.0,
+            Self::DONT_PROPAGATE.0,
+            Self::COLORMAP.0,
+            Self::CURSOR.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -6693,6 +8254,17 @@ impl core::fmt::Debug for BackPixmap  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for BackPixmap {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::NONE.0,
+            Self::PARENT_RELATIVE.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -6758,6 +8330,27 @@ impl core::fmt::Debug for Gravity  {
             (Self::STATIC.0, "STATIC", "Static"),
         ];
         pretty_print_enum(fmt, self.0, &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for Gravity {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::BIT_FORGET.0,
+            Self::WIN_UNMAP.0,
+            Self::NORTH_WEST.0,
+            Self::NORTH.0,
+            Self::NORTH_EAST.0,
+            Self::WEST.0,
+            Self::CENTER.0,
+            Self::EAST.0,
+            Self::SOUTH_WEST.0,
+            Self::SOUTH.0,
+            Self::SOUTH_EAST.0,
+            Self::STATIC.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
     }
 }
 
@@ -7017,6 +8610,327 @@ impl CreateWindowAux {
             expr_value |= u32::from(CW::CURSOR);
         }
         expr_value
+    }
+}
+#[cfg(test)]
+mod create_window_aux {
+    use super::CreateWindowAux;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for CreateWindowAux {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                background_pixmap: GenRandom::generate(rng),
+                background_pixel: GenRandom::generate(rng),
+                border_pixmap: GenRandom::generate(rng),
+                border_pixel: GenRandom::generate(rng),
+                bit_gravity: GenRandom::generate(rng),
+                win_gravity: GenRandom::generate(rng),
+                backing_store: GenRandom::generate(rng),
+                backing_planes: GenRandom::generate(rng),
+                backing_pixel: GenRandom::generate(rng),
+                override_redirect: GenRandom::generate(rng),
+                save_under: GenRandom::generate(rng),
+                event_mask: GenRandom::generate(rng),
+                do_not_propogate_mask: GenRandom::generate(rng),
+                colormap: GenRandom::generate(rng),
+                cursor: GenRandom::generate(rng),
+            }
+        }
+    }
+    fn generate_values(rng: &Rng) -> alloc::vec::Vec<CreateWindowAux> {
+        alloc::vec![
+            CreateWindowAux {
+                background_pixmap: None,
+                background_pixel: None,
+                border_pixmap: None,
+                border_pixel: None,
+                bit_gravity: None,
+                win_gravity: None,
+                backing_store: None,
+                backing_planes: None,
+                backing_pixel: None,
+                override_redirect: None,
+                save_under: None,
+                event_mask: None,
+                do_not_propogate_mask: None,
+                colormap: None,
+                cursor: None,
+            },
+            CreateWindowAux {
+                background_pixmap: Some(GenRandom::generate(rng)),
+                background_pixel: Some(GenRandom::generate(rng)),
+                border_pixmap: Some(GenRandom::generate(rng)),
+                border_pixel: Some(GenRandom::generate(rng)),
+                bit_gravity: Some(GenRandom::generate(rng)),
+                win_gravity: Some(GenRandom::generate(rng)),
+                backing_store: Some(GenRandom::generate(rng)),
+                backing_planes: Some(GenRandom::generate(rng)),
+                backing_pixel: Some(GenRandom::generate(rng)),
+                override_redirect: Some(GenRandom::generate(rng)),
+                save_under: Some(GenRandom::generate(rng)),
+                event_mask: Some(GenRandom::generate(rng)),
+                do_not_propogate_mask: Some(GenRandom::generate(rng)),
+                colormap: Some(GenRandom::generate(rng)),
+                cursor: Some(GenRandom::generate(rng)),
+            },
+            CreateWindowAux {
+                background_pixmap: Some(GenRandom::generate(rng)),
+                background_pixel: None,
+                border_pixmap: None,
+                border_pixel: None,
+                bit_gravity: None,
+                win_gravity: None,
+                backing_store: None,
+                backing_planes: None,
+                backing_pixel: None,
+                override_redirect: None,
+                save_under: None,
+                event_mask: None,
+                do_not_propogate_mask: None,
+                colormap: None,
+                cursor: None,
+            },
+            CreateWindowAux {
+                background_pixmap: None,
+                background_pixel: Some(GenRandom::generate(rng)),
+                border_pixmap: None,
+                border_pixel: None,
+                bit_gravity: None,
+                win_gravity: None,
+                backing_store: None,
+                backing_planes: None,
+                backing_pixel: None,
+                override_redirect: None,
+                save_under: None,
+                event_mask: None,
+                do_not_propogate_mask: None,
+                colormap: None,
+                cursor: None,
+            },
+            CreateWindowAux {
+                background_pixmap: None,
+                background_pixel: None,
+                border_pixmap: Some(GenRandom::generate(rng)),
+                border_pixel: None,
+                bit_gravity: None,
+                win_gravity: None,
+                backing_store: None,
+                backing_planes: None,
+                backing_pixel: None,
+                override_redirect: None,
+                save_under: None,
+                event_mask: None,
+                do_not_propogate_mask: None,
+                colormap: None,
+                cursor: None,
+            },
+            CreateWindowAux {
+                background_pixmap: None,
+                background_pixel: None,
+                border_pixmap: None,
+                border_pixel: Some(GenRandom::generate(rng)),
+                bit_gravity: None,
+                win_gravity: None,
+                backing_store: None,
+                backing_planes: None,
+                backing_pixel: None,
+                override_redirect: None,
+                save_under: None,
+                event_mask: None,
+                do_not_propogate_mask: None,
+                colormap: None,
+                cursor: None,
+            },
+            CreateWindowAux {
+                background_pixmap: None,
+                background_pixel: None,
+                border_pixmap: None,
+                border_pixel: None,
+                bit_gravity: Some(GenRandom::generate(rng)),
+                win_gravity: None,
+                backing_store: None,
+                backing_planes: None,
+                backing_pixel: None,
+                override_redirect: None,
+                save_under: None,
+                event_mask: None,
+                do_not_propogate_mask: None,
+                colormap: None,
+                cursor: None,
+            },
+            CreateWindowAux {
+                background_pixmap: None,
+                background_pixel: None,
+                border_pixmap: None,
+                border_pixel: None,
+                bit_gravity: None,
+                win_gravity: Some(GenRandom::generate(rng)),
+                backing_store: None,
+                backing_planes: None,
+                backing_pixel: None,
+                override_redirect: None,
+                save_under: None,
+                event_mask: None,
+                do_not_propogate_mask: None,
+                colormap: None,
+                cursor: None,
+            },
+            CreateWindowAux {
+                background_pixmap: None,
+                background_pixel: None,
+                border_pixmap: None,
+                border_pixel: None,
+                bit_gravity: None,
+                win_gravity: None,
+                backing_store: Some(GenRandom::generate(rng)),
+                backing_planes: None,
+                backing_pixel: None,
+                override_redirect: None,
+                save_under: None,
+                event_mask: None,
+                do_not_propogate_mask: None,
+                colormap: None,
+                cursor: None,
+            },
+            CreateWindowAux {
+                background_pixmap: None,
+                background_pixel: None,
+                border_pixmap: None,
+                border_pixel: None,
+                bit_gravity: None,
+                win_gravity: None,
+                backing_store: None,
+                backing_planes: Some(GenRandom::generate(rng)),
+                backing_pixel: None,
+                override_redirect: None,
+                save_under: None,
+                event_mask: None,
+                do_not_propogate_mask: None,
+                colormap: None,
+                cursor: None,
+            },
+            CreateWindowAux {
+                background_pixmap: None,
+                background_pixel: None,
+                border_pixmap: None,
+                border_pixel: None,
+                bit_gravity: None,
+                win_gravity: None,
+                backing_store: None,
+                backing_planes: None,
+                backing_pixel: Some(GenRandom::generate(rng)),
+                override_redirect: None,
+                save_under: None,
+                event_mask: None,
+                do_not_propogate_mask: None,
+                colormap: None,
+                cursor: None,
+            },
+            CreateWindowAux {
+                background_pixmap: None,
+                background_pixel: None,
+                border_pixmap: None,
+                border_pixel: None,
+                bit_gravity: None,
+                win_gravity: None,
+                backing_store: None,
+                backing_planes: None,
+                backing_pixel: None,
+                override_redirect: Some(GenRandom::generate(rng)),
+                save_under: None,
+                event_mask: None,
+                do_not_propogate_mask: None,
+                colormap: None,
+                cursor: None,
+            },
+            CreateWindowAux {
+                background_pixmap: None,
+                background_pixel: None,
+                border_pixmap: None,
+                border_pixel: None,
+                bit_gravity: None,
+                win_gravity: None,
+                backing_store: None,
+                backing_planes: None,
+                backing_pixel: None,
+                override_redirect: None,
+                save_under: Some(GenRandom::generate(rng)),
+                event_mask: None,
+                do_not_propogate_mask: None,
+                colormap: None,
+                cursor: None,
+            },
+            CreateWindowAux {
+                background_pixmap: None,
+                background_pixel: None,
+                border_pixmap: None,
+                border_pixel: None,
+                bit_gravity: None,
+                win_gravity: None,
+                backing_store: None,
+                backing_planes: None,
+                backing_pixel: None,
+                override_redirect: None,
+                save_under: None,
+                event_mask: Some(GenRandom::generate(rng)),
+                do_not_propogate_mask: None,
+                colormap: None,
+                cursor: None,
+            },
+            CreateWindowAux {
+                background_pixmap: None,
+                background_pixel: None,
+                border_pixmap: None,
+                border_pixel: None,
+                bit_gravity: None,
+                win_gravity: None,
+                backing_store: None,
+                backing_planes: None,
+                backing_pixel: None,
+                override_redirect: None,
+                save_under: None,
+                event_mask: None,
+                do_not_propogate_mask: Some(GenRandom::generate(rng)),
+                colormap: None,
+                cursor: None,
+            },
+            CreateWindowAux {
+                background_pixmap: None,
+                background_pixel: None,
+                border_pixmap: None,
+                border_pixel: None,
+                bit_gravity: None,
+                win_gravity: None,
+                backing_store: None,
+                backing_planes: None,
+                backing_pixel: None,
+                override_redirect: None,
+                save_under: None,
+                event_mask: None,
+                do_not_propogate_mask: None,
+                colormap: Some(GenRandom::generate(rng)),
+                cursor: None,
+            },
+            CreateWindowAux {
+                background_pixmap: None,
+                background_pixel: None,
+                border_pixmap: None,
+                border_pixel: None,
+                bit_gravity: None,
+                win_gravity: None,
+                backing_store: None,
+                backing_planes: None,
+                backing_pixel: None,
+                override_redirect: None,
+                save_under: None,
+                event_mask: None,
+                do_not_propogate_mask: None,
+                colormap: None,
+                cursor: Some(GenRandom::generate(rng)),
+            },
+        ]
     }
 }
 impl CreateWindowAux {
@@ -7570,6 +9484,327 @@ impl ChangeWindowAttributesAux {
         expr_value
     }
 }
+#[cfg(test)]
+mod change_window_attributes_aux {
+    use super::ChangeWindowAttributesAux;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for ChangeWindowAttributesAux {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                background_pixmap: GenRandom::generate(rng),
+                background_pixel: GenRandom::generate(rng),
+                border_pixmap: GenRandom::generate(rng),
+                border_pixel: GenRandom::generate(rng),
+                bit_gravity: GenRandom::generate(rng),
+                win_gravity: GenRandom::generate(rng),
+                backing_store: GenRandom::generate(rng),
+                backing_planes: GenRandom::generate(rng),
+                backing_pixel: GenRandom::generate(rng),
+                override_redirect: GenRandom::generate(rng),
+                save_under: GenRandom::generate(rng),
+                event_mask: GenRandom::generate(rng),
+                do_not_propogate_mask: GenRandom::generate(rng),
+                colormap: GenRandom::generate(rng),
+                cursor: GenRandom::generate(rng),
+            }
+        }
+    }
+    fn generate_values(rng: &Rng) -> alloc::vec::Vec<ChangeWindowAttributesAux> {
+        alloc::vec![
+            ChangeWindowAttributesAux {
+                background_pixmap: None,
+                background_pixel: None,
+                border_pixmap: None,
+                border_pixel: None,
+                bit_gravity: None,
+                win_gravity: None,
+                backing_store: None,
+                backing_planes: None,
+                backing_pixel: None,
+                override_redirect: None,
+                save_under: None,
+                event_mask: None,
+                do_not_propogate_mask: None,
+                colormap: None,
+                cursor: None,
+            },
+            ChangeWindowAttributesAux {
+                background_pixmap: Some(GenRandom::generate(rng)),
+                background_pixel: Some(GenRandom::generate(rng)),
+                border_pixmap: Some(GenRandom::generate(rng)),
+                border_pixel: Some(GenRandom::generate(rng)),
+                bit_gravity: Some(GenRandom::generate(rng)),
+                win_gravity: Some(GenRandom::generate(rng)),
+                backing_store: Some(GenRandom::generate(rng)),
+                backing_planes: Some(GenRandom::generate(rng)),
+                backing_pixel: Some(GenRandom::generate(rng)),
+                override_redirect: Some(GenRandom::generate(rng)),
+                save_under: Some(GenRandom::generate(rng)),
+                event_mask: Some(GenRandom::generate(rng)),
+                do_not_propogate_mask: Some(GenRandom::generate(rng)),
+                colormap: Some(GenRandom::generate(rng)),
+                cursor: Some(GenRandom::generate(rng)),
+            },
+            ChangeWindowAttributesAux {
+                background_pixmap: Some(GenRandom::generate(rng)),
+                background_pixel: None,
+                border_pixmap: None,
+                border_pixel: None,
+                bit_gravity: None,
+                win_gravity: None,
+                backing_store: None,
+                backing_planes: None,
+                backing_pixel: None,
+                override_redirect: None,
+                save_under: None,
+                event_mask: None,
+                do_not_propogate_mask: None,
+                colormap: None,
+                cursor: None,
+            },
+            ChangeWindowAttributesAux {
+                background_pixmap: None,
+                background_pixel: Some(GenRandom::generate(rng)),
+                border_pixmap: None,
+                border_pixel: None,
+                bit_gravity: None,
+                win_gravity: None,
+                backing_store: None,
+                backing_planes: None,
+                backing_pixel: None,
+                override_redirect: None,
+                save_under: None,
+                event_mask: None,
+                do_not_propogate_mask: None,
+                colormap: None,
+                cursor: None,
+            },
+            ChangeWindowAttributesAux {
+                background_pixmap: None,
+                background_pixel: None,
+                border_pixmap: Some(GenRandom::generate(rng)),
+                border_pixel: None,
+                bit_gravity: None,
+                win_gravity: None,
+                backing_store: None,
+                backing_planes: None,
+                backing_pixel: None,
+                override_redirect: None,
+                save_under: None,
+                event_mask: None,
+                do_not_propogate_mask: None,
+                colormap: None,
+                cursor: None,
+            },
+            ChangeWindowAttributesAux {
+                background_pixmap: None,
+                background_pixel: None,
+                border_pixmap: None,
+                border_pixel: Some(GenRandom::generate(rng)),
+                bit_gravity: None,
+                win_gravity: None,
+                backing_store: None,
+                backing_planes: None,
+                backing_pixel: None,
+                override_redirect: None,
+                save_under: None,
+                event_mask: None,
+                do_not_propogate_mask: None,
+                colormap: None,
+                cursor: None,
+            },
+            ChangeWindowAttributesAux {
+                background_pixmap: None,
+                background_pixel: None,
+                border_pixmap: None,
+                border_pixel: None,
+                bit_gravity: Some(GenRandom::generate(rng)),
+                win_gravity: None,
+                backing_store: None,
+                backing_planes: None,
+                backing_pixel: None,
+                override_redirect: None,
+                save_under: None,
+                event_mask: None,
+                do_not_propogate_mask: None,
+                colormap: None,
+                cursor: None,
+            },
+            ChangeWindowAttributesAux {
+                background_pixmap: None,
+                background_pixel: None,
+                border_pixmap: None,
+                border_pixel: None,
+                bit_gravity: None,
+                win_gravity: Some(GenRandom::generate(rng)),
+                backing_store: None,
+                backing_planes: None,
+                backing_pixel: None,
+                override_redirect: None,
+                save_under: None,
+                event_mask: None,
+                do_not_propogate_mask: None,
+                colormap: None,
+                cursor: None,
+            },
+            ChangeWindowAttributesAux {
+                background_pixmap: None,
+                background_pixel: None,
+                border_pixmap: None,
+                border_pixel: None,
+                bit_gravity: None,
+                win_gravity: None,
+                backing_store: Some(GenRandom::generate(rng)),
+                backing_planes: None,
+                backing_pixel: None,
+                override_redirect: None,
+                save_under: None,
+                event_mask: None,
+                do_not_propogate_mask: None,
+                colormap: None,
+                cursor: None,
+            },
+            ChangeWindowAttributesAux {
+                background_pixmap: None,
+                background_pixel: None,
+                border_pixmap: None,
+                border_pixel: None,
+                bit_gravity: None,
+                win_gravity: None,
+                backing_store: None,
+                backing_planes: Some(GenRandom::generate(rng)),
+                backing_pixel: None,
+                override_redirect: None,
+                save_under: None,
+                event_mask: None,
+                do_not_propogate_mask: None,
+                colormap: None,
+                cursor: None,
+            },
+            ChangeWindowAttributesAux {
+                background_pixmap: None,
+                background_pixel: None,
+                border_pixmap: None,
+                border_pixel: None,
+                bit_gravity: None,
+                win_gravity: None,
+                backing_store: None,
+                backing_planes: None,
+                backing_pixel: Some(GenRandom::generate(rng)),
+                override_redirect: None,
+                save_under: None,
+                event_mask: None,
+                do_not_propogate_mask: None,
+                colormap: None,
+                cursor: None,
+            },
+            ChangeWindowAttributesAux {
+                background_pixmap: None,
+                background_pixel: None,
+                border_pixmap: None,
+                border_pixel: None,
+                bit_gravity: None,
+                win_gravity: None,
+                backing_store: None,
+                backing_planes: None,
+                backing_pixel: None,
+                override_redirect: Some(GenRandom::generate(rng)),
+                save_under: None,
+                event_mask: None,
+                do_not_propogate_mask: None,
+                colormap: None,
+                cursor: None,
+            },
+            ChangeWindowAttributesAux {
+                background_pixmap: None,
+                background_pixel: None,
+                border_pixmap: None,
+                border_pixel: None,
+                bit_gravity: None,
+                win_gravity: None,
+                backing_store: None,
+                backing_planes: None,
+                backing_pixel: None,
+                override_redirect: None,
+                save_under: Some(GenRandom::generate(rng)),
+                event_mask: None,
+                do_not_propogate_mask: None,
+                colormap: None,
+                cursor: None,
+            },
+            ChangeWindowAttributesAux {
+                background_pixmap: None,
+                background_pixel: None,
+                border_pixmap: None,
+                border_pixel: None,
+                bit_gravity: None,
+                win_gravity: None,
+                backing_store: None,
+                backing_planes: None,
+                backing_pixel: None,
+                override_redirect: None,
+                save_under: None,
+                event_mask: Some(GenRandom::generate(rng)),
+                do_not_propogate_mask: None,
+                colormap: None,
+                cursor: None,
+            },
+            ChangeWindowAttributesAux {
+                background_pixmap: None,
+                background_pixel: None,
+                border_pixmap: None,
+                border_pixel: None,
+                bit_gravity: None,
+                win_gravity: None,
+                backing_store: None,
+                backing_planes: None,
+                backing_pixel: None,
+                override_redirect: None,
+                save_under: None,
+                event_mask: None,
+                do_not_propogate_mask: Some(GenRandom::generate(rng)),
+                colormap: None,
+                cursor: None,
+            },
+            ChangeWindowAttributesAux {
+                background_pixmap: None,
+                background_pixel: None,
+                border_pixmap: None,
+                border_pixel: None,
+                bit_gravity: None,
+                win_gravity: None,
+                backing_store: None,
+                backing_planes: None,
+                backing_pixel: None,
+                override_redirect: None,
+                save_under: None,
+                event_mask: None,
+                do_not_propogate_mask: None,
+                colormap: Some(GenRandom::generate(rng)),
+                cursor: None,
+            },
+            ChangeWindowAttributesAux {
+                background_pixmap: None,
+                background_pixel: None,
+                border_pixmap: None,
+                border_pixel: None,
+                bit_gravity: None,
+                win_gravity: None,
+                backing_store: None,
+                backing_planes: None,
+                backing_pixel: None,
+                override_redirect: None,
+                save_under: None,
+                event_mask: None,
+                do_not_propogate_mask: None,
+                colormap: None,
+                cursor: Some(GenRandom::generate(rng)),
+            },
+        ]
+    }
+}
 impl ChangeWindowAttributesAux {
     /// Create a new instance with all fields unset / not present.
     pub fn new() -> Self {
@@ -7824,6 +10059,18 @@ impl core::fmt::Debug for MapState  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for MapState {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::UNMAPPED.0,
+            Self::UNVIEWABLE.0,
+            Self::VIEWABLE.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 /// Opcode for the GetWindowAttributes request
 pub const GET_WINDOW_ATTRIBUTES_REQUEST: u8 = 3;
@@ -8060,6 +10307,45 @@ impl Serialize for GetWindowAttributesReply {
         bytes.extend_from_slice(&[0; 2]);
     }
 }
+#[cfg(test)]
+mod get_window_attributes_reply {
+    use super::GetWindowAttributesReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetWindowAttributesReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                backing_store: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                visual: GenRandom::generate(rng),
+                class: GenRandom::generate(rng),
+                bit_gravity: GenRandom::generate(rng),
+                win_gravity: GenRandom::generate(rng),
+                backing_planes: GenRandom::generate(rng),
+                backing_pixel: GenRandom::generate(rng),
+                save_under: GenRandom::generate(rng),
+                map_is_installed: GenRandom::generate(rng),
+                map_state: GenRandom::generate(rng),
+                override_redirect: GenRandom::generate(rng),
+                colormap: GenRandom::generate(rng),
+                all_event_masks: GenRandom::generate(rng),
+                your_event_mask: GenRandom::generate(rng),
+                do_not_propagate_mask: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(13452508855763206144);
+        let value = GetWindowAttributesReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the DestroyWindow request
 pub const DESTROY_WINDOW_REQUEST: u8 = 4;
@@ -8251,6 +10537,17 @@ impl core::fmt::Debug for SetMode  {
             (Self::DELETE.0.into(), "DELETE", "Delete"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for SetMode {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::INSERT.0,
+            Self::DELETE.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
     }
 }
 
@@ -8793,6 +11090,22 @@ impl core::fmt::Debug for ConfigWindow  {
     }
 }
 bitmask_binop!(ConfigWindow, u8);
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for ConfigWindow {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::X.0,
+            Self::Y.0,
+            Self::WIDTH.0,
+            Self::HEIGHT.0,
+            Self::BORDER_WIDTH.0,
+            Self::SIBLING.0,
+            Self::STACK_MODE.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -8844,6 +11157,20 @@ impl core::fmt::Debug for StackMode  {
             (Self::OPPOSITE.0, "OPPOSITE", "Opposite"),
         ];
         pretty_print_enum(fmt, self.0, &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for StackMode {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::ABOVE.0,
+            Self::BELOW.0,
+            Self::TOP_IF.0,
+            Self::BOTTOM_IF.0,
+            Self::OPPOSITE.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
     }
 }
 
@@ -8981,6 +11308,111 @@ impl ConfigureWindowAux {
             expr_value |= u16::from(ConfigWindow::STACK_MODE);
         }
         expr_value
+    }
+}
+#[cfg(test)]
+mod configure_window_aux {
+    use super::ConfigureWindowAux;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for ConfigureWindowAux {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                x: GenRandom::generate(rng),
+                y: GenRandom::generate(rng),
+                width: GenRandom::generate(rng),
+                height: GenRandom::generate(rng),
+                border_width: GenRandom::generate(rng),
+                sibling: GenRandom::generate(rng),
+                stack_mode: GenRandom::generate(rng),
+            }
+        }
+    }
+    fn generate_values(rng: &Rng) -> alloc::vec::Vec<ConfigureWindowAux> {
+        alloc::vec![
+            ConfigureWindowAux {
+                x: None,
+                y: None,
+                width: None,
+                height: None,
+                border_width: None,
+                sibling: None,
+                stack_mode: None,
+            },
+            ConfigureWindowAux {
+                x: Some(GenRandom::generate(rng)),
+                y: Some(GenRandom::generate(rng)),
+                width: Some(GenRandom::generate(rng)),
+                height: Some(GenRandom::generate(rng)),
+                border_width: Some(GenRandom::generate(rng)),
+                sibling: Some(GenRandom::generate(rng)),
+                stack_mode: Some(GenRandom::generate(rng)),
+            },
+            ConfigureWindowAux {
+                x: Some(GenRandom::generate(rng)),
+                y: None,
+                width: None,
+                height: None,
+                border_width: None,
+                sibling: None,
+                stack_mode: None,
+            },
+            ConfigureWindowAux {
+                x: None,
+                y: Some(GenRandom::generate(rng)),
+                width: None,
+                height: None,
+                border_width: None,
+                sibling: None,
+                stack_mode: None,
+            },
+            ConfigureWindowAux {
+                x: None,
+                y: None,
+                width: Some(GenRandom::generate(rng)),
+                height: None,
+                border_width: None,
+                sibling: None,
+                stack_mode: None,
+            },
+            ConfigureWindowAux {
+                x: None,
+                y: None,
+                width: None,
+                height: Some(GenRandom::generate(rng)),
+                border_width: None,
+                sibling: None,
+                stack_mode: None,
+            },
+            ConfigureWindowAux {
+                x: None,
+                y: None,
+                width: None,
+                height: None,
+                border_width: Some(GenRandom::generate(rng)),
+                sibling: None,
+                stack_mode: None,
+            },
+            ConfigureWindowAux {
+                x: None,
+                y: None,
+                width: None,
+                height: None,
+                border_width: None,
+                sibling: Some(GenRandom::generate(rng)),
+                stack_mode: None,
+            },
+            ConfigureWindowAux {
+                x: None,
+                y: None,
+                width: None,
+                height: None,
+                border_width: None,
+                sibling: None,
+                stack_mode: Some(GenRandom::generate(rng)),
+            },
+        ]
     }
 }
 impl ConfigureWindowAux {
@@ -9247,6 +11679,17 @@ impl core::fmt::Debug for Circulate  {
             (Self::LOWER_HIGHEST.0.into(), "LOWER_HIGHEST", "LowerHighest"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for Circulate {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::RAISE_LOWEST.0,
+            Self::LOWER_HIGHEST.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
     }
 }
 
@@ -9526,6 +11969,37 @@ impl Serialize for GetGeometryReply {
         bytes.extend_from_slice(&[0; 2]);
     }
 }
+#[cfg(test)]
+mod get_geometry_reply {
+    use super::GetGeometryReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetGeometryReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                depth: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                root: GenRandom::generate(rng),
+                x: GenRandom::generate(rng),
+                y: GenRandom::generate(rng),
+                width: GenRandom::generate(rng),
+                height: GenRandom::generate(rng),
+                border_width: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(11970134353351012352);
+        let value = GetGeometryReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the QueryTree request
 pub const QUERY_TREE_REQUEST: u8 = 15;
@@ -9691,6 +12165,33 @@ impl QueryTreeReply {
     pub fn children_len(&self) -> u16 {
         self.children.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod query_tree_reply {
+    use super::QueryTreeReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for QueryTreeReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                root: GenRandom::generate(rng),
+                parent: GenRandom::generate(rng),
+                children: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(6370668853011081216);
+        let value = QueryTreeReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -9868,6 +12369,31 @@ impl Serialize for InternAtomReply {
         self.atom.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod intern_atom_reply {
+    use super::InternAtomReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for InternAtomReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                atom: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(15487324559096004608);
+        let value = InternAtomReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the GetAtomName request
 pub const GET_ATOM_NAME_REQUEST: u8 = 17;
@@ -9989,6 +12515,31 @@ impl GetAtomNameReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod get_atom_name_reply {
+    use super::GetAtomNameReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetAtomNameReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                name: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(8176970650204008448);
+        let value = GetAtomNameReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// # Fields
 ///
@@ -10057,6 +12608,18 @@ impl core::fmt::Debug for PropMode  {
             (Self::APPEND.0.into(), "APPEND", "Append"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for PropMode {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::REPLACE.0,
+            Self::PREPEND.0,
+            Self::APPEND.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
     }
 }
 
@@ -10341,6 +12904,16 @@ impl core::fmt::Debug for GetPropertyType  {
             (Self::ANY.0.into(), "ANY", "Any"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for GetPropertyType {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::ANY.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
     }
 }
 
@@ -10727,6 +13300,35 @@ impl Serialize for GetPropertyReply {
         bytes.extend_from_slice(&self.value);
     }
 }
+#[cfg(test)]
+mod get_property_reply {
+    use super::GetPropertyReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetPropertyReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                format: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                type_: GenRandom::generate(rng),
+                bytes_after: GenRandom::generate(rng),
+                value_len: GenRandom::generate(rng),
+                value: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(5255331004769370112);
+        let value = GetPropertyReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the ListProperties request
 pub const LIST_PROPERTIES_REQUEST: u8 = 21;
@@ -10845,6 +13447,31 @@ impl ListPropertiesReply {
     pub fn atoms_len(&self) -> u16 {
         self.atoms.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod list_properties_reply {
+    use super::ListPropertiesReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for ListPropertiesReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                atoms: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(5363867181899579392);
+        let value = ListPropertiesReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -11083,6 +13710,31 @@ impl Serialize for GetSelectionOwnerReply {
         self.owner.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod get_selection_owner_reply {
+    use super::GetSelectionOwnerReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetSelectionOwnerReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                owner: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(13184655366915031040);
+        let value = GetSelectionOwnerReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the ConvertSelection request
 pub const CONVERT_SELECTION_REQUEST: u8 = 24;
@@ -11240,6 +13892,17 @@ impl core::fmt::Debug for SendEventDest  {
             (Self::ITEM_FOCUS.0.into(), "ITEM_FOCUS", "ItemFocus"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for SendEventDest {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::POINTER_WINDOW.0,
+            Self::ITEM_FOCUS.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
     }
 }
 
@@ -11461,6 +14124,17 @@ impl core::fmt::Debug for GrabMode  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for GrabMode {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::SYNC.0,
+            Self::ASYNC.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -11526,6 +14200,20 @@ impl core::fmt::Debug for GrabStatus  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for GrabStatus {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::SUCCESS.0,
+            Self::ALREADY_GRABBED.0,
+            Self::INVALID_TIME.0,
+            Self::NOT_VIEWABLE.0,
+            Self::FROZEN.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -11581,6 +14269,16 @@ impl core::fmt::Debug for CursorEnum  {
             (Self::NONE.0.into(), "NONE", "None"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for CursorEnum {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::NONE.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
     }
 }
 
@@ -11809,6 +14507,31 @@ impl Serialize for GrabPointerReply {
         self.length.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod grab_pointer_reply {
+    use super::GrabPointerReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GrabPointerReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                status: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(15949059947942510592);
+        let value = GrabPointerReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the UngrabPointer request
 pub const UNGRAB_POINTER_REQUEST: u8 = 27;
@@ -11961,6 +14684,21 @@ impl core::fmt::Debug for ButtonIndex  {
             (Self::M5.0.into(), "M5", "M5"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for ButtonIndex {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::ANY.0,
+            Self::M1.0,
+            Self::M2.0,
+            Self::M3.0,
+            Self::M4.0,
+            Self::M5.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
     }
 }
 
@@ -12477,6 +15215,31 @@ impl Serialize for GrabKeyboardReply {
         self.length.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod grab_keyboard_reply {
+    use super::GrabKeyboardReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GrabKeyboardReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                status: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(576348105627131904);
+        let value = GrabKeyboardReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the UngrabKeyboard request
 pub const UNGRAB_KEYBOARD_REQUEST: u8 = 32;
@@ -12588,6 +15351,16 @@ impl core::fmt::Debug for Grab  {
             (Self::ANY.0.into(), "ANY", "Any"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for Grab {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::ANY.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
     }
 }
 
@@ -12959,6 +15732,23 @@ impl core::fmt::Debug for Allow  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for Allow {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::ASYNC_POINTER.0,
+            Self::SYNC_POINTER.0,
+            Self::REPLAY_POINTER.0,
+            Self::ASYNC_KEYBOARD.0,
+            Self::SYNC_KEYBOARD.0,
+            Self::REPLAY_KEYBOARD.0,
+            Self::ASYNC_BOTH.0,
+            Self::SYNC_BOTH.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 /// Opcode for the AllowEvents request
 pub const ALLOW_EVENTS_REQUEST: u8 = 35;
@@ -13322,6 +16112,38 @@ impl Serialize for QueryPointerReply {
         bytes.extend_from_slice(&[0; 2]);
     }
 }
+#[cfg(test)]
+mod query_pointer_reply {
+    use super::QueryPointerReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for QueryPointerReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                same_screen: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                root: GenRandom::generate(rng),
+                child: GenRandom::generate(rng),
+                root_x: GenRandom::generate(rng),
+                root_y: GenRandom::generate(rng),
+                win_x: GenRandom::generate(rng),
+                win_y: GenRandom::generate(rng),
+                mask: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(16124027079137492992);
+        let value = QueryPointerReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -13361,6 +16183,31 @@ impl Serialize for Timecoord {
         self.time.serialize_into(bytes);
         self.x.serialize_into(bytes);
         self.y.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod timecoord {
+    use super::Timecoord;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for Timecoord {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                time: GenRandom::generate(rng),
+                x: GenRandom::generate(rng),
+                y: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(1350213544862028000);
+        let value = Timecoord::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -13497,6 +16344,31 @@ impl GetMotionEventsReply {
     pub fn events_len(&self) -> u32 {
         self.events.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod get_motion_events_reply {
+    use super::GetMotionEventsReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetMotionEventsReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                events: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(2706223001216679936);
+        let value = GetMotionEventsReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -13646,6 +16518,34 @@ impl Serialize for TranslateCoordinatesReply {
         self.child.serialize_into(bytes);
         self.dst_x.serialize_into(bytes);
         self.dst_y.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod translate_coordinates_reply {
+    use super::TranslateCoordinatesReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for TranslateCoordinatesReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                same_screen: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                child: GenRandom::generate(rng),
+                dst_x: GenRandom::generate(rng),
+                dst_y: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(5621073170357288960);
+        let value = TranslateCoordinatesReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -13850,6 +16750,19 @@ impl core::fmt::Debug for InputFocus  {
             (Self::FOLLOW_KEYBOARD.0.into(), "FOLLOW_KEYBOARD", "FollowKeyboard"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for InputFocus {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::NONE.0,
+            Self::POINTER_ROOT.0,
+            Self::PARENT.0,
+            Self::FOLLOW_KEYBOARD.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
     }
 }
 
@@ -14064,6 +16977,32 @@ impl Serialize for GetInputFocusReply {
         self.focus.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod get_input_focus_reply {
+    use super::GetInputFocusReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetInputFocusReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                revert_to: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                focus: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(8318029433737707520);
+        let value = GetInputFocusReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the QueryKeymap request
 pub const QUERY_KEYMAP_REQUEST: u8 = 44;
@@ -14196,6 +17135,31 @@ impl Serialize for QueryKeymapReply {
         self.sequence.serialize_into(bytes);
         self.length.serialize_into(bytes);
         bytes.extend_from_slice(&self.keys);
+    }
+}
+#[cfg(test)]
+mod query_keymap_reply {
+    use super::QueryKeymapReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for QueryKeymapReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                keys: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(17001817659442188288);
+        let value = QueryKeymapReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -14409,6 +17373,17 @@ impl core::fmt::Debug for FontDraw  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for FontDraw {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::LEFT_TO_RIGHT.0,
+            Self::RIGHT_TO_LEFT.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -14444,6 +17419,30 @@ impl Serialize for Fontprop {
         bytes.reserve(8);
         self.name.serialize_into(bytes);
         self.value.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod fontprop {
+    use super::Fontprop;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for Fontprop {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                name: GenRandom::generate(rng),
+                value: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(15737493677875200);
+        let value = Fontprop::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -14501,6 +17500,34 @@ impl Serialize for Charinfo {
         self.ascent.serialize_into(bytes);
         self.descent.serialize_into(bytes);
         self.attributes.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod charinfo {
+    use super::Charinfo;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for Charinfo {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                left_side_bearing: GenRandom::generate(rng),
+                right_side_bearing: GenRandom::generate(rng),
+                character_width: GenRandom::generate(rng),
+                ascent: GenRandom::generate(rng),
+                descent: GenRandom::generate(rng),
+                attributes: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(10076039523950400);
+        let value = Charinfo::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -14694,6 +17721,43 @@ impl QueryFontReply {
     pub fn char_infos_len(&self) -> u32 {
         self.char_infos.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod query_font_reply {
+    use super::QueryFontReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for QueryFontReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                min_bounds: GenRandom::generate(rng),
+                max_bounds: GenRandom::generate(rng),
+                min_char_or_byte2: GenRandom::generate(rng),
+                max_char_or_byte2: GenRandom::generate(rng),
+                default_char: GenRandom::generate(rng),
+                draw_direction: GenRandom::generate(rng),
+                min_byte1: GenRandom::generate(rng),
+                max_byte1: GenRandom::generate(rng),
+                all_chars_exist: GenRandom::generate(rng),
+                font_ascent: GenRandom::generate(rng),
+                font_descent: GenRandom::generate(rng),
+                properties: GenRandom::generate(rng),
+                char_infos: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(16787272398572908544);
+        let value = QueryFontReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -14918,6 +17982,38 @@ impl Serialize for QueryTextExtentsReply {
         self.overall_right.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod query_text_extents_reply {
+    use super::QueryTextExtentsReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for QueryTextExtentsReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                draw_direction: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                font_ascent: GenRandom::generate(rng),
+                font_descent: GenRandom::generate(rng),
+                overall_ascent: GenRandom::generate(rng),
+                overall_descent: GenRandom::generate(rng),
+                overall_width: GenRandom::generate(rng),
+                overall_left: GenRandom::generate(rng),
+                overall_right: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(16595848173646249984);
+        let value = QueryTextExtentsReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -14959,6 +18055,29 @@ impl Str {
     pub fn name_len(&self) -> u8 {
         self.name.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod str {
+    use super::Str;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for Str {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                name: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(1097592);
+        let value = Str::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -15109,6 +18228,31 @@ impl ListFontsReply {
     pub fn names_len(&self) -> u16 {
         self.names.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod list_fonts_reply {
+    use super::ListFontsReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for ListFontsReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                names: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(8907022770976358400);
+        let value = ListFontsReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -15330,6 +18474,44 @@ impl ListFontsWithInfoReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod list_fonts_with_info_reply {
+    use super::ListFontsWithInfoReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for ListFontsWithInfoReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                min_bounds: GenRandom::generate(rng),
+                max_bounds: GenRandom::generate(rng),
+                min_char_or_byte2: GenRandom::generate(rng),
+                max_char_or_byte2: GenRandom::generate(rng),
+                default_char: GenRandom::generate(rng),
+                draw_direction: GenRandom::generate(rng),
+                min_byte1: GenRandom::generate(rng),
+                max_byte1: GenRandom::generate(rng),
+                all_chars_exist: GenRandom::generate(rng),
+                font_ascent: GenRandom::generate(rng),
+                font_descent: GenRandom::generate(rng),
+                replies_hint: GenRandom::generate(rng),
+                properties: GenRandom::generate(rng),
+                name: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(15967986436993449984);
+        let value = ListFontsWithInfoReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the SetFontPath request
 pub const SET_FONT_PATH_REQUEST: u8 = 51;
@@ -15508,6 +18690,31 @@ impl GetFontPathReply {
     pub fn path_len(&self) -> u16 {
         self.path.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod get_font_path_reply {
+    use super::GetFontPathReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetFontPathReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                path: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(5045075289860734976);
+        let value = GetFontPathReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -15872,6 +19079,38 @@ impl core::fmt::Debug for GC  {
     }
 }
 bitmask_binop!(GC, u32);
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for GC {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::FUNCTION.0,
+            Self::PLANE_MASK.0,
+            Self::FOREGROUND.0,
+            Self::BACKGROUND.0,
+            Self::LINE_WIDTH.0,
+            Self::LINE_STYLE.0,
+            Self::CAP_STYLE.0,
+            Self::JOIN_STYLE.0,
+            Self::FILL_STYLE.0,
+            Self::FILL_RULE.0,
+            Self::TILE.0,
+            Self::STIPPLE.0,
+            Self::TILE_STIPPLE_ORIGIN_X.0,
+            Self::TILE_STIPPLE_ORIGIN_Y.0,
+            Self::FONT.0,
+            Self::SUBWINDOW_MODE.0,
+            Self::GRAPHICS_EXPOSURES.0,
+            Self::CLIP_ORIGIN_X.0,
+            Self::CLIP_ORIGIN_Y.0,
+            Self::CLIP_MASK.0,
+            Self::DASH_OFFSET.0,
+            Self::DASH_LIST.0,
+            Self::ARC_MODE.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -15947,6 +19186,31 @@ impl core::fmt::Debug for GX  {
         pretty_print_enum(fmt, self.0, &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for GX {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::CLEAR.0,
+            Self::AND.0,
+            Self::AND_REVERSE.0,
+            Self::COPY.0,
+            Self::AND_INVERTED.0,
+            Self::NOOP.0,
+            Self::XOR.0,
+            Self::OR.0,
+            Self::NOR.0,
+            Self::EQUIV.0,
+            Self::INVERT.0,
+            Self::OR_REVERSE.0,
+            Self::COPY_INVERTED.0,
+            Self::OR_INVERTED.0,
+            Self::NAND.0,
+            Self::SET.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -15994,6 +19258,18 @@ impl core::fmt::Debug for LineStyle  {
             (Self::DOUBLE_DASH.0, "DOUBLE_DASH", "DoubleDash"),
         ];
         pretty_print_enum(fmt, self.0, &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for LineStyle {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::SOLID.0,
+            Self::ON_OFF_DASH.0,
+            Self::DOUBLE_DASH.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
     }
 }
 
@@ -16047,6 +19323,19 @@ impl core::fmt::Debug for CapStyle  {
         pretty_print_enum(fmt, self.0, &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for CapStyle {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::NOT_LAST.0,
+            Self::BUTT.0,
+            Self::ROUND.0,
+            Self::PROJECTING.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -16094,6 +19383,18 @@ impl core::fmt::Debug for JoinStyle  {
             (Self::BEVEL.0, "BEVEL", "Bevel"),
         ];
         pretty_print_enum(fmt, self.0, &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for JoinStyle {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::MITER.0,
+            Self::ROUND.0,
+            Self::BEVEL.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
     }
 }
 
@@ -16147,6 +19448,19 @@ impl core::fmt::Debug for FillStyle  {
         pretty_print_enum(fmt, self.0, &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for FillStyle {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::SOLID.0,
+            Self::TILED.0,
+            Self::STIPPLED.0,
+            Self::OPAQUE_STIPPLED.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -16192,6 +19506,17 @@ impl core::fmt::Debug for FillRule  {
             (Self::WINDING.0, "WINDING", "Winding"),
         ];
         pretty_print_enum(fmt, self.0, &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for FillRule {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::EVEN_ODD.0,
+            Self::WINDING.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
     }
 }
 
@@ -16241,6 +19566,17 @@ impl core::fmt::Debug for SubwindowMode  {
         pretty_print_enum(fmt, self.0, &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for SubwindowMode {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::CLIP_BY_CHILDREN.0,
+            Self::INCLUDE_INFERIORS.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -16286,6 +19622,17 @@ impl core::fmt::Debug for ArcMode  {
             (Self::PIE_SLICE.0, "PIE_SLICE", "PieSlice"),
         ];
         pretty_print_enum(fmt, self.0, &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for ArcMode {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::CHORD.0,
+            Self::PIE_SLICE.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
     }
 }
 
@@ -16670,6 +20017,671 @@ impl CreateGCAux {
             expr_value |= u32::from(GC::ARC_MODE);
         }
         expr_value
+    }
+}
+#[cfg(test)]
+mod create_gc_aux {
+    use super::CreateGCAux;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for CreateGCAux {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                function: GenRandom::generate(rng),
+                plane_mask: GenRandom::generate(rng),
+                foreground: GenRandom::generate(rng),
+                background: GenRandom::generate(rng),
+                line_width: GenRandom::generate(rng),
+                line_style: GenRandom::generate(rng),
+                cap_style: GenRandom::generate(rng),
+                join_style: GenRandom::generate(rng),
+                fill_style: GenRandom::generate(rng),
+                fill_rule: GenRandom::generate(rng),
+                tile: GenRandom::generate(rng),
+                stipple: GenRandom::generate(rng),
+                tile_stipple_x_origin: GenRandom::generate(rng),
+                tile_stipple_y_origin: GenRandom::generate(rng),
+                font: GenRandom::generate(rng),
+                subwindow_mode: GenRandom::generate(rng),
+                graphics_exposures: GenRandom::generate(rng),
+                clip_x_origin: GenRandom::generate(rng),
+                clip_y_origin: GenRandom::generate(rng),
+                clip_mask: GenRandom::generate(rng),
+                dash_offset: GenRandom::generate(rng),
+                dashes: GenRandom::generate(rng),
+                arc_mode: GenRandom::generate(rng),
+            }
+        }
+    }
+    fn generate_values(rng: &Rng) -> alloc::vec::Vec<CreateGCAux> {
+        alloc::vec![
+            CreateGCAux {
+                function: None,
+                plane_mask: None,
+                foreground: None,
+                background: None,
+                line_width: None,
+                line_style: None,
+                cap_style: None,
+                join_style: None,
+                fill_style: None,
+                fill_rule: None,
+                tile: None,
+                stipple: None,
+                tile_stipple_x_origin: None,
+                tile_stipple_y_origin: None,
+                font: None,
+                subwindow_mode: None,
+                graphics_exposures: None,
+                clip_x_origin: None,
+                clip_y_origin: None,
+                clip_mask: None,
+                dash_offset: None,
+                dashes: None,
+                arc_mode: None,
+            },
+            CreateGCAux {
+                function: Some(GenRandom::generate(rng)),
+                plane_mask: Some(GenRandom::generate(rng)),
+                foreground: Some(GenRandom::generate(rng)),
+                background: Some(GenRandom::generate(rng)),
+                line_width: Some(GenRandom::generate(rng)),
+                line_style: Some(GenRandom::generate(rng)),
+                cap_style: Some(GenRandom::generate(rng)),
+                join_style: Some(GenRandom::generate(rng)),
+                fill_style: Some(GenRandom::generate(rng)),
+                fill_rule: Some(GenRandom::generate(rng)),
+                tile: Some(GenRandom::generate(rng)),
+                stipple: Some(GenRandom::generate(rng)),
+                tile_stipple_x_origin: Some(GenRandom::generate(rng)),
+                tile_stipple_y_origin: Some(GenRandom::generate(rng)),
+                font: Some(GenRandom::generate(rng)),
+                subwindow_mode: Some(GenRandom::generate(rng)),
+                graphics_exposures: Some(GenRandom::generate(rng)),
+                clip_x_origin: Some(GenRandom::generate(rng)),
+                clip_y_origin: Some(GenRandom::generate(rng)),
+                clip_mask: Some(GenRandom::generate(rng)),
+                dash_offset: Some(GenRandom::generate(rng)),
+                dashes: Some(GenRandom::generate(rng)),
+                arc_mode: Some(GenRandom::generate(rng)),
+            },
+            CreateGCAux {
+                function: Some(GenRandom::generate(rng)),
+                plane_mask: None,
+                foreground: None,
+                background: None,
+                line_width: None,
+                line_style: None,
+                cap_style: None,
+                join_style: None,
+                fill_style: None,
+                fill_rule: None,
+                tile: None,
+                stipple: None,
+                tile_stipple_x_origin: None,
+                tile_stipple_y_origin: None,
+                font: None,
+                subwindow_mode: None,
+                graphics_exposures: None,
+                clip_x_origin: None,
+                clip_y_origin: None,
+                clip_mask: None,
+                dash_offset: None,
+                dashes: None,
+                arc_mode: None,
+            },
+            CreateGCAux {
+                function: None,
+                plane_mask: Some(GenRandom::generate(rng)),
+                foreground: None,
+                background: None,
+                line_width: None,
+                line_style: None,
+                cap_style: None,
+                join_style: None,
+                fill_style: None,
+                fill_rule: None,
+                tile: None,
+                stipple: None,
+                tile_stipple_x_origin: None,
+                tile_stipple_y_origin: None,
+                font: None,
+                subwindow_mode: None,
+                graphics_exposures: None,
+                clip_x_origin: None,
+                clip_y_origin: None,
+                clip_mask: None,
+                dash_offset: None,
+                dashes: None,
+                arc_mode: None,
+            },
+            CreateGCAux {
+                function: None,
+                plane_mask: None,
+                foreground: Some(GenRandom::generate(rng)),
+                background: None,
+                line_width: None,
+                line_style: None,
+                cap_style: None,
+                join_style: None,
+                fill_style: None,
+                fill_rule: None,
+                tile: None,
+                stipple: None,
+                tile_stipple_x_origin: None,
+                tile_stipple_y_origin: None,
+                font: None,
+                subwindow_mode: None,
+                graphics_exposures: None,
+                clip_x_origin: None,
+                clip_y_origin: None,
+                clip_mask: None,
+                dash_offset: None,
+                dashes: None,
+                arc_mode: None,
+            },
+            CreateGCAux {
+                function: None,
+                plane_mask: None,
+                foreground: None,
+                background: Some(GenRandom::generate(rng)),
+                line_width: None,
+                line_style: None,
+                cap_style: None,
+                join_style: None,
+                fill_style: None,
+                fill_rule: None,
+                tile: None,
+                stipple: None,
+                tile_stipple_x_origin: None,
+                tile_stipple_y_origin: None,
+                font: None,
+                subwindow_mode: None,
+                graphics_exposures: None,
+                clip_x_origin: None,
+                clip_y_origin: None,
+                clip_mask: None,
+                dash_offset: None,
+                dashes: None,
+                arc_mode: None,
+            },
+            CreateGCAux {
+                function: None,
+                plane_mask: None,
+                foreground: None,
+                background: None,
+                line_width: Some(GenRandom::generate(rng)),
+                line_style: None,
+                cap_style: None,
+                join_style: None,
+                fill_style: None,
+                fill_rule: None,
+                tile: None,
+                stipple: None,
+                tile_stipple_x_origin: None,
+                tile_stipple_y_origin: None,
+                font: None,
+                subwindow_mode: None,
+                graphics_exposures: None,
+                clip_x_origin: None,
+                clip_y_origin: None,
+                clip_mask: None,
+                dash_offset: None,
+                dashes: None,
+                arc_mode: None,
+            },
+            CreateGCAux {
+                function: None,
+                plane_mask: None,
+                foreground: None,
+                background: None,
+                line_width: None,
+                line_style: Some(GenRandom::generate(rng)),
+                cap_style: None,
+                join_style: None,
+                fill_style: None,
+                fill_rule: None,
+                tile: None,
+                stipple: None,
+                tile_stipple_x_origin: None,
+                tile_stipple_y_origin: None,
+                font: None,
+                subwindow_mode: None,
+                graphics_exposures: None,
+                clip_x_origin: None,
+                clip_y_origin: None,
+                clip_mask: None,
+                dash_offset: None,
+                dashes: None,
+                arc_mode: None,
+            },
+            CreateGCAux {
+                function: None,
+                plane_mask: None,
+                foreground: None,
+                background: None,
+                line_width: None,
+                line_style: None,
+                cap_style: Some(GenRandom::generate(rng)),
+                join_style: None,
+                fill_style: None,
+                fill_rule: None,
+                tile: None,
+                stipple: None,
+                tile_stipple_x_origin: None,
+                tile_stipple_y_origin: None,
+                font: None,
+                subwindow_mode: None,
+                graphics_exposures: None,
+                clip_x_origin: None,
+                clip_y_origin: None,
+                clip_mask: None,
+                dash_offset: None,
+                dashes: None,
+                arc_mode: None,
+            },
+            CreateGCAux {
+                function: None,
+                plane_mask: None,
+                foreground: None,
+                background: None,
+                line_width: None,
+                line_style: None,
+                cap_style: None,
+                join_style: Some(GenRandom::generate(rng)),
+                fill_style: None,
+                fill_rule: None,
+                tile: None,
+                stipple: None,
+                tile_stipple_x_origin: None,
+                tile_stipple_y_origin: None,
+                font: None,
+                subwindow_mode: None,
+                graphics_exposures: None,
+                clip_x_origin: None,
+                clip_y_origin: None,
+                clip_mask: None,
+                dash_offset: None,
+                dashes: None,
+                arc_mode: None,
+            },
+            CreateGCAux {
+                function: None,
+                plane_mask: None,
+                foreground: None,
+                background: None,
+                line_width: None,
+                line_style: None,
+                cap_style: None,
+                join_style: None,
+                fill_style: Some(GenRandom::generate(rng)),
+                fill_rule: None,
+                tile: None,
+                stipple: None,
+                tile_stipple_x_origin: None,
+                tile_stipple_y_origin: None,
+                font: None,
+                subwindow_mode: None,
+                graphics_exposures: None,
+                clip_x_origin: None,
+                clip_y_origin: None,
+                clip_mask: None,
+                dash_offset: None,
+                dashes: None,
+                arc_mode: None,
+            },
+            CreateGCAux {
+                function: None,
+                plane_mask: None,
+                foreground: None,
+                background: None,
+                line_width: None,
+                line_style: None,
+                cap_style: None,
+                join_style: None,
+                fill_style: None,
+                fill_rule: Some(GenRandom::generate(rng)),
+                tile: None,
+                stipple: None,
+                tile_stipple_x_origin: None,
+                tile_stipple_y_origin: None,
+                font: None,
+                subwindow_mode: None,
+                graphics_exposures: None,
+                clip_x_origin: None,
+                clip_y_origin: None,
+                clip_mask: None,
+                dash_offset: None,
+                dashes: None,
+                arc_mode: None,
+            },
+            CreateGCAux {
+                function: None,
+                plane_mask: None,
+                foreground: None,
+                background: None,
+                line_width: None,
+                line_style: None,
+                cap_style: None,
+                join_style: None,
+                fill_style: None,
+                fill_rule: None,
+                tile: Some(GenRandom::generate(rng)),
+                stipple: None,
+                tile_stipple_x_origin: None,
+                tile_stipple_y_origin: None,
+                font: None,
+                subwindow_mode: None,
+                graphics_exposures: None,
+                clip_x_origin: None,
+                clip_y_origin: None,
+                clip_mask: None,
+                dash_offset: None,
+                dashes: None,
+                arc_mode: None,
+            },
+            CreateGCAux {
+                function: None,
+                plane_mask: None,
+                foreground: None,
+                background: None,
+                line_width: None,
+                line_style: None,
+                cap_style: None,
+                join_style: None,
+                fill_style: None,
+                fill_rule: None,
+                tile: None,
+                stipple: Some(GenRandom::generate(rng)),
+                tile_stipple_x_origin: None,
+                tile_stipple_y_origin: None,
+                font: None,
+                subwindow_mode: None,
+                graphics_exposures: None,
+                clip_x_origin: None,
+                clip_y_origin: None,
+                clip_mask: None,
+                dash_offset: None,
+                dashes: None,
+                arc_mode: None,
+            },
+            CreateGCAux {
+                function: None,
+                plane_mask: None,
+                foreground: None,
+                background: None,
+                line_width: None,
+                line_style: None,
+                cap_style: None,
+                join_style: None,
+                fill_style: None,
+                fill_rule: None,
+                tile: None,
+                stipple: None,
+                tile_stipple_x_origin: Some(GenRandom::generate(rng)),
+                tile_stipple_y_origin: None,
+                font: None,
+                subwindow_mode: None,
+                graphics_exposures: None,
+                clip_x_origin: None,
+                clip_y_origin: None,
+                clip_mask: None,
+                dash_offset: None,
+                dashes: None,
+                arc_mode: None,
+            },
+            CreateGCAux {
+                function: None,
+                plane_mask: None,
+                foreground: None,
+                background: None,
+                line_width: None,
+                line_style: None,
+                cap_style: None,
+                join_style: None,
+                fill_style: None,
+                fill_rule: None,
+                tile: None,
+                stipple: None,
+                tile_stipple_x_origin: None,
+                tile_stipple_y_origin: Some(GenRandom::generate(rng)),
+                font: None,
+                subwindow_mode: None,
+                graphics_exposures: None,
+                clip_x_origin: None,
+                clip_y_origin: None,
+                clip_mask: None,
+                dash_offset: None,
+                dashes: None,
+                arc_mode: None,
+            },
+            CreateGCAux {
+                function: None,
+                plane_mask: None,
+                foreground: None,
+                background: None,
+                line_width: None,
+                line_style: None,
+                cap_style: None,
+                join_style: None,
+                fill_style: None,
+                fill_rule: None,
+                tile: None,
+                stipple: None,
+                tile_stipple_x_origin: None,
+                tile_stipple_y_origin: None,
+                font: Some(GenRandom::generate(rng)),
+                subwindow_mode: None,
+                graphics_exposures: None,
+                clip_x_origin: None,
+                clip_y_origin: None,
+                clip_mask: None,
+                dash_offset: None,
+                dashes: None,
+                arc_mode: None,
+            },
+            CreateGCAux {
+                function: None,
+                plane_mask: None,
+                foreground: None,
+                background: None,
+                line_width: None,
+                line_style: None,
+                cap_style: None,
+                join_style: None,
+                fill_style: None,
+                fill_rule: None,
+                tile: None,
+                stipple: None,
+                tile_stipple_x_origin: None,
+                tile_stipple_y_origin: None,
+                font: None,
+                subwindow_mode: Some(GenRandom::generate(rng)),
+                graphics_exposures: None,
+                clip_x_origin: None,
+                clip_y_origin: None,
+                clip_mask: None,
+                dash_offset: None,
+                dashes: None,
+                arc_mode: None,
+            },
+            CreateGCAux {
+                function: None,
+                plane_mask: None,
+                foreground: None,
+                background: None,
+                line_width: None,
+                line_style: None,
+                cap_style: None,
+                join_style: None,
+                fill_style: None,
+                fill_rule: None,
+                tile: None,
+                stipple: None,
+                tile_stipple_x_origin: None,
+                tile_stipple_y_origin: None,
+                font: None,
+                subwindow_mode: None,
+                graphics_exposures: Some(GenRandom::generate(rng)),
+                clip_x_origin: None,
+                clip_y_origin: None,
+                clip_mask: None,
+                dash_offset: None,
+                dashes: None,
+                arc_mode: None,
+            },
+            CreateGCAux {
+                function: None,
+                plane_mask: None,
+                foreground: None,
+                background: None,
+                line_width: None,
+                line_style: None,
+                cap_style: None,
+                join_style: None,
+                fill_style: None,
+                fill_rule: None,
+                tile: None,
+                stipple: None,
+                tile_stipple_x_origin: None,
+                tile_stipple_y_origin: None,
+                font: None,
+                subwindow_mode: None,
+                graphics_exposures: None,
+                clip_x_origin: Some(GenRandom::generate(rng)),
+                clip_y_origin: None,
+                clip_mask: None,
+                dash_offset: None,
+                dashes: None,
+                arc_mode: None,
+            },
+            CreateGCAux {
+                function: None,
+                plane_mask: None,
+                foreground: None,
+                background: None,
+                line_width: None,
+                line_style: None,
+                cap_style: None,
+                join_style: None,
+                fill_style: None,
+                fill_rule: None,
+                tile: None,
+                stipple: None,
+                tile_stipple_x_origin: None,
+                tile_stipple_y_origin: None,
+                font: None,
+                subwindow_mode: None,
+                graphics_exposures: None,
+                clip_x_origin: None,
+                clip_y_origin: Some(GenRandom::generate(rng)),
+                clip_mask: None,
+                dash_offset: None,
+                dashes: None,
+                arc_mode: None,
+            },
+            CreateGCAux {
+                function: None,
+                plane_mask: None,
+                foreground: None,
+                background: None,
+                line_width: None,
+                line_style: None,
+                cap_style: None,
+                join_style: None,
+                fill_style: None,
+                fill_rule: None,
+                tile: None,
+                stipple: None,
+                tile_stipple_x_origin: None,
+                tile_stipple_y_origin: None,
+                font: None,
+                subwindow_mode: None,
+                graphics_exposures: None,
+                clip_x_origin: None,
+                clip_y_origin: None,
+                clip_mask: Some(GenRandom::generate(rng)),
+                dash_offset: None,
+                dashes: None,
+                arc_mode: None,
+            },
+            CreateGCAux {
+                function: None,
+                plane_mask: None,
+                foreground: None,
+                background: None,
+                line_width: None,
+                line_style: None,
+                cap_style: None,
+                join_style: None,
+                fill_style: None,
+                fill_rule: None,
+                tile: None,
+                stipple: None,
+                tile_stipple_x_origin: None,
+                tile_stipple_y_origin: None,
+                font: None,
+                subwindow_mode: None,
+                graphics_exposures: None,
+                clip_x_origin: None,
+                clip_y_origin: None,
+                clip_mask: None,
+                dash_offset: Some(GenRandom::generate(rng)),
+                dashes: None,
+                arc_mode: None,
+            },
+            CreateGCAux {
+                function: None,
+                plane_mask: None,
+                foreground: None,
+                background: None,
+                line_width: None,
+                line_style: None,
+                cap_style: None,
+                join_style: None,
+                fill_style: None,
+                fill_rule: None,
+                tile: None,
+                stipple: None,
+                tile_stipple_x_origin: None,
+                tile_stipple_y_origin: None,
+                font: None,
+                subwindow_mode: None,
+                graphics_exposures: None,
+                clip_x_origin: None,
+                clip_y_origin: None,
+                clip_mask: None,
+                dash_offset: None,
+                dashes: Some(GenRandom::generate(rng)),
+                arc_mode: None,
+            },
+            CreateGCAux {
+                function: None,
+                plane_mask: None,
+                foreground: None,
+                background: None,
+                line_width: None,
+                line_style: None,
+                cap_style: None,
+                join_style: None,
+                fill_style: None,
+                fill_rule: None,
+                tile: None,
+                stipple: None,
+                tile_stipple_x_origin: None,
+                tile_stipple_y_origin: None,
+                font: None,
+                subwindow_mode: None,
+                graphics_exposures: None,
+                clip_x_origin: None,
+                clip_y_origin: None,
+                clip_mask: None,
+                dash_offset: None,
+                dashes: None,
+                arc_mode: Some(GenRandom::generate(rng)),
+            },
+        ]
     }
 }
 impl CreateGCAux {
@@ -17309,6 +21321,671 @@ impl ChangeGCAux {
         expr_value
     }
 }
+#[cfg(test)]
+mod change_gc_aux {
+    use super::ChangeGCAux;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for ChangeGCAux {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                function: GenRandom::generate(rng),
+                plane_mask: GenRandom::generate(rng),
+                foreground: GenRandom::generate(rng),
+                background: GenRandom::generate(rng),
+                line_width: GenRandom::generate(rng),
+                line_style: GenRandom::generate(rng),
+                cap_style: GenRandom::generate(rng),
+                join_style: GenRandom::generate(rng),
+                fill_style: GenRandom::generate(rng),
+                fill_rule: GenRandom::generate(rng),
+                tile: GenRandom::generate(rng),
+                stipple: GenRandom::generate(rng),
+                tile_stipple_x_origin: GenRandom::generate(rng),
+                tile_stipple_y_origin: GenRandom::generate(rng),
+                font: GenRandom::generate(rng),
+                subwindow_mode: GenRandom::generate(rng),
+                graphics_exposures: GenRandom::generate(rng),
+                clip_x_origin: GenRandom::generate(rng),
+                clip_y_origin: GenRandom::generate(rng),
+                clip_mask: GenRandom::generate(rng),
+                dash_offset: GenRandom::generate(rng),
+                dashes: GenRandom::generate(rng),
+                arc_mode: GenRandom::generate(rng),
+            }
+        }
+    }
+    fn generate_values(rng: &Rng) -> alloc::vec::Vec<ChangeGCAux> {
+        alloc::vec![
+            ChangeGCAux {
+                function: None,
+                plane_mask: None,
+                foreground: None,
+                background: None,
+                line_width: None,
+                line_style: None,
+                cap_style: None,
+                join_style: None,
+                fill_style: None,
+                fill_rule: None,
+                tile: None,
+                stipple: None,
+                tile_stipple_x_origin: None,
+                tile_stipple_y_origin: None,
+                font: None,
+                subwindow_mode: None,
+                graphics_exposures: None,
+                clip_x_origin: None,
+                clip_y_origin: None,
+                clip_mask: None,
+                dash_offset: None,
+                dashes: None,
+                arc_mode: None,
+            },
+            ChangeGCAux {
+                function: Some(GenRandom::generate(rng)),
+                plane_mask: Some(GenRandom::generate(rng)),
+                foreground: Some(GenRandom::generate(rng)),
+                background: Some(GenRandom::generate(rng)),
+                line_width: Some(GenRandom::generate(rng)),
+                line_style: Some(GenRandom::generate(rng)),
+                cap_style: Some(GenRandom::generate(rng)),
+                join_style: Some(GenRandom::generate(rng)),
+                fill_style: Some(GenRandom::generate(rng)),
+                fill_rule: Some(GenRandom::generate(rng)),
+                tile: Some(GenRandom::generate(rng)),
+                stipple: Some(GenRandom::generate(rng)),
+                tile_stipple_x_origin: Some(GenRandom::generate(rng)),
+                tile_stipple_y_origin: Some(GenRandom::generate(rng)),
+                font: Some(GenRandom::generate(rng)),
+                subwindow_mode: Some(GenRandom::generate(rng)),
+                graphics_exposures: Some(GenRandom::generate(rng)),
+                clip_x_origin: Some(GenRandom::generate(rng)),
+                clip_y_origin: Some(GenRandom::generate(rng)),
+                clip_mask: Some(GenRandom::generate(rng)),
+                dash_offset: Some(GenRandom::generate(rng)),
+                dashes: Some(GenRandom::generate(rng)),
+                arc_mode: Some(GenRandom::generate(rng)),
+            },
+            ChangeGCAux {
+                function: Some(GenRandom::generate(rng)),
+                plane_mask: None,
+                foreground: None,
+                background: None,
+                line_width: None,
+                line_style: None,
+                cap_style: None,
+                join_style: None,
+                fill_style: None,
+                fill_rule: None,
+                tile: None,
+                stipple: None,
+                tile_stipple_x_origin: None,
+                tile_stipple_y_origin: None,
+                font: None,
+                subwindow_mode: None,
+                graphics_exposures: None,
+                clip_x_origin: None,
+                clip_y_origin: None,
+                clip_mask: None,
+                dash_offset: None,
+                dashes: None,
+                arc_mode: None,
+            },
+            ChangeGCAux {
+                function: None,
+                plane_mask: Some(GenRandom::generate(rng)),
+                foreground: None,
+                background: None,
+                line_width: None,
+                line_style: None,
+                cap_style: None,
+                join_style: None,
+                fill_style: None,
+                fill_rule: None,
+                tile: None,
+                stipple: None,
+                tile_stipple_x_origin: None,
+                tile_stipple_y_origin: None,
+                font: None,
+                subwindow_mode: None,
+                graphics_exposures: None,
+                clip_x_origin: None,
+                clip_y_origin: None,
+                clip_mask: None,
+                dash_offset: None,
+                dashes: None,
+                arc_mode: None,
+            },
+            ChangeGCAux {
+                function: None,
+                plane_mask: None,
+                foreground: Some(GenRandom::generate(rng)),
+                background: None,
+                line_width: None,
+                line_style: None,
+                cap_style: None,
+                join_style: None,
+                fill_style: None,
+                fill_rule: None,
+                tile: None,
+                stipple: None,
+                tile_stipple_x_origin: None,
+                tile_stipple_y_origin: None,
+                font: None,
+                subwindow_mode: None,
+                graphics_exposures: None,
+                clip_x_origin: None,
+                clip_y_origin: None,
+                clip_mask: None,
+                dash_offset: None,
+                dashes: None,
+                arc_mode: None,
+            },
+            ChangeGCAux {
+                function: None,
+                plane_mask: None,
+                foreground: None,
+                background: Some(GenRandom::generate(rng)),
+                line_width: None,
+                line_style: None,
+                cap_style: None,
+                join_style: None,
+                fill_style: None,
+                fill_rule: None,
+                tile: None,
+                stipple: None,
+                tile_stipple_x_origin: None,
+                tile_stipple_y_origin: None,
+                font: None,
+                subwindow_mode: None,
+                graphics_exposures: None,
+                clip_x_origin: None,
+                clip_y_origin: None,
+                clip_mask: None,
+                dash_offset: None,
+                dashes: None,
+                arc_mode: None,
+            },
+            ChangeGCAux {
+                function: None,
+                plane_mask: None,
+                foreground: None,
+                background: None,
+                line_width: Some(GenRandom::generate(rng)),
+                line_style: None,
+                cap_style: None,
+                join_style: None,
+                fill_style: None,
+                fill_rule: None,
+                tile: None,
+                stipple: None,
+                tile_stipple_x_origin: None,
+                tile_stipple_y_origin: None,
+                font: None,
+                subwindow_mode: None,
+                graphics_exposures: None,
+                clip_x_origin: None,
+                clip_y_origin: None,
+                clip_mask: None,
+                dash_offset: None,
+                dashes: None,
+                arc_mode: None,
+            },
+            ChangeGCAux {
+                function: None,
+                plane_mask: None,
+                foreground: None,
+                background: None,
+                line_width: None,
+                line_style: Some(GenRandom::generate(rng)),
+                cap_style: None,
+                join_style: None,
+                fill_style: None,
+                fill_rule: None,
+                tile: None,
+                stipple: None,
+                tile_stipple_x_origin: None,
+                tile_stipple_y_origin: None,
+                font: None,
+                subwindow_mode: None,
+                graphics_exposures: None,
+                clip_x_origin: None,
+                clip_y_origin: None,
+                clip_mask: None,
+                dash_offset: None,
+                dashes: None,
+                arc_mode: None,
+            },
+            ChangeGCAux {
+                function: None,
+                plane_mask: None,
+                foreground: None,
+                background: None,
+                line_width: None,
+                line_style: None,
+                cap_style: Some(GenRandom::generate(rng)),
+                join_style: None,
+                fill_style: None,
+                fill_rule: None,
+                tile: None,
+                stipple: None,
+                tile_stipple_x_origin: None,
+                tile_stipple_y_origin: None,
+                font: None,
+                subwindow_mode: None,
+                graphics_exposures: None,
+                clip_x_origin: None,
+                clip_y_origin: None,
+                clip_mask: None,
+                dash_offset: None,
+                dashes: None,
+                arc_mode: None,
+            },
+            ChangeGCAux {
+                function: None,
+                plane_mask: None,
+                foreground: None,
+                background: None,
+                line_width: None,
+                line_style: None,
+                cap_style: None,
+                join_style: Some(GenRandom::generate(rng)),
+                fill_style: None,
+                fill_rule: None,
+                tile: None,
+                stipple: None,
+                tile_stipple_x_origin: None,
+                tile_stipple_y_origin: None,
+                font: None,
+                subwindow_mode: None,
+                graphics_exposures: None,
+                clip_x_origin: None,
+                clip_y_origin: None,
+                clip_mask: None,
+                dash_offset: None,
+                dashes: None,
+                arc_mode: None,
+            },
+            ChangeGCAux {
+                function: None,
+                plane_mask: None,
+                foreground: None,
+                background: None,
+                line_width: None,
+                line_style: None,
+                cap_style: None,
+                join_style: None,
+                fill_style: Some(GenRandom::generate(rng)),
+                fill_rule: None,
+                tile: None,
+                stipple: None,
+                tile_stipple_x_origin: None,
+                tile_stipple_y_origin: None,
+                font: None,
+                subwindow_mode: None,
+                graphics_exposures: None,
+                clip_x_origin: None,
+                clip_y_origin: None,
+                clip_mask: None,
+                dash_offset: None,
+                dashes: None,
+                arc_mode: None,
+            },
+            ChangeGCAux {
+                function: None,
+                plane_mask: None,
+                foreground: None,
+                background: None,
+                line_width: None,
+                line_style: None,
+                cap_style: None,
+                join_style: None,
+                fill_style: None,
+                fill_rule: Some(GenRandom::generate(rng)),
+                tile: None,
+                stipple: None,
+                tile_stipple_x_origin: None,
+                tile_stipple_y_origin: None,
+                font: None,
+                subwindow_mode: None,
+                graphics_exposures: None,
+                clip_x_origin: None,
+                clip_y_origin: None,
+                clip_mask: None,
+                dash_offset: None,
+                dashes: None,
+                arc_mode: None,
+            },
+            ChangeGCAux {
+                function: None,
+                plane_mask: None,
+                foreground: None,
+                background: None,
+                line_width: None,
+                line_style: None,
+                cap_style: None,
+                join_style: None,
+                fill_style: None,
+                fill_rule: None,
+                tile: Some(GenRandom::generate(rng)),
+                stipple: None,
+                tile_stipple_x_origin: None,
+                tile_stipple_y_origin: None,
+                font: None,
+                subwindow_mode: None,
+                graphics_exposures: None,
+                clip_x_origin: None,
+                clip_y_origin: None,
+                clip_mask: None,
+                dash_offset: None,
+                dashes: None,
+                arc_mode: None,
+            },
+            ChangeGCAux {
+                function: None,
+                plane_mask: None,
+                foreground: None,
+                background: None,
+                line_width: None,
+                line_style: None,
+                cap_style: None,
+                join_style: None,
+                fill_style: None,
+                fill_rule: None,
+                tile: None,
+                stipple: Some(GenRandom::generate(rng)),
+                tile_stipple_x_origin: None,
+                tile_stipple_y_origin: None,
+                font: None,
+                subwindow_mode: None,
+                graphics_exposures: None,
+                clip_x_origin: None,
+                clip_y_origin: None,
+                clip_mask: None,
+                dash_offset: None,
+                dashes: None,
+                arc_mode: None,
+            },
+            ChangeGCAux {
+                function: None,
+                plane_mask: None,
+                foreground: None,
+                background: None,
+                line_width: None,
+                line_style: None,
+                cap_style: None,
+                join_style: None,
+                fill_style: None,
+                fill_rule: None,
+                tile: None,
+                stipple: None,
+                tile_stipple_x_origin: Some(GenRandom::generate(rng)),
+                tile_stipple_y_origin: None,
+                font: None,
+                subwindow_mode: None,
+                graphics_exposures: None,
+                clip_x_origin: None,
+                clip_y_origin: None,
+                clip_mask: None,
+                dash_offset: None,
+                dashes: None,
+                arc_mode: None,
+            },
+            ChangeGCAux {
+                function: None,
+                plane_mask: None,
+                foreground: None,
+                background: None,
+                line_width: None,
+                line_style: None,
+                cap_style: None,
+                join_style: None,
+                fill_style: None,
+                fill_rule: None,
+                tile: None,
+                stipple: None,
+                tile_stipple_x_origin: None,
+                tile_stipple_y_origin: Some(GenRandom::generate(rng)),
+                font: None,
+                subwindow_mode: None,
+                graphics_exposures: None,
+                clip_x_origin: None,
+                clip_y_origin: None,
+                clip_mask: None,
+                dash_offset: None,
+                dashes: None,
+                arc_mode: None,
+            },
+            ChangeGCAux {
+                function: None,
+                plane_mask: None,
+                foreground: None,
+                background: None,
+                line_width: None,
+                line_style: None,
+                cap_style: None,
+                join_style: None,
+                fill_style: None,
+                fill_rule: None,
+                tile: None,
+                stipple: None,
+                tile_stipple_x_origin: None,
+                tile_stipple_y_origin: None,
+                font: Some(GenRandom::generate(rng)),
+                subwindow_mode: None,
+                graphics_exposures: None,
+                clip_x_origin: None,
+                clip_y_origin: None,
+                clip_mask: None,
+                dash_offset: None,
+                dashes: None,
+                arc_mode: None,
+            },
+            ChangeGCAux {
+                function: None,
+                plane_mask: None,
+                foreground: None,
+                background: None,
+                line_width: None,
+                line_style: None,
+                cap_style: None,
+                join_style: None,
+                fill_style: None,
+                fill_rule: None,
+                tile: None,
+                stipple: None,
+                tile_stipple_x_origin: None,
+                tile_stipple_y_origin: None,
+                font: None,
+                subwindow_mode: Some(GenRandom::generate(rng)),
+                graphics_exposures: None,
+                clip_x_origin: None,
+                clip_y_origin: None,
+                clip_mask: None,
+                dash_offset: None,
+                dashes: None,
+                arc_mode: None,
+            },
+            ChangeGCAux {
+                function: None,
+                plane_mask: None,
+                foreground: None,
+                background: None,
+                line_width: None,
+                line_style: None,
+                cap_style: None,
+                join_style: None,
+                fill_style: None,
+                fill_rule: None,
+                tile: None,
+                stipple: None,
+                tile_stipple_x_origin: None,
+                tile_stipple_y_origin: None,
+                font: None,
+                subwindow_mode: None,
+                graphics_exposures: Some(GenRandom::generate(rng)),
+                clip_x_origin: None,
+                clip_y_origin: None,
+                clip_mask: None,
+                dash_offset: None,
+                dashes: None,
+                arc_mode: None,
+            },
+            ChangeGCAux {
+                function: None,
+                plane_mask: None,
+                foreground: None,
+                background: None,
+                line_width: None,
+                line_style: None,
+                cap_style: None,
+                join_style: None,
+                fill_style: None,
+                fill_rule: None,
+                tile: None,
+                stipple: None,
+                tile_stipple_x_origin: None,
+                tile_stipple_y_origin: None,
+                font: None,
+                subwindow_mode: None,
+                graphics_exposures: None,
+                clip_x_origin: Some(GenRandom::generate(rng)),
+                clip_y_origin: None,
+                clip_mask: None,
+                dash_offset: None,
+                dashes: None,
+                arc_mode: None,
+            },
+            ChangeGCAux {
+                function: None,
+                plane_mask: None,
+                foreground: None,
+                background: None,
+                line_width: None,
+                line_style: None,
+                cap_style: None,
+                join_style: None,
+                fill_style: None,
+                fill_rule: None,
+                tile: None,
+                stipple: None,
+                tile_stipple_x_origin: None,
+                tile_stipple_y_origin: None,
+                font: None,
+                subwindow_mode: None,
+                graphics_exposures: None,
+                clip_x_origin: None,
+                clip_y_origin: Some(GenRandom::generate(rng)),
+                clip_mask: None,
+                dash_offset: None,
+                dashes: None,
+                arc_mode: None,
+            },
+            ChangeGCAux {
+                function: None,
+                plane_mask: None,
+                foreground: None,
+                background: None,
+                line_width: None,
+                line_style: None,
+                cap_style: None,
+                join_style: None,
+                fill_style: None,
+                fill_rule: None,
+                tile: None,
+                stipple: None,
+                tile_stipple_x_origin: None,
+                tile_stipple_y_origin: None,
+                font: None,
+                subwindow_mode: None,
+                graphics_exposures: None,
+                clip_x_origin: None,
+                clip_y_origin: None,
+                clip_mask: Some(GenRandom::generate(rng)),
+                dash_offset: None,
+                dashes: None,
+                arc_mode: None,
+            },
+            ChangeGCAux {
+                function: None,
+                plane_mask: None,
+                foreground: None,
+                background: None,
+                line_width: None,
+                line_style: None,
+                cap_style: None,
+                join_style: None,
+                fill_style: None,
+                fill_rule: None,
+                tile: None,
+                stipple: None,
+                tile_stipple_x_origin: None,
+                tile_stipple_y_origin: None,
+                font: None,
+                subwindow_mode: None,
+                graphics_exposures: None,
+                clip_x_origin: None,
+                clip_y_origin: None,
+                clip_mask: None,
+                dash_offset: Some(GenRandom::generate(rng)),
+                dashes: None,
+                arc_mode: None,
+            },
+            ChangeGCAux {
+                function: None,
+                plane_mask: None,
+                foreground: None,
+                background: None,
+                line_width: None,
+                line_style: None,
+                cap_style: None,
+                join_style: None,
+                fill_style: None,
+                fill_rule: None,
+                tile: None,
+                stipple: None,
+                tile_stipple_x_origin: None,
+                tile_stipple_y_origin: None,
+                font: None,
+                subwindow_mode: None,
+                graphics_exposures: None,
+                clip_x_origin: None,
+                clip_y_origin: None,
+                clip_mask: None,
+                dash_offset: None,
+                dashes: Some(GenRandom::generate(rng)),
+                arc_mode: None,
+            },
+            ChangeGCAux {
+                function: None,
+                plane_mask: None,
+                foreground: None,
+                background: None,
+                line_width: None,
+                line_style: None,
+                cap_style: None,
+                join_style: None,
+                fill_style: None,
+                fill_rule: None,
+                tile: None,
+                stipple: None,
+                tile_stipple_x_origin: None,
+                tile_stipple_y_origin: None,
+                font: None,
+                subwindow_mode: None,
+                graphics_exposures: None,
+                clip_x_origin: None,
+                clip_y_origin: None,
+                clip_mask: None,
+                dash_offset: None,
+                dashes: None,
+                arc_mode: Some(GenRandom::generate(rng)),
+            },
+        ]
+    }
+}
 impl ChangeGCAux {
     /// Create a new instance with all fields unset / not present.
     pub fn new() -> Self {
@@ -17788,6 +22465,19 @@ impl core::fmt::Debug for ClipOrdering  {
             (Self::YX_BANDED.0.into(), "YX_BANDED", "YXBanded"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for ClipOrdering {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::UNSORTED.0,
+            Self::Y_SORTED.0,
+            Self::YX_SORTED.0,
+            Self::YX_BANDED.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
     }
 }
 
@@ -18344,6 +23034,17 @@ impl core::fmt::Debug for CoordMode  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for CoordMode {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::ORIGIN.0,
+            Self::PREVIOUS.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 /// Opcode for the PolyPoint request
 pub const POLY_POINT_REQUEST: u8 = 64;
@@ -18608,6 +23309,32 @@ impl Serialize for Segment {
         self.y1.serialize_into(bytes);
         self.x2.serialize_into(bytes);
         self.y2.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod segment {
+    use super::Segment;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for Segment {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                x1: GenRandom::generate(rng),
+                y1: GenRandom::generate(rng),
+                x2: GenRandom::generate(rng),
+                y2: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(121292860123160);
+        let value = Segment::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -18953,6 +23680,18 @@ impl core::fmt::Debug for PolyShape  {
             (Self::CONVEX.0.into(), "CONVEX", "Convex"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for PolyShape {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::COMPLEX.0,
+            Self::NONCONVEX.0,
+            Self::CONVEX.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
     }
 }
 
@@ -19316,6 +24055,18 @@ impl core::fmt::Debug for ImageFormat  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for ImageFormat {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::XY_BITMAP.0,
+            Self::XY_PIXMAP.0,
+            Self::Z_PIXMAP.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 /// Opcode for the PutImage request
 pub const PUT_IMAGE_REQUEST: u8 = 72;
@@ -19600,6 +24351,32 @@ impl GetImageReply {
         self.data.len()
             .checked_div(4).unwrap()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod get_image_reply {
+    use super::GetImageReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetImageReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                depth: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                visual: GenRandom::generate(rng),
+                data: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(2818075533431943680);
+        let value = GetImageReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -20099,6 +24876,17 @@ impl core::fmt::Debug for ColormapAlloc  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for ColormapAlloc {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::NONE.0,
+            Self::ALL.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 /// Opcode for the CreateColormap request
 pub const CREATE_COLORMAP_REQUEST: u8 = 78;
@@ -20527,6 +25315,31 @@ impl ListInstalledColormapsReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod list_installed_colormaps_reply {
+    use super::ListInstalledColormapsReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for ListInstalledColormapsReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                cmaps: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(16379369681254875136);
+        let value = ListInstalledColormapsReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the AllocColor request
 pub const ALLOC_COLOR_REQUEST: u8 = 84;
@@ -20703,6 +25516,34 @@ impl Serialize for AllocColorReply {
         self.pixel.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod alloc_color_reply {
+    use super::AllocColorReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for AllocColorReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                red: GenRandom::generate(rng),
+                green: GenRandom::generate(rng),
+                blue: GenRandom::generate(rng),
+                pixel: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(13146487247743696896);
+        let value = AllocColorReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the AllocNamedColor request
 pub const ALLOC_NAMED_COLOR_REQUEST: u8 = 85;
@@ -20875,6 +25716,37 @@ impl Serialize for AllocNamedColorReply {
         self.visual_blue.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod alloc_named_color_reply {
+    use super::AllocNamedColorReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for AllocNamedColorReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                pixel: GenRandom::generate(rng),
+                exact_red: GenRandom::generate(rng),
+                exact_green: GenRandom::generate(rng),
+                exact_blue: GenRandom::generate(rng),
+                visual_red: GenRandom::generate(rng),
+                visual_green: GenRandom::generate(rng),
+                visual_blue: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(246143697105059840);
+        let value = AllocNamedColorReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the AllocColorCells request
 pub const ALLOC_COLOR_CELLS_REQUEST: u8 = 86;
@@ -21027,6 +25899,32 @@ impl AllocColorCellsReply {
     pub fn masks_len(&self) -> u16 {
         self.masks.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod alloc_color_cells_reply {
+    use super::AllocColorCellsReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for AllocColorCellsReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                pixels: GenRandom::generate(rng),
+                masks: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(5012485255660306432);
+        let value = AllocColorCellsReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -21187,6 +26085,34 @@ impl AllocColorPlanesReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod alloc_color_planes_reply {
+    use super::AllocColorPlanesReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for AllocColorPlanesReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                red_mask: GenRandom::generate(rng),
+                green_mask: GenRandom::generate(rng),
+                blue_mask: GenRandom::generate(rng),
+                pixels: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(8092714068678279168);
+        let value = AllocColorPlanesReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the FreeColors request
 pub const FREE_COLORS_REQUEST: u8 = 88;
@@ -21335,6 +26261,18 @@ impl core::fmt::Debug for ColorFlag  {
     }
 }
 bitmask_binop!(ColorFlag, u8);
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for ColorFlag {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::RED.0,
+            Self::GREEN.0,
+            Self::BLUE.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -21388,6 +26326,33 @@ impl Serialize for Coloritem {
         self.blue.serialize_into(bytes);
         self.flags.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 1]);
+    }
+}
+#[cfg(test)]
+mod coloritem {
+    use super::Coloritem;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for Coloritem {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                pixel: GenRandom::generate(rng),
+                red: GenRandom::generate(rng),
+                green: GenRandom::generate(rng),
+                blue: GenRandom::generate(rng),
+                flags: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(1362838918268530080);
+        let value = Coloritem::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -21600,6 +26565,31 @@ impl Serialize for Rgb {
         bytes.extend_from_slice(&[0; 2]);
     }
 }
+#[cfg(test)]
+mod rgb {
+    use super::Rgb;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for Rgb {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                red: GenRandom::generate(rng),
+                green: GenRandom::generate(rng),
+                blue: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(827708);
+        let value = Rgb::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the QueryColors request
 pub const QUERY_COLORS_REQUEST: u8 = 91;
@@ -21739,6 +26729,31 @@ impl QueryColorsReply {
     pub fn colors_len(&self) -> u16 {
         self.colors.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod query_colors_reply {
+    use super::QueryColorsReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for QueryColorsReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                colors: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(7287906247680432128);
+        let value = QueryColorsReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -21905,6 +26920,36 @@ impl Serialize for LookupColorReply {
         self.visual_blue.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod lookup_color_reply {
+    use super::LookupColorReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for LookupColorReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                exact_red: GenRandom::generate(rng),
+                exact_green: GenRandom::generate(rng),
+                exact_blue: GenRandom::generate(rng),
+                visual_red: GenRandom::generate(rng),
+                visual_green: GenRandom::generate(rng),
+                visual_blue: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(7514334087573340160);
+        let value = LookupColorReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -21960,6 +27005,16 @@ impl core::fmt::Debug for PixmapEnum  {
             (Self::NONE.0.into(), "NONE", "None"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for PixmapEnum {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::NONE.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
     }
 }
 
@@ -22137,6 +27192,16 @@ impl core::fmt::Debug for FontEnum  {
             (Self::NONE.0.into(), "NONE", "None"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for FontEnum {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::NONE.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
     }
 }
 
@@ -22513,6 +27578,18 @@ impl core::fmt::Debug for QueryShapeOf  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for QueryShapeOf {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::LARGEST_CURSOR.0,
+            Self::FASTEST_TILE.0,
+            Self::FASTEST_STIPPLE.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 /// Opcode for the QueryBestSize request
 pub const QUERY_BEST_SIZE_REQUEST: u8 = 97;
@@ -22646,6 +27723,32 @@ impl Serialize for QueryBestSizeReply {
         self.length.serialize_into(bytes);
         self.width.serialize_into(bytes);
         self.height.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+mod query_best_size_reply {
+    use super::QueryBestSizeReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for QueryBestSizeReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                width: GenRandom::generate(rng),
+                height: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(14572926922084225024);
+        let value = QueryBestSizeReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -22814,6 +27917,34 @@ impl Serialize for QueryExtensionReply {
         self.first_error.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod query_extension_reply {
+    use super::QueryExtensionReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for QueryExtensionReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                present: GenRandom::generate(rng),
+                major_opcode: GenRandom::generate(rng),
+                first_event: GenRandom::generate(rng),
+                first_error: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(11485206319621701632);
+        let value = QueryExtensionReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the ListExtensions request
 pub const LIST_EXTENSIONS_REQUEST: u8 = 99;
@@ -22921,6 +28052,31 @@ impl ListExtensionsReply {
     pub fn names_len(&self) -> u8 {
         self.names.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod list_extensions_reply {
+    use super::ListExtensionsReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for ListExtensionsReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                names: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(10489262257463361536);
+        let value = ListExtensionsReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 
@@ -23126,6 +28282,31 @@ impl GetKeyboardMappingReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod get_keyboard_mapping_reply {
+    use super::GetKeyboardMappingReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetKeyboardMappingReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                keysyms_per_keycode: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                keysyms: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(5665083084266012672);
+        let value = GetKeyboardMappingReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -23198,6 +28379,23 @@ impl core::fmt::Debug for KB  {
     }
 }
 bitmask_binop!(KB, u8);
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for KB {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::KEY_CLICK_PERCENT.0,
+            Self::BELL_PERCENT.0,
+            Self::BELL_PITCH.0,
+            Self::BELL_DURATION.0,
+            Self::LED.0,
+            Self::LED_MODE.0,
+            Self::KEY.0,
+            Self::AUTO_REPEAT_MODE.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -23243,6 +28441,17 @@ impl core::fmt::Debug for LedMode  {
             (Self::ON.0, "ON", "On"),
         ];
         pretty_print_enum(fmt, self.0, &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for LedMode {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::OFF.0,
+            Self::ON.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
     }
 }
 
@@ -23292,6 +28501,18 @@ impl core::fmt::Debug for AutoRepeatMode  {
             (Self::DEFAULT.0, "DEFAULT", "Default"),
         ];
         pretty_print_enum(fmt, self.0, &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for AutoRepeatMode {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::OFF.0,
+            Self::ON.0,
+            Self::DEFAULT.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
     }
 }
 
@@ -23445,6 +28666,131 @@ impl ChangeKeyboardControlAux {
             expr_value |= u32::from(KB::AUTO_REPEAT_MODE);
         }
         expr_value
+    }
+}
+#[cfg(test)]
+mod change_keyboard_control_aux {
+    use super::ChangeKeyboardControlAux;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for ChangeKeyboardControlAux {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                key_click_percent: GenRandom::generate(rng),
+                bell_percent: GenRandom::generate(rng),
+                bell_pitch: GenRandom::generate(rng),
+                bell_duration: GenRandom::generate(rng),
+                led: GenRandom::generate(rng),
+                led_mode: GenRandom::generate(rng),
+                key: GenRandom::generate(rng),
+                auto_repeat_mode: GenRandom::generate(rng),
+            }
+        }
+    }
+    fn generate_values(rng: &Rng) -> alloc::vec::Vec<ChangeKeyboardControlAux> {
+        alloc::vec![
+            ChangeKeyboardControlAux {
+                key_click_percent: None,
+                bell_percent: None,
+                bell_pitch: None,
+                bell_duration: None,
+                led: None,
+                led_mode: None,
+                key: None,
+                auto_repeat_mode: None,
+            },
+            ChangeKeyboardControlAux {
+                key_click_percent: Some(GenRandom::generate(rng)),
+                bell_percent: Some(GenRandom::generate(rng)),
+                bell_pitch: Some(GenRandom::generate(rng)),
+                bell_duration: Some(GenRandom::generate(rng)),
+                led: Some(GenRandom::generate(rng)),
+                led_mode: Some(GenRandom::generate(rng)),
+                key: Some(GenRandom::generate(rng)),
+                auto_repeat_mode: Some(GenRandom::generate(rng)),
+            },
+            ChangeKeyboardControlAux {
+                key_click_percent: Some(GenRandom::generate(rng)),
+                bell_percent: None,
+                bell_pitch: None,
+                bell_duration: None,
+                led: None,
+                led_mode: None,
+                key: None,
+                auto_repeat_mode: None,
+            },
+            ChangeKeyboardControlAux {
+                key_click_percent: None,
+                bell_percent: Some(GenRandom::generate(rng)),
+                bell_pitch: None,
+                bell_duration: None,
+                led: None,
+                led_mode: None,
+                key: None,
+                auto_repeat_mode: None,
+            },
+            ChangeKeyboardControlAux {
+                key_click_percent: None,
+                bell_percent: None,
+                bell_pitch: Some(GenRandom::generate(rng)),
+                bell_duration: None,
+                led: None,
+                led_mode: None,
+                key: None,
+                auto_repeat_mode: None,
+            },
+            ChangeKeyboardControlAux {
+                key_click_percent: None,
+                bell_percent: None,
+                bell_pitch: None,
+                bell_duration: Some(GenRandom::generate(rng)),
+                led: None,
+                led_mode: None,
+                key: None,
+                auto_repeat_mode: None,
+            },
+            ChangeKeyboardControlAux {
+                key_click_percent: None,
+                bell_percent: None,
+                bell_pitch: None,
+                bell_duration: None,
+                led: Some(GenRandom::generate(rng)),
+                led_mode: None,
+                key: None,
+                auto_repeat_mode: None,
+            },
+            ChangeKeyboardControlAux {
+                key_click_percent: None,
+                bell_percent: None,
+                bell_pitch: None,
+                bell_duration: None,
+                led: None,
+                led_mode: Some(GenRandom::generate(rng)),
+                key: None,
+                auto_repeat_mode: None,
+            },
+            ChangeKeyboardControlAux {
+                key_click_percent: None,
+                bell_percent: None,
+                bell_pitch: None,
+                bell_duration: None,
+                led: None,
+                led_mode: None,
+                key: Some(GenRandom::generate(rng)),
+                auto_repeat_mode: None,
+            },
+            ChangeKeyboardControlAux {
+                key_click_percent: None,
+                bell_percent: None,
+                bell_pitch: None,
+                bell_duration: None,
+                led: None,
+                led_mode: None,
+                key: None,
+                auto_repeat_mode: Some(GenRandom::generate(rng)),
+            },
+        ]
     }
 }
 impl ChangeKeyboardControlAux {
@@ -23740,6 +29086,37 @@ impl Serialize for GetKeyboardControlReply {
         bytes.extend_from_slice(&self.auto_repeats);
     }
 }
+#[cfg(test)]
+mod get_keyboard_control_reply {
+    use super::GetKeyboardControlReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetKeyboardControlReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                global_auto_repeat: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                led_mask: GenRandom::generate(rng),
+                key_click_percent: GenRandom::generate(rng),
+                bell_percent: GenRandom::generate(rng),
+                bell_pitch: GenRandom::generate(rng),
+                bell_duration: GenRandom::generate(rng),
+                auto_repeats: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(9271617891041017856);
+        let value = GetKeyboardControlReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the Bell request
 pub const BELL_REQUEST: u8 = 104;
@@ -24003,6 +29380,33 @@ impl Serialize for GetPointerControlReply {
         bytes.extend_from_slice(&[0; 18]);
     }
 }
+#[cfg(test)]
+mod get_pointer_control_reply {
+    use super::GetPointerControlReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetPointerControlReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                acceleration_numerator: GenRandom::generate(rng),
+                acceleration_denominator: GenRandom::generate(rng),
+                threshold: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(6065377153925513216);
+        let value = GetPointerControlReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -24064,6 +29468,18 @@ impl core::fmt::Debug for Blanking  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for Blanking {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::NOT_PREFERRED.0,
+            Self::PREFERRED.0,
+            Self::DEFAULT.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -24123,6 +29539,18 @@ impl core::fmt::Debug for Exposures  {
             (Self::DEFAULT.0.into(), "DEFAULT", "Default"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for Exposures {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::NOT_ALLOWED.0,
+            Self::ALLOWED.0,
+            Self::DEFAULT.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
     }
 }
 
@@ -24341,6 +29769,34 @@ impl Serialize for GetScreenSaverReply {
         bytes.extend_from_slice(&[0; 18]);
     }
 }
+#[cfg(test)]
+mod get_screen_saver_reply {
+    use super::GetScreenSaverReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetScreenSaverReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                timeout: GenRandom::generate(rng),
+                interval: GenRandom::generate(rng),
+                prefer_blanking: GenRandom::generate(rng),
+                allow_exposures: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(1137448785168605184);
+        let value = GetScreenSaverReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -24398,6 +29854,17 @@ impl core::fmt::Debug for HostMode  {
             (Self::DELETE.0.into(), "DELETE", "Delete"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for HostMode {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::INSERT.0,
+            Self::DELETE.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
     }
 }
 
@@ -24463,6 +29930,20 @@ impl core::fmt::Debug for Family  {
             (Self::INTERNET6.0.into(), "INTERNET6", "Internet6"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for Family {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::INTERNET.0,
+            Self::DEC_NET.0,
+            Self::CHAOS.0,
+            Self::SERVER_INTERPRETED.0,
+            Self::INTERNET6.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
     }
 }
 
@@ -24600,6 +30081,30 @@ impl Host {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod host {
+    use super::Host;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for Host {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                family: GenRandom::generate(rng),
+                address: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(106613280);
+        let value = Host::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the ListHosts request
 pub const LIST_HOSTS_REQUEST: u8 = 110;
@@ -24713,6 +30218,32 @@ impl ListHostsReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod list_hosts_reply {
+    use super::ListHostsReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for ListHostsReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                mode: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                hosts: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(15088007780937170944);
+        let value = ListHostsReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -24770,6 +30301,17 @@ impl core::fmt::Debug for AccessControl  {
             (Self::ENABLE.0.into(), "ENABLE", "Enable"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for AccessControl {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::DISABLE.0,
+            Self::ENABLE.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
     }
 }
 
@@ -24885,6 +30427,18 @@ impl core::fmt::Debug for CloseDown  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for CloseDown {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::DESTROY_ALL.0,
+            Self::RETAIN_PERMANENT.0,
+            Self::RETAIN_TEMPORARY.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 /// Opcode for the SetCloseDownMode request
 pub const SET_CLOSE_DOWN_MODE_REQUEST: u8 = 112;
@@ -24992,6 +30546,16 @@ impl core::fmt::Debug for Kill  {
             (Self::ALL_TEMPORARY.0.into(), "ALL_TEMPORARY", "AllTemporary"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for Kill {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::ALL_TEMPORARY.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
     }
 }
 
@@ -25210,6 +30774,17 @@ impl core::fmt::Debug for ScreenSaver  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for ScreenSaver {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::RESET.0,
+            Self::ACTIVE.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
+    }
+}
 
 /// Opcode for the ForceScreenSaver request
 pub const FORCE_SCREEN_SAVER_REQUEST: u8 = 115;
@@ -25321,6 +30896,18 @@ impl core::fmt::Debug for MappingStatus  {
             (Self::FAILURE.0.into(), "FAILURE", "Failure"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for MappingStatus {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::SUCCESS.0,
+            Self::BUSY.0,
+            Self::FAILURE.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
     }
 }
 
@@ -25439,6 +31026,31 @@ impl Serialize for SetPointerMappingReply {
         self.length.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod set_pointer_mapping_reply {
+    use super::SetPointerMappingReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for SetPointerMappingReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                status: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(2449621050074333184);
+        let value = SetPointerMappingReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the GetPointerMapping request
 pub const GET_POINTER_MAPPING_REQUEST: u8 = 117;
@@ -25549,6 +31161,31 @@ impl GetPointerMappingReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+mod get_pointer_mapping_reply {
+    use super::GetPointerMappingReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetPointerMappingReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                map: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(12096705757496475648);
+        let value = GetPointerMappingReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -25618,6 +31255,23 @@ impl core::fmt::Debug for MapIndex  {
             (Self::M5.0.into(), "M5", "M5"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenRandom for MapIndex {
+    fn generate(rng: &fastrand::Rng) -> Self {
+        let possible_values = &[
+            Self::SHIFT.0,
+            Self::LOCK.0,
+            Self::CONTROL.0,
+            Self::M1.0,
+            Self::M2.0,
+            Self::M3.0,
+            Self::M4.0,
+            Self::M5.0,
+        ];
+        let index = rng.usize(..possible_values.len());
+        Self(possible_values[index])
     }
 }
 
@@ -25737,6 +31391,31 @@ impl Serialize for SetModifierMappingReply {
         self.length.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+mod set_modifier_mapping_reply {
+    use super::SetModifierMappingReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for SetModifierMappingReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                status: GenRandom::generate(rng),
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(12316042512845242368);
+        let value = SetModifierMappingReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
+    }
+}
 
 /// Opcode for the GetModifierMapping request
 pub const GET_MODIFIER_MAPPING_REQUEST: u8 = 119;
@@ -25847,6 +31526,31 @@ impl GetModifierMappingReply {
         self.keycodes.len()
             .checked_div(8).unwrap()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+mod get_modifier_mapping_reply {
+    use super::GetModifierMappingReply;
+    #[allow(unused_imports)]
+    use crate::x11_utils::{GenRandom, Serialize};
+    use fastrand::Rng;
+    impl GenRandom for GetModifierMappingReply {
+        fn generate(rng: &Rng) -> Self {
+            Self {
+                sequence: GenRandom::generate(rng),
+                length: GenRandom::generate(rng),
+                keycodes: GenRandom::generate(rng),
+            }
+        }
+    }
+    #[test]
+    fn check_serialize() {
+        let rng = Rng::with_seed(17425157646951907328);
+        let value = GetModifierMappingReply::generate(&rng);
+        let left = value.serialize();
+        let mut right = alloc::vec![];
+        value.serialize_into(&mut right);
+        assert_eq!(&left[..], right.as_slice());
     }
 }
 

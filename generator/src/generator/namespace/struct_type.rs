@@ -2,6 +2,8 @@ use std::collections::HashMap;
 
 use xcbgen::defs as xcbdefs;
 
+use crate::generator::namespace::test_framework::{TestFramework, TestFrameworkType};
+
 use super::{
     gather_deducible_fields, parse, serialize, switch, to_rust_variable_name, DeducibleField,
     DeducibleLengthFieldOp, Derives, FieldContainer, NamespaceGenerator, Output,
@@ -292,6 +294,23 @@ pub(super) fn emit_struct_type(
             });
         }
         outln!(out, "}}");
+    }
+
+    // emit the testing framework
+    if generate_serialize {
+        let tf = TestFramework {
+            generator,
+            name,
+            variant: TestFrameworkType::Struct {
+                fields,
+                deducibles: &deducible_fields,
+            },
+            externals: external_params,
+        };
+        tf.open(out);
+        tf.gen_random(out);
+        tf.gen_check_serialize(out);
+        tf.close(out);
     }
 }
 
