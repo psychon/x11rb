@@ -175,17 +175,23 @@ impl Serialize for QueryVersionReply {
 }
 #[cfg(test)]
 mod query_version_reply {
+    #![allow(dead_code, unused_imports)]
     use super::QueryVersionReply;
-    #[allow(unused_imports)]
-    use crate::x11_utils::{GenRandom, Serialize};
+    use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
+    use alloc::vec::Vec;
+    use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for QueryVersionReply {
         fn generate(rng: &Rng) -> Self {
+            let sequence: u16 = GenRandom::generate(rng);
+            let length: u32 = GenRandom::generate(rng);
+            let major_version: u16 = GenRandom::generate(rng);
+            let minor_version: u16 = GenRandom::generate(rng);
             Self {
-                sequence: GenRandom::generate(rng),
-                length: GenRandom::generate(rng),
-                major_version: GenRandom::generate(rng),
-                minor_version: GenRandom::generate(rng),
+                sequence,
+                length,
+                major_version,
+                minor_version,
             }
         }
     }

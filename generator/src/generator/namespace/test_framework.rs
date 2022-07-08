@@ -8,7 +8,10 @@ use super::{
 };
 use crate::generator::{
     camel_case_to_lower_snake,
-    namespace::helpers::{to_rust_type_name, to_rust_variable_name},
+    namespace::{
+        expr_to_str::expr_to_str,
+        helpers::{to_rust_type_name, to_rust_variable_name},
+    },
     output::Output,
 };
 
@@ -48,9 +51,14 @@ impl<'a, 'b, 'r> TestFramework<'a, 'b, 'r> {
         out.incr_indent();
 
         // continue with imports
+        outln!(out, "#![allow(dead_code, unused_imports)]");
         outln!(out, "use super::{};", to_rust_type_name(self.name));
-        outln!(out, "#[allow(unused_imports)]");
-        outln!(out, "use crate::x11_utils::{{GenRandom, Serialize}};");
+        outln!(
+            out,
+            "use crate::x11_utils::{{GenRandom, Serialize, gen_random_list}};"
+        );
+        outln!(out, "use alloc::vec::Vec;");
+        outln!(out, "use core::convert::TryFrom;");
         outln!(out, "use fastrand::Rng;");
     }
 
@@ -118,17 +126,87 @@ impl<'a, 'b, 'r> TestFramework<'a, 'b, 'r> {
         fields: &[xcbdefs::FieldDef],
         deducibles: &HashMap<String, DeducibleField>,
     ) {
-        outln!(out, "Self {{");
-        out.indented(|out| {
-            // for each non-deducible field, generate a random value
-            for field in fields.iter().filter(|field| match field.name() {
-                None => false,
-                Some(_) => self.generator.field_is_visible(field, deducibles),
-            }) {
+        // iterate over each deducible field and randomly generate them
+        for (ded_name, ded_ty) in deducibles {
+            if let DeducibleField::LengthOf(..) = ded_ty {
+                // write the length
+                // make it between 0 and 16 so that we don't exceed
+                // our stack
                 outln!(
                     out,
-                    "{}: GenRandom::generate(rng),",
-                    to_rust_variable_name(field.name().unwrap())
+                    "let {} = u32::from(rng.u8(..16));",
+                    to_rust_variable_name(ded_name),
+                );
+            }
+        }
+
+        let non_deducible_fields = fields.iter().filter(|field| match field.name() {
+            None => false,
+            Some(_) => self.generator.field_is_visible(field, deducibles),
+        });
+
+        let explicit_type = |field: &xcbdefs::FieldDef| {
+            let ty = match field {
+                xcbdefs::FieldDef::Normal(n) => &n.type_,
+                xcbdefs::FieldDef::List(l) => &l.element_type,
+                _ => return "".to_string(),
+            };
+
+            if matches!(ty.type_.get_resolved(), xcbdefs::TypeRef::BuiltIn(_)) && !matches!(ty.value_set, xcbdefs::FieldValueSet::Enum(_) | xcbdefs::FieldValueSet::Mask(_)) {
+                format!(": {}", self.generator.field_to_rust_type(field, ""))
+            } else {
+                "".to_string()
+            }
+        };
+
+        // for each non-deducible field, generate a random value
+        for field in non_deducible_fields.clone() {
+            match field {
+                field @ xcbdefs::FieldDef::List(list_field) => {
+                    if list_field.length_expr.is_some() {
+                        // create the expression
+                        let fname = to_rust_variable_name(&list_field.name);
+                        let length_expr = expr_to_str(
+                            self.generator,
+                            list_field.length_expr.as_ref().unwrap(),
+                            |s| to_rust_variable_name(s),
+                            true,
+                            None,
+                            false,
+                        );
+
+                        // output the expression
+                        outln!(
+                            out,
+                            "let {}{} = gen_random_list(rng, usize::try_from({}).unwrap());",
+                            fname,
+                            explicit_type(field),
+                            length_expr,
+                        );
+
+                        continue;
+                    } 
+                }
+                _ => {
+                    
+                }
+            }
+
+            outln!(
+                out,
+                "let {}{} = GenRandom::generate(rng);",
+                to_rust_variable_name(field.name().unwrap()), 
+                explicit_type(field),
+            );
+        }
+
+        outln!(out, "Self {{");
+        out.indented(|out| {
+            for field in non_deducible_fields {
+                outln!(
+                    out,
+                    "{},",
+                    to_rust_variable_name(field.name().unwrap()),
                 );
             }
         });
@@ -214,7 +292,7 @@ impl<'a, 'b, 'r> TestFramework<'a, 'b, 'r> {
         {
             outln!(
                 out,
-                "fn generate_values(rng: &Rng) -> alloc::vec::Vec<{}> {{",
+                "fn generate_values(rng: &Rng) -> Vec<{}> {{",
                 to_rust_type_name(self.name)
             );
             out.indented(|out| {

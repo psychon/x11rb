@@ -155,17 +155,23 @@ impl Serialize for QueryVersionReply {
 }
 #[cfg(test)]
 mod query_version_reply {
+    #![allow(dead_code, unused_imports)]
     use super::QueryVersionReply;
-    #[allow(unused_imports)]
-    use crate::x11_utils::{GenRandom, Serialize};
+    use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
+    use alloc::vec::Vec;
+    use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for QueryVersionReply {
         fn generate(rng: &Rng) -> Self {
+            let sequence: u16 = GenRandom::generate(rng);
+            let length: u32 = GenRandom::generate(rng);
+            let server_major: u16 = GenRandom::generate(rng);
+            let server_minor: u16 = GenRandom::generate(rng);
             Self {
-                sequence: GenRandom::generate(rng),
-                length: GenRandom::generate(rng),
-                server_major: GenRandom::generate(rng),
-                server_minor: GenRandom::generate(rng),
+                sequence,
+                length,
+                server_major,
+                server_minor,
             }
         }
     }
@@ -354,16 +360,22 @@ impl GetDeviceCreateContextReply {
 }
 #[cfg(test)]
 mod get_device_create_context_reply {
+    #![allow(dead_code, unused_imports)]
     use super::GetDeviceCreateContextReply;
-    #[allow(unused_imports)]
-    use crate::x11_utils::{GenRandom, Serialize};
+    use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
+    use alloc::vec::Vec;
+    use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for GetDeviceCreateContextReply {
         fn generate(rng: &Rng) -> Self {
+            let context_len = u32::from(rng.u8(..16));
+            let sequence: u16 = GenRandom::generate(rng);
+            let length: u32 = GenRandom::generate(rng);
+            let context: Vec<u8> = gen_random_list(rng, usize::try_from(context_len).unwrap());
             Self {
-                sequence: GenRandom::generate(rng),
-                length: GenRandom::generate(rng),
-                context: GenRandom::generate(rng),
+                sequence,
+                length,
+                context,
             }
         }
     }
@@ -570,16 +582,22 @@ impl GetDeviceContextReply {
 }
 #[cfg(test)]
 mod get_device_context_reply {
+    #![allow(dead_code, unused_imports)]
     use super::GetDeviceContextReply;
-    #[allow(unused_imports)]
-    use crate::x11_utils::{GenRandom, Serialize};
+    use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
+    use alloc::vec::Vec;
+    use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for GetDeviceContextReply {
         fn generate(rng: &Rng) -> Self {
+            let context_len = u32::from(rng.u8(..16));
+            let sequence: u16 = GenRandom::generate(rng);
+            let length: u32 = GenRandom::generate(rng);
+            let context: Vec<u8> = gen_random_list(rng, usize::try_from(context_len).unwrap());
             Self {
-                sequence: GenRandom::generate(rng),
-                length: GenRandom::generate(rng),
-                context: GenRandom::generate(rng),
+                sequence,
+                length,
+                context,
             }
         }
     }
@@ -768,16 +786,22 @@ impl GetWindowCreateContextReply {
 }
 #[cfg(test)]
 mod get_window_create_context_reply {
+    #![allow(dead_code, unused_imports)]
     use super::GetWindowCreateContextReply;
-    #[allow(unused_imports)]
-    use crate::x11_utils::{GenRandom, Serialize};
+    use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
+    use alloc::vec::Vec;
+    use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for GetWindowCreateContextReply {
         fn generate(rng: &Rng) -> Self {
+            let context_len = u32::from(rng.u8(..16));
+            let sequence: u16 = GenRandom::generate(rng);
+            let length: u32 = GenRandom::generate(rng);
+            let context: Vec<u8> = gen_random_list(rng, usize::try_from(context_len).unwrap());
             Self {
-                sequence: GenRandom::generate(rng),
-                length: GenRandom::generate(rng),
-                context: GenRandom::generate(rng),
+                sequence,
+                length,
+                context,
             }
         }
     }
@@ -911,16 +935,22 @@ impl GetWindowContextReply {
 }
 #[cfg(test)]
 mod get_window_context_reply {
+    #![allow(dead_code, unused_imports)]
     use super::GetWindowContextReply;
-    #[allow(unused_imports)]
-    use crate::x11_utils::{GenRandom, Serialize};
+    use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
+    use alloc::vec::Vec;
+    use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for GetWindowContextReply {
         fn generate(rng: &Rng) -> Self {
+            let context_len = u32::from(rng.u8(..16));
+            let sequence: u16 = GenRandom::generate(rng);
+            let length: u32 = GenRandom::generate(rng);
+            let context: Vec<u8> = gen_random_list(rng, usize::try_from(context_len).unwrap());
             Self {
-                sequence: GenRandom::generate(rng),
-                length: GenRandom::generate(rng),
-                context: GenRandom::generate(rng),
+                sequence,
+                length,
+                context,
             }
         }
     }
@@ -1014,16 +1044,23 @@ impl ListItem {
 }
 #[cfg(test)]
 mod list_item {
+    #![allow(dead_code, unused_imports)]
     use super::ListItem;
-    #[allow(unused_imports)]
-    use crate::x11_utils::{GenRandom, Serialize};
+    use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
+    use alloc::vec::Vec;
+    use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for ListItem {
         fn generate(rng: &Rng) -> Self {
+            let object_context_len = u32::from(rng.u8(..16));
+            let data_context_len = u32::from(rng.u8(..16));
+            let name = GenRandom::generate(rng);
+            let object_context: Vec<u8> = gen_random_list(rng, usize::try_from(object_context_len).unwrap());
+            let data_context: Vec<u8> = gen_random_list(rng, usize::try_from(data_context_len).unwrap());
             Self {
-                name: GenRandom::generate(rng),
-                object_context: GenRandom::generate(rng),
-                data_context: GenRandom::generate(rng),
+                name,
+                object_context,
+                data_context,
             }
         }
     }
@@ -1212,16 +1249,22 @@ impl GetPropertyCreateContextReply {
 }
 #[cfg(test)]
 mod get_property_create_context_reply {
+    #![allow(dead_code, unused_imports)]
     use super::GetPropertyCreateContextReply;
-    #[allow(unused_imports)]
-    use crate::x11_utils::{GenRandom, Serialize};
+    use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
+    use alloc::vec::Vec;
+    use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for GetPropertyCreateContextReply {
         fn generate(rng: &Rng) -> Self {
+            let context_len = u32::from(rng.u8(..16));
+            let sequence: u16 = GenRandom::generate(rng);
+            let length: u32 = GenRandom::generate(rng);
+            let context: Vec<u8> = gen_random_list(rng, usize::try_from(context_len).unwrap());
             Self {
-                sequence: GenRandom::generate(rng),
-                length: GenRandom::generate(rng),
-                context: GenRandom::generate(rng),
+                sequence,
+                length,
+                context,
             }
         }
     }
@@ -1410,16 +1453,22 @@ impl GetPropertyUseContextReply {
 }
 #[cfg(test)]
 mod get_property_use_context_reply {
+    #![allow(dead_code, unused_imports)]
     use super::GetPropertyUseContextReply;
-    #[allow(unused_imports)]
-    use crate::x11_utils::{GenRandom, Serialize};
+    use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
+    use alloc::vec::Vec;
+    use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for GetPropertyUseContextReply {
         fn generate(rng: &Rng) -> Self {
+            let context_len = u32::from(rng.u8(..16));
+            let sequence: u16 = GenRandom::generate(rng);
+            let length: u32 = GenRandom::generate(rng);
+            let context: Vec<u8> = gen_random_list(rng, usize::try_from(context_len).unwrap());
             Self {
-                sequence: GenRandom::generate(rng),
-                length: GenRandom::generate(rng),
-                context: GenRandom::generate(rng),
+                sequence,
+                length,
+                context,
             }
         }
     }
@@ -1561,16 +1610,22 @@ impl GetPropertyContextReply {
 }
 #[cfg(test)]
 mod get_property_context_reply {
+    #![allow(dead_code, unused_imports)]
     use super::GetPropertyContextReply;
-    #[allow(unused_imports)]
-    use crate::x11_utils::{GenRandom, Serialize};
+    use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
+    use alloc::vec::Vec;
+    use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for GetPropertyContextReply {
         fn generate(rng: &Rng) -> Self {
+            let context_len = u32::from(rng.u8(..16));
+            let sequence: u16 = GenRandom::generate(rng);
+            let length: u32 = GenRandom::generate(rng);
+            let context: Vec<u8> = gen_random_list(rng, usize::try_from(context_len).unwrap());
             Self {
-                sequence: GenRandom::generate(rng),
-                length: GenRandom::generate(rng),
-                context: GenRandom::generate(rng),
+                sequence,
+                length,
+                context,
             }
         }
     }
@@ -1712,16 +1767,22 @@ impl GetPropertyDataContextReply {
 }
 #[cfg(test)]
 mod get_property_data_context_reply {
+    #![allow(dead_code, unused_imports)]
     use super::GetPropertyDataContextReply;
-    #[allow(unused_imports)]
-    use crate::x11_utils::{GenRandom, Serialize};
+    use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
+    use alloc::vec::Vec;
+    use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for GetPropertyDataContextReply {
         fn generate(rng: &Rng) -> Self {
+            let context_len = u32::from(rng.u8(..16));
+            let sequence: u16 = GenRandom::generate(rng);
+            let length: u32 = GenRandom::generate(rng);
+            let context: Vec<u8> = gen_random_list(rng, usize::try_from(context_len).unwrap());
             Self {
-                sequence: GenRandom::generate(rng),
-                length: GenRandom::generate(rng),
-                context: GenRandom::generate(rng),
+                sequence,
+                length,
+                context,
             }
         }
     }
@@ -1854,16 +1915,22 @@ impl ListPropertiesReply {
 }
 #[cfg(test)]
 mod list_properties_reply {
+    #![allow(dead_code, unused_imports)]
     use super::ListPropertiesReply;
-    #[allow(unused_imports)]
-    use crate::x11_utils::{GenRandom, Serialize};
+    use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
+    use alloc::vec::Vec;
+    use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for ListPropertiesReply {
         fn generate(rng: &Rng) -> Self {
+            let properties_len = u32::from(rng.u8(..16));
+            let sequence: u16 = GenRandom::generate(rng);
+            let length: u32 = GenRandom::generate(rng);
+            let properties = gen_random_list(rng, usize::try_from(properties_len).unwrap());
             Self {
-                sequence: GenRandom::generate(rng),
-                length: GenRandom::generate(rng),
-                properties: GenRandom::generate(rng),
+                sequence,
+                length,
+                properties,
             }
         }
     }
@@ -2052,16 +2119,22 @@ impl GetSelectionCreateContextReply {
 }
 #[cfg(test)]
 mod get_selection_create_context_reply {
+    #![allow(dead_code, unused_imports)]
     use super::GetSelectionCreateContextReply;
-    #[allow(unused_imports)]
-    use crate::x11_utils::{GenRandom, Serialize};
+    use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
+    use alloc::vec::Vec;
+    use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for GetSelectionCreateContextReply {
         fn generate(rng: &Rng) -> Self {
+            let context_len = u32::from(rng.u8(..16));
+            let sequence: u16 = GenRandom::generate(rng);
+            let length: u32 = GenRandom::generate(rng);
+            let context: Vec<u8> = gen_random_list(rng, usize::try_from(context_len).unwrap());
             Self {
-                sequence: GenRandom::generate(rng),
-                length: GenRandom::generate(rng),
-                context: GenRandom::generate(rng),
+                sequence,
+                length,
+                context,
             }
         }
     }
@@ -2250,16 +2323,22 @@ impl GetSelectionUseContextReply {
 }
 #[cfg(test)]
 mod get_selection_use_context_reply {
+    #![allow(dead_code, unused_imports)]
     use super::GetSelectionUseContextReply;
-    #[allow(unused_imports)]
-    use crate::x11_utils::{GenRandom, Serialize};
+    use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
+    use alloc::vec::Vec;
+    use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for GetSelectionUseContextReply {
         fn generate(rng: &Rng) -> Self {
+            let context_len = u32::from(rng.u8(..16));
+            let sequence: u16 = GenRandom::generate(rng);
+            let length: u32 = GenRandom::generate(rng);
+            let context: Vec<u8> = gen_random_list(rng, usize::try_from(context_len).unwrap());
             Self {
-                sequence: GenRandom::generate(rng),
-                length: GenRandom::generate(rng),
-                context: GenRandom::generate(rng),
+                sequence,
+                length,
+                context,
             }
         }
     }
@@ -2393,16 +2472,22 @@ impl GetSelectionContextReply {
 }
 #[cfg(test)]
 mod get_selection_context_reply {
+    #![allow(dead_code, unused_imports)]
     use super::GetSelectionContextReply;
-    #[allow(unused_imports)]
-    use crate::x11_utils::{GenRandom, Serialize};
+    use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
+    use alloc::vec::Vec;
+    use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for GetSelectionContextReply {
         fn generate(rng: &Rng) -> Self {
+            let context_len = u32::from(rng.u8(..16));
+            let sequence: u16 = GenRandom::generate(rng);
+            let length: u32 = GenRandom::generate(rng);
+            let context: Vec<u8> = gen_random_list(rng, usize::try_from(context_len).unwrap());
             Self {
-                sequence: GenRandom::generate(rng),
-                length: GenRandom::generate(rng),
-                context: GenRandom::generate(rng),
+                sequence,
+                length,
+                context,
             }
         }
     }
@@ -2536,16 +2621,22 @@ impl GetSelectionDataContextReply {
 }
 #[cfg(test)]
 mod get_selection_data_context_reply {
+    #![allow(dead_code, unused_imports)]
     use super::GetSelectionDataContextReply;
-    #[allow(unused_imports)]
-    use crate::x11_utils::{GenRandom, Serialize};
+    use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
+    use alloc::vec::Vec;
+    use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for GetSelectionDataContextReply {
         fn generate(rng: &Rng) -> Self {
+            let context_len = u32::from(rng.u8(..16));
+            let sequence: u16 = GenRandom::generate(rng);
+            let length: u32 = GenRandom::generate(rng);
+            let context: Vec<u8> = gen_random_list(rng, usize::try_from(context_len).unwrap());
             Self {
-                sequence: GenRandom::generate(rng),
-                length: GenRandom::generate(rng),
-                context: GenRandom::generate(rng),
+                sequence,
+                length,
+                context,
             }
         }
     }
@@ -2669,16 +2760,22 @@ impl ListSelectionsReply {
 }
 #[cfg(test)]
 mod list_selections_reply {
+    #![allow(dead_code, unused_imports)]
     use super::ListSelectionsReply;
-    #[allow(unused_imports)]
-    use crate::x11_utils::{GenRandom, Serialize};
+    use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
+    use alloc::vec::Vec;
+    use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for ListSelectionsReply {
         fn generate(rng: &Rng) -> Self {
+            let selections_len = u32::from(rng.u8(..16));
+            let sequence: u16 = GenRandom::generate(rng);
+            let length: u32 = GenRandom::generate(rng);
+            let selections = gen_random_list(rng, usize::try_from(selections_len).unwrap());
             Self {
-                sequence: GenRandom::generate(rng),
-                length: GenRandom::generate(rng),
-                selections: GenRandom::generate(rng),
+                sequence,
+                length,
+                selections,
             }
         }
     }
@@ -2812,16 +2909,22 @@ impl GetClientContextReply {
 }
 #[cfg(test)]
 mod get_client_context_reply {
+    #![allow(dead_code, unused_imports)]
     use super::GetClientContextReply;
-    #[allow(unused_imports)]
-    use crate::x11_utils::{GenRandom, Serialize};
+    use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
+    use alloc::vec::Vec;
+    use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for GetClientContextReply {
         fn generate(rng: &Rng) -> Self {
+            let context_len = u32::from(rng.u8(..16));
+            let sequence: u16 = GenRandom::generate(rng);
+            let length: u32 = GenRandom::generate(rng);
+            let context: Vec<u8> = gen_random_list(rng, usize::try_from(context_len).unwrap());
             Self {
-                sequence: GenRandom::generate(rng),
-                length: GenRandom::generate(rng),
-                context: GenRandom::generate(rng),
+                sequence,
+                length,
+                context,
             }
         }
     }

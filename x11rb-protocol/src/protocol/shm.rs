@@ -116,20 +116,29 @@ impl Serialize for CompletionEvent {
 }
 #[cfg(test)]
 mod completion_event {
+    #![allow(dead_code, unused_imports)]
     use super::CompletionEvent;
-    #[allow(unused_imports)]
-    use crate::x11_utils::{GenRandom, Serialize};
+    use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
+    use alloc::vec::Vec;
+    use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for CompletionEvent {
         fn generate(rng: &Rng) -> Self {
+            let response_type: u8 = GenRandom::generate(rng);
+            let sequence: u16 = GenRandom::generate(rng);
+            let drawable = GenRandom::generate(rng);
+            let minor_event: u16 = GenRandom::generate(rng);
+            let major_event: u8 = GenRandom::generate(rng);
+            let shmseg = GenRandom::generate(rng);
+            let offset: u32 = GenRandom::generate(rng);
             Self {
-                response_type: GenRandom::generate(rng),
-                sequence: GenRandom::generate(rng),
-                drawable: GenRandom::generate(rng),
-                minor_event: GenRandom::generate(rng),
-                major_event: GenRandom::generate(rng),
-                shmseg: GenRandom::generate(rng),
-                offset: GenRandom::generate(rng),
+                response_type,
+                sequence,
+                drawable,
+                minor_event,
+                major_event,
+                shmseg,
+                offset,
             }
         }
     }
@@ -342,21 +351,31 @@ impl Serialize for QueryVersionReply {
 }
 #[cfg(test)]
 mod query_version_reply {
+    #![allow(dead_code, unused_imports)]
     use super::QueryVersionReply;
-    #[allow(unused_imports)]
-    use crate::x11_utils::{GenRandom, Serialize};
+    use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
+    use alloc::vec::Vec;
+    use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for QueryVersionReply {
         fn generate(rng: &Rng) -> Self {
+            let shared_pixmaps: bool = GenRandom::generate(rng);
+            let sequence: u16 = GenRandom::generate(rng);
+            let length: u32 = GenRandom::generate(rng);
+            let major_version: u16 = GenRandom::generate(rng);
+            let minor_version: u16 = GenRandom::generate(rng);
+            let uid: u16 = GenRandom::generate(rng);
+            let gid: u16 = GenRandom::generate(rng);
+            let pixmap_format: u8 = GenRandom::generate(rng);
             Self {
-                shared_pixmaps: GenRandom::generate(rng),
-                sequence: GenRandom::generate(rng),
-                length: GenRandom::generate(rng),
-                major_version: GenRandom::generate(rng),
-                minor_version: GenRandom::generate(rng),
-                uid: GenRandom::generate(rng),
-                gid: GenRandom::generate(rng),
-                pixmap_format: GenRandom::generate(rng),
+                shared_pixmaps,
+                sequence,
+                length,
+                major_version,
+                minor_version,
+                uid,
+                gid,
+                pixmap_format,
             }
         }
     }
@@ -816,18 +835,25 @@ impl Serialize for GetImageReply {
 }
 #[cfg(test)]
 mod get_image_reply {
+    #![allow(dead_code, unused_imports)]
     use super::GetImageReply;
-    #[allow(unused_imports)]
-    use crate::x11_utils::{GenRandom, Serialize};
+    use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
+    use alloc::vec::Vec;
+    use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for GetImageReply {
         fn generate(rng: &Rng) -> Self {
+            let depth: u8 = GenRandom::generate(rng);
+            let sequence: u16 = GenRandom::generate(rng);
+            let length: u32 = GenRandom::generate(rng);
+            let visual = GenRandom::generate(rng);
+            let size: u32 = GenRandom::generate(rng);
             Self {
-                depth: GenRandom::generate(rng),
-                sequence: GenRandom::generate(rng),
-                length: GenRandom::generate(rng),
-                visual: GenRandom::generate(rng),
-                size: GenRandom::generate(rng),
+                depth,
+                sequence,
+                length,
+                visual,
+                size,
             }
         }
     }
@@ -1157,17 +1183,23 @@ impl Serialize for CreateSegmentReply {
 }
 #[cfg(test)]
 mod create_segment_reply {
+    #![allow(dead_code, unused_imports)]
     use super::CreateSegmentReply;
-    #[allow(unused_imports)]
-    use crate::x11_utils::{GenRandom, Serialize};
+    use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
+    use alloc::vec::Vec;
+    use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for CreateSegmentReply {
         fn generate(rng: &Rng) -> Self {
+            let nfd: u8 = GenRandom::generate(rng);
+            let sequence: u16 = GenRandom::generate(rng);
+            let length: u32 = GenRandom::generate(rng);
+            let shm_fd = GenRandom::generate(rng);
             Self {
-                nfd: GenRandom::generate(rng),
-                sequence: GenRandom::generate(rng),
-                length: GenRandom::generate(rng),
-                shm_fd: GenRandom::generate(rng),
+                nfd,
+                sequence,
+                length,
+                shm_fd,
             }
         }
     }

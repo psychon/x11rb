@@ -175,17 +175,23 @@ impl Serialize for QueryVersionReply {
 }
 #[cfg(test)]
 mod query_version_reply {
+    #![allow(dead_code, unused_imports)]
     use super::QueryVersionReply;
-    #[allow(unused_imports)]
-    use crate::x11_utils::{GenRandom, Serialize};
+    use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
+    use alloc::vec::Vec;
+    use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for QueryVersionReply {
         fn generate(rng: &Rng) -> Self {
+            let sequence: u16 = GenRandom::generate(rng);
+            let length: u32 = GenRandom::generate(rng);
+            let server_major_version: u16 = GenRandom::generate(rng);
+            let server_minor_version: u16 = GenRandom::generate(rng);
             Self {
-                sequence: GenRandom::generate(rng),
-                length: GenRandom::generate(rng),
-                server_major_version: GenRandom::generate(rng),
-                server_minor_version: GenRandom::generate(rng),
+                sequence,
+                length,
+                server_major_version,
+                server_minor_version,
             }
         }
     }
@@ -331,15 +337,19 @@ impl Serialize for StartReply {
 }
 #[cfg(test)]
 mod start_reply {
+    #![allow(dead_code, unused_imports)]
     use super::StartReply;
-    #[allow(unused_imports)]
-    use crate::x11_utils::{GenRandom, Serialize};
+    use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
+    use alloc::vec::Vec;
+    use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for StartReply {
         fn generate(rng: &Rng) -> Self {
+            let sequence: u16 = GenRandom::generate(rng);
+            let length: u32 = GenRandom::generate(rng);
             Self {
-                sequence: GenRandom::generate(rng),
-                length: GenRandom::generate(rng),
+                sequence,
+                length,
             }
         }
     }
@@ -485,15 +495,19 @@ impl Serialize for EndReply {
 }
 #[cfg(test)]
 mod end_reply {
+    #![allow(dead_code, unused_imports)]
     use super::EndReply;
-    #[allow(unused_imports)]
-    use crate::x11_utils::{GenRandom, Serialize};
+    use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
+    use alloc::vec::Vec;
+    use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for EndReply {
         fn generate(rng: &Rng) -> Self {
+            let sequence: u16 = GenRandom::generate(rng);
+            let length: u32 = GenRandom::generate(rng);
             Self {
-                sequence: GenRandom::generate(rng),
-                length: GenRandom::generate(rng),
+                sequence,
+                length,
             }
         }
     }
@@ -646,9 +660,11 @@ impl Serialize for Event {
 }
 #[cfg(test)]
 mod event {
+    #![allow(dead_code, unused_imports)]
     use super::Event;
-    #[allow(unused_imports)]
-    use crate::x11_utils::{GenRandom, Serialize};
+    use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
+    use alloc::vec::Vec;
+    use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for Event {
         fn generate(rng: &Rng) -> Self {
@@ -899,15 +915,19 @@ impl Serialize for SendReply {
 }
 #[cfg(test)]
 mod send_reply {
+    #![allow(dead_code, unused_imports)]
     use super::SendReply;
-    #[allow(unused_imports)]
-    use crate::x11_utils::{GenRandom, Serialize};
+    use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
+    use alloc::vec::Vec;
+    use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for SendReply {
         fn generate(rng: &Rng) -> Self {
+            let sequence: u16 = GenRandom::generate(rng);
+            let length: u32 = GenRandom::generate(rng);
             Self {
-                sequence: GenRandom::generate(rng),
-                length: GenRandom::generate(rng),
+                sequence,
+                length,
             }
         }
     }
@@ -1053,15 +1073,19 @@ impl Serialize for SelectInputReply {
 }
 #[cfg(test)]
 mod select_input_reply {
+    #![allow(dead_code, unused_imports)]
     use super::SelectInputReply;
-    #[allow(unused_imports)]
-    use crate::x11_utils::{GenRandom, Serialize};
+    use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
+    use alloc::vec::Vec;
+    use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for SelectInputReply {
         fn generate(rng: &Rng) -> Self {
+            let sequence: u16 = GenRandom::generate(rng);
+            let length: u32 = GenRandom::generate(rng);
             Self {
-                sequence: GenRandom::generate(rng),
-                length: GenRandom::generate(rng),
+                sequence,
+                length,
             }
         }
     }

@@ -136,16 +136,21 @@ impl Serialize for EnableReply {
 }
 #[cfg(test)]
 mod enable_reply {
+    #![allow(dead_code, unused_imports)]
     use super::EnableReply;
-    #[allow(unused_imports)]
-    use crate::x11_utils::{GenRandom, Serialize};
+    use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
+    use alloc::vec::Vec;
+    use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for EnableReply {
         fn generate(rng: &Rng) -> Self {
+            let sequence: u16 = GenRandom::generate(rng);
+            let length: u32 = GenRandom::generate(rng);
+            let maximum_request_length: u32 = GenRandom::generate(rng);
             Self {
-                sequence: GenRandom::generate(rng),
-                length: GenRandom::generate(rng),
-                maximum_request_length: GenRandom::generate(rng),
+                sequence,
+                length,
+                maximum_request_length,
             }
         }
     }

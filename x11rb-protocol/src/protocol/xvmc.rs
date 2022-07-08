@@ -122,22 +122,33 @@ impl Serialize for SurfaceInfo {
 }
 #[cfg(test)]
 mod surface_info {
+    #![allow(dead_code, unused_imports)]
     use super::SurfaceInfo;
-    #[allow(unused_imports)]
-    use crate::x11_utils::{GenRandom, Serialize};
+    use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
+    use alloc::vec::Vec;
+    use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for SurfaceInfo {
         fn generate(rng: &Rng) -> Self {
+            let id = GenRandom::generate(rng);
+            let chroma_format: u16 = GenRandom::generate(rng);
+            let pad0: u16 = GenRandom::generate(rng);
+            let max_width: u16 = GenRandom::generate(rng);
+            let max_height: u16 = GenRandom::generate(rng);
+            let subpicture_max_width: u16 = GenRandom::generate(rng);
+            let subpicture_max_height: u16 = GenRandom::generate(rng);
+            let mc_type: u32 = GenRandom::generate(rng);
+            let flags: u32 = GenRandom::generate(rng);
             Self {
-                id: GenRandom::generate(rng),
-                chroma_format: GenRandom::generate(rng),
-                pad0: GenRandom::generate(rng),
-                max_width: GenRandom::generate(rng),
-                max_height: GenRandom::generate(rng),
-                subpicture_max_width: GenRandom::generate(rng),
-                subpicture_max_height: GenRandom::generate(rng),
-                mc_type: GenRandom::generate(rng),
-                flags: GenRandom::generate(rng),
+                id,
+                chroma_format,
+                pad0,
+                max_width,
+                max_height,
+                subpicture_max_width,
+                subpicture_max_height,
+                mc_type,
+                flags,
             }
         }
     }
@@ -264,17 +275,23 @@ impl Serialize for QueryVersionReply {
 }
 #[cfg(test)]
 mod query_version_reply {
+    #![allow(dead_code, unused_imports)]
     use super::QueryVersionReply;
-    #[allow(unused_imports)]
-    use crate::x11_utils::{GenRandom, Serialize};
+    use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
+    use alloc::vec::Vec;
+    use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for QueryVersionReply {
         fn generate(rng: &Rng) -> Self {
+            let sequence: u16 = GenRandom::generate(rng);
+            let length: u32 = GenRandom::generate(rng);
+            let major: u32 = GenRandom::generate(rng);
+            let minor: u32 = GenRandom::generate(rng);
             Self {
-                sequence: GenRandom::generate(rng),
-                length: GenRandom::generate(rng),
-                major: GenRandom::generate(rng),
-                minor: GenRandom::generate(rng),
+                sequence,
+                length,
+                major,
+                minor,
             }
         }
     }
@@ -407,16 +424,22 @@ impl ListSurfaceTypesReply {
 }
 #[cfg(test)]
 mod list_surface_types_reply {
+    #![allow(dead_code, unused_imports)]
     use super::ListSurfaceTypesReply;
-    #[allow(unused_imports)]
-    use crate::x11_utils::{GenRandom, Serialize};
+    use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
+    use alloc::vec::Vec;
+    use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for ListSurfaceTypesReply {
         fn generate(rng: &Rng) -> Self {
+            let num = u32::from(rng.u8(..16));
+            let sequence: u16 = GenRandom::generate(rng);
+            let length: u32 = GenRandom::generate(rng);
+            let surfaces = gen_random_list(rng, usize::try_from(num).unwrap());
             Self {
-                sequence: GenRandom::generate(rng),
-                length: GenRandom::generate(rng),
-                surfaces: GenRandom::generate(rng),
+                sequence,
+                length,
+                surfaces,
             }
         }
     }
@@ -591,18 +614,26 @@ impl CreateContextReply {
 }
 #[cfg(test)]
 mod create_context_reply {
+    #![allow(dead_code, unused_imports)]
     use super::CreateContextReply;
-    #[allow(unused_imports)]
-    use crate::x11_utils::{GenRandom, Serialize};
+    use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
+    use alloc::vec::Vec;
+    use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for CreateContextReply {
         fn generate(rng: &Rng) -> Self {
+            let length = u32::from(rng.u8(..16));
+            let sequence: u16 = GenRandom::generate(rng);
+            let width_actual: u16 = GenRandom::generate(rng);
+            let height_actual: u16 = GenRandom::generate(rng);
+            let flags_return: u32 = GenRandom::generate(rng);
+            let priv_data: Vec<u32> = gen_random_list(rng, usize::try_from(length).unwrap());
             Self {
-                sequence: GenRandom::generate(rng),
-                width_actual: GenRandom::generate(rng),
-                height_actual: GenRandom::generate(rng),
-                flags_return: GenRandom::generate(rng),
-                priv_data: GenRandom::generate(rng),
+                sequence,
+                width_actual,
+                height_actual,
+                flags_return,
+                priv_data,
             }
         }
     }
@@ -793,15 +824,20 @@ impl CreateSurfaceReply {
 }
 #[cfg(test)]
 mod create_surface_reply {
+    #![allow(dead_code, unused_imports)]
     use super::CreateSurfaceReply;
-    #[allow(unused_imports)]
-    use crate::x11_utils::{GenRandom, Serialize};
+    use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
+    use alloc::vec::Vec;
+    use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for CreateSurfaceReply {
         fn generate(rng: &Rng) -> Self {
+            let length = u32::from(rng.u8(..16));
+            let sequence: u16 = GenRandom::generate(rng);
+            let priv_data: Vec<u32> = gen_random_list(rng, usize::try_from(length).unwrap());
             Self {
-                sequence: GenRandom::generate(rng),
-                priv_data: GenRandom::generate(rng),
+                sequence,
+                priv_data,
             }
         }
     }
@@ -1028,20 +1064,30 @@ impl CreateSubpictureReply {
 }
 #[cfg(test)]
 mod create_subpicture_reply {
+    #![allow(dead_code, unused_imports)]
     use super::CreateSubpictureReply;
-    #[allow(unused_imports)]
-    use crate::x11_utils::{GenRandom, Serialize};
+    use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
+    use alloc::vec::Vec;
+    use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for CreateSubpictureReply {
         fn generate(rng: &Rng) -> Self {
+            let length = u32::from(rng.u8(..16));
+            let sequence: u16 = GenRandom::generate(rng);
+            let width_actual: u16 = GenRandom::generate(rng);
+            let height_actual: u16 = GenRandom::generate(rng);
+            let num_palette_entries: u16 = GenRandom::generate(rng);
+            let entry_bytes: u16 = GenRandom::generate(rng);
+            let component_order: [u8; 4] = gen_random_list(rng, usize::try_from(4u32).unwrap());
+            let priv_data: Vec<u32> = gen_random_list(rng, usize::try_from(length).unwrap());
             Self {
-                sequence: GenRandom::generate(rng),
-                width_actual: GenRandom::generate(rng),
-                height_actual: GenRandom::generate(rng),
-                num_palette_entries: GenRandom::generate(rng),
-                entry_bytes: GenRandom::generate(rng),
-                component_order: GenRandom::generate(rng),
-                priv_data: GenRandom::generate(rng),
+                sequence,
+                width_actual,
+                height_actual,
+                num_palette_entries,
+                entry_bytes,
+                component_order,
+                priv_data,
             }
         }
     }
@@ -1235,16 +1281,22 @@ impl ListSubpictureTypesReply {
 }
 #[cfg(test)]
 mod list_subpicture_types_reply {
+    #![allow(dead_code, unused_imports)]
     use super::ListSubpictureTypesReply;
-    #[allow(unused_imports)]
-    use crate::x11_utils::{GenRandom, Serialize};
+    use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
+    use alloc::vec::Vec;
+    use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for ListSubpictureTypesReply {
         fn generate(rng: &Rng) -> Self {
+            let num = u32::from(rng.u8(..16));
+            let sequence: u16 = GenRandom::generate(rng);
+            let length: u32 = GenRandom::generate(rng);
+            let types = gen_random_list(rng, usize::try_from(num).unwrap());
             Self {
-                sequence: GenRandom::generate(rng),
-                length: GenRandom::generate(rng),
-                types: GenRandom::generate(rng),
+                sequence,
+                length,
+                types,
             }
         }
     }

@@ -153,17 +153,23 @@ impl Serialize for GetVersionReply {
 }
 #[cfg(test)]
 mod get_version_reply {
+    #![allow(dead_code, unused_imports)]
     use super::GetVersionReply;
-    #[allow(unused_imports)]
-    use crate::x11_utils::{GenRandom, Serialize};
+    use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
+    use alloc::vec::Vec;
+    use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for GetVersionReply {
         fn generate(rng: &Rng) -> Self {
+            let sequence: u16 = GenRandom::generate(rng);
+            let length: u32 = GenRandom::generate(rng);
+            let server_major_version: u16 = GenRandom::generate(rng);
+            let server_minor_version: u16 = GenRandom::generate(rng);
             Self {
-                sequence: GenRandom::generate(rng),
-                length: GenRandom::generate(rng),
-                server_major_version: GenRandom::generate(rng),
-                server_minor_version: GenRandom::generate(rng),
+                sequence,
+                length,
+                server_major_version,
+                server_minor_version,
             }
         }
     }
@@ -290,17 +296,23 @@ impl Serialize for GetXIDRangeReply {
 }
 #[cfg(test)]
 mod get_xid_range_reply {
+    #![allow(dead_code, unused_imports)]
     use super::GetXIDRangeReply;
-    #[allow(unused_imports)]
-    use crate::x11_utils::{GenRandom, Serialize};
+    use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
+    use alloc::vec::Vec;
+    use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for GetXIDRangeReply {
         fn generate(rng: &Rng) -> Self {
+            let sequence: u16 = GenRandom::generate(rng);
+            let length: u32 = GenRandom::generate(rng);
+            let start_id: u32 = GenRandom::generate(rng);
+            let count: u32 = GenRandom::generate(rng);
             Self {
-                sequence: GenRandom::generate(rng),
-                length: GenRandom::generate(rng),
-                start_id: GenRandom::generate(rng),
-                count: GenRandom::generate(rng),
+                sequence,
+                length,
+                start_id,
+                count,
             }
         }
     }
@@ -433,16 +445,22 @@ impl GetXIDListReply {
 }
 #[cfg(test)]
 mod get_xid_list_reply {
+    #![allow(dead_code, unused_imports)]
     use super::GetXIDListReply;
-    #[allow(unused_imports)]
-    use crate::x11_utils::{GenRandom, Serialize};
+    use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
+    use alloc::vec::Vec;
+    use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for GetXIDListReply {
         fn generate(rng: &Rng) -> Self {
+            let ids_len = u32::from(rng.u8(..16));
+            let sequence: u16 = GenRandom::generate(rng);
+            let length: u32 = GenRandom::generate(rng);
+            let ids: Vec<u32> = gen_random_list(rng, usize::try_from(ids_len).unwrap());
             Self {
-                sequence: GenRandom::generate(rng),
-                length: GenRandom::generate(rng),
-                ids: GenRandom::generate(rng),
+                sequence,
+                length,
+                ids,
             }
         }
     }

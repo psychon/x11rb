@@ -264,17 +264,23 @@ impl Serialize for QueryVersionReply {
 }
 #[cfg(test)]
 mod query_version_reply {
+    #![allow(dead_code, unused_imports)]
     use super::QueryVersionReply;
-    #[allow(unused_imports)]
-    use crate::x11_utils::{GenRandom, Serialize};
+    use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
+    use alloc::vec::Vec;
+    use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for QueryVersionReply {
         fn generate(rng: &Rng) -> Self {
+            let sequence: u16 = GenRandom::generate(rng);
+            let length: u32 = GenRandom::generate(rng);
+            let major_version: u32 = GenRandom::generate(rng);
+            let minor_version: u32 = GenRandom::generate(rng);
             Self {
-                sequence: GenRandom::generate(rng),
-                length: GenRandom::generate(rng),
-                major_version: GenRandom::generate(rng),
-                minor_version: GenRandom::generate(rng),
+                sequence,
+                length,
+                major_version,
+                minor_version,
             }
         }
     }
@@ -636,21 +642,31 @@ impl Serialize for NotifyEvent {
 }
 #[cfg(test)]
 mod notify_event {
+    #![allow(dead_code, unused_imports)]
     use super::NotifyEvent;
-    #[allow(unused_imports)]
-    use crate::x11_utils::{GenRandom, Serialize};
+    use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
+    use alloc::vec::Vec;
+    use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for NotifyEvent {
         fn generate(rng: &Rng) -> Self {
+            let response_type: u8 = GenRandom::generate(rng);
+            let level = GenRandom::generate(rng);
+            let sequence: u16 = GenRandom::generate(rng);
+            let drawable = GenRandom::generate(rng);
+            let damage = GenRandom::generate(rng);
+            let timestamp = GenRandom::generate(rng);
+            let area = GenRandom::generate(rng);
+            let geometry = GenRandom::generate(rng);
             Self {
-                response_type: GenRandom::generate(rng),
-                level: GenRandom::generate(rng),
-                sequence: GenRandom::generate(rng),
-                drawable: GenRandom::generate(rng),
-                damage: GenRandom::generate(rng),
-                timestamp: GenRandom::generate(rng),
-                area: GenRandom::generate(rng),
-                geometry: GenRandom::generate(rng),
+                response_type,
+                level,
+                sequence,
+                drawable,
+                damage,
+                timestamp,
+                area,
+                geometry,
             }
         }
     }

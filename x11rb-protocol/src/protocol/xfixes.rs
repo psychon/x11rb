@@ -185,17 +185,23 @@ impl Serialize for QueryVersionReply {
 }
 #[cfg(test)]
 mod query_version_reply {
+    #![allow(dead_code, unused_imports)]
     use super::QueryVersionReply;
-    #[allow(unused_imports)]
-    use crate::x11_utils::{GenRandom, Serialize};
+    use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
+    use alloc::vec::Vec;
+    use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for QueryVersionReply {
         fn generate(rng: &Rng) -> Self {
+            let sequence: u16 = GenRandom::generate(rng);
+            let length: u32 = GenRandom::generate(rng);
+            let major_version: u32 = GenRandom::generate(rng);
+            let minor_version: u32 = GenRandom::generate(rng);
             Self {
-                sequence: GenRandom::generate(rng),
-                length: GenRandom::generate(rng),
-                major_version: GenRandom::generate(rng),
-                minor_version: GenRandom::generate(rng),
+                sequence,
+                length,
+                major_version,
+                minor_version,
             }
         }
     }
@@ -735,21 +741,31 @@ impl Serialize for SelectionNotifyEvent {
 }
 #[cfg(test)]
 mod selection_notify_event {
+    #![allow(dead_code, unused_imports)]
     use super::SelectionNotifyEvent;
-    #[allow(unused_imports)]
-    use crate::x11_utils::{GenRandom, Serialize};
+    use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
+    use alloc::vec::Vec;
+    use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for SelectionNotifyEvent {
         fn generate(rng: &Rng) -> Self {
+            let response_type: u8 = GenRandom::generate(rng);
+            let subtype = GenRandom::generate(rng);
+            let sequence: u16 = GenRandom::generate(rng);
+            let window = GenRandom::generate(rng);
+            let owner = GenRandom::generate(rng);
+            let selection = GenRandom::generate(rng);
+            let timestamp = GenRandom::generate(rng);
+            let selection_timestamp = GenRandom::generate(rng);
             Self {
-                response_type: GenRandom::generate(rng),
-                subtype: GenRandom::generate(rng),
-                sequence: GenRandom::generate(rng),
-                window: GenRandom::generate(rng),
-                owner: GenRandom::generate(rng),
-                selection: GenRandom::generate(rng),
-                timestamp: GenRandom::generate(rng),
-                selection_timestamp: GenRandom::generate(rng),
+                response_type,
+                subtype,
+                sequence,
+                window,
+                owner,
+                selection,
+                timestamp,
+                selection_timestamp,
             }
         }
     }
@@ -1110,20 +1126,29 @@ impl Serialize for CursorNotifyEvent {
 }
 #[cfg(test)]
 mod cursor_notify_event {
+    #![allow(dead_code, unused_imports)]
     use super::CursorNotifyEvent;
-    #[allow(unused_imports)]
-    use crate::x11_utils::{GenRandom, Serialize};
+    use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
+    use alloc::vec::Vec;
+    use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for CursorNotifyEvent {
         fn generate(rng: &Rng) -> Self {
+            let response_type: u8 = GenRandom::generate(rng);
+            let subtype = GenRandom::generate(rng);
+            let sequence: u16 = GenRandom::generate(rng);
+            let window = GenRandom::generate(rng);
+            let cursor_serial: u32 = GenRandom::generate(rng);
+            let timestamp = GenRandom::generate(rng);
+            let name = GenRandom::generate(rng);
             Self {
-                response_type: GenRandom::generate(rng),
-                subtype: GenRandom::generate(rng),
-                sequence: GenRandom::generate(rng),
-                window: GenRandom::generate(rng),
-                cursor_serial: GenRandom::generate(rng),
-                timestamp: GenRandom::generate(rng),
-                name: GenRandom::generate(rng),
+                response_type,
+                subtype,
+                sequence,
+                window,
+                cursor_serial,
+                timestamp,
+                name,
             }
         }
     }
@@ -1362,23 +1387,35 @@ impl Serialize for GetCursorImageReply {
 }
 #[cfg(test)]
 mod get_cursor_image_reply {
+    #![allow(dead_code, unused_imports)]
     use super::GetCursorImageReply;
-    #[allow(unused_imports)]
-    use crate::x11_utils::{GenRandom, Serialize};
+    use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
+    use alloc::vec::Vec;
+    use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for GetCursorImageReply {
         fn generate(rng: &Rng) -> Self {
+            let sequence: u16 = GenRandom::generate(rng);
+            let length: u32 = GenRandom::generate(rng);
+            let x: i16 = GenRandom::generate(rng);
+            let y: i16 = GenRandom::generate(rng);
+            let width: u16 = GenRandom::generate(rng);
+            let height: u16 = GenRandom::generate(rng);
+            let xhot: u16 = GenRandom::generate(rng);
+            let yhot: u16 = GenRandom::generate(rng);
+            let cursor_serial: u32 = GenRandom::generate(rng);
+            let cursor_image: Vec<u32> = gen_random_list(rng, usize::try_from(u32::from(width).checked_mul(u32::from(height)).unwrap()).unwrap());
             Self {
-                sequence: GenRandom::generate(rng),
-                length: GenRandom::generate(rng),
-                x: GenRandom::generate(rng),
-                y: GenRandom::generate(rng),
-                width: GenRandom::generate(rng),
-                height: GenRandom::generate(rng),
-                xhot: GenRandom::generate(rng),
-                yhot: GenRandom::generate(rng),
-                cursor_serial: GenRandom::generate(rng),
-                cursor_image: GenRandom::generate(rng),
+                sequence,
+                length,
+                x,
+                y,
+                width,
+                height,
+                xhot,
+                yhot,
+                cursor_serial,
+                cursor_image,
             }
         }
     }
@@ -2506,16 +2543,22 @@ impl FetchRegionReply {
 }
 #[cfg(test)]
 mod fetch_region_reply {
+    #![allow(dead_code, unused_imports)]
     use super::FetchRegionReply;
-    #[allow(unused_imports)]
-    use crate::x11_utils::{GenRandom, Serialize};
+    use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
+    use alloc::vec::Vec;
+    use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for FetchRegionReply {
         fn generate(rng: &Rng) -> Self {
+            let length = u32::from(rng.u8(..16));
+            let sequence: u16 = GenRandom::generate(rng);
+            let extents = GenRandom::generate(rng);
+            let rectangles = gen_random_list(rng, usize::try_from(length.checked_div(2u32).unwrap()).unwrap());
             Self {
-                sequence: GenRandom::generate(rng),
-                extents: GenRandom::generate(rng),
-                rectangles: GenRandom::generate(rng),
+                sequence,
+                extents,
+                rectangles,
             }
         }
     }
@@ -2955,17 +2998,24 @@ impl GetCursorNameReply {
 }
 #[cfg(test)]
 mod get_cursor_name_reply {
+    #![allow(dead_code, unused_imports)]
     use super::GetCursorNameReply;
-    #[allow(unused_imports)]
-    use crate::x11_utils::{GenRandom, Serialize};
+    use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
+    use alloc::vec::Vec;
+    use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for GetCursorNameReply {
         fn generate(rng: &Rng) -> Self {
+            let nbytes = u32::from(rng.u8(..16));
+            let sequence: u16 = GenRandom::generate(rng);
+            let length: u32 = GenRandom::generate(rng);
+            let atom = GenRandom::generate(rng);
+            let name: Vec<u8> = gen_random_list(rng, usize::try_from(nbytes).unwrap());
             Self {
-                sequence: GenRandom::generate(rng),
-                length: GenRandom::generate(rng),
-                atom: GenRandom::generate(rng),
-                name: GenRandom::generate(rng),
+                sequence,
+                length,
+                atom,
+                name,
             }
         }
     }
@@ -3118,25 +3168,40 @@ impl GetCursorImageAndNameReply {
 }
 #[cfg(test)]
 mod get_cursor_image_and_name_reply {
+    #![allow(dead_code, unused_imports)]
     use super::GetCursorImageAndNameReply;
-    #[allow(unused_imports)]
-    use crate::x11_utils::{GenRandom, Serialize};
+    use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
+    use alloc::vec::Vec;
+    use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for GetCursorImageAndNameReply {
         fn generate(rng: &Rng) -> Self {
+            let nbytes = u32::from(rng.u8(..16));
+            let sequence: u16 = GenRandom::generate(rng);
+            let length: u32 = GenRandom::generate(rng);
+            let x: i16 = GenRandom::generate(rng);
+            let y: i16 = GenRandom::generate(rng);
+            let width: u16 = GenRandom::generate(rng);
+            let height: u16 = GenRandom::generate(rng);
+            let xhot: u16 = GenRandom::generate(rng);
+            let yhot: u16 = GenRandom::generate(rng);
+            let cursor_serial: u32 = GenRandom::generate(rng);
+            let cursor_atom = GenRandom::generate(rng);
+            let cursor_image: Vec<u32> = gen_random_list(rng, usize::try_from(u32::from(width).checked_mul(u32::from(height)).unwrap()).unwrap());
+            let name: Vec<u8> = gen_random_list(rng, usize::try_from(nbytes).unwrap());
             Self {
-                sequence: GenRandom::generate(rng),
-                length: GenRandom::generate(rng),
-                x: GenRandom::generate(rng),
-                y: GenRandom::generate(rng),
-                width: GenRandom::generate(rng),
-                height: GenRandom::generate(rng),
-                xhot: GenRandom::generate(rng),
-                yhot: GenRandom::generate(rng),
-                cursor_serial: GenRandom::generate(rng),
-                cursor_atom: GenRandom::generate(rng),
-                cursor_image: GenRandom::generate(rng),
-                name: GenRandom::generate(rng),
+                sequence,
+                length,
+                x,
+                y,
+                width,
+                height,
+                xhot,
+                yhot,
+                cursor_serial,
+                cursor_atom,
+                cursor_image,
+                name,
             }
         }
     }

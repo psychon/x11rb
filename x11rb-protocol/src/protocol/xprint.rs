@@ -111,15 +111,21 @@ impl Printer {
 }
 #[cfg(test)]
 mod printer {
+    #![allow(dead_code, unused_imports)]
     use super::Printer;
-    #[allow(unused_imports)]
-    use crate::x11_utils::{GenRandom, Serialize};
+    use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
+    use alloc::vec::Vec;
+    use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for Printer {
         fn generate(rng: &Rng) -> Self {
+            let name_len = u32::from(rng.u8(..16));
+            let desc_len = u32::from(rng.u8(..16));
+            let name = gen_random_list(rng, usize::try_from(name_len).unwrap());
+            let description = gen_random_list(rng, usize::try_from(desc_len).unwrap());
             Self {
-                name: GenRandom::generate(rng),
-                description: GenRandom::generate(rng),
+                name,
+                description,
             }
         }
     }
@@ -567,17 +573,23 @@ impl Serialize for PrintQueryVersionReply {
 }
 #[cfg(test)]
 mod print_query_version_reply {
+    #![allow(dead_code, unused_imports)]
     use super::PrintQueryVersionReply;
-    #[allow(unused_imports)]
-    use crate::x11_utils::{GenRandom, Serialize};
+    use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
+    use alloc::vec::Vec;
+    use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for PrintQueryVersionReply {
         fn generate(rng: &Rng) -> Self {
+            let sequence: u16 = GenRandom::generate(rng);
+            let length: u32 = GenRandom::generate(rng);
+            let major_version: u16 = GenRandom::generate(rng);
+            let minor_version: u16 = GenRandom::generate(rng);
             Self {
-                sequence: GenRandom::generate(rng),
-                length: GenRandom::generate(rng),
-                major_version: GenRandom::generate(rng),
-                minor_version: GenRandom::generate(rng),
+                sequence,
+                length,
+                major_version,
+                minor_version,
             }
         }
     }
@@ -733,16 +745,22 @@ impl PrintGetPrinterListReply {
 }
 #[cfg(test)]
 mod print_get_printer_list_reply {
+    #![allow(dead_code, unused_imports)]
     use super::PrintGetPrinterListReply;
-    #[allow(unused_imports)]
-    use crate::x11_utils::{GenRandom, Serialize};
+    use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
+    use alloc::vec::Vec;
+    use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for PrintGetPrinterListReply {
         fn generate(rng: &Rng) -> Self {
+            let list_count = u32::from(rng.u8(..16));
+            let sequence: u16 = GenRandom::generate(rng);
+            let length: u32 = GenRandom::generate(rng);
+            let printers = gen_random_list(rng, usize::try_from(list_count).unwrap());
             Self {
-                sequence: GenRandom::generate(rng),
-                length: GenRandom::generate(rng),
-                printers: GenRandom::generate(rng),
+                sequence,
+                length,
+                printers,
             }
         }
     }
@@ -1043,16 +1061,21 @@ impl Serialize for PrintGetContextReply {
 }
 #[cfg(test)]
 mod print_get_context_reply {
+    #![allow(dead_code, unused_imports)]
     use super::PrintGetContextReply;
-    #[allow(unused_imports)]
-    use crate::x11_utils::{GenRandom, Serialize};
+    use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
+    use alloc::vec::Vec;
+    use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for PrintGetContextReply {
         fn generate(rng: &Rng) -> Self {
+            let sequence: u16 = GenRandom::generate(rng);
+            let length: u32 = GenRandom::generate(rng);
+            let context: u32 = GenRandom::generate(rng);
             Self {
-                sequence: GenRandom::generate(rng),
-                length: GenRandom::generate(rng),
-                context: GenRandom::generate(rng),
+                sequence,
+                length,
+                context,
             }
         }
     }
@@ -1224,16 +1247,21 @@ impl Serialize for PrintGetScreenOfContextReply {
 }
 #[cfg(test)]
 mod print_get_screen_of_context_reply {
+    #![allow(dead_code, unused_imports)]
     use super::PrintGetScreenOfContextReply;
-    #[allow(unused_imports)]
-    use crate::x11_utils::{GenRandom, Serialize};
+    use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
+    use alloc::vec::Vec;
+    use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for PrintGetScreenOfContextReply {
         fn generate(rng: &Rng) -> Self {
+            let sequence: u16 = GenRandom::generate(rng);
+            let length: u32 = GenRandom::generate(rng);
+            let root = GenRandom::generate(rng);
             Self {
-                sequence: GenRandom::generate(rng),
-                length: GenRandom::generate(rng),
-                root: GenRandom::generate(rng),
+                sequence,
+                length,
+                root,
             }
         }
     }
@@ -1686,18 +1714,26 @@ impl PrintGetDocumentDataReply {
 }
 #[cfg(test)]
 mod print_get_document_data_reply {
+    #![allow(dead_code, unused_imports)]
     use super::PrintGetDocumentDataReply;
-    #[allow(unused_imports)]
-    use crate::x11_utils::{GenRandom, Serialize};
+    use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
+    use alloc::vec::Vec;
+    use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for PrintGetDocumentDataReply {
         fn generate(rng: &Rng) -> Self {
+            let data_len = u32::from(rng.u8(..16));
+            let sequence: u16 = GenRandom::generate(rng);
+            let length: u32 = GenRandom::generate(rng);
+            let status_code: u32 = GenRandom::generate(rng);
+            let finished_flag: u32 = GenRandom::generate(rng);
+            let data: Vec<u8> = gen_random_list(rng, usize::try_from(data_len).unwrap());
             Self {
-                sequence: GenRandom::generate(rng),
-                length: GenRandom::generate(rng),
-                status_code: GenRandom::generate(rng),
-                finished_flag: GenRandom::generate(rng),
-                data: GenRandom::generate(rng),
+                sequence,
+                length,
+                status_code,
+                finished_flag,
+                data,
             }
         }
     }
@@ -2001,17 +2037,23 @@ impl Serialize for PrintInputSelectedReply {
 }
 #[cfg(test)]
 mod print_input_selected_reply {
+    #![allow(dead_code, unused_imports)]
     use super::PrintInputSelectedReply;
-    #[allow(unused_imports)]
-    use crate::x11_utils::{GenRandom, Serialize};
+    use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
+    use alloc::vec::Vec;
+    use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for PrintInputSelectedReply {
         fn generate(rng: &Rng) -> Self {
+            let sequence: u16 = GenRandom::generate(rng);
+            let length: u32 = GenRandom::generate(rng);
+            let event_mask: u32 = GenRandom::generate(rng);
+            let all_events_mask: u32 = GenRandom::generate(rng);
             Self {
-                sequence: GenRandom::generate(rng),
-                length: GenRandom::generate(rng),
-                event_mask: GenRandom::generate(rng),
-                all_events_mask: GenRandom::generate(rng),
+                sequence,
+                length,
+                event_mask,
+                all_events_mask,
             }
         }
     }
@@ -2154,16 +2196,22 @@ impl PrintGetAttributesReply {
 }
 #[cfg(test)]
 mod print_get_attributes_reply {
+    #![allow(dead_code, unused_imports)]
     use super::PrintGetAttributesReply;
-    #[allow(unused_imports)]
-    use crate::x11_utils::{GenRandom, Serialize};
+    use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
+    use alloc::vec::Vec;
+    use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for PrintGetAttributesReply {
         fn generate(rng: &Rng) -> Self {
+            let string_len = u32::from(rng.u8(..16));
+            let sequence: u16 = GenRandom::generate(rng);
+            let length: u32 = GenRandom::generate(rng);
+            let attributes = gen_random_list(rng, usize::try_from(string_len).unwrap());
             Self {
-                sequence: GenRandom::generate(rng),
-                length: GenRandom::generate(rng),
-                attributes: GenRandom::generate(rng),
+                sequence,
+                length,
+                attributes,
             }
         }
     }
@@ -2327,16 +2375,22 @@ impl PrintGetOneAttributesReply {
 }
 #[cfg(test)]
 mod print_get_one_attributes_reply {
+    #![allow(dead_code, unused_imports)]
     use super::PrintGetOneAttributesReply;
-    #[allow(unused_imports)]
-    use crate::x11_utils::{GenRandom, Serialize};
+    use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
+    use alloc::vec::Vec;
+    use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for PrintGetOneAttributesReply {
         fn generate(rng: &Rng) -> Self {
+            let value_len = u32::from(rng.u8(..16));
+            let sequence: u16 = GenRandom::generate(rng);
+            let length: u32 = GenRandom::generate(rng);
+            let value = gen_random_list(rng, usize::try_from(value_len).unwrap());
             Self {
-                sequence: GenRandom::generate(rng),
-                length: GenRandom::generate(rng),
-                value: GenRandom::generate(rng),
+                sequence,
+                length,
+                value,
             }
         }
     }
@@ -2582,21 +2636,31 @@ impl Serialize for PrintGetPageDimensionsReply {
 }
 #[cfg(test)]
 mod print_get_page_dimensions_reply {
+    #![allow(dead_code, unused_imports)]
     use super::PrintGetPageDimensionsReply;
-    #[allow(unused_imports)]
-    use crate::x11_utils::{GenRandom, Serialize};
+    use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
+    use alloc::vec::Vec;
+    use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for PrintGetPageDimensionsReply {
         fn generate(rng: &Rng) -> Self {
+            let sequence: u16 = GenRandom::generate(rng);
+            let length: u32 = GenRandom::generate(rng);
+            let width: u16 = GenRandom::generate(rng);
+            let height: u16 = GenRandom::generate(rng);
+            let offset_x: u16 = GenRandom::generate(rng);
+            let offset_y: u16 = GenRandom::generate(rng);
+            let reproducible_width: u16 = GenRandom::generate(rng);
+            let reproducible_height: u16 = GenRandom::generate(rng);
             Self {
-                sequence: GenRandom::generate(rng),
-                length: GenRandom::generate(rng),
-                width: GenRandom::generate(rng),
-                height: GenRandom::generate(rng),
-                offset_x: GenRandom::generate(rng),
-                offset_y: GenRandom::generate(rng),
-                reproducible_width: GenRandom::generate(rng),
-                reproducible_height: GenRandom::generate(rng),
+                sequence,
+                length,
+                width,
+                height,
+                offset_x,
+                offset_y,
+                reproducible_width,
+                reproducible_height,
             }
         }
     }
@@ -2720,16 +2784,22 @@ impl PrintQueryScreensReply {
 }
 #[cfg(test)]
 mod print_query_screens_reply {
+    #![allow(dead_code, unused_imports)]
     use super::PrintQueryScreensReply;
-    #[allow(unused_imports)]
-    use crate::x11_utils::{GenRandom, Serialize};
+    use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
+    use alloc::vec::Vec;
+    use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for PrintQueryScreensReply {
         fn generate(rng: &Rng) -> Self {
+            let list_count = u32::from(rng.u8(..16));
+            let sequence: u16 = GenRandom::generate(rng);
+            let length: u32 = GenRandom::generate(rng);
+            let roots = gen_random_list(rng, usize::try_from(list_count).unwrap());
             Self {
-                sequence: GenRandom::generate(rng),
-                length: GenRandom::generate(rng),
-                roots: GenRandom::generate(rng),
+                sequence,
+                length,
+                roots,
             }
         }
     }
@@ -2865,17 +2935,23 @@ impl Serialize for PrintSetImageResolutionReply {
 }
 #[cfg(test)]
 mod print_set_image_resolution_reply {
+    #![allow(dead_code, unused_imports)]
     use super::PrintSetImageResolutionReply;
-    #[allow(unused_imports)]
-    use crate::x11_utils::{GenRandom, Serialize};
+    use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
+    use alloc::vec::Vec;
+    use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for PrintSetImageResolutionReply {
         fn generate(rng: &Rng) -> Self {
+            let status: bool = GenRandom::generate(rng);
+            let sequence: u16 = GenRandom::generate(rng);
+            let length: u32 = GenRandom::generate(rng);
+            let previous_resolutions: u16 = GenRandom::generate(rng);
             Self {
-                status: GenRandom::generate(rng),
-                sequence: GenRandom::generate(rng),
-                length: GenRandom::generate(rng),
-                previous_resolutions: GenRandom::generate(rng),
+                status,
+                sequence,
+                length,
+                previous_resolutions,
             }
         }
     }
@@ -3001,16 +3077,21 @@ impl Serialize for PrintGetImageResolutionReply {
 }
 #[cfg(test)]
 mod print_get_image_resolution_reply {
+    #![allow(dead_code, unused_imports)]
     use super::PrintGetImageResolutionReply;
-    #[allow(unused_imports)]
-    use crate::x11_utils::{GenRandom, Serialize};
+    use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
+    use alloc::vec::Vec;
+    use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for PrintGetImageResolutionReply {
         fn generate(rng: &Rng) -> Self {
+            let sequence: u16 = GenRandom::generate(rng);
+            let length: u32 = GenRandom::generate(rng);
+            let image_resolution: u16 = GenRandom::generate(rng);
             Self {
-                sequence: GenRandom::generate(rng),
-                length: GenRandom::generate(rng),
-                image_resolution: GenRandom::generate(rng),
+                sequence,
+                length,
+                image_resolution,
             }
         }
     }
@@ -3082,18 +3163,25 @@ impl Serialize for NotifyEvent {
 }
 #[cfg(test)]
 mod notify_event {
+    #![allow(dead_code, unused_imports)]
     use super::NotifyEvent;
-    #[allow(unused_imports)]
-    use crate::x11_utils::{GenRandom, Serialize};
+    use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
+    use alloc::vec::Vec;
+    use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for NotifyEvent {
         fn generate(rng: &Rng) -> Self {
+            let response_type: u8 = GenRandom::generate(rng);
+            let detail: u8 = GenRandom::generate(rng);
+            let sequence: u16 = GenRandom::generate(rng);
+            let context = GenRandom::generate(rng);
+            let cancel: bool = GenRandom::generate(rng);
             Self {
-                response_type: GenRandom::generate(rng),
-                detail: GenRandom::generate(rng),
-                sequence: GenRandom::generate(rng),
-                context: GenRandom::generate(rng),
-                cancel: GenRandom::generate(rng),
+                response_type,
+                detail,
+                sequence,
+                context,
+                cancel,
             }
         }
     }
@@ -3209,17 +3297,23 @@ impl Serialize for AttributNotifyEvent {
 }
 #[cfg(test)]
 mod attribut_notify_event {
+    #![allow(dead_code, unused_imports)]
     use super::AttributNotifyEvent;
-    #[allow(unused_imports)]
-    use crate::x11_utils::{GenRandom, Serialize};
+    use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
+    use alloc::vec::Vec;
+    use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for AttributNotifyEvent {
         fn generate(rng: &Rng) -> Self {
+            let response_type: u8 = GenRandom::generate(rng);
+            let detail: u8 = GenRandom::generate(rng);
+            let sequence: u16 = GenRandom::generate(rng);
+            let context = GenRandom::generate(rng);
             Self {
-                response_type: GenRandom::generate(rng),
-                detail: GenRandom::generate(rng),
-                sequence: GenRandom::generate(rng),
-                context: GenRandom::generate(rng),
+                response_type,
+                detail,
+                sequence,
+                context,
             }
         }
     }

@@ -153,17 +153,23 @@ impl Serialize for GetVersionReply {
 }
 #[cfg(test)]
 mod get_version_reply {
+    #![allow(dead_code, unused_imports)]
     use super::GetVersionReply;
-    #[allow(unused_imports)]
-    use crate::x11_utils::{GenRandom, Serialize};
+    use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
+    use alloc::vec::Vec;
+    use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for GetVersionReply {
         fn generate(rng: &Rng) -> Self {
+            let sequence: u16 = GenRandom::generate(rng);
+            let length: u32 = GenRandom::generate(rng);
+            let server_major_version: u16 = GenRandom::generate(rng);
+            let server_minor_version: u16 = GenRandom::generate(rng);
             Self {
-                sequence: GenRandom::generate(rng),
-                length: GenRandom::generate(rng),
-                server_major_version: GenRandom::generate(rng),
-                server_minor_version: GenRandom::generate(rng),
+                sequence,
+                length,
+                server_major_version,
+                server_minor_version,
             }
         }
     }
@@ -304,16 +310,21 @@ impl Serialize for CapableReply {
 }
 #[cfg(test)]
 mod capable_reply {
+    #![allow(dead_code, unused_imports)]
     use super::CapableReply;
-    #[allow(unused_imports)]
-    use crate::x11_utils::{GenRandom, Serialize};
+    use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
+    use alloc::vec::Vec;
+    use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for CapableReply {
         fn generate(rng: &Rng) -> Self {
+            let sequence: u16 = GenRandom::generate(rng);
+            let length: u32 = GenRandom::generate(rng);
+            let capable: bool = GenRandom::generate(rng);
             Self {
-                sequence: GenRandom::generate(rng),
-                length: GenRandom::generate(rng),
-                capable: GenRandom::generate(rng),
+                sequence,
+                length,
+                capable,
             }
         }
     }
@@ -462,18 +473,25 @@ impl Serialize for GetTimeoutsReply {
 }
 #[cfg(test)]
 mod get_timeouts_reply {
+    #![allow(dead_code, unused_imports)]
     use super::GetTimeoutsReply;
-    #[allow(unused_imports)]
-    use crate::x11_utils::{GenRandom, Serialize};
+    use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
+    use alloc::vec::Vec;
+    use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for GetTimeoutsReply {
         fn generate(rng: &Rng) -> Self {
+            let sequence: u16 = GenRandom::generate(rng);
+            let length: u32 = GenRandom::generate(rng);
+            let standby_timeout: u16 = GenRandom::generate(rng);
+            let suspend_timeout: u16 = GenRandom::generate(rng);
+            let off_timeout: u16 = GenRandom::generate(rng);
             Self {
-                sequence: GenRandom::generate(rng),
-                length: GenRandom::generate(rng),
-                standby_timeout: GenRandom::generate(rng),
-                suspend_timeout: GenRandom::generate(rng),
-                off_timeout: GenRandom::generate(rng),
+                sequence,
+                length,
+                standby_timeout,
+                suspend_timeout,
+                off_timeout,
             }
         }
     }
@@ -896,17 +914,23 @@ impl Serialize for InfoReply {
 }
 #[cfg(test)]
 mod info_reply {
+    #![allow(dead_code, unused_imports)]
     use super::InfoReply;
-    #[allow(unused_imports)]
-    use crate::x11_utils::{GenRandom, Serialize};
+    use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
+    use alloc::vec::Vec;
+    use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for InfoReply {
         fn generate(rng: &Rng) -> Self {
+            let sequence: u16 = GenRandom::generate(rng);
+            let length: u32 = GenRandom::generate(rng);
+            let power_level = GenRandom::generate(rng);
+            let state: bool = GenRandom::generate(rng);
             Self {
-                sequence: GenRandom::generate(rng),
-                length: GenRandom::generate(rng),
-                power_level: GenRandom::generate(rng),
-                state: GenRandom::generate(rng),
+                sequence,
+                length,
+                power_level,
+                state,
             }
         }
     }

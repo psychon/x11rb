@@ -163,17 +163,23 @@ impl Serialize for QueryVersionReply {
 }
 #[cfg(test)]
 mod query_version_reply {
+    #![allow(dead_code, unused_imports)]
     use super::QueryVersionReply;
-    #[allow(unused_imports)]
-    use crate::x11_utils::{GenRandom, Serialize};
+    use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
+    use alloc::vec::Vec;
+    use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for QueryVersionReply {
         fn generate(rng: &Rng) -> Self {
+            let sequence: u16 = GenRandom::generate(rng);
+            let length: u32 = GenRandom::generate(rng);
+            let major_version: u32 = GenRandom::generate(rng);
+            let minor_version: u32 = GenRandom::generate(rng);
             Self {
-                sequence: GenRandom::generate(rng),
-                length: GenRandom::generate(rng),
-                major_version: GenRandom::generate(rng),
-                minor_version: GenRandom::generate(rng),
+                sequence,
+                length,
+                major_version,
+                minor_version,
             }
         }
     }
@@ -331,17 +337,23 @@ impl Serialize for OpenReply {
 }
 #[cfg(test)]
 mod open_reply {
+    #![allow(dead_code, unused_imports)]
     use super::OpenReply;
-    #[allow(unused_imports)]
-    use crate::x11_utils::{GenRandom, Serialize};
+    use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
+    use alloc::vec::Vec;
+    use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for OpenReply {
         fn generate(rng: &Rng) -> Self {
+            let nfd: u8 = GenRandom::generate(rng);
+            let sequence: u16 = GenRandom::generate(rng);
+            let length: u32 = GenRandom::generate(rng);
+            let device_fd = GenRandom::generate(rng);
             Self {
-                nfd: GenRandom::generate(rng),
-                sequence: GenRandom::generate(rng),
-                length: GenRandom::generate(rng),
-                device_fd: GenRandom::generate(rng),
+                nfd,
+                sequence,
+                length,
+                device_fd,
             }
         }
     }
@@ -615,23 +627,35 @@ impl Serialize for BufferFromPixmapReply {
 }
 #[cfg(test)]
 mod buffer_from_pixmap_reply {
+    #![allow(dead_code, unused_imports)]
     use super::BufferFromPixmapReply;
-    #[allow(unused_imports)]
-    use crate::x11_utils::{GenRandom, Serialize};
+    use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
+    use alloc::vec::Vec;
+    use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for BufferFromPixmapReply {
         fn generate(rng: &Rng) -> Self {
+            let nfd: u8 = GenRandom::generate(rng);
+            let sequence: u16 = GenRandom::generate(rng);
+            let length: u32 = GenRandom::generate(rng);
+            let size: u32 = GenRandom::generate(rng);
+            let width: u16 = GenRandom::generate(rng);
+            let height: u16 = GenRandom::generate(rng);
+            let stride: u16 = GenRandom::generate(rng);
+            let depth: u8 = GenRandom::generate(rng);
+            let bpp: u8 = GenRandom::generate(rng);
+            let pixmap_fd = GenRandom::generate(rng);
             Self {
-                nfd: GenRandom::generate(rng),
-                sequence: GenRandom::generate(rng),
-                length: GenRandom::generate(rng),
-                size: GenRandom::generate(rng),
-                width: GenRandom::generate(rng),
-                height: GenRandom::generate(rng),
-                stride: GenRandom::generate(rng),
-                depth: GenRandom::generate(rng),
-                bpp: GenRandom::generate(rng),
-                pixmap_fd: GenRandom::generate(rng),
+                nfd,
+                sequence,
+                length,
+                size,
+                width,
+                height,
+                stride,
+                depth,
+                bpp,
+                pixmap_fd,
             }
         }
     }
@@ -862,17 +886,23 @@ impl Serialize for FDFromFenceReply {
 }
 #[cfg(test)]
 mod fd_from_fence_reply {
+    #![allow(dead_code, unused_imports)]
     use super::FDFromFenceReply;
-    #[allow(unused_imports)]
-    use crate::x11_utils::{GenRandom, Serialize};
+    use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
+    use alloc::vec::Vec;
+    use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for FDFromFenceReply {
         fn generate(rng: &Rng) -> Self {
+            let nfd: u8 = GenRandom::generate(rng);
+            let sequence: u16 = GenRandom::generate(rng);
+            let length: u32 = GenRandom::generate(rng);
+            let fence_fd = GenRandom::generate(rng);
             Self {
-                nfd: GenRandom::generate(rng),
-                sequence: GenRandom::generate(rng),
-                length: GenRandom::generate(rng),
-                fence_fd: GenRandom::generate(rng),
+                nfd,
+                sequence,
+                length,
+                fence_fd,
             }
         }
     }
@@ -1037,17 +1067,25 @@ impl GetSupportedModifiersReply {
 }
 #[cfg(test)]
 mod get_supported_modifiers_reply {
+    #![allow(dead_code, unused_imports)]
     use super::GetSupportedModifiersReply;
-    #[allow(unused_imports)]
-    use crate::x11_utils::{GenRandom, Serialize};
+    use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
+    use alloc::vec::Vec;
+    use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for GetSupportedModifiersReply {
         fn generate(rng: &Rng) -> Self {
+            let num_screen_modifiers = u32::from(rng.u8(..16));
+            let num_window_modifiers = u32::from(rng.u8(..16));
+            let sequence: u16 = GenRandom::generate(rng);
+            let length: u32 = GenRandom::generate(rng);
+            let window_modifiers: Vec<u64> = gen_random_list(rng, usize::try_from(num_window_modifiers).unwrap());
+            let screen_modifiers: Vec<u64> = gen_random_list(rng, usize::try_from(num_screen_modifiers).unwrap());
             Self {
-                sequence: GenRandom::generate(rng),
-                length: GenRandom::generate(rng),
-                window_modifiers: GenRandom::generate(rng),
-                screen_modifiers: GenRandom::generate(rng),
+                sequence,
+                length,
+                window_modifiers,
+                screen_modifiers,
             }
         }
     }
@@ -1379,23 +1417,36 @@ impl BuffersFromPixmapReply {
 }
 #[cfg(test)]
 mod buffers_from_pixmap_reply {
+    #![allow(dead_code, unused_imports)]
     use super::BuffersFromPixmapReply;
-    #[allow(unused_imports)]
-    use crate::x11_utils::{GenRandom, Serialize};
+    use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
+    use alloc::vec::Vec;
+    use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for BuffersFromPixmapReply {
         fn generate(rng: &Rng) -> Self {
+            let nfd = u32::from(rng.u8(..16));
+            let sequence: u16 = GenRandom::generate(rng);
+            let length: u32 = GenRandom::generate(rng);
+            let width: u16 = GenRandom::generate(rng);
+            let height: u16 = GenRandom::generate(rng);
+            let modifier: u64 = GenRandom::generate(rng);
+            let depth: u8 = GenRandom::generate(rng);
+            let bpp: u8 = GenRandom::generate(rng);
+            let strides: Vec<u32> = gen_random_list(rng, usize::try_from(nfd).unwrap());
+            let offsets: Vec<u32> = gen_random_list(rng, usize::try_from(nfd).unwrap());
+            let buffers = GenRandom::generate(rng);
             Self {
-                sequence: GenRandom::generate(rng),
-                length: GenRandom::generate(rng),
-                width: GenRandom::generate(rng),
-                height: GenRandom::generate(rng),
-                modifier: GenRandom::generate(rng),
-                depth: GenRandom::generate(rng),
-                bpp: GenRandom::generate(rng),
-                strides: GenRandom::generate(rng),
-                offsets: GenRandom::generate(rng),
-                buffers: GenRandom::generate(rng),
+                sequence,
+                length,
+                width,
+                height,
+                modifier,
+                depth,
+                bpp,
+                strides,
+                offsets,
+                buffers,
             }
         }
     }

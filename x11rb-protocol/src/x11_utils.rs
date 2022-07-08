@@ -674,7 +674,7 @@ pub fn parse_request_header(
 #[cfg(test)]
 mod gen_random {
     use alloc::{borrow::Cow, vec::Vec};
-    use core::iter;
+    use core::{convert::{TryFrom, TryInto}, iter};
     use fastrand::Rng;
 
     /// Generate a randomized version of this type.
@@ -720,6 +720,7 @@ mod gen_random {
                 impl<T: Default + GenRandom> GenRandom for [T; $num] {
                     fn generate(rng: &Rng) -> Self {
                         let mut result: [T; $num] = Default::default();
+                        #[allow(clippy::reversed_empty_ranges)]
                         for i in 0..$num {
                             result[i] = T::generate(rng);
                         }
@@ -735,11 +736,15 @@ mod gen_random {
         16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32
     }
 
+    /// Generate a list of values of the given length.
+    pub(crate) fn gen_random_list<T: GenRandom, R: TryFrom<Vec<T>>>(rng: &Rng, len: usize) -> R {
+        let list: Vec<T> = iter::repeat_with(|| T::generate(rng)).take(len).collect();
+        list.try_into().unwrap_or_else(|_| panic!("list cast fail"))
+    }
+
     impl<T: GenRandom> GenRandom for Vec<T> {
         fn generate(rng: &Rng) -> Self {
-            iter::repeat_with(|| T::generate(rng))
-                .take(rng.u16(..) as usize)
-                .collect()
+            gen_random_list(rng, rng.u8(..16).into())
         }
     }
 
@@ -768,4 +773,4 @@ mod gen_random {
 }
 
 #[cfg(test)]
-pub(crate) use gen_random::GenRandom;
+pub(crate) use gen_random::{gen_random_list, GenRandom};

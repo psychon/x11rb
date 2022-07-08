@@ -152,17 +152,23 @@ impl Serialize for GetVersionReply {
 }
 #[cfg(test)]
 mod get_version_reply {
+    #![allow(dead_code, unused_imports)]
     use super::GetVersionReply;
-    #[allow(unused_imports)]
-    use crate::x11_utils::{GenRandom, Serialize};
+    use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
+    use alloc::vec::Vec;
+    use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for GetVersionReply {
         fn generate(rng: &Rng) -> Self {
+            let major_version: u8 = GenRandom::generate(rng);
+            let sequence: u16 = GenRandom::generate(rng);
+            let length: u32 = GenRandom::generate(rng);
+            let minor_version: u16 = GenRandom::generate(rng);
             Self {
-                major_version: GenRandom::generate(rng),
-                sequence: GenRandom::generate(rng),
-                length: GenRandom::generate(rng),
-                minor_version: GenRandom::generate(rng),
+                major_version,
+                sequence,
+                length,
+                minor_version,
             }
         }
     }
@@ -374,16 +380,21 @@ impl Serialize for CompareCursorReply {
 }
 #[cfg(test)]
 mod compare_cursor_reply {
+    #![allow(dead_code, unused_imports)]
     use super::CompareCursorReply;
-    #[allow(unused_imports)]
-    use crate::x11_utils::{GenRandom, Serialize};
+    use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
+    use alloc::vec::Vec;
+    use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for CompareCursorReply {
         fn generate(rng: &Rng) -> Self {
+            let same: bool = GenRandom::generate(rng);
+            let sequence: u16 = GenRandom::generate(rng);
+            let length: u32 = GenRandom::generate(rng);
             Self {
-                same: GenRandom::generate(rng),
-                sequence: GenRandom::generate(rng),
-                length: GenRandom::generate(rng),
+                same,
+                sequence,
+                length,
             }
         }
     }

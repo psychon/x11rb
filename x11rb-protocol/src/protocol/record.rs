@@ -66,15 +66,19 @@ impl Serialize for Range8 {
 }
 #[cfg(test)]
 mod range8 {
+    #![allow(dead_code, unused_imports)]
     use super::Range8;
-    #[allow(unused_imports)]
-    use crate::x11_utils::{GenRandom, Serialize};
+    use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
+    use alloc::vec::Vec;
+    use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for Range8 {
         fn generate(rng: &Rng) -> Self {
+            let first: u8 = GenRandom::generate(rng);
+            let last: u8 = GenRandom::generate(rng);
             Self {
-                first: GenRandom::generate(rng),
-                last: GenRandom::generate(rng),
+                first,
+                last,
             }
         }
     }
@@ -123,15 +127,19 @@ impl Serialize for Range16 {
 }
 #[cfg(test)]
 mod range16 {
+    #![allow(dead_code, unused_imports)]
     use super::Range16;
-    #[allow(unused_imports)]
-    use crate::x11_utils::{GenRandom, Serialize};
+    use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
+    use alloc::vec::Vec;
+    use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for Range16 {
         fn generate(rng: &Rng) -> Self {
+            let first: u16 = GenRandom::generate(rng);
+            let last: u16 = GenRandom::generate(rng);
             Self {
-                first: GenRandom::generate(rng),
-                last: GenRandom::generate(rng),
+                first,
+                last,
             }
         }
     }
@@ -182,15 +190,19 @@ impl Serialize for ExtRange {
 }
 #[cfg(test)]
 mod ext_range {
+    #![allow(dead_code, unused_imports)]
     use super::ExtRange;
-    #[allow(unused_imports)]
-    use crate::x11_utils::{GenRandom, Serialize};
+    use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
+    use alloc::vec::Vec;
+    use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for ExtRange {
         fn generate(rng: &Rng) -> Self {
+            let major = GenRandom::generate(rng);
+            let minor = GenRandom::generate(rng);
             Self {
-                major: GenRandom::generate(rng),
-                minor: GenRandom::generate(rng),
+                major,
+                minor,
             }
         }
     }
@@ -287,22 +299,33 @@ impl Serialize for Range {
 }
 #[cfg(test)]
 mod range {
+    #![allow(dead_code, unused_imports)]
     use super::Range;
-    #[allow(unused_imports)]
-    use crate::x11_utils::{GenRandom, Serialize};
+    use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
+    use alloc::vec::Vec;
+    use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for Range {
         fn generate(rng: &Rng) -> Self {
+            let core_requests = GenRandom::generate(rng);
+            let core_replies = GenRandom::generate(rng);
+            let ext_requests = GenRandom::generate(rng);
+            let ext_replies = GenRandom::generate(rng);
+            let delivered_events = GenRandom::generate(rng);
+            let device_events = GenRandom::generate(rng);
+            let errors = GenRandom::generate(rng);
+            let client_started: bool = GenRandom::generate(rng);
+            let client_died: bool = GenRandom::generate(rng);
             Self {
-                core_requests: GenRandom::generate(rng),
-                core_replies: GenRandom::generate(rng),
-                ext_requests: GenRandom::generate(rng),
-                ext_replies: GenRandom::generate(rng),
-                delivered_events: GenRandom::generate(rng),
-                device_events: GenRandom::generate(rng),
-                errors: GenRandom::generate(rng),
-                client_started: GenRandom::generate(rng),
-                client_died: GenRandom::generate(rng),
+                core_requests,
+                core_replies,
+                ext_requests,
+                ext_replies,
+                delivered_events,
+                device_events,
+                errors,
+                client_started,
+                client_died,
             }
         }
     }
@@ -515,15 +538,20 @@ impl ClientInfo {
 }
 #[cfg(test)]
 mod client_info {
+    #![allow(dead_code, unused_imports)]
     use super::ClientInfo;
-    #[allow(unused_imports)]
-    use crate::x11_utils::{GenRandom, Serialize};
+    use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
+    use alloc::vec::Vec;
+    use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for ClientInfo {
         fn generate(rng: &Rng) -> Self {
+            let num_ranges = u32::from(rng.u8(..16));
+            let client_resource = GenRandom::generate(rng);
+            let ranges = gen_random_list(rng, usize::try_from(num_ranges).unwrap());
             Self {
-                client_resource: GenRandom::generate(rng),
-                ranges: GenRandom::generate(rng),
+                client_resource,
+                ranges,
             }
         }
     }
@@ -662,17 +690,23 @@ impl Serialize for QueryVersionReply {
 }
 #[cfg(test)]
 mod query_version_reply {
+    #![allow(dead_code, unused_imports)]
     use super::QueryVersionReply;
-    #[allow(unused_imports)]
-    use crate::x11_utils::{GenRandom, Serialize};
+    use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
+    use alloc::vec::Vec;
+    use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for QueryVersionReply {
         fn generate(rng: &Rng) -> Self {
+            let sequence: u16 = GenRandom::generate(rng);
+            let length: u32 = GenRandom::generate(rng);
+            let major_version: u16 = GenRandom::generate(rng);
+            let minor_version: u16 = GenRandom::generate(rng);
             Self {
-                sequence: GenRandom::generate(rng),
-                length: GenRandom::generate(rng),
-                major_version: GenRandom::generate(rng),
-                minor_version: GenRandom::generate(rng),
+                sequence,
+                length,
+                major_version,
+                minor_version,
             }
         }
     }
@@ -1079,18 +1113,26 @@ impl GetContextReply {
 }
 #[cfg(test)]
 mod get_context_reply {
+    #![allow(dead_code, unused_imports)]
     use super::GetContextReply;
-    #[allow(unused_imports)]
-    use crate::x11_utils::{GenRandom, Serialize};
+    use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
+    use alloc::vec::Vec;
+    use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for GetContextReply {
         fn generate(rng: &Rng) -> Self {
+            let num_intercepted_clients = u32::from(rng.u8(..16));
+            let enabled: bool = GenRandom::generate(rng);
+            let sequence: u16 = GenRandom::generate(rng);
+            let length: u32 = GenRandom::generate(rng);
+            let element_header = GenRandom::generate(rng);
+            let intercepted_clients = gen_random_list(rng, usize::try_from(num_intercepted_clients).unwrap());
             Self {
-                enabled: GenRandom::generate(rng),
-                sequence: GenRandom::generate(rng),
-                length: GenRandom::generate(rng),
-                element_header: GenRandom::generate(rng),
-                intercepted_clients: GenRandom::generate(rng),
+                enabled,
+                sequence,
+                length,
+                element_header,
+                intercepted_clients,
             }
         }
     }
@@ -1241,21 +1283,32 @@ impl EnableContextReply {
 }
 #[cfg(test)]
 mod enable_context_reply {
+    #![allow(dead_code, unused_imports)]
     use super::EnableContextReply;
-    #[allow(unused_imports)]
-    use crate::x11_utils::{GenRandom, Serialize};
+    use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
+    use alloc::vec::Vec;
+    use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for EnableContextReply {
         fn generate(rng: &Rng) -> Self {
+            let length = u32::from(rng.u8(..16));
+            let category: u8 = GenRandom::generate(rng);
+            let sequence: u16 = GenRandom::generate(rng);
+            let element_header = GenRandom::generate(rng);
+            let client_swapped: bool = GenRandom::generate(rng);
+            let xid_base: u32 = GenRandom::generate(rng);
+            let server_time: u32 = GenRandom::generate(rng);
+            let rec_sequence_num: u32 = GenRandom::generate(rng);
+            let data: Vec<u8> = gen_random_list(rng, usize::try_from(length.checked_mul(4u32).unwrap()).unwrap());
             Self {
-                category: GenRandom::generate(rng),
-                sequence: GenRandom::generate(rng),
-                element_header: GenRandom::generate(rng),
-                client_swapped: GenRandom::generate(rng),
-                xid_base: GenRandom::generate(rng),
-                server_time: GenRandom::generate(rng),
-                rec_sequence_num: GenRandom::generate(rng),
-                data: GenRandom::generate(rng),
+                category,
+                sequence,
+                element_header,
+                client_swapped,
+                xid_base,
+                server_time,
+                rec_sequence_num,
+                data,
             }
         }
     }
