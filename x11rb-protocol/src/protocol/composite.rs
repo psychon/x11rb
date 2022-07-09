@@ -253,8 +253,8 @@ impl Serialize for QueryVersionReply {
 }
 #[cfg(test)]
 mod query_version_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::QueryVersionReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -793,8 +793,8 @@ impl Serialize for GetOverlayWindowReply {
 }
 #[cfg(test)]
 mod get_overlay_window_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::GetOverlayWindowReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -803,7 +803,7 @@ mod get_overlay_window_reply {
         fn generate(rng: &Rng) -> Self {
             let sequence: u16 = GenRandom::generate(rng);
             let length: u32 = GenRandom::generate(rng);
-            let overlay_win = GenRandom::generate(rng);
+            let overlay_win: xproto::Window = GenRandom::generate(rng);
             Self {
                 sequence,
                 length,

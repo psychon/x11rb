@@ -293,8 +293,8 @@ impl Serialize for NotifyEvent {
 }
 #[cfg(test)]
 mod notify_event {
-    #![allow(dead_code, unused_imports)]
-    use super::NotifyEvent;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -302,14 +302,14 @@ mod notify_event {
     impl GenRandom for NotifyEvent {
         fn generate(rng: &Rng) -> Self {
             let response_type: u8 = GenRandom::generate(rng);
-            let shape_kind = GenRandom::generate(rng);
+            let shape_kind: SK = GenRandom::generate(rng);
             let sequence: u16 = GenRandom::generate(rng);
-            let affected_window = GenRandom::generate(rng);
+            let affected_window: xproto::Window = GenRandom::generate(rng);
             let extents_x: i16 = GenRandom::generate(rng);
             let extents_y: i16 = GenRandom::generate(rng);
             let extents_width: u16 = GenRandom::generate(rng);
             let extents_height: u16 = GenRandom::generate(rng);
-            let server_time = GenRandom::generate(rng);
+            let server_time: xproto::Timestamp = GenRandom::generate(rng);
             let shaped: bool = GenRandom::generate(rng);
             Self {
                 response_type,
@@ -497,8 +497,8 @@ impl Serialize for QueryVersionReply {
 }
 #[cfg(test)]
 mod query_version_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::QueryVersionReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -1062,8 +1062,8 @@ impl Serialize for QueryExtentsReply {
 }
 #[cfg(test)]
 mod query_extents_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::QueryExtentsReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -1278,8 +1278,8 @@ impl Serialize for InputSelectedReply {
 }
 #[cfg(test)]
 mod input_selected_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::InputSelectedReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -1437,8 +1437,8 @@ impl GetRectanglesReply {
 }
 #[cfg(test)]
 mod get_rectangles_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::GetRectanglesReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -1446,10 +1446,10 @@ mod get_rectangles_reply {
     impl GenRandom for GetRectanglesReply {
         fn generate(rng: &Rng) -> Self {
             let rectangles_len = u32::from(rng.u8(..16));
-            let ordering = GenRandom::generate(rng);
+            let ordering: xproto::ClipOrdering = GenRandom::generate(rng);
             let sequence: u16 = GenRandom::generate(rng);
             let length: u32 = GenRandom::generate(rng);
-            let rectangles = gen_random_list(rng, usize::try_from(rectangles_len).unwrap());
+            let rectangles: Vec<xproto::Rectangle> = gen_random_list(rng, usize::try_from(rectangles_len).unwrap());
             Self {
                 ordering,
                 sequence,

@@ -2434,22 +2434,22 @@ impl Serialize for IndicatorMap {
 }
 #[cfg(test)]
 mod indicator_map {
-    #![allow(dead_code, unused_imports)]
-    use super::IndicatorMap;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for IndicatorMap {
         fn generate(rng: &Rng) -> Self {
-            let flags = GenRandom::generate(rng);
-            let which_groups = GenRandom::generate(rng);
-            let groups = GenRandom::generate(rng);
-            let which_mods = GenRandom::generate(rng);
-            let mods = GenRandom::generate(rng);
-            let real_mods = GenRandom::generate(rng);
-            let vmods = GenRandom::generate(rng);
-            let ctrls = GenRandom::generate(rng);
+            let flags: IMFlag = GenRandom::generate(rng);
+            let which_groups: IMGroupsWhich = GenRandom::generate(rng);
+            let groups: SetOfGroup = GenRandom::generate(rng);
+            let which_mods: IMModsWhich = GenRandom::generate(rng);
+            let mods: u8 = GenRandom::generate(rng);
+            let real_mods: u8 = GenRandom::generate(rng);
+            let vmods: u16 = GenRandom::generate(rng);
+            let ctrls: u32 = GenRandom::generate(rng);
             Self {
                 flags,
                 which_groups,
@@ -2932,17 +2932,17 @@ impl Serialize for ModDef {
 }
 #[cfg(test)]
 mod mod_def {
-    #![allow(dead_code, unused_imports)]
-    use super::ModDef;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for ModDef {
         fn generate(rng: &Rng) -> Self {
-            let mask = GenRandom::generate(rng);
-            let real_mods = GenRandom::generate(rng);
-            let vmods = GenRandom::generate(rng);
+            let mask: u8 = GenRandom::generate(rng);
+            let real_mods: u8 = GenRandom::generate(rng);
+            let vmods: u16 = GenRandom::generate(rng);
             Self {
                 mask,
                 real_mods,
@@ -2991,8 +2991,8 @@ impl Serialize for KeyName {
 }
 #[cfg(test)]
 mod key_name {
-    #![allow(dead_code, unused_imports)]
-    use super::KeyName;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -3054,8 +3054,8 @@ impl Serialize for KeyAlias {
 }
 #[cfg(test)]
 mod key_alias {
-    #![allow(dead_code, unused_imports)]
-    use super::KeyAlias;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -3130,8 +3130,8 @@ impl CountedString16 {
 }
 #[cfg(test)]
 mod counted_string16 {
-    #![allow(dead_code, unused_imports)]
-    use super::CountedString16;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -3210,8 +3210,8 @@ impl Serialize for KTMapEntry {
 }
 #[cfg(test)]
 mod kt_map_entry {
-    #![allow(dead_code, unused_imports)]
-    use super::KTMapEntry;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -3219,10 +3219,10 @@ mod kt_map_entry {
     impl GenRandom for KTMapEntry {
         fn generate(rng: &Rng) -> Self {
             let active: bool = GenRandom::generate(rng);
-            let mods_mask = GenRandom::generate(rng);
+            let mods_mask: u8 = GenRandom::generate(rng);
             let level: u8 = GenRandom::generate(rng);
-            let mods_mods = GenRandom::generate(rng);
-            let mods_vmods = GenRandom::generate(rng);
+            let mods_mods: u8 = GenRandom::generate(rng);
+            let mods_vmods: u16 = GenRandom::generate(rng);
             Self {
                 active,
                 mods_mask,
@@ -3308,8 +3308,8 @@ impl KeyType {
 }
 #[cfg(test)]
 mod key_type {
-    #![allow(dead_code, unused_imports)]
-    use super::KeyType;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -3317,13 +3317,13 @@ mod key_type {
     impl GenRandom for KeyType {
         fn generate(rng: &Rng) -> Self {
             let n_map_entries = u32::from(rng.u8(..16));
-            let mods_mask = GenRandom::generate(rng);
-            let mods_mods = GenRandom::generate(rng);
-            let mods_vmods = GenRandom::generate(rng);
+            let mods_mask: u8 = GenRandom::generate(rng);
+            let mods_mods: u8 = GenRandom::generate(rng);
+            let mods_vmods: u16 = GenRandom::generate(rng);
             let num_levels: u8 = GenRandom::generate(rng);
             let has_preserve: bool = GenRandom::generate(rng);
-            let map = gen_random_list(rng, usize::try_from(n_map_entries).unwrap());
-            let preserve = gen_random_list(rng, usize::try_from(u32::from(has_preserve).checked_mul(u32::from(n_map_entries)).unwrap()).unwrap());
+            let map: Vec<KTMapEntry> = gen_random_list(rng, usize::try_from(n_map_entries).unwrap());
+            let preserve: Vec<ModDef> = gen_random_list(rng, usize::try_from(u32::from(has_preserve).checked_mul(u32::from(n_map_entries)).unwrap()).unwrap());
             Self {
                 mods_mask,
                 mods_mods,
@@ -3400,8 +3400,8 @@ impl KeySymMap {
 }
 #[cfg(test)]
 mod key_sym_map {
-    #![allow(dead_code, unused_imports)]
-    use super::KeySymMap;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -3412,7 +3412,7 @@ mod key_sym_map {
             let kt_index: [u8; 4] = gen_random_list(rng, usize::try_from(4u32).unwrap());
             let group_info: u8 = GenRandom::generate(rng);
             let width: u8 = GenRandom::generate(rng);
-            let syms = gen_random_list(rng, usize::try_from(n_syms).unwrap());
+            let syms: Vec<xproto::Keysym> = gen_random_list(rng, usize::try_from(n_syms).unwrap());
             Self {
                 kt_index,
                 group_info,
@@ -3464,8 +3464,8 @@ impl Serialize for CommonBehavior {
 }
 #[cfg(test)]
 mod common_behavior {
-    #![allow(dead_code, unused_imports)]
-    use super::CommonBehavior;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -3521,8 +3521,8 @@ impl Serialize for DefaultBehavior {
 }
 #[cfg(test)]
 mod default_behavior {
-    #![allow(dead_code, unused_imports)]
-    use super::DefaultBehavior;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -3580,8 +3580,8 @@ impl Serialize for RadioGroupBehavior {
 }
 #[cfg(test)]
 mod radio_group_behavior {
-    #![allow(dead_code, unused_imports)]
-    use super::RadioGroupBehavior;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -3639,8 +3639,8 @@ impl Serialize for OverlayBehavior {
 }
 #[cfg(test)]
 mod overlay_behavior {
-    #![allow(dead_code, unused_imports)]
-    use super::OverlayBehavior;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -3648,7 +3648,7 @@ mod overlay_behavior {
     impl GenRandom for OverlayBehavior {
         fn generate(rng: &Rng) -> Self {
             let type_: u8 = GenRandom::generate(rng);
-            let key = GenRandom::generate(rng);
+            let key: xproto::Keycode = GenRandom::generate(rng);
             Self {
                 type_,
                 key,
@@ -3952,16 +3952,16 @@ impl Serialize for SetBehavior {
 }
 #[cfg(test)]
 mod set_behavior {
-    #![allow(dead_code, unused_imports)]
-    use super::SetBehavior;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for SetBehavior {
         fn generate(rng: &Rng) -> Self {
-            let keycode = GenRandom::generate(rng);
-            let behavior = GenRandom::generate(rng);
+            let keycode: xproto::Keycode = GenRandom::generate(rng);
+            let behavior: Behavior = GenRandom::generate(rng);
             Self {
                 keycode,
                 behavior,
@@ -4011,16 +4011,16 @@ impl Serialize for SetExplicit {
 }
 #[cfg(test)]
 mod set_explicit {
-    #![allow(dead_code, unused_imports)]
-    use super::SetExplicit;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for SetExplicit {
         fn generate(rng: &Rng) -> Self {
-            let keycode = GenRandom::generate(rng);
-            let explicit = GenRandom::generate(rng);
+            let keycode: xproto::Keycode = GenRandom::generate(rng);
+            let explicit: u8 = GenRandom::generate(rng);
             Self {
                 keycode,
                 explicit,
@@ -4070,16 +4070,16 @@ impl Serialize for KeyModMap {
 }
 #[cfg(test)]
 mod key_mod_map {
-    #![allow(dead_code, unused_imports)]
-    use super::KeyModMap;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for KeyModMap {
         fn generate(rng: &Rng) -> Self {
-            let keycode = GenRandom::generate(rng);
-            let mods = GenRandom::generate(rng);
+            let keycode: xproto::Keycode = GenRandom::generate(rng);
+            let mods: u8 = GenRandom::generate(rng);
             Self {
                 keycode,
                 mods,
@@ -4133,16 +4133,16 @@ impl Serialize for KeyVModMap {
 }
 #[cfg(test)]
 mod key_v_mod_map {
-    #![allow(dead_code, unused_imports)]
-    use super::KeyVModMap;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for KeyVModMap {
         fn generate(rng: &Rng) -> Self {
-            let keycode = GenRandom::generate(rng);
-            let vmods = GenRandom::generate(rng);
+            let keycode: xproto::Keycode = GenRandom::generate(rng);
+            let vmods: u16 = GenRandom::generate(rng);
             Self {
                 keycode,
                 vmods,
@@ -4198,8 +4198,8 @@ impl Serialize for KTSetMapEntry {
 }
 #[cfg(test)]
 mod kt_set_map_entry {
-    #![allow(dead_code, unused_imports)]
-    use super::KTSetMapEntry;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -4207,8 +4207,8 @@ mod kt_set_map_entry {
     impl GenRandom for KTSetMapEntry {
         fn generate(rng: &Rng) -> Self {
             let level: u8 = GenRandom::generate(rng);
-            let real_mods = GenRandom::generate(rng);
-            let virtual_mods = GenRandom::generate(rng);
+            let real_mods: u8 = GenRandom::generate(rng);
+            let virtual_mods: u16 = GenRandom::generate(rng);
             Self {
                 level,
                 real_mods,
@@ -4292,8 +4292,8 @@ impl SetKeyType {
 }
 #[cfg(test)]
 mod set_key_type {
-    #![allow(dead_code, unused_imports)]
-    use super::SetKeyType;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -4301,13 +4301,13 @@ mod set_key_type {
     impl GenRandom for SetKeyType {
         fn generate(rng: &Rng) -> Self {
             let n_map_entries = u32::from(rng.u8(..16));
-            let mask = GenRandom::generate(rng);
-            let real_mods = GenRandom::generate(rng);
-            let virtual_mods = GenRandom::generate(rng);
+            let mask: u8 = GenRandom::generate(rng);
+            let real_mods: u8 = GenRandom::generate(rng);
+            let virtual_mods: u16 = GenRandom::generate(rng);
             let num_levels: u8 = GenRandom::generate(rng);
             let preserve: bool = GenRandom::generate(rng);
-            let entries = gen_random_list(rng, usize::try_from(n_map_entries).unwrap());
-            let preserve_entries = gen_random_list(rng, usize::try_from(u32::from(preserve).checked_mul(u32::from(n_map_entries)).unwrap()).unwrap());
+            let entries: Vec<KTSetMapEntry> = gen_random_list(rng, usize::try_from(n_map_entries).unwrap());
+            let preserve_entries: Vec<KTSetMapEntry> = gen_random_list(rng, usize::try_from(u32::from(preserve).checked_mul(u32::from(n_map_entries)).unwrap()).unwrap());
             Self {
                 mask,
                 real_mods,
@@ -4381,8 +4381,8 @@ impl Outline {
 }
 #[cfg(test)]
 mod outline {
-    #![allow(dead_code, unused_imports)]
-    use super::Outline;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -4391,7 +4391,7 @@ mod outline {
         fn generate(rng: &Rng) -> Self {
             let n_points = u32::from(rng.u8(..16));
             let corner_radius: u8 = GenRandom::generate(rng);
-            let points = gen_random_list(rng, usize::try_from(n_points).unwrap());
+            let points: Vec<xproto::Point> = gen_random_list(rng, usize::try_from(n_points).unwrap());
             Self {
                 corner_radius,
                 points,
@@ -4464,8 +4464,8 @@ impl Shape {
 }
 #[cfg(test)]
 mod shape {
-    #![allow(dead_code, unused_imports)]
-    use super::Shape;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -4473,10 +4473,10 @@ mod shape {
     impl GenRandom for Shape {
         fn generate(rng: &Rng) -> Self {
             let n_outlines = u32::from(rng.u8(..16));
-            let name = GenRandom::generate(rng);
+            let name: xproto::Atom = GenRandom::generate(rng);
             let primary_ndx: u8 = GenRandom::generate(rng);
             let approx_ndx: u8 = GenRandom::generate(rng);
-            let outlines = gen_random_list(rng, usize::try_from(n_outlines).unwrap());
+            let outlines: Vec<Outline> = gen_random_list(rng, usize::try_from(n_outlines).unwrap());
             Self {
                 name,
                 primary_ndx,
@@ -4542,15 +4542,15 @@ impl Serialize for Key {
 }
 #[cfg(test)]
 mod key {
-    #![allow(dead_code, unused_imports)]
-    use super::Key;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for Key {
         fn generate(rng: &Rng) -> Self {
-            let name = gen_random_list(rng, usize::try_from(4u32).unwrap());
+            let name: [String8; 4] = gen_random_list(rng, usize::try_from(4u32).unwrap());
             let gap: i16 = GenRandom::generate(rng);
             let shape_ndx: u8 = GenRandom::generate(rng);
             let color_ndx: u8 = GenRandom::generate(rng);
@@ -4611,16 +4611,16 @@ impl Serialize for OverlayKey {
 }
 #[cfg(test)]
 mod overlay_key {
-    #![allow(dead_code, unused_imports)]
-    use super::OverlayKey;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for OverlayKey {
         fn generate(rng: &Rng) -> Self {
-            let over = gen_random_list(rng, usize::try_from(4u32).unwrap());
-            let under = gen_random_list(rng, usize::try_from(4u32).unwrap());
+            let over: [String8; 4] = gen_random_list(rng, usize::try_from(4u32).unwrap());
+            let under: [String8; 4] = gen_random_list(rng, usize::try_from(4u32).unwrap());
             Self {
                 over,
                 under,
@@ -4687,8 +4687,8 @@ impl OverlayRow {
 }
 #[cfg(test)]
 mod overlay_row {
-    #![allow(dead_code, unused_imports)]
-    use super::OverlayRow;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -4697,7 +4697,7 @@ mod overlay_row {
         fn generate(rng: &Rng) -> Self {
             let n_keys = u32::from(rng.u8(..16));
             let row_under: u8 = GenRandom::generate(rng);
-            let keys = gen_random_list(rng, usize::try_from(n_keys).unwrap());
+            let keys: Vec<OverlayKey> = gen_random_list(rng, usize::try_from(n_keys).unwrap());
             Self {
                 row_under,
                 keys,
@@ -4764,8 +4764,8 @@ impl Overlay {
 }
 #[cfg(test)]
 mod overlay {
-    #![allow(dead_code, unused_imports)]
-    use super::Overlay;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -4773,8 +4773,8 @@ mod overlay {
     impl GenRandom for Overlay {
         fn generate(rng: &Rng) -> Self {
             let n_rows = u32::from(rng.u8(..16));
-            let name = GenRandom::generate(rng);
-            let rows = gen_random_list(rng, usize::try_from(n_rows).unwrap());
+            let name: xproto::Atom = GenRandom::generate(rng);
+            let rows: Vec<OverlayRow> = gen_random_list(rng, usize::try_from(n_rows).unwrap());
             Self {
                 name,
                 rows,
@@ -4847,8 +4847,8 @@ impl Row {
 }
 #[cfg(test)]
 mod row {
-    #![allow(dead_code, unused_imports)]
-    use super::Row;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -4859,7 +4859,7 @@ mod row {
             let top: i16 = GenRandom::generate(rng);
             let left: i16 = GenRandom::generate(rng);
             let vertical: bool = GenRandom::generate(rng);
-            let keys = gen_random_list(rng, usize::try_from(n_keys).unwrap());
+            let keys: Vec<Key> = gen_random_list(rng, usize::try_from(n_keys).unwrap());
             Self {
                 top,
                 left,
@@ -5012,8 +5012,8 @@ impl Listing {
 }
 #[cfg(test)]
 mod listing {
-    #![allow(dead_code, unused_imports)]
-    use super::Listing;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -5022,7 +5022,7 @@ mod listing {
         fn generate(rng: &Rng) -> Self {
             let length = u32::from(rng.u8(..16));
             let flags: u16 = GenRandom::generate(rng);
-            let string = gen_random_list(rng, usize::try_from(length).unwrap());
+            let string: Vec<String8> = gen_random_list(rng, usize::try_from(length).unwrap());
             Self {
                 flags,
                 string,
@@ -5090,22 +5090,22 @@ impl Serialize for DeviceLedInfo {
 }
 #[cfg(test)]
 mod device_led_info {
-    #![allow(dead_code, unused_imports)]
-    use super::DeviceLedInfo;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for DeviceLedInfo {
         fn generate(rng: &Rng) -> Self {
-            let led_class = GenRandom::generate(rng);
-            let led_id = GenRandom::generate(rng);
+            let led_class: LedClass = GenRandom::generate(rng);
+            let led_id: IDSpec = GenRandom::generate(rng);
             let names_present: u32 = GenRandom::generate(rng);
             let maps_present: u32 = GenRandom::generate(rng);
             let phys_indicators: u32 = GenRandom::generate(rng);
             let state: u32 = GenRandom::generate(rng);
-            let names = gen_random_list(rng, usize::try_from(names_present.count_ones()).unwrap());
-            let maps = gen_random_list(rng, usize::try_from(maps_present.count_ones()).unwrap());
+            let names: Vec<xproto::Atom> = gen_random_list(rng, usize::try_from(names_present.count_ones()).unwrap());
+            let maps: Vec<IndicatorMap> = gen_random_list(rng, usize::try_from(maps_present.count_ones()).unwrap());
             Self {
                 led_class,
                 led_id,
@@ -5446,15 +5446,15 @@ impl Serialize for SANoAction {
 }
 #[cfg(test)]
 mod sa_no_action {
-    #![allow(dead_code, unused_imports)]
-    use super::SANoAction;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for SANoAction {
         fn generate(rng: &Rng) -> Self {
-            let type_ = GenRandom::generate(rng);
+            let type_: SAType = GenRandom::generate(rng);
             Self {
                 type_,
             }
@@ -5528,20 +5528,20 @@ impl Serialize for SASetMods {
 }
 #[cfg(test)]
 mod sa_set_mods {
-    #![allow(dead_code, unused_imports)]
-    use super::SASetMods;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for SASetMods {
         fn generate(rng: &Rng) -> Self {
-            let type_ = GenRandom::generate(rng);
-            let flags = GenRandom::generate(rng);
-            let mask = GenRandom::generate(rng);
-            let real_mods = GenRandom::generate(rng);
-            let vmods_high = GenRandom::generate(rng);
-            let vmods_low = GenRandom::generate(rng);
+            let type_: SAType = GenRandom::generate(rng);
+            let flags: u8 = GenRandom::generate(rng);
+            let mask: u8 = GenRandom::generate(rng);
+            let real_mods: u8 = GenRandom::generate(rng);
+            let vmods_high: u8 = GenRandom::generate(rng);
+            let vmods_low: u8 = GenRandom::generate(rng);
             Self {
                 type_,
                 flags,
@@ -5612,16 +5612,16 @@ impl Serialize for SASetGroup {
 }
 #[cfg(test)]
 mod sa_set_group {
-    #![allow(dead_code, unused_imports)]
-    use super::SASetGroup;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for SASetGroup {
         fn generate(rng: &Rng) -> Self {
-            let type_ = GenRandom::generate(rng);
-            let flags = GenRandom::generate(rng);
+            let type_: SAType = GenRandom::generate(rng);
+            let flags: u8 = GenRandom::generate(rng);
             let group: i8 = GenRandom::generate(rng);
             Self {
                 type_,
@@ -5776,16 +5776,16 @@ impl Serialize for SAMovePtr {
 }
 #[cfg(test)]
 mod sa_move_ptr {
-    #![allow(dead_code, unused_imports)]
-    use super::SAMovePtr;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for SAMovePtr {
         fn generate(rng: &Rng) -> Self {
-            let type_ = GenRandom::generate(rng);
-            let flags = GenRandom::generate(rng);
+            let type_: SAType = GenRandom::generate(rng);
+            let flags: u8 = GenRandom::generate(rng);
             let x_high: i8 = GenRandom::generate(rng);
             let x_low: u8 = GenRandom::generate(rng);
             let y_high: i8 = GenRandom::generate(rng);
@@ -5860,15 +5860,15 @@ impl Serialize for SAPtrBtn {
 }
 #[cfg(test)]
 mod sa_ptr_btn {
-    #![allow(dead_code, unused_imports)]
-    use super::SAPtrBtn;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for SAPtrBtn {
         fn generate(rng: &Rng) -> Self {
-            let type_ = GenRandom::generate(rng);
+            let type_: SAType = GenRandom::generate(rng);
             let flags: u8 = GenRandom::generate(rng);
             let count: u8 = GenRandom::generate(rng);
             let button: u8 = GenRandom::generate(rng);
@@ -5938,15 +5938,15 @@ impl Serialize for SALockPtrBtn {
 }
 #[cfg(test)]
 mod sa_lock_ptr_btn {
-    #![allow(dead_code, unused_imports)]
-    use super::SALockPtrBtn;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for SALockPtrBtn {
         fn generate(rng: &Rng) -> Self {
-            let type_ = GenRandom::generate(rng);
+            let type_: SAType = GenRandom::generate(rng);
             let flags: u8 = GenRandom::generate(rng);
             let button: u8 = GenRandom::generate(rng);
             Self {
@@ -6087,17 +6087,17 @@ impl Serialize for SASetPtrDflt {
 }
 #[cfg(test)]
 mod sa_set_ptr_dflt {
-    #![allow(dead_code, unused_imports)]
-    use super::SASetPtrDflt;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for SASetPtrDflt {
         fn generate(rng: &Rng) -> Self {
-            let type_ = GenRandom::generate(rng);
-            let flags = GenRandom::generate(rng);
-            let affect = GenRandom::generate(rng);
+            let type_: SAType = GenRandom::generate(rng);
+            let flags: u8 = GenRandom::generate(rng);
+            let affect: u8 = GenRandom::generate(rng);
             let value: i8 = GenRandom::generate(rng);
             Self {
                 type_,
@@ -6338,22 +6338,22 @@ impl Serialize for SAIsoLock {
 }
 #[cfg(test)]
 mod sa_iso_lock {
-    #![allow(dead_code, unused_imports)]
-    use super::SAIsoLock;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for SAIsoLock {
         fn generate(rng: &Rng) -> Self {
-            let type_ = GenRandom::generate(rng);
-            let flags = GenRandom::generate(rng);
-            let mask = GenRandom::generate(rng);
-            let real_mods = GenRandom::generate(rng);
+            let type_: SAType = GenRandom::generate(rng);
+            let flags: u8 = GenRandom::generate(rng);
+            let mask: u8 = GenRandom::generate(rng);
+            let real_mods: u8 = GenRandom::generate(rng);
             let group: i8 = GenRandom::generate(rng);
-            let affect = GenRandom::generate(rng);
-            let vmods_high = GenRandom::generate(rng);
-            let vmods_low = GenRandom::generate(rng);
+            let affect: u8 = GenRandom::generate(rng);
+            let vmods_high: u8 = GenRandom::generate(rng);
+            let vmods_low: u8 = GenRandom::generate(rng);
             Self {
                 type_,
                 flags,
@@ -6414,15 +6414,15 @@ impl Serialize for SATerminate {
 }
 #[cfg(test)]
 mod sa_terminate {
-    #![allow(dead_code, unused_imports)]
-    use super::SATerminate;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for SATerminate {
         fn generate(rng: &Rng) -> Self {
-            let type_ = GenRandom::generate(rng);
+            let type_: SAType = GenRandom::generate(rng);
             Self {
                 type_,
             }
@@ -6555,15 +6555,15 @@ impl Serialize for SASwitchScreen {
 }
 #[cfg(test)]
 mod sa_switch_screen {
-    #![allow(dead_code, unused_imports)]
-    use super::SASwitchScreen;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for SASwitchScreen {
         fn generate(rng: &Rng) -> Self {
-            let type_ = GenRandom::generate(rng);
+            let type_: SAType = GenRandom::generate(rng);
             let flags: u8 = GenRandom::generate(rng);
             let new_screen: i8 = GenRandom::generate(rng);
             Self {
@@ -6800,17 +6800,17 @@ impl Serialize for SASetControls {
 }
 #[cfg(test)]
 mod sa_set_controls {
-    #![allow(dead_code, unused_imports)]
-    use super::SASetControls;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for SASetControls {
         fn generate(rng: &Rng) -> Self {
-            let type_ = GenRandom::generate(rng);
-            let bool_ctrls_high = GenRandom::generate(rng);
-            let bool_ctrls_low = GenRandom::generate(rng);
+            let type_: SAType = GenRandom::generate(rng);
+            let bool_ctrls_high: u8 = GenRandom::generate(rng);
+            let bool_ctrls_low: u8 = GenRandom::generate(rng);
             Self {
                 type_,
                 bool_ctrls_high,
@@ -6948,16 +6948,16 @@ impl Serialize for SAActionMessage {
 }
 #[cfg(test)]
 mod sa_action_message {
-    #![allow(dead_code, unused_imports)]
-    use super::SAActionMessage;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for SAActionMessage {
         fn generate(rng: &Rng) -> Self {
-            let type_ = GenRandom::generate(rng);
-            let flags = GenRandom::generate(rng);
+            let type_: SAType = GenRandom::generate(rng);
+            let flags: u8 = GenRandom::generate(rng);
             let message: [u8; 6] = gen_random_list(rng, usize::try_from(6u32).unwrap());
             Self {
                 type_,
@@ -7040,22 +7040,22 @@ impl Serialize for SARedirectKey {
 }
 #[cfg(test)]
 mod sa_redirect_key {
-    #![allow(dead_code, unused_imports)]
-    use super::SARedirectKey;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for SARedirectKey {
         fn generate(rng: &Rng) -> Self {
-            let type_ = GenRandom::generate(rng);
-            let newkey = GenRandom::generate(rng);
-            let mask = GenRandom::generate(rng);
-            let real_modifiers = GenRandom::generate(rng);
-            let vmods_mask_high = GenRandom::generate(rng);
-            let vmods_mask_low = GenRandom::generate(rng);
-            let vmods_high = GenRandom::generate(rng);
-            let vmods_low = GenRandom::generate(rng);
+            let type_: SAType = GenRandom::generate(rng);
+            let newkey: xproto::Keycode = GenRandom::generate(rng);
+            let mask: u8 = GenRandom::generate(rng);
+            let real_modifiers: u8 = GenRandom::generate(rng);
+            let vmods_mask_high: u8 = GenRandom::generate(rng);
+            let vmods_mask_low: u8 = GenRandom::generate(rng);
+            let vmods_high: u8 = GenRandom::generate(rng);
+            let vmods_low: u8 = GenRandom::generate(rng);
             Self {
                 type_,
                 newkey,
@@ -7132,15 +7132,15 @@ impl Serialize for SADeviceBtn {
 }
 #[cfg(test)]
 mod sa_device_btn {
-    #![allow(dead_code, unused_imports)]
-    use super::SADeviceBtn;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for SADeviceBtn {
         fn generate(rng: &Rng) -> Self {
-            let type_ = GenRandom::generate(rng);
+            let type_: SAType = GenRandom::generate(rng);
             let flags: u8 = GenRandom::generate(rng);
             let count: u8 = GenRandom::generate(rng);
             let button: u8 = GenRandom::generate(rng);
@@ -7287,16 +7287,16 @@ impl Serialize for SALockDeviceBtn {
 }
 #[cfg(test)]
 mod sa_lock_device_btn {
-    #![allow(dead_code, unused_imports)]
-    use super::SALockDeviceBtn;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for SALockDeviceBtn {
         fn generate(rng: &Rng) -> Self {
-            let type_ = GenRandom::generate(rng);
-            let flags = GenRandom::generate(rng);
+            let type_: SAType = GenRandom::generate(rng);
+            let flags: u8 = GenRandom::generate(rng);
             let button: u8 = GenRandom::generate(rng);
             let device: u8 = GenRandom::generate(rng);
             Self {
@@ -7465,20 +7465,20 @@ impl Serialize for SADeviceValuator {
 }
 #[cfg(test)]
 mod sa_device_valuator {
-    #![allow(dead_code, unused_imports)]
-    use super::SADeviceValuator;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for SADeviceValuator {
         fn generate(rng: &Rng) -> Self {
-            let type_ = GenRandom::generate(rng);
+            let type_: SAType = GenRandom::generate(rng);
             let device: u8 = GenRandom::generate(rng);
-            let val1what = GenRandom::generate(rng);
+            let val1what: SAValWhat = GenRandom::generate(rng);
             let val1index: u8 = GenRandom::generate(rng);
             let val1value: u8 = GenRandom::generate(rng);
-            let val2what = GenRandom::generate(rng);
+            let val2what: SAValWhat = GenRandom::generate(rng);
             let val2index: u8 = GenRandom::generate(rng);
             let val2value: u8 = GenRandom::generate(rng);
             Self {
@@ -7543,15 +7543,15 @@ impl Serialize for SIAction {
 }
 #[cfg(test)]
 mod si_action {
-    #![allow(dead_code, unused_imports)]
-    use super::SIAction;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for SIAction {
         fn generate(rng: &Rng) -> Self {
-            let type_ = GenRandom::generate(rng);
+            let type_: SAType = GenRandom::generate(rng);
             let data: [u8; 7] = gen_random_list(rng, usize::try_from(7u32).unwrap());
             Self {
                 type_,
@@ -7632,20 +7632,20 @@ impl Serialize for SymInterpret {
 }
 #[cfg(test)]
 mod sym_interpret {
-    #![allow(dead_code, unused_imports)]
-    use super::SymInterpret;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for SymInterpret {
         fn generate(rng: &Rng) -> Self {
-            let sym = GenRandom::generate(rng);
-            let mods = GenRandom::generate(rng);
+            let sym: xproto::Keysym = GenRandom::generate(rng);
+            let mods: u8 = GenRandom::generate(rng);
             let match_: u8 = GenRandom::generate(rng);
-            let virtual_mod = GenRandom::generate(rng);
+            let virtual_mod: u8 = GenRandom::generate(rng);
             let flags: u8 = GenRandom::generate(rng);
-            let action = GenRandom::generate(rng);
+            let action: SIAction = GenRandom::generate(rng);
             Self {
                 sym,
                 mods,
@@ -8132,8 +8132,8 @@ impl Serialize for UseExtensionReply {
 }
 #[cfg(test)]
 mod use_extension_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::UseExtensionReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -8199,16 +8199,16 @@ impl Serialize for SelectEventsAuxBitcase1 {
 }
 #[cfg(test)]
 mod select_events_aux_bitcase1 {
-    #![allow(dead_code, unused_imports)]
-    use super::SelectEventsAuxBitcase1;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for SelectEventsAuxBitcase1 {
         fn generate(rng: &Rng) -> Self {
-            let affect_new_keyboard = GenRandom::generate(rng);
-            let new_keyboard_details = GenRandom::generate(rng);
+            let affect_new_keyboard: u16 = GenRandom::generate(rng);
+            let new_keyboard_details: u16 = GenRandom::generate(rng);
             Self {
                 affect_new_keyboard,
                 new_keyboard_details,
@@ -8259,16 +8259,16 @@ impl Serialize for SelectEventsAuxBitcase2 {
 }
 #[cfg(test)]
 mod select_events_aux_bitcase2 {
-    #![allow(dead_code, unused_imports)]
-    use super::SelectEventsAuxBitcase2;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for SelectEventsAuxBitcase2 {
         fn generate(rng: &Rng) -> Self {
-            let affect_state = GenRandom::generate(rng);
-            let state_details = GenRandom::generate(rng);
+            let affect_state: u16 = GenRandom::generate(rng);
+            let state_details: u16 = GenRandom::generate(rng);
             Self {
                 affect_state,
                 state_details,
@@ -8323,16 +8323,16 @@ impl Serialize for SelectEventsAuxBitcase3 {
 }
 #[cfg(test)]
 mod select_events_aux_bitcase3 {
-    #![allow(dead_code, unused_imports)]
-    use super::SelectEventsAuxBitcase3;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for SelectEventsAuxBitcase3 {
         fn generate(rng: &Rng) -> Self {
-            let affect_ctrls = GenRandom::generate(rng);
-            let ctrl_details = GenRandom::generate(rng);
+            let affect_ctrls: u32 = GenRandom::generate(rng);
+            let ctrl_details: u32 = GenRandom::generate(rng);
             Self {
                 affect_ctrls,
                 ctrl_details,
@@ -8387,8 +8387,8 @@ impl Serialize for SelectEventsAuxBitcase4 {
 }
 #[cfg(test)]
 mod select_events_aux_bitcase4 {
-    #![allow(dead_code, unused_imports)]
-    use super::SelectEventsAuxBitcase4;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -8451,8 +8451,8 @@ impl Serialize for SelectEventsAuxBitcase5 {
 }
 #[cfg(test)]
 mod select_events_aux_bitcase5 {
-    #![allow(dead_code, unused_imports)]
-    use super::SelectEventsAuxBitcase5;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -8511,16 +8511,16 @@ impl Serialize for SelectEventsAuxBitcase6 {
 }
 #[cfg(test)]
 mod select_events_aux_bitcase6 {
-    #![allow(dead_code, unused_imports)]
-    use super::SelectEventsAuxBitcase6;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for SelectEventsAuxBitcase6 {
         fn generate(rng: &Rng) -> Self {
-            let affect_names = GenRandom::generate(rng);
-            let names_details = GenRandom::generate(rng);
+            let affect_names: u16 = GenRandom::generate(rng);
+            let names_details: u16 = GenRandom::generate(rng);
             Self {
                 affect_names,
                 names_details,
@@ -8569,16 +8569,16 @@ impl Serialize for SelectEventsAuxBitcase7 {
 }
 #[cfg(test)]
 mod select_events_aux_bitcase7 {
-    #![allow(dead_code, unused_imports)]
-    use super::SelectEventsAuxBitcase7;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for SelectEventsAuxBitcase7 {
         fn generate(rng: &Rng) -> Self {
-            let affect_compat = GenRandom::generate(rng);
-            let compat_details = GenRandom::generate(rng);
+            let affect_compat: u8 = GenRandom::generate(rng);
+            let compat_details: u8 = GenRandom::generate(rng);
             Self {
                 affect_compat,
                 compat_details,
@@ -8627,8 +8627,8 @@ impl Serialize for SelectEventsAuxBitcase8 {
 }
 #[cfg(test)]
 mod select_events_aux_bitcase8 {
-    #![allow(dead_code, unused_imports)]
-    use super::SelectEventsAuxBitcase8;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -8685,8 +8685,8 @@ impl Serialize for SelectEventsAuxBitcase9 {
 }
 #[cfg(test)]
 mod select_events_aux_bitcase9 {
-    #![allow(dead_code, unused_imports)]
-    use super::SelectEventsAuxBitcase9;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -8745,16 +8745,16 @@ impl Serialize for SelectEventsAuxBitcase10 {
 }
 #[cfg(test)]
 mod select_events_aux_bitcase10 {
-    #![allow(dead_code, unused_imports)]
-    use super::SelectEventsAuxBitcase10;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for SelectEventsAuxBitcase10 {
         fn generate(rng: &Rng) -> Self {
-            let affect_access_x = GenRandom::generate(rng);
-            let access_x_details = GenRandom::generate(rng);
+            let affect_access_x: u16 = GenRandom::generate(rng);
+            let access_x_details: u16 = GenRandom::generate(rng);
             Self {
                 affect_access_x,
                 access_x_details,
@@ -8805,16 +8805,16 @@ impl Serialize for SelectEventsAuxBitcase11 {
 }
 #[cfg(test)]
 mod select_events_aux_bitcase11 {
-    #![allow(dead_code, unused_imports)]
-    use super::SelectEventsAuxBitcase11;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for SelectEventsAuxBitcase11 {
         fn generate(rng: &Rng) -> Self {
-            let affect_ext_dev = GenRandom::generate(rng);
-            let extdev_details = GenRandom::generate(rng);
+            let affect_ext_dev: u16 = GenRandom::generate(rng);
+            let extdev_details: u16 = GenRandom::generate(rng);
             Self {
                 affect_ext_dev,
                 extdev_details,
@@ -9019,8 +9019,8 @@ impl SelectEventsAux {
 }
 #[cfg(test)]
 mod select_events_aux {
-    #![allow(dead_code, unused_imports)]
-    use super::SelectEventsAux;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -9692,8 +9692,8 @@ impl Serialize for GetStateReply {
 }
 #[cfg(test)]
 mod get_state_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::GetStateReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -9703,20 +9703,20 @@ mod get_state_reply {
             let device_id: u8 = GenRandom::generate(rng);
             let sequence: u16 = GenRandom::generate(rng);
             let length: u32 = GenRandom::generate(rng);
-            let mods = GenRandom::generate(rng);
-            let base_mods = GenRandom::generate(rng);
-            let latched_mods = GenRandom::generate(rng);
-            let locked_mods = GenRandom::generate(rng);
-            let group = GenRandom::generate(rng);
-            let locked_group = GenRandom::generate(rng);
+            let mods: u8 = GenRandom::generate(rng);
+            let base_mods: u8 = GenRandom::generate(rng);
+            let latched_mods: u8 = GenRandom::generate(rng);
+            let locked_mods: u8 = GenRandom::generate(rng);
+            let group: Group = GenRandom::generate(rng);
+            let locked_group: Group = GenRandom::generate(rng);
             let base_group: i16 = GenRandom::generate(rng);
             let latched_group: i16 = GenRandom::generate(rng);
-            let compat_state = GenRandom::generate(rng);
-            let grab_mods = GenRandom::generate(rng);
-            let compat_grab_mods = GenRandom::generate(rng);
-            let lookup_mods = GenRandom::generate(rng);
-            let compat_lookup_mods = GenRandom::generate(rng);
-            let ptr_btn_state = GenRandom::generate(rng);
+            let compat_state: u8 = GenRandom::generate(rng);
+            let grab_mods: u8 = GenRandom::generate(rng);
+            let compat_grab_mods: u8 = GenRandom::generate(rng);
+            let lookup_mods: u8 = GenRandom::generate(rng);
+            let compat_lookup_mods: u8 = GenRandom::generate(rng);
+            let ptr_btn_state: u16 = GenRandom::generate(rng);
             Self {
                 device_id,
                 sequence,
@@ -10141,8 +10141,8 @@ impl Serialize for GetControlsReply {
 }
 #[cfg(test)]
 mod get_controls_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::GetControlsReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -10155,12 +10155,12 @@ mod get_controls_reply {
             let mouse_keys_dflt_btn: u8 = GenRandom::generate(rng);
             let num_groups: u8 = GenRandom::generate(rng);
             let groups_wrap: u8 = GenRandom::generate(rng);
-            let internal_mods_mask = GenRandom::generate(rng);
-            let ignore_lock_mods_mask = GenRandom::generate(rng);
-            let internal_mods_real_mods = GenRandom::generate(rng);
-            let ignore_lock_mods_real_mods = GenRandom::generate(rng);
-            let internal_mods_vmods = GenRandom::generate(rng);
-            let ignore_lock_mods_vmods = GenRandom::generate(rng);
+            let internal_mods_mask: u8 = GenRandom::generate(rng);
+            let ignore_lock_mods_mask: u8 = GenRandom::generate(rng);
+            let internal_mods_real_mods: u8 = GenRandom::generate(rng);
+            let ignore_lock_mods_real_mods: u8 = GenRandom::generate(rng);
+            let internal_mods_vmods: u16 = GenRandom::generate(rng);
+            let ignore_lock_mods_vmods: u16 = GenRandom::generate(rng);
             let repeat_delay: u16 = GenRandom::generate(rng);
             let repeat_interval: u16 = GenRandom::generate(rng);
             let slow_keys_delay: u16 = GenRandom::generate(rng);
@@ -10170,13 +10170,13 @@ mod get_controls_reply {
             let mouse_keys_time_to_max: u16 = GenRandom::generate(rng);
             let mouse_keys_max_speed: u16 = GenRandom::generate(rng);
             let mouse_keys_curve: i16 = GenRandom::generate(rng);
-            let access_x_option = GenRandom::generate(rng);
+            let access_x_option: u16 = GenRandom::generate(rng);
             let access_x_timeout: u16 = GenRandom::generate(rng);
-            let access_x_timeout_options_mask = GenRandom::generate(rng);
-            let access_x_timeout_options_values = GenRandom::generate(rng);
-            let access_x_timeout_mask = GenRandom::generate(rng);
-            let access_x_timeout_values = GenRandom::generate(rng);
-            let enabled_controls = GenRandom::generate(rng);
+            let access_x_timeout_options_mask: u16 = GenRandom::generate(rng);
+            let access_x_timeout_options_values: u16 = GenRandom::generate(rng);
+            let access_x_timeout_mask: u32 = GenRandom::generate(rng);
+            let access_x_timeout_values: u32 = GenRandom::generate(rng);
+            let enabled_controls: u32 = GenRandom::generate(rng);
             let per_key_repeat: [u8; 32] = gen_random_list(rng, usize::try_from(32u32).unwrap());
             Self {
                 device_id,
@@ -10668,16 +10668,18 @@ impl GetMapMapBitcase3 {
 }
 #[cfg(test)]
 mod get_map_map_bitcase3 {
-    #![allow(dead_code, unused_imports)]
-    use super::GetMapMapBitcase3;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for GetMapMapBitcase3 {
         fn generate(rng: &Rng) -> Self {
+            let n_key_actions: u8 = GenRandom::generate(rng);
+            let total_actions: u16 = GenRandom::generate(rng);
             let acts_rtrn_count: Vec<u8> = gen_random_list(rng, usize::try_from(n_key_actions).unwrap());
-            let acts_rtrn_acts = gen_random_list(rng, usize::try_from(total_actions).unwrap());
+            let acts_rtrn_acts: Vec<Action> = gen_random_list(rng, usize::try_from(total_actions).unwrap());
             Self {
                 acts_rtrn_count,
                 acts_rtrn_acts,
@@ -10879,8 +10881,8 @@ impl GetMapMap {
 }
 #[cfg(test)]
 mod get_map_map {
-    #![allow(dead_code, unused_imports)]
-    use super::GetMapMap;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -11129,8 +11131,8 @@ impl Serialize for GetMapReply {
 }
 #[cfg(test)]
 mod get_map_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::GetMapReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -11140,31 +11142,31 @@ mod get_map_reply {
             let device_id: u8 = GenRandom::generate(rng);
             let sequence: u16 = GenRandom::generate(rng);
             let length: u32 = GenRandom::generate(rng);
-            let min_key_code = GenRandom::generate(rng);
-            let max_key_code = GenRandom::generate(rng);
+            let min_key_code: xproto::Keycode = GenRandom::generate(rng);
+            let max_key_code: xproto::Keycode = GenRandom::generate(rng);
             let first_type: u8 = GenRandom::generate(rng);
             let n_types: u8 = GenRandom::generate(rng);
             let total_types: u8 = GenRandom::generate(rng);
-            let first_key_sym = GenRandom::generate(rng);
+            let first_key_sym: xproto::Keycode = GenRandom::generate(rng);
             let total_syms: u16 = GenRandom::generate(rng);
             let n_key_syms: u8 = GenRandom::generate(rng);
-            let first_key_action = GenRandom::generate(rng);
+            let first_key_action: xproto::Keycode = GenRandom::generate(rng);
             let total_actions: u16 = GenRandom::generate(rng);
             let n_key_actions: u8 = GenRandom::generate(rng);
-            let first_key_behavior = GenRandom::generate(rng);
+            let first_key_behavior: xproto::Keycode = GenRandom::generate(rng);
             let n_key_behaviors: u8 = GenRandom::generate(rng);
             let total_key_behaviors: u8 = GenRandom::generate(rng);
-            let first_key_explicit = GenRandom::generate(rng);
+            let first_key_explicit: xproto::Keycode = GenRandom::generate(rng);
             let n_key_explicit: u8 = GenRandom::generate(rng);
             let total_key_explicit: u8 = GenRandom::generate(rng);
-            let first_mod_map_key = GenRandom::generate(rng);
+            let first_mod_map_key: xproto::Keycode = GenRandom::generate(rng);
             let n_mod_map_keys: u8 = GenRandom::generate(rng);
             let total_mod_map_keys: u8 = GenRandom::generate(rng);
-            let first_v_mod_map_key = GenRandom::generate(rng);
+            let first_v_mod_map_key: xproto::Keycode = GenRandom::generate(rng);
             let n_v_mod_map_keys: u8 = GenRandom::generate(rng);
             let total_v_mod_map_keys: u8 = GenRandom::generate(rng);
-            let virtual_mods = GenRandom::generate(rng);
-            let map = GenRandom::generate(rng);
+            let virtual_mods: u16 = GenRandom::generate(rng);
+            let map: GetMapMap = GenRandom::generate(rng);
             Self {
                 device_id,
                 sequence,
@@ -11245,16 +11247,18 @@ impl SetMapAuxBitcase3 {
 }
 #[cfg(test)]
 mod set_map_aux_bitcase3 {
-    #![allow(dead_code, unused_imports)]
-    use super::SetMapAuxBitcase3;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for SetMapAuxBitcase3 {
         fn generate(rng: &Rng) -> Self {
+            let n_key_actions: u8 = GenRandom::generate(rng);
+            let total_actions: u16 = GenRandom::generate(rng);
             let actions_count: Vec<u8> = gen_random_list(rng, usize::try_from(n_key_actions).unwrap());
-            let actions = gen_random_list(rng, usize::try_from(total_actions).unwrap());
+            let actions: Vec<Action> = gen_random_list(rng, usize::try_from(total_actions).unwrap());
             Self {
                 actions_count,
                 actions,
@@ -11445,8 +11449,8 @@ impl SetMapAux {
 }
 #[cfg(test)]
 mod set_map_aux {
-    #![allow(dead_code, unused_imports)]
-    use super::SetMapAux;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -11997,8 +12001,8 @@ impl GetCompatMapReply {
 }
 #[cfg(test)]
 mod get_compat_map_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::GetCompatMapReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -12009,11 +12013,11 @@ mod get_compat_map_reply {
             let device_id: u8 = GenRandom::generate(rng);
             let sequence: u16 = GenRandom::generate(rng);
             let length: u32 = GenRandom::generate(rng);
-            let groups_rtrn = GenRandom::generate(rng);
+            let groups_rtrn: u8 = GenRandom::generate(rng);
             let first_si_rtrn: u16 = GenRandom::generate(rng);
             let n_total_si: u16 = GenRandom::generate(rng);
-            let si_rtrn = gen_random_list(rng, usize::try_from(n_si_rtrn).unwrap());
-            let group_rtrn = gen_random_list(rng, usize::try_from(groups_rtrn.count_ones()).unwrap());
+            let si_rtrn: Vec<SymInterpret> = gen_random_list(rng, usize::try_from(n_si_rtrn).unwrap());
+            let group_rtrn: Vec<ModDef> = gen_random_list(rng, usize::try_from(groups_rtrn.count_ones()).unwrap());
             Self {
                 device_id,
                 sequence,
@@ -12282,8 +12286,8 @@ impl Serialize for GetIndicatorStateReply {
 }
 #[cfg(test)]
 mod get_indicator_state_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::GetIndicatorStateReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -12433,8 +12437,8 @@ impl Serialize for GetIndicatorMapReply {
 }
 #[cfg(test)]
 mod get_indicator_map_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::GetIndicatorMapReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -12447,7 +12451,7 @@ mod get_indicator_map_reply {
             let which: u32 = GenRandom::generate(rng);
             let real_indicators: u32 = GenRandom::generate(rng);
             let n_indicators: u8 = GenRandom::generate(rng);
-            let maps = gen_random_list(rng, usize::try_from(which.count_ones()).unwrap());
+            let maps: Vec<IndicatorMap> = gen_random_list(rng, usize::try_from(which.count_ones()).unwrap());
             Self {
                 device_id,
                 sequence,
@@ -12759,8 +12763,8 @@ impl Serialize for GetNamedIndicatorReply {
 }
 #[cfg(test)]
 mod get_named_indicator_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::GetNamedIndicatorReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -12770,19 +12774,19 @@ mod get_named_indicator_reply {
             let device_id: u8 = GenRandom::generate(rng);
             let sequence: u16 = GenRandom::generate(rng);
             let length: u32 = GenRandom::generate(rng);
-            let indicator = GenRandom::generate(rng);
+            let indicator: xproto::Atom = GenRandom::generate(rng);
             let found: bool = GenRandom::generate(rng);
             let on: bool = GenRandom::generate(rng);
             let real_indicator: bool = GenRandom::generate(rng);
             let ndx: u8 = GenRandom::generate(rng);
-            let map_flags = GenRandom::generate(rng);
-            let map_which_groups = GenRandom::generate(rng);
-            let map_groups = GenRandom::generate(rng);
-            let map_which_mods = GenRandom::generate(rng);
-            let map_mods = GenRandom::generate(rng);
-            let map_real_mods = GenRandom::generate(rng);
-            let map_vmod = GenRandom::generate(rng);
-            let map_ctrls = GenRandom::generate(rng);
+            let map_flags: u8 = GenRandom::generate(rng);
+            let map_which_groups: u8 = GenRandom::generate(rng);
+            let map_groups: u8 = GenRandom::generate(rng);
+            let map_which_mods: u8 = GenRandom::generate(rng);
+            let map_mods: u8 = GenRandom::generate(rng);
+            let map_real_mods: u8 = GenRandom::generate(rng);
+            let map_vmod: u16 = GenRandom::generate(rng);
+            let map_ctrls: u32 = GenRandom::generate(rng);
             let supported: bool = GenRandom::generate(rng);
             Self {
                 device_id,
@@ -13052,16 +13056,17 @@ impl GetNamesValueListBitcase8 {
 }
 #[cfg(test)]
 mod get_names_value_list_bitcase8 {
-    #![allow(dead_code, unused_imports)]
-    use super::GetNamesValueListBitcase8;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for GetNamesValueListBitcase8 {
         fn generate(rng: &Rng) -> Self {
+            let n_types: u8 = GenRandom::generate(rng);
             let n_levels_per_type: Vec<u8> = gen_random_list(rng, usize::try_from(n_types).unwrap());
-            let kt_level_names = gen_random_list(rng, usize::try_from(n_levels_per_type.iter().fold(0u32, |acc, x| acc.checked_add(u32::from(*x)).unwrap())).unwrap());
+            let kt_level_names: Vec<xproto::Atom> = gen_random_list(rng, usize::try_from(n_levels_per_type.iter().fold(0u32, |acc, x| acc.checked_add(u32::from(*x)).unwrap())).unwrap());
             Self {
                 n_levels_per_type,
                 kt_level_names,
@@ -13332,8 +13337,8 @@ impl GetNamesValueList {
 }
 #[cfg(test)]
 mod get_names_value_list {
-    #![allow(dead_code, unused_imports)]
-    use super::GetNamesValueList;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -13703,8 +13708,8 @@ impl Serialize for GetNamesReply {
 }
 #[cfg(test)]
 mod get_names_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::GetNamesReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -13714,18 +13719,18 @@ mod get_names_reply {
             let device_id: u8 = GenRandom::generate(rng);
             let sequence: u16 = GenRandom::generate(rng);
             let length: u32 = GenRandom::generate(rng);
-            let min_key_code = GenRandom::generate(rng);
-            let max_key_code = GenRandom::generate(rng);
+            let min_key_code: xproto::Keycode = GenRandom::generate(rng);
+            let max_key_code: xproto::Keycode = GenRandom::generate(rng);
             let n_types: u8 = GenRandom::generate(rng);
-            let group_names = GenRandom::generate(rng);
-            let virtual_mods = GenRandom::generate(rng);
-            let first_key = GenRandom::generate(rng);
+            let group_names: u8 = GenRandom::generate(rng);
+            let virtual_mods: u16 = GenRandom::generate(rng);
+            let first_key: xproto::Keycode = GenRandom::generate(rng);
             let n_keys: u8 = GenRandom::generate(rng);
             let indicators: u32 = GenRandom::generate(rng);
             let n_radio_groups: u8 = GenRandom::generate(rng);
             let n_key_aliases: u8 = GenRandom::generate(rng);
             let n_kt_levels: u16 = GenRandom::generate(rng);
-            let value_list = GenRandom::generate(rng);
+            let value_list: GetNamesValueList = GenRandom::generate(rng);
             Self {
                 device_id,
                 sequence,
@@ -13793,16 +13798,17 @@ impl SetNamesAuxBitcase8 {
 }
 #[cfg(test)]
 mod set_names_aux_bitcase8 {
-    #![allow(dead_code, unused_imports)]
-    use super::SetNamesAuxBitcase8;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for SetNamesAuxBitcase8 {
         fn generate(rng: &Rng) -> Self {
+            let n_types: u8 = GenRandom::generate(rng);
             let n_levels_per_type: Vec<u8> = gen_random_list(rng, usize::try_from(n_types).unwrap());
-            let kt_level_names = gen_random_list(rng, usize::try_from(n_levels_per_type.iter().fold(0u32, |acc, x| acc.checked_add(u32::from(*x)).unwrap())).unwrap());
+            let kt_level_names: Vec<xproto::Atom> = gen_random_list(rng, usize::try_from(n_levels_per_type.iter().fold(0u32, |acc, x| acc.checked_add(u32::from(*x)).unwrap())).unwrap());
             Self {
                 n_levels_per_type,
                 kt_level_names,
@@ -14074,8 +14080,8 @@ impl SetNamesAux {
 }
 #[cfg(test)]
 mod set_names_aux {
-    #![allow(dead_code, unused_imports)]
-    use super::SetNamesAux;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -14793,8 +14799,8 @@ impl Serialize for PerClientFlagsReply {
 }
 #[cfg(test)]
 mod per_client_flags_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::PerClientFlagsReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -14804,10 +14810,10 @@ mod per_client_flags_reply {
             let device_id: u8 = GenRandom::generate(rng);
             let sequence: u16 = GenRandom::generate(rng);
             let length: u32 = GenRandom::generate(rng);
-            let supported = GenRandom::generate(rng);
-            let value = GenRandom::generate(rng);
-            let auto_ctrls = GenRandom::generate(rng);
-            let auto_ctrls_values = GenRandom::generate(rng);
+            let supported: u32 = GenRandom::generate(rng);
+            let value: u32 = GenRandom::generate(rng);
+            let auto_ctrls: u32 = GenRandom::generate(rng);
+            let auto_ctrls_values: u32 = GenRandom::generate(rng);
             Self {
                 device_id,
                 sequence,
@@ -15051,30 +15057,30 @@ impl ListComponentsReply {
 }
 #[cfg(test)]
 mod list_components_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::ListComponentsReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for ListComponentsReply {
         fn generate(rng: &Rng) -> Self {
-            let n_keymaps = u32::from(rng.u8(..16));
+            let n_keycodes = u32::from(rng.u8(..16));
+            let n_geometries = u32::from(rng.u8(..16));
+            let n_compat_maps = u32::from(rng.u8(..16));
             let n_types = u32::from(rng.u8(..16));
             let n_symbols = u32::from(rng.u8(..16));
-            let n_compat_maps = u32::from(rng.u8(..16));
-            let n_geometries = u32::from(rng.u8(..16));
-            let n_keycodes = u32::from(rng.u8(..16));
+            let n_keymaps = u32::from(rng.u8(..16));
             let device_id: u8 = GenRandom::generate(rng);
             let sequence: u16 = GenRandom::generate(rng);
             let length: u32 = GenRandom::generate(rng);
             let extra: u16 = GenRandom::generate(rng);
-            let keymaps = gen_random_list(rng, usize::try_from(n_keymaps).unwrap());
-            let keycodes = gen_random_list(rng, usize::try_from(n_keycodes).unwrap());
-            let types = gen_random_list(rng, usize::try_from(n_types).unwrap());
-            let compat_maps = gen_random_list(rng, usize::try_from(n_compat_maps).unwrap());
-            let symbols = gen_random_list(rng, usize::try_from(n_symbols).unwrap());
-            let geometries = gen_random_list(rng, usize::try_from(n_geometries).unwrap());
+            let keymaps: Vec<Listing> = gen_random_list(rng, usize::try_from(n_keymaps).unwrap());
+            let keycodes: Vec<Listing> = gen_random_list(rng, usize::try_from(n_keycodes).unwrap());
+            let types: Vec<Listing> = gen_random_list(rng, usize::try_from(n_types).unwrap());
+            let compat_maps: Vec<Listing> = gen_random_list(rng, usize::try_from(n_compat_maps).unwrap());
+            let symbols: Vec<Listing> = gen_random_list(rng, usize::try_from(n_symbols).unwrap());
+            let geometries: Vec<Listing> = gen_random_list(rng, usize::try_from(n_geometries).unwrap());
             Self {
                 device_id,
                 sequence,
@@ -15208,16 +15214,18 @@ impl GetKbdByNameRepliesTypesMapBitcase3 {
 }
 #[cfg(test)]
 mod get_kbd_by_name_replies_types_map_bitcase3 {
-    #![allow(dead_code, unused_imports)]
-    use super::GetKbdByNameRepliesTypesMapBitcase3;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for GetKbdByNameRepliesTypesMapBitcase3 {
         fn generate(rng: &Rng) -> Self {
+            let n_key_actions: u8 = GenRandom::generate(rng);
+            let total_actions: u16 = GenRandom::generate(rng);
             let acts_rtrn_count: Vec<u8> = gen_random_list(rng, usize::try_from(n_key_actions).unwrap());
-            let acts_rtrn_acts = gen_random_list(rng, usize::try_from(total_actions).unwrap());
+            let acts_rtrn_acts: Vec<Action> = gen_random_list(rng, usize::try_from(total_actions).unwrap());
             Self {
                 acts_rtrn_count,
                 acts_rtrn_acts,
@@ -15419,8 +15427,8 @@ impl GetKbdByNameRepliesTypesMap {
 }
 #[cfg(test)]
 mod get_kbd_by_name_replies_types_map {
-    #![allow(dead_code, unused_imports)]
-    use super::GetKbdByNameRepliesTypesMap;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -15662,8 +15670,8 @@ impl Serialize for GetKbdByNameRepliesTypes {
 }
 #[cfg(test)]
 mod get_kbd_by_name_replies_types {
-    #![allow(dead_code, unused_imports)]
-    use super::GetKbdByNameRepliesTypes;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -15674,31 +15682,31 @@ mod get_kbd_by_name_replies_types {
             let type_device_id: u8 = GenRandom::generate(rng);
             let getmap_sequence: u16 = GenRandom::generate(rng);
             let getmap_length: u32 = GenRandom::generate(rng);
-            let type_min_key_code = GenRandom::generate(rng);
-            let type_max_key_code = GenRandom::generate(rng);
+            let type_min_key_code: xproto::Keycode = GenRandom::generate(rng);
+            let type_max_key_code: xproto::Keycode = GenRandom::generate(rng);
             let first_type: u8 = GenRandom::generate(rng);
             let n_types: u8 = GenRandom::generate(rng);
             let total_types: u8 = GenRandom::generate(rng);
-            let first_key_sym = GenRandom::generate(rng);
+            let first_key_sym: xproto::Keycode = GenRandom::generate(rng);
             let total_syms: u16 = GenRandom::generate(rng);
             let n_key_syms: u8 = GenRandom::generate(rng);
-            let first_key_action = GenRandom::generate(rng);
+            let first_key_action: xproto::Keycode = GenRandom::generate(rng);
             let total_actions: u16 = GenRandom::generate(rng);
             let n_key_actions: u8 = GenRandom::generate(rng);
-            let first_key_behavior = GenRandom::generate(rng);
+            let first_key_behavior: xproto::Keycode = GenRandom::generate(rng);
             let n_key_behaviors: u8 = GenRandom::generate(rng);
             let total_key_behaviors: u8 = GenRandom::generate(rng);
-            let first_key_explicit = GenRandom::generate(rng);
+            let first_key_explicit: xproto::Keycode = GenRandom::generate(rng);
             let n_key_explicit: u8 = GenRandom::generate(rng);
             let total_key_explicit: u8 = GenRandom::generate(rng);
-            let first_mod_map_key = GenRandom::generate(rng);
+            let first_mod_map_key: xproto::Keycode = GenRandom::generate(rng);
             let n_mod_map_keys: u8 = GenRandom::generate(rng);
             let total_mod_map_keys: u8 = GenRandom::generate(rng);
-            let first_v_mod_map_key = GenRandom::generate(rng);
+            let first_v_mod_map_key: xproto::Keycode = GenRandom::generate(rng);
             let n_v_mod_map_keys: u8 = GenRandom::generate(rng);
             let total_v_mod_map_keys: u8 = GenRandom::generate(rng);
-            let virtual_mods = GenRandom::generate(rng);
-            let map = GenRandom::generate(rng);
+            let virtual_mods: u16 = GenRandom::generate(rng);
+            let map: GetKbdByNameRepliesTypesMap = GenRandom::generate(rng);
             Self {
                 getmap_type,
                 type_device_id,
@@ -15815,8 +15823,8 @@ impl GetKbdByNameRepliesCompatMap {
 }
 #[cfg(test)]
 mod get_kbd_by_name_replies_compat_map {
-    #![allow(dead_code, unused_imports)]
-    use super::GetKbdByNameRepliesCompatMap;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -15828,11 +15836,11 @@ mod get_kbd_by_name_replies_compat_map {
             let compat_device_id: u8 = GenRandom::generate(rng);
             let compatmap_sequence: u16 = GenRandom::generate(rng);
             let compatmap_length: u32 = GenRandom::generate(rng);
-            let groups_rtrn = GenRandom::generate(rng);
+            let groups_rtrn: u8 = GenRandom::generate(rng);
             let first_si_rtrn: u16 = GenRandom::generate(rng);
             let n_total_si: u16 = GenRandom::generate(rng);
-            let si_rtrn = gen_random_list(rng, usize::try_from(n_si_rtrn).unwrap());
-            let group_rtrn = gen_random_list(rng, usize::try_from(groups_rtrn.count_ones()).unwrap());
+            let si_rtrn: Vec<SymInterpret> = gen_random_list(rng, usize::try_from(n_si_rtrn).unwrap());
+            let group_rtrn: Vec<ModDef> = gen_random_list(rng, usize::try_from(groups_rtrn.count_ones()).unwrap());
             Self {
                 compatmap_type,
                 compat_device_id,
@@ -15920,8 +15928,8 @@ impl GetKbdByNameRepliesIndicatorMaps {
 }
 #[cfg(test)]
 mod get_kbd_by_name_replies_indicator_maps {
-    #![allow(dead_code, unused_imports)]
-    use super::GetKbdByNameRepliesIndicatorMaps;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -15935,7 +15943,7 @@ mod get_kbd_by_name_replies_indicator_maps {
             let indicatormap_length: u32 = GenRandom::generate(rng);
             let which: u32 = GenRandom::generate(rng);
             let real_indicators: u32 = GenRandom::generate(rng);
-            let maps = gen_random_list(rng, usize::try_from(n_indicators).unwrap());
+            let maps: Vec<IndicatorMap> = gen_random_list(rng, usize::try_from(n_indicators).unwrap());
             Self {
                 indicatormap_type,
                 indicator_device_id,
@@ -15994,16 +16002,17 @@ impl GetKbdByNameRepliesKeyNamesValueListBitcase8 {
 }
 #[cfg(test)]
 mod get_kbd_by_name_replies_key_names_value_list_bitcase8 {
-    #![allow(dead_code, unused_imports)]
-    use super::GetKbdByNameRepliesKeyNamesValueListBitcase8;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for GetKbdByNameRepliesKeyNamesValueListBitcase8 {
         fn generate(rng: &Rng) -> Self {
+            let n_types: u8 = GenRandom::generate(rng);
             let n_levels_per_type: Vec<u8> = gen_random_list(rng, usize::try_from(n_types).unwrap());
-            let kt_level_names = gen_random_list(rng, usize::try_from(n_levels_per_type.iter().fold(0u32, |acc, x| acc.checked_add(u32::from(*x)).unwrap())).unwrap());
+            let kt_level_names: Vec<xproto::Atom> = gen_random_list(rng, usize::try_from(n_levels_per_type.iter().fold(0u32, |acc, x| acc.checked_add(u32::from(*x)).unwrap())).unwrap());
             Self {
                 n_levels_per_type,
                 kt_level_names,
@@ -16274,8 +16283,8 @@ impl GetKbdByNameRepliesKeyNamesValueList {
 }
 #[cfg(test)]
 mod get_kbd_by_name_replies_key_names_value_list {
-    #![allow(dead_code, unused_imports)]
-    use super::GetKbdByNameRepliesKeyNamesValueList;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -16638,8 +16647,8 @@ impl Serialize for GetKbdByNameRepliesKeyNames {
 }
 #[cfg(test)]
 mod get_kbd_by_name_replies_key_names {
-    #![allow(dead_code, unused_imports)]
-    use super::GetKbdByNameRepliesKeyNames;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -16650,18 +16659,18 @@ mod get_kbd_by_name_replies_key_names {
             let key_device_id: u8 = GenRandom::generate(rng);
             let keyname_sequence: u16 = GenRandom::generate(rng);
             let keyname_length: u32 = GenRandom::generate(rng);
-            let key_min_key_code = GenRandom::generate(rng);
-            let key_max_key_code = GenRandom::generate(rng);
+            let key_min_key_code: xproto::Keycode = GenRandom::generate(rng);
+            let key_max_key_code: xproto::Keycode = GenRandom::generate(rng);
             let n_types: u8 = GenRandom::generate(rng);
-            let group_names = GenRandom::generate(rng);
-            let virtual_mods = GenRandom::generate(rng);
-            let first_key = GenRandom::generate(rng);
+            let group_names: u8 = GenRandom::generate(rng);
+            let virtual_mods: u16 = GenRandom::generate(rng);
+            let first_key: xproto::Keycode = GenRandom::generate(rng);
             let n_keys: u8 = GenRandom::generate(rng);
             let indicators: u32 = GenRandom::generate(rng);
             let n_radio_groups: u8 = GenRandom::generate(rng);
             let n_key_aliases: u8 = GenRandom::generate(rng);
             let n_kt_levels: u16 = GenRandom::generate(rng);
-            let value_list = GenRandom::generate(rng);
+            let value_list: GetKbdByNameRepliesKeyNamesValueList = GenRandom::generate(rng);
             Self {
                 keyname_type,
                 key_device_id,
@@ -16768,8 +16777,8 @@ impl Serialize for GetKbdByNameRepliesGeometry {
 }
 #[cfg(test)]
 mod get_kbd_by_name_replies_geometry {
-    #![allow(dead_code, unused_imports)]
-    use super::GetKbdByNameRepliesGeometry;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -16780,7 +16789,7 @@ mod get_kbd_by_name_replies_geometry {
             let geometry_device_id: u8 = GenRandom::generate(rng);
             let geometry_sequence: u16 = GenRandom::generate(rng);
             let geometry_length: u32 = GenRandom::generate(rng);
-            let name = GenRandom::generate(rng);
+            let name: xproto::Atom = GenRandom::generate(rng);
             let geometry_found: bool = GenRandom::generate(rng);
             let width_mm: u16 = GenRandom::generate(rng);
             let height_mm: u16 = GenRandom::generate(rng);
@@ -16792,7 +16801,7 @@ mod get_kbd_by_name_replies_geometry {
             let n_key_aliases: u16 = GenRandom::generate(rng);
             let base_color_ndx: u8 = GenRandom::generate(rng);
             let label_color_ndx: u8 = GenRandom::generate(rng);
-            let label_font = GenRandom::generate(rng);
+            let label_font: CountedString16 = GenRandom::generate(rng);
             Self {
                 geometry_type,
                 geometry_device_id,
@@ -16904,8 +16913,8 @@ impl GetKbdByNameReplies {
 }
 #[cfg(test)]
 mod get_kbd_by_name_replies {
-    #![allow(dead_code, unused_imports)]
-    use super::GetKbdByNameReplies;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -17041,8 +17050,8 @@ impl Serialize for GetKbdByNameReply {
 }
 #[cfg(test)]
 mod get_kbd_by_name_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::GetKbdByNameReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -17052,13 +17061,13 @@ mod get_kbd_by_name_reply {
             let device_id: u8 = GenRandom::generate(rng);
             let sequence: u16 = GenRandom::generate(rng);
             let length: u32 = GenRandom::generate(rng);
-            let min_key_code = GenRandom::generate(rng);
-            let max_key_code = GenRandom::generate(rng);
+            let min_key_code: xproto::Keycode = GenRandom::generate(rng);
+            let max_key_code: xproto::Keycode = GenRandom::generate(rng);
             let loaded: bool = GenRandom::generate(rng);
             let new_keyboard: bool = GenRandom::generate(rng);
-            let found = GenRandom::generate(rng);
-            let reported = GenRandom::generate(rng);
-            let replies = GenRandom::generate(rng);
+            let found: u16 = GenRandom::generate(rng);
+            let reported: u16 = GenRandom::generate(rng);
+            let replies: GetKbdByNameReplies = GenRandom::generate(rng);
             Self {
                 device_id,
                 sequence,
@@ -17315,8 +17324,8 @@ impl GetDeviceInfoReply {
 }
 #[cfg(test)]
 mod get_device_info_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::GetDeviceInfoReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -17329,9 +17338,9 @@ mod get_device_info_reply {
             let device_id: u8 = GenRandom::generate(rng);
             let sequence: u16 = GenRandom::generate(rng);
             let length: u32 = GenRandom::generate(rng);
-            let present = GenRandom::generate(rng);
-            let supported = GenRandom::generate(rng);
-            let unsupported = GenRandom::generate(rng);
+            let present: u16 = GenRandom::generate(rng);
+            let supported: u16 = GenRandom::generate(rng);
+            let unsupported: u16 = GenRandom::generate(rng);
             let first_btn_wanted: u8 = GenRandom::generate(rng);
             let n_btns_wanted: u8 = GenRandom::generate(rng);
             let first_btn_rtrn: u8 = GenRandom::generate(rng);
@@ -17339,10 +17348,10 @@ mod get_device_info_reply {
             let has_own_state: bool = GenRandom::generate(rng);
             let dflt_kbd_fb: u16 = GenRandom::generate(rng);
             let dflt_led_fb: u16 = GenRandom::generate(rng);
-            let dev_type = GenRandom::generate(rng);
-            let name = gen_random_list(rng, usize::try_from(name_len).unwrap());
-            let btn_actions = gen_random_list(rng, usize::try_from(n_btns_rtrn).unwrap());
-            let leds = gen_random_list(rng, usize::try_from(n_device_led_f_bs).unwrap());
+            let dev_type: xproto::Atom = GenRandom::generate(rng);
+            let name: Vec<String8> = gen_random_list(rng, usize::try_from(name_len).unwrap());
+            let btn_actions: Vec<Action> = gen_random_list(rng, usize::try_from(n_btns_rtrn).unwrap());
+            let leds: Vec<DeviceLedInfo> = gen_random_list(rng, usize::try_from(n_device_led_f_bs).unwrap());
             Self {
                 device_id,
                 sequence,
@@ -17663,8 +17672,8 @@ impl Serialize for SetDebuggingFlagsReply {
 }
 #[cfg(test)]
 mod set_debugging_flags_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::SetDebuggingFlagsReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -17812,8 +17821,8 @@ impl Serialize for NewKeyboardNotifyEvent {
 }
 #[cfg(test)]
 mod new_keyboard_notify_event {
-    #![allow(dead_code, unused_imports)]
-    use super::NewKeyboardNotifyEvent;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -17823,16 +17832,16 @@ mod new_keyboard_notify_event {
             let response_type: u8 = GenRandom::generate(rng);
             let xkb_type: u8 = GenRandom::generate(rng);
             let sequence: u16 = GenRandom::generate(rng);
-            let time = GenRandom::generate(rng);
+            let time: xproto::Timestamp = GenRandom::generate(rng);
             let device_id: u8 = GenRandom::generate(rng);
             let old_device_id: u8 = GenRandom::generate(rng);
-            let min_key_code = GenRandom::generate(rng);
-            let max_key_code = GenRandom::generate(rng);
-            let old_min_key_code = GenRandom::generate(rng);
-            let old_max_key_code = GenRandom::generate(rng);
+            let min_key_code: xproto::Keycode = GenRandom::generate(rng);
+            let max_key_code: xproto::Keycode = GenRandom::generate(rng);
+            let old_min_key_code: xproto::Keycode = GenRandom::generate(rng);
+            let old_max_key_code: xproto::Keycode = GenRandom::generate(rng);
             let request_major: u8 = GenRandom::generate(rng);
             let request_minor: u8 = GenRandom::generate(rng);
-            let changed = GenRandom::generate(rng);
+            let changed: u16 = GenRandom::generate(rng);
             Self {
                 response_type,
                 xkb_type,
@@ -18075,8 +18084,8 @@ impl Serialize for MapNotifyEvent {
 }
 #[cfg(test)]
 mod map_notify_event {
-    #![allow(dead_code, unused_imports)]
-    use super::MapNotifyEvent;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -18086,27 +18095,27 @@ mod map_notify_event {
             let response_type: u8 = GenRandom::generate(rng);
             let xkb_type: u8 = GenRandom::generate(rng);
             let sequence: u16 = GenRandom::generate(rng);
-            let time = GenRandom::generate(rng);
+            let time: xproto::Timestamp = GenRandom::generate(rng);
             let device_id: u8 = GenRandom::generate(rng);
             let ptr_btn_actions: u8 = GenRandom::generate(rng);
-            let changed = GenRandom::generate(rng);
-            let min_key_code = GenRandom::generate(rng);
-            let max_key_code = GenRandom::generate(rng);
+            let changed: u16 = GenRandom::generate(rng);
+            let min_key_code: xproto::Keycode = GenRandom::generate(rng);
+            let max_key_code: xproto::Keycode = GenRandom::generate(rng);
             let first_type: u8 = GenRandom::generate(rng);
             let n_types: u8 = GenRandom::generate(rng);
-            let first_key_sym = GenRandom::generate(rng);
+            let first_key_sym: xproto::Keycode = GenRandom::generate(rng);
             let n_key_syms: u8 = GenRandom::generate(rng);
-            let first_key_act = GenRandom::generate(rng);
+            let first_key_act: xproto::Keycode = GenRandom::generate(rng);
             let n_key_acts: u8 = GenRandom::generate(rng);
-            let first_key_behavior = GenRandom::generate(rng);
+            let first_key_behavior: xproto::Keycode = GenRandom::generate(rng);
             let n_key_behavior: u8 = GenRandom::generate(rng);
-            let first_key_explicit = GenRandom::generate(rng);
+            let first_key_explicit: xproto::Keycode = GenRandom::generate(rng);
             let n_key_explicit: u8 = GenRandom::generate(rng);
-            let first_mod_map_key = GenRandom::generate(rng);
+            let first_mod_map_key: xproto::Keycode = GenRandom::generate(rng);
             let n_mod_map_keys: u8 = GenRandom::generate(rng);
-            let first_v_mod_map_key = GenRandom::generate(rng);
+            let first_v_mod_map_key: xproto::Keycode = GenRandom::generate(rng);
             let n_v_mod_map_keys: u8 = GenRandom::generate(rng);
-            let virtual_mods = GenRandom::generate(rng);
+            let virtual_mods: u16 = GenRandom::generate(rng);
             Self {
                 response_type,
                 xkb_type,
@@ -18371,8 +18380,8 @@ impl Serialize for StateNotifyEvent {
 }
 #[cfg(test)]
 mod state_notify_event {
-    #![allow(dead_code, unused_imports)]
-    use super::StateNotifyEvent;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -18382,24 +18391,24 @@ mod state_notify_event {
             let response_type: u8 = GenRandom::generate(rng);
             let xkb_type: u8 = GenRandom::generate(rng);
             let sequence: u16 = GenRandom::generate(rng);
-            let time = GenRandom::generate(rng);
+            let time: xproto::Timestamp = GenRandom::generate(rng);
             let device_id: u8 = GenRandom::generate(rng);
-            let mods = GenRandom::generate(rng);
-            let base_mods = GenRandom::generate(rng);
-            let latched_mods = GenRandom::generate(rng);
-            let locked_mods = GenRandom::generate(rng);
-            let group = GenRandom::generate(rng);
+            let mods: u8 = GenRandom::generate(rng);
+            let base_mods: u8 = GenRandom::generate(rng);
+            let latched_mods: u8 = GenRandom::generate(rng);
+            let locked_mods: u8 = GenRandom::generate(rng);
+            let group: Group = GenRandom::generate(rng);
             let base_group: i16 = GenRandom::generate(rng);
             let latched_group: i16 = GenRandom::generate(rng);
-            let locked_group = GenRandom::generate(rng);
-            let compat_state = GenRandom::generate(rng);
-            let grab_mods = GenRandom::generate(rng);
-            let compat_grab_mods = GenRandom::generate(rng);
-            let lookup_mods = GenRandom::generate(rng);
-            let compat_loockup_mods = GenRandom::generate(rng);
-            let ptr_btn_state = GenRandom::generate(rng);
-            let changed = GenRandom::generate(rng);
-            let keycode = GenRandom::generate(rng);
+            let locked_group: Group = GenRandom::generate(rng);
+            let compat_state: u8 = GenRandom::generate(rng);
+            let grab_mods: u8 = GenRandom::generate(rng);
+            let compat_grab_mods: u8 = GenRandom::generate(rng);
+            let lookup_mods: u8 = GenRandom::generate(rng);
+            let compat_loockup_mods: u8 = GenRandom::generate(rng);
+            let ptr_btn_state: u16 = GenRandom::generate(rng);
+            let changed: u16 = GenRandom::generate(rng);
+            let keycode: xproto::Keycode = GenRandom::generate(rng);
             let event_type: u8 = GenRandom::generate(rng);
             let request_major: u8 = GenRandom::generate(rng);
             let request_minor: u8 = GenRandom::generate(rng);
@@ -18625,8 +18634,8 @@ impl Serialize for ControlsNotifyEvent {
 }
 #[cfg(test)]
 mod controls_notify_event {
-    #![allow(dead_code, unused_imports)]
-    use super::ControlsNotifyEvent;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -18636,13 +18645,13 @@ mod controls_notify_event {
             let response_type: u8 = GenRandom::generate(rng);
             let xkb_type: u8 = GenRandom::generate(rng);
             let sequence: u16 = GenRandom::generate(rng);
-            let time = GenRandom::generate(rng);
+            let time: xproto::Timestamp = GenRandom::generate(rng);
             let device_id: u8 = GenRandom::generate(rng);
             let num_groups: u8 = GenRandom::generate(rng);
-            let changed_controls = GenRandom::generate(rng);
-            let enabled_controls = GenRandom::generate(rng);
-            let enabled_control_changes = GenRandom::generate(rng);
-            let keycode = GenRandom::generate(rng);
+            let changed_controls: u32 = GenRandom::generate(rng);
+            let enabled_controls: u32 = GenRandom::generate(rng);
+            let enabled_control_changes: u32 = GenRandom::generate(rng);
+            let keycode: xproto::Keycode = GenRandom::generate(rng);
             let event_type: u8 = GenRandom::generate(rng);
             let request_major: u8 = GenRandom::generate(rng);
             let request_minor: u8 = GenRandom::generate(rng);
@@ -18822,8 +18831,8 @@ impl Serialize for IndicatorStateNotifyEvent {
 }
 #[cfg(test)]
 mod indicator_state_notify_event {
-    #![allow(dead_code, unused_imports)]
-    use super::IndicatorStateNotifyEvent;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -18833,7 +18842,7 @@ mod indicator_state_notify_event {
             let response_type: u8 = GenRandom::generate(rng);
             let xkb_type: u8 = GenRandom::generate(rng);
             let sequence: u16 = GenRandom::generate(rng);
-            let time = GenRandom::generate(rng);
+            let time: xproto::Timestamp = GenRandom::generate(rng);
             let device_id: u8 = GenRandom::generate(rng);
             let state: u32 = GenRandom::generate(rng);
             let state_changed: u32 = GenRandom::generate(rng);
@@ -19001,8 +19010,8 @@ impl Serialize for IndicatorMapNotifyEvent {
 }
 #[cfg(test)]
 mod indicator_map_notify_event {
-    #![allow(dead_code, unused_imports)]
-    use super::IndicatorMapNotifyEvent;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -19012,7 +19021,7 @@ mod indicator_map_notify_event {
             let response_type: u8 = GenRandom::generate(rng);
             let xkb_type: u8 = GenRandom::generate(rng);
             let sequence: u16 = GenRandom::generate(rng);
-            let time = GenRandom::generate(rng);
+            let time: xproto::Timestamp = GenRandom::generate(rng);
             let device_id: u8 = GenRandom::generate(rng);
             let state: u32 = GenRandom::generate(rng);
             let map_changed: u32 = GenRandom::generate(rng);
@@ -19222,8 +19231,8 @@ impl Serialize for NamesNotifyEvent {
 }
 #[cfg(test)]
 mod names_notify_event {
-    #![allow(dead_code, unused_imports)]
-    use super::NamesNotifyEvent;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -19233,18 +19242,18 @@ mod names_notify_event {
             let response_type: u8 = GenRandom::generate(rng);
             let xkb_type: u8 = GenRandom::generate(rng);
             let sequence: u16 = GenRandom::generate(rng);
-            let time = GenRandom::generate(rng);
+            let time: xproto::Timestamp = GenRandom::generate(rng);
             let device_id: u8 = GenRandom::generate(rng);
-            let changed = GenRandom::generate(rng);
+            let changed: u16 = GenRandom::generate(rng);
             let first_type: u8 = GenRandom::generate(rng);
             let n_types: u8 = GenRandom::generate(rng);
             let first_level_name: u8 = GenRandom::generate(rng);
             let n_level_names: u8 = GenRandom::generate(rng);
             let n_radio_groups: u8 = GenRandom::generate(rng);
             let n_key_aliases: u8 = GenRandom::generate(rng);
-            let changed_group_names = GenRandom::generate(rng);
-            let changed_virtual_mods = GenRandom::generate(rng);
-            let first_key = GenRandom::generate(rng);
+            let changed_group_names: u8 = GenRandom::generate(rng);
+            let changed_virtual_mods: u16 = GenRandom::generate(rng);
+            let first_key: xproto::Keycode = GenRandom::generate(rng);
             let n_keys: u8 = GenRandom::generate(rng);
             let changed_indicators: u32 = GenRandom::generate(rng);
             Self {
@@ -19437,8 +19446,8 @@ impl Serialize for CompatMapNotifyEvent {
 }
 #[cfg(test)]
 mod compat_map_notify_event {
-    #![allow(dead_code, unused_imports)]
-    use super::CompatMapNotifyEvent;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -19448,9 +19457,9 @@ mod compat_map_notify_event {
             let response_type: u8 = GenRandom::generate(rng);
             let xkb_type: u8 = GenRandom::generate(rng);
             let sequence: u16 = GenRandom::generate(rng);
-            let time = GenRandom::generate(rng);
+            let time: xproto::Timestamp = GenRandom::generate(rng);
             let device_id: u8 = GenRandom::generate(rng);
-            let changed_groups = GenRandom::generate(rng);
+            let changed_groups: u8 = GenRandom::generate(rng);
             let first_si: u16 = GenRandom::generate(rng);
             let n_si: u16 = GenRandom::generate(rng);
             let n_total_si: u16 = GenRandom::generate(rng);
@@ -19645,8 +19654,8 @@ impl Serialize for BellNotifyEvent {
 }
 #[cfg(test)]
 mod bell_notify_event {
-    #![allow(dead_code, unused_imports)]
-    use super::BellNotifyEvent;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -19656,15 +19665,15 @@ mod bell_notify_event {
             let response_type: u8 = GenRandom::generate(rng);
             let xkb_type: u8 = GenRandom::generate(rng);
             let sequence: u16 = GenRandom::generate(rng);
-            let time = GenRandom::generate(rng);
+            let time: xproto::Timestamp = GenRandom::generate(rng);
             let device_id: u8 = GenRandom::generate(rng);
-            let bell_class = GenRandom::generate(rng);
+            let bell_class: BellClassResult = GenRandom::generate(rng);
             let bell_id: u8 = GenRandom::generate(rng);
             let percent: u8 = GenRandom::generate(rng);
             let pitch: u16 = GenRandom::generate(rng);
             let duration: u16 = GenRandom::generate(rng);
-            let name = GenRandom::generate(rng);
-            let window = GenRandom::generate(rng);
+            let name: xproto::Atom = GenRandom::generate(rng);
+            let window: xproto::Window = GenRandom::generate(rng);
             let event_only: bool = GenRandom::generate(rng);
             Self {
                 response_type,
@@ -19857,8 +19866,8 @@ impl Serialize for ActionMessageEvent {
 }
 #[cfg(test)]
 mod action_message_event {
-    #![allow(dead_code, unused_imports)]
-    use super::ActionMessageEvent;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -19868,14 +19877,14 @@ mod action_message_event {
             let response_type: u8 = GenRandom::generate(rng);
             let xkb_type: u8 = GenRandom::generate(rng);
             let sequence: u16 = GenRandom::generate(rng);
-            let time = GenRandom::generate(rng);
+            let time: xproto::Timestamp = GenRandom::generate(rng);
             let device_id: u8 = GenRandom::generate(rng);
-            let keycode = GenRandom::generate(rng);
+            let keycode: xproto::Keycode = GenRandom::generate(rng);
             let press: bool = GenRandom::generate(rng);
             let key_event_follows: bool = GenRandom::generate(rng);
-            let mods = GenRandom::generate(rng);
-            let group = GenRandom::generate(rng);
-            let message = gen_random_list(rng, usize::try_from(8u32).unwrap());
+            let mods: u8 = GenRandom::generate(rng);
+            let group: Group = GenRandom::generate(rng);
+            let message: [String8; 8] = gen_random_list(rng, usize::try_from(8u32).unwrap());
             Self {
                 response_type,
                 xkb_type,
@@ -20053,8 +20062,8 @@ impl Serialize for AccessXNotifyEvent {
 }
 #[cfg(test)]
 mod access_x_notify_event {
-    #![allow(dead_code, unused_imports)]
-    use super::AccessXNotifyEvent;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -20064,10 +20073,10 @@ mod access_x_notify_event {
             let response_type: u8 = GenRandom::generate(rng);
             let xkb_type: u8 = GenRandom::generate(rng);
             let sequence: u16 = GenRandom::generate(rng);
-            let time = GenRandom::generate(rng);
+            let time: xproto::Timestamp = GenRandom::generate(rng);
             let device_id: u8 = GenRandom::generate(rng);
-            let keycode = GenRandom::generate(rng);
-            let detailt = GenRandom::generate(rng);
+            let keycode: xproto::Keycode = GenRandom::generate(rng);
+            let detailt: u16 = GenRandom::generate(rng);
             let slow_keys_delay: u16 = GenRandom::generate(rng);
             let debounce_delay: u16 = GenRandom::generate(rng);
             Self {
@@ -20267,8 +20276,8 @@ impl Serialize for ExtensionDeviceNotifyEvent {
 }
 #[cfg(test)]
 mod extension_device_notify_event {
-    #![allow(dead_code, unused_imports)]
-    use super::ExtensionDeviceNotifyEvent;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -20278,17 +20287,17 @@ mod extension_device_notify_event {
             let response_type: u8 = GenRandom::generate(rng);
             let xkb_type: u8 = GenRandom::generate(rng);
             let sequence: u16 = GenRandom::generate(rng);
-            let time = GenRandom::generate(rng);
+            let time: xproto::Timestamp = GenRandom::generate(rng);
             let device_id: u8 = GenRandom::generate(rng);
-            let reason = GenRandom::generate(rng);
-            let led_class = GenRandom::generate(rng);
+            let reason: u16 = GenRandom::generate(rng);
+            let led_class: LedClassResult = GenRandom::generate(rng);
             let led_id: u16 = GenRandom::generate(rng);
             let leds_defined: u32 = GenRandom::generate(rng);
             let led_state: u32 = GenRandom::generate(rng);
             let first_button: u8 = GenRandom::generate(rng);
             let n_buttons: u8 = GenRandom::generate(rng);
-            let supported = GenRandom::generate(rng);
-            let unsupported = GenRandom::generate(rng);
+            let supported: u16 = GenRandom::generate(rng);
+            let unsupported: u16 = GenRandom::generate(rng);
             Self {
                 response_type,
                 xkb_type,

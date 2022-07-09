@@ -187,8 +187,8 @@ impl Serialize for ScreenSize {
 }
 #[cfg(test)]
 mod screen_size {
-    #![allow(dead_code, unused_imports)]
-    use super::ScreenSize;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -261,8 +261,8 @@ impl RefreshRates {
 }
 #[cfg(test)]
 mod refresh_rates {
-    #![allow(dead_code, unused_imports)]
-    use super::RefreshRates;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -434,8 +434,8 @@ impl Serialize for QueryVersionReply {
 }
 #[cfg(test)]
 mod query_version_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::QueryVersionReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -729,21 +729,21 @@ impl Serialize for SetScreenConfigReply {
 }
 #[cfg(test)]
 mod set_screen_config_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::SetScreenConfigReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for SetScreenConfigReply {
         fn generate(rng: &Rng) -> Self {
-            let status = GenRandom::generate(rng);
+            let status: SetConfig = GenRandom::generate(rng);
             let sequence: u16 = GenRandom::generate(rng);
             let length: u32 = GenRandom::generate(rng);
-            let new_timestamp = GenRandom::generate(rng);
-            let config_timestamp = GenRandom::generate(rng);
-            let root = GenRandom::generate(rng);
-            let subpixel_order = GenRandom::generate(rng);
+            let new_timestamp: xproto::Timestamp = GenRandom::generate(rng);
+            let config_timestamp: xproto::Timestamp = GenRandom::generate(rng);
+            let root: xproto::Window = GenRandom::generate(rng);
+            let subpixel_order: render::SubPixel = GenRandom::generate(rng);
             Self {
                 status,
                 sequence,
@@ -1061,8 +1061,8 @@ impl GetScreenInfoReply {
 }
 #[cfg(test)]
 mod get_screen_info_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::GetScreenInfoReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -1070,18 +1070,18 @@ mod get_screen_info_reply {
     impl GenRandom for GetScreenInfoReply {
         fn generate(rng: &Rng) -> Self {
             let n_sizes = u32::from(rng.u8(..16));
-            let rotations = GenRandom::generate(rng);
+            let rotations: u8 = GenRandom::generate(rng);
             let sequence: u16 = GenRandom::generate(rng);
             let length: u32 = GenRandom::generate(rng);
-            let root = GenRandom::generate(rng);
-            let timestamp = GenRandom::generate(rng);
-            let config_timestamp = GenRandom::generate(rng);
+            let root: xproto::Window = GenRandom::generate(rng);
+            let timestamp: xproto::Timestamp = GenRandom::generate(rng);
+            let config_timestamp: xproto::Timestamp = GenRandom::generate(rng);
             let size_id: u16 = GenRandom::generate(rng);
-            let rotation = GenRandom::generate(rng);
+            let rotation: u16 = GenRandom::generate(rng);
             let rate: u16 = GenRandom::generate(rng);
             let n_info: u16 = GenRandom::generate(rng);
-            let sizes = gen_random_list(rng, usize::try_from(n_sizes).unwrap());
-            let rates = gen_random_list(rng, usize::try_from(u32::from(n_info).checked_sub(u32::from(n_sizes)).unwrap()).unwrap());
+            let sizes: Vec<ScreenSize> = gen_random_list(rng, usize::try_from(n_sizes).unwrap());
+            let rates: Vec<RefreshRates> = gen_random_list(rng, usize::try_from(u32::from(n_info).checked_sub(u32::from(n_sizes)).unwrap()).unwrap());
             Self {
                 rotations,
                 sequence,
@@ -1256,8 +1256,8 @@ impl Serialize for GetScreenSizeRangeReply {
 }
 #[cfg(test)]
 mod get_screen_size_range_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::GetScreenSizeRangeReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -1579,8 +1579,8 @@ impl Serialize for ModeInfo {
 }
 #[cfg(test)]
 mod mode_info {
-    #![allow(dead_code, unused_imports)]
-    use super::ModeInfo;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -1599,7 +1599,7 @@ mod mode_info {
             let vsync_end: u16 = GenRandom::generate(rng);
             let vtotal: u16 = GenRandom::generate(rng);
             let name_len: u16 = GenRandom::generate(rng);
-            let mode_flags = GenRandom::generate(rng);
+            let mode_flags: u32 = GenRandom::generate(rng);
             Self {
                 id,
                 width,
@@ -1810,8 +1810,8 @@ impl GetScreenResourcesReply {
 }
 #[cfg(test)]
 mod get_screen_resources_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::GetScreenResourcesReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -1824,11 +1824,11 @@ mod get_screen_resources_reply {
             let num_outputs = u32::from(rng.u8(..16));
             let sequence: u16 = GenRandom::generate(rng);
             let length: u32 = GenRandom::generate(rng);
-            let timestamp = GenRandom::generate(rng);
-            let config_timestamp = GenRandom::generate(rng);
-            let crtcs = gen_random_list(rng, usize::try_from(num_crtcs).unwrap());
-            let outputs = gen_random_list(rng, usize::try_from(num_outputs).unwrap());
-            let modes = gen_random_list(rng, usize::try_from(num_modes).unwrap());
+            let timestamp: xproto::Timestamp = GenRandom::generate(rng);
+            let config_timestamp: xproto::Timestamp = GenRandom::generate(rng);
+            let crtcs: Vec<Crtc> = gen_random_list(rng, usize::try_from(num_crtcs).unwrap());
+            let outputs: Vec<Output> = gen_random_list(rng, usize::try_from(num_outputs).unwrap());
+            let modes: Vec<ModeInfo> = gen_random_list(rng, usize::try_from(num_modes).unwrap());
             let names: Vec<u8> = gen_random_list(rng, usize::try_from(names_len).unwrap());
             Self {
                 sequence,
@@ -2133,31 +2133,31 @@ impl GetOutputInfoReply {
 }
 #[cfg(test)]
 mod get_output_info_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::GetOutputInfoReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for GetOutputInfoReply {
         fn generate(rng: &Rng) -> Self {
-            let name_len = u32::from(rng.u8(..16));
             let num_clones = u32::from(rng.u8(..16));
             let num_crtcs = u32::from(rng.u8(..16));
+            let name_len = u32::from(rng.u8(..16));
             let num_modes = u32::from(rng.u8(..16));
-            let status = GenRandom::generate(rng);
+            let status: SetConfig = GenRandom::generate(rng);
             let sequence: u16 = GenRandom::generate(rng);
             let length: u32 = GenRandom::generate(rng);
-            let timestamp = GenRandom::generate(rng);
-            let crtc = GenRandom::generate(rng);
+            let timestamp: xproto::Timestamp = GenRandom::generate(rng);
+            let crtc: Crtc = GenRandom::generate(rng);
             let mm_width: u32 = GenRandom::generate(rng);
             let mm_height: u32 = GenRandom::generate(rng);
-            let connection = GenRandom::generate(rng);
-            let subpixel_order = GenRandom::generate(rng);
+            let connection: Connection = GenRandom::generate(rng);
+            let subpixel_order: render::SubPixel = GenRandom::generate(rng);
             let num_preferred: u16 = GenRandom::generate(rng);
-            let crtcs = gen_random_list(rng, usize::try_from(num_crtcs).unwrap());
-            let modes = gen_random_list(rng, usize::try_from(num_modes).unwrap());
-            let clones = gen_random_list(rng, usize::try_from(num_clones).unwrap());
+            let crtcs: Vec<Crtc> = gen_random_list(rng, usize::try_from(num_crtcs).unwrap());
+            let modes: Vec<Mode> = gen_random_list(rng, usize::try_from(num_modes).unwrap());
+            let clones: Vec<Output> = gen_random_list(rng, usize::try_from(num_clones).unwrap());
             let name: Vec<u8> = gen_random_list(rng, usize::try_from(name_len).unwrap());
             Self {
                 status,
@@ -2306,8 +2306,8 @@ impl ListOutputPropertiesReply {
 }
 #[cfg(test)]
 mod list_output_properties_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::ListOutputPropertiesReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -2317,7 +2317,7 @@ mod list_output_properties_reply {
             let num_atoms = u32::from(rng.u8(..16));
             let sequence: u16 = GenRandom::generate(rng);
             let length: u32 = GenRandom::generate(rng);
-            let atoms = gen_random_list(rng, usize::try_from(num_atoms).unwrap());
+            let atoms: Vec<xproto::Atom> = gen_random_list(rng, usize::try_from(num_atoms).unwrap());
             Self {
                 sequence,
                 length,
@@ -2468,8 +2468,8 @@ impl QueryOutputPropertyReply {
 }
 #[cfg(test)]
 mod query_output_property_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::QueryOutputPropertyReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -2928,8 +2928,8 @@ impl Serialize for GetOutputPropertyReply {
 }
 #[cfg(test)]
 mod get_output_property_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::GetOutputPropertyReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -2939,7 +2939,7 @@ mod get_output_property_reply {
             let format: u8 = GenRandom::generate(rng);
             let sequence: u16 = GenRandom::generate(rng);
             let length: u32 = GenRandom::generate(rng);
-            let type_ = GenRandom::generate(rng);
+            let type_: xproto::Atom = GenRandom::generate(rng);
             let bytes_after: u32 = GenRandom::generate(rng);
             let num_items: u32 = GenRandom::generate(rng);
             let data: Vec<u8> = gen_random_list(rng, usize::try_from(num_items.checked_mul(u32::from(format).checked_div(8u32).unwrap()).unwrap()).unwrap());
@@ -3150,8 +3150,8 @@ impl Serialize for CreateModeReply {
 }
 #[cfg(test)]
 mod create_mode_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::CreateModeReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -3160,7 +3160,7 @@ mod create_mode_reply {
         fn generate(rng: &Rng) -> Self {
             let sequence: u16 = GenRandom::generate(rng);
             let length: u32 = GenRandom::generate(rng);
-            let mode = GenRandom::generate(rng);
+            let mode: Mode = GenRandom::generate(rng);
             Self {
                 sequence,
                 length,
@@ -3523,29 +3523,29 @@ impl GetCrtcInfoReply {
 }
 #[cfg(test)]
 mod get_crtc_info_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::GetCrtcInfoReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for GetCrtcInfoReply {
         fn generate(rng: &Rng) -> Self {
-            let num_possible_outputs = u32::from(rng.u8(..16));
             let num_outputs = u32::from(rng.u8(..16));
-            let status = GenRandom::generate(rng);
+            let num_possible_outputs = u32::from(rng.u8(..16));
+            let status: SetConfig = GenRandom::generate(rng);
             let sequence: u16 = GenRandom::generate(rng);
             let length: u32 = GenRandom::generate(rng);
-            let timestamp = GenRandom::generate(rng);
+            let timestamp: xproto::Timestamp = GenRandom::generate(rng);
             let x: i16 = GenRandom::generate(rng);
             let y: i16 = GenRandom::generate(rng);
             let width: u16 = GenRandom::generate(rng);
             let height: u16 = GenRandom::generate(rng);
-            let mode = GenRandom::generate(rng);
-            let rotation = GenRandom::generate(rng);
-            let rotations = GenRandom::generate(rng);
-            let outputs = gen_random_list(rng, usize::try_from(num_outputs).unwrap());
-            let possible = gen_random_list(rng, usize::try_from(num_possible_outputs).unwrap());
+            let mode: Mode = GenRandom::generate(rng);
+            let rotation: u16 = GenRandom::generate(rng);
+            let rotations: u16 = GenRandom::generate(rng);
+            let outputs: Vec<Output> = gen_random_list(rng, usize::try_from(num_outputs).unwrap());
+            let possible: Vec<Output> = gen_random_list(rng, usize::try_from(num_possible_outputs).unwrap());
             Self {
                 status,
                 sequence,
@@ -3784,18 +3784,18 @@ impl Serialize for SetCrtcConfigReply {
 }
 #[cfg(test)]
 mod set_crtc_config_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::SetCrtcConfigReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for SetCrtcConfigReply {
         fn generate(rng: &Rng) -> Self {
-            let status = GenRandom::generate(rng);
+            let status: SetConfig = GenRandom::generate(rng);
             let sequence: u16 = GenRandom::generate(rng);
             let length: u32 = GenRandom::generate(rng);
-            let timestamp = GenRandom::generate(rng);
+            let timestamp: xproto::Timestamp = GenRandom::generate(rng);
             Self {
                 status,
                 sequence,
@@ -3950,8 +3950,8 @@ impl Serialize for GetCrtcGammaSizeReply {
 }
 #[cfg(test)]
 mod get_crtc_gamma_size_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::GetCrtcGammaSizeReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -4105,8 +4105,8 @@ impl GetCrtcGammaReply {
 }
 #[cfg(test)]
 mod get_crtc_gamma_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::GetCrtcGammaReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -4410,25 +4410,25 @@ impl GetScreenResourcesCurrentReply {
 }
 #[cfg(test)]
 mod get_screen_resources_current_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::GetScreenResourcesCurrentReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for GetScreenResourcesCurrentReply {
         fn generate(rng: &Rng) -> Self {
+            let num_modes = u32::from(rng.u8(..16));
+            let names_len = u32::from(rng.u8(..16));
             let num_outputs = u32::from(rng.u8(..16));
             let num_crtcs = u32::from(rng.u8(..16));
-            let names_len = u32::from(rng.u8(..16));
-            let num_modes = u32::from(rng.u8(..16));
             let sequence: u16 = GenRandom::generate(rng);
             let length: u32 = GenRandom::generate(rng);
-            let timestamp = GenRandom::generate(rng);
-            let config_timestamp = GenRandom::generate(rng);
-            let crtcs = gen_random_list(rng, usize::try_from(num_crtcs).unwrap());
-            let outputs = gen_random_list(rng, usize::try_from(num_outputs).unwrap());
-            let modes = gen_random_list(rng, usize::try_from(num_modes).unwrap());
+            let timestamp: xproto::Timestamp = GenRandom::generate(rng);
+            let config_timestamp: xproto::Timestamp = GenRandom::generate(rng);
+            let crtcs: Vec<Crtc> = gen_random_list(rng, usize::try_from(num_crtcs).unwrap());
+            let outputs: Vec<Output> = gen_random_list(rng, usize::try_from(num_outputs).unwrap());
+            let modes: Vec<ModeInfo> = gen_random_list(rng, usize::try_from(num_modes).unwrap());
             let names: Vec<u8> = gen_random_list(rng, usize::try_from(names_len).unwrap());
             Self {
                 sequence,
@@ -4863,8 +4863,8 @@ impl GetCrtcTransformReply {
 }
 #[cfg(test)]
 mod get_crtc_transform_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::GetCrtcTransformReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -4872,18 +4872,18 @@ mod get_crtc_transform_reply {
     impl GenRandom for GetCrtcTransformReply {
         fn generate(rng: &Rng) -> Self {
             let current_len = u32::from(rng.u8(..16));
-            let pending_nparams = u32::from(rng.u8(..16));
             let current_nparams = u32::from(rng.u8(..16));
+            let pending_nparams = u32::from(rng.u8(..16));
             let pending_len = u32::from(rng.u8(..16));
             let sequence: u16 = GenRandom::generate(rng);
             let length: u32 = GenRandom::generate(rng);
-            let pending_transform = GenRandom::generate(rng);
+            let pending_transform: render::Transform = GenRandom::generate(rng);
             let has_transforms: bool = GenRandom::generate(rng);
-            let current_transform = GenRandom::generate(rng);
+            let current_transform: render::Transform = GenRandom::generate(rng);
             let pending_filter_name: Vec<u8> = gen_random_list(rng, usize::try_from(pending_len).unwrap());
-            let pending_params = gen_random_list(rng, usize::try_from(pending_nparams).unwrap());
+            let pending_params: Vec<render::Fixed> = gen_random_list(rng, usize::try_from(pending_nparams).unwrap());
             let current_filter_name: Vec<u8> = gen_random_list(rng, usize::try_from(current_len).unwrap());
-            let current_params = gen_random_list(rng, usize::try_from(current_nparams).unwrap());
+            let current_params: Vec<render::Fixed> = gen_random_list(rng, usize::try_from(current_nparams).unwrap());
             Self {
                 sequence,
                 length,
@@ -5096,18 +5096,18 @@ impl Serialize for GetPanningReply {
 }
 #[cfg(test)]
 mod get_panning_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::GetPanningReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for GetPanningReply {
         fn generate(rng: &Rng) -> Self {
-            let status = GenRandom::generate(rng);
+            let status: SetConfig = GenRandom::generate(rng);
             let sequence: u16 = GenRandom::generate(rng);
             let length: u32 = GenRandom::generate(rng);
-            let timestamp = GenRandom::generate(rng);
+            let timestamp: xproto::Timestamp = GenRandom::generate(rng);
             let left: u16 = GenRandom::generate(rng);
             let top: u16 = GenRandom::generate(rng);
             let width: u16 = GenRandom::generate(rng);
@@ -5347,18 +5347,18 @@ impl Serialize for SetPanningReply {
 }
 #[cfg(test)]
 mod set_panning_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::SetPanningReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for SetPanningReply {
         fn generate(rng: &Rng) -> Self {
-            let status = GenRandom::generate(rng);
+            let status: SetConfig = GenRandom::generate(rng);
             let sequence: u16 = GenRandom::generate(rng);
             let length: u32 = GenRandom::generate(rng);
-            let timestamp = GenRandom::generate(rng);
+            let timestamp: xproto::Timestamp = GenRandom::generate(rng);
             Self {
                 status,
                 sequence,
@@ -5552,8 +5552,8 @@ impl Serialize for GetOutputPrimaryReply {
 }
 #[cfg(test)]
 mod get_output_primary_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::GetOutputPrimaryReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -5562,7 +5562,7 @@ mod get_output_primary_reply {
         fn generate(rng: &Rng) -> Self {
             let sequence: u16 = GenRandom::generate(rng);
             let length: u32 = GenRandom::generate(rng);
-            let output = GenRandom::generate(rng);
+            let output: Output = GenRandom::generate(rng);
             Self {
                 sequence,
                 length,
@@ -5702,8 +5702,8 @@ impl GetProvidersReply {
 }
 #[cfg(test)]
 mod get_providers_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::GetProvidersReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -5713,8 +5713,8 @@ mod get_providers_reply {
             let num_providers = u32::from(rng.u8(..16));
             let sequence: u16 = GenRandom::generate(rng);
             let length: u32 = GenRandom::generate(rng);
-            let timestamp = GenRandom::generate(rng);
-            let providers = gen_random_list(rng, usize::try_from(num_providers).unwrap());
+            let timestamp: xproto::Timestamp = GenRandom::generate(rng);
+            let providers: Vec<Provider> = gen_random_list(rng, usize::try_from(num_providers).unwrap());
             Self {
                 sequence,
                 length,
@@ -6006,26 +6006,26 @@ impl GetProviderInfoReply {
 }
 #[cfg(test)]
 mod get_provider_info_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::GetProviderInfoReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for GetProviderInfoReply {
         fn generate(rng: &Rng) -> Self {
-            let num_associated_providers = u32::from(rng.u8(..16));
             let name_len = u32::from(rng.u8(..16));
+            let num_associated_providers = u32::from(rng.u8(..16));
             let num_outputs = u32::from(rng.u8(..16));
             let num_crtcs = u32::from(rng.u8(..16));
             let status: u8 = GenRandom::generate(rng);
             let sequence: u16 = GenRandom::generate(rng);
             let length: u32 = GenRandom::generate(rng);
-            let timestamp = GenRandom::generate(rng);
-            let capabilities = GenRandom::generate(rng);
-            let crtcs = gen_random_list(rng, usize::try_from(num_crtcs).unwrap());
-            let outputs = gen_random_list(rng, usize::try_from(num_outputs).unwrap());
-            let associated_providers = gen_random_list(rng, usize::try_from(num_associated_providers).unwrap());
+            let timestamp: xproto::Timestamp = GenRandom::generate(rng);
+            let capabilities: u32 = GenRandom::generate(rng);
+            let crtcs: Vec<Crtc> = gen_random_list(rng, usize::try_from(num_crtcs).unwrap());
+            let outputs: Vec<Output> = gen_random_list(rng, usize::try_from(num_outputs).unwrap());
+            let associated_providers: Vec<Provider> = gen_random_list(rng, usize::try_from(num_associated_providers).unwrap());
             let associated_capability: Vec<u32> = gen_random_list(rng, usize::try_from(num_associated_providers).unwrap());
             let name: Vec<u8> = gen_random_list(rng, usize::try_from(name_len).unwrap());
             Self {
@@ -6309,8 +6309,8 @@ impl ListProviderPropertiesReply {
 }
 #[cfg(test)]
 mod list_provider_properties_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::ListProviderPropertiesReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -6320,7 +6320,7 @@ mod list_provider_properties_reply {
             let num_atoms = u32::from(rng.u8(..16));
             let sequence: u16 = GenRandom::generate(rng);
             let length: u32 = GenRandom::generate(rng);
-            let atoms = gen_random_list(rng, usize::try_from(num_atoms).unwrap());
+            let atoms: Vec<xproto::Atom> = gen_random_list(rng, usize::try_from(num_atoms).unwrap());
             Self {
                 sequence,
                 length,
@@ -6471,8 +6471,8 @@ impl QueryProviderPropertyReply {
 }
 #[cfg(test)]
 mod query_provider_property_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::QueryProviderPropertyReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -6930,8 +6930,8 @@ impl Serialize for GetProviderPropertyReply {
 }
 #[cfg(test)]
 mod get_provider_property_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::GetProviderPropertyReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -6941,7 +6941,7 @@ mod get_provider_property_reply {
             let format: u8 = GenRandom::generate(rng);
             let sequence: u16 = GenRandom::generate(rng);
             let length: u32 = GenRandom::generate(rng);
-            let type_ = GenRandom::generate(rng);
+            let type_: xproto::Atom = GenRandom::generate(rng);
             let bytes_after: u32 = GenRandom::generate(rng);
             let num_items: u32 = GenRandom::generate(rng);
             let data: Vec<u8> = gen_random_list(rng, usize::try_from(num_items.checked_mul(u32::from(format).checked_div(8u32).unwrap()).unwrap()).unwrap());
@@ -7080,8 +7080,8 @@ impl Serialize for ScreenChangeNotifyEvent {
 }
 #[cfg(test)]
 mod screen_change_notify_event {
-    #![allow(dead_code, unused_imports)]
-    use super::ScreenChangeNotifyEvent;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -7089,14 +7089,14 @@ mod screen_change_notify_event {
     impl GenRandom for ScreenChangeNotifyEvent {
         fn generate(rng: &Rng) -> Self {
             let response_type: u8 = GenRandom::generate(rng);
-            let rotation = GenRandom::generate(rng);
+            let rotation: u8 = GenRandom::generate(rng);
             let sequence: u16 = GenRandom::generate(rng);
-            let timestamp = GenRandom::generate(rng);
-            let config_timestamp = GenRandom::generate(rng);
-            let root = GenRandom::generate(rng);
-            let request_window = GenRandom::generate(rng);
+            let timestamp: xproto::Timestamp = GenRandom::generate(rng);
+            let config_timestamp: xproto::Timestamp = GenRandom::generate(rng);
+            let root: xproto::Window = GenRandom::generate(rng);
+            let request_window: xproto::Window = GenRandom::generate(rng);
             let size_id: u16 = GenRandom::generate(rng);
-            let subpixel_order = GenRandom::generate(rng);
+            let subpixel_order: render::SubPixel = GenRandom::generate(rng);
             let width: u16 = GenRandom::generate(rng);
             let height: u16 = GenRandom::generate(rng);
             let mwidth: u16 = GenRandom::generate(rng);
@@ -7358,19 +7358,19 @@ impl Serialize for CrtcChange {
 }
 #[cfg(test)]
 mod crtc_change {
-    #![allow(dead_code, unused_imports)]
-    use super::CrtcChange;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for CrtcChange {
         fn generate(rng: &Rng) -> Self {
-            let timestamp = GenRandom::generate(rng);
-            let window = GenRandom::generate(rng);
-            let crtc = GenRandom::generate(rng);
-            let mode = GenRandom::generate(rng);
-            let rotation = GenRandom::generate(rng);
+            let timestamp: xproto::Timestamp = GenRandom::generate(rng);
+            let window: xproto::Window = GenRandom::generate(rng);
+            let crtc: Crtc = GenRandom::generate(rng);
+            let mode: Mode = GenRandom::generate(rng);
+            let rotation: u16 = GenRandom::generate(rng);
             let x: i16 = GenRandom::generate(rng);
             let y: i16 = GenRandom::generate(rng);
             let width: u16 = GenRandom::generate(rng);
@@ -7487,23 +7487,23 @@ impl Serialize for OutputChange {
 }
 #[cfg(test)]
 mod output_change {
-    #![allow(dead_code, unused_imports)]
-    use super::OutputChange;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for OutputChange {
         fn generate(rng: &Rng) -> Self {
-            let timestamp = GenRandom::generate(rng);
-            let config_timestamp = GenRandom::generate(rng);
-            let window = GenRandom::generate(rng);
-            let output = GenRandom::generate(rng);
-            let crtc = GenRandom::generate(rng);
-            let mode = GenRandom::generate(rng);
-            let rotation = GenRandom::generate(rng);
-            let connection = GenRandom::generate(rng);
-            let subpixel_order = GenRandom::generate(rng);
+            let timestamp: xproto::Timestamp = GenRandom::generate(rng);
+            let config_timestamp: xproto::Timestamp = GenRandom::generate(rng);
+            let window: xproto::Window = GenRandom::generate(rng);
+            let output: Output = GenRandom::generate(rng);
+            let crtc: Crtc = GenRandom::generate(rng);
+            let mode: Mode = GenRandom::generate(rng);
+            let rotation: u16 = GenRandom::generate(rng);
+            let connection: Connection = GenRandom::generate(rng);
+            let subpixel_order: render::SubPixel = GenRandom::generate(rng);
             Self {
                 timestamp,
                 config_timestamp,
@@ -7601,19 +7601,19 @@ impl Serialize for OutputProperty {
 }
 #[cfg(test)]
 mod output_property {
-    #![allow(dead_code, unused_imports)]
-    use super::OutputProperty;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for OutputProperty {
         fn generate(rng: &Rng) -> Self {
-            let window = GenRandom::generate(rng);
-            let output = GenRandom::generate(rng);
-            let atom = GenRandom::generate(rng);
-            let timestamp = GenRandom::generate(rng);
-            let status = GenRandom::generate(rng);
+            let window: xproto::Window = GenRandom::generate(rng);
+            let output: Output = GenRandom::generate(rng);
+            let atom: xproto::Atom = GenRandom::generate(rng);
+            let timestamp: xproto::Timestamp = GenRandom::generate(rng);
+            let status: xproto::Property = GenRandom::generate(rng);
             Self {
                 window,
                 output,
@@ -7698,17 +7698,17 @@ impl Serialize for ProviderChange {
 }
 #[cfg(test)]
 mod provider_change {
-    #![allow(dead_code, unused_imports)]
-    use super::ProviderChange;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for ProviderChange {
         fn generate(rng: &Rng) -> Self {
-            let timestamp = GenRandom::generate(rng);
-            let window = GenRandom::generate(rng);
-            let provider = GenRandom::generate(rng);
+            let timestamp: xproto::Timestamp = GenRandom::generate(rng);
+            let window: xproto::Window = GenRandom::generate(rng);
+            let provider: Provider = GenRandom::generate(rng);
             Self {
                 timestamp,
                 window,
@@ -7799,18 +7799,18 @@ impl Serialize for ProviderProperty {
 }
 #[cfg(test)]
 mod provider_property {
-    #![allow(dead_code, unused_imports)]
-    use super::ProviderProperty;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for ProviderProperty {
         fn generate(rng: &Rng) -> Self {
-            let window = GenRandom::generate(rng);
-            let provider = GenRandom::generate(rng);
-            let atom = GenRandom::generate(rng);
-            let timestamp = GenRandom::generate(rng);
+            let window: xproto::Window = GenRandom::generate(rng);
+            let provider: Provider = GenRandom::generate(rng);
+            let atom: xproto::Atom = GenRandom::generate(rng);
+            let timestamp: xproto::Timestamp = GenRandom::generate(rng);
             let state: u8 = GenRandom::generate(rng);
             Self {
                 window,
@@ -7892,16 +7892,16 @@ impl Serialize for ResourceChange {
 }
 #[cfg(test)]
 mod resource_change {
-    #![allow(dead_code, unused_imports)]
-    use super::ResourceChange;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for ResourceChange {
         fn generate(rng: &Rng) -> Self {
-            let timestamp = GenRandom::generate(rng);
-            let window = GenRandom::generate(rng);
+            let timestamp: xproto::Timestamp = GenRandom::generate(rng);
+            let window: xproto::Window = GenRandom::generate(rng);
             Self {
                 timestamp,
                 window,
@@ -7990,8 +7990,8 @@ impl MonitorInfo {
 }
 #[cfg(test)]
 mod monitor_info {
-    #![allow(dead_code, unused_imports)]
-    use super::MonitorInfo;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -7999,7 +7999,7 @@ mod monitor_info {
     impl GenRandom for MonitorInfo {
         fn generate(rng: &Rng) -> Self {
             let n_output = u32::from(rng.u8(..16));
-            let name = GenRandom::generate(rng);
+            let name: xproto::Atom = GenRandom::generate(rng);
             let primary: bool = GenRandom::generate(rng);
             let automatic: bool = GenRandom::generate(rng);
             let x: i16 = GenRandom::generate(rng);
@@ -8008,7 +8008,7 @@ mod monitor_info {
             let height: u16 = GenRandom::generate(rng);
             let width_in_millimeters: u32 = GenRandom::generate(rng);
             let height_in_millimeters: u32 = GenRandom::generate(rng);
-            let outputs = gen_random_list(rng, usize::try_from(n_output).unwrap());
+            let outputs: Vec<Output> = gen_random_list(rng, usize::try_from(n_output).unwrap());
             Self {
                 name,
                 primary,
@@ -8166,8 +8166,8 @@ impl GetMonitorsReply {
 }
 #[cfg(test)]
 mod get_monitors_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::GetMonitorsReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -8177,9 +8177,9 @@ mod get_monitors_reply {
             let n_monitors = u32::from(rng.u8(..16));
             let sequence: u16 = GenRandom::generate(rng);
             let length: u32 = GenRandom::generate(rng);
-            let timestamp = GenRandom::generate(rng);
+            let timestamp: xproto::Timestamp = GenRandom::generate(rng);
             let n_outputs: u32 = GenRandom::generate(rng);
-            let monitors = gen_random_list(rng, usize::try_from(n_monitors).unwrap());
+            let monitors: Vec<MonitorInfo> = gen_random_list(rng, usize::try_from(n_monitors).unwrap());
             Self {
                 sequence,
                 length,
@@ -8495,8 +8495,8 @@ impl Serialize for CreateLeaseReply {
 }
 #[cfg(test)]
 mod create_lease_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::CreateLeaseReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -8506,7 +8506,7 @@ mod create_lease_reply {
             let nfd: u8 = GenRandom::generate(rng);
             let sequence: u16 = GenRandom::generate(rng);
             let length: u32 = GenRandom::generate(rng);
-            let master_fd = GenRandom::generate(rng);
+            let master_fd: RawFdContainer = GenRandom::generate(rng);
             Self {
                 nfd,
                 sequence,
@@ -8655,17 +8655,17 @@ impl Serialize for LeaseNotify {
 }
 #[cfg(test)]
 mod lease_notify {
-    #![allow(dead_code, unused_imports)]
-    use super::LeaseNotify;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for LeaseNotify {
         fn generate(rng: &Rng) -> Self {
-            let timestamp = GenRandom::generate(rng);
-            let window = GenRandom::generate(rng);
-            let lease = GenRandom::generate(rng);
+            let timestamp: xproto::Timestamp = GenRandom::generate(rng);
+            let window: xproto::Window = GenRandom::generate(rng);
+            let lease: Lease = GenRandom::generate(rng);
             let created: u8 = GenRandom::generate(rng);
             Self {
                 timestamp,
@@ -8892,8 +8892,8 @@ impl Serialize for NotifyEvent {
 }
 #[cfg(test)]
 mod notify_event {
-    #![allow(dead_code, unused_imports)]
-    use super::NotifyEvent;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -8901,9 +8901,9 @@ mod notify_event {
     impl GenRandom for NotifyEvent {
         fn generate(rng: &Rng) -> Self {
             let response_type: u8 = GenRandom::generate(rng);
-            let sub_code = GenRandom::generate(rng);
+            let sub_code: Notify = GenRandom::generate(rng);
             let sequence: u16 = GenRandom::generate(rng);
-            let u = GenRandom::generate(rng);
+            let u: NotifyData = GenRandom::generate(rng);
             Self {
                 response_type,
                 sub_code,

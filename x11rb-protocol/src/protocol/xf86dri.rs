@@ -78,8 +78,8 @@ impl Serialize for DrmClipRect {
 }
 #[cfg(test)]
 mod drm_clip_rect {
-    #![allow(dead_code, unused_imports)]
-    use super::DrmClipRect;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -225,8 +225,8 @@ impl Serialize for QueryVersionReply {
 }
 #[cfg(test)]
 mod query_version_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::QueryVersionReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -368,8 +368,8 @@ impl Serialize for QueryDirectRenderingCapableReply {
 }
 #[cfg(test)]
 mod query_direct_rendering_capable_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::QueryDirectRenderingCapableReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -522,8 +522,8 @@ impl OpenConnectionReply {
 }
 #[cfg(test)]
 mod open_connection_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::OpenConnectionReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -737,8 +737,8 @@ impl GetClientDriverNameReply {
 }
 #[cfg(test)]
 mod get_client_driver_name_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::GetClientDriverNameReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -902,8 +902,8 @@ impl Serialize for CreateContextReply {
 }
 #[cfg(test)]
 mod create_context_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::CreateContextReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -1113,8 +1113,8 @@ impl Serialize for CreateDrawableReply {
 }
 #[cfg(test)]
 mod create_drawable_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::CreateDrawableReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -1370,8 +1370,8 @@ impl GetDrawableInfoReply {
 }
 #[cfg(test)]
 mod get_drawable_info_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::GetDrawableInfoReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -1390,8 +1390,8 @@ mod get_drawable_info_reply {
             let drawable_size_h: i16 = GenRandom::generate(rng);
             let back_x: i16 = GenRandom::generate(rng);
             let back_y: i16 = GenRandom::generate(rng);
-            let clip_rects = gen_random_list(rng, usize::try_from(num_clip_rects).unwrap());
-            let back_clip_rects = gen_random_list(rng, usize::try_from(num_back_clip_rects).unwrap());
+            let clip_rects: Vec<DrmClipRect> = gen_random_list(rng, usize::try_from(num_clip_rects).unwrap());
+            let back_clip_rects: Vec<DrmClipRect> = gen_random_list(rng, usize::try_from(num_back_clip_rects).unwrap());
             Self {
                 sequence,
                 length,
@@ -1550,8 +1550,8 @@ impl GetDeviceInfoReply {
 }
 #[cfg(test)]
 mod get_device_info_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::GetDeviceInfoReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -1711,8 +1711,8 @@ impl Serialize for AuthConnectionReply {
 }
 #[cfg(test)]
 mod auth_connection_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::AuthConnectionReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;

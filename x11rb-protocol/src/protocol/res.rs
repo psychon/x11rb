@@ -72,8 +72,8 @@ impl Serialize for Client {
 }
 #[cfg(test)]
 mod client {
-    #![allow(dead_code, unused_imports)]
-    use super::Client;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -137,15 +137,15 @@ impl Serialize for Type {
 }
 #[cfg(test)]
 mod type_ {
-    #![allow(dead_code, unused_imports)]
-    use super::Type;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for Type {
         fn generate(rng: &Rng) -> Self {
-            let resource_type = GenRandom::generate(rng);
+            let resource_type: xproto::Atom = GenRandom::generate(rng);
             let count: u32 = GenRandom::generate(rng);
             Self {
                 resource_type,
@@ -273,8 +273,8 @@ impl Serialize for ClientIdSpec {
 }
 #[cfg(test)]
 mod client_id_spec {
-    #![allow(dead_code, unused_imports)]
-    use super::ClientIdSpec;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -282,7 +282,7 @@ mod client_id_spec {
     impl GenRandom for ClientIdSpec {
         fn generate(rng: &Rng) -> Self {
             let client: u32 = GenRandom::generate(rng);
-            let mask = GenRandom::generate(rng);
+            let mask: u32 = GenRandom::generate(rng);
             Self {
                 client,
                 mask,
@@ -348,8 +348,8 @@ impl ClientIdValue {
 }
 #[cfg(test)]
 mod client_id_value {
-    #![allow(dead_code, unused_imports)]
-    use super::ClientIdValue;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -357,7 +357,7 @@ mod client_id_value {
     impl GenRandom for ClientIdValue {
         fn generate(rng: &Rng) -> Self {
             let length = u32::from(rng.u8(..16));
-            let spec = GenRandom::generate(rng);
+            let spec: ClientIdSpec = GenRandom::generate(rng);
             let value: Vec<u32> = gen_random_list(rng, usize::try_from(length.checked_div(4u32).unwrap()).unwrap());
             Self {
                 spec,
@@ -414,8 +414,8 @@ impl Serialize for ResourceIdSpec {
 }
 #[cfg(test)]
 mod resource_id_spec {
-    #![allow(dead_code, unused_imports)]
-    use super::ResourceIdSpec;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -499,15 +499,15 @@ impl Serialize for ResourceSizeSpec {
 }
 #[cfg(test)]
 mod resource_size_spec {
-    #![allow(dead_code, unused_imports)]
-    use super::ResourceSizeSpec;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for ResourceSizeSpec {
         fn generate(rng: &Rng) -> Self {
-            let spec = GenRandom::generate(rng);
+            let spec: ResourceIdSpec = GenRandom::generate(rng);
             let bytes: u32 = GenRandom::generate(rng);
             let ref_count: u32 = GenRandom::generate(rng);
             let use_count: u32 = GenRandom::generate(rng);
@@ -577,8 +577,8 @@ impl ResourceSizeValue {
 }
 #[cfg(test)]
 mod resource_size_value {
-    #![allow(dead_code, unused_imports)]
-    use super::ResourceSizeValue;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -586,8 +586,8 @@ mod resource_size_value {
     impl GenRandom for ResourceSizeValue {
         fn generate(rng: &Rng) -> Self {
             let num_cross_references = u32::from(rng.u8(..16));
-            let size = GenRandom::generate(rng);
-            let cross_references = gen_random_list(rng, usize::try_from(num_cross_references).unwrap());
+            let size: ResourceSizeSpec = GenRandom::generate(rng);
+            let cross_references: Vec<ResourceSizeSpec> = gen_random_list(rng, usize::try_from(num_cross_references).unwrap());
             Self {
                 size,
                 cross_references,
@@ -726,8 +726,8 @@ impl Serialize for QueryVersionReply {
 }
 #[cfg(test)]
 mod query_version_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::QueryVersionReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -866,8 +866,8 @@ impl QueryClientsReply {
 }
 #[cfg(test)]
 mod query_clients_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::QueryClientsReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -877,7 +877,7 @@ mod query_clients_reply {
             let num_clients = u32::from(rng.u8(..16));
             let sequence: u16 = GenRandom::generate(rng);
             let length: u32 = GenRandom::generate(rng);
-            let clients = gen_random_list(rng, usize::try_from(num_clients).unwrap());
+            let clients: Vec<Client> = gen_random_list(rng, usize::try_from(num_clients).unwrap());
             Self {
                 sequence,
                 length,
@@ -1014,8 +1014,8 @@ impl QueryClientResourcesReply {
 }
 #[cfg(test)]
 mod query_client_resources_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::QueryClientResourcesReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -1025,7 +1025,7 @@ mod query_client_resources_reply {
             let num_types = u32::from(rng.u8(..16));
             let sequence: u16 = GenRandom::generate(rng);
             let length: u32 = GenRandom::generate(rng);
-            let types = gen_random_list(rng, usize::try_from(num_types).unwrap());
+            let types: Vec<Type> = gen_random_list(rng, usize::try_from(num_types).unwrap());
             Self {
                 sequence,
                 length,
@@ -1165,8 +1165,8 @@ impl Serialize for QueryClientPixmapBytesReply {
 }
 #[cfg(test)]
 mod query_client_pixmap_bytes_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::QueryClientPixmapBytesReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -1326,8 +1326,8 @@ impl QueryClientIdsReply {
 }
 #[cfg(test)]
 mod query_client_ids_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::QueryClientIdsReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -1337,7 +1337,7 @@ mod query_client_ids_reply {
             let num_ids = u32::from(rng.u8(..16));
             let sequence: u16 = GenRandom::generate(rng);
             let length: u32 = GenRandom::generate(rng);
-            let ids = gen_random_list(rng, usize::try_from(num_ids).unwrap());
+            let ids: Vec<ClientIdValue> = gen_random_list(rng, usize::try_from(num_ids).unwrap());
             Self {
                 sequence,
                 length,
@@ -1495,8 +1495,8 @@ impl QueryResourceBytesReply {
 }
 #[cfg(test)]
 mod query_resource_bytes_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::QueryResourceBytesReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -1506,7 +1506,7 @@ mod query_resource_bytes_reply {
             let num_sizes = u32::from(rng.u8(..16));
             let sequence: u16 = GenRandom::generate(rng);
             let length: u32 = GenRandom::generate(rng);
-            let sizes = gen_random_list(rng, usize::try_from(num_sizes).unwrap());
+            let sizes: Vec<ResourceSizeValue> = gen_random_list(rng, usize::try_from(num_sizes).unwrap());
             Self {
                 sequence,
                 length,

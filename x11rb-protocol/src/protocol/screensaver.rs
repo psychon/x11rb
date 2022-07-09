@@ -398,8 +398,8 @@ impl Serialize for QueryVersionReply {
 }
 #[cfg(test)]
 mod query_version_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::QueryVersionReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -583,8 +583,8 @@ impl Serialize for QueryInfoReply {
 }
 #[cfg(test)]
 mod query_info_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::QueryInfoReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -594,11 +594,11 @@ mod query_info_reply {
             let state: u8 = GenRandom::generate(rng);
             let sequence: u16 = GenRandom::generate(rng);
             let length: u32 = GenRandom::generate(rng);
-            let saver_window = GenRandom::generate(rng);
+            let saver_window: xproto::Window = GenRandom::generate(rng);
             let ms_until_server: u32 = GenRandom::generate(rng);
             let ms_since_user_input: u32 = GenRandom::generate(rng);
             let event_mask: u32 = GenRandom::generate(rng);
-            let kind = GenRandom::generate(rng);
+            let kind: Kind = GenRandom::generate(rng);
             Self {
                 state,
                 sequence,
@@ -943,8 +943,8 @@ impl SetAttributesAux {
 }
 #[cfg(test)]
 mod set_attributes_aux {
-    #![allow(dead_code, unused_imports)]
-    use super::SetAttributesAux;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -1694,8 +1694,8 @@ impl Serialize for NotifyEvent {
 }
 #[cfg(test)]
 mod notify_event {
-    #![allow(dead_code, unused_imports)]
-    use super::NotifyEvent;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -1703,12 +1703,12 @@ mod notify_event {
     impl GenRandom for NotifyEvent {
         fn generate(rng: &Rng) -> Self {
             let response_type: u8 = GenRandom::generate(rng);
-            let state = GenRandom::generate(rng);
+            let state: State = GenRandom::generate(rng);
             let sequence: u16 = GenRandom::generate(rng);
-            let time = GenRandom::generate(rng);
-            let root = GenRandom::generate(rng);
-            let window = GenRandom::generate(rng);
-            let kind = GenRandom::generate(rng);
+            let time: xproto::Timestamp = GenRandom::generate(rng);
+            let root: xproto::Window = GenRandom::generate(rng);
+            let window: xproto::Window = GenRandom::generate(rng);
+            let kind: Kind = GenRandom::generate(rng);
             let forced: bool = GenRandom::generate(rng);
             Self {
                 response_type,

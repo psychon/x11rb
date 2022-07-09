@@ -674,7 +674,10 @@ pub fn parse_request_header(
 #[cfg(test)]
 mod gen_random {
     use alloc::{borrow::Cow, vec::Vec};
-    use core::{convert::{TryFrom, TryInto}, iter};
+    use core::{
+        convert::{TryFrom, TryInto},
+        iter,
+    };
     use fastrand::Rng;
 
     /// Generate a randomized version of this type.

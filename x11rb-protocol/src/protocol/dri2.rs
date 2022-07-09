@@ -307,15 +307,15 @@ impl Serialize for DRI2Buffer {
 }
 #[cfg(test)]
 mod dr_i2_buffer {
-    #![allow(dead_code, unused_imports)]
-    use super::DRI2Buffer;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for DRI2Buffer {
         fn generate(rng: &Rng) -> Self {
-            let attachment = GenRandom::generate(rng);
+            let attachment: Attachment = GenRandom::generate(rng);
             let name: u32 = GenRandom::generate(rng);
             let pitch: u32 = GenRandom::generate(rng);
             let cpp: u32 = GenRandom::generate(rng);
@@ -379,15 +379,15 @@ impl Serialize for AttachFormat {
 }
 #[cfg(test)]
 mod attach_format {
-    #![allow(dead_code, unused_imports)]
-    use super::AttachFormat;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for AttachFormat {
         fn generate(rng: &Rng) -> Self {
-            let attachment = GenRandom::generate(rng);
+            let attachment: Attachment = GenRandom::generate(rng);
             let format: u32 = GenRandom::generate(rng);
             Self {
                 attachment,
@@ -535,8 +535,8 @@ impl Serialize for QueryVersionReply {
 }
 #[cfg(test)]
 mod query_version_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::QueryVersionReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -719,8 +719,8 @@ impl ConnectReply {
 }
 #[cfg(test)]
 mod connect_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::ConnectReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -875,8 +875,8 @@ impl Serialize for AuthenticateReply {
 }
 #[cfg(test)]
 mod authenticate_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::AuthenticateReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -1164,8 +1164,8 @@ impl GetBuffersReply {
 }
 #[cfg(test)]
 mod get_buffers_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::GetBuffersReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -1177,7 +1177,7 @@ mod get_buffers_reply {
             let length: u32 = GenRandom::generate(rng);
             let width: u32 = GenRandom::generate(rng);
             let height: u32 = GenRandom::generate(rng);
-            let buffers = gen_random_list(rng, usize::try_from(count).unwrap());
+            let buffers: Vec<DRI2Buffer> = gen_random_list(rng, usize::try_from(count).unwrap());
             Self {
                 sequence,
                 length,
@@ -1327,8 +1327,8 @@ impl Serialize for CopyRegionReply {
 }
 #[cfg(test)]
 mod copy_region_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::CopyRegionReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -1508,8 +1508,8 @@ impl GetBuffersWithFormatReply {
 }
 #[cfg(test)]
 mod get_buffers_with_format_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::GetBuffersWithFormatReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -1521,7 +1521,7 @@ mod get_buffers_with_format_reply {
             let length: u32 = GenRandom::generate(rng);
             let width: u32 = GenRandom::generate(rng);
             let height: u32 = GenRandom::generate(rng);
-            let buffers = gen_random_list(rng, usize::try_from(count).unwrap());
+            let buffers: Vec<DRI2Buffer> = gen_random_list(rng, usize::try_from(count).unwrap());
             Self {
                 sequence,
                 length,
@@ -1711,8 +1711,8 @@ impl Serialize for SwapBuffersReply {
 }
 #[cfg(test)]
 mod swap_buffers_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::SwapBuffersReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -1895,8 +1895,8 @@ impl Serialize for GetMSCReply {
 }
 #[cfg(test)]
 mod get_msc_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::GetMSCReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -2135,8 +2135,8 @@ impl Serialize for WaitMSCReply {
 }
 #[cfg(test)]
 mod wait_msc_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::WaitMSCReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -2343,8 +2343,8 @@ impl Serialize for WaitSBCReply {
 }
 #[cfg(test)]
 mod wait_sbc_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::WaitSBCReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -2574,8 +2574,8 @@ impl Serialize for GetParamReply {
 }
 #[cfg(test)]
 mod get_param_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::GetParamReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -2708,8 +2708,8 @@ impl Serialize for BufferSwapCompleteEvent {
 }
 #[cfg(test)]
 mod buffer_swap_complete_event {
-    #![allow(dead_code, unused_imports)]
-    use super::BufferSwapCompleteEvent;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -2718,8 +2718,8 @@ mod buffer_swap_complete_event {
         fn generate(rng: &Rng) -> Self {
             let response_type: u8 = GenRandom::generate(rng);
             let sequence: u16 = GenRandom::generate(rng);
-            let event_type = GenRandom::generate(rng);
-            let drawable = GenRandom::generate(rng);
+            let event_type: EventType = GenRandom::generate(rng);
+            let drawable: xproto::Drawable = GenRandom::generate(rng);
             let ust_hi: u32 = GenRandom::generate(rng);
             let ust_lo: u32 = GenRandom::generate(rng);
             let msc_hi: u32 = GenRandom::generate(rng);
@@ -2851,8 +2851,8 @@ impl Serialize for InvalidateBuffersEvent {
 }
 #[cfg(test)]
 mod invalidate_buffers_event {
-    #![allow(dead_code, unused_imports)]
-    use super::InvalidateBuffersEvent;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -2861,7 +2861,7 @@ mod invalidate_buffers_event {
         fn generate(rng: &Rng) -> Self {
             let response_type: u8 = GenRandom::generate(rng);
             let sequence: u16 = GenRandom::generate(rng);
-            let drawable = GenRandom::generate(rng);
+            let drawable: xproto::Drawable = GenRandom::generate(rng);
             Self {
                 response_type,
                 sequence,

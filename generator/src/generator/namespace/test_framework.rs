@@ -20,6 +20,7 @@ use xcbgen::defs as xcbdefs;
 pub(super) struct TestFramework<'a, 'b, 'r> {
     pub(super) generator: &'r NamespaceGenerator<'a, 'b>,
     pub(super) name: &'r str,
+    pub(super) switch_prefix: &'r str,
     pub(super) variant: TestFrameworkType<'r>,
     pub(super) externals: &'r [xcbdefs::ExternalParam],
 }
@@ -51,8 +52,8 @@ impl<'a, 'b, 'r> TestFramework<'a, 'b, 'r> {
         out.incr_indent();
 
         // continue with imports
-        outln!(out, "#![allow(dead_code, unused_imports)]");
-        outln!(out, "use super::{};", to_rust_type_name(self.name));
+        outln!(out, "#![allow(dead_code, unused_imports, clippy::useless_conversion)]");
+        outln!(out, "use super::*;");
         outln!(
             out,
             "use crate::x11_utils::{{GenRandom, Serialize, gen_random_list}};"
@@ -140,74 +141,77 @@ impl<'a, 'b, 'r> TestFramework<'a, 'b, 'r> {
             }
         }
 
+        // also randomly generate externals
+        for external in self.externals {
+            outln!(
+                out,
+                "let {}: {} = GenRandom::generate(rng);",
+                to_rust_variable_name(&external.name),
+                self.generator.type_to_rust_type(&external.type_),
+            );
+        }
+
         let non_deducible_fields = fields.iter().filter(|field| match field.name() {
             None => false,
             Some(_) => self.generator.field_is_visible(field, deducibles),
         });
 
         let explicit_type = |field: &xcbdefs::FieldDef| {
-            let ty = match field {
-                xcbdefs::FieldDef::Normal(n) => &n.type_,
-                xcbdefs::FieldDef::List(l) => &l.element_type,
-                _ => return "".to_string(),
-            };
-
-            if matches!(ty.type_.get_resolved(), xcbdefs::TypeRef::BuiltIn(_)) && !matches!(ty.value_set, xcbdefs::FieldValueSet::Enum(_) | xcbdefs::FieldValueSet::Mask(_)) {
-                format!(": {}", self.generator.field_to_rust_type(field, ""))
-            } else {
-                "".to_string()
-            }
+            format!(
+                ": {}",
+                self.generator.field_to_rust_type(field, self.switch_prefix)
+            )
         };
+
+        let mut emitted_field = false;
 
         // for each non-deducible field, generate a random value
         for field in non_deducible_fields.clone() {
-            match field {
-                field @ xcbdefs::FieldDef::List(list_field) => {
-                    if list_field.length_expr.is_some() {
-                        // create the expression
-                        let fname = to_rust_variable_name(&list_field.name);
-                        let length_expr = expr_to_str(
-                            self.generator,
-                            list_field.length_expr.as_ref().unwrap(),
-                            |s| to_rust_variable_name(s),
-                            true,
-                            None,
-                            false,
-                        );
+            emitted_field = true;
 
-                        // output the expression
-                        outln!(
-                            out,
-                            "let {}{} = gen_random_list(rng, usize::try_from({}).unwrap());",
-                            fname,
-                            explicit_type(field),
-                            length_expr,
-                        );
+            if let xcbdefs::FieldDef::List(list_field) = field {
+                if list_field.length_expr.is_some() {
+                    // create the expression
+                    let fname = to_rust_variable_name(&list_field.name);
+                    let length_expr = expr_to_str(
+                        self.generator,
+                        list_field.length_expr.as_ref().unwrap(),
+                        to_rust_variable_name,
+                        true,
+                        None,
+                        false,
+                    );
 
-                        continue;
-                    } 
-                }
-                _ => {
-                    
+                    // output the expression
+                    outln!(
+                        out,
+                        "let {}{} = gen_random_list(rng, usize::try_from({}).unwrap());",
+                        fname,
+                        explicit_type(field),
+                        length_expr,
+                    );
+
+                    continue;
                 }
             }
 
             outln!(
                 out,
                 "let {}{} = GenRandom::generate(rng);",
-                to_rust_variable_name(field.name().unwrap()), 
+                to_rust_variable_name(field.name().unwrap()),
                 explicit_type(field),
             );
+        }
+
+        // if we didn't end up emitting anything, eat the RNG to prevent warnings
+        if !emitted_field {
+            outln!(out, "let _ = rng;");
         }
 
         outln!(out, "Self {{");
         out.indented(|out| {
             for field in non_deducible_fields {
-                outln!(
-                    out,
-                    "{},",
-                    to_rust_variable_name(field.name().unwrap()),
-                );
+                outln!(out, "{},", to_rust_variable_name(field.name().unwrap()),);
             }
         });
         outln!(out, "}}");

@@ -264,8 +264,8 @@ impl Serialize for QueryVersionReply {
 }
 #[cfg(test)]
 mod query_version_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::QueryVersionReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -642,8 +642,8 @@ impl Serialize for NotifyEvent {
 }
 #[cfg(test)]
 mod notify_event {
-    #![allow(dead_code, unused_imports)]
-    use super::NotifyEvent;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -651,13 +651,13 @@ mod notify_event {
     impl GenRandom for NotifyEvent {
         fn generate(rng: &Rng) -> Self {
             let response_type: u8 = GenRandom::generate(rng);
-            let level = GenRandom::generate(rng);
+            let level: ReportLevel = GenRandom::generate(rng);
             let sequence: u16 = GenRandom::generate(rng);
-            let drawable = GenRandom::generate(rng);
-            let damage = GenRandom::generate(rng);
-            let timestamp = GenRandom::generate(rng);
-            let area = GenRandom::generate(rng);
-            let geometry = GenRandom::generate(rng);
+            let drawable: xproto::Drawable = GenRandom::generate(rng);
+            let damage: Damage = GenRandom::generate(rng);
+            let timestamp: xproto::Timestamp = GenRandom::generate(rng);
+            let area: xproto::Rectangle = GenRandom::generate(rng);
+            let geometry: xproto::Rectangle = GenRandom::generate(rng);
             Self {
                 response_type,
                 level,

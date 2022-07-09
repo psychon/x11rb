@@ -16,7 +16,7 @@ mod raw_fd_container {
     pub struct RawFdContainer(pub(crate) ());
 
     impl crate::x11_utils::GenRandom for RawFdContainer {
-        fn generate(rng: &fastrand::Rng) -> Self {
+        fn generate(_: &fastrand::Rng) -> Self {
             Self(())
         }
     }

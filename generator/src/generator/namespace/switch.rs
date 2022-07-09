@@ -366,6 +366,7 @@ pub(super) fn emit_switch_type(
         let tf = TestFramework {
             generator,
             name,
+            switch_prefix: "",
             variant: TestFrameworkType::Switch {
                 switch_case: switch,
                 case_info: &case_infos,

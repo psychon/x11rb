@@ -122,15 +122,15 @@ impl Serialize for SurfaceInfo {
 }
 #[cfg(test)]
 mod surface_info {
-    #![allow(dead_code, unused_imports)]
-    use super::SurfaceInfo;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for SurfaceInfo {
         fn generate(rng: &Rng) -> Self {
-            let id = GenRandom::generate(rng);
+            let id: Surface = GenRandom::generate(rng);
             let chroma_format: u16 = GenRandom::generate(rng);
             let pad0: u16 = GenRandom::generate(rng);
             let max_width: u16 = GenRandom::generate(rng);
@@ -275,8 +275,8 @@ impl Serialize for QueryVersionReply {
 }
 #[cfg(test)]
 mod query_version_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::QueryVersionReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -424,8 +424,8 @@ impl ListSurfaceTypesReply {
 }
 #[cfg(test)]
 mod list_surface_types_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::ListSurfaceTypesReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -435,7 +435,7 @@ mod list_surface_types_reply {
             let num = u32::from(rng.u8(..16));
             let sequence: u16 = GenRandom::generate(rng);
             let length: u32 = GenRandom::generate(rng);
-            let surfaces = gen_random_list(rng, usize::try_from(num).unwrap());
+            let surfaces: Vec<SurfaceInfo> = gen_random_list(rng, usize::try_from(num).unwrap());
             Self {
                 sequence,
                 length,
@@ -614,8 +614,8 @@ impl CreateContextReply {
 }
 #[cfg(test)]
 mod create_context_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::CreateContextReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -824,8 +824,8 @@ impl CreateSurfaceReply {
 }
 #[cfg(test)]
 mod create_surface_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::CreateSurfaceReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -1064,8 +1064,8 @@ impl CreateSubpictureReply {
 }
 #[cfg(test)]
 mod create_subpicture_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::CreateSubpictureReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -1281,8 +1281,8 @@ impl ListSubpictureTypesReply {
 }
 #[cfg(test)]
 mod list_subpicture_types_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::ListSubpictureTypesReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -1292,7 +1292,7 @@ mod list_subpicture_types_reply {
             let num = u32::from(rng.u8(..16));
             let sequence: u16 = GenRandom::generate(rng);
             let length: u32 = GenRandom::generate(rng);
-            let types = gen_random_list(rng, usize::try_from(num).unwrap());
+            let types: Vec<xv::ImageFormatInfo> = gen_random_list(rng, usize::try_from(num).unwrap());
             Self {
                 sequence,
                 length,

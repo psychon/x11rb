@@ -356,8 +356,8 @@ impl Serialize for Int64 {
 }
 #[cfg(test)]
 mod int64 {
-    #![allow(dead_code, unused_imports)]
-    use super::Int64;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -440,8 +440,8 @@ impl Systemcounter {
 }
 #[cfg(test)]
 mod systemcounter {
-    #![allow(dead_code, unused_imports)]
-    use super::Systemcounter;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -449,8 +449,8 @@ mod systemcounter {
     impl GenRandom for Systemcounter {
         fn generate(rng: &Rng) -> Self {
             let name_len = u32::from(rng.u8(..16));
-            let counter = GenRandom::generate(rng);
-            let resolution = GenRandom::generate(rng);
+            let counter: Counter = GenRandom::generate(rng);
+            let resolution: Int64 = GenRandom::generate(rng);
             let name: Vec<u8> = gen_random_list(rng, usize::try_from(name_len).unwrap());
             Self {
                 counter,
@@ -530,18 +530,18 @@ impl Serialize for Trigger {
 }
 #[cfg(test)]
 mod trigger {
-    #![allow(dead_code, unused_imports)]
-    use super::Trigger;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for Trigger {
         fn generate(rng: &Rng) -> Self {
-            let counter = GenRandom::generate(rng);
-            let wait_type = GenRandom::generate(rng);
-            let wait_value = GenRandom::generate(rng);
-            let test_type = GenRandom::generate(rng);
+            let counter: Counter = GenRandom::generate(rng);
+            let wait_type: VALUETYPE = GenRandom::generate(rng);
+            let wait_value: Int64 = GenRandom::generate(rng);
+            let test_type: TESTTYPE = GenRandom::generate(rng);
             Self {
                 counter,
                 wait_type,
@@ -619,16 +619,16 @@ impl Serialize for Waitcondition {
 }
 #[cfg(test)]
 mod waitcondition {
-    #![allow(dead_code, unused_imports)]
-    use super::Waitcondition;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for Waitcondition {
         fn generate(rng: &Rng) -> Self {
-            let trigger = GenRandom::generate(rng);
-            let event_threshold = GenRandom::generate(rng);
+            let trigger: Trigger = GenRandom::generate(rng);
+            let event_threshold: Int64 = GenRandom::generate(rng);
             Self {
                 trigger,
                 event_threshold,
@@ -795,8 +795,8 @@ impl Serialize for InitializeReply {
 }
 #[cfg(test)]
 mod initialize_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::InitializeReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -935,8 +935,8 @@ impl ListSystemCountersReply {
 }
 #[cfg(test)]
 mod list_system_counters_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::ListSystemCountersReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -946,7 +946,7 @@ mod list_system_counters_reply {
             let counters_len = u32::from(rng.u8(..16));
             let sequence: u16 = GenRandom::generate(rng);
             let length: u32 = GenRandom::generate(rng);
-            let counters = gen_random_list(rng, usize::try_from(counters_len).unwrap());
+            let counters: Vec<Systemcounter> = gen_random_list(rng, usize::try_from(counters_len).unwrap());
             Self {
                 sequence,
                 length,
@@ -1200,8 +1200,8 @@ impl Serialize for QueryCounterReply {
 }
 #[cfg(test)]
 mod query_counter_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::QueryCounterReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -1210,7 +1210,7 @@ mod query_counter_reply {
         fn generate(rng: &Rng) -> Self {
             let sequence: u16 = GenRandom::generate(rng);
             let length: u32 = GenRandom::generate(rng);
-            let counter_value = GenRandom::generate(rng);
+            let counter_value: Int64 = GenRandom::generate(rng);
             Self {
                 sequence,
                 length,
@@ -1548,8 +1548,8 @@ impl CreateAlarmAux {
 }
 #[cfg(test)]
 mod create_alarm_aux {
-    #![allow(dead_code, unused_imports)]
-    use super::CreateAlarmAux;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -1876,8 +1876,8 @@ impl ChangeAlarmAux {
 }
 #[cfg(test)]
 mod change_alarm_aux {
-    #![allow(dead_code, unused_imports)]
-    use super::ChangeAlarmAux;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -2289,8 +2289,8 @@ impl Serialize for QueryAlarmReply {
 }
 #[cfg(test)]
 mod query_alarm_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::QueryAlarmReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -2299,10 +2299,10 @@ mod query_alarm_reply {
         fn generate(rng: &Rng) -> Self {
             let sequence: u16 = GenRandom::generate(rng);
             let length: u32 = GenRandom::generate(rng);
-            let trigger = GenRandom::generate(rng);
-            let delta = GenRandom::generate(rng);
+            let trigger: Trigger = GenRandom::generate(rng);
+            let delta: Int64 = GenRandom::generate(rng);
             let events: bool = GenRandom::generate(rng);
-            let state = GenRandom::generate(rng);
+            let state: ALARMSTATE = GenRandom::generate(rng);
             Self {
                 sequence,
                 length,
@@ -2498,8 +2498,8 @@ impl Serialize for GetPriorityReply {
 }
 #[cfg(test)]
 mod get_priority_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::GetPriorityReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -2890,8 +2890,8 @@ impl Serialize for QueryFenceReply {
 }
 #[cfg(test)]
 mod query_fence_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::QueryFenceReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -3082,8 +3082,8 @@ impl Serialize for CounterNotifyEvent {
 }
 #[cfg(test)]
 mod counter_notify_event {
-    #![allow(dead_code, unused_imports)]
-    use super::CounterNotifyEvent;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -3093,10 +3093,10 @@ mod counter_notify_event {
             let response_type: u8 = GenRandom::generate(rng);
             let kind: u8 = GenRandom::generate(rng);
             let sequence: u16 = GenRandom::generate(rng);
-            let counter = GenRandom::generate(rng);
-            let wait_value = GenRandom::generate(rng);
-            let counter_value = GenRandom::generate(rng);
-            let timestamp = GenRandom::generate(rng);
+            let counter: Counter = GenRandom::generate(rng);
+            let wait_value: Int64 = GenRandom::generate(rng);
+            let counter_value: Int64 = GenRandom::generate(rng);
+            let timestamp: xproto::Timestamp = GenRandom::generate(rng);
             let count: u16 = GenRandom::generate(rng);
             let destroyed: bool = GenRandom::generate(rng);
             Self {
@@ -3270,8 +3270,8 @@ impl Serialize for AlarmNotifyEvent {
 }
 #[cfg(test)]
 mod alarm_notify_event {
-    #![allow(dead_code, unused_imports)]
-    use super::AlarmNotifyEvent;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -3281,11 +3281,11 @@ mod alarm_notify_event {
             let response_type: u8 = GenRandom::generate(rng);
             let kind: u8 = GenRandom::generate(rng);
             let sequence: u16 = GenRandom::generate(rng);
-            let alarm = GenRandom::generate(rng);
-            let counter_value = GenRandom::generate(rng);
-            let alarm_value = GenRandom::generate(rng);
-            let timestamp = GenRandom::generate(rng);
-            let state = GenRandom::generate(rng);
+            let alarm: Alarm = GenRandom::generate(rng);
+            let counter_value: Int64 = GenRandom::generate(rng);
+            let alarm_value: Int64 = GenRandom::generate(rng);
+            let timestamp: xproto::Timestamp = GenRandom::generate(rng);
+            let state: ALARMSTATE = GenRandom::generate(rng);
             Self {
                 response_type,
                 kind,

@@ -136,8 +136,8 @@ impl Serialize for EnableReply {
 }
 #[cfg(test)]
 mod enable_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::EnableReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;

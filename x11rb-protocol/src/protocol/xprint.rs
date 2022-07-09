@@ -111,8 +111,8 @@ impl Printer {
 }
 #[cfg(test)]
 mod printer {
-    #![allow(dead_code, unused_imports)]
-    use super::Printer;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -121,8 +121,8 @@ mod printer {
         fn generate(rng: &Rng) -> Self {
             let name_len = u32::from(rng.u8(..16));
             let desc_len = u32::from(rng.u8(..16));
-            let name = gen_random_list(rng, usize::try_from(name_len).unwrap());
-            let description = gen_random_list(rng, usize::try_from(desc_len).unwrap());
+            let name: Vec<String8> = gen_random_list(rng, usize::try_from(name_len).unwrap());
+            let description: Vec<String8> = gen_random_list(rng, usize::try_from(desc_len).unwrap());
             Self {
                 name,
                 description,
@@ -573,8 +573,8 @@ impl Serialize for PrintQueryVersionReply {
 }
 #[cfg(test)]
 mod print_query_version_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::PrintQueryVersionReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -745,8 +745,8 @@ impl PrintGetPrinterListReply {
 }
 #[cfg(test)]
 mod print_get_printer_list_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::PrintGetPrinterListReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -756,7 +756,7 @@ mod print_get_printer_list_reply {
             let list_count = u32::from(rng.u8(..16));
             let sequence: u16 = GenRandom::generate(rng);
             let length: u32 = GenRandom::generate(rng);
-            let printers = gen_random_list(rng, usize::try_from(list_count).unwrap());
+            let printers: Vec<Printer> = gen_random_list(rng, usize::try_from(list_count).unwrap());
             Self {
                 sequence,
                 length,
@@ -1061,8 +1061,8 @@ impl Serialize for PrintGetContextReply {
 }
 #[cfg(test)]
 mod print_get_context_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::PrintGetContextReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -1247,8 +1247,8 @@ impl Serialize for PrintGetScreenOfContextReply {
 }
 #[cfg(test)]
 mod print_get_screen_of_context_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::PrintGetScreenOfContextReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -1257,7 +1257,7 @@ mod print_get_screen_of_context_reply {
         fn generate(rng: &Rng) -> Self {
             let sequence: u16 = GenRandom::generate(rng);
             let length: u32 = GenRandom::generate(rng);
-            let root = GenRandom::generate(rng);
+            let root: xproto::Window = GenRandom::generate(rng);
             Self {
                 sequence,
                 length,
@@ -1714,8 +1714,8 @@ impl PrintGetDocumentDataReply {
 }
 #[cfg(test)]
 mod print_get_document_data_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::PrintGetDocumentDataReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -2037,8 +2037,8 @@ impl Serialize for PrintInputSelectedReply {
 }
 #[cfg(test)]
 mod print_input_selected_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::PrintInputSelectedReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -2196,8 +2196,8 @@ impl PrintGetAttributesReply {
 }
 #[cfg(test)]
 mod print_get_attributes_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::PrintGetAttributesReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -2207,7 +2207,7 @@ mod print_get_attributes_reply {
             let string_len = u32::from(rng.u8(..16));
             let sequence: u16 = GenRandom::generate(rng);
             let length: u32 = GenRandom::generate(rng);
-            let attributes = gen_random_list(rng, usize::try_from(string_len).unwrap());
+            let attributes: Vec<String8> = gen_random_list(rng, usize::try_from(string_len).unwrap());
             Self {
                 sequence,
                 length,
@@ -2375,8 +2375,8 @@ impl PrintGetOneAttributesReply {
 }
 #[cfg(test)]
 mod print_get_one_attributes_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::PrintGetOneAttributesReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -2386,7 +2386,7 @@ mod print_get_one_attributes_reply {
             let value_len = u32::from(rng.u8(..16));
             let sequence: u16 = GenRandom::generate(rng);
             let length: u32 = GenRandom::generate(rng);
-            let value = gen_random_list(rng, usize::try_from(value_len).unwrap());
+            let value: Vec<String8> = gen_random_list(rng, usize::try_from(value_len).unwrap());
             Self {
                 sequence,
                 length,
@@ -2636,8 +2636,8 @@ impl Serialize for PrintGetPageDimensionsReply {
 }
 #[cfg(test)]
 mod print_get_page_dimensions_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::PrintGetPageDimensionsReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -2784,8 +2784,8 @@ impl PrintQueryScreensReply {
 }
 #[cfg(test)]
 mod print_query_screens_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::PrintQueryScreensReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -2795,7 +2795,7 @@ mod print_query_screens_reply {
             let list_count = u32::from(rng.u8(..16));
             let sequence: u16 = GenRandom::generate(rng);
             let length: u32 = GenRandom::generate(rng);
-            let roots = gen_random_list(rng, usize::try_from(list_count).unwrap());
+            let roots: Vec<xproto::Window> = gen_random_list(rng, usize::try_from(list_count).unwrap());
             Self {
                 sequence,
                 length,
@@ -2935,8 +2935,8 @@ impl Serialize for PrintSetImageResolutionReply {
 }
 #[cfg(test)]
 mod print_set_image_resolution_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::PrintSetImageResolutionReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -3077,8 +3077,8 @@ impl Serialize for PrintGetImageResolutionReply {
 }
 #[cfg(test)]
 mod print_get_image_resolution_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::PrintGetImageResolutionReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -3163,8 +3163,8 @@ impl Serialize for NotifyEvent {
 }
 #[cfg(test)]
 mod notify_event {
-    #![allow(dead_code, unused_imports)]
-    use super::NotifyEvent;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -3174,7 +3174,7 @@ mod notify_event {
             let response_type: u8 = GenRandom::generate(rng);
             let detail: u8 = GenRandom::generate(rng);
             let sequence: u16 = GenRandom::generate(rng);
-            let context = GenRandom::generate(rng);
+            let context: Pcontext = GenRandom::generate(rng);
             let cancel: bool = GenRandom::generate(rng);
             Self {
                 response_type,
@@ -3297,8 +3297,8 @@ impl Serialize for AttributNotifyEvent {
 }
 #[cfg(test)]
 mod attribut_notify_event {
-    #![allow(dead_code, unused_imports)]
-    use super::AttributNotifyEvent;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -3308,7 +3308,7 @@ mod attribut_notify_event {
             let response_type: u8 = GenRandom::generate(rng);
             let detail: u8 = GenRandom::generate(rng);
             let sequence: u16 = GenRandom::generate(rng);
-            let context = GenRandom::generate(rng);
+            let context: Pcontext = GenRandom::generate(rng);
             Self {
                 response_type,
                 detail,

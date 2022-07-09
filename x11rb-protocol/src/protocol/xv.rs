@@ -600,8 +600,8 @@ impl Serialize for Rational {
 }
 #[cfg(test)]
 mod rational {
-    #![allow(dead_code, unused_imports)]
-    use super::Rational;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -667,15 +667,15 @@ impl Serialize for Format {
 }
 #[cfg(test)]
 mod format {
-    #![allow(dead_code, unused_imports)]
-    use super::Format;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for Format {
         fn generate(rng: &Rng) -> Self {
-            let visual = GenRandom::generate(rng);
+            let visual: xproto::Visualid = GenRandom::generate(rng);
             let depth: u8 = GenRandom::generate(rng);
             Self {
                 visual,
@@ -775,8 +775,8 @@ impl AdaptorInfo {
 }
 #[cfg(test)]
 mod adaptor_info {
-    #![allow(dead_code, unused_imports)]
-    use super::AdaptorInfo;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -785,11 +785,11 @@ mod adaptor_info {
         fn generate(rng: &Rng) -> Self {
             let num_formats = u32::from(rng.u8(..16));
             let name_size = u32::from(rng.u8(..16));
-            let base_id = GenRandom::generate(rng);
+            let base_id: Port = GenRandom::generate(rng);
             let num_ports: u16 = GenRandom::generate(rng);
-            let type_ = GenRandom::generate(rng);
+            let type_: u8 = GenRandom::generate(rng);
             let name: Vec<u8> = gen_random_list(rng, usize::try_from(name_size).unwrap());
-            let formats = gen_random_list(rng, usize::try_from(num_formats).unwrap());
+            let formats: Vec<Format> = gen_random_list(rng, usize::try_from(num_formats).unwrap());
             Self {
                 base_id,
                 num_ports,
@@ -875,8 +875,8 @@ impl EncodingInfo {
 }
 #[cfg(test)]
 mod encoding_info {
-    #![allow(dead_code, unused_imports)]
-    use super::EncodingInfo;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -884,10 +884,10 @@ mod encoding_info {
     impl GenRandom for EncodingInfo {
         fn generate(rng: &Rng) -> Self {
             let name_size = u32::from(rng.u8(..16));
-            let encoding = GenRandom::generate(rng);
+            let encoding: Encoding = GenRandom::generate(rng);
             let width: u16 = GenRandom::generate(rng);
             let height: u16 = GenRandom::generate(rng);
-            let rate = GenRandom::generate(rng);
+            let rate: Rational = GenRandom::generate(rng);
             let name: Vec<u8> = gen_random_list(rng, usize::try_from(name_size).unwrap());
             Self {
                 encoding,
@@ -986,16 +986,16 @@ impl Image {
 }
 #[cfg(test)]
 mod image {
-    #![allow(dead_code, unused_imports)]
-    use super::Image;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for Image {
         fn generate(rng: &Rng) -> Self {
-            let data_size = u32::from(rng.u8(..16));
             let num_planes = u32::from(rng.u8(..16));
+            let data_size = u32::from(rng.u8(..16));
             let id: u32 = GenRandom::generate(rng);
             let width: u16 = GenRandom::generate(rng);
             let height: u16 = GenRandom::generate(rng);
@@ -1083,8 +1083,8 @@ impl AttributeInfo {
 }
 #[cfg(test)]
 mod attribute_info {
-    #![allow(dead_code, unused_imports)]
-    use super::AttributeInfo;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -1092,7 +1092,7 @@ mod attribute_info {
     impl GenRandom for AttributeInfo {
         fn generate(rng: &Rng) -> Self {
             let size = u32::from(rng.u8(..16));
-            let flags = GenRandom::generate(rng);
+            let flags: u32 = GenRandom::generate(rng);
             let min: i32 = GenRandom::generate(rng);
             let max: i32 = GenRandom::generate(rng);
             let name: Vec<u8> = gen_random_list(rng, usize::try_from(size).unwrap());
@@ -1367,8 +1367,8 @@ impl Serialize for ImageFormatInfo {
 }
 #[cfg(test)]
 mod image_format_info {
-    #![allow(dead_code, unused_imports)]
-    use super::ImageFormatInfo;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -1376,8 +1376,8 @@ mod image_format_info {
     impl GenRandom for ImageFormatInfo {
         fn generate(rng: &Rng) -> Self {
             let id: u32 = GenRandom::generate(rng);
-            let type_ = GenRandom::generate(rng);
-            let byte_order = GenRandom::generate(rng);
+            let type_: ImageFormatInfoType = GenRandom::generate(rng);
+            let byte_order: xproto::ImageOrder = GenRandom::generate(rng);
             let guid: [u8; 16] = gen_random_list(rng, usize::try_from(16u32).unwrap());
             let bpp: u8 = GenRandom::generate(rng);
             let num_planes: u8 = GenRandom::generate(rng);
@@ -1385,7 +1385,7 @@ mod image_format_info {
             let red_mask: u32 = GenRandom::generate(rng);
             let green_mask: u32 = GenRandom::generate(rng);
             let blue_mask: u32 = GenRandom::generate(rng);
-            let format = GenRandom::generate(rng);
+            let format: ImageFormatInfoFormat = GenRandom::generate(rng);
             let y_sample_bits: u32 = GenRandom::generate(rng);
             let u_sample_bits: u32 = GenRandom::generate(rng);
             let v_sample_bits: u32 = GenRandom::generate(rng);
@@ -1396,7 +1396,7 @@ mod image_format_info {
             let vvert_u_period: u32 = GenRandom::generate(rng);
             let vvert_v_period: u32 = GenRandom::generate(rng);
             let vcomp_order: [u8; 32] = gen_random_list(rng, usize::try_from(32u32).unwrap());
-            let vscanline_order = GenRandom::generate(rng);
+            let vscanline_order: ScanlineOrder = GenRandom::generate(rng);
             Self {
                 id,
                 type_,
@@ -1512,8 +1512,8 @@ impl Serialize for VideoNotifyEvent {
 }
 #[cfg(test)]
 mod video_notify_event {
-    #![allow(dead_code, unused_imports)]
-    use super::VideoNotifyEvent;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -1521,11 +1521,11 @@ mod video_notify_event {
     impl GenRandom for VideoNotifyEvent {
         fn generate(rng: &Rng) -> Self {
             let response_type: u8 = GenRandom::generate(rng);
-            let reason = GenRandom::generate(rng);
+            let reason: VideoNotifyReason = GenRandom::generate(rng);
             let sequence: u16 = GenRandom::generate(rng);
-            let time = GenRandom::generate(rng);
-            let drawable = GenRandom::generate(rng);
-            let port = GenRandom::generate(rng);
+            let time: xproto::Timestamp = GenRandom::generate(rng);
+            let drawable: xproto::Drawable = GenRandom::generate(rng);
+            let port: Port = GenRandom::generate(rng);
             Self {
                 response_type,
                 reason,
@@ -1671,8 +1671,8 @@ impl Serialize for PortNotifyEvent {
 }
 #[cfg(test)]
 mod port_notify_event {
-    #![allow(dead_code, unused_imports)]
-    use super::PortNotifyEvent;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -1681,9 +1681,9 @@ mod port_notify_event {
         fn generate(rng: &Rng) -> Self {
             let response_type: u8 = GenRandom::generate(rng);
             let sequence: u16 = GenRandom::generate(rng);
-            let time = GenRandom::generate(rng);
-            let port = GenRandom::generate(rng);
-            let attribute = GenRandom::generate(rng);
+            let time: xproto::Timestamp = GenRandom::generate(rng);
+            let port: Port = GenRandom::generate(rng);
+            let attribute: xproto::Atom = GenRandom::generate(rng);
             let value: i32 = GenRandom::generate(rng);
             Self {
                 response_type,
@@ -1864,8 +1864,8 @@ impl Serialize for QueryExtensionReply {
 }
 #[cfg(test)]
 mod query_extension_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::QueryExtensionReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -2013,8 +2013,8 @@ impl QueryAdaptorsReply {
 }
 #[cfg(test)]
 mod query_adaptors_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::QueryAdaptorsReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -2024,7 +2024,7 @@ mod query_adaptors_reply {
             let num_adaptors = u32::from(rng.u8(..16));
             let sequence: u16 = GenRandom::generate(rng);
             let length: u32 = GenRandom::generate(rng);
-            let info = gen_random_list(rng, usize::try_from(num_adaptors).unwrap());
+            let info: Vec<AdaptorInfo> = gen_random_list(rng, usize::try_from(num_adaptors).unwrap());
             Self {
                 sequence,
                 length,
@@ -2161,8 +2161,8 @@ impl QueryEncodingsReply {
 }
 #[cfg(test)]
 mod query_encodings_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::QueryEncodingsReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -2172,7 +2172,7 @@ mod query_encodings_reply {
             let num_encodings = u32::from(rng.u8(..16));
             let sequence: u16 = GenRandom::generate(rng);
             let length: u32 = GenRandom::generate(rng);
-            let info = gen_random_list(rng, usize::try_from(num_encodings).unwrap());
+            let info: Vec<EncodingInfo> = gen_random_list(rng, usize::try_from(num_encodings).unwrap());
             Self {
                 sequence,
                 length,
@@ -2307,15 +2307,15 @@ impl Serialize for GrabPortReply {
 }
 #[cfg(test)]
 mod grab_port_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::GrabPortReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for GrabPortReply {
         fn generate(rng: &Rng) -> Self {
-            let result = GenRandom::generate(rng);
+            let result: GrabPortStatus = GenRandom::generate(rng);
             let sequence: u16 = GenRandom::generate(rng);
             let length: u32 = GenRandom::generate(rng);
             Self {
@@ -3200,8 +3200,8 @@ impl Serialize for QueryBestSizeReply {
 }
 #[cfg(test)]
 mod query_best_size_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::QueryBestSizeReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -3421,8 +3421,8 @@ impl Serialize for GetPortAttributeReply {
 }
 #[cfg(test)]
 mod get_port_attribute_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::GetPortAttributeReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -3571,8 +3571,8 @@ impl QueryPortAttributesReply {
 }
 #[cfg(test)]
 mod query_port_attributes_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::QueryPortAttributesReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -3583,7 +3583,7 @@ mod query_port_attributes_reply {
             let sequence: u16 = GenRandom::generate(rng);
             let length: u32 = GenRandom::generate(rng);
             let text_size: u32 = GenRandom::generate(rng);
-            let attributes = gen_random_list(rng, usize::try_from(num_attributes).unwrap());
+            let attributes: Vec<AttributeInfo> = gen_random_list(rng, usize::try_from(num_attributes).unwrap());
             Self {
                 sequence,
                 length,
@@ -3721,8 +3721,8 @@ impl ListImageFormatsReply {
 }
 #[cfg(test)]
 mod list_image_formats_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::ListImageFormatsReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -3732,7 +3732,7 @@ mod list_image_formats_reply {
             let num_formats = u32::from(rng.u8(..16));
             let sequence: u16 = GenRandom::generate(rng);
             let length: u32 = GenRandom::generate(rng);
-            let format = gen_random_list(rng, usize::try_from(num_formats).unwrap());
+            let format: Vec<ImageFormatInfo> = gen_random_list(rng, usize::try_from(num_formats).unwrap());
             Self {
                 sequence,
                 length,
@@ -3902,8 +3902,8 @@ impl QueryImageAttributesReply {
 }
 #[cfg(test)]
 mod query_image_attributes_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::QueryImageAttributesReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;

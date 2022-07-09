@@ -185,8 +185,8 @@ impl Serialize for QueryVersionReply {
 }
 #[cfg(test)]
 mod query_version_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::QueryVersionReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -741,8 +741,8 @@ impl Serialize for SelectionNotifyEvent {
 }
 #[cfg(test)]
 mod selection_notify_event {
-    #![allow(dead_code, unused_imports)]
-    use super::SelectionNotifyEvent;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -750,13 +750,13 @@ mod selection_notify_event {
     impl GenRandom for SelectionNotifyEvent {
         fn generate(rng: &Rng) -> Self {
             let response_type: u8 = GenRandom::generate(rng);
-            let subtype = GenRandom::generate(rng);
+            let subtype: SelectionEvent = GenRandom::generate(rng);
             let sequence: u16 = GenRandom::generate(rng);
-            let window = GenRandom::generate(rng);
-            let owner = GenRandom::generate(rng);
-            let selection = GenRandom::generate(rng);
-            let timestamp = GenRandom::generate(rng);
-            let selection_timestamp = GenRandom::generate(rng);
+            let window: xproto::Window = GenRandom::generate(rng);
+            let owner: xproto::Window = GenRandom::generate(rng);
+            let selection: xproto::Atom = GenRandom::generate(rng);
+            let timestamp: xproto::Timestamp = GenRandom::generate(rng);
+            let selection_timestamp: xproto::Timestamp = GenRandom::generate(rng);
             Self {
                 response_type,
                 subtype,
@@ -1126,8 +1126,8 @@ impl Serialize for CursorNotifyEvent {
 }
 #[cfg(test)]
 mod cursor_notify_event {
-    #![allow(dead_code, unused_imports)]
-    use super::CursorNotifyEvent;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -1135,12 +1135,12 @@ mod cursor_notify_event {
     impl GenRandom for CursorNotifyEvent {
         fn generate(rng: &Rng) -> Self {
             let response_type: u8 = GenRandom::generate(rng);
-            let subtype = GenRandom::generate(rng);
+            let subtype: CursorNotify = GenRandom::generate(rng);
             let sequence: u16 = GenRandom::generate(rng);
-            let window = GenRandom::generate(rng);
+            let window: xproto::Window = GenRandom::generate(rng);
             let cursor_serial: u32 = GenRandom::generate(rng);
-            let timestamp = GenRandom::generate(rng);
-            let name = GenRandom::generate(rng);
+            let timestamp: xproto::Timestamp = GenRandom::generate(rng);
+            let name: xproto::Atom = GenRandom::generate(rng);
             Self {
                 response_type,
                 subtype,
@@ -1387,8 +1387,8 @@ impl Serialize for GetCursorImageReply {
 }
 #[cfg(test)]
 mod get_cursor_image_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::GetCursorImageReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -2543,8 +2543,8 @@ impl FetchRegionReply {
 }
 #[cfg(test)]
 mod fetch_region_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::FetchRegionReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -2553,8 +2553,8 @@ mod fetch_region_reply {
         fn generate(rng: &Rng) -> Self {
             let length = u32::from(rng.u8(..16));
             let sequence: u16 = GenRandom::generate(rng);
-            let extents = GenRandom::generate(rng);
-            let rectangles = gen_random_list(rng, usize::try_from(length.checked_div(2u32).unwrap()).unwrap());
+            let extents: xproto::Rectangle = GenRandom::generate(rng);
+            let rectangles: Vec<xproto::Rectangle> = gen_random_list(rng, usize::try_from(length.checked_div(2u32).unwrap()).unwrap());
             Self {
                 sequence,
                 extents,
@@ -2998,8 +2998,8 @@ impl GetCursorNameReply {
 }
 #[cfg(test)]
 mod get_cursor_name_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::GetCursorNameReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -3009,7 +3009,7 @@ mod get_cursor_name_reply {
             let nbytes = u32::from(rng.u8(..16));
             let sequence: u16 = GenRandom::generate(rng);
             let length: u32 = GenRandom::generate(rng);
-            let atom = GenRandom::generate(rng);
+            let atom: xproto::Atom = GenRandom::generate(rng);
             let name: Vec<u8> = gen_random_list(rng, usize::try_from(nbytes).unwrap());
             Self {
                 sequence,
@@ -3168,8 +3168,8 @@ impl GetCursorImageAndNameReply {
 }
 #[cfg(test)]
 mod get_cursor_image_and_name_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::GetCursorImageAndNameReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -3186,7 +3186,7 @@ mod get_cursor_image_and_name_reply {
             let xhot: u16 = GenRandom::generate(rng);
             let yhot: u16 = GenRandom::generate(rng);
             let cursor_serial: u32 = GenRandom::generate(rng);
-            let cursor_atom = GenRandom::generate(rng);
+            let cursor_atom: xproto::Atom = GenRandom::generate(rng);
             let cursor_image: Vec<u32> = gen_random_list(rng, usize::try_from(u32::from(width).checked_mul(u32::from(height)).unwrap()).unwrap());
             let name: Vec<u8> = gen_random_list(rng, usize::try_from(nbytes).unwrap());
             Self {

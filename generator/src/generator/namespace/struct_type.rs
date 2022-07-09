@@ -301,6 +301,7 @@ pub(super) fn emit_struct_type(
         let tf = TestFramework {
             generator,
             name,
+            switch_prefix,
             variant: TestFrameworkType::Struct {
                 fields,
                 deducibles: &deducible_fields,

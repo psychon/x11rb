@@ -116,8 +116,8 @@ impl Serialize for CompletionEvent {
 }
 #[cfg(test)]
 mod completion_event {
-    #![allow(dead_code, unused_imports)]
-    use super::CompletionEvent;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -126,10 +126,10 @@ mod completion_event {
         fn generate(rng: &Rng) -> Self {
             let response_type: u8 = GenRandom::generate(rng);
             let sequence: u16 = GenRandom::generate(rng);
-            let drawable = GenRandom::generate(rng);
+            let drawable: xproto::Drawable = GenRandom::generate(rng);
             let minor_event: u16 = GenRandom::generate(rng);
             let major_event: u8 = GenRandom::generate(rng);
-            let shmseg = GenRandom::generate(rng);
+            let shmseg: Seg = GenRandom::generate(rng);
             let offset: u32 = GenRandom::generate(rng);
             Self {
                 response_type,
@@ -351,8 +351,8 @@ impl Serialize for QueryVersionReply {
 }
 #[cfg(test)]
 mod query_version_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::QueryVersionReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -835,8 +835,8 @@ impl Serialize for GetImageReply {
 }
 #[cfg(test)]
 mod get_image_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::GetImageReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -846,7 +846,7 @@ mod get_image_reply {
             let depth: u8 = GenRandom::generate(rng);
             let sequence: u16 = GenRandom::generate(rng);
             let length: u32 = GenRandom::generate(rng);
-            let visual = GenRandom::generate(rng);
+            let visual: xproto::Visualid = GenRandom::generate(rng);
             let size: u32 = GenRandom::generate(rng);
             Self {
                 depth,
@@ -1183,8 +1183,8 @@ impl Serialize for CreateSegmentReply {
 }
 #[cfg(test)]
 mod create_segment_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::CreateSegmentReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -1194,7 +1194,7 @@ mod create_segment_reply {
             let nfd: u8 = GenRandom::generate(rng);
             let sequence: u16 = GenRandom::generate(rng);
             let length: u32 = GenRandom::generate(rng);
-            let shm_fd = GenRandom::generate(rng);
+            let shm_fd: RawFdContainer = GenRandom::generate(rng);
             Self {
                 nfd,
                 sequence,

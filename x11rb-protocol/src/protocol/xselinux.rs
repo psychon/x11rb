@@ -155,8 +155,8 @@ impl Serialize for QueryVersionReply {
 }
 #[cfg(test)]
 mod query_version_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::QueryVersionReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -360,8 +360,8 @@ impl GetDeviceCreateContextReply {
 }
 #[cfg(test)]
 mod get_device_create_context_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::GetDeviceCreateContextReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -582,8 +582,8 @@ impl GetDeviceContextReply {
 }
 #[cfg(test)]
 mod get_device_context_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::GetDeviceContextReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -786,8 +786,8 @@ impl GetWindowCreateContextReply {
 }
 #[cfg(test)]
 mod get_window_create_context_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::GetWindowCreateContextReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -935,8 +935,8 @@ impl GetWindowContextReply {
 }
 #[cfg(test)]
 mod get_window_context_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::GetWindowContextReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -1044,8 +1044,8 @@ impl ListItem {
 }
 #[cfg(test)]
 mod list_item {
-    #![allow(dead_code, unused_imports)]
-    use super::ListItem;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -1054,7 +1054,7 @@ mod list_item {
         fn generate(rng: &Rng) -> Self {
             let object_context_len = u32::from(rng.u8(..16));
             let data_context_len = u32::from(rng.u8(..16));
-            let name = GenRandom::generate(rng);
+            let name: xproto::Atom = GenRandom::generate(rng);
             let object_context: Vec<u8> = gen_random_list(rng, usize::try_from(object_context_len).unwrap());
             let data_context: Vec<u8> = gen_random_list(rng, usize::try_from(data_context_len).unwrap());
             Self {
@@ -1249,8 +1249,8 @@ impl GetPropertyCreateContextReply {
 }
 #[cfg(test)]
 mod get_property_create_context_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::GetPropertyCreateContextReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -1453,8 +1453,8 @@ impl GetPropertyUseContextReply {
 }
 #[cfg(test)]
 mod get_property_use_context_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::GetPropertyUseContextReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -1610,8 +1610,8 @@ impl GetPropertyContextReply {
 }
 #[cfg(test)]
 mod get_property_context_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::GetPropertyContextReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -1767,8 +1767,8 @@ impl GetPropertyDataContextReply {
 }
 #[cfg(test)]
 mod get_property_data_context_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::GetPropertyDataContextReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -1915,8 +1915,8 @@ impl ListPropertiesReply {
 }
 #[cfg(test)]
 mod list_properties_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::ListPropertiesReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -1926,7 +1926,7 @@ mod list_properties_reply {
             let properties_len = u32::from(rng.u8(..16));
             let sequence: u16 = GenRandom::generate(rng);
             let length: u32 = GenRandom::generate(rng);
-            let properties = gen_random_list(rng, usize::try_from(properties_len).unwrap());
+            let properties: Vec<ListItem> = gen_random_list(rng, usize::try_from(properties_len).unwrap());
             Self {
                 sequence,
                 length,
@@ -2119,8 +2119,8 @@ impl GetSelectionCreateContextReply {
 }
 #[cfg(test)]
 mod get_selection_create_context_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::GetSelectionCreateContextReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -2323,8 +2323,8 @@ impl GetSelectionUseContextReply {
 }
 #[cfg(test)]
 mod get_selection_use_context_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::GetSelectionUseContextReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -2472,8 +2472,8 @@ impl GetSelectionContextReply {
 }
 #[cfg(test)]
 mod get_selection_context_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::GetSelectionContextReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -2621,8 +2621,8 @@ impl GetSelectionDataContextReply {
 }
 #[cfg(test)]
 mod get_selection_data_context_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::GetSelectionDataContextReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -2760,8 +2760,8 @@ impl ListSelectionsReply {
 }
 #[cfg(test)]
 mod list_selections_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::ListSelectionsReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -2771,7 +2771,7 @@ mod list_selections_reply {
             let selections_len = u32::from(rng.u8(..16));
             let sequence: u16 = GenRandom::generate(rng);
             let length: u32 = GenRandom::generate(rng);
-            let selections = gen_random_list(rng, usize::try_from(selections_len).unwrap());
+            let selections: Vec<ListItem> = gen_random_list(rng, usize::try_from(selections_len).unwrap());
             Self {
                 sequence,
                 length,
@@ -2909,8 +2909,8 @@ impl GetClientContextReply {
 }
 #[cfg(test)]
 mod get_client_context_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::GetClientContextReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;

@@ -537,15 +537,15 @@ impl Serialize for Notify {
 }
 #[cfg(test)]
 mod notify {
-    #![allow(dead_code, unused_imports)]
-    use super::Notify;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for Notify {
         fn generate(rng: &Rng) -> Self {
-            let window = GenRandom::generate(rng);
+            let window: xproto::Window = GenRandom::generate(rng);
             let serial: u32 = GenRandom::generate(rng);
             Self {
                 window,
@@ -693,8 +693,8 @@ impl Serialize for QueryVersionReply {
 }
 #[cfg(test)]
 mod query_version_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::QueryVersionReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -1214,8 +1214,8 @@ impl Serialize for QueryCapabilitiesReply {
 }
 #[cfg(test)]
 mod query_capabilities_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::QueryCapabilitiesReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -1313,8 +1313,8 @@ impl Serialize for GenericEvent {
 }
 #[cfg(test)]
 mod generic_event {
-    #![allow(dead_code, unused_imports)]
-    use super::GenericEvent;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -1326,7 +1326,7 @@ mod generic_event {
             let sequence: u16 = GenRandom::generate(rng);
             let length: u32 = GenRandom::generate(rng);
             let evtype: u16 = GenRandom::generate(rng);
-            let event = GenRandom::generate(rng);
+            let event: Event = GenRandom::generate(rng);
             Self {
                 response_type,
                 extension,
@@ -1532,8 +1532,8 @@ impl Serialize for ConfigureNotifyEvent {
 }
 #[cfg(test)]
 mod configure_notify_event {
-    #![allow(dead_code, unused_imports)]
-    use super::ConfigureNotifyEvent;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -1545,8 +1545,8 @@ mod configure_notify_event {
             let sequence: u16 = GenRandom::generate(rng);
             let length: u32 = GenRandom::generate(rng);
             let event_type: u16 = GenRandom::generate(rng);
-            let event = GenRandom::generate(rng);
-            let window = GenRandom::generate(rng);
+            let event: Event = GenRandom::generate(rng);
+            let window: xproto::Window = GenRandom::generate(rng);
             let x: i16 = GenRandom::generate(rng);
             let y: i16 = GenRandom::generate(rng);
             let width: u16 = GenRandom::generate(rng);
@@ -1705,8 +1705,8 @@ impl Serialize for CompleteNotifyEvent {
 }
 #[cfg(test)]
 mod complete_notify_event {
-    #![allow(dead_code, unused_imports)]
-    use super::CompleteNotifyEvent;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -1718,10 +1718,10 @@ mod complete_notify_event {
             let sequence: u16 = GenRandom::generate(rng);
             let length: u32 = GenRandom::generate(rng);
             let event_type: u16 = GenRandom::generate(rng);
-            let kind = GenRandom::generate(rng);
-            let mode = GenRandom::generate(rng);
-            let event = GenRandom::generate(rng);
-            let window = GenRandom::generate(rng);
+            let kind: CompleteKind = GenRandom::generate(rng);
+            let mode: CompleteMode = GenRandom::generate(rng);
+            let event: Event = GenRandom::generate(rng);
+            let window: xproto::Window = GenRandom::generate(rng);
             let serial: u32 = GenRandom::generate(rng);
             let ust: u64 = GenRandom::generate(rng);
             let msc: u64 = GenRandom::generate(rng);
@@ -1854,8 +1854,8 @@ impl Serialize for IdleNotifyEvent {
 }
 #[cfg(test)]
 mod idle_notify_event {
-    #![allow(dead_code, unused_imports)]
-    use super::IdleNotifyEvent;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -1867,11 +1867,11 @@ mod idle_notify_event {
             let sequence: u16 = GenRandom::generate(rng);
             let length: u32 = GenRandom::generate(rng);
             let event_type: u16 = GenRandom::generate(rng);
-            let event = GenRandom::generate(rng);
-            let window = GenRandom::generate(rng);
+            let event: Event = GenRandom::generate(rng);
+            let window: xproto::Window = GenRandom::generate(rng);
             let serial: u32 = GenRandom::generate(rng);
-            let pixmap = GenRandom::generate(rng);
-            let idle_fence = GenRandom::generate(rng);
+            let pixmap: xproto::Pixmap = GenRandom::generate(rng);
+            let idle_fence: sync::Fence = GenRandom::generate(rng);
             Self {
                 response_type,
                 extension,
@@ -2015,8 +2015,8 @@ impl Serialize for RedirectNotifyEvent {
 }
 #[cfg(test)]
 mod redirect_notify_event {
-    #![allow(dead_code, unused_imports)]
-    use super::RedirectNotifyEvent;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -2029,25 +2029,25 @@ mod redirect_notify_event {
             let length: u32 = GenRandom::generate(rng);
             let event_type: u16 = GenRandom::generate(rng);
             let update_window: bool = GenRandom::generate(rng);
-            let event = GenRandom::generate(rng);
-            let event_window = GenRandom::generate(rng);
-            let window = GenRandom::generate(rng);
-            let pixmap = GenRandom::generate(rng);
+            let event: Event = GenRandom::generate(rng);
+            let event_window: xproto::Window = GenRandom::generate(rng);
+            let window: xproto::Window = GenRandom::generate(rng);
+            let pixmap: xproto::Pixmap = GenRandom::generate(rng);
             let serial: u32 = GenRandom::generate(rng);
-            let valid_region = GenRandom::generate(rng);
-            let update_region = GenRandom::generate(rng);
-            let valid_rect = GenRandom::generate(rng);
-            let update_rect = GenRandom::generate(rng);
+            let valid_region: xfixes::Region = GenRandom::generate(rng);
+            let update_region: xfixes::Region = GenRandom::generate(rng);
+            let valid_rect: xproto::Rectangle = GenRandom::generate(rng);
+            let update_rect: xproto::Rectangle = GenRandom::generate(rng);
             let x_off: i16 = GenRandom::generate(rng);
             let y_off: i16 = GenRandom::generate(rng);
-            let target_crtc = GenRandom::generate(rng);
-            let wait_fence = GenRandom::generate(rng);
-            let idle_fence = GenRandom::generate(rng);
+            let target_crtc: randr::Crtc = GenRandom::generate(rng);
+            let wait_fence: sync::Fence = GenRandom::generate(rng);
+            let idle_fence: sync::Fence = GenRandom::generate(rng);
             let options: u32 = GenRandom::generate(rng);
             let target_msc: u64 = GenRandom::generate(rng);
             let divisor: u64 = GenRandom::generate(rng);
             let remainder: u64 = GenRandom::generate(rng);
-            let notifies = GenRandom::generate(rng);
+            let notifies: Vec<Notify> = GenRandom::generate(rng);
             Self {
                 response_type,
                 extension,

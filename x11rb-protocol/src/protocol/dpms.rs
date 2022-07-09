@@ -153,8 +153,8 @@ impl Serialize for GetVersionReply {
 }
 #[cfg(test)]
 mod get_version_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::GetVersionReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -310,8 +310,8 @@ impl Serialize for CapableReply {
 }
 #[cfg(test)]
 mod capable_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::CapableReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -473,8 +473,8 @@ impl Serialize for GetTimeoutsReply {
 }
 #[cfg(test)]
 mod get_timeouts_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::GetTimeoutsReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -914,8 +914,8 @@ impl Serialize for InfoReply {
 }
 #[cfg(test)]
 mod info_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::InfoReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -924,7 +924,7 @@ mod info_reply {
         fn generate(rng: &Rng) -> Self {
             let sequence: u16 = GenRandom::generate(rng);
             let length: u32 = GenRandom::generate(rng);
-            let power_level = GenRandom::generate(rng);
+            let power_level: DPMSMode = GenRandom::generate(rng);
             let state: bool = GenRandom::generate(rng);
             Self {
                 sequence,

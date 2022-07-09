@@ -395,15 +395,15 @@ impl Serialize for ModeInfo {
 }
 #[cfg(test)]
 mod mode_info {
-    #![allow(dead_code, unused_imports)]
-    use super::ModeInfo;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for ModeInfo {
         fn generate(rng: &Rng) -> Self {
-            let dotclock = GenRandom::generate(rng);
+            let dotclock: Dotclock = GenRandom::generate(rng);
             let hdisplay: u16 = GenRandom::generate(rng);
             let hsyncstart: u16 = GenRandom::generate(rng);
             let hsyncend: u16 = GenRandom::generate(rng);
@@ -413,7 +413,7 @@ mod mode_info {
             let vsyncstart: u16 = GenRandom::generate(rng);
             let vsyncend: u16 = GenRandom::generate(rng);
             let vtotal: u16 = GenRandom::generate(rng);
-            let flags = GenRandom::generate(rng);
+            let flags: u32 = GenRandom::generate(rng);
             let privsize: u32 = GenRandom::generate(rng);
             Self {
                 dotclock,
@@ -550,8 +550,8 @@ impl Serialize for QueryVersionReply {
 }
 #[cfg(test)]
 mod query_version_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::QueryVersionReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -736,8 +736,8 @@ impl GetModeLineReply {
 }
 #[cfg(test)]
 mod get_mode_line_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::GetModeLineReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -747,7 +747,7 @@ mod get_mode_line_reply {
             let privsize = u32::from(rng.u8(..16));
             let sequence: u16 = GenRandom::generate(rng);
             let length: u32 = GenRandom::generate(rng);
-            let dotclock = GenRandom::generate(rng);
+            let dotclock: Dotclock = GenRandom::generate(rng);
             let hdisplay: u16 = GenRandom::generate(rng);
             let hsyncstart: u16 = GenRandom::generate(rng);
             let hsyncend: u16 = GenRandom::generate(rng);
@@ -757,7 +757,7 @@ mod get_mode_line_reply {
             let vsyncstart: u16 = GenRandom::generate(rng);
             let vsyncend: u16 = GenRandom::generate(rng);
             let vtotal: u16 = GenRandom::generate(rng);
-            let flags = GenRandom::generate(rng);
+            let flags: u32 = GenRandom::generate(rng);
             let private: Vec<u8> = gen_random_list(rng, usize::try_from(privsize).unwrap());
             Self {
                 sequence,
@@ -1189,22 +1189,22 @@ impl GetMonitorReply {
 }
 #[cfg(test)]
 mod get_monitor_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::GetMonitorReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for GetMonitorReply {
         fn generate(rng: &Rng) -> Self {
-            let model_length = u32::from(rng.u8(..16));
-            let num_vsync = u32::from(rng.u8(..16));
             let num_hsync = u32::from(rng.u8(..16));
             let vendor_length = u32::from(rng.u8(..16));
+            let model_length = u32::from(rng.u8(..16));
+            let num_vsync = u32::from(rng.u8(..16));
             let sequence: u16 = GenRandom::generate(rng);
             let length: u32 = GenRandom::generate(rng);
-            let hsync = gen_random_list(rng, usize::try_from(num_hsync).unwrap());
-            let vsync = gen_random_list(rng, usize::try_from(num_vsync).unwrap());
+            let hsync: Vec<Syncrange> = gen_random_list(rng, usize::try_from(num_hsync).unwrap());
+            let vsync: Vec<Syncrange> = gen_random_list(rng, usize::try_from(num_vsync).unwrap());
             let vendor: Vec<u8> = gen_random_list(rng, usize::try_from(vendor_length).unwrap());
             let alignment_pad: Vec<u8> = gen_random_list(rng, usize::try_from((u32::from(vendor_length).checked_add(3u32).unwrap() & (!3u32)).checked_sub(u32::from(vendor_length)).unwrap()).unwrap());
             let model: Vec<u8> = gen_random_list(rng, usize::try_from(model_length).unwrap());
@@ -1406,8 +1406,8 @@ impl GetAllModeLinesReply {
 }
 #[cfg(test)]
 mod get_all_mode_lines_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::GetAllModeLinesReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -1417,7 +1417,7 @@ mod get_all_mode_lines_reply {
             let modecount = u32::from(rng.u8(..16));
             let sequence: u16 = GenRandom::generate(rng);
             let length: u32 = GenRandom::generate(rng);
-            let modeinfo = gen_random_list(rng, usize::try_from(modecount).unwrap());
+            let modeinfo: Vec<ModeInfo> = gen_random_list(rng, usize::try_from(modecount).unwrap());
             Self {
                 sequence,
                 length,
@@ -2125,8 +2125,8 @@ impl Serialize for ValidateModeLineReply {
 }
 #[cfg(test)]
 mod validate_mode_line_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::ValidateModeLineReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -2464,8 +2464,8 @@ impl Serialize for GetViewPortReply {
 }
 #[cfg(test)]
 mod get_view_port_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::GetViewPortReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -2676,8 +2676,8 @@ impl Serialize for GetDotClocksReply {
 }
 #[cfg(test)]
 mod get_dot_clocks_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::GetDotClocksReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -2686,7 +2686,7 @@ mod get_dot_clocks_reply {
         fn generate(rng: &Rng) -> Self {
             let sequence: u16 = GenRandom::generate(rng);
             let length: u32 = GenRandom::generate(rng);
-            let flags = GenRandom::generate(rng);
+            let flags: u32 = GenRandom::generate(rng);
             let clocks: u32 = GenRandom::generate(rng);
             let maxclocks: u32 = GenRandom::generate(rng);
             let clock: Vec<u32> = gen_random_list(rng, usize::try_from(1u32.checked_sub(flags & 1u32).unwrap().checked_mul(clocks).unwrap()).unwrap());
@@ -3027,8 +3027,8 @@ impl Serialize for GetGammaReply {
 }
 #[cfg(test)]
 mod get_gamma_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::GetGammaReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -3176,8 +3176,8 @@ impl Serialize for GetGammaRampReply {
 }
 #[cfg(test)]
 mod get_gamma_ramp_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::GetGammaRampReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -3434,8 +3434,8 @@ impl Serialize for GetGammaRampSizeReply {
 }
 #[cfg(test)]
 mod get_gamma_ramp_size_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::GetGammaRampSizeReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -3599,8 +3599,8 @@ impl Serialize for GetPermissionsReply {
 }
 #[cfg(test)]
 mod get_permissions_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::GetPermissionsReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -3609,7 +3609,7 @@ mod get_permissions_reply {
         fn generate(rng: &Rng) -> Self {
             let sequence: u16 = GenRandom::generate(rng);
             let length: u32 = GenRandom::generate(rng);
-            let permissions = GenRandom::generate(rng);
+            let permissions: u32 = GenRandom::generate(rng);
             Self {
                 sequence,
                 length,

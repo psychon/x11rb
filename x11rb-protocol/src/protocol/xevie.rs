@@ -175,8 +175,8 @@ impl Serialize for QueryVersionReply {
 }
 #[cfg(test)]
 mod query_version_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::QueryVersionReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -337,8 +337,8 @@ impl Serialize for StartReply {
 }
 #[cfg(test)]
 mod start_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::StartReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -495,8 +495,8 @@ impl Serialize for EndReply {
 }
 #[cfg(test)]
 mod end_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::EndReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -660,14 +660,15 @@ impl Serialize for Event {
 }
 #[cfg(test)]
 mod event {
-    #![allow(dead_code, unused_imports)]
-    use super::Event;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for Event {
         fn generate(rng: &Rng) -> Self {
+            let _ = rng;
             Self {
             }
         }
@@ -915,8 +916,8 @@ impl Serialize for SendReply {
 }
 #[cfg(test)]
 mod send_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::SendReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -1073,8 +1074,8 @@ impl Serialize for SelectInputReply {
 }
 #[cfg(test)]
 mod select_input_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::SelectInputReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;

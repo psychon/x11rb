@@ -163,8 +163,8 @@ impl Serialize for QueryVersionReply {
 }
 #[cfg(test)]
 mod query_version_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::QueryVersionReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -337,8 +337,8 @@ impl Serialize for OpenReply {
 }
 #[cfg(test)]
 mod open_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::OpenReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -348,7 +348,7 @@ mod open_reply {
             let nfd: u8 = GenRandom::generate(rng);
             let sequence: u16 = GenRandom::generate(rng);
             let length: u32 = GenRandom::generate(rng);
-            let device_fd = GenRandom::generate(rng);
+            let device_fd: RawFdContainer = GenRandom::generate(rng);
             Self {
                 nfd,
                 sequence,
@@ -627,8 +627,8 @@ impl Serialize for BufferFromPixmapReply {
 }
 #[cfg(test)]
 mod buffer_from_pixmap_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::BufferFromPixmapReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -644,7 +644,7 @@ mod buffer_from_pixmap_reply {
             let stride: u16 = GenRandom::generate(rng);
             let depth: u8 = GenRandom::generate(rng);
             let bpp: u8 = GenRandom::generate(rng);
-            let pixmap_fd = GenRandom::generate(rng);
+            let pixmap_fd: RawFdContainer = GenRandom::generate(rng);
             Self {
                 nfd,
                 sequence,
@@ -886,8 +886,8 @@ impl Serialize for FDFromFenceReply {
 }
 #[cfg(test)]
 mod fd_from_fence_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::FDFromFenceReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -897,7 +897,7 @@ mod fd_from_fence_reply {
             let nfd: u8 = GenRandom::generate(rng);
             let sequence: u16 = GenRandom::generate(rng);
             let length: u32 = GenRandom::generate(rng);
-            let fence_fd = GenRandom::generate(rng);
+            let fence_fd: RawFdContainer = GenRandom::generate(rng);
             Self {
                 nfd,
                 sequence,
@@ -1067,16 +1067,16 @@ impl GetSupportedModifiersReply {
 }
 #[cfg(test)]
 mod get_supported_modifiers_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::GetSupportedModifiersReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
     use fastrand::Rng;
     impl GenRandom for GetSupportedModifiersReply {
         fn generate(rng: &Rng) -> Self {
-            let num_screen_modifiers = u32::from(rng.u8(..16));
             let num_window_modifiers = u32::from(rng.u8(..16));
+            let num_screen_modifiers = u32::from(rng.u8(..16));
             let sequence: u16 = GenRandom::generate(rng);
             let length: u32 = GenRandom::generate(rng);
             let window_modifiers: Vec<u64> = gen_random_list(rng, usize::try_from(num_window_modifiers).unwrap());
@@ -1417,8 +1417,8 @@ impl BuffersFromPixmapReply {
 }
 #[cfg(test)]
 mod buffers_from_pixmap_reply {
-    #![allow(dead_code, unused_imports)]
-    use super::BuffersFromPixmapReply;
+    #![allow(dead_code, unused_imports, clippy::useless_conversion)]
+    use super::*;
     use crate::x11_utils::{GenRandom, Serialize, gen_random_list};
     use alloc::vec::Vec;
     use core::convert::TryFrom;
@@ -1435,7 +1435,7 @@ mod buffers_from_pixmap_reply {
             let bpp: u8 = GenRandom::generate(rng);
             let strides: Vec<u32> = gen_random_list(rng, usize::try_from(nfd).unwrap());
             let offsets: Vec<u32> = gen_random_list(rng, usize::try_from(nfd).unwrap());
-            let buffers = GenRandom::generate(rng);
+            let buffers: Vec<RawFdContainer> = GenRandom::generate(rng);
             Self {
                 sequence,
                 length,
