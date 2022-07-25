@@ -71,7 +71,7 @@
 //! }
 //! ```
 //! More examples can be found in the
-//! [examples](https://github.com/psychon/x11rb/tree/master/examples) directory.
+//! [examples](https://github.com/psychon/x11rb/tree/master/x11rb/examples) directory.
 //!
 //! ## Feature flags
 //!
