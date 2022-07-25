@@ -18,6 +18,9 @@ serde = { version = "1", features = ["derive"], optional = true }
 
 [dev-dependencies]
 criterion = "0.3"
+# FIXME: Remove this when possible. plotters v0.3.2 no longer builds with Rust
+# 1.46, which is currently our MSRV. Thus, make cargo not pick that version.
+plotters = "= 0.3.1"
 
 [target.'cfg(unix)'.dependencies.nix]
 version = "0.24"
