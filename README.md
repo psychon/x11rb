@@ -34,7 +34,7 @@ of sending multiple requests and only afterwards wait for the replies.
 ## Crate features
 
 Most X11 extensions are feature-gated. For example, to use the shared memory
-extansion, the `shm` feature has to be enabled.
+extension, the `shm` feature has to be enabled.
 
 The `all-extensions` feature just enables all X11 extensions.
 
