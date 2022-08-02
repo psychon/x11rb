@@ -85,7 +85,6 @@ jobs:
     strategy:
       matrix:
         include:
-          - rust: 1.46.0
           - rust: stable
           - rust: beta
           - rust: nightly
@@ -166,6 +165,26 @@ jobs:
         flags: tests
         verbose: true
       continue-on-error: true
+
+  msrv-check:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: 1.46.0
+        override: true
+          #
+    # build
+    - name: cargo check x11rb-protocol with all features
+      run: cargo build --package x11rb-protocol --verbose --lib --all-features
+    - name: cargo check x11rb with all features
+      run: cargo build --package x11rb --verbose --lib --all-features
+
+    # build no_std
+    - name: cargo check protocol without default features
+      run: cargo build --manifest-path x11rb-protocol/Cargo.toml --no-default-features --features=all-extensions
 
   big-endian-test:
     runs-on: ubuntu-latest
