@@ -153,7 +153,6 @@ where
         visual_id,
         &win_aux,
     )?;
-    conn.free_colormap(colormap)?;
 
     let title = "Simple Window";
     conn.change_property8(
@@ -243,10 +242,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let atoms = AtomCollection::new(&conn)?.reply()?;
     let (mut width, mut height) = (100, 100);
     let (depth, visualid) = choose_visual(&conn, screen_num)?;
+    println!("Using visual {:#x} with depth {}", visualid, depth);
 
     // Check if a composite manager is running. In a real application, we should also react to a
     // composite manager starting/stopping at runtime.
     let transparency = composite_manager_running(&conn, screen_num)?;
+    println!(
+        "Composite manager running / working transparency: {:?}",
+        transparency
+    );
 
     let window = create_window(&conn, screen, &atoms, (width, height), depth, visualid)?;
 
