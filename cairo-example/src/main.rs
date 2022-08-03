@@ -153,7 +153,6 @@ where
         visual_id,
         &win_aux,
     )?;
-    conn.free_colormap(colormap)?;
 
     let title = "Simple Window";
     conn.change_property8(
