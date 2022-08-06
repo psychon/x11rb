@@ -543,6 +543,7 @@ impl SelectInputRequest {
         }
         let (drawable, remaining) = xproto::Drawable::try_parse(value)?;
         let (event_mask, remaining) = u32::try_parse(remaining)?;
+        let event_mask = event_mask.into();
         let _ = remaining;
         Ok(SelectInputRequest {
             drawable,
@@ -681,6 +682,7 @@ impl SetAttributesAux {
         let event_mask = if switch_expr & u32::from(xproto::CW::EVENT_MASK) != 0 {
             let remaining = outer_remaining;
             let (event_mask, remaining) = u32::try_parse(remaining)?;
+            let event_mask = event_mask.into();
             outer_remaining = remaining;
             Some(event_mask)
         } else {
@@ -689,6 +691,7 @@ impl SetAttributesAux {
         let do_not_propogate_mask = if switch_expr & u32::from(xproto::CW::DONT_PROPAGATE) != 0 {
             let remaining = outer_remaining;
             let (do_not_propogate_mask, remaining) = u32::try_parse(remaining)?;
+            let do_not_propogate_mask = do_not_propogate_mask.into();
             outer_remaining = remaining;
             Some(do_not_propogate_mask)
         } else {

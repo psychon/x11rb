@@ -564,6 +564,7 @@ impl TryParse for AdaptorInfo {
         let misalignment = (4 - (offset % 4)) % 4;
         let remaining = remaining.get(misalignment..).ok_or(ParseError::InsufficientData)?;
         let (formats, remaining) = crate::x11_utils::parse_list::<Format>(remaining, num_formats.try_to_usize()?)?;
+        let type_ = type_.into();
         let result = AdaptorInfo { base_id, num_ports, type_, name, formats };
         Ok((result, remaining))
     }
@@ -780,6 +781,7 @@ impl TryParse for AttributeInfo {
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
         let remaining = remaining.get(misalignment..).ok_or(ParseError::InsufficientData)?;
+        let flags = flags.into();
         let result = AttributeInfo { flags, min, max, name };
         Ok((result, remaining))
     }

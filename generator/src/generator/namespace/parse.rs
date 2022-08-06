@@ -310,14 +310,17 @@ fn emit_value_parse(
 }
 
 fn emit_value_post_parse(type_: &xcbdefs::FieldValueType, var_name: &str, out: &mut Output) {
-    if let xcbdefs::FieldValueSet::Enum(_) = type_.value_set {
+    if let xcbdefs::FieldValueSet::Enum(_) | xcbdefs::FieldValueSet::Mask(_) = type_.value_set {
         // Handle turning things into enum instances.
         outln!(out, "let {var} = {var}.into();", var = var_name);
     }
 }
 
 fn needs_post_parse(type_: &xcbdefs::FieldValueType) -> bool {
-    matches!(type_.value_set, xcbdefs::FieldValueSet::Enum(_))
+    matches!(
+        type_.value_set,
+        xcbdefs::FieldValueSet::Enum(_) | xcbdefs::FieldValueSet::Mask(_)
+    )
 }
 
 pub(super) fn can_use_simple_list_parsing(

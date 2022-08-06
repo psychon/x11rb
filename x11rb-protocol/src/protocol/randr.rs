@@ -480,6 +480,7 @@ impl SetScreenConfigRequest {
         let (config_timestamp, remaining) = xproto::Timestamp::try_parse(remaining)?;
         let (size_id, remaining) = u16::try_parse(remaining)?;
         let (rotation, remaining) = u16::try_parse(remaining)?;
+        let rotation = rotation.into();
         let (rate, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let _ = remaining;
@@ -710,6 +711,7 @@ impl SelectInputRequest {
         }
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let (enable, remaining) = u16::try_parse(remaining)?;
+        let enable = enable.into();
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let _ = remaining;
         Ok(SelectInputRequest {
@@ -822,6 +824,8 @@ impl TryParse for GetScreenInfoReply {
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
+        let rotations = rotations.into();
+        let rotation = rotation.into();
         let result = GetScreenInfoReply { rotations, sequence, length, root, timestamp, config_timestamp, size_id, rotation, rate, n_info, sizes, rates };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
@@ -1205,6 +1209,7 @@ impl TryParse for ModeInfo {
         let (vtotal, remaining) = u16::try_parse(remaining)?;
         let (name_len, remaining) = u16::try_parse(remaining)?;
         let (mode_flags, remaining) = u32::try_parse(remaining)?;
+        let mode_flags = mode_flags.into();
         let result = ModeInfo { id, width, height, dot_clock, hsync_start, hsync_end, htotal, hskew, vsync_start, vsync_end, vtotal, name_len, mode_flags };
         Ok((result, remaining))
     }
@@ -2860,6 +2865,8 @@ impl TryParse for GetCrtcInfoReply {
             return Err(ParseError::InvalidValue);
         }
         let status = status.into();
+        let rotation = rotation.into();
+        let rotations = rotations.into();
         let result = GetCrtcInfoReply { status, sequence, length, timestamp, x, y, width, height, mode, rotation, rotations, outputs, possible };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
@@ -3003,6 +3010,7 @@ impl<'input> SetCrtcConfigRequest<'input> {
         let (y, remaining) = i16::try_parse(remaining)?;
         let (mode, remaining) = Mode::try_parse(remaining)?;
         let (rotation, remaining) = u16::try_parse(remaining)?;
+        let rotation = rotation.into();
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let mut remaining = remaining;
         // Length is 'everything left in the input'
@@ -4886,6 +4894,7 @@ impl TryParse for GetProviderInfoReply {
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
+        let capabilities = capabilities.into();
         let result = GetProviderInfoReply { status, sequence, length, timestamp, capabilities, crtcs, outputs, associated_providers, associated_capability, name };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
@@ -5826,6 +5835,7 @@ impl TryParse for ScreenChangeNotifyEvent {
         let (height, remaining) = u16::try_parse(remaining)?;
         let (mwidth, remaining) = u16::try_parse(remaining)?;
         let (mheight, remaining) = u16::try_parse(remaining)?;
+        let rotation = rotation.into();
         let subpixel_order = subpixel_order.into();
         let result = ScreenChangeNotifyEvent { response_type, rotation, sequence, timestamp, config_timestamp, root, request_window, size_id, subpixel_order, width, height, mwidth, mheight };
         let _ = remaining;
@@ -6053,6 +6063,7 @@ impl TryParse for CrtcChange {
         let (y, remaining) = i16::try_parse(remaining)?;
         let (width, remaining) = u16::try_parse(remaining)?;
         let (height, remaining) = u16::try_parse(remaining)?;
+        let rotation = rotation.into();
         let result = CrtcChange { timestamp, window, crtc, mode, rotation, x, y, width, height };
         Ok((result, remaining))
     }
@@ -6139,6 +6150,7 @@ impl TryParse for OutputChange {
         let (rotation, remaining) = u16::try_parse(remaining)?;
         let (connection, remaining) = u8::try_parse(remaining)?;
         let (subpixel_order, remaining) = u8::try_parse(remaining)?;
+        let rotation = rotation.into();
         let connection = connection.into();
         let subpixel_order = subpixel_order.into();
         let result = OutputChange { timestamp, config_timestamp, window, output, crtc, mode, rotation, connection, subpixel_order };

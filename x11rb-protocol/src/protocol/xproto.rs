@@ -644,6 +644,7 @@ impl TryParse for Screen {
         let (root_depth, remaining) = u8::try_parse(remaining)?;
         let (allowed_depths_len, remaining) = u8::try_parse(remaining)?;
         let (allowed_depths, remaining) = crate::x11_utils::parse_list::<Depth>(remaining, allowed_depths_len.try_to_usize()?)?;
+        let current_input_masks = current_input_masks.into();
         let backing_stores = backing_stores.into();
         let result = Screen { root, default_colormap, white_pixel, black_pixel, current_input_masks, width_in_pixels, height_in_pixels, width_in_millimeters, height_in_millimeters, min_installed_maps, max_installed_maps, root_visual, backing_stores, save_unders, root_depth, allowed_depths };
         Ok((result, remaining))
@@ -1348,6 +1349,7 @@ impl TryParse for KeyPressEvent {
         let (state, remaining) = u16::try_parse(remaining)?;
         let (same_screen, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
+        let state = state.into();
         let result = KeyPressEvent { response_type, detail, sequence, time, root, event, child, root_x, root_y, event_x, event_y, state, same_screen };
         let _ = remaining;
         let remaining = initial_value.get(32..)
@@ -1607,6 +1609,7 @@ impl TryParse for ButtonPressEvent {
         let (state, remaining) = u16::try_parse(remaining)?;
         let (same_screen, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
+        let state = state.into();
         let result = ButtonPressEvent { response_type, detail, sequence, time, root, event, child, root_x, root_y, event_x, event_y, state, same_screen };
         let _ = remaining;
         let remaining = initial_value.get(32..)
@@ -1864,6 +1867,7 @@ impl TryParse for MotionNotifyEvent {
         let (same_screen, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let detail = detail.into();
+        let state = state.into();
         let result = MotionNotifyEvent { response_type, detail, sequence, time, root, event, child, root_x, root_y, event_x, event_y, state, same_screen };
         let _ = remaining;
         let remaining = initial_value.get(32..)
@@ -2184,6 +2188,7 @@ impl TryParse for EnterNotifyEvent {
         let (mode, remaining) = u8::try_parse(remaining)?;
         let (same_screen_focus, remaining) = u8::try_parse(remaining)?;
         let detail = detail.into();
+        let state = state.into();
         let mode = mode.into();
         let result = EnterNotifyEvent { response_type, detail, sequence, time, root, event, child, root_x, root_y, event_x, event_y, state, mode, same_screen_focus };
         let _ = remaining;
@@ -4129,6 +4134,7 @@ impl TryParse for ConfigureRequestEvent {
         let (border_width, remaining) = u16::try_parse(remaining)?;
         let (value_mask, remaining) = u16::try_parse(remaining)?;
         let stack_mode = stack_mode.into();
+        let value_mask = value_mask.into();
         let result = ConfigureRequestEvent { response_type, stack_mode, sequence, parent, window, sibling, x, y, width, height, border_width, value_mask };
         let _ = remaining;
         let remaining = initial_value.get(32..)
@@ -6873,6 +6879,7 @@ impl CreateWindowAux {
         let event_mask = if switch_expr & u32::from(CW::EVENT_MASK) != 0 {
             let remaining = outer_remaining;
             let (event_mask, remaining) = u32::try_parse(remaining)?;
+            let event_mask = event_mask.into();
             outer_remaining = remaining;
             Some(event_mask)
         } else {
@@ -6881,6 +6888,7 @@ impl CreateWindowAux {
         let do_not_propogate_mask = if switch_expr & u32::from(CW::DONT_PROPAGATE) != 0 {
             let remaining = outer_remaining;
             let (do_not_propogate_mask, remaining) = u32::try_parse(remaining)?;
+            let do_not_propogate_mask = do_not_propogate_mask.into();
             outer_remaining = remaining;
             Some(do_not_propogate_mask)
         } else {
@@ -7424,6 +7432,7 @@ impl ChangeWindowAttributesAux {
         let event_mask = if switch_expr & u32::from(CW::EVENT_MASK) != 0 {
             let remaining = outer_remaining;
             let (event_mask, remaining) = u32::try_parse(remaining)?;
+            let event_mask = event_mask.into();
             outer_remaining = remaining;
             Some(event_mask)
         } else {
@@ -7432,6 +7441,7 @@ impl ChangeWindowAttributesAux {
         let do_not_propogate_mask = if switch_expr & u32::from(CW::DONT_PROPAGATE) != 0 {
             let remaining = outer_remaining;
             let (do_not_propogate_mask, remaining) = u32::try_parse(remaining)?;
+            let do_not_propogate_mask = do_not_propogate_mask.into();
             outer_remaining = remaining;
             Some(do_not_propogate_mask)
         } else {
@@ -7955,6 +7965,9 @@ impl TryParse for GetWindowAttributesReply {
         let bit_gravity = bit_gravity.into();
         let win_gravity = win_gravity.into();
         let map_state = map_state.into();
+        let all_event_masks = all_event_masks.into();
+        let your_event_mask = your_event_mask.into();
+        let do_not_propagate_mask = do_not_propagate_mask.into();
         let result = GetWindowAttributesReply { backing_store, sequence, length, visual, class, bit_gravity, win_gravity, backing_planes, backing_pixel, save_under, map_is_installed, map_state, override_redirect, colormap, all_event_masks, your_event_mask, do_not_propagate_mask };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
@@ -11353,6 +11366,7 @@ impl<'input> SendEventRequest<'input> {
         let _ = remaining;
         let (destination, remaining) = Window::try_parse(value)?;
         let (event_mask, remaining) = u32::try_parse(remaining)?;
+        let event_mask = event_mask.into();
         let (event, remaining) = crate::x11_utils::parse_u8_list(remaining, 32)?;
         let event = <&[u8; 32]>::try_from(event).unwrap();
         let _ = remaining;
@@ -11712,6 +11726,7 @@ impl GrabPointerRequest {
         let _ = remaining;
         let (grab_window, remaining) = Window::try_parse(value)?;
         let (event_mask, remaining) = u16::try_parse(remaining)?;
+        let event_mask = event_mask.into();
         let (pointer_mode, remaining) = u8::try_parse(remaining)?;
         let pointer_mode = pointer_mode.into();
         let (keyboard_mode, remaining) = u8::try_parse(remaining)?;
@@ -12090,6 +12105,7 @@ impl GrabButtonRequest {
         let _ = remaining;
         let (grab_window, remaining) = Window::try_parse(value)?;
         let (event_mask, remaining) = u16::try_parse(remaining)?;
+        let event_mask = event_mask.into();
         let (pointer_mode, remaining) = u8::try_parse(remaining)?;
         let pointer_mode = pointer_mode.into();
         let (keyboard_mode, remaining) = u8::try_parse(remaining)?;
@@ -12100,6 +12116,7 @@ impl GrabButtonRequest {
         let button = button.into();
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (modifiers, remaining) = u16::try_parse(remaining)?;
+        let modifiers = modifiers.into();
         let _ = remaining;
         Ok(GrabButtonRequest {
             owner_events,
@@ -12174,6 +12191,7 @@ impl UngrabButtonRequest {
         let _ = remaining;
         let (grab_window, remaining) = Window::try_parse(value)?;
         let (modifiers, remaining) = u16::try_parse(remaining)?;
+        let modifiers = modifiers.into();
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let _ = remaining;
         Ok(UngrabButtonRequest {
@@ -12247,6 +12265,7 @@ impl ChangeActivePointerGrabRequest {
         let (cursor, remaining) = Cursor::try_parse(value)?;
         let (time, remaining) = Timestamp::try_parse(remaining)?;
         let (event_mask, remaining) = u16::try_parse(remaining)?;
+        let event_mask = event_mask.into();
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let _ = remaining;
         Ok(ChangeActivePointerGrabRequest {
@@ -12696,6 +12715,7 @@ impl GrabKeyRequest {
         let _ = remaining;
         let (grab_window, remaining) = Window::try_parse(value)?;
         let (modifiers, remaining) = u16::try_parse(remaining)?;
+        let modifiers = modifiers.into();
         let (key, remaining) = Keycode::try_parse(remaining)?;
         let (pointer_mode, remaining) = u8::try_parse(remaining)?;
         let pointer_mode = pointer_mode.into();
@@ -12797,6 +12817,7 @@ impl UngrabKeyRequest {
         let _ = remaining;
         let (grab_window, remaining) = Window::try_parse(value)?;
         let (modifiers, remaining) = u16::try_parse(remaining)?;
+        let modifiers = modifiers.into();
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let _ = remaining;
         Ok(UngrabKeyRequest {
@@ -13242,6 +13263,7 @@ impl TryParse for QueryPointerReply {
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
+        let mask = mask.into();
         let result = QueryPointerReply { same_screen, sequence, length, root, child, root_x, root_y, win_x, win_y, mask };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
@@ -17615,6 +17637,7 @@ impl CopyGCRequest {
         let (src_gc, remaining) = Gcontext::try_parse(value)?;
         let (dst_gc, remaining) = Gcontext::try_parse(remaining)?;
         let (value_mask, remaining) = u32::try_parse(remaining)?;
+        let value_mask = value_mask.into();
         let _ = remaining;
         Ok(CopyGCRequest {
             src_gc,
@@ -21342,6 +21365,7 @@ impl TryParse for Coloritem {
         let (blue, remaining) = u16::try_parse(remaining)?;
         let (flags, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
+        let flags = flags.into();
         let result = Coloritem { pixel, red, green, blue, flags };
         Ok((result, remaining))
     }
@@ -21510,6 +21534,7 @@ impl<'input> StoreNamedColorRequest<'input> {
         }
         let remaining = &[header.minor_opcode];
         let (flags, remaining) = u8::try_parse(remaining)?;
+        let flags = flags.into();
         let _ = remaining;
         let (cmap, remaining) = Colormap::try_parse(value)?;
         let (pixel, remaining) = u32::try_parse(remaining)?;

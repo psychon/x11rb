@@ -930,6 +930,7 @@ impl SelectInputRequest {
         let (eid, remaining) = Event::try_parse(value)?;
         let (window, remaining) = xproto::Window::try_parse(remaining)?;
         let (event_mask, remaining) = u32::try_parse(remaining)?;
+        let event_mask = event_mask.into();
         let _ = remaining;
         Ok(SelectInputRequest {
             eid,

@@ -166,6 +166,7 @@ impl TryParse for ClientIdSpec {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (client, remaining) = u32::try_parse(remaining)?;
         let (mask, remaining) = u32::try_parse(remaining)?;
+        let mask = mask.into();
         let result = ClientIdSpec { client, mask };
         Ok((result, remaining))
     }

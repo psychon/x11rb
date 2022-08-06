@@ -232,6 +232,7 @@ impl TryParse for ModeInfo {
         let (flags, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::InsufficientData)?;
         let (privsize, remaining) = u32::try_parse(remaining)?;
+        let flags = flags.into();
         let result = ModeInfo { dotclock, hdisplay, hsyncstart, hsyncend, htotal, hskew, vdisplay, vsyncstart, vsyncend, vtotal, flags, privsize };
         Ok((result, remaining))
     }
@@ -527,6 +528,7 @@ impl TryParse for GetModeLineReply {
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
+        let flags = flags.into();
         let result = GetModeLineReply { sequence, length, dotclock, hdisplay, hsyncstart, hsyncend, htotal, hskew, vdisplay, vsyncstart, vsyncend, vtotal, flags, private };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
@@ -693,6 +695,7 @@ impl<'input> ModModeLineRequest<'input> {
         let (vtotal, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (flags, remaining) = u32::try_parse(remaining)?;
+        let flags = flags.into();
         let remaining = remaining.get(12..).ok_or(ParseError::InsufficientData)?;
         let (privsize, remaining) = u32::try_parse(remaining)?;
         let (private, remaining) = crate::x11_utils::parse_u8_list(remaining, privsize.try_to_usize()?)?;
@@ -1337,6 +1340,7 @@ impl<'input> AddModeLineRequest<'input> {
         let (vtotal, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (flags, remaining) = u32::try_parse(remaining)?;
+        let flags = flags.into();
         let remaining = remaining.get(12..).ok_or(ParseError::InsufficientData)?;
         let (privsize, remaining) = u32::try_parse(remaining)?;
         let (after_dotclock, remaining) = Dotclock::try_parse(remaining)?;
@@ -1351,6 +1355,7 @@ impl<'input> AddModeLineRequest<'input> {
         let (after_vtotal, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (after_flags, remaining) = u32::try_parse(remaining)?;
+        let after_flags = after_flags.into();
         let remaining = remaining.get(12..).ok_or(ParseError::InsufficientData)?;
         let (private, remaining) = crate::x11_utils::parse_u8_list(remaining, privsize.try_to_usize()?)?;
         let _ = remaining;
@@ -1542,6 +1547,7 @@ impl<'input> DeleteModeLineRequest<'input> {
         let (vtotal, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (flags, remaining) = u32::try_parse(remaining)?;
+        let flags = flags.into();
         let remaining = remaining.get(12..).ok_or(ParseError::InsufficientData)?;
         let (privsize, remaining) = u32::try_parse(remaining)?;
         let (private, remaining) = crate::x11_utils::parse_u8_list(remaining, privsize.try_to_usize()?)?;
@@ -1712,6 +1718,7 @@ impl<'input> ValidateModeLineRequest<'input> {
         let (vtotal, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (flags, remaining) = u32::try_parse(remaining)?;
+        let flags = flags.into();
         let remaining = remaining.get(12..).ok_or(ParseError::InsufficientData)?;
         let (privsize, remaining) = u32::try_parse(remaining)?;
         let (private, remaining) = crate::x11_utils::parse_u8_list(remaining, privsize.try_to_usize()?)?;
@@ -1963,6 +1970,7 @@ impl<'input> SwitchToModeRequest<'input> {
         let (vtotal, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (flags, remaining) = u32::try_parse(remaining)?;
+        let flags = flags.into();
         let remaining = remaining.get(12..).ok_or(ParseError::InsufficientData)?;
         let (privsize, remaining) = u32::try_parse(remaining)?;
         let (private, remaining) = crate::x11_utils::parse_u8_list(remaining, privsize.try_to_usize()?)?;
@@ -2304,6 +2312,7 @@ impl TryParse for GetDotClocksReply {
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
+        let flags = flags.into();
         let result = GetDotClocksReply { sequence, length, flags, clocks, maxclocks, clock };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
@@ -3060,6 +3069,7 @@ impl TryParse for GetPermissionsReply {
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
+        let permissions = permissions.into();
         let result = GetPermissionsReply { sequence, length, permissions };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)

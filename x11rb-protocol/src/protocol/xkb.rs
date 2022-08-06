@@ -1928,6 +1928,10 @@ impl TryParse for IndicatorMap {
         let which_groups = which_groups.into();
         let groups = groups.into();
         let which_mods = which_mods.into();
+        let mods = mods.into();
+        let real_mods = real_mods.into();
+        let vmods = vmods.into();
+        let ctrls = ctrls.into();
         let result = IndicatorMap { flags, which_groups, groups, which_mods, mods, real_mods, vmods, ctrls };
         Ok((result, remaining))
     }
@@ -2295,6 +2299,9 @@ impl TryParse for ModDef {
         let (mask, remaining) = u8::try_parse(remaining)?;
         let (real_mods, remaining) = u8::try_parse(remaining)?;
         let (vmods, remaining) = u16::try_parse(remaining)?;
+        let mask = mask.into();
+        let real_mods = real_mods.into();
+        let vmods = vmods.into();
         let result = ModDef { mask, real_mods, vmods };
         Ok((result, remaining))
     }
@@ -2451,6 +2458,9 @@ impl TryParse for KTMapEntry {
         let (mods_mods, remaining) = u8::try_parse(remaining)?;
         let (mods_vmods, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
+        let mods_mask = mods_mask.into();
+        let mods_mods = mods_mods.into();
+        let mods_vmods = mods_vmods.into();
         let result = KTMapEntry { active, mods_mask, level, mods_mods, mods_vmods };
         Ok((result, remaining))
     }
@@ -2507,6 +2517,9 @@ impl TryParse for KeyType {
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (map, remaining) = crate::x11_utils::parse_list::<KTMapEntry>(remaining, n_map_entries.try_to_usize()?)?;
         let (preserve, remaining) = crate::x11_utils::parse_list::<ModDef>(remaining, u32::from(has_preserve).checked_mul(u32::from(n_map_entries)).ok_or(ParseError::InvalidExpression)?.try_to_usize()?)?;
+        let mods_mask = mods_mask.into();
+        let mods_mods = mods_mods.into();
+        let mods_vmods = mods_vmods.into();
         let result = KeyType { mods_mask, mods_mods, mods_vmods, num_levels, has_preserve, map, preserve };
         Ok((result, remaining))
     }
@@ -2997,6 +3010,7 @@ impl TryParse for SetExplicit {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (keycode, remaining) = xproto::Keycode::try_parse(remaining)?;
         let (explicit, remaining) = u8::try_parse(remaining)?;
+        let explicit = explicit.into();
         let result = SetExplicit { keycode, explicit };
         Ok((result, remaining))
     }
@@ -3028,6 +3042,7 @@ impl TryParse for KeyModMap {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (keycode, remaining) = xproto::Keycode::try_parse(remaining)?;
         let (mods, remaining) = u8::try_parse(remaining)?;
+        let mods = mods.into();
         let result = KeyModMap { keycode, mods };
         Ok((result, remaining))
     }
@@ -3060,6 +3075,7 @@ impl TryParse for KeyVModMap {
         let (keycode, remaining) = xproto::Keycode::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (vmods, remaining) = u16::try_parse(remaining)?;
+        let vmods = vmods.into();
         let result = KeyVModMap { keycode, vmods };
         Ok((result, remaining))
     }
@@ -3096,6 +3112,8 @@ impl TryParse for KTSetMapEntry {
         let (level, remaining) = u8::try_parse(remaining)?;
         let (real_mods, remaining) = u8::try_parse(remaining)?;
         let (virtual_mods, remaining) = u16::try_parse(remaining)?;
+        let real_mods = real_mods.into();
+        let virtual_mods = virtual_mods.into();
         let result = KTSetMapEntry { level, real_mods, virtual_mods };
         Ok((result, remaining))
     }
@@ -3143,6 +3161,9 @@ impl TryParse for SetKeyType {
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (entries, remaining) = crate::x11_utils::parse_list::<KTSetMapEntry>(remaining, n_map_entries.try_to_usize()?)?;
         let (preserve_entries, remaining) = crate::x11_utils::parse_list::<KTSetMapEntry>(remaining, u32::from(preserve).checked_mul(u32::from(n_map_entries)).ok_or(ParseError::InvalidExpression)?.try_to_usize()?)?;
+        let mask = mask.into();
+        let real_mods = real_mods.into();
+        let virtual_mods = virtual_mods.into();
         let result = SetKeyType { mask, real_mods, virtual_mods, num_levels, preserve, entries, preserve_entries };
         Ok((result, remaining))
     }
@@ -3969,6 +3990,11 @@ impl TryParse for SASetMods {
         let (vmods_low, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let type_ = type_.into();
+        let flags = flags.into();
+        let mask = mask.into();
+        let real_mods = real_mods.into();
+        let vmods_high = vmods_high.into();
+        let vmods_low = vmods_low.into();
         let result = SASetMods { type_, flags, mask, real_mods, vmods_high, vmods_low };
         Ok((result, remaining))
     }
@@ -4023,6 +4049,7 @@ impl TryParse for SASetGroup {
         let (group, remaining) = i8::try_parse(remaining)?;
         let remaining = remaining.get(5..).ok_or(ParseError::InsufficientData)?;
         let type_ = type_.into();
+        let flags = flags.into();
         let result = SASetGroup { type_, flags, group };
         Ok((result, remaining))
     }
@@ -4139,6 +4166,7 @@ impl TryParse for SAMovePtr {
         let (y_low, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let type_ = type_.into();
+        let flags = flags.into();
         let result = SAMovePtr { type_, flags, x_high, x_low, y_high, y_low };
         Ok((result, remaining))
     }
@@ -4345,6 +4373,8 @@ impl TryParse for SASetPtrDflt {
         let (value, remaining) = i8::try_parse(remaining)?;
         let remaining = remaining.get(4..).ok_or(ParseError::InsufficientData)?;
         let type_ = type_.into();
+        let flags = flags.into();
+        let affect = affect.into();
         let result = SASetPtrDflt { type_, flags, affect, value };
         Ok((result, remaining))
     }
@@ -4530,6 +4560,12 @@ impl TryParse for SAIsoLock {
         let (vmods_high, remaining) = u8::try_parse(remaining)?;
         let (vmods_low, remaining) = u8::try_parse(remaining)?;
         let type_ = type_.into();
+        let flags = flags.into();
+        let mask = mask.into();
+        let real_mods = real_mods.into();
+        let affect = affect.into();
+        let vmods_high = vmods_high.into();
+        let vmods_low = vmods_low.into();
         let result = SAIsoLock { type_, flags, mask, real_mods, group, affect, vmods_high, vmods_low };
         Ok((result, remaining))
     }
@@ -4862,6 +4898,8 @@ impl TryParse for SASetControls {
         let (bool_ctrls_low, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let type_ = type_.into();
+        let bool_ctrls_high = bool_ctrls_high.into();
+        let bool_ctrls_low = bool_ctrls_low.into();
         let result = SASetControls { type_, bool_ctrls_high, bool_ctrls_low };
         Ok((result, remaining))
     }
@@ -4971,6 +5009,7 @@ impl TryParse for SAActionMessage {
         let (message, remaining) = crate::x11_utils::parse_u8_list(remaining, 6)?;
         let message = <[u8; 6]>::try_from(message).unwrap();
         let type_ = type_.into();
+        let flags = flags.into();
         let result = SAActionMessage { type_, flags, message };
         Ok((result, remaining))
     }
@@ -5022,6 +5061,12 @@ impl TryParse for SARedirectKey {
         let (vmods_high, remaining) = u8::try_parse(remaining)?;
         let (vmods_low, remaining) = u8::try_parse(remaining)?;
         let type_ = type_.into();
+        let mask = mask.into();
+        let real_modifiers = real_modifiers.into();
+        let vmods_mask_high = vmods_mask_high.into();
+        let vmods_mask_low = vmods_mask_low.into();
+        let vmods_high = vmods_high.into();
+        let vmods_low = vmods_low.into();
         let result = SARedirectKey { type_, newkey, mask, real_modifiers, vmods_mask_high, vmods_mask_low, vmods_high, vmods_low };
         Ok((result, remaining))
     }
@@ -5190,6 +5235,7 @@ impl TryParse for SALockDeviceBtn {
         let (device, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let type_ = type_.into();
+        let flags = flags.into();
         let result = SALockDeviceBtn { type_, flags, button, device };
         Ok((result, remaining))
     }
@@ -5410,6 +5456,8 @@ impl TryParse for SymInterpret {
         let (virtual_mod, remaining) = u8::try_parse(remaining)?;
         let (flags, remaining) = u8::try_parse(remaining)?;
         let (action, remaining) = SIAction::try_parse(remaining)?;
+        let mods = mods.into();
+        let virtual_mod = virtual_mod.into();
         let result = SymInterpret { sym, mods, match_, virtual_mod, flags, action };
         Ok((result, remaining))
     }
@@ -5921,6 +5969,8 @@ impl TryParse for SelectEventsAuxBitcase1 {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (affect_new_keyboard, remaining) = u16::try_parse(remaining)?;
         let (new_keyboard_details, remaining) = u16::try_parse(remaining)?;
+        let affect_new_keyboard = affect_new_keyboard.into();
+        let new_keyboard_details = new_keyboard_details.into();
         let result = SelectEventsAuxBitcase1 { affect_new_keyboard, new_keyboard_details };
         Ok((result, remaining))
     }
@@ -5953,6 +6003,8 @@ impl TryParse for SelectEventsAuxBitcase2 {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (affect_state, remaining) = u16::try_parse(remaining)?;
         let (state_details, remaining) = u16::try_parse(remaining)?;
+        let affect_state = affect_state.into();
+        let state_details = state_details.into();
         let result = SelectEventsAuxBitcase2 { affect_state, state_details };
         Ok((result, remaining))
     }
@@ -5985,6 +6037,8 @@ impl TryParse for SelectEventsAuxBitcase3 {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (affect_ctrls, remaining) = u32::try_parse(remaining)?;
         let (ctrl_details, remaining) = u32::try_parse(remaining)?;
+        let affect_ctrls = affect_ctrls.into();
+        let ctrl_details = ctrl_details.into();
         let result = SelectEventsAuxBitcase3 { affect_ctrls, ctrl_details };
         Ok((result, remaining))
     }
@@ -6093,6 +6147,8 @@ impl TryParse for SelectEventsAuxBitcase6 {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (affect_names, remaining) = u16::try_parse(remaining)?;
         let (names_details, remaining) = u16::try_parse(remaining)?;
+        let affect_names = affect_names.into();
+        let names_details = names_details.into();
         let result = SelectEventsAuxBitcase6 { affect_names, names_details };
         Ok((result, remaining))
     }
@@ -6125,6 +6181,8 @@ impl TryParse for SelectEventsAuxBitcase7 {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (affect_compat, remaining) = u8::try_parse(remaining)?;
         let (compat_details, remaining) = u8::try_parse(remaining)?;
+        let affect_compat = affect_compat.into();
+        let compat_details = compat_details.into();
         let result = SelectEventsAuxBitcase7 { affect_compat, compat_details };
         Ok((result, remaining))
     }
@@ -6215,6 +6273,8 @@ impl TryParse for SelectEventsAuxBitcase10 {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (affect_access_x, remaining) = u16::try_parse(remaining)?;
         let (access_x_details, remaining) = u16::try_parse(remaining)?;
+        let affect_access_x = affect_access_x.into();
+        let access_x_details = access_x_details.into();
         let result = SelectEventsAuxBitcase10 { affect_access_x, access_x_details };
         Ok((result, remaining))
     }
@@ -6247,6 +6307,8 @@ impl TryParse for SelectEventsAuxBitcase11 {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (affect_ext_dev, remaining) = u16::try_parse(remaining)?;
         let (extdev_details, remaining) = u16::try_parse(remaining)?;
+        let affect_ext_dev = affect_ext_dev.into();
+        let extdev_details = extdev_details.into();
         let result = SelectEventsAuxBitcase11 { affect_ext_dev, extdev_details };
         Ok((result, remaining))
     }
@@ -6587,9 +6649,13 @@ impl<'input> SelectEventsRequest<'input> {
         let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
         let (affect_which, remaining) = u16::try_parse(remaining)?;
         let (clear, remaining) = u16::try_parse(remaining)?;
+        let clear = clear.into();
         let (select_all, remaining) = u16::try_parse(remaining)?;
+        let select_all = select_all.into();
         let (affect_map, remaining) = u16::try_parse(remaining)?;
+        let affect_map = affect_map.into();
         let (map, remaining) = u16::try_parse(remaining)?;
+        let map = map.into();
         let (details, remaining) = SelectEventsAux::try_parse(remaining, affect_which, clear, select_all)?;
         let _ = remaining;
         Ok(SelectEventsRequest {
@@ -6839,8 +6905,18 @@ impl TryParse for GetStateReply {
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
+        let mods = mods.into();
+        let base_mods = base_mods.into();
+        let latched_mods = latched_mods.into();
+        let locked_mods = locked_mods.into();
         let group = group.into();
         let locked_group = locked_group.into();
+        let compat_state = compat_state.into();
+        let grab_mods = grab_mods.into();
+        let compat_grab_mods = compat_grab_mods.into();
+        let lookup_mods = lookup_mods.into();
+        let compat_lookup_mods = compat_lookup_mods.into();
+        let ptr_btn_state = ptr_btn_state.into();
         let result = GetStateReply { device_id, sequence, length, mods, base_mods, latched_mods, locked_mods, group, locked_group, base_group, latched_group, compat_state, grab_mods, compat_grab_mods, lookup_mods, compat_lookup_mods, ptr_btn_state };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
@@ -6987,11 +7063,14 @@ impl LatchLockStateRequest {
         }
         let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
         let (affect_mod_locks, remaining) = u8::try_parse(remaining)?;
+        let affect_mod_locks = affect_mod_locks.into();
         let (mod_locks, remaining) = u8::try_parse(remaining)?;
+        let mod_locks = mod_locks.into();
         let (lock_group, remaining) = bool::try_parse(remaining)?;
         let (group_lock, remaining) = u8::try_parse(remaining)?;
         let group_lock = group_lock.into();
         let (affect_mod_latches, remaining) = u8::try_parse(remaining)?;
+        let affect_mod_latches = affect_mod_latches.into();
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (latch_group, remaining) = bool::try_parse(remaining)?;
@@ -7149,6 +7228,18 @@ impl TryParse for GetControlsReply {
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
+        let internal_mods_mask = internal_mods_mask.into();
+        let ignore_lock_mods_mask = ignore_lock_mods_mask.into();
+        let internal_mods_real_mods = internal_mods_real_mods.into();
+        let ignore_lock_mods_real_mods = ignore_lock_mods_real_mods.into();
+        let internal_mods_vmods = internal_mods_vmods.into();
+        let ignore_lock_mods_vmods = ignore_lock_mods_vmods.into();
+        let access_x_option = access_x_option.into();
+        let access_x_timeout_options_mask = access_x_timeout_options_mask.into();
+        let access_x_timeout_options_values = access_x_timeout_options_values.into();
+        let access_x_timeout_mask = access_x_timeout_mask.into();
+        let access_x_timeout_values = access_x_timeout_values.into();
+        let enabled_controls = enabled_controls.into();
         let result = GetControlsReply { device_id, sequence, length, mouse_keys_dflt_btn, num_groups, groups_wrap, internal_mods_mask, ignore_lock_mods_mask, internal_mods_real_mods, ignore_lock_mods_real_mods, internal_mods_vmods, ignore_lock_mods_vmods, repeat_delay, repeat_interval, slow_keys_delay, debounce_delay, mouse_keys_delay, mouse_keys_interval, mouse_keys_time_to_max, mouse_keys_max_speed, mouse_keys_curve, access_x_option, access_x_timeout, access_x_timeout_options_mask, access_x_timeout_options_values, access_x_timeout_mask, access_x_timeout_values, enabled_controls, per_key_repeat };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
@@ -7474,20 +7565,32 @@ impl<'input> SetControlsRequest<'input> {
         }
         let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
         let (affect_internal_real_mods, remaining) = u8::try_parse(remaining)?;
+        let affect_internal_real_mods = affect_internal_real_mods.into();
         let (internal_real_mods, remaining) = u8::try_parse(remaining)?;
+        let internal_real_mods = internal_real_mods.into();
         let (affect_ignore_lock_real_mods, remaining) = u8::try_parse(remaining)?;
+        let affect_ignore_lock_real_mods = affect_ignore_lock_real_mods.into();
         let (ignore_lock_real_mods, remaining) = u8::try_parse(remaining)?;
+        let ignore_lock_real_mods = ignore_lock_real_mods.into();
         let (affect_internal_virtual_mods, remaining) = u16::try_parse(remaining)?;
+        let affect_internal_virtual_mods = affect_internal_virtual_mods.into();
         let (internal_virtual_mods, remaining) = u16::try_parse(remaining)?;
+        let internal_virtual_mods = internal_virtual_mods.into();
         let (affect_ignore_lock_virtual_mods, remaining) = u16::try_parse(remaining)?;
+        let affect_ignore_lock_virtual_mods = affect_ignore_lock_virtual_mods.into();
         let (ignore_lock_virtual_mods, remaining) = u16::try_parse(remaining)?;
+        let ignore_lock_virtual_mods = ignore_lock_virtual_mods.into();
         let (mouse_keys_dflt_btn, remaining) = u8::try_parse(remaining)?;
         let (groups_wrap, remaining) = u8::try_parse(remaining)?;
         let (access_x_options, remaining) = u16::try_parse(remaining)?;
+        let access_x_options = access_x_options.into();
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (affect_enabled_controls, remaining) = u32::try_parse(remaining)?;
+        let affect_enabled_controls = affect_enabled_controls.into();
         let (enabled_controls, remaining) = u32::try_parse(remaining)?;
+        let enabled_controls = enabled_controls.into();
         let (change_controls, remaining) = u32::try_parse(remaining)?;
+        let change_controls = change_controls.into();
         let (repeat_delay, remaining) = u16::try_parse(remaining)?;
         let (repeat_interval, remaining) = u16::try_parse(remaining)?;
         let (slow_keys_delay, remaining) = u16::try_parse(remaining)?;
@@ -7499,9 +7602,13 @@ impl<'input> SetControlsRequest<'input> {
         let (mouse_keys_curve, remaining) = i16::try_parse(remaining)?;
         let (access_x_timeout, remaining) = u16::try_parse(remaining)?;
         let (access_x_timeout_mask, remaining) = u32::try_parse(remaining)?;
+        let access_x_timeout_mask = access_x_timeout_mask.into();
         let (access_x_timeout_values, remaining) = u32::try_parse(remaining)?;
+        let access_x_timeout_values = access_x_timeout_values.into();
         let (access_x_timeout_options_mask, remaining) = u16::try_parse(remaining)?;
+        let access_x_timeout_options_mask = access_x_timeout_options_mask.into();
         let (access_x_timeout_options_values, remaining) = u16::try_parse(remaining)?;
+        let access_x_timeout_options_values = access_x_timeout_options_values.into();
         let (per_key_repeat, remaining) = crate::x11_utils::parse_u8_list(remaining, 32)?;
         let per_key_repeat = <&[u8; 32]>::try_from(per_key_repeat).unwrap();
         let _ = remaining;
@@ -7676,7 +7783,9 @@ impl GetMapRequest {
         }
         let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
         let (full, remaining) = u16::try_parse(remaining)?;
+        let full = full.into();
         let (partial, remaining) = u16::try_parse(remaining)?;
+        let partial = partial.into();
         let (first_type, remaining) = u8::try_parse(remaining)?;
         let (n_types, remaining) = u8::try_parse(remaining)?;
         let (first_key_sym, remaining) = xproto::Keycode::try_parse(remaining)?;
@@ -7686,6 +7795,7 @@ impl GetMapRequest {
         let (first_key_behavior, remaining) = xproto::Keycode::try_parse(remaining)?;
         let (n_key_behaviors, remaining) = u8::try_parse(remaining)?;
         let (virtual_mods, remaining) = u16::try_parse(remaining)?;
+        let virtual_mods = virtual_mods.into();
         let (first_key_explicit, remaining) = xproto::Keycode::try_parse(remaining)?;
         let (n_key_explicit, remaining) = u8::try_parse(remaining)?;
         let (first_mod_map_key, remaining) = xproto::Keycode::try_parse(remaining)?;
@@ -8019,6 +8129,7 @@ impl TryParse for GetMapReply {
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
+        let virtual_mods = virtual_mods.into();
         let result = GetMapReply { device_id, sequence, length, min_key_code, max_key_code, first_type, n_types, total_types, first_key_sym, total_syms, n_key_syms, first_key_action, total_actions, n_key_actions, first_key_behavior, n_key_behaviors, total_key_behaviors, first_key_explicit, n_key_explicit, total_key_explicit, first_mod_map_key, n_mod_map_keys, total_mod_map_keys, first_v_mod_map_key, n_v_mod_map_keys, total_v_mod_map_keys, virtual_mods, map };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
@@ -8453,6 +8564,7 @@ impl<'input> SetMapRequest<'input> {
         let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
         let (present, remaining) = u16::try_parse(remaining)?;
         let (flags, remaining) = u16::try_parse(remaining)?;
+        let flags = flags.into();
         let (min_key_code, remaining) = xproto::Keycode::try_parse(remaining)?;
         let (max_key_code, remaining) = xproto::Keycode::try_parse(remaining)?;
         let (first_type, remaining) = u8::try_parse(remaining)?;
@@ -8476,6 +8588,7 @@ impl<'input> SetMapRequest<'input> {
         let (n_v_mod_map_keys, remaining) = u8::try_parse(remaining)?;
         let (total_v_mod_map_keys, remaining) = u8::try_parse(remaining)?;
         let (virtual_mods, remaining) = u16::try_parse(remaining)?;
+        let virtual_mods = virtual_mods.into();
         let (values, remaining) = SetMapAux::try_parse(remaining, present, n_types, n_key_syms, n_key_actions, total_actions, total_key_behaviors, virtual_mods, total_key_explicit, total_mod_map_keys, total_v_mod_map_keys)?;
         let _ = remaining;
         Ok(SetMapRequest {
@@ -8599,6 +8712,7 @@ impl GetCompatMapRequest {
         }
         let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
         let (groups, remaining) = u8::try_parse(remaining)?;
+        let groups = groups.into();
         let (get_all_si, remaining) = bool::try_parse(remaining)?;
         let (first_si, remaining) = u16::try_parse(remaining)?;
         let (n_si, remaining) = u16::try_parse(remaining)?;
@@ -8656,6 +8770,7 @@ impl TryParse for GetCompatMapReply {
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
+        let groups_rtrn = groups_rtrn.into();
         let result = GetCompatMapReply { device_id, sequence, length, groups_rtrn, first_si_rtrn, n_total_si, si_rtrn, group_rtrn };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
@@ -8770,6 +8885,7 @@ impl<'input> SetCompatMapRequest<'input> {
         let (recompute_actions, remaining) = bool::try_parse(remaining)?;
         let (truncate_si, remaining) = bool::try_parse(remaining)?;
         let (groups, remaining) = u8::try_parse(remaining)?;
+        let groups = groups.into();
         let (first_si, remaining) = u16::try_parse(remaining)?;
         let (n_si, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
@@ -9268,6 +9384,14 @@ impl TryParse for GetNamedIndicatorReply {
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
+        let map_flags = map_flags.into();
+        let map_which_groups = map_which_groups.into();
+        let map_groups = map_groups.into();
+        let map_which_mods = map_which_mods.into();
+        let map_mods = map_mods.into();
+        let map_real_mods = map_real_mods.into();
+        let map_vmod = map_vmod.into();
+        let map_ctrls = map_ctrls.into();
         let result = GetNamedIndicatorReply { device_id, sequence, length, indicator, found, on, real_indicator, ndx, map_flags, map_which_groups, map_groups, map_which_mods, map_mods, map_real_mods, map_vmod, map_ctrls, supported };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
@@ -9453,12 +9577,19 @@ impl SetNamedIndicatorRequest {
         let (create_map, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (map_flags, remaining) = u8::try_parse(remaining)?;
+        let map_flags = map_flags.into();
         let (map_which_groups, remaining) = u8::try_parse(remaining)?;
+        let map_which_groups = map_which_groups.into();
         let (map_groups, remaining) = u8::try_parse(remaining)?;
+        let map_groups = map_groups.into();
         let (map_which_mods, remaining) = u8::try_parse(remaining)?;
+        let map_which_mods = map_which_mods.into();
         let (map_real_mods, remaining) = u8::try_parse(remaining)?;
+        let map_real_mods = map_real_mods.into();
         let (map_vmods, remaining) = u16::try_parse(remaining)?;
+        let map_vmods = map_vmods.into();
         let (map_ctrls, remaining) = u32::try_parse(remaining)?;
+        let map_ctrls = map_ctrls.into();
         let _ = remaining;
         Ok(SetNamedIndicatorRequest {
             device_spec,
@@ -9534,6 +9665,7 @@ impl GetNamesRequest {
         let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (which, remaining) = u32::try_parse(remaining)?;
+        let which = which.into();
         let _ = remaining;
         Ok(GetNamesRequest {
             device_spec,
@@ -9886,6 +10018,8 @@ impl TryParse for GetNamesReply {
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
+        let group_names = group_names.into();
+        let virtual_mods = virtual_mods.into();
         let result = GetNamesReply { device_id, sequence, length, min_key_code, max_key_code, n_types, group_names, virtual_mods, first_key, n_keys, indicators, n_radio_groups, n_key_aliases, n_kt_levels, value_list };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
@@ -10390,6 +10524,7 @@ impl<'input> SetNamesRequest<'input> {
         }
         let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
         let (virtual_mods, remaining) = u16::try_parse(remaining)?;
+        let virtual_mods = virtual_mods.into();
         let (which, remaining) = u32::try_parse(remaining)?;
         let (first_type, remaining) = u8::try_parse(remaining)?;
         let (n_types, remaining) = u8::try_parse(remaining)?;
@@ -10397,6 +10532,7 @@ impl<'input> SetNamesRequest<'input> {
         let (n_kt_levels, remaining) = u8::try_parse(remaining)?;
         let (indicators, remaining) = u32::try_parse(remaining)?;
         let (group_names, remaining) = u8::try_parse(remaining)?;
+        let group_names = group_names.into();
         let (n_radio_groups, remaining) = u8::try_parse(remaining)?;
         let (first_key, remaining) = xproto::Keycode::try_parse(remaining)?;
         let (n_keys, remaining) = u8::try_parse(remaining)?;
@@ -10521,10 +10657,15 @@ impl PerClientFlagsRequest {
         let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (change, remaining) = u32::try_parse(remaining)?;
+        let change = change.into();
         let (value, remaining) = u32::try_parse(remaining)?;
+        let value = value.into();
         let (ctrls_to_change, remaining) = u32::try_parse(remaining)?;
+        let ctrls_to_change = ctrls_to_change.into();
         let (auto_ctrls, remaining) = u32::try_parse(remaining)?;
+        let auto_ctrls = auto_ctrls.into();
         let (auto_ctrls_values, remaining) = u32::try_parse(remaining)?;
+        let auto_ctrls_values = auto_ctrls_values.into();
         let _ = remaining;
         Ok(PerClientFlagsRequest {
             device_spec,
@@ -10576,6 +10717,10 @@ impl TryParse for PerClientFlagsReply {
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
+        let supported = supported.into();
+        let value = value.into();
+        let auto_ctrls = auto_ctrls.into();
+        let auto_ctrls_values = auto_ctrls_values.into();
         let result = PerClientFlagsReply { device_id, sequence, length, supported, value, auto_ctrls, auto_ctrls_values };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
@@ -10909,7 +11054,9 @@ impl GetKbdByNameRequest {
         }
         let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
         let (need, remaining) = u16::try_parse(remaining)?;
+        let need = need.into();
         let (want, remaining) = u16::try_parse(remaining)?;
+        let want = want.into();
         let (load, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let _ = remaining;
@@ -11221,6 +11368,7 @@ impl TryParse for GetKbdByNameRepliesTypes {
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (virtual_mods, remaining) = u16::try_parse(remaining)?;
         let (map, remaining) = GetKbdByNameRepliesTypesMap::try_parse(remaining, present, n_types, n_key_syms, n_key_actions, total_actions, total_key_behaviors, virtual_mods, total_key_explicit, total_mod_map_keys, total_v_mod_map_keys)?;
+        let virtual_mods = virtual_mods.into();
         let result = GetKbdByNameRepliesTypes { getmap_type, type_device_id, getmap_sequence, getmap_length, type_min_key_code, type_max_key_code, first_type, n_types, total_types, first_key_sym, total_syms, n_key_syms, first_key_action, total_actions, n_key_actions, first_key_behavior, n_key_behaviors, total_key_behaviors, first_key_explicit, n_key_explicit, total_key_explicit, first_mod_map_key, n_mod_map_keys, total_mod_map_keys, first_v_mod_map_key, n_v_mod_map_keys, total_v_mod_map_keys, virtual_mods, map };
         Ok((result, remaining))
     }
@@ -11296,6 +11444,7 @@ impl TryParse for GetKbdByNameRepliesCompatMap {
         let remaining = remaining.get(16..).ok_or(ParseError::InsufficientData)?;
         let (si_rtrn, remaining) = crate::x11_utils::parse_list::<SymInterpret>(remaining, n_si_rtrn.try_to_usize()?)?;
         let (group_rtrn, remaining) = crate::x11_utils::parse_list::<ModDef>(remaining, groups_rtrn.count_ones().try_to_usize()?)?;
+        let groups_rtrn = groups_rtrn.into();
         let result = GetKbdByNameRepliesCompatMap { compatmap_type, compat_device_id, compatmap_sequence, compatmap_length, groups_rtrn, first_si_rtrn, n_total_si, si_rtrn, group_rtrn };
         Ok((result, remaining))
     }
@@ -11730,6 +11879,8 @@ impl TryParse for GetKbdByNameRepliesKeyNames {
         let (n_kt_levels, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(4..).ok_or(ParseError::InsufficientData)?;
         let (value_list, remaining) = GetKbdByNameRepliesKeyNamesValueList::try_parse(remaining, which, n_types, indicators, virtual_mods, group_names, n_keys, n_key_aliases, n_radio_groups)?;
+        let group_names = group_names.into();
+        let virtual_mods = virtual_mods.into();
         let result = GetKbdByNameRepliesKeyNames { keyname_type, key_device_id, keyname_sequence, keyname_length, key_min_key_code, key_max_key_code, n_types, group_names, virtual_mods, first_key, n_keys, indicators, n_radio_groups, n_key_aliases, n_kt_levels, value_list };
         Ok((result, remaining))
     }
@@ -11949,6 +12100,8 @@ impl TryParse for GetKbdByNameReply {
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
+        let found = found.into();
+        let reported = reported.into();
         let result = GetKbdByNameReply { device_id, sequence, length, min_key_code, max_key_code, loaded, new_keyboard, found, reported, replies };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
@@ -12036,6 +12189,7 @@ impl GetDeviceInfoRequest {
         }
         let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
         let (wanted, remaining) = u16::try_parse(remaining)?;
+        let wanted = wanted.into();
         let (all_buttons, remaining) = bool::try_parse(remaining)?;
         let (first_button, remaining) = u8::try_parse(remaining)?;
         let (n_buttons, remaining) = u8::try_parse(remaining)?;
@@ -12124,6 +12278,9 @@ impl TryParse for GetDeviceInfoReply {
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
+        let present = present.into();
+        let supported = supported.into();
+        let unsupported = unsupported.into();
         let result = GetDeviceInfoReply { device_id, sequence, length, present, supported, unsupported, first_btn_wanted, n_btns_wanted, first_btn_rtrn, total_btns, has_own_state, dflt_kbd_fb, dflt_led_fb, dev_type, name, btn_actions, leds };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
@@ -12268,6 +12425,7 @@ impl<'input> SetDeviceInfoRequest<'input> {
         let (first_btn, remaining) = u8::try_parse(remaining)?;
         let (n_btns, remaining) = u8::try_parse(remaining)?;
         let (change, remaining) = u16::try_parse(remaining)?;
+        let change = change.into();
         let (n_device_led_f_bs, remaining) = u16::try_parse(remaining)?;
         let (btn_actions, remaining) = crate::x11_utils::parse_list::<Action>(remaining, n_btns.try_to_usize()?)?;
         let (leds, remaining) = crate::x11_utils::parse_list::<DeviceLedInfo>(remaining, n_device_led_f_bs.try_to_usize()?)?;
@@ -12534,6 +12692,7 @@ impl TryParse for NewKeyboardNotifyEvent {
         let (request_minor, remaining) = u8::try_parse(remaining)?;
         let (changed, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(14..).ok_or(ParseError::InsufficientData)?;
+        let changed = changed.into();
         let result = NewKeyboardNotifyEvent { response_type, xkb_type, sequence, time, device_id, old_device_id, min_key_code, max_key_code, old_min_key_code, old_max_key_code, request_major, request_minor, changed };
         let _ = remaining;
         let remaining = initial_value.get(32..)
@@ -12725,6 +12884,8 @@ impl TryParse for MapNotifyEvent {
         let (n_v_mod_map_keys, remaining) = u8::try_parse(remaining)?;
         let (virtual_mods, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
+        let changed = changed.into();
+        let virtual_mods = virtual_mods.into();
         let result = MapNotifyEvent { response_type, xkb_type, sequence, time, device_id, ptr_btn_actions, changed, min_key_code, max_key_code, first_type, n_types, first_key_sym, n_key_syms, first_key_act, n_key_acts, first_key_behavior, n_key_behavior, first_key_explicit, n_key_explicit, first_mod_map_key, n_mod_map_keys, first_v_mod_map_key, n_v_mod_map_keys, virtual_mods };
         let _ = remaining;
         let remaining = initial_value.get(32..)
@@ -12948,8 +13109,19 @@ impl TryParse for StateNotifyEvent {
         let (event_type, remaining) = u8::try_parse(remaining)?;
         let (request_major, remaining) = u8::try_parse(remaining)?;
         let (request_minor, remaining) = u8::try_parse(remaining)?;
+        let mods = mods.into();
+        let base_mods = base_mods.into();
+        let latched_mods = latched_mods.into();
+        let locked_mods = locked_mods.into();
         let group = group.into();
         let locked_group = locked_group.into();
+        let compat_state = compat_state.into();
+        let grab_mods = grab_mods.into();
+        let compat_grab_mods = compat_grab_mods.into();
+        let lookup_mods = lookup_mods.into();
+        let compat_loockup_mods = compat_loockup_mods.into();
+        let ptr_btn_state = ptr_btn_state.into();
+        let changed = changed.into();
         let result = StateNotifyEvent { response_type, xkb_type, sequence, time, device_id, mods, base_mods, latched_mods, locked_mods, group, base_group, latched_group, locked_group, compat_state, grab_mods, compat_grab_mods, lookup_mods, compat_loockup_mods, ptr_btn_state, changed, keycode, event_type, request_major, request_minor };
         let _ = remaining;
         let remaining = initial_value.get(32..)
@@ -13152,6 +13324,9 @@ impl TryParse for ControlsNotifyEvent {
         let (request_major, remaining) = u8::try_parse(remaining)?;
         let (request_minor, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(4..).ok_or(ParseError::InsufficientData)?;
+        let changed_controls = changed_controls.into();
+        let enabled_controls = enabled_controls.into();
+        let enabled_control_changes = enabled_control_changes.into();
         let result = ControlsNotifyEvent { response_type, xkb_type, sequence, time, device_id, num_groups, changed_controls, enabled_controls, enabled_control_changes, keycode, event_type, request_major, request_minor };
         let _ = remaining;
         let remaining = initial_value.get(32..)
@@ -13614,6 +13789,9 @@ impl TryParse for NamesNotifyEvent {
         let (n_keys, remaining) = u8::try_parse(remaining)?;
         let (changed_indicators, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(4..).ok_or(ParseError::InsufficientData)?;
+        let changed = changed.into();
+        let changed_group_names = changed_group_names.into();
+        let changed_virtual_mods = changed_virtual_mods.into();
         let result = NamesNotifyEvent { response_type, xkb_type, sequence, time, device_id, changed, first_type, n_types, first_level_name, n_level_names, n_radio_groups, n_key_aliases, changed_group_names, changed_virtual_mods, first_key, n_keys, changed_indicators };
         let _ = remaining;
         let remaining = initial_value.get(32..)
@@ -13789,6 +13967,7 @@ impl TryParse for CompatMapNotifyEvent {
         let (n_si, remaining) = u16::try_parse(remaining)?;
         let (n_total_si, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(16..).ok_or(ParseError::InsufficientData)?;
+        let changed_groups = changed_groups.into();
         let result = CompatMapNotifyEvent { response_type, xkb_type, sequence, time, device_id, changed_groups, first_si, n_si, n_total_si };
         let _ = remaining;
         let remaining = initial_value.get(32..)
@@ -14113,6 +14292,7 @@ impl TryParse for ActionMessageEvent {
         let (message, remaining) = crate::x11_utils::parse_u8_list(remaining, 8)?;
         let message = <[u8; 8]>::try_from(message).unwrap();
         let remaining = remaining.get(10..).ok_or(ParseError::InsufficientData)?;
+        let mods = mods.into();
         let group = group.into();
         let result = ActionMessageEvent { response_type, xkb_type, sequence, time, device_id, keycode, press, key_event_follows, mods, group, message };
         let _ = remaining;
@@ -14267,6 +14447,7 @@ impl TryParse for AccessXNotifyEvent {
         let (slow_keys_delay, remaining) = u16::try_parse(remaining)?;
         let (debounce_delay, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(16..).ok_or(ParseError::InsufficientData)?;
+        let detailt = detailt.into();
         let result = AccessXNotifyEvent { response_type, xkb_type, sequence, time, device_id, keycode, detailt, slow_keys_delay, debounce_delay };
         let _ = remaining;
         let remaining = initial_value.get(32..)
@@ -14427,7 +14608,10 @@ impl TryParse for ExtensionDeviceNotifyEvent {
         let (supported, remaining) = u16::try_parse(remaining)?;
         let (unsupported, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
+        let reason = reason.into();
         let led_class = led_class.into();
+        let supported = supported.into();
+        let unsupported = unsupported.into();
         let result = ExtensionDeviceNotifyEvent { response_type, xkb_type, sequence, time, device_id, reason, led_class, led_id, leds_defined, led_state, first_button, n_buttons, supported, unsupported };
         let _ = remaining;
         let remaining = initial_value.get(32..)

@@ -738,6 +738,7 @@ impl SelectSelectionInputRequest {
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let (selection, remaining) = xproto::Atom::try_parse(remaining)?;
         let (event_mask, remaining) = u32::try_parse(remaining)?;
+        let event_mask = event_mask.into();
         let _ = remaining;
         Ok(SelectSelectionInputRequest {
             window,
@@ -1043,6 +1044,7 @@ impl SelectCursorInputRequest {
         }
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let (event_mask, remaining) = u32::try_parse(remaining)?;
+        let event_mask = event_mask.into();
         let _ = remaining;
         Ok(SelectCursorInputRequest {
             window,
@@ -3297,6 +3299,7 @@ impl<'input> CreatePointerBarrierRequest<'input> {
         let (x2, remaining) = u16::try_parse(remaining)?;
         let (y2, remaining) = u16::try_parse(remaining)?;
         let (directions, remaining) = u32::try_parse(remaining)?;
+        let directions = directions.into();
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (num_devices, remaining) = u16::try_parse(remaining)?;
         let (devices, remaining) = crate::x11_utils::parse_list::<u16>(remaining, num_devices.try_to_usize()?)?;
