@@ -4,6 +4,8 @@
 //! Bindings to the `ScreenSaver` X11 extension.
 
 #![allow(clippy::too_many_arguments)]
+// The code generator is simpler if it can always use conversions
+#![allow(clippy::useless_conversion)]
 
 #[allow(unused_imports)]
 use alloc::borrow::Cow;
@@ -97,63 +99,51 @@ impl core::fmt::Debug for Kind  {
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct Event(u8);
+pub struct Event(u32);
 impl Event {
     pub const NOTIFY_MASK: Self = Self(1 << 0);
     pub const CYCLE_MASK: Self = Self(1 << 1);
 }
-impl From<Event> for u8 {
+impl From<Event> for u32 {
     #[inline]
     fn from(input: Event) -> Self {
         input.0
     }
 }
-impl From<Event> for Option<u8> {
+impl From<Event> for Option<u32> {
     #[inline]
     fn from(input: Event) -> Self {
         Some(input.0)
     }
 }
-impl From<Event> for u16 {
-    #[inline]
-    fn from(input: Event) -> Self {
-        u16::from(input.0)
-    }
-}
-impl From<Event> for Option<u16> {
-    #[inline]
-    fn from(input: Event) -> Self {
-        Some(u16::from(input.0))
-    }
-}
-impl From<Event> for u32 {
-    #[inline]
-    fn from(input: Event) -> Self {
-        u32::from(input.0)
-    }
-}
-impl From<Event> for Option<u32> {
-    #[inline]
-    fn from(input: Event) -> Self {
-        Some(u32::from(input.0))
-    }
-}
 impl From<u8> for Event {
     #[inline]
     fn from(value: u8) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u16> for Event {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u32> for Event {
+    #[inline]
+    fn from(value: u32) -> Self {
         Self(value)
     }
 }
 impl core::fmt::Debug for Event  {
     fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
-            (Self::NOTIFY_MASK.0.into(), "NOTIFY_MASK", "NotifyMask"),
-            (Self::CYCLE_MASK.0.into(), "CYCLE_MASK", "CycleMask"),
+            (Self::NOTIFY_MASK.0, "NOTIFY_MASK", "NotifyMask"),
+            (Self::CYCLE_MASK.0, "CYCLE_MASK", "CycleMask"),
         ];
-        pretty_print_bitmask(fmt, self.0.into(), &variants)
+        pretty_print_bitmask(fmt, self.0, &variants)
     }
 }
-bitmask_binop!(Event, u8);
+bitmask_binop!(Event, u32);
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -520,14 +510,14 @@ pub const SELECT_INPUT_REQUEST: u8 = 2;
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SelectInputRequest {
     pub drawable: xproto::Drawable,
-    pub event_mask: u32,
+    pub event_mask: Event,
 }
 impl SelectInputRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
         let length_so_far = 0;
         let drawable_bytes = self.drawable.serialize();
-        let event_mask_bytes = self.event_mask.serialize();
+        let event_mask_bytes = u32::from(self.event_mask).serialize();
         let mut request0 = vec![
             major_opcode,
             SELECT_INPUT_REQUEST,
@@ -555,6 +545,7 @@ impl SelectInputRequest {
         }
         let (drawable, remaining) = xproto::Drawable::try_parse(value)?;
         let (event_mask, remaining) = u32::try_parse(remaining)?;
+        let event_mask = event_mask.into();
         let _ = remaining;
         Ok(SelectInputRequest {
             drawable,
@@ -590,14 +581,14 @@ pub struct SetAttributesAux {
     pub backing_pixel: Option<u32>,
     pub override_redirect: Option<xproto::Bool32>,
     pub save_under: Option<xproto::Bool32>,
-    pub event_mask: Option<u32>,
-    pub do_not_propogate_mask: Option<u32>,
+    pub event_mask: Option<xproto::EventMask>,
+    pub do_not_propogate_mask: Option<xproto::EventMask>,
     pub colormap: Option<xproto::Colormap>,
     pub cursor: Option<xproto::Cursor>,
 }
 impl SetAttributesAux {
     fn try_parse(value: &[u8], value_mask: u32) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = value_mask;
+        let switch_expr = u32::from(value_mask);
         let mut outer_remaining = value;
         let background_pixmap = if switch_expr & u32::from(xproto::CW::BACK_PIXMAP) != 0 {
             let remaining = outer_remaining;
@@ -693,6 +684,7 @@ impl SetAttributesAux {
         let event_mask = if switch_expr & u32::from(xproto::CW::EVENT_MASK) != 0 {
             let remaining = outer_remaining;
             let (event_mask, remaining) = u32::try_parse(remaining)?;
+            let event_mask = event_mask.into();
             outer_remaining = remaining;
             Some(event_mask)
         } else {
@@ -701,6 +693,7 @@ impl SetAttributesAux {
         let do_not_propogate_mask = if switch_expr & u32::from(xproto::CW::DONT_PROPAGATE) != 0 {
             let remaining = outer_remaining;
             let (do_not_propogate_mask, remaining) = u32::try_parse(remaining)?;
+            let do_not_propogate_mask = do_not_propogate_mask.into();
             outer_remaining = remaining;
             Some(do_not_propogate_mask)
         } else {
@@ -730,7 +723,7 @@ impl SetAttributesAux {
     #[allow(dead_code)]
     fn serialize(&self, value_mask: u32) -> Vec<u8> {
         let mut result = Vec::new();
-        self.serialize_into(&mut result, value_mask);
+        self.serialize_into(&mut result, u32::from(value_mask));
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, value_mask: u32) {
@@ -769,10 +762,10 @@ impl SetAttributesAux {
             save_under.serialize_into(bytes);
         }
         if let Some(event_mask) = self.event_mask {
-            event_mask.serialize_into(bytes);
+            u32::from(event_mask).serialize_into(bytes);
         }
         if let Some(do_not_propogate_mask) = self.do_not_propogate_mask {
-            do_not_propogate_mask.serialize_into(bytes);
+            u32::from(do_not_propogate_mask).serialize_into(bytes);
         }
         if let Some(colormap) = self.colormap {
             colormap.serialize_into(bytes);
@@ -906,13 +899,13 @@ impl SetAttributesAux {
     }
     /// Set the `event_mask` field of this structure.
     #[must_use]
-    pub fn event_mask<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+    pub fn event_mask<I>(mut self, value: I) -> Self where I: Into<Option<xproto::EventMask>> {
         self.event_mask = value.into();
         self
     }
     /// Set the `do_not_propogate_mask` field of this structure.
     #[must_use]
-    pub fn do_not_propogate_mask<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+    pub fn do_not_propogate_mask<I>(mut self, value: I) -> Self where I: Into<Option<xproto::EventMask>> {
         self.do_not_propogate_mask = value.into();
         self
     }
@@ -992,7 +985,7 @@ impl<'input> SetAttributesRequest<'input> {
             value_mask_bytes[3],
         ];
         let length_so_far = length_so_far + request0.len();
-        let value_list_bytes = self.value_list.serialize(value_mask);
+        let value_list_bytes = self.value_list.serialize(u32::from(value_mask));
         let length_so_far = length_so_far + value_list_bytes.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
@@ -1017,7 +1010,7 @@ impl<'input> SetAttributesRequest<'input> {
         let (depth, remaining) = u8::try_parse(remaining)?;
         let (visual, remaining) = xproto::Visualid::try_parse(remaining)?;
         let (value_mask, remaining) = u32::try_parse(remaining)?;
-        let (value_list, remaining) = SetAttributesAux::try_parse(remaining, value_mask)?;
+        let (value_list, remaining) = SetAttributesAux::try_parse(remaining, u32::from(value_mask))?;
         let _ = remaining;
         Ok(SetAttributesRequest {
             drawable,

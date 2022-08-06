@@ -4,6 +4,8 @@
 //! Bindings to the `Sync` X11 extension.
 
 #![allow(clippy::too_many_arguments)]
+// The code generator is simpler if it can always use conversions
+#![allow(clippy::useless_conversion)]
 
 #[allow(unused_imports)]
 use alloc::borrow::Cow;
@@ -201,7 +203,7 @@ impl core::fmt::Debug for VALUETYPE  {
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct CA(u8);
+pub struct CA(u32);
 impl CA {
     pub const COUNTER: Self = Self(1 << 0);
     pub const VALUE_TYPE: Self = Self(1 << 1);
@@ -210,62 +212,50 @@ impl CA {
     pub const DELTA: Self = Self(1 << 4);
     pub const EVENTS: Self = Self(1 << 5);
 }
-impl From<CA> for u8 {
+impl From<CA> for u32 {
     #[inline]
     fn from(input: CA) -> Self {
         input.0
     }
 }
-impl From<CA> for Option<u8> {
+impl From<CA> for Option<u32> {
     #[inline]
     fn from(input: CA) -> Self {
         Some(input.0)
     }
 }
-impl From<CA> for u16 {
-    #[inline]
-    fn from(input: CA) -> Self {
-        u16::from(input.0)
-    }
-}
-impl From<CA> for Option<u16> {
-    #[inline]
-    fn from(input: CA) -> Self {
-        Some(u16::from(input.0))
-    }
-}
-impl From<CA> for u32 {
-    #[inline]
-    fn from(input: CA) -> Self {
-        u32::from(input.0)
-    }
-}
-impl From<CA> for Option<u32> {
-    #[inline]
-    fn from(input: CA) -> Self {
-        Some(u32::from(input.0))
-    }
-}
 impl From<u8> for CA {
     #[inline]
     fn from(value: u8) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u16> for CA {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u32> for CA {
+    #[inline]
+    fn from(value: u32) -> Self {
         Self(value)
     }
 }
 impl core::fmt::Debug for CA  {
     fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
-            (Self::COUNTER.0.into(), "COUNTER", "Counter"),
-            (Self::VALUE_TYPE.0.into(), "VALUE_TYPE", "ValueType"),
-            (Self::VALUE.0.into(), "VALUE", "Value"),
-            (Self::TEST_TYPE.0.into(), "TEST_TYPE", "TestType"),
-            (Self::DELTA.0.into(), "DELTA", "Delta"),
-            (Self::EVENTS.0.into(), "EVENTS", "Events"),
+            (Self::COUNTER.0, "COUNTER", "Counter"),
+            (Self::VALUE_TYPE.0, "VALUE_TYPE", "ValueType"),
+            (Self::VALUE.0, "VALUE", "Value"),
+            (Self::TEST_TYPE.0, "TEST_TYPE", "TestType"),
+            (Self::DELTA.0, "DELTA", "Delta"),
+            (Self::EVENTS.0, "EVENTS", "Events"),
         ];
-        pretty_print_bitmask(fmt, self.0.into(), &variants)
+        pretty_print_bitmask(fmt, self.0, &variants)
     }
 }
-bitmask_binop!(CA, u8);
+bitmask_binop!(CA, u32);
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -1174,7 +1164,7 @@ pub struct CreateAlarmAux {
 }
 impl CreateAlarmAux {
     fn try_parse(value: &[u8], value_mask: u32) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = value_mask;
+        let switch_expr = u32::from(value_mask);
         let mut outer_remaining = value;
         let counter = if switch_expr & u32::from(CA::COUNTER) != 0 {
             let remaining = outer_remaining;
@@ -1234,7 +1224,7 @@ impl CreateAlarmAux {
     #[allow(dead_code)]
     fn serialize(&self, value_mask: u32) -> Vec<u8> {
         let mut result = Vec::new();
-        self.serialize_into(&mut result, value_mask);
+        self.serialize_into(&mut result, u32::from(value_mask));
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, value_mask: u32) {
@@ -1356,7 +1346,7 @@ impl<'input> CreateAlarmRequest<'input> {
             value_mask_bytes[3],
         ];
         let length_so_far = length_so_far + request0.len();
-        let value_list_bytes = self.value_list.serialize(value_mask);
+        let value_list_bytes = self.value_list.serialize(u32::from(value_mask));
         let length_so_far = length_so_far + value_list_bytes.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
@@ -1372,7 +1362,7 @@ impl<'input> CreateAlarmRequest<'input> {
         }
         let (id, remaining) = Alarm::try_parse(value)?;
         let (value_mask, remaining) = u32::try_parse(remaining)?;
-        let (value_list, remaining) = CreateAlarmAux::try_parse(remaining, value_mask)?;
+        let (value_list, remaining) = CreateAlarmAux::try_parse(remaining, u32::from(value_mask))?;
         let _ = remaining;
         Ok(CreateAlarmRequest {
             id,
@@ -1413,7 +1403,7 @@ pub struct ChangeAlarmAux {
 }
 impl ChangeAlarmAux {
     fn try_parse(value: &[u8], value_mask: u32) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = value_mask;
+        let switch_expr = u32::from(value_mask);
         let mut outer_remaining = value;
         let counter = if switch_expr & u32::from(CA::COUNTER) != 0 {
             let remaining = outer_remaining;
@@ -1473,7 +1463,7 @@ impl ChangeAlarmAux {
     #[allow(dead_code)]
     fn serialize(&self, value_mask: u32) -> Vec<u8> {
         let mut result = Vec::new();
-        self.serialize_into(&mut result, value_mask);
+        self.serialize_into(&mut result, u32::from(value_mask));
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, value_mask: u32) {
@@ -1595,7 +1585,7 @@ impl<'input> ChangeAlarmRequest<'input> {
             value_mask_bytes[3],
         ];
         let length_so_far = length_so_far + request0.len();
-        let value_list_bytes = self.value_list.serialize(value_mask);
+        let value_list_bytes = self.value_list.serialize(u32::from(value_mask));
         let length_so_far = length_so_far + value_list_bytes.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
@@ -1611,7 +1601,7 @@ impl<'input> ChangeAlarmRequest<'input> {
         }
         let (id, remaining) = Alarm::try_parse(value)?;
         let (value_mask, remaining) = u32::try_parse(remaining)?;
-        let (value_list, remaining) = ChangeAlarmAux::try_parse(remaining, value_mask)?;
+        let (value_list, remaining) = ChangeAlarmAux::try_parse(remaining, u32::from(value_mask))?;
         let _ = remaining;
         Ok(ChangeAlarmRequest {
             id,

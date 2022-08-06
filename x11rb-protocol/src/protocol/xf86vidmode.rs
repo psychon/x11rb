@@ -4,6 +4,8 @@
 //! Bindings to the `XF86VidMode` X11 extension.
 
 #![allow(clippy::too_many_arguments)]
+// The code generator is simpler if it can always use conversions
+#![allow(clippy::useless_conversion)]
 
 #[allow(unused_imports)]
 use alloc::borrow::Cow;
@@ -38,7 +40,7 @@ pub type Dotclock = u32;
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct ModeFlag(u16);
+pub struct ModeFlag(u32);
 impl ModeFlag {
     pub const POSITIVE_H_SYNC: Self = Self(1 << 0);
     pub const NEGATIVE_H_SYNC: Self = Self(1 << 1);
@@ -54,28 +56,16 @@ impl ModeFlag {
     pub const DOUBLE_CLOCK: Self = Self(1 << 11);
     pub const HALF_CLOCK: Self = Self(1 << 12);
 }
-impl From<ModeFlag> for u16 {
+impl From<ModeFlag> for u32 {
     #[inline]
     fn from(input: ModeFlag) -> Self {
         input.0
     }
 }
-impl From<ModeFlag> for Option<u16> {
-    #[inline]
-    fn from(input: ModeFlag) -> Self {
-        Some(input.0)
-    }
-}
-impl From<ModeFlag> for u32 {
-    #[inline]
-    fn from(input: ModeFlag) -> Self {
-        u32::from(input.0)
-    }
-}
 impl From<ModeFlag> for Option<u32> {
     #[inline]
     fn from(input: ModeFlag) -> Self {
-        Some(u32::from(input.0))
+        Some(input.0)
     }
 }
 impl From<u8> for ModeFlag {
@@ -87,148 +77,130 @@ impl From<u8> for ModeFlag {
 impl From<u16> for ModeFlag {
     #[inline]
     fn from(value: u16) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u32> for ModeFlag {
+    #[inline]
+    fn from(value: u32) -> Self {
         Self(value)
     }
 }
 impl core::fmt::Debug for ModeFlag  {
     fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
-            (Self::POSITIVE_H_SYNC.0.into(), "POSITIVE_H_SYNC", "PositiveHSync"),
-            (Self::NEGATIVE_H_SYNC.0.into(), "NEGATIVE_H_SYNC", "NegativeHSync"),
-            (Self::POSITIVE_V_SYNC.0.into(), "POSITIVE_V_SYNC", "PositiveVSync"),
-            (Self::NEGATIVE_V_SYNC.0.into(), "NEGATIVE_V_SYNC", "NegativeVSync"),
-            (Self::INTERLACE.0.into(), "INTERLACE", "Interlace"),
-            (Self::COMPOSITE_SYNC.0.into(), "COMPOSITE_SYNC", "CompositeSync"),
-            (Self::POSITIVE_C_SYNC.0.into(), "POSITIVE_C_SYNC", "PositiveCSync"),
-            (Self::NEGATIVE_C_SYNC.0.into(), "NEGATIVE_C_SYNC", "NegativeCSync"),
-            (Self::H_SKEW.0.into(), "H_SKEW", "HSkew"),
-            (Self::BROADCAST.0.into(), "BROADCAST", "Broadcast"),
-            (Self::PIXMUX.0.into(), "PIXMUX", "Pixmux"),
-            (Self::DOUBLE_CLOCK.0.into(), "DOUBLE_CLOCK", "DoubleClock"),
-            (Self::HALF_CLOCK.0.into(), "HALF_CLOCK", "HalfClock"),
+            (Self::POSITIVE_H_SYNC.0, "POSITIVE_H_SYNC", "PositiveHSync"),
+            (Self::NEGATIVE_H_SYNC.0, "NEGATIVE_H_SYNC", "NegativeHSync"),
+            (Self::POSITIVE_V_SYNC.0, "POSITIVE_V_SYNC", "PositiveVSync"),
+            (Self::NEGATIVE_V_SYNC.0, "NEGATIVE_V_SYNC", "NegativeVSync"),
+            (Self::INTERLACE.0, "INTERLACE", "Interlace"),
+            (Self::COMPOSITE_SYNC.0, "COMPOSITE_SYNC", "CompositeSync"),
+            (Self::POSITIVE_C_SYNC.0, "POSITIVE_C_SYNC", "PositiveCSync"),
+            (Self::NEGATIVE_C_SYNC.0, "NEGATIVE_C_SYNC", "NegativeCSync"),
+            (Self::H_SKEW.0, "H_SKEW", "HSkew"),
+            (Self::BROADCAST.0, "BROADCAST", "Broadcast"),
+            (Self::PIXMUX.0, "PIXMUX", "Pixmux"),
+            (Self::DOUBLE_CLOCK.0, "DOUBLE_CLOCK", "DoubleClock"),
+            (Self::HALF_CLOCK.0, "HALF_CLOCK", "HalfClock"),
         ];
-        pretty_print_bitmask(fmt, self.0.into(), &variants)
+        pretty_print_bitmask(fmt, self.0, &variants)
     }
 }
-bitmask_binop!(ModeFlag, u16);
+bitmask_binop!(ModeFlag, u32);
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct ClockFlag(u8);
+pub struct ClockFlag(u32);
 impl ClockFlag {
     pub const PROGRAMABLE: Self = Self(1 << 0);
 }
-impl From<ClockFlag> for u8 {
+impl From<ClockFlag> for u32 {
     #[inline]
     fn from(input: ClockFlag) -> Self {
         input.0
     }
 }
-impl From<ClockFlag> for Option<u8> {
+impl From<ClockFlag> for Option<u32> {
     #[inline]
     fn from(input: ClockFlag) -> Self {
         Some(input.0)
     }
 }
-impl From<ClockFlag> for u16 {
-    #[inline]
-    fn from(input: ClockFlag) -> Self {
-        u16::from(input.0)
-    }
-}
-impl From<ClockFlag> for Option<u16> {
-    #[inline]
-    fn from(input: ClockFlag) -> Self {
-        Some(u16::from(input.0))
-    }
-}
-impl From<ClockFlag> for u32 {
-    #[inline]
-    fn from(input: ClockFlag) -> Self {
-        u32::from(input.0)
-    }
-}
-impl From<ClockFlag> for Option<u32> {
-    #[inline]
-    fn from(input: ClockFlag) -> Self {
-        Some(u32::from(input.0))
-    }
-}
 impl From<u8> for ClockFlag {
     #[inline]
     fn from(value: u8) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u16> for ClockFlag {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u32> for ClockFlag {
+    #[inline]
+    fn from(value: u32) -> Self {
         Self(value)
     }
 }
 impl core::fmt::Debug for ClockFlag  {
     fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
-            (Self::PROGRAMABLE.0.into(), "PROGRAMABLE", "Programable"),
+            (Self::PROGRAMABLE.0, "PROGRAMABLE", "Programable"),
         ];
-        pretty_print_bitmask(fmt, self.0.into(), &variants)
+        pretty_print_bitmask(fmt, self.0, &variants)
     }
 }
-bitmask_binop!(ClockFlag, u8);
+bitmask_binop!(ClockFlag, u32);
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct Permission(u8);
+pub struct Permission(u32);
 impl Permission {
     pub const READ: Self = Self(1 << 0);
     pub const WRITE: Self = Self(1 << 1);
 }
-impl From<Permission> for u8 {
+impl From<Permission> for u32 {
     #[inline]
     fn from(input: Permission) -> Self {
         input.0
     }
 }
-impl From<Permission> for Option<u8> {
+impl From<Permission> for Option<u32> {
     #[inline]
     fn from(input: Permission) -> Self {
         Some(input.0)
     }
 }
-impl From<Permission> for u16 {
-    #[inline]
-    fn from(input: Permission) -> Self {
-        u16::from(input.0)
-    }
-}
-impl From<Permission> for Option<u16> {
-    #[inline]
-    fn from(input: Permission) -> Self {
-        Some(u16::from(input.0))
-    }
-}
-impl From<Permission> for u32 {
-    #[inline]
-    fn from(input: Permission) -> Self {
-        u32::from(input.0)
-    }
-}
-impl From<Permission> for Option<u32> {
-    #[inline]
-    fn from(input: Permission) -> Self {
-        Some(u32::from(input.0))
-    }
-}
 impl From<u8> for Permission {
     #[inline]
     fn from(value: u8) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u16> for Permission {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u32> for Permission {
+    #[inline]
+    fn from(value: u32) -> Self {
         Self(value)
     }
 }
 impl core::fmt::Debug for Permission  {
     fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
-            (Self::READ.0.into(), "READ", "Read"),
-            (Self::WRITE.0.into(), "WRITE", "Write"),
+            (Self::READ.0, "READ", "Read"),
+            (Self::WRITE.0, "WRITE", "Write"),
         ];
-        pretty_print_bitmask(fmt, self.0.into(), &variants)
+        pretty_print_bitmask(fmt, self.0, &variants)
     }
 }
-bitmask_binop!(Permission, u8);
+bitmask_binop!(Permission, u32);
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -243,7 +215,7 @@ pub struct ModeInfo {
     pub vsyncstart: u16,
     pub vsyncend: u16,
     pub vtotal: u16,
-    pub flags: u32,
+    pub flags: ModeFlag,
     pub privsize: u32,
 }
 impl TryParse for ModeInfo {
@@ -262,6 +234,7 @@ impl TryParse for ModeInfo {
         let (flags, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::InsufficientData)?;
         let (privsize, remaining) = u32::try_parse(remaining)?;
+        let flags = flags.into();
         let result = ModeInfo { dotclock, hdisplay, hsyncstart, hsyncend, htotal, hskew, vdisplay, vsyncstart, vsyncend, vtotal, flags, privsize };
         Ok((result, remaining))
     }
@@ -279,7 +252,7 @@ impl Serialize for ModeInfo {
         let vsyncstart_bytes = self.vsyncstart.serialize();
         let vsyncend_bytes = self.vsyncend.serialize();
         let vtotal_bytes = self.vtotal.serialize();
-        let flags_bytes = self.flags.serialize();
+        let flags_bytes = u32::from(self.flags).serialize();
         let privsize_bytes = self.privsize.serialize();
         [
             dotclock_bytes[0],
@@ -345,7 +318,7 @@ impl Serialize for ModeInfo {
         self.vsyncend.serialize_into(bytes);
         self.vtotal.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 4]);
-        self.flags.serialize_into(bytes);
+        u32::from(self.flags).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 12]);
         self.privsize.serialize_into(bytes);
     }
@@ -528,7 +501,7 @@ pub struct GetModeLineReply {
     pub vsyncstart: u16,
     pub vsyncend: u16,
     pub vtotal: u16,
-    pub flags: u32,
+    pub flags: ModeFlag,
     pub private: Vec<u8>,
 }
 impl TryParse for GetModeLineReply {
@@ -557,6 +530,7 @@ impl TryParse for GetModeLineReply {
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
+        let flags = flags.into();
         let result = GetModeLineReply { sequence, length, dotclock, hdisplay, hsyncstart, hsyncend, htotal, hskew, vdisplay, vsyncstart, vsyncend, vtotal, flags, private };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
@@ -589,7 +563,7 @@ impl Serialize for GetModeLineReply {
         self.vsyncend.serialize_into(bytes);
         self.vtotal.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 2]);
-        self.flags.serialize_into(bytes);
+        u32::from(self.flags).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 12]);
         let privsize = u32::try_from(self.private.len()).expect("`private` has too many elements");
         privsize.serialize_into(bytes);
@@ -627,7 +601,7 @@ pub struct ModModeLineRequest<'input> {
     pub vsyncstart: u16,
     pub vsyncend: u16,
     pub vtotal: u16,
-    pub flags: u32,
+    pub flags: ModeFlag,
     pub private: Cow<'input, [u8]>,
 }
 impl<'input> ModModeLineRequest<'input> {
@@ -644,7 +618,7 @@ impl<'input> ModModeLineRequest<'input> {
         let vsyncstart_bytes = self.vsyncstart.serialize();
         let vsyncend_bytes = self.vsyncend.serialize();
         let vtotal_bytes = self.vtotal.serialize();
-        let flags_bytes = self.flags.serialize();
+        let flags_bytes = u32::from(self.flags).serialize();
         let privsize = u32::try_from(self.private.len()).expect("`private` has too many elements");
         let privsize_bytes = privsize.serialize();
         let mut request0 = vec![
@@ -723,6 +697,7 @@ impl<'input> ModModeLineRequest<'input> {
         let (vtotal, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (flags, remaining) = u32::try_parse(remaining)?;
+        let flags = flags.into();
         let remaining = remaining.get(12..).ok_or(ParseError::InsufficientData)?;
         let (privsize, remaining) = u32::try_parse(remaining)?;
         let (private, remaining) = crate::x11_utils::parse_u8_list(remaining, privsize.try_to_usize()?)?;
@@ -1203,7 +1178,7 @@ pub struct AddModeLineRequest<'input> {
     pub vsyncstart: u16,
     pub vsyncend: u16,
     pub vtotal: u16,
-    pub flags: u32,
+    pub flags: ModeFlag,
     pub after_dotclock: Dotclock,
     pub after_hdisplay: u16,
     pub after_hsyncstart: u16,
@@ -1214,7 +1189,7 @@ pub struct AddModeLineRequest<'input> {
     pub after_vsyncstart: u16,
     pub after_vsyncend: u16,
     pub after_vtotal: u16,
-    pub after_flags: u32,
+    pub after_flags: ModeFlag,
     pub private: Cow<'input, [u8]>,
 }
 impl<'input> AddModeLineRequest<'input> {
@@ -1232,7 +1207,7 @@ impl<'input> AddModeLineRequest<'input> {
         let vsyncstart_bytes = self.vsyncstart.serialize();
         let vsyncend_bytes = self.vsyncend.serialize();
         let vtotal_bytes = self.vtotal.serialize();
-        let flags_bytes = self.flags.serialize();
+        let flags_bytes = u32::from(self.flags).serialize();
         let privsize = u32::try_from(self.private.len()).expect("`private` has too many elements");
         let privsize_bytes = privsize.serialize();
         let after_dotclock_bytes = self.after_dotclock.serialize();
@@ -1245,7 +1220,7 @@ impl<'input> AddModeLineRequest<'input> {
         let after_vsyncstart_bytes = self.after_vsyncstart.serialize();
         let after_vsyncend_bytes = self.after_vsyncend.serialize();
         let after_vtotal_bytes = self.after_vtotal.serialize();
-        let after_flags_bytes = self.after_flags.serialize();
+        let after_flags_bytes = u32::from(self.after_flags).serialize();
         let mut request0 = vec![
             major_opcode,
             ADD_MODE_LINE_REQUEST,
@@ -1367,6 +1342,7 @@ impl<'input> AddModeLineRequest<'input> {
         let (vtotal, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (flags, remaining) = u32::try_parse(remaining)?;
+        let flags = flags.into();
         let remaining = remaining.get(12..).ok_or(ParseError::InsufficientData)?;
         let (privsize, remaining) = u32::try_parse(remaining)?;
         let (after_dotclock, remaining) = Dotclock::try_parse(remaining)?;
@@ -1381,6 +1357,7 @@ impl<'input> AddModeLineRequest<'input> {
         let (after_vtotal, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (after_flags, remaining) = u32::try_parse(remaining)?;
+        let after_flags = after_flags.into();
         let remaining = remaining.get(12..).ok_or(ParseError::InsufficientData)?;
         let (private, remaining) = crate::x11_utils::parse_u8_list(remaining, privsize.try_to_usize()?)?;
         let _ = remaining;
@@ -1470,7 +1447,7 @@ pub struct DeleteModeLineRequest<'input> {
     pub vsyncstart: u16,
     pub vsyncend: u16,
     pub vtotal: u16,
-    pub flags: u32,
+    pub flags: ModeFlag,
     pub private: Cow<'input, [u8]>,
 }
 impl<'input> DeleteModeLineRequest<'input> {
@@ -1488,7 +1465,7 @@ impl<'input> DeleteModeLineRequest<'input> {
         let vsyncstart_bytes = self.vsyncstart.serialize();
         let vsyncend_bytes = self.vsyncend.serialize();
         let vtotal_bytes = self.vtotal.serialize();
-        let flags_bytes = self.flags.serialize();
+        let flags_bytes = u32::from(self.flags).serialize();
         let privsize = u32::try_from(self.private.len()).expect("`private` has too many elements");
         let privsize_bytes = privsize.serialize();
         let mut request0 = vec![
@@ -1572,6 +1549,7 @@ impl<'input> DeleteModeLineRequest<'input> {
         let (vtotal, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (flags, remaining) = u32::try_parse(remaining)?;
+        let flags = flags.into();
         let remaining = remaining.get(12..).ok_or(ParseError::InsufficientData)?;
         let (privsize, remaining) = u32::try_parse(remaining)?;
         let (private, remaining) = crate::x11_utils::parse_u8_list(remaining, privsize.try_to_usize()?)?;
@@ -1640,7 +1618,7 @@ pub struct ValidateModeLineRequest<'input> {
     pub vsyncstart: u16,
     pub vsyncend: u16,
     pub vtotal: u16,
-    pub flags: u32,
+    pub flags: ModeFlag,
     pub private: Cow<'input, [u8]>,
 }
 impl<'input> ValidateModeLineRequest<'input> {
@@ -1658,7 +1636,7 @@ impl<'input> ValidateModeLineRequest<'input> {
         let vsyncstart_bytes = self.vsyncstart.serialize();
         let vsyncend_bytes = self.vsyncend.serialize();
         let vtotal_bytes = self.vtotal.serialize();
-        let flags_bytes = self.flags.serialize();
+        let flags_bytes = u32::from(self.flags).serialize();
         let privsize = u32::try_from(self.private.len()).expect("`private` has too many elements");
         let privsize_bytes = privsize.serialize();
         let mut request0 = vec![
@@ -1742,6 +1720,7 @@ impl<'input> ValidateModeLineRequest<'input> {
         let (vtotal, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (flags, remaining) = u32::try_parse(remaining)?;
+        let flags = flags.into();
         let remaining = remaining.get(12..).ok_or(ParseError::InsufficientData)?;
         let (privsize, remaining) = u32::try_parse(remaining)?;
         let (private, remaining) = crate::x11_utils::parse_u8_list(remaining, privsize.try_to_usize()?)?;
@@ -1891,7 +1870,7 @@ pub struct SwitchToModeRequest<'input> {
     pub vsyncstart: u16,
     pub vsyncend: u16,
     pub vtotal: u16,
-    pub flags: u32,
+    pub flags: ModeFlag,
     pub private: Cow<'input, [u8]>,
 }
 impl<'input> SwitchToModeRequest<'input> {
@@ -1909,7 +1888,7 @@ impl<'input> SwitchToModeRequest<'input> {
         let vsyncstart_bytes = self.vsyncstart.serialize();
         let vsyncend_bytes = self.vsyncend.serialize();
         let vtotal_bytes = self.vtotal.serialize();
-        let flags_bytes = self.flags.serialize();
+        let flags_bytes = u32::from(self.flags).serialize();
         let privsize = u32::try_from(self.private.len()).expect("`private` has too many elements");
         let privsize_bytes = privsize.serialize();
         let mut request0 = vec![
@@ -1993,6 +1972,7 @@ impl<'input> SwitchToModeRequest<'input> {
         let (vtotal, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (flags, remaining) = u32::try_parse(remaining)?;
+        let flags = flags.into();
         let remaining = remaining.get(12..).ok_or(ParseError::InsufficientData)?;
         let (privsize, remaining) = u32::try_parse(remaining)?;
         let (private, remaining) = crate::x11_utils::parse_u8_list(remaining, privsize.try_to_usize()?)?;
@@ -2314,7 +2294,7 @@ impl crate::x11_utils::ReplyRequest for GetDotClocksRequest {
 pub struct GetDotClocksReply {
     pub sequence: u16,
     pub length: u32,
-    pub flags: u32,
+    pub flags: ClockFlag,
     pub clocks: u32,
     pub maxclocks: u32,
     pub clock: Vec<u32>,
@@ -2330,10 +2310,11 @@ impl TryParse for GetDotClocksReply {
         let (clocks, remaining) = u32::try_parse(remaining)?;
         let (maxclocks, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::InsufficientData)?;
-        let (clock, remaining) = crate::x11_utils::parse_list::<u32>(remaining, 1u32.checked_sub(flags & 1u32).ok_or(ParseError::InvalidExpression)?.checked_mul(clocks).ok_or(ParseError::InvalidExpression)?.try_to_usize()?)?;
+        let (clock, remaining) = crate::x11_utils::parse_list::<u32>(remaining, 1u32.checked_sub(u32::from(flags) & 1u32).ok_or(ParseError::InvalidExpression)?.checked_mul(u32::from(clocks)).ok_or(ParseError::InvalidExpression)?.try_to_usize()?)?;
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
+        let flags = flags.into();
         let result = GetDotClocksReply { sequence, length, flags, clocks, maxclocks, clock };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
@@ -2355,11 +2336,11 @@ impl Serialize for GetDotClocksReply {
         bytes.extend_from_slice(&[0; 1]);
         self.sequence.serialize_into(bytes);
         self.length.serialize_into(bytes);
-        self.flags.serialize_into(bytes);
+        u32::from(self.flags).serialize_into(bytes);
         self.clocks.serialize_into(bytes);
         self.maxclocks.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 12]);
-        assert_eq!(self.clock.len(), usize::try_from(1u32.checked_sub(self.flags & 1u32).unwrap().checked_mul(self.clocks).unwrap()).unwrap(), "`clock` has an incorrect length");
+        assert_eq!(self.clock.len(), usize::try_from(1u32.checked_sub(u32::from(self.flags) & 1u32).unwrap().checked_mul(u32::from(self.clocks)).unwrap()).unwrap(), "`clock` has an incorrect length");
         self.clock.serialize_into(bytes);
     }
 }
@@ -3076,7 +3057,7 @@ impl crate::x11_utils::ReplyRequest for GetPermissionsRequest {
 pub struct GetPermissionsReply {
     pub sequence: u16,
     pub length: u32,
-    pub permissions: u32,
+    pub permissions: Permission,
 }
 impl TryParse for GetPermissionsReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -3090,6 +3071,7 @@ impl TryParse for GetPermissionsReply {
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
+        let permissions = permissions.into();
         let result = GetPermissionsReply { sequence, length, permissions };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
@@ -3103,7 +3085,7 @@ impl Serialize for GetPermissionsReply {
         let response_type_bytes = &[1];
         let sequence_bytes = self.sequence.serialize();
         let length_bytes = self.length.serialize();
-        let permissions_bytes = self.permissions.serialize();
+        let permissions_bytes = u32::from(self.permissions).serialize();
         [
             response_type_bytes[0],
             0,
@@ -3146,7 +3128,7 @@ impl Serialize for GetPermissionsReply {
         bytes.extend_from_slice(&[0; 1]);
         self.sequence.serialize_into(bytes);
         self.length.serialize_into(bytes);
-        self.permissions.serialize_into(bytes);
+        u32::from(self.permissions).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 20]);
     }
 }

@@ -4,6 +4,8 @@
 //! Bindings to the `Present` X11 extension.
 
 #![allow(clippy::too_many_arguments)]
+// The code generator is simpler if it can always use conversions
+#![allow(clippy::useless_conversion)]
 
 #[allow(unused_imports)]
 use alloc::borrow::Cow;
@@ -105,7 +107,7 @@ impl core::fmt::Debug for EventEnum  {
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct EventMask(u8);
+pub struct EventMask(u32);
 impl EventMask {
     pub const NO_EVENT: Self = Self(0);
     pub const CONFIGURE_NOTIFY: Self = Self(1 << 0);
@@ -113,61 +115,49 @@ impl EventMask {
     pub const IDLE_NOTIFY: Self = Self(1 << 2);
     pub const REDIRECT_NOTIFY: Self = Self(1 << 3);
 }
-impl From<EventMask> for u8 {
+impl From<EventMask> for u32 {
     #[inline]
     fn from(input: EventMask) -> Self {
         input.0
     }
 }
-impl From<EventMask> for core::option::Option<u8> {
+impl From<EventMask> for core::option::Option<u32> {
     #[inline]
     fn from(input: EventMask) -> Self {
         Some(input.0)
     }
 }
-impl From<EventMask> for u16 {
-    #[inline]
-    fn from(input: EventMask) -> Self {
-        u16::from(input.0)
-    }
-}
-impl From<EventMask> for core::option::Option<u16> {
-    #[inline]
-    fn from(input: EventMask) -> Self {
-        Some(u16::from(input.0))
-    }
-}
-impl From<EventMask> for u32 {
-    #[inline]
-    fn from(input: EventMask) -> Self {
-        u32::from(input.0)
-    }
-}
-impl From<EventMask> for core::option::Option<u32> {
-    #[inline]
-    fn from(input: EventMask) -> Self {
-        Some(u32::from(input.0))
-    }
-}
 impl From<u8> for EventMask {
     #[inline]
     fn from(value: u8) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u16> for EventMask {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u32> for EventMask {
+    #[inline]
+    fn from(value: u32) -> Self {
         Self(value)
     }
 }
 impl core::fmt::Debug for EventMask  {
     fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
-            (Self::NO_EVENT.0.into(), "NO_EVENT", "NoEvent"),
-            (Self::CONFIGURE_NOTIFY.0.into(), "CONFIGURE_NOTIFY", "ConfigureNotify"),
-            (Self::COMPLETE_NOTIFY.0.into(), "COMPLETE_NOTIFY", "CompleteNotify"),
-            (Self::IDLE_NOTIFY.0.into(), "IDLE_NOTIFY", "IdleNotify"),
-            (Self::REDIRECT_NOTIFY.0.into(), "REDIRECT_NOTIFY", "RedirectNotify"),
+            (Self::NO_EVENT.0, "NO_EVENT", "NoEvent"),
+            (Self::CONFIGURE_NOTIFY.0, "CONFIGURE_NOTIFY", "ConfigureNotify"),
+            (Self::COMPLETE_NOTIFY.0, "COMPLETE_NOTIFY", "CompleteNotify"),
+            (Self::IDLE_NOTIFY.0, "IDLE_NOTIFY", "IdleNotify"),
+            (Self::REDIRECT_NOTIFY.0, "REDIRECT_NOTIFY", "RedirectNotify"),
         ];
-        pretty_print_bitmask(fmt, self.0.into(), &variants)
+        pretty_print_bitmask(fmt, self.0, &variants)
     }
 }
-bitmask_binop!(EventMask, u8);
+bitmask_binop!(EventMask, u32);
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -901,7 +891,7 @@ pub const SELECT_INPUT_REQUEST: u8 = 3;
 pub struct SelectInputRequest {
     pub eid: Event,
     pub window: xproto::Window,
-    pub event_mask: u32,
+    pub event_mask: EventMask,
 }
 impl SelectInputRequest {
     /// Serialize this request into bytes for the provided connection
@@ -909,7 +899,7 @@ impl SelectInputRequest {
         let length_so_far = 0;
         let eid_bytes = self.eid.serialize();
         let window_bytes = self.window.serialize();
-        let event_mask_bytes = self.event_mask.serialize();
+        let event_mask_bytes = u32::from(self.event_mask).serialize();
         let mut request0 = vec![
             major_opcode,
             SELECT_INPUT_REQUEST,
@@ -942,6 +932,7 @@ impl SelectInputRequest {
         let (eid, remaining) = Event::try_parse(value)?;
         let (window, remaining) = xproto::Window::try_parse(remaining)?;
         let (event_mask, remaining) = u32::try_parse(remaining)?;
+        let event_mask = event_mask.into();
         let _ = remaining;
         Ok(SelectInputRequest {
             eid,

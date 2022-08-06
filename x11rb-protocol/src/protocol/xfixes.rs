@@ -4,6 +4,8 @@
 //! Bindings to the `XFixes` X11 extension.
 
 #![allow(clippy::too_many_arguments)]
+// The code generator is simpler if it can always use conversions
+#![allow(clippy::useless_conversion)]
 
 #[allow(unused_imports)]
 use alloc::borrow::Cow;
@@ -497,65 +499,53 @@ impl core::fmt::Debug for SelectionEvent  {
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct SelectionEventMask(u8);
+pub struct SelectionEventMask(u32);
 impl SelectionEventMask {
     pub const SET_SELECTION_OWNER: Self = Self(1 << 0);
     pub const SELECTION_WINDOW_DESTROY: Self = Self(1 << 1);
     pub const SELECTION_CLIENT_CLOSE: Self = Self(1 << 2);
 }
-impl From<SelectionEventMask> for u8 {
+impl From<SelectionEventMask> for u32 {
     #[inline]
     fn from(input: SelectionEventMask) -> Self {
         input.0
     }
 }
-impl From<SelectionEventMask> for Option<u8> {
+impl From<SelectionEventMask> for Option<u32> {
     #[inline]
     fn from(input: SelectionEventMask) -> Self {
         Some(input.0)
     }
 }
-impl From<SelectionEventMask> for u16 {
-    #[inline]
-    fn from(input: SelectionEventMask) -> Self {
-        u16::from(input.0)
-    }
-}
-impl From<SelectionEventMask> for Option<u16> {
-    #[inline]
-    fn from(input: SelectionEventMask) -> Self {
-        Some(u16::from(input.0))
-    }
-}
-impl From<SelectionEventMask> for u32 {
-    #[inline]
-    fn from(input: SelectionEventMask) -> Self {
-        u32::from(input.0)
-    }
-}
-impl From<SelectionEventMask> for Option<u32> {
-    #[inline]
-    fn from(input: SelectionEventMask) -> Self {
-        Some(u32::from(input.0))
-    }
-}
 impl From<u8> for SelectionEventMask {
     #[inline]
     fn from(value: u8) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u16> for SelectionEventMask {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u32> for SelectionEventMask {
+    #[inline]
+    fn from(value: u32) -> Self {
         Self(value)
     }
 }
 impl core::fmt::Debug for SelectionEventMask  {
     fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
-            (Self::SET_SELECTION_OWNER.0.into(), "SET_SELECTION_OWNER", "SetSelectionOwner"),
-            (Self::SELECTION_WINDOW_DESTROY.0.into(), "SELECTION_WINDOW_DESTROY", "SelectionWindowDestroy"),
-            (Self::SELECTION_CLIENT_CLOSE.0.into(), "SELECTION_CLIENT_CLOSE", "SelectionClientClose"),
+            (Self::SET_SELECTION_OWNER.0, "SET_SELECTION_OWNER", "SetSelectionOwner"),
+            (Self::SELECTION_WINDOW_DESTROY.0, "SELECTION_WINDOW_DESTROY", "SelectionWindowDestroy"),
+            (Self::SELECTION_CLIENT_CLOSE.0, "SELECTION_CLIENT_CLOSE", "SelectionClientClose"),
         ];
-        pretty_print_bitmask(fmt, self.0.into(), &variants)
+        pretty_print_bitmask(fmt, self.0, &variants)
     }
 }
-bitmask_binop!(SelectionEventMask, u8);
+bitmask_binop!(SelectionEventMask, u32);
 
 /// Opcode for the SelectionNotify event
 pub const SELECTION_NOTIFY_EVENT: u8 = 0;
@@ -709,7 +699,7 @@ pub const SELECT_SELECTION_INPUT_REQUEST: u8 = 2;
 pub struct SelectSelectionInputRequest {
     pub window: xproto::Window,
     pub selection: xproto::Atom,
-    pub event_mask: u32,
+    pub event_mask: SelectionEventMask,
 }
 impl SelectSelectionInputRequest {
     /// Serialize this request into bytes for the provided connection
@@ -717,7 +707,7 @@ impl SelectSelectionInputRequest {
         let length_so_far = 0;
         let window_bytes = self.window.serialize();
         let selection_bytes = self.selection.serialize();
-        let event_mask_bytes = self.event_mask.serialize();
+        let event_mask_bytes = u32::from(self.event_mask).serialize();
         let mut request0 = vec![
             major_opcode,
             SELECT_SELECTION_INPUT_REQUEST,
@@ -750,6 +740,7 @@ impl SelectSelectionInputRequest {
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let (selection, remaining) = xproto::Atom::try_parse(remaining)?;
         let (event_mask, remaining) = u32::try_parse(remaining)?;
+        let event_mask = event_mask.into();
         let _ = remaining;
         Ok(SelectSelectionInputRequest {
             window,
@@ -830,61 +821,49 @@ impl core::fmt::Debug for CursorNotify  {
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct CursorNotifyMask(u8);
+pub struct CursorNotifyMask(u32);
 impl CursorNotifyMask {
     pub const DISPLAY_CURSOR: Self = Self(1 << 0);
 }
-impl From<CursorNotifyMask> for u8 {
+impl From<CursorNotifyMask> for u32 {
     #[inline]
     fn from(input: CursorNotifyMask) -> Self {
         input.0
     }
 }
-impl From<CursorNotifyMask> for Option<u8> {
+impl From<CursorNotifyMask> for Option<u32> {
     #[inline]
     fn from(input: CursorNotifyMask) -> Self {
         Some(input.0)
     }
 }
-impl From<CursorNotifyMask> for u16 {
-    #[inline]
-    fn from(input: CursorNotifyMask) -> Self {
-        u16::from(input.0)
-    }
-}
-impl From<CursorNotifyMask> for Option<u16> {
-    #[inline]
-    fn from(input: CursorNotifyMask) -> Self {
-        Some(u16::from(input.0))
-    }
-}
-impl From<CursorNotifyMask> for u32 {
-    #[inline]
-    fn from(input: CursorNotifyMask) -> Self {
-        u32::from(input.0)
-    }
-}
-impl From<CursorNotifyMask> for Option<u32> {
-    #[inline]
-    fn from(input: CursorNotifyMask) -> Self {
-        Some(u32::from(input.0))
-    }
-}
 impl From<u8> for CursorNotifyMask {
     #[inline]
     fn from(value: u8) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u16> for CursorNotifyMask {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u32> for CursorNotifyMask {
+    #[inline]
+    fn from(value: u32) -> Self {
         Self(value)
     }
 }
 impl core::fmt::Debug for CursorNotifyMask  {
     fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
-            (Self::DISPLAY_CURSOR.0.into(), "DISPLAY_CURSOR", "DisplayCursor"),
+            (Self::DISPLAY_CURSOR.0, "DISPLAY_CURSOR", "DisplayCursor"),
         ];
-        pretty_print_bitmask(fmt, self.0.into(), &variants)
+        pretty_print_bitmask(fmt, self.0, &variants)
     }
 }
-bitmask_binop!(CursorNotifyMask, u8);
+bitmask_binop!(CursorNotifyMask, u32);
 
 /// Opcode for the CursorNotify event
 pub const CURSOR_NOTIFY_EVENT: u8 = 1;
@@ -1032,14 +1011,14 @@ pub const SELECT_CURSOR_INPUT_REQUEST: u8 = 3;
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SelectCursorInputRequest {
     pub window: xproto::Window,
-    pub event_mask: u32,
+    pub event_mask: CursorNotifyMask,
 }
 impl SelectCursorInputRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
         let length_so_far = 0;
         let window_bytes = self.window.serialize();
-        let event_mask_bytes = self.event_mask.serialize();
+        let event_mask_bytes = u32::from(self.event_mask).serialize();
         let mut request0 = vec![
             major_opcode,
             SELECT_CURSOR_INPUT_REQUEST,
@@ -1067,6 +1046,7 @@ impl SelectCursorInputRequest {
         }
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let (event_mask, remaining) = u32::try_parse(remaining)?;
+        let event_mask = event_mask.into();
         let _ = remaining;
         Ok(SelectCursorInputRequest {
             window,
@@ -2253,7 +2233,7 @@ impl TryParse for FetchRegionReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (extents, remaining) = xproto::Rectangle::try_parse(remaining)?;
         let remaining = remaining.get(16..).ok_or(ParseError::InsufficientData)?;
-        let (rectangles, remaining) = crate::x11_utils::parse_list::<xproto::Rectangle>(remaining, length.checked_div(2u32).ok_or(ParseError::InvalidExpression)?.try_to_usize()?)?;
+        let (rectangles, remaining) = crate::x11_utils::parse_list::<xproto::Rectangle>(remaining, u32::from(length).checked_div(2u32).ok_or(ParseError::InvalidExpression)?.try_to_usize()?)?;
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
@@ -3192,67 +3172,55 @@ pub type Barrier = u32;
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct BarrierDirections(u8);
+pub struct BarrierDirections(u32);
 impl BarrierDirections {
     pub const POSITIVE_X: Self = Self(1 << 0);
     pub const POSITIVE_Y: Self = Self(1 << 1);
     pub const NEGATIVE_X: Self = Self(1 << 2);
     pub const NEGATIVE_Y: Self = Self(1 << 3);
 }
-impl From<BarrierDirections> for u8 {
+impl From<BarrierDirections> for u32 {
     #[inline]
     fn from(input: BarrierDirections) -> Self {
         input.0
     }
 }
-impl From<BarrierDirections> for Option<u8> {
+impl From<BarrierDirections> for Option<u32> {
     #[inline]
     fn from(input: BarrierDirections) -> Self {
         Some(input.0)
     }
 }
-impl From<BarrierDirections> for u16 {
-    #[inline]
-    fn from(input: BarrierDirections) -> Self {
-        u16::from(input.0)
-    }
-}
-impl From<BarrierDirections> for Option<u16> {
-    #[inline]
-    fn from(input: BarrierDirections) -> Self {
-        Some(u16::from(input.0))
-    }
-}
-impl From<BarrierDirections> for u32 {
-    #[inline]
-    fn from(input: BarrierDirections) -> Self {
-        u32::from(input.0)
-    }
-}
-impl From<BarrierDirections> for Option<u32> {
-    #[inline]
-    fn from(input: BarrierDirections) -> Self {
-        Some(u32::from(input.0))
-    }
-}
 impl From<u8> for BarrierDirections {
     #[inline]
     fn from(value: u8) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u16> for BarrierDirections {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u32> for BarrierDirections {
+    #[inline]
+    fn from(value: u32) -> Self {
         Self(value)
     }
 }
 impl core::fmt::Debug for BarrierDirections  {
     fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
-            (Self::POSITIVE_X.0.into(), "POSITIVE_X", "PositiveX"),
-            (Self::POSITIVE_Y.0.into(), "POSITIVE_Y", "PositiveY"),
-            (Self::NEGATIVE_X.0.into(), "NEGATIVE_X", "NegativeX"),
-            (Self::NEGATIVE_Y.0.into(), "NEGATIVE_Y", "NegativeY"),
+            (Self::POSITIVE_X.0, "POSITIVE_X", "PositiveX"),
+            (Self::POSITIVE_Y.0, "POSITIVE_Y", "PositiveY"),
+            (Self::NEGATIVE_X.0, "NEGATIVE_X", "NegativeX"),
+            (Self::NEGATIVE_Y.0, "NEGATIVE_Y", "NegativeY"),
         ];
-        pretty_print_bitmask(fmt, self.0.into(), &variants)
+        pretty_print_bitmask(fmt, self.0, &variants)
     }
 }
-bitmask_binop!(BarrierDirections, u8);
+bitmask_binop!(BarrierDirections, u32);
 
 /// Opcode for the CreatePointerBarrier request
 pub const CREATE_POINTER_BARRIER_REQUEST: u8 = 31;
@@ -3265,7 +3233,7 @@ pub struct CreatePointerBarrierRequest<'input> {
     pub y1: u16,
     pub x2: u16,
     pub y2: u16,
-    pub directions: u32,
+    pub directions: BarrierDirections,
     pub devices: Cow<'input, [u16]>,
 }
 impl<'input> CreatePointerBarrierRequest<'input> {
@@ -3278,7 +3246,7 @@ impl<'input> CreatePointerBarrierRequest<'input> {
         let y1_bytes = self.y1.serialize();
         let x2_bytes = self.x2.serialize();
         let y2_bytes = self.y2.serialize();
-        let directions_bytes = self.directions.serialize();
+        let directions_bytes = u32::from(self.directions).serialize();
         let num_devices = u16::try_from(self.devices.len()).expect("`devices` has too many elements");
         let num_devices_bytes = num_devices.serialize();
         let mut request0 = vec![
@@ -3333,6 +3301,7 @@ impl<'input> CreatePointerBarrierRequest<'input> {
         let (x2, remaining) = u16::try_parse(remaining)?;
         let (y2, remaining) = u16::try_parse(remaining)?;
         let (directions, remaining) = u32::try_parse(remaining)?;
+        let directions = directions.into();
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (num_devices, remaining) = u16::try_parse(remaining)?;
         let (devices, remaining) = crate::x11_utils::parse_list::<u16>(remaining, num_devices.try_to_usize()?)?;

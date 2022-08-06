@@ -152,7 +152,7 @@ fn test_change_window_attributes() {
         ChangeWindowAttributesRequest {
             window: 0x0513,
             value_list: Cow::Owned(ChangeWindowAttributesAux {
-                event_mask: Some(EventMask::PROPERTY_CHANGE.into()),
+                event_mask: Some(EventMask::PROPERTY_CHANGE),
                 ..Default::default()
             }),
         }

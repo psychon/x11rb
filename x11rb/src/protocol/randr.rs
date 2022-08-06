@@ -49,12 +49,10 @@ where
     conn.send_request_with_reply(&slices, fds)
 }
 
-pub fn set_screen_config<Conn, A>(conn: &Conn, window: xproto::Window, timestamp: xproto::Timestamp, config_timestamp: xproto::Timestamp, size_id: u16, rotation: A, rate: u16) -> Result<Cookie<'_, Conn, SetScreenConfigReply>, ConnectionError>
+pub fn set_screen_config<Conn>(conn: &Conn, window: xproto::Window, timestamp: xproto::Timestamp, config_timestamp: xproto::Timestamp, size_id: u16, rotation: Rotation, rate: u16) -> Result<Cookie<'_, Conn, SetScreenConfigReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u16>,
 {
-    let rotation: u16 = rotation.into();
     let request0 = SetScreenConfigRequest {
         window,
         timestamp,
@@ -68,12 +66,10 @@ where
     conn.send_request_with_reply(&slices, fds)
 }
 
-pub fn select_input<Conn, A>(conn: &Conn, window: xproto::Window, enable: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn select_input<Conn>(conn: &Conn, window: xproto::Window, enable: NotifyMask) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u16>,
 {
-    let enable: u16 = enable.into();
     let request0 = SelectInputRequest {
         window,
         enable,
@@ -305,12 +301,10 @@ where
     conn.send_request_with_reply(&slices, fds)
 }
 
-pub fn set_crtc_config<'c, 'input, Conn, A>(conn: &'c Conn, crtc: Crtc, timestamp: xproto::Timestamp, config_timestamp: xproto::Timestamp, x: i16, y: i16, mode: Mode, rotation: A, outputs: &'input [Output]) -> Result<Cookie<'c, Conn, SetCrtcConfigReply>, ConnectionError>
+pub fn set_crtc_config<'c, 'input, Conn>(conn: &'c Conn, crtc: Crtc, timestamp: xproto::Timestamp, config_timestamp: xproto::Timestamp, x: i16, y: i16, mode: Mode, rotation: Rotation, outputs: &'input [Output]) -> Result<Cookie<'c, Conn, SetCrtcConfigReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u16>,
 {
-    let rotation: u16 = rotation.into();
     let request0 = SetCrtcConfigRequest {
         crtc,
         timestamp,
@@ -682,15 +676,11 @@ pub trait ConnectionExt: RequestConnection {
     {
         query_version(self, major_version, minor_version)
     }
-    fn randr_set_screen_config<A>(&self, window: xproto::Window, timestamp: xproto::Timestamp, config_timestamp: xproto::Timestamp, size_id: u16, rotation: A, rate: u16) -> Result<Cookie<'_, Self, SetScreenConfigReply>, ConnectionError>
-    where
-        A: Into<u16>,
+    fn randr_set_screen_config(&self, window: xproto::Window, timestamp: xproto::Timestamp, config_timestamp: xproto::Timestamp, size_id: u16, rotation: Rotation, rate: u16) -> Result<Cookie<'_, Self, SetScreenConfigReply>, ConnectionError>
     {
         set_screen_config(self, window, timestamp, config_timestamp, size_id, rotation, rate)
     }
-    fn randr_select_input<A>(&self, window: xproto::Window, enable: A) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where
-        A: Into<u16>,
+    fn randr_select_input(&self, window: xproto::Window, enable: NotifyMask) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         select_input(self, window, enable)
     }
@@ -760,9 +750,7 @@ pub trait ConnectionExt: RequestConnection {
     {
         get_crtc_info(self, crtc, config_timestamp)
     }
-    fn randr_set_crtc_config<'c, 'input, A>(&'c self, crtc: Crtc, timestamp: xproto::Timestamp, config_timestamp: xproto::Timestamp, x: i16, y: i16, mode: Mode, rotation: A, outputs: &'input [Output]) -> Result<Cookie<'c, Self, SetCrtcConfigReply>, ConnectionError>
-    where
-        A: Into<u16>,
+    fn randr_set_crtc_config<'c, 'input>(&'c self, crtc: Crtc, timestamp: xproto::Timestamp, config_timestamp: xproto::Timestamp, x: i16, y: i16, mode: Mode, rotation: Rotation, outputs: &'input [Output]) -> Result<Cookie<'c, Self, SetCrtcConfigReply>, ConnectionError>
     {
         set_crtc_config(self, crtc, timestamp, config_timestamp, x, y, mode, rotation, outputs)
     }

@@ -4,6 +4,8 @@
 //! Bindings to the `xkb` X11 extension.
 
 #![allow(clippy::too_many_arguments)]
+// The code generator is simpler if it can always use conversions
+#![allow(clippy::useless_conversion)]
 
 #[allow(unused_imports)]
 use alloc::borrow::Cow;
@@ -171,34 +173,22 @@ bitmask_binop!(EventType, u16);
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct NKNDetail(u8);
+pub struct NKNDetail(u16);
 impl NKNDetail {
     pub const KEYCODES: Self = Self(1 << 0);
     pub const GEOMETRY: Self = Self(1 << 1);
     pub const DEVICE_ID: Self = Self(1 << 2);
 }
-impl From<NKNDetail> for u8 {
+impl From<NKNDetail> for u16 {
     #[inline]
     fn from(input: NKNDetail) -> Self {
         input.0
     }
 }
-impl From<NKNDetail> for Option<u8> {
-    #[inline]
-    fn from(input: NKNDetail) -> Self {
-        Some(input.0)
-    }
-}
-impl From<NKNDetail> for u16 {
-    #[inline]
-    fn from(input: NKNDetail) -> Self {
-        u16::from(input.0)
-    }
-}
 impl From<NKNDetail> for Option<u16> {
     #[inline]
     fn from(input: NKNDetail) -> Self {
-        Some(u16::from(input.0))
+        Some(input.0)
     }
 }
 impl From<NKNDetail> for u32 {
@@ -216,6 +206,12 @@ impl From<NKNDetail> for Option<u32> {
 impl From<u8> for NKNDetail {
     #[inline]
     fn from(value: u8) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u16> for NKNDetail {
+    #[inline]
+    fn from(value: u16) -> Self {
         Self(value)
     }
 }
@@ -229,11 +225,11 @@ impl core::fmt::Debug for NKNDetail  {
         pretty_print_bitmask(fmt, self.0.into(), &variants)
     }
 }
-bitmask_binop!(NKNDetail, u8);
+bitmask_binop!(NKNDetail, u16);
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct AXNDetail(u8);
+pub struct AXNDetail(u16);
 impl AXNDetail {
     pub const SK_PRESS: Self = Self(1 << 0);
     pub const SK_ACCEPT: Self = Self(1 << 1);
@@ -243,28 +239,16 @@ impl AXNDetail {
     pub const BK_REJECT: Self = Self(1 << 5);
     pub const AXK_WARNING: Self = Self(1 << 6);
 }
-impl From<AXNDetail> for u8 {
+impl From<AXNDetail> for u16 {
     #[inline]
     fn from(input: AXNDetail) -> Self {
         input.0
     }
 }
-impl From<AXNDetail> for Option<u8> {
-    #[inline]
-    fn from(input: AXNDetail) -> Self {
-        Some(input.0)
-    }
-}
-impl From<AXNDetail> for u16 {
-    #[inline]
-    fn from(input: AXNDetail) -> Self {
-        u16::from(input.0)
-    }
-}
 impl From<AXNDetail> for Option<u16> {
     #[inline]
     fn from(input: AXNDetail) -> Self {
-        Some(u16::from(input.0))
+        Some(input.0)
     }
 }
 impl From<AXNDetail> for u32 {
@@ -282,6 +266,12 @@ impl From<AXNDetail> for Option<u32> {
 impl From<u8> for AXNDetail {
     #[inline]
     fn from(value: u8) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u16> for AXNDetail {
+    #[inline]
+    fn from(value: u16) -> Self {
         Self(value)
     }
 }
@@ -299,11 +289,11 @@ impl core::fmt::Debug for AXNDetail  {
         pretty_print_bitmask(fmt, self.0.into(), &variants)
     }
 }
-bitmask_binop!(AXNDetail, u8);
+bitmask_binop!(AXNDetail, u16);
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct MapPart(u8);
+pub struct MapPart(u16);
 impl MapPart {
     pub const KEY_TYPES: Self = Self(1 << 0);
     pub const KEY_SYMS: Self = Self(1 << 1);
@@ -314,28 +304,16 @@ impl MapPart {
     pub const VIRTUAL_MODS: Self = Self(1 << 6);
     pub const VIRTUAL_MOD_MAP: Self = Self(1 << 7);
 }
-impl From<MapPart> for u8 {
+impl From<MapPart> for u16 {
     #[inline]
     fn from(input: MapPart) -> Self {
         input.0
     }
 }
-impl From<MapPart> for Option<u8> {
-    #[inline]
-    fn from(input: MapPart) -> Self {
-        Some(input.0)
-    }
-}
-impl From<MapPart> for u16 {
-    #[inline]
-    fn from(input: MapPart) -> Self {
-        u16::from(input.0)
-    }
-}
 impl From<MapPart> for Option<u16> {
     #[inline]
     fn from(input: MapPart) -> Self {
-        Some(u16::from(input.0))
+        Some(input.0)
     }
 }
 impl From<MapPart> for u32 {
@@ -353,6 +331,12 @@ impl From<MapPart> for Option<u32> {
 impl From<u8> for MapPart {
     #[inline]
     fn from(value: u8) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u16> for MapPart {
+    #[inline]
+    fn from(value: u16) -> Self {
         Self(value)
     }
 }
@@ -371,37 +355,25 @@ impl core::fmt::Debug for MapPart  {
         pretty_print_bitmask(fmt, self.0.into(), &variants)
     }
 }
-bitmask_binop!(MapPart, u8);
+bitmask_binop!(MapPart, u16);
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct SetMapFlags(u8);
+pub struct SetMapFlags(u16);
 impl SetMapFlags {
     pub const RESIZE_TYPES: Self = Self(1 << 0);
     pub const RECOMPUTE_ACTIONS: Self = Self(1 << 1);
 }
-impl From<SetMapFlags> for u8 {
+impl From<SetMapFlags> for u16 {
     #[inline]
     fn from(input: SetMapFlags) -> Self {
         input.0
     }
 }
-impl From<SetMapFlags> for Option<u8> {
-    #[inline]
-    fn from(input: SetMapFlags) -> Self {
-        Some(input.0)
-    }
-}
-impl From<SetMapFlags> for u16 {
-    #[inline]
-    fn from(input: SetMapFlags) -> Self {
-        u16::from(input.0)
-    }
-}
 impl From<SetMapFlags> for Option<u16> {
     #[inline]
     fn from(input: SetMapFlags) -> Self {
-        Some(u16::from(input.0))
+        Some(input.0)
     }
 }
 impl From<SetMapFlags> for u32 {
@@ -419,6 +391,12 @@ impl From<SetMapFlags> for Option<u32> {
 impl From<u8> for SetMapFlags {
     #[inline]
     fn from(value: u8) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u16> for SetMapFlags {
+    #[inline]
+    fn from(value: u16) -> Self {
         Self(value)
     }
 }
@@ -431,7 +409,7 @@ impl core::fmt::Debug for SetMapFlags  {
         pretty_print_bitmask(fmt, self.0.into(), &variants)
     }
 }
-bitmask_binop!(SetMapFlags, u8);
+bitmask_binop!(SetMapFlags, u16);
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -513,7 +491,7 @@ bitmask_binop!(StatePart, u16);
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct BoolCtrl(u16);
+pub struct BoolCtrl(u32);
 impl BoolCtrl {
     pub const REPEAT_KEYS: Self = Self(1 << 0);
     pub const SLOW_KEYS: Self = Self(1 << 1);
@@ -529,28 +507,16 @@ impl BoolCtrl {
     pub const OVERLAY2_MASK: Self = Self(1 << 11);
     pub const IGNORE_GROUP_LOCK_MASK: Self = Self(1 << 12);
 }
-impl From<BoolCtrl> for u16 {
+impl From<BoolCtrl> for u32 {
     #[inline]
     fn from(input: BoolCtrl) -> Self {
         input.0
     }
 }
-impl From<BoolCtrl> for Option<u16> {
-    #[inline]
-    fn from(input: BoolCtrl) -> Self {
-        Some(input.0)
-    }
-}
-impl From<BoolCtrl> for u32 {
-    #[inline]
-    fn from(input: BoolCtrl) -> Self {
-        u32::from(input.0)
-    }
-}
 impl From<BoolCtrl> for Option<u32> {
     #[inline]
     fn from(input: BoolCtrl) -> Self {
-        Some(u32::from(input.0))
+        Some(input.0)
     }
 }
 impl From<u8> for BoolCtrl {
@@ -562,30 +528,36 @@ impl From<u8> for BoolCtrl {
 impl From<u16> for BoolCtrl {
     #[inline]
     fn from(value: u16) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u32> for BoolCtrl {
+    #[inline]
+    fn from(value: u32) -> Self {
         Self(value)
     }
 }
 impl core::fmt::Debug for BoolCtrl  {
     fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
-            (Self::REPEAT_KEYS.0.into(), "REPEAT_KEYS", "RepeatKeys"),
-            (Self::SLOW_KEYS.0.into(), "SLOW_KEYS", "SlowKeys"),
-            (Self::BOUNCE_KEYS.0.into(), "BOUNCE_KEYS", "BounceKeys"),
-            (Self::STICKY_KEYS.0.into(), "STICKY_KEYS", "StickyKeys"),
-            (Self::MOUSE_KEYS.0.into(), "MOUSE_KEYS", "MouseKeys"),
-            (Self::MOUSE_KEYS_ACCEL.0.into(), "MOUSE_KEYS_ACCEL", "MouseKeysAccel"),
-            (Self::ACCESS_X_KEYS.0.into(), "ACCESS_X_KEYS", "AccessXKeys"),
-            (Self::ACCESS_X_TIMEOUT_MASK.0.into(), "ACCESS_X_TIMEOUT_MASK", "AccessXTimeoutMask"),
-            (Self::ACCESS_X_FEEDBACK_MASK.0.into(), "ACCESS_X_FEEDBACK_MASK", "AccessXFeedbackMask"),
-            (Self::AUDIBLE_BELL_MASK.0.into(), "AUDIBLE_BELL_MASK", "AudibleBellMask"),
-            (Self::OVERLAY1_MASK.0.into(), "OVERLAY1_MASK", "Overlay1Mask"),
-            (Self::OVERLAY2_MASK.0.into(), "OVERLAY2_MASK", "Overlay2Mask"),
-            (Self::IGNORE_GROUP_LOCK_MASK.0.into(), "IGNORE_GROUP_LOCK_MASK", "IgnoreGroupLockMask"),
+            (Self::REPEAT_KEYS.0, "REPEAT_KEYS", "RepeatKeys"),
+            (Self::SLOW_KEYS.0, "SLOW_KEYS", "SlowKeys"),
+            (Self::BOUNCE_KEYS.0, "BOUNCE_KEYS", "BounceKeys"),
+            (Self::STICKY_KEYS.0, "STICKY_KEYS", "StickyKeys"),
+            (Self::MOUSE_KEYS.0, "MOUSE_KEYS", "MouseKeys"),
+            (Self::MOUSE_KEYS_ACCEL.0, "MOUSE_KEYS_ACCEL", "MouseKeysAccel"),
+            (Self::ACCESS_X_KEYS.0, "ACCESS_X_KEYS", "AccessXKeys"),
+            (Self::ACCESS_X_TIMEOUT_MASK.0, "ACCESS_X_TIMEOUT_MASK", "AccessXTimeoutMask"),
+            (Self::ACCESS_X_FEEDBACK_MASK.0, "ACCESS_X_FEEDBACK_MASK", "AccessXFeedbackMask"),
+            (Self::AUDIBLE_BELL_MASK.0, "AUDIBLE_BELL_MASK", "AudibleBellMask"),
+            (Self::OVERLAY1_MASK.0, "OVERLAY1_MASK", "Overlay1Mask"),
+            (Self::OVERLAY2_MASK.0, "OVERLAY2_MASK", "Overlay2Mask"),
+            (Self::IGNORE_GROUP_LOCK_MASK.0, "IGNORE_GROUP_LOCK_MASK", "IgnoreGroupLockMask"),
         ];
-        pretty_print_bitmask(fmt, self.0.into(), &variants)
+        pretty_print_bitmask(fmt, self.0, &variants)
     }
 }
-bitmask_binop!(BoolCtrl, u16);
+bitmask_binop!(BoolCtrl, u32);
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -1939,10 +1911,10 @@ pub struct IndicatorMap {
     pub which_groups: IMGroupsWhich,
     pub groups: SetOfGroup,
     pub which_mods: IMModsWhich,
-    pub mods: u8,
-    pub real_mods: u8,
-    pub vmods: u16,
-    pub ctrls: u32,
+    pub mods: xproto::ModMask,
+    pub real_mods: xproto::ModMask,
+    pub vmods: VMod,
+    pub ctrls: BoolCtrl,
 }
 impl TryParse for IndicatorMap {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -1958,6 +1930,10 @@ impl TryParse for IndicatorMap {
         let which_groups = which_groups.into();
         let groups = groups.into();
         let which_mods = which_mods.into();
+        let mods = mods.into();
+        let real_mods = real_mods.into();
+        let vmods = vmods.into();
+        let ctrls = ctrls.into();
         let result = IndicatorMap { flags, which_groups, groups, which_mods, mods, real_mods, vmods, ctrls };
         Ok((result, remaining))
     }
@@ -1969,10 +1945,10 @@ impl Serialize for IndicatorMap {
         let which_groups_bytes = u8::from(self.which_groups).serialize();
         let groups_bytes = u8::from(self.groups).serialize();
         let which_mods_bytes = u8::from(self.which_mods).serialize();
-        let mods_bytes = self.mods.serialize();
-        let real_mods_bytes = self.real_mods.serialize();
-        let vmods_bytes = self.vmods.serialize();
-        let ctrls_bytes = self.ctrls.serialize();
+        let mods_bytes = (u16::from(self.mods) as u8).serialize();
+        let real_mods_bytes = (u16::from(self.real_mods) as u8).serialize();
+        let vmods_bytes = u16::from(self.vmods).serialize();
+        let ctrls_bytes = u32::from(self.ctrls).serialize();
         [
             flags_bytes[0],
             which_groups_bytes[0],
@@ -1994,10 +1970,10 @@ impl Serialize for IndicatorMap {
         u8::from(self.which_groups).serialize_into(bytes);
         u8::from(self.groups).serialize_into(bytes);
         u8::from(self.which_mods).serialize_into(bytes);
-        self.mods.serialize_into(bytes);
-        self.real_mods.serialize_into(bytes);
-        self.vmods.serialize_into(bytes);
-        self.ctrls.serialize_into(bytes);
+        (u16::from(self.mods) as u8).serialize_into(bytes);
+        (u16::from(self.real_mods) as u8).serialize_into(bytes);
+        u16::from(self.vmods).serialize_into(bytes);
+        u32::from(self.ctrls).serialize_into(bytes);
     }
 }
 
@@ -2063,7 +2039,7 @@ bitmask_binop!(CMDetail, u8);
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct NameDetail(u16);
+pub struct NameDetail(u32);
 impl NameDetail {
     pub const KEYCODES: Self = Self(1 << 0);
     pub const GEOMETRY: Self = Self(1 << 1);
@@ -2080,28 +2056,16 @@ impl NameDetail {
     pub const GROUP_NAMES: Self = Self(1 << 12);
     pub const RG_NAMES: Self = Self(1 << 13);
 }
-impl From<NameDetail> for u16 {
+impl From<NameDetail> for u32 {
     #[inline]
     fn from(input: NameDetail) -> Self {
         input.0
     }
 }
-impl From<NameDetail> for Option<u16> {
-    #[inline]
-    fn from(input: NameDetail) -> Self {
-        Some(input.0)
-    }
-}
-impl From<NameDetail> for u32 {
-    #[inline]
-    fn from(input: NameDetail) -> Self {
-        u32::from(input.0)
-    }
-}
 impl From<NameDetail> for Option<u32> {
     #[inline]
     fn from(input: NameDetail) -> Self {
-        Some(u32::from(input.0))
+        Some(input.0)
     }
 }
 impl From<u8> for NameDetail {
@@ -2113,35 +2077,41 @@ impl From<u8> for NameDetail {
 impl From<u16> for NameDetail {
     #[inline]
     fn from(value: u16) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u32> for NameDetail {
+    #[inline]
+    fn from(value: u32) -> Self {
         Self(value)
     }
 }
 impl core::fmt::Debug for NameDetail  {
     fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
-            (Self::KEYCODES.0.into(), "KEYCODES", "Keycodes"),
-            (Self::GEOMETRY.0.into(), "GEOMETRY", "Geometry"),
-            (Self::SYMBOLS.0.into(), "SYMBOLS", "Symbols"),
-            (Self::PHYS_SYMBOLS.0.into(), "PHYS_SYMBOLS", "PhysSymbols"),
-            (Self::TYPES.0.into(), "TYPES", "Types"),
-            (Self::COMPAT.0.into(), "COMPAT", "Compat"),
-            (Self::KEY_TYPE_NAMES.0.into(), "KEY_TYPE_NAMES", "KeyTypeNames"),
-            (Self::KT_LEVEL_NAMES.0.into(), "KT_LEVEL_NAMES", "KTLevelNames"),
-            (Self::INDICATOR_NAMES.0.into(), "INDICATOR_NAMES", "IndicatorNames"),
-            (Self::KEY_NAMES.0.into(), "KEY_NAMES", "KeyNames"),
-            (Self::KEY_ALIASES.0.into(), "KEY_ALIASES", "KeyAliases"),
-            (Self::VIRTUAL_MOD_NAMES.0.into(), "VIRTUAL_MOD_NAMES", "VirtualModNames"),
-            (Self::GROUP_NAMES.0.into(), "GROUP_NAMES", "GroupNames"),
-            (Self::RG_NAMES.0.into(), "RG_NAMES", "RGNames"),
+            (Self::KEYCODES.0, "KEYCODES", "Keycodes"),
+            (Self::GEOMETRY.0, "GEOMETRY", "Geometry"),
+            (Self::SYMBOLS.0, "SYMBOLS", "Symbols"),
+            (Self::PHYS_SYMBOLS.0, "PHYS_SYMBOLS", "PhysSymbols"),
+            (Self::TYPES.0, "TYPES", "Types"),
+            (Self::COMPAT.0, "COMPAT", "Compat"),
+            (Self::KEY_TYPE_NAMES.0, "KEY_TYPE_NAMES", "KeyTypeNames"),
+            (Self::KT_LEVEL_NAMES.0, "KT_LEVEL_NAMES", "KTLevelNames"),
+            (Self::INDICATOR_NAMES.0, "INDICATOR_NAMES", "IndicatorNames"),
+            (Self::KEY_NAMES.0, "KEY_NAMES", "KeyNames"),
+            (Self::KEY_ALIASES.0, "KEY_ALIASES", "KeyAliases"),
+            (Self::VIRTUAL_MOD_NAMES.0, "VIRTUAL_MOD_NAMES", "VirtualModNames"),
+            (Self::GROUP_NAMES.0, "GROUP_NAMES", "GroupNames"),
+            (Self::RG_NAMES.0, "RG_NAMES", "RGNames"),
         ];
-        pretty_print_bitmask(fmt, self.0.into(), &variants)
+        pretty_print_bitmask(fmt, self.0, &variants)
     }
 }
-bitmask_binop!(NameDetail, u16);
+bitmask_binop!(NameDetail, u32);
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct GBNDetail(u8);
+pub struct GBNDetail(u16);
 impl GBNDetail {
     pub const TYPES: Self = Self(1 << 0);
     pub const COMPAT_MAP: Self = Self(1 << 1);
@@ -2152,28 +2122,16 @@ impl GBNDetail {
     pub const GEOMETRY: Self = Self(1 << 6);
     pub const OTHER_NAMES: Self = Self(1 << 7);
 }
-impl From<GBNDetail> for u8 {
+impl From<GBNDetail> for u16 {
     #[inline]
     fn from(input: GBNDetail) -> Self {
         input.0
     }
 }
-impl From<GBNDetail> for Option<u8> {
-    #[inline]
-    fn from(input: GBNDetail) -> Self {
-        Some(input.0)
-    }
-}
-impl From<GBNDetail> for u16 {
-    #[inline]
-    fn from(input: GBNDetail) -> Self {
-        u16::from(input.0)
-    }
-}
 impl From<GBNDetail> for Option<u16> {
     #[inline]
     fn from(input: GBNDetail) -> Self {
-        Some(u16::from(input.0))
+        Some(input.0)
     }
 }
 impl From<GBNDetail> for u32 {
@@ -2191,6 +2149,12 @@ impl From<GBNDetail> for Option<u32> {
 impl From<u8> for GBNDetail {
     #[inline]
     fn from(value: u8) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u16> for GBNDetail {
+    #[inline]
+    fn from(value: u16) -> Self {
         Self(value)
     }
 }
@@ -2209,11 +2173,11 @@ impl core::fmt::Debug for GBNDetail  {
         pretty_print_bitmask(fmt, self.0.into(), &variants)
     }
 }
-bitmask_binop!(GBNDetail, u8);
+bitmask_binop!(GBNDetail, u16);
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct XIFeature(u8);
+pub struct XIFeature(u16);
 impl XIFeature {
     pub const KEYBOARDS: Self = Self(1 << 0);
     pub const BUTTON_ACTIONS: Self = Self(1 << 1);
@@ -2221,28 +2185,16 @@ impl XIFeature {
     pub const INDICATOR_MAPS: Self = Self(1 << 3);
     pub const INDICATOR_STATE: Self = Self(1 << 4);
 }
-impl From<XIFeature> for u8 {
+impl From<XIFeature> for u16 {
     #[inline]
     fn from(input: XIFeature) -> Self {
         input.0
     }
 }
-impl From<XIFeature> for Option<u8> {
-    #[inline]
-    fn from(input: XIFeature) -> Self {
-        Some(input.0)
-    }
-}
-impl From<XIFeature> for u16 {
-    #[inline]
-    fn from(input: XIFeature) -> Self {
-        u16::from(input.0)
-    }
-}
 impl From<XIFeature> for Option<u16> {
     #[inline]
     fn from(input: XIFeature) -> Self {
-        Some(u16::from(input.0))
+        Some(input.0)
     }
 }
 impl From<XIFeature> for u32 {
@@ -2260,6 +2212,12 @@ impl From<XIFeature> for Option<u32> {
 impl From<u8> for XIFeature {
     #[inline]
     fn from(value: u8) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u16> for XIFeature {
+    #[inline]
+    fn from(value: u16) -> Self {
         Self(value)
     }
 }
@@ -2275,11 +2233,11 @@ impl core::fmt::Debug for XIFeature  {
         pretty_print_bitmask(fmt, self.0.into(), &variants)
     }
 }
-bitmask_binop!(XIFeature, u8);
+bitmask_binop!(XIFeature, u16);
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct PerClientFlag(u8);
+pub struct PerClientFlag(u32);
 impl PerClientFlag {
     pub const DETECTABLE_AUTO_REPEAT: Self = Self(1 << 0);
     pub const GRABS_USE_XKB_STATE: Self = Self(1 << 1);
@@ -2287,74 +2245,65 @@ impl PerClientFlag {
     pub const LOOKUP_STATE_WHEN_GRABBED: Self = Self(1 << 3);
     pub const SEND_EVENT_USES_XKB_STATE: Self = Self(1 << 4);
 }
-impl From<PerClientFlag> for u8 {
+impl From<PerClientFlag> for u32 {
     #[inline]
     fn from(input: PerClientFlag) -> Self {
         input.0
     }
 }
-impl From<PerClientFlag> for Option<u8> {
+impl From<PerClientFlag> for Option<u32> {
     #[inline]
     fn from(input: PerClientFlag) -> Self {
         Some(input.0)
     }
 }
-impl From<PerClientFlag> for u16 {
-    #[inline]
-    fn from(input: PerClientFlag) -> Self {
-        u16::from(input.0)
-    }
-}
-impl From<PerClientFlag> for Option<u16> {
-    #[inline]
-    fn from(input: PerClientFlag) -> Self {
-        Some(u16::from(input.0))
-    }
-}
-impl From<PerClientFlag> for u32 {
-    #[inline]
-    fn from(input: PerClientFlag) -> Self {
-        u32::from(input.0)
-    }
-}
-impl From<PerClientFlag> for Option<u32> {
-    #[inline]
-    fn from(input: PerClientFlag) -> Self {
-        Some(u32::from(input.0))
-    }
-}
 impl From<u8> for PerClientFlag {
     #[inline]
     fn from(value: u8) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u16> for PerClientFlag {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u32> for PerClientFlag {
+    #[inline]
+    fn from(value: u32) -> Self {
         Self(value)
     }
 }
 impl core::fmt::Debug for PerClientFlag  {
     fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
-            (Self::DETECTABLE_AUTO_REPEAT.0.into(), "DETECTABLE_AUTO_REPEAT", "DetectableAutoRepeat"),
-            (Self::GRABS_USE_XKB_STATE.0.into(), "GRABS_USE_XKB_STATE", "GrabsUseXKBState"),
-            (Self::AUTO_RESET_CONTROLS.0.into(), "AUTO_RESET_CONTROLS", "AutoResetControls"),
-            (Self::LOOKUP_STATE_WHEN_GRABBED.0.into(), "LOOKUP_STATE_WHEN_GRABBED", "LookupStateWhenGrabbed"),
-            (Self::SEND_EVENT_USES_XKB_STATE.0.into(), "SEND_EVENT_USES_XKB_STATE", "SendEventUsesXKBState"),
+            (Self::DETECTABLE_AUTO_REPEAT.0, "DETECTABLE_AUTO_REPEAT", "DetectableAutoRepeat"),
+            (Self::GRABS_USE_XKB_STATE.0, "GRABS_USE_XKB_STATE", "GrabsUseXKBState"),
+            (Self::AUTO_RESET_CONTROLS.0, "AUTO_RESET_CONTROLS", "AutoResetControls"),
+            (Self::LOOKUP_STATE_WHEN_GRABBED.0, "LOOKUP_STATE_WHEN_GRABBED", "LookupStateWhenGrabbed"),
+            (Self::SEND_EVENT_USES_XKB_STATE.0, "SEND_EVENT_USES_XKB_STATE", "SendEventUsesXKBState"),
         ];
-        pretty_print_bitmask(fmt, self.0.into(), &variants)
+        pretty_print_bitmask(fmt, self.0, &variants)
     }
 }
-bitmask_binop!(PerClientFlag, u8);
+bitmask_binop!(PerClientFlag, u32);
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ModDef {
-    pub mask: u8,
-    pub real_mods: u8,
-    pub vmods: u16,
+    pub mask: xproto::ModMask,
+    pub real_mods: xproto::ModMask,
+    pub vmods: VMod,
 }
 impl TryParse for ModDef {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (mask, remaining) = u8::try_parse(remaining)?;
         let (real_mods, remaining) = u8::try_parse(remaining)?;
         let (vmods, remaining) = u16::try_parse(remaining)?;
+        let mask = mask.into();
+        let real_mods = real_mods.into();
+        let vmods = vmods.into();
         let result = ModDef { mask, real_mods, vmods };
         Ok((result, remaining))
     }
@@ -2362,9 +2311,9 @@ impl TryParse for ModDef {
 impl Serialize for ModDef {
     type Bytes = [u8; 4];
     fn serialize(&self) -> [u8; 4] {
-        let mask_bytes = self.mask.serialize();
-        let real_mods_bytes = self.real_mods.serialize();
-        let vmods_bytes = self.vmods.serialize();
+        let mask_bytes = (u16::from(self.mask) as u8).serialize();
+        let real_mods_bytes = (u16::from(self.real_mods) as u8).serialize();
+        let vmods_bytes = u16::from(self.vmods).serialize();
         [
             mask_bytes[0],
             real_mods_bytes[0],
@@ -2374,9 +2323,9 @@ impl Serialize for ModDef {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(4);
-        self.mask.serialize_into(bytes);
-        self.real_mods.serialize_into(bytes);
-        self.vmods.serialize_into(bytes);
+        (u16::from(self.mask) as u8).serialize_into(bytes);
+        (u16::from(self.real_mods) as u8).serialize_into(bytes);
+        u16::from(self.vmods).serialize_into(bytes);
     }
 }
 
@@ -2498,10 +2447,10 @@ impl CountedString16 {
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct KTMapEntry {
     pub active: bool,
-    pub mods_mask: u8,
+    pub mods_mask: xproto::ModMask,
     pub level: u8,
-    pub mods_mods: u8,
-    pub mods_vmods: u16,
+    pub mods_mods: xproto::ModMask,
+    pub mods_vmods: VMod,
 }
 impl TryParse for KTMapEntry {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -2511,6 +2460,9 @@ impl TryParse for KTMapEntry {
         let (mods_mods, remaining) = u8::try_parse(remaining)?;
         let (mods_vmods, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
+        let mods_mask = mods_mask.into();
+        let mods_mods = mods_mods.into();
+        let mods_vmods = mods_vmods.into();
         let result = KTMapEntry { active, mods_mask, level, mods_mods, mods_vmods };
         Ok((result, remaining))
     }
@@ -2519,10 +2471,10 @@ impl Serialize for KTMapEntry {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
         let active_bytes = self.active.serialize();
-        let mods_mask_bytes = self.mods_mask.serialize();
+        let mods_mask_bytes = (u16::from(self.mods_mask) as u8).serialize();
         let level_bytes = self.level.serialize();
-        let mods_mods_bytes = self.mods_mods.serialize();
-        let mods_vmods_bytes = self.mods_vmods.serialize();
+        let mods_mods_bytes = (u16::from(self.mods_mods) as u8).serialize();
+        let mods_vmods_bytes = u16::from(self.mods_vmods).serialize();
         [
             active_bytes[0],
             mods_mask_bytes[0],
@@ -2537,10 +2489,10 @@ impl Serialize for KTMapEntry {
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
         self.active.serialize_into(bytes);
-        self.mods_mask.serialize_into(bytes);
+        (u16::from(self.mods_mask) as u8).serialize_into(bytes);
         self.level.serialize_into(bytes);
-        self.mods_mods.serialize_into(bytes);
-        self.mods_vmods.serialize_into(bytes);
+        (u16::from(self.mods_mods) as u8).serialize_into(bytes);
+        u16::from(self.mods_vmods).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 2]);
     }
 }
@@ -2548,9 +2500,9 @@ impl Serialize for KTMapEntry {
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct KeyType {
-    pub mods_mask: u8,
-    pub mods_mods: u8,
-    pub mods_vmods: u16,
+    pub mods_mask: xproto::ModMask,
+    pub mods_mods: xproto::ModMask,
+    pub mods_vmods: VMod,
     pub num_levels: u8,
     pub has_preserve: bool,
     pub map: Vec<KTMapEntry>,
@@ -2567,6 +2519,9 @@ impl TryParse for KeyType {
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (map, remaining) = crate::x11_utils::parse_list::<KTMapEntry>(remaining, n_map_entries.try_to_usize()?)?;
         let (preserve, remaining) = crate::x11_utils::parse_list::<ModDef>(remaining, u32::from(has_preserve).checked_mul(u32::from(n_map_entries)).ok_or(ParseError::InvalidExpression)?.try_to_usize()?)?;
+        let mods_mask = mods_mask.into();
+        let mods_mods = mods_mods.into();
+        let mods_vmods = mods_vmods.into();
         let result = KeyType { mods_mask, mods_mods, mods_vmods, num_levels, has_preserve, map, preserve };
         Ok((result, remaining))
     }
@@ -2580,9 +2535,9 @@ impl Serialize for KeyType {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        self.mods_mask.serialize_into(bytes);
-        self.mods_mods.serialize_into(bytes);
-        self.mods_vmods.serialize_into(bytes);
+        (u16::from(self.mods_mask) as u8).serialize_into(bytes);
+        (u16::from(self.mods_mods) as u8).serialize_into(bytes);
+        u16::from(self.mods_vmods).serialize_into(bytes);
         self.num_levels.serialize_into(bytes);
         let n_map_entries = u8::try_from(self.map.len()).expect("`map` has too many elements");
         n_map_entries.serialize_into(bytes);
@@ -3051,12 +3006,13 @@ impl Serialize for SetBehavior {
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetExplicit {
     pub keycode: xproto::Keycode,
-    pub explicit: u8,
+    pub explicit: Explicit,
 }
 impl TryParse for SetExplicit {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (keycode, remaining) = xproto::Keycode::try_parse(remaining)?;
         let (explicit, remaining) = u8::try_parse(remaining)?;
+        let explicit = explicit.into();
         let result = SetExplicit { keycode, explicit };
         Ok((result, remaining))
     }
@@ -3065,7 +3021,7 @@ impl Serialize for SetExplicit {
     type Bytes = [u8; 2];
     fn serialize(&self) -> [u8; 2] {
         let keycode_bytes = self.keycode.serialize();
-        let explicit_bytes = self.explicit.serialize();
+        let explicit_bytes = u8::from(self.explicit).serialize();
         [
             keycode_bytes[0],
             explicit_bytes[0],
@@ -3074,7 +3030,7 @@ impl Serialize for SetExplicit {
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(2);
         self.keycode.serialize_into(bytes);
-        self.explicit.serialize_into(bytes);
+        u8::from(self.explicit).serialize_into(bytes);
     }
 }
 
@@ -3082,12 +3038,13 @@ impl Serialize for SetExplicit {
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct KeyModMap {
     pub keycode: xproto::Keycode,
-    pub mods: u8,
+    pub mods: xproto::ModMask,
 }
 impl TryParse for KeyModMap {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (keycode, remaining) = xproto::Keycode::try_parse(remaining)?;
         let (mods, remaining) = u8::try_parse(remaining)?;
+        let mods = mods.into();
         let result = KeyModMap { keycode, mods };
         Ok((result, remaining))
     }
@@ -3096,7 +3053,7 @@ impl Serialize for KeyModMap {
     type Bytes = [u8; 2];
     fn serialize(&self) -> [u8; 2] {
         let keycode_bytes = self.keycode.serialize();
-        let mods_bytes = self.mods.serialize();
+        let mods_bytes = (u16::from(self.mods) as u8).serialize();
         [
             keycode_bytes[0],
             mods_bytes[0],
@@ -3105,7 +3062,7 @@ impl Serialize for KeyModMap {
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(2);
         self.keycode.serialize_into(bytes);
-        self.mods.serialize_into(bytes);
+        (u16::from(self.mods) as u8).serialize_into(bytes);
     }
 }
 
@@ -3113,13 +3070,14 @@ impl Serialize for KeyModMap {
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct KeyVModMap {
     pub keycode: xproto::Keycode,
-    pub vmods: u16,
+    pub vmods: VMod,
 }
 impl TryParse for KeyVModMap {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (keycode, remaining) = xproto::Keycode::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (vmods, remaining) = u16::try_parse(remaining)?;
+        let vmods = vmods.into();
         let result = KeyVModMap { keycode, vmods };
         Ok((result, remaining))
     }
@@ -3128,7 +3086,7 @@ impl Serialize for KeyVModMap {
     type Bytes = [u8; 4];
     fn serialize(&self) -> [u8; 4] {
         let keycode_bytes = self.keycode.serialize();
-        let vmods_bytes = self.vmods.serialize();
+        let vmods_bytes = u16::from(self.vmods).serialize();
         [
             keycode_bytes[0],
             0,
@@ -3140,7 +3098,7 @@ impl Serialize for KeyVModMap {
         bytes.reserve(4);
         self.keycode.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 1]);
-        self.vmods.serialize_into(bytes);
+        u16::from(self.vmods).serialize_into(bytes);
     }
 }
 
@@ -3148,14 +3106,16 @@ impl Serialize for KeyVModMap {
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct KTSetMapEntry {
     pub level: u8,
-    pub real_mods: u8,
-    pub virtual_mods: u16,
+    pub real_mods: xproto::ModMask,
+    pub virtual_mods: VMod,
 }
 impl TryParse for KTSetMapEntry {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (level, remaining) = u8::try_parse(remaining)?;
         let (real_mods, remaining) = u8::try_parse(remaining)?;
         let (virtual_mods, remaining) = u16::try_parse(remaining)?;
+        let real_mods = real_mods.into();
+        let virtual_mods = virtual_mods.into();
         let result = KTSetMapEntry { level, real_mods, virtual_mods };
         Ok((result, remaining))
     }
@@ -3164,8 +3124,8 @@ impl Serialize for KTSetMapEntry {
     type Bytes = [u8; 4];
     fn serialize(&self) -> [u8; 4] {
         let level_bytes = self.level.serialize();
-        let real_mods_bytes = self.real_mods.serialize();
-        let virtual_mods_bytes = self.virtual_mods.serialize();
+        let real_mods_bytes = (u16::from(self.real_mods) as u8).serialize();
+        let virtual_mods_bytes = u16::from(self.virtual_mods).serialize();
         [
             level_bytes[0],
             real_mods_bytes[0],
@@ -3176,17 +3136,17 @@ impl Serialize for KTSetMapEntry {
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(4);
         self.level.serialize_into(bytes);
-        self.real_mods.serialize_into(bytes);
-        self.virtual_mods.serialize_into(bytes);
+        (u16::from(self.real_mods) as u8).serialize_into(bytes);
+        u16::from(self.virtual_mods).serialize_into(bytes);
     }
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetKeyType {
-    pub mask: u8,
-    pub real_mods: u8,
-    pub virtual_mods: u16,
+    pub mask: xproto::ModMask,
+    pub real_mods: xproto::ModMask,
+    pub virtual_mods: VMod,
     pub num_levels: u8,
     pub preserve: bool,
     pub entries: Vec<KTSetMapEntry>,
@@ -3203,6 +3163,9 @@ impl TryParse for SetKeyType {
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (entries, remaining) = crate::x11_utils::parse_list::<KTSetMapEntry>(remaining, n_map_entries.try_to_usize()?)?;
         let (preserve_entries, remaining) = crate::x11_utils::parse_list::<KTSetMapEntry>(remaining, u32::from(preserve).checked_mul(u32::from(n_map_entries)).ok_or(ParseError::InvalidExpression)?.try_to_usize()?)?;
+        let mask = mask.into();
+        let real_mods = real_mods.into();
+        let virtual_mods = virtual_mods.into();
         let result = SetKeyType { mask, real_mods, virtual_mods, num_levels, preserve, entries, preserve_entries };
         Ok((result, remaining))
     }
@@ -3216,9 +3179,9 @@ impl Serialize for SetKeyType {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        self.mask.serialize_into(bytes);
-        self.real_mods.serialize_into(bytes);
-        self.virtual_mods.serialize_into(bytes);
+        (u16::from(self.mask) as u8).serialize_into(bytes);
+        (u16::from(self.real_mods) as u8).serialize_into(bytes);
+        u16::from(self.virtual_mods).serialize_into(bytes);
         self.num_levels.serialize_into(bytes);
         let n_map_entries = u8::try_from(self.entries.len()).expect("`entries` has too many elements");
         n_map_entries.serialize_into(bytes);
@@ -3719,8 +3682,8 @@ impl TryParse for DeviceLedInfo {
         let (maps_present, remaining) = u32::try_parse(remaining)?;
         let (phys_indicators, remaining) = u32::try_parse(remaining)?;
         let (state, remaining) = u32::try_parse(remaining)?;
-        let (names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, names_present.count_ones().try_to_usize()?)?;
-        let (maps, remaining) = crate::x11_utils::parse_list::<IndicatorMap>(remaining, maps_present.count_ones().try_to_usize()?)?;
+        let (names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, u32::from(names_present).count_ones().try_to_usize()?)?;
+        let (maps, remaining) = crate::x11_utils::parse_list::<IndicatorMap>(remaining, u32::from(maps_present).count_ones().try_to_usize()?)?;
         let led_class = led_class.into();
         let result = DeviceLedInfo { led_class, led_id, names_present, maps_present, phys_indicators, state, names, maps };
         Ok((result, remaining))
@@ -3741,9 +3704,9 @@ impl Serialize for DeviceLedInfo {
         self.maps_present.serialize_into(bytes);
         self.phys_indicators.serialize_into(bytes);
         self.state.serialize_into(bytes);
-        assert_eq!(self.names.len(), usize::try_from(self.names_present.count_ones()).unwrap(), "`names` has an incorrect length");
+        assert_eq!(self.names.len(), usize::try_from(u32::from(self.names_present).count_ones()).unwrap(), "`names` has an incorrect length");
         self.names.serialize_into(bytes);
-        assert_eq!(self.maps.len(), usize::try_from(self.maps_present.count_ones()).unwrap(), "`maps` has an incorrect length");
+        assert_eq!(self.maps.len(), usize::try_from(u32::from(self.maps_present).count_ones()).unwrap(), "`maps` has an incorrect length");
         self.maps.serialize_into(bytes);
     }
 }
@@ -4013,11 +3976,11 @@ impl Serialize for SANoAction {
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SASetMods {
     pub type_: SAType,
-    pub flags: u8,
-    pub mask: u8,
-    pub real_mods: u8,
-    pub vmods_high: u8,
-    pub vmods_low: u8,
+    pub flags: SA,
+    pub mask: xproto::ModMask,
+    pub real_mods: xproto::ModMask,
+    pub vmods_high: VModsHigh,
+    pub vmods_low: VModsLow,
 }
 impl TryParse for SASetMods {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -4029,6 +3992,11 @@ impl TryParse for SASetMods {
         let (vmods_low, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let type_ = type_.into();
+        let flags = flags.into();
+        let mask = mask.into();
+        let real_mods = real_mods.into();
+        let vmods_high = vmods_high.into();
+        let vmods_low = vmods_low.into();
         let result = SASetMods { type_, flags, mask, real_mods, vmods_high, vmods_low };
         Ok((result, remaining))
     }
@@ -4037,11 +4005,11 @@ impl Serialize for SASetMods {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
         let type_bytes = u8::from(self.type_).serialize();
-        let flags_bytes = self.flags.serialize();
-        let mask_bytes = self.mask.serialize();
-        let real_mods_bytes = self.real_mods.serialize();
-        let vmods_high_bytes = self.vmods_high.serialize();
-        let vmods_low_bytes = self.vmods_low.serialize();
+        let flags_bytes = u8::from(self.flags).serialize();
+        let mask_bytes = (u16::from(self.mask) as u8).serialize();
+        let real_mods_bytes = (u16::from(self.real_mods) as u8).serialize();
+        let vmods_high_bytes = u8::from(self.vmods_high).serialize();
+        let vmods_low_bytes = u8::from(self.vmods_low).serialize();
         [
             type_bytes[0],
             flags_bytes[0],
@@ -4056,11 +4024,11 @@ impl Serialize for SASetMods {
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
         u8::from(self.type_).serialize_into(bytes);
-        self.flags.serialize_into(bytes);
-        self.mask.serialize_into(bytes);
-        self.real_mods.serialize_into(bytes);
-        self.vmods_high.serialize_into(bytes);
-        self.vmods_low.serialize_into(bytes);
+        u8::from(self.flags).serialize_into(bytes);
+        (u16::from(self.mask) as u8).serialize_into(bytes);
+        (u16::from(self.real_mods) as u8).serialize_into(bytes);
+        u8::from(self.vmods_high).serialize_into(bytes);
+        u8::from(self.vmods_low).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 2]);
     }
 }
@@ -4073,7 +4041,7 @@ pub type SALockMods = SASetMods;
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SASetGroup {
     pub type_: SAType,
-    pub flags: u8,
+    pub flags: SA,
     pub group: i8,
 }
 impl TryParse for SASetGroup {
@@ -4083,6 +4051,7 @@ impl TryParse for SASetGroup {
         let (group, remaining) = i8::try_parse(remaining)?;
         let remaining = remaining.get(5..).ok_or(ParseError::InsufficientData)?;
         let type_ = type_.into();
+        let flags = flags.into();
         let result = SASetGroup { type_, flags, group };
         Ok((result, remaining))
     }
@@ -4091,7 +4060,7 @@ impl Serialize for SASetGroup {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
         let type_bytes = u8::from(self.type_).serialize();
-        let flags_bytes = self.flags.serialize();
+        let flags_bytes = u8::from(self.flags).serialize();
         let group_bytes = self.group.serialize();
         [
             type_bytes[0],
@@ -4107,7 +4076,7 @@ impl Serialize for SASetGroup {
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
         u8::from(self.type_).serialize_into(bytes);
-        self.flags.serialize_into(bytes);
+        u8::from(self.flags).serialize_into(bytes);
         self.group.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 5]);
     }
@@ -4183,7 +4152,7 @@ bitmask_binop!(SAMovePtrFlag, u8);
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SAMovePtr {
     pub type_: SAType,
-    pub flags: u8,
+    pub flags: SAMovePtrFlag,
     pub x_high: i8,
     pub x_low: u8,
     pub y_high: i8,
@@ -4199,6 +4168,7 @@ impl TryParse for SAMovePtr {
         let (y_low, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let type_ = type_.into();
+        let flags = flags.into();
         let result = SAMovePtr { type_, flags, x_high, x_low, y_high, y_low };
         Ok((result, remaining))
     }
@@ -4207,7 +4177,7 @@ impl Serialize for SAMovePtr {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
         let type_bytes = u8::from(self.type_).serialize();
-        let flags_bytes = self.flags.serialize();
+        let flags_bytes = u8::from(self.flags).serialize();
         let x_high_bytes = self.x_high.serialize();
         let x_low_bytes = self.x_low.serialize();
         let y_high_bytes = self.y_high.serialize();
@@ -4226,7 +4196,7 @@ impl Serialize for SAMovePtr {
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
         u8::from(self.type_).serialize_into(bytes);
-        self.flags.serialize_into(bytes);
+        u8::from(self.flags).serialize_into(bytes);
         self.x_high.serialize_into(bytes);
         self.x_low.serialize_into(bytes);
         self.y_high.serialize_into(bytes);
@@ -4393,8 +4363,8 @@ bitmask_binop!(SASetPtrDfltFlag, u8);
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SASetPtrDflt {
     pub type_: SAType,
-    pub flags: u8,
-    pub affect: u8,
+    pub flags: SASetPtrDfltFlag,
+    pub affect: SASetPtrDfltFlag,
     pub value: i8,
 }
 impl TryParse for SASetPtrDflt {
@@ -4405,6 +4375,8 @@ impl TryParse for SASetPtrDflt {
         let (value, remaining) = i8::try_parse(remaining)?;
         let remaining = remaining.get(4..).ok_or(ParseError::InsufficientData)?;
         let type_ = type_.into();
+        let flags = flags.into();
+        let affect = affect.into();
         let result = SASetPtrDflt { type_, flags, affect, value };
         Ok((result, remaining))
     }
@@ -4413,8 +4385,8 @@ impl Serialize for SASetPtrDflt {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
         let type_bytes = u8::from(self.type_).serialize();
-        let flags_bytes = self.flags.serialize();
-        let affect_bytes = self.affect.serialize();
+        let flags_bytes = u8::from(self.flags).serialize();
+        let affect_bytes = u8::from(self.affect).serialize();
         let value_bytes = self.value.serialize();
         [
             type_bytes[0],
@@ -4430,8 +4402,8 @@ impl Serialize for SASetPtrDflt {
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
         u8::from(self.type_).serialize_into(bytes);
-        self.flags.serialize_into(bytes);
-        self.affect.serialize_into(bytes);
+        u8::from(self.flags).serialize_into(bytes);
+        u8::from(self.affect).serialize_into(bytes);
         self.value.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 4]);
     }
@@ -4571,13 +4543,13 @@ bitmask_binop!(SAIsoLockNoAffect, u8);
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SAIsoLock {
     pub type_: SAType,
-    pub flags: u8,
-    pub mask: u8,
-    pub real_mods: u8,
+    pub flags: SAIsoLockFlag,
+    pub mask: xproto::ModMask,
+    pub real_mods: xproto::ModMask,
     pub group: i8,
-    pub affect: u8,
-    pub vmods_high: u8,
-    pub vmods_low: u8,
+    pub affect: SAIsoLockNoAffect,
+    pub vmods_high: VModsHigh,
+    pub vmods_low: VModsLow,
 }
 impl TryParse for SAIsoLock {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -4590,6 +4562,12 @@ impl TryParse for SAIsoLock {
         let (vmods_high, remaining) = u8::try_parse(remaining)?;
         let (vmods_low, remaining) = u8::try_parse(remaining)?;
         let type_ = type_.into();
+        let flags = flags.into();
+        let mask = mask.into();
+        let real_mods = real_mods.into();
+        let affect = affect.into();
+        let vmods_high = vmods_high.into();
+        let vmods_low = vmods_low.into();
         let result = SAIsoLock { type_, flags, mask, real_mods, group, affect, vmods_high, vmods_low };
         Ok((result, remaining))
     }
@@ -4598,13 +4576,13 @@ impl Serialize for SAIsoLock {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
         let type_bytes = u8::from(self.type_).serialize();
-        let flags_bytes = self.flags.serialize();
-        let mask_bytes = self.mask.serialize();
-        let real_mods_bytes = self.real_mods.serialize();
+        let flags_bytes = u8::from(self.flags).serialize();
+        let mask_bytes = (u16::from(self.mask) as u8).serialize();
+        let real_mods_bytes = (u16::from(self.real_mods) as u8).serialize();
         let group_bytes = self.group.serialize();
-        let affect_bytes = self.affect.serialize();
-        let vmods_high_bytes = self.vmods_high.serialize();
-        let vmods_low_bytes = self.vmods_low.serialize();
+        let affect_bytes = u8::from(self.affect).serialize();
+        let vmods_high_bytes = u8::from(self.vmods_high).serialize();
+        let vmods_low_bytes = u8::from(self.vmods_low).serialize();
         [
             type_bytes[0],
             flags_bytes[0],
@@ -4619,13 +4597,13 @@ impl Serialize for SAIsoLock {
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
         u8::from(self.type_).serialize_into(bytes);
-        self.flags.serialize_into(bytes);
-        self.mask.serialize_into(bytes);
-        self.real_mods.serialize_into(bytes);
+        u8::from(self.flags).serialize_into(bytes);
+        (u16::from(self.mask) as u8).serialize_into(bytes);
+        (u16::from(self.real_mods) as u8).serialize_into(bytes);
         self.group.serialize_into(bytes);
-        self.affect.serialize_into(bytes);
-        self.vmods_high.serialize_into(bytes);
-        self.vmods_low.serialize_into(bytes);
+        u8::from(self.affect).serialize_into(bytes);
+        u8::from(self.vmods_high).serialize_into(bytes);
+        u8::from(self.vmods_low).serialize_into(bytes);
     }
 }
 
@@ -4911,8 +4889,8 @@ bitmask_binop!(BoolCtrlsLow, u8);
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SASetControls {
     pub type_: SAType,
-    pub bool_ctrls_high: u8,
-    pub bool_ctrls_low: u8,
+    pub bool_ctrls_high: BoolCtrlsHigh,
+    pub bool_ctrls_low: BoolCtrlsLow,
 }
 impl TryParse for SASetControls {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -4922,6 +4900,8 @@ impl TryParse for SASetControls {
         let (bool_ctrls_low, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let type_ = type_.into();
+        let bool_ctrls_high = bool_ctrls_high.into();
+        let bool_ctrls_low = bool_ctrls_low.into();
         let result = SASetControls { type_, bool_ctrls_high, bool_ctrls_low };
         Ok((result, remaining))
     }
@@ -4930,8 +4910,8 @@ impl Serialize for SASetControls {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
         let type_bytes = u8::from(self.type_).serialize();
-        let bool_ctrls_high_bytes = self.bool_ctrls_high.serialize();
-        let bool_ctrls_low_bytes = self.bool_ctrls_low.serialize();
+        let bool_ctrls_high_bytes = u8::from(self.bool_ctrls_high).serialize();
+        let bool_ctrls_low_bytes = u8::from(self.bool_ctrls_low).serialize();
         [
             type_bytes[0],
             0,
@@ -4947,8 +4927,8 @@ impl Serialize for SASetControls {
         bytes.reserve(8);
         u8::from(self.type_).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 3]);
-        self.bool_ctrls_high.serialize_into(bytes);
-        self.bool_ctrls_low.serialize_into(bytes);
+        u8::from(self.bool_ctrls_high).serialize_into(bytes);
+        u8::from(self.bool_ctrls_low).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 2]);
     }
 }
@@ -5021,7 +5001,7 @@ bitmask_binop!(ActionMessageFlag, u8);
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SAActionMessage {
     pub type_: SAType,
-    pub flags: u8,
+    pub flags: ActionMessageFlag,
     pub message: [u8; 6],
 }
 impl TryParse for SAActionMessage {
@@ -5031,6 +5011,7 @@ impl TryParse for SAActionMessage {
         let (message, remaining) = crate::x11_utils::parse_u8_list(remaining, 6)?;
         let message = <[u8; 6]>::try_from(message).unwrap();
         let type_ = type_.into();
+        let flags = flags.into();
         let result = SAActionMessage { type_, flags, message };
         Ok((result, remaining))
     }
@@ -5039,7 +5020,7 @@ impl Serialize for SAActionMessage {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
         let type_bytes = u8::from(self.type_).serialize();
-        let flags_bytes = self.flags.serialize();
+        let flags_bytes = u8::from(self.flags).serialize();
         [
             type_bytes[0],
             flags_bytes[0],
@@ -5054,7 +5035,7 @@ impl Serialize for SAActionMessage {
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
         u8::from(self.type_).serialize_into(bytes);
-        self.flags.serialize_into(bytes);
+        u8::from(self.flags).serialize_into(bytes);
         bytes.extend_from_slice(&self.message);
     }
 }
@@ -5064,12 +5045,12 @@ impl Serialize for SAActionMessage {
 pub struct SARedirectKey {
     pub type_: SAType,
     pub newkey: xproto::Keycode,
-    pub mask: u8,
-    pub real_modifiers: u8,
-    pub vmods_mask_high: u8,
-    pub vmods_mask_low: u8,
-    pub vmods_high: u8,
-    pub vmods_low: u8,
+    pub mask: xproto::ModMask,
+    pub real_modifiers: xproto::ModMask,
+    pub vmods_mask_high: VModsHigh,
+    pub vmods_mask_low: VModsLow,
+    pub vmods_high: VModsHigh,
+    pub vmods_low: VModsLow,
 }
 impl TryParse for SARedirectKey {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -5082,6 +5063,12 @@ impl TryParse for SARedirectKey {
         let (vmods_high, remaining) = u8::try_parse(remaining)?;
         let (vmods_low, remaining) = u8::try_parse(remaining)?;
         let type_ = type_.into();
+        let mask = mask.into();
+        let real_modifiers = real_modifiers.into();
+        let vmods_mask_high = vmods_mask_high.into();
+        let vmods_mask_low = vmods_mask_low.into();
+        let vmods_high = vmods_high.into();
+        let vmods_low = vmods_low.into();
         let result = SARedirectKey { type_, newkey, mask, real_modifiers, vmods_mask_high, vmods_mask_low, vmods_high, vmods_low };
         Ok((result, remaining))
     }
@@ -5091,12 +5078,12 @@ impl Serialize for SARedirectKey {
     fn serialize(&self) -> [u8; 8] {
         let type_bytes = u8::from(self.type_).serialize();
         let newkey_bytes = self.newkey.serialize();
-        let mask_bytes = self.mask.serialize();
-        let real_modifiers_bytes = self.real_modifiers.serialize();
-        let vmods_mask_high_bytes = self.vmods_mask_high.serialize();
-        let vmods_mask_low_bytes = self.vmods_mask_low.serialize();
-        let vmods_high_bytes = self.vmods_high.serialize();
-        let vmods_low_bytes = self.vmods_low.serialize();
+        let mask_bytes = (u16::from(self.mask) as u8).serialize();
+        let real_modifiers_bytes = (u16::from(self.real_modifiers) as u8).serialize();
+        let vmods_mask_high_bytes = u8::from(self.vmods_mask_high).serialize();
+        let vmods_mask_low_bytes = u8::from(self.vmods_mask_low).serialize();
+        let vmods_high_bytes = u8::from(self.vmods_high).serialize();
+        let vmods_low_bytes = u8::from(self.vmods_low).serialize();
         [
             type_bytes[0],
             newkey_bytes[0],
@@ -5112,12 +5099,12 @@ impl Serialize for SARedirectKey {
         bytes.reserve(8);
         u8::from(self.type_).serialize_into(bytes);
         self.newkey.serialize_into(bytes);
-        self.mask.serialize_into(bytes);
-        self.real_modifiers.serialize_into(bytes);
-        self.vmods_mask_high.serialize_into(bytes);
-        self.vmods_mask_low.serialize_into(bytes);
-        self.vmods_high.serialize_into(bytes);
-        self.vmods_low.serialize_into(bytes);
+        (u16::from(self.mask) as u8).serialize_into(bytes);
+        (u16::from(self.real_modifiers) as u8).serialize_into(bytes);
+        u8::from(self.vmods_mask_high).serialize_into(bytes);
+        u8::from(self.vmods_mask_low).serialize_into(bytes);
+        u8::from(self.vmods_high).serialize_into(bytes);
+        u8::from(self.vmods_low).serialize_into(bytes);
     }
 }
 
@@ -5237,7 +5224,7 @@ bitmask_binop!(LockDeviceFlags, u8);
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SALockDeviceBtn {
     pub type_: SAType,
-    pub flags: u8,
+    pub flags: LockDeviceFlags,
     pub button: u8,
     pub device: u8,
 }
@@ -5250,6 +5237,7 @@ impl TryParse for SALockDeviceBtn {
         let (device, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let type_ = type_.into();
+        let flags = flags.into();
         let result = SALockDeviceBtn { type_, flags, button, device };
         Ok((result, remaining))
     }
@@ -5258,7 +5246,7 @@ impl Serialize for SALockDeviceBtn {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
         let type_bytes = u8::from(self.type_).serialize();
-        let flags_bytes = self.flags.serialize();
+        let flags_bytes = u8::from(self.flags).serialize();
         let button_bytes = self.button.serialize();
         let device_bytes = self.device.serialize();
         [
@@ -5275,7 +5263,7 @@ impl Serialize for SALockDeviceBtn {
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
         u8::from(self.type_).serialize_into(bytes);
-        self.flags.serialize_into(bytes);
+        u8::from(self.flags).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 1]);
         self.button.serialize_into(bytes);
         self.device.serialize_into(bytes);
@@ -5456,9 +5444,9 @@ impl Serialize for SIAction {
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SymInterpret {
     pub sym: xproto::Keysym,
-    pub mods: u8,
+    pub mods: xproto::ModMask,
     pub match_: u8,
-    pub virtual_mod: u8,
+    pub virtual_mod: VModsLow,
     pub flags: u8,
     pub action: SIAction,
 }
@@ -5470,6 +5458,8 @@ impl TryParse for SymInterpret {
         let (virtual_mod, remaining) = u8::try_parse(remaining)?;
         let (flags, remaining) = u8::try_parse(remaining)?;
         let (action, remaining) = SIAction::try_parse(remaining)?;
+        let mods = mods.into();
+        let virtual_mod = virtual_mod.into();
         let result = SymInterpret { sym, mods, match_, virtual_mod, flags, action };
         Ok((result, remaining))
     }
@@ -5478,9 +5468,9 @@ impl Serialize for SymInterpret {
     type Bytes = [u8; 16];
     fn serialize(&self) -> [u8; 16] {
         let sym_bytes = self.sym.serialize();
-        let mods_bytes = self.mods.serialize();
+        let mods_bytes = (u16::from(self.mods) as u8).serialize();
         let match_bytes = self.match_.serialize();
-        let virtual_mod_bytes = self.virtual_mod.serialize();
+        let virtual_mod_bytes = u8::from(self.virtual_mod).serialize();
         let flags_bytes = self.flags.serialize();
         let action_bytes = self.action.serialize();
         [
@@ -5505,9 +5495,9 @@ impl Serialize for SymInterpret {
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(16);
         self.sym.serialize_into(bytes);
-        self.mods.serialize_into(bytes);
+        (u16::from(self.mods) as u8).serialize_into(bytes);
         self.match_.serialize_into(bytes);
-        self.virtual_mod.serialize_into(bytes);
+        u8::from(self.virtual_mod).serialize_into(bytes);
         self.flags.serialize_into(bytes);
         self.action.serialize_into(bytes);
     }
@@ -5974,13 +5964,15 @@ impl Serialize for UseExtensionReply {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SelectEventsAuxBitcase1 {
-    pub affect_new_keyboard: u16,
-    pub new_keyboard_details: u16,
+    pub affect_new_keyboard: NKNDetail,
+    pub new_keyboard_details: NKNDetail,
 }
 impl TryParse for SelectEventsAuxBitcase1 {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (affect_new_keyboard, remaining) = u16::try_parse(remaining)?;
         let (new_keyboard_details, remaining) = u16::try_parse(remaining)?;
+        let affect_new_keyboard = affect_new_keyboard.into();
+        let new_keyboard_details = new_keyboard_details.into();
         let result = SelectEventsAuxBitcase1 { affect_new_keyboard, new_keyboard_details };
         Ok((result, remaining))
     }
@@ -5988,8 +5980,8 @@ impl TryParse for SelectEventsAuxBitcase1 {
 impl Serialize for SelectEventsAuxBitcase1 {
     type Bytes = [u8; 4];
     fn serialize(&self) -> [u8; 4] {
-        let affect_new_keyboard_bytes = self.affect_new_keyboard.serialize();
-        let new_keyboard_details_bytes = self.new_keyboard_details.serialize();
+        let affect_new_keyboard_bytes = u16::from(self.affect_new_keyboard).serialize();
+        let new_keyboard_details_bytes = u16::from(self.new_keyboard_details).serialize();
         [
             affect_new_keyboard_bytes[0],
             affect_new_keyboard_bytes[1],
@@ -5999,20 +5991,22 @@ impl Serialize for SelectEventsAuxBitcase1 {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(4);
-        self.affect_new_keyboard.serialize_into(bytes);
-        self.new_keyboard_details.serialize_into(bytes);
+        u16::from(self.affect_new_keyboard).serialize_into(bytes);
+        u16::from(self.new_keyboard_details).serialize_into(bytes);
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SelectEventsAuxBitcase2 {
-    pub affect_state: u16,
-    pub state_details: u16,
+    pub affect_state: StatePart,
+    pub state_details: StatePart,
 }
 impl TryParse for SelectEventsAuxBitcase2 {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (affect_state, remaining) = u16::try_parse(remaining)?;
         let (state_details, remaining) = u16::try_parse(remaining)?;
+        let affect_state = affect_state.into();
+        let state_details = state_details.into();
         let result = SelectEventsAuxBitcase2 { affect_state, state_details };
         Ok((result, remaining))
     }
@@ -6020,8 +6014,8 @@ impl TryParse for SelectEventsAuxBitcase2 {
 impl Serialize for SelectEventsAuxBitcase2 {
     type Bytes = [u8; 4];
     fn serialize(&self) -> [u8; 4] {
-        let affect_state_bytes = self.affect_state.serialize();
-        let state_details_bytes = self.state_details.serialize();
+        let affect_state_bytes = u16::from(self.affect_state).serialize();
+        let state_details_bytes = u16::from(self.state_details).serialize();
         [
             affect_state_bytes[0],
             affect_state_bytes[1],
@@ -6031,20 +6025,22 @@ impl Serialize for SelectEventsAuxBitcase2 {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(4);
-        self.affect_state.serialize_into(bytes);
-        self.state_details.serialize_into(bytes);
+        u16::from(self.affect_state).serialize_into(bytes);
+        u16::from(self.state_details).serialize_into(bytes);
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SelectEventsAuxBitcase3 {
-    pub affect_ctrls: u32,
-    pub ctrl_details: u32,
+    pub affect_ctrls: Control,
+    pub ctrl_details: Control,
 }
 impl TryParse for SelectEventsAuxBitcase3 {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (affect_ctrls, remaining) = u32::try_parse(remaining)?;
         let (ctrl_details, remaining) = u32::try_parse(remaining)?;
+        let affect_ctrls = affect_ctrls.into();
+        let ctrl_details = ctrl_details.into();
         let result = SelectEventsAuxBitcase3 { affect_ctrls, ctrl_details };
         Ok((result, remaining))
     }
@@ -6052,8 +6048,8 @@ impl TryParse for SelectEventsAuxBitcase3 {
 impl Serialize for SelectEventsAuxBitcase3 {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
-        let affect_ctrls_bytes = self.affect_ctrls.serialize();
-        let ctrl_details_bytes = self.ctrl_details.serialize();
+        let affect_ctrls_bytes = u32::from(self.affect_ctrls).serialize();
+        let ctrl_details_bytes = u32::from(self.ctrl_details).serialize();
         [
             affect_ctrls_bytes[0],
             affect_ctrls_bytes[1],
@@ -6067,8 +6063,8 @@ impl Serialize for SelectEventsAuxBitcase3 {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        self.affect_ctrls.serialize_into(bytes);
-        self.ctrl_details.serialize_into(bytes);
+        u32::from(self.affect_ctrls).serialize_into(bytes);
+        u32::from(self.ctrl_details).serialize_into(bytes);
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -6146,13 +6142,15 @@ impl Serialize for SelectEventsAuxBitcase5 {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SelectEventsAuxBitcase6 {
-    pub affect_names: u16,
-    pub names_details: u16,
+    pub affect_names: NameDetail,
+    pub names_details: NameDetail,
 }
 impl TryParse for SelectEventsAuxBitcase6 {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (affect_names, remaining) = u16::try_parse(remaining)?;
         let (names_details, remaining) = u16::try_parse(remaining)?;
+        let affect_names = affect_names.into();
+        let names_details = names_details.into();
         let result = SelectEventsAuxBitcase6 { affect_names, names_details };
         Ok((result, remaining))
     }
@@ -6160,8 +6158,8 @@ impl TryParse for SelectEventsAuxBitcase6 {
 impl Serialize for SelectEventsAuxBitcase6 {
     type Bytes = [u8; 4];
     fn serialize(&self) -> [u8; 4] {
-        let affect_names_bytes = self.affect_names.serialize();
-        let names_details_bytes = self.names_details.serialize();
+        let affect_names_bytes = (u32::from(self.affect_names) as u16).serialize();
+        let names_details_bytes = (u32::from(self.names_details) as u16).serialize();
         [
             affect_names_bytes[0],
             affect_names_bytes[1],
@@ -6171,20 +6169,22 @@ impl Serialize for SelectEventsAuxBitcase6 {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(4);
-        self.affect_names.serialize_into(bytes);
-        self.names_details.serialize_into(bytes);
+        (u32::from(self.affect_names) as u16).serialize_into(bytes);
+        (u32::from(self.names_details) as u16).serialize_into(bytes);
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SelectEventsAuxBitcase7 {
-    pub affect_compat: u8,
-    pub compat_details: u8,
+    pub affect_compat: CMDetail,
+    pub compat_details: CMDetail,
 }
 impl TryParse for SelectEventsAuxBitcase7 {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (affect_compat, remaining) = u8::try_parse(remaining)?;
         let (compat_details, remaining) = u8::try_parse(remaining)?;
+        let affect_compat = affect_compat.into();
+        let compat_details = compat_details.into();
         let result = SelectEventsAuxBitcase7 { affect_compat, compat_details };
         Ok((result, remaining))
     }
@@ -6192,8 +6192,8 @@ impl TryParse for SelectEventsAuxBitcase7 {
 impl Serialize for SelectEventsAuxBitcase7 {
     type Bytes = [u8; 2];
     fn serialize(&self) -> [u8; 2] {
-        let affect_compat_bytes = self.affect_compat.serialize();
-        let compat_details_bytes = self.compat_details.serialize();
+        let affect_compat_bytes = u8::from(self.affect_compat).serialize();
+        let compat_details_bytes = u8::from(self.compat_details).serialize();
         [
             affect_compat_bytes[0],
             compat_details_bytes[0],
@@ -6201,8 +6201,8 @@ impl Serialize for SelectEventsAuxBitcase7 {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(2);
-        self.affect_compat.serialize_into(bytes);
-        self.compat_details.serialize_into(bytes);
+        u8::from(self.affect_compat).serialize_into(bytes);
+        u8::from(self.compat_details).serialize_into(bytes);
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -6268,13 +6268,15 @@ impl Serialize for SelectEventsAuxBitcase9 {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SelectEventsAuxBitcase10 {
-    pub affect_access_x: u16,
-    pub access_x_details: u16,
+    pub affect_access_x: AXNDetail,
+    pub access_x_details: AXNDetail,
 }
 impl TryParse for SelectEventsAuxBitcase10 {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (affect_access_x, remaining) = u16::try_parse(remaining)?;
         let (access_x_details, remaining) = u16::try_parse(remaining)?;
+        let affect_access_x = affect_access_x.into();
+        let access_x_details = access_x_details.into();
         let result = SelectEventsAuxBitcase10 { affect_access_x, access_x_details };
         Ok((result, remaining))
     }
@@ -6282,8 +6284,8 @@ impl TryParse for SelectEventsAuxBitcase10 {
 impl Serialize for SelectEventsAuxBitcase10 {
     type Bytes = [u8; 4];
     fn serialize(&self) -> [u8; 4] {
-        let affect_access_x_bytes = self.affect_access_x.serialize();
-        let access_x_details_bytes = self.access_x_details.serialize();
+        let affect_access_x_bytes = u16::from(self.affect_access_x).serialize();
+        let access_x_details_bytes = u16::from(self.access_x_details).serialize();
         [
             affect_access_x_bytes[0],
             affect_access_x_bytes[1],
@@ -6293,20 +6295,22 @@ impl Serialize for SelectEventsAuxBitcase10 {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(4);
-        self.affect_access_x.serialize_into(bytes);
-        self.access_x_details.serialize_into(bytes);
+        u16::from(self.affect_access_x).serialize_into(bytes);
+        u16::from(self.access_x_details).serialize_into(bytes);
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SelectEventsAuxBitcase11 {
-    pub affect_ext_dev: u16,
-    pub extdev_details: u16,
+    pub affect_ext_dev: XIFeature,
+    pub extdev_details: XIFeature,
 }
 impl TryParse for SelectEventsAuxBitcase11 {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (affect_ext_dev, remaining) = u16::try_parse(remaining)?;
         let (extdev_details, remaining) = u16::try_parse(remaining)?;
+        let affect_ext_dev = affect_ext_dev.into();
+        let extdev_details = extdev_details.into();
         let result = SelectEventsAuxBitcase11 { affect_ext_dev, extdev_details };
         Ok((result, remaining))
     }
@@ -6314,8 +6318,8 @@ impl TryParse for SelectEventsAuxBitcase11 {
 impl Serialize for SelectEventsAuxBitcase11 {
     type Bytes = [u8; 4];
     fn serialize(&self) -> [u8; 4] {
-        let affect_ext_dev_bytes = self.affect_ext_dev.serialize();
-        let extdev_details_bytes = self.extdev_details.serialize();
+        let affect_ext_dev_bytes = u16::from(self.affect_ext_dev).serialize();
+        let extdev_details_bytes = u16::from(self.extdev_details).serialize();
         [
             affect_ext_dev_bytes[0],
             affect_ext_dev_bytes[1],
@@ -6325,8 +6329,8 @@ impl Serialize for SelectEventsAuxBitcase11 {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(4);
-        self.affect_ext_dev.serialize_into(bytes);
-        self.extdev_details.serialize_into(bytes);
+        u16::from(self.affect_ext_dev).serialize_into(bytes);
+        u16::from(self.extdev_details).serialize_into(bytes);
     }
 }
 /// Auxiliary and optional information for the `select_events` function
@@ -6347,7 +6351,7 @@ pub struct SelectEventsAux {
 }
 impl SelectEventsAux {
     fn try_parse(value: &[u8], affect_which: u16, clear: u16, select_all: u16) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = affect_which & ((!clear) & (!select_all));
+        let switch_expr = u16::from(affect_which) & ((!u16::from(clear)) & (!u16::from(select_all)));
         let mut outer_remaining = value;
         let bitcase1 = if switch_expr & u16::from(EventType::NEW_KEYBOARD_NOTIFY) != 0 {
             let (bitcase1, new_remaining) = SelectEventsAuxBitcase1::try_parse(outer_remaining)?;
@@ -6434,7 +6438,7 @@ impl SelectEventsAux {
     #[allow(dead_code)]
     fn serialize(&self, affect_which: u16, clear: u16, select_all: u16) -> Vec<u8> {
         let mut result = Vec::new();
-        self.serialize_into(&mut result, affect_which, clear, select_all);
+        self.serialize_into(&mut result, u16::from(affect_which), u16::from(clear), u16::from(select_all));
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, affect_which: u16, clear: u16, select_all: u16) {
@@ -6594,10 +6598,10 @@ pub const SELECT_EVENTS_REQUEST: u8 = 1;
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SelectEventsRequest<'input> {
     pub device_spec: DeviceSpec,
-    pub clear: u16,
-    pub select_all: u16,
-    pub affect_map: u16,
-    pub map: u16,
+    pub clear: EventType,
+    pub select_all: EventType,
+    pub affect_map: MapPart,
+    pub map: MapPart,
     pub details: Cow<'input, SelectEventsAux>,
 }
 impl<'input> SelectEventsRequest<'input> {
@@ -6605,12 +6609,12 @@ impl<'input> SelectEventsRequest<'input> {
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'input>> {
         let length_so_far = 0;
         let device_spec_bytes = self.device_spec.serialize();
-        let affect_which: u16 = self.details.switch_expr() | (self.clear | self.select_all);
+        let affect_which: u16 = self.details.switch_expr() | (u16::from(self.clear) | u16::from(self.select_all));
         let affect_which_bytes = affect_which.serialize();
-        let clear_bytes = self.clear.serialize();
-        let select_all_bytes = self.select_all.serialize();
-        let affect_map_bytes = self.affect_map.serialize();
-        let map_bytes = self.map.serialize();
+        let clear_bytes = u16::from(self.clear).serialize();
+        let select_all_bytes = u16::from(self.select_all).serialize();
+        let affect_map_bytes = u16::from(self.affect_map).serialize();
+        let map_bytes = u16::from(self.map).serialize();
         let mut request0 = vec![
             major_opcode,
             SELECT_EVENTS_REQUEST,
@@ -6630,7 +6634,7 @@ impl<'input> SelectEventsRequest<'input> {
             map_bytes[1],
         ];
         let length_so_far = length_so_far + request0.len();
-        let details_bytes = self.details.serialize(affect_which, self.clear, self.select_all);
+        let details_bytes = self.details.serialize(u16::from(affect_which), u16::from(self.clear), u16::from(self.select_all));
         let length_so_far = length_so_far + details_bytes.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
@@ -6647,10 +6651,14 @@ impl<'input> SelectEventsRequest<'input> {
         let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
         let (affect_which, remaining) = u16::try_parse(remaining)?;
         let (clear, remaining) = u16::try_parse(remaining)?;
+        let clear = clear.into();
         let (select_all, remaining) = u16::try_parse(remaining)?;
+        let select_all = select_all.into();
         let (affect_map, remaining) = u16::try_parse(remaining)?;
+        let affect_map = affect_map.into();
         let (map, remaining) = u16::try_parse(remaining)?;
-        let (details, remaining) = SelectEventsAux::try_parse(remaining, affect_which, clear, select_all)?;
+        let map = map.into();
+        let (details, remaining) = SelectEventsAux::try_parse(remaining, u16::from(affect_which), u16::from(clear), u16::from(select_all))?;
         let _ = remaining;
         Ok(SelectEventsRequest {
             device_spec,
@@ -6858,20 +6866,20 @@ pub struct GetStateReply {
     pub device_id: u8,
     pub sequence: u16,
     pub length: u32,
-    pub mods: u8,
-    pub base_mods: u8,
-    pub latched_mods: u8,
-    pub locked_mods: u8,
+    pub mods: xproto::ModMask,
+    pub base_mods: xproto::ModMask,
+    pub latched_mods: xproto::ModMask,
+    pub locked_mods: xproto::ModMask,
     pub group: Group,
     pub locked_group: Group,
     pub base_group: i16,
     pub latched_group: i16,
-    pub compat_state: u8,
-    pub grab_mods: u8,
-    pub compat_grab_mods: u8,
-    pub lookup_mods: u8,
-    pub compat_lookup_mods: u8,
-    pub ptr_btn_state: u16,
+    pub compat_state: xproto::ModMask,
+    pub grab_mods: xproto::ModMask,
+    pub compat_grab_mods: xproto::ModMask,
+    pub lookup_mods: xproto::ModMask,
+    pub compat_lookup_mods: xproto::ModMask,
+    pub ptr_btn_state: xproto::KeyButMask,
 }
 impl TryParse for GetStateReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -6899,8 +6907,18 @@ impl TryParse for GetStateReply {
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
+        let mods = mods.into();
+        let base_mods = base_mods.into();
+        let latched_mods = latched_mods.into();
+        let locked_mods = locked_mods.into();
         let group = group.into();
         let locked_group = locked_group.into();
+        let compat_state = compat_state.into();
+        let grab_mods = grab_mods.into();
+        let compat_grab_mods = compat_grab_mods.into();
+        let lookup_mods = lookup_mods.into();
+        let compat_lookup_mods = compat_lookup_mods.into();
+        let ptr_btn_state = ptr_btn_state.into();
         let result = GetStateReply { device_id, sequence, length, mods, base_mods, latched_mods, locked_mods, group, locked_group, base_group, latched_group, compat_state, grab_mods, compat_grab_mods, lookup_mods, compat_lookup_mods, ptr_btn_state };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
@@ -6915,20 +6933,20 @@ impl Serialize for GetStateReply {
         let device_id_bytes = self.device_id.serialize();
         let sequence_bytes = self.sequence.serialize();
         let length_bytes = self.length.serialize();
-        let mods_bytes = self.mods.serialize();
-        let base_mods_bytes = self.base_mods.serialize();
-        let latched_mods_bytes = self.latched_mods.serialize();
-        let locked_mods_bytes = self.locked_mods.serialize();
+        let mods_bytes = (u16::from(self.mods) as u8).serialize();
+        let base_mods_bytes = (u16::from(self.base_mods) as u8).serialize();
+        let latched_mods_bytes = (u16::from(self.latched_mods) as u8).serialize();
+        let locked_mods_bytes = (u16::from(self.locked_mods) as u8).serialize();
         let group_bytes = u8::from(self.group).serialize();
         let locked_group_bytes = u8::from(self.locked_group).serialize();
         let base_group_bytes = self.base_group.serialize();
         let latched_group_bytes = self.latched_group.serialize();
-        let compat_state_bytes = self.compat_state.serialize();
-        let grab_mods_bytes = self.grab_mods.serialize();
-        let compat_grab_mods_bytes = self.compat_grab_mods.serialize();
-        let lookup_mods_bytes = self.lookup_mods.serialize();
-        let compat_lookup_mods_bytes = self.compat_lookup_mods.serialize();
-        let ptr_btn_state_bytes = self.ptr_btn_state.serialize();
+        let compat_state_bytes = (u16::from(self.compat_state) as u8).serialize();
+        let grab_mods_bytes = (u16::from(self.grab_mods) as u8).serialize();
+        let compat_grab_mods_bytes = (u16::from(self.compat_grab_mods) as u8).serialize();
+        let lookup_mods_bytes = (u16::from(self.lookup_mods) as u8).serialize();
+        let compat_lookup_mods_bytes = (u16::from(self.compat_lookup_mods) as u8).serialize();
+        let ptr_btn_state_bytes = u16::from(self.ptr_btn_state).serialize();
         [
             response_type_bytes[0],
             device_id_bytes[0],
@@ -6971,21 +6989,21 @@ impl Serialize for GetStateReply {
         self.device_id.serialize_into(bytes);
         self.sequence.serialize_into(bytes);
         self.length.serialize_into(bytes);
-        self.mods.serialize_into(bytes);
-        self.base_mods.serialize_into(bytes);
-        self.latched_mods.serialize_into(bytes);
-        self.locked_mods.serialize_into(bytes);
+        (u16::from(self.mods) as u8).serialize_into(bytes);
+        (u16::from(self.base_mods) as u8).serialize_into(bytes);
+        (u16::from(self.latched_mods) as u8).serialize_into(bytes);
+        (u16::from(self.locked_mods) as u8).serialize_into(bytes);
         u8::from(self.group).serialize_into(bytes);
         u8::from(self.locked_group).serialize_into(bytes);
         self.base_group.serialize_into(bytes);
         self.latched_group.serialize_into(bytes);
-        self.compat_state.serialize_into(bytes);
-        self.grab_mods.serialize_into(bytes);
-        self.compat_grab_mods.serialize_into(bytes);
-        self.lookup_mods.serialize_into(bytes);
-        self.compat_lookup_mods.serialize_into(bytes);
+        (u16::from(self.compat_state) as u8).serialize_into(bytes);
+        (u16::from(self.grab_mods) as u8).serialize_into(bytes);
+        (u16::from(self.compat_grab_mods) as u8).serialize_into(bytes);
+        (u16::from(self.lookup_mods) as u8).serialize_into(bytes);
+        (u16::from(self.compat_lookup_mods) as u8).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 1]);
-        self.ptr_btn_state.serialize_into(bytes);
+        u16::from(self.ptr_btn_state).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 6]);
     }
 }
@@ -6996,11 +7014,11 @@ pub const LATCH_LOCK_STATE_REQUEST: u8 = 5;
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct LatchLockStateRequest {
     pub device_spec: DeviceSpec,
-    pub affect_mod_locks: u8,
-    pub mod_locks: u8,
+    pub affect_mod_locks: xproto::ModMask,
+    pub mod_locks: xproto::ModMask,
     pub lock_group: bool,
     pub group_lock: Group,
-    pub affect_mod_latches: u8,
+    pub affect_mod_latches: xproto::ModMask,
     pub latch_group: bool,
     pub group_latch: u16,
 }
@@ -7009,11 +7027,11 @@ impl LatchLockStateRequest {
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
         let length_so_far = 0;
         let device_spec_bytes = self.device_spec.serialize();
-        let affect_mod_locks_bytes = self.affect_mod_locks.serialize();
-        let mod_locks_bytes = self.mod_locks.serialize();
+        let affect_mod_locks_bytes = (u16::from(self.affect_mod_locks) as u8).serialize();
+        let mod_locks_bytes = (u16::from(self.mod_locks) as u8).serialize();
         let lock_group_bytes = self.lock_group.serialize();
         let group_lock_bytes = u8::from(self.group_lock).serialize();
-        let affect_mod_latches_bytes = self.affect_mod_latches.serialize();
+        let affect_mod_latches_bytes = (u16::from(self.affect_mod_latches) as u8).serialize();
         let latch_group_bytes = self.latch_group.serialize();
         let group_latch_bytes = self.group_latch.serialize();
         let mut request0 = vec![
@@ -7047,11 +7065,14 @@ impl LatchLockStateRequest {
         }
         let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
         let (affect_mod_locks, remaining) = u8::try_parse(remaining)?;
+        let affect_mod_locks = affect_mod_locks.into();
         let (mod_locks, remaining) = u8::try_parse(remaining)?;
+        let mod_locks = mod_locks.into();
         let (lock_group, remaining) = bool::try_parse(remaining)?;
         let (group_lock, remaining) = u8::try_parse(remaining)?;
         let group_lock = group_lock.into();
         let (affect_mod_latches, remaining) = u8::try_parse(remaining)?;
+        let affect_mod_latches = affect_mod_latches.into();
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (latch_group, remaining) = bool::try_parse(remaining)?;
@@ -7146,12 +7167,12 @@ pub struct GetControlsReply {
     pub mouse_keys_dflt_btn: u8,
     pub num_groups: u8,
     pub groups_wrap: u8,
-    pub internal_mods_mask: u8,
-    pub ignore_lock_mods_mask: u8,
-    pub internal_mods_real_mods: u8,
-    pub ignore_lock_mods_real_mods: u8,
-    pub internal_mods_vmods: u16,
-    pub ignore_lock_mods_vmods: u16,
+    pub internal_mods_mask: xproto::ModMask,
+    pub ignore_lock_mods_mask: xproto::ModMask,
+    pub internal_mods_real_mods: xproto::ModMask,
+    pub ignore_lock_mods_real_mods: xproto::ModMask,
+    pub internal_mods_vmods: VMod,
+    pub ignore_lock_mods_vmods: VMod,
     pub repeat_delay: u16,
     pub repeat_interval: u16,
     pub slow_keys_delay: u16,
@@ -7161,13 +7182,13 @@ pub struct GetControlsReply {
     pub mouse_keys_time_to_max: u16,
     pub mouse_keys_max_speed: u16,
     pub mouse_keys_curve: i16,
-    pub access_x_option: u16,
+    pub access_x_option: AXOption,
     pub access_x_timeout: u16,
-    pub access_x_timeout_options_mask: u16,
-    pub access_x_timeout_options_values: u16,
-    pub access_x_timeout_mask: u32,
-    pub access_x_timeout_values: u32,
-    pub enabled_controls: u32,
+    pub access_x_timeout_options_mask: AXOption,
+    pub access_x_timeout_options_values: AXOption,
+    pub access_x_timeout_mask: BoolCtrl,
+    pub access_x_timeout_values: BoolCtrl,
+    pub enabled_controls: BoolCtrl,
     pub per_key_repeat: [u8; 32],
 }
 impl TryParse for GetControlsReply {
@@ -7209,6 +7230,18 @@ impl TryParse for GetControlsReply {
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
+        let internal_mods_mask = internal_mods_mask.into();
+        let ignore_lock_mods_mask = ignore_lock_mods_mask.into();
+        let internal_mods_real_mods = internal_mods_real_mods.into();
+        let ignore_lock_mods_real_mods = ignore_lock_mods_real_mods.into();
+        let internal_mods_vmods = internal_mods_vmods.into();
+        let ignore_lock_mods_vmods = ignore_lock_mods_vmods.into();
+        let access_x_option = access_x_option.into();
+        let access_x_timeout_options_mask = access_x_timeout_options_mask.into();
+        let access_x_timeout_options_values = access_x_timeout_options_values.into();
+        let access_x_timeout_mask = access_x_timeout_mask.into();
+        let access_x_timeout_values = access_x_timeout_values.into();
+        let enabled_controls = enabled_controls.into();
         let result = GetControlsReply { device_id, sequence, length, mouse_keys_dflt_btn, num_groups, groups_wrap, internal_mods_mask, ignore_lock_mods_mask, internal_mods_real_mods, ignore_lock_mods_real_mods, internal_mods_vmods, ignore_lock_mods_vmods, repeat_delay, repeat_interval, slow_keys_delay, debounce_delay, mouse_keys_delay, mouse_keys_interval, mouse_keys_time_to_max, mouse_keys_max_speed, mouse_keys_curve, access_x_option, access_x_timeout, access_x_timeout_options_mask, access_x_timeout_options_values, access_x_timeout_mask, access_x_timeout_values, enabled_controls, per_key_repeat };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
@@ -7226,12 +7259,12 @@ impl Serialize for GetControlsReply {
         let mouse_keys_dflt_btn_bytes = self.mouse_keys_dflt_btn.serialize();
         let num_groups_bytes = self.num_groups.serialize();
         let groups_wrap_bytes = self.groups_wrap.serialize();
-        let internal_mods_mask_bytes = self.internal_mods_mask.serialize();
-        let ignore_lock_mods_mask_bytes = self.ignore_lock_mods_mask.serialize();
-        let internal_mods_real_mods_bytes = self.internal_mods_real_mods.serialize();
-        let ignore_lock_mods_real_mods_bytes = self.ignore_lock_mods_real_mods.serialize();
-        let internal_mods_vmods_bytes = self.internal_mods_vmods.serialize();
-        let ignore_lock_mods_vmods_bytes = self.ignore_lock_mods_vmods.serialize();
+        let internal_mods_mask_bytes = (u16::from(self.internal_mods_mask) as u8).serialize();
+        let ignore_lock_mods_mask_bytes = (u16::from(self.ignore_lock_mods_mask) as u8).serialize();
+        let internal_mods_real_mods_bytes = (u16::from(self.internal_mods_real_mods) as u8).serialize();
+        let ignore_lock_mods_real_mods_bytes = (u16::from(self.ignore_lock_mods_real_mods) as u8).serialize();
+        let internal_mods_vmods_bytes = u16::from(self.internal_mods_vmods).serialize();
+        let ignore_lock_mods_vmods_bytes = u16::from(self.ignore_lock_mods_vmods).serialize();
         let repeat_delay_bytes = self.repeat_delay.serialize();
         let repeat_interval_bytes = self.repeat_interval.serialize();
         let slow_keys_delay_bytes = self.slow_keys_delay.serialize();
@@ -7241,13 +7274,13 @@ impl Serialize for GetControlsReply {
         let mouse_keys_time_to_max_bytes = self.mouse_keys_time_to_max.serialize();
         let mouse_keys_max_speed_bytes = self.mouse_keys_max_speed.serialize();
         let mouse_keys_curve_bytes = self.mouse_keys_curve.serialize();
-        let access_x_option_bytes = self.access_x_option.serialize();
+        let access_x_option_bytes = u16::from(self.access_x_option).serialize();
         let access_x_timeout_bytes = self.access_x_timeout.serialize();
-        let access_x_timeout_options_mask_bytes = self.access_x_timeout_options_mask.serialize();
-        let access_x_timeout_options_values_bytes = self.access_x_timeout_options_values.serialize();
-        let access_x_timeout_mask_bytes = self.access_x_timeout_mask.serialize();
-        let access_x_timeout_values_bytes = self.access_x_timeout_values.serialize();
-        let enabled_controls_bytes = self.enabled_controls.serialize();
+        let access_x_timeout_options_mask_bytes = u16::from(self.access_x_timeout_options_mask).serialize();
+        let access_x_timeout_options_values_bytes = u16::from(self.access_x_timeout_options_values).serialize();
+        let access_x_timeout_mask_bytes = u32::from(self.access_x_timeout_mask).serialize();
+        let access_x_timeout_values_bytes = u32::from(self.access_x_timeout_values).serialize();
+        let enabled_controls_bytes = u32::from(self.enabled_controls).serialize();
         [
             response_type_bytes[0],
             device_id_bytes[0],
@@ -7353,13 +7386,13 @@ impl Serialize for GetControlsReply {
         self.mouse_keys_dflt_btn.serialize_into(bytes);
         self.num_groups.serialize_into(bytes);
         self.groups_wrap.serialize_into(bytes);
-        self.internal_mods_mask.serialize_into(bytes);
-        self.ignore_lock_mods_mask.serialize_into(bytes);
-        self.internal_mods_real_mods.serialize_into(bytes);
-        self.ignore_lock_mods_real_mods.serialize_into(bytes);
+        (u16::from(self.internal_mods_mask) as u8).serialize_into(bytes);
+        (u16::from(self.ignore_lock_mods_mask) as u8).serialize_into(bytes);
+        (u16::from(self.internal_mods_real_mods) as u8).serialize_into(bytes);
+        (u16::from(self.ignore_lock_mods_real_mods) as u8).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 1]);
-        self.internal_mods_vmods.serialize_into(bytes);
-        self.ignore_lock_mods_vmods.serialize_into(bytes);
+        u16::from(self.internal_mods_vmods).serialize_into(bytes);
+        u16::from(self.ignore_lock_mods_vmods).serialize_into(bytes);
         self.repeat_delay.serialize_into(bytes);
         self.repeat_interval.serialize_into(bytes);
         self.slow_keys_delay.serialize_into(bytes);
@@ -7369,14 +7402,14 @@ impl Serialize for GetControlsReply {
         self.mouse_keys_time_to_max.serialize_into(bytes);
         self.mouse_keys_max_speed.serialize_into(bytes);
         self.mouse_keys_curve.serialize_into(bytes);
-        self.access_x_option.serialize_into(bytes);
+        u16::from(self.access_x_option).serialize_into(bytes);
         self.access_x_timeout.serialize_into(bytes);
-        self.access_x_timeout_options_mask.serialize_into(bytes);
-        self.access_x_timeout_options_values.serialize_into(bytes);
+        u16::from(self.access_x_timeout_options_mask).serialize_into(bytes);
+        u16::from(self.access_x_timeout_options_values).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 2]);
-        self.access_x_timeout_mask.serialize_into(bytes);
-        self.access_x_timeout_values.serialize_into(bytes);
-        self.enabled_controls.serialize_into(bytes);
+        u32::from(self.access_x_timeout_mask).serialize_into(bytes);
+        u32::from(self.access_x_timeout_values).serialize_into(bytes);
+        u32::from(self.enabled_controls).serialize_into(bytes);
         bytes.extend_from_slice(&self.per_key_repeat);
     }
 }
@@ -7387,20 +7420,20 @@ pub const SET_CONTROLS_REQUEST: u8 = 7;
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetControlsRequest<'input> {
     pub device_spec: DeviceSpec,
-    pub affect_internal_real_mods: u8,
-    pub internal_real_mods: u8,
-    pub affect_ignore_lock_real_mods: u8,
-    pub ignore_lock_real_mods: u8,
-    pub affect_internal_virtual_mods: u16,
-    pub internal_virtual_mods: u16,
-    pub affect_ignore_lock_virtual_mods: u16,
-    pub ignore_lock_virtual_mods: u16,
+    pub affect_internal_real_mods: xproto::ModMask,
+    pub internal_real_mods: xproto::ModMask,
+    pub affect_ignore_lock_real_mods: xproto::ModMask,
+    pub ignore_lock_real_mods: xproto::ModMask,
+    pub affect_internal_virtual_mods: VMod,
+    pub internal_virtual_mods: VMod,
+    pub affect_ignore_lock_virtual_mods: VMod,
+    pub ignore_lock_virtual_mods: VMod,
     pub mouse_keys_dflt_btn: u8,
     pub groups_wrap: u8,
-    pub access_x_options: u16,
-    pub affect_enabled_controls: u32,
-    pub enabled_controls: u32,
-    pub change_controls: u32,
+    pub access_x_options: AXOption,
+    pub affect_enabled_controls: BoolCtrl,
+    pub enabled_controls: BoolCtrl,
+    pub change_controls: Control,
     pub repeat_delay: u16,
     pub repeat_interval: u16,
     pub slow_keys_delay: u16,
@@ -7411,10 +7444,10 @@ pub struct SetControlsRequest<'input> {
     pub mouse_keys_max_speed: u16,
     pub mouse_keys_curve: i16,
     pub access_x_timeout: u16,
-    pub access_x_timeout_mask: u32,
-    pub access_x_timeout_values: u32,
-    pub access_x_timeout_options_mask: u16,
-    pub access_x_timeout_options_values: u16,
+    pub access_x_timeout_mask: BoolCtrl,
+    pub access_x_timeout_values: BoolCtrl,
+    pub access_x_timeout_options_mask: AXOption,
+    pub access_x_timeout_options_values: AXOption,
     pub per_key_repeat: Cow<'input, [u8; 32]>,
 }
 impl<'input> SetControlsRequest<'input> {
@@ -7422,20 +7455,20 @@ impl<'input> SetControlsRequest<'input> {
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'input>> {
         let length_so_far = 0;
         let device_spec_bytes = self.device_spec.serialize();
-        let affect_internal_real_mods_bytes = self.affect_internal_real_mods.serialize();
-        let internal_real_mods_bytes = self.internal_real_mods.serialize();
-        let affect_ignore_lock_real_mods_bytes = self.affect_ignore_lock_real_mods.serialize();
-        let ignore_lock_real_mods_bytes = self.ignore_lock_real_mods.serialize();
-        let affect_internal_virtual_mods_bytes = self.affect_internal_virtual_mods.serialize();
-        let internal_virtual_mods_bytes = self.internal_virtual_mods.serialize();
-        let affect_ignore_lock_virtual_mods_bytes = self.affect_ignore_lock_virtual_mods.serialize();
-        let ignore_lock_virtual_mods_bytes = self.ignore_lock_virtual_mods.serialize();
+        let affect_internal_real_mods_bytes = (u16::from(self.affect_internal_real_mods) as u8).serialize();
+        let internal_real_mods_bytes = (u16::from(self.internal_real_mods) as u8).serialize();
+        let affect_ignore_lock_real_mods_bytes = (u16::from(self.affect_ignore_lock_real_mods) as u8).serialize();
+        let ignore_lock_real_mods_bytes = (u16::from(self.ignore_lock_real_mods) as u8).serialize();
+        let affect_internal_virtual_mods_bytes = u16::from(self.affect_internal_virtual_mods).serialize();
+        let internal_virtual_mods_bytes = u16::from(self.internal_virtual_mods).serialize();
+        let affect_ignore_lock_virtual_mods_bytes = u16::from(self.affect_ignore_lock_virtual_mods).serialize();
+        let ignore_lock_virtual_mods_bytes = u16::from(self.ignore_lock_virtual_mods).serialize();
         let mouse_keys_dflt_btn_bytes = self.mouse_keys_dflt_btn.serialize();
         let groups_wrap_bytes = self.groups_wrap.serialize();
-        let access_x_options_bytes = self.access_x_options.serialize();
-        let affect_enabled_controls_bytes = self.affect_enabled_controls.serialize();
-        let enabled_controls_bytes = self.enabled_controls.serialize();
-        let change_controls_bytes = self.change_controls.serialize();
+        let access_x_options_bytes = u16::from(self.access_x_options).serialize();
+        let affect_enabled_controls_bytes = u32::from(self.affect_enabled_controls).serialize();
+        let enabled_controls_bytes = u32::from(self.enabled_controls).serialize();
+        let change_controls_bytes = u32::from(self.change_controls).serialize();
         let repeat_delay_bytes = self.repeat_delay.serialize();
         let repeat_interval_bytes = self.repeat_interval.serialize();
         let slow_keys_delay_bytes = self.slow_keys_delay.serialize();
@@ -7446,10 +7479,10 @@ impl<'input> SetControlsRequest<'input> {
         let mouse_keys_max_speed_bytes = self.mouse_keys_max_speed.serialize();
         let mouse_keys_curve_bytes = self.mouse_keys_curve.serialize();
         let access_x_timeout_bytes = self.access_x_timeout.serialize();
-        let access_x_timeout_mask_bytes = self.access_x_timeout_mask.serialize();
-        let access_x_timeout_values_bytes = self.access_x_timeout_values.serialize();
-        let access_x_timeout_options_mask_bytes = self.access_x_timeout_options_mask.serialize();
-        let access_x_timeout_options_values_bytes = self.access_x_timeout_options_values.serialize();
+        let access_x_timeout_mask_bytes = u32::from(self.access_x_timeout_mask).serialize();
+        let access_x_timeout_values_bytes = u32::from(self.access_x_timeout_values).serialize();
+        let access_x_timeout_options_mask_bytes = u16::from(self.access_x_timeout_options_mask).serialize();
+        let access_x_timeout_options_values_bytes = u16::from(self.access_x_timeout_options_values).serialize();
         let mut request0 = vec![
             major_opcode,
             SET_CONTROLS_REQUEST,
@@ -7534,20 +7567,32 @@ impl<'input> SetControlsRequest<'input> {
         }
         let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
         let (affect_internal_real_mods, remaining) = u8::try_parse(remaining)?;
+        let affect_internal_real_mods = affect_internal_real_mods.into();
         let (internal_real_mods, remaining) = u8::try_parse(remaining)?;
+        let internal_real_mods = internal_real_mods.into();
         let (affect_ignore_lock_real_mods, remaining) = u8::try_parse(remaining)?;
+        let affect_ignore_lock_real_mods = affect_ignore_lock_real_mods.into();
         let (ignore_lock_real_mods, remaining) = u8::try_parse(remaining)?;
+        let ignore_lock_real_mods = ignore_lock_real_mods.into();
         let (affect_internal_virtual_mods, remaining) = u16::try_parse(remaining)?;
+        let affect_internal_virtual_mods = affect_internal_virtual_mods.into();
         let (internal_virtual_mods, remaining) = u16::try_parse(remaining)?;
+        let internal_virtual_mods = internal_virtual_mods.into();
         let (affect_ignore_lock_virtual_mods, remaining) = u16::try_parse(remaining)?;
+        let affect_ignore_lock_virtual_mods = affect_ignore_lock_virtual_mods.into();
         let (ignore_lock_virtual_mods, remaining) = u16::try_parse(remaining)?;
+        let ignore_lock_virtual_mods = ignore_lock_virtual_mods.into();
         let (mouse_keys_dflt_btn, remaining) = u8::try_parse(remaining)?;
         let (groups_wrap, remaining) = u8::try_parse(remaining)?;
         let (access_x_options, remaining) = u16::try_parse(remaining)?;
+        let access_x_options = access_x_options.into();
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (affect_enabled_controls, remaining) = u32::try_parse(remaining)?;
+        let affect_enabled_controls = affect_enabled_controls.into();
         let (enabled_controls, remaining) = u32::try_parse(remaining)?;
+        let enabled_controls = enabled_controls.into();
         let (change_controls, remaining) = u32::try_parse(remaining)?;
+        let change_controls = change_controls.into();
         let (repeat_delay, remaining) = u16::try_parse(remaining)?;
         let (repeat_interval, remaining) = u16::try_parse(remaining)?;
         let (slow_keys_delay, remaining) = u16::try_parse(remaining)?;
@@ -7559,9 +7604,13 @@ impl<'input> SetControlsRequest<'input> {
         let (mouse_keys_curve, remaining) = i16::try_parse(remaining)?;
         let (access_x_timeout, remaining) = u16::try_parse(remaining)?;
         let (access_x_timeout_mask, remaining) = u32::try_parse(remaining)?;
+        let access_x_timeout_mask = access_x_timeout_mask.into();
         let (access_x_timeout_values, remaining) = u32::try_parse(remaining)?;
+        let access_x_timeout_values = access_x_timeout_values.into();
         let (access_x_timeout_options_mask, remaining) = u16::try_parse(remaining)?;
+        let access_x_timeout_options_mask = access_x_timeout_options_mask.into();
         let (access_x_timeout_options_values, remaining) = u16::try_parse(remaining)?;
+        let access_x_timeout_options_values = access_x_timeout_options_values.into();
         let (per_key_repeat, remaining) = crate::x11_utils::parse_u8_list(remaining, 32)?;
         let per_key_repeat = <&[u8; 32]>::try_from(per_key_repeat).unwrap();
         let _ = remaining;
@@ -7653,8 +7702,8 @@ pub const GET_MAP_REQUEST: u8 = 8;
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetMapRequest {
     pub device_spec: DeviceSpec,
-    pub full: u16,
-    pub partial: u16,
+    pub full: MapPart,
+    pub partial: MapPart,
     pub first_type: u8,
     pub n_types: u8,
     pub first_key_sym: xproto::Keycode,
@@ -7663,7 +7712,7 @@ pub struct GetMapRequest {
     pub n_key_actions: u8,
     pub first_key_behavior: xproto::Keycode,
     pub n_key_behaviors: u8,
-    pub virtual_mods: u16,
+    pub virtual_mods: VMod,
     pub first_key_explicit: xproto::Keycode,
     pub n_key_explicit: u8,
     pub first_mod_map_key: xproto::Keycode,
@@ -7676,8 +7725,8 @@ impl GetMapRequest {
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
         let length_so_far = 0;
         let device_spec_bytes = self.device_spec.serialize();
-        let full_bytes = self.full.serialize();
-        let partial_bytes = self.partial.serialize();
+        let full_bytes = u16::from(self.full).serialize();
+        let partial_bytes = u16::from(self.partial).serialize();
         let first_type_bytes = self.first_type.serialize();
         let n_types_bytes = self.n_types.serialize();
         let first_key_sym_bytes = self.first_key_sym.serialize();
@@ -7686,7 +7735,7 @@ impl GetMapRequest {
         let n_key_actions_bytes = self.n_key_actions.serialize();
         let first_key_behavior_bytes = self.first_key_behavior.serialize();
         let n_key_behaviors_bytes = self.n_key_behaviors.serialize();
-        let virtual_mods_bytes = self.virtual_mods.serialize();
+        let virtual_mods_bytes = u16::from(self.virtual_mods).serialize();
         let first_key_explicit_bytes = self.first_key_explicit.serialize();
         let n_key_explicit_bytes = self.n_key_explicit.serialize();
         let first_mod_map_key_bytes = self.first_mod_map_key.serialize();
@@ -7736,7 +7785,9 @@ impl GetMapRequest {
         }
         let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
         let (full, remaining) = u16::try_parse(remaining)?;
+        let full = full.into();
         let (partial, remaining) = u16::try_parse(remaining)?;
+        let partial = partial.into();
         let (first_type, remaining) = u8::try_parse(remaining)?;
         let (n_types, remaining) = u8::try_parse(remaining)?;
         let (first_key_sym, remaining) = xproto::Keycode::try_parse(remaining)?;
@@ -7746,6 +7797,7 @@ impl GetMapRequest {
         let (first_key_behavior, remaining) = xproto::Keycode::try_parse(remaining)?;
         let (n_key_behaviors, remaining) = u8::try_parse(remaining)?;
         let (virtual_mods, remaining) = u16::try_parse(remaining)?;
+        let virtual_mods = virtual_mods.into();
         let (first_key_explicit, remaining) = xproto::Keycode::try_parse(remaining)?;
         let (n_key_explicit, remaining) = u8::try_parse(remaining)?;
         let (first_mod_map_key, remaining) = xproto::Keycode::try_parse(remaining)?;
@@ -7814,7 +7866,7 @@ impl GetMapMapBitcase3 {
     #[allow(dead_code)]
     fn serialize(&self, n_key_actions: u8, total_actions: u16) -> Vec<u8> {
         let mut result = Vec::new();
-        self.serialize_into(&mut result, n_key_actions, total_actions);
+        self.serialize_into(&mut result, u8::from(n_key_actions), u16::from(total_actions));
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, n_key_actions: u8, total_actions: u16) {
@@ -7832,14 +7884,14 @@ pub struct GetMapMap {
     pub syms_rtrn: Option<Vec<KeySymMap>>,
     pub bitcase3: Option<GetMapMapBitcase3>,
     pub behaviors_rtrn: Option<Vec<SetBehavior>>,
-    pub vmods_rtrn: Option<Vec<u8>>,
+    pub vmods_rtrn: Option<Vec<xproto::ModMask>>,
     pub explicit_rtrn: Option<Vec<SetExplicit>>,
     pub modmap_rtrn: Option<Vec<KeyModMap>>,
     pub vmodmap_rtrn: Option<Vec<KeyVModMap>>,
 }
 impl GetMapMap {
     fn try_parse(value: &[u8], present: u16, n_types: u8, n_key_syms: u8, n_key_actions: u8, total_actions: u16, total_key_behaviors: u8, virtual_mods: u16, total_key_explicit: u8, total_mod_map_keys: u8, total_v_mod_map_keys: u8) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = present;
+        let switch_expr = u16::from(present);
         let mut outer_remaining = value;
         let types_rtrn = if switch_expr & u16::from(MapPart::KEY_TYPES) != 0 {
             let remaining = outer_remaining;
@@ -7875,8 +7927,15 @@ impl GetMapMap {
         let vmods_rtrn = if switch_expr & u16::from(MapPart::VIRTUAL_MODS) != 0 {
             let remaining = outer_remaining;
             let value = remaining;
-            let (vmods_rtrn, remaining) = crate::x11_utils::parse_u8_list(remaining, virtual_mods.count_ones().try_to_usize()?)?;
-            let vmods_rtrn = vmods_rtrn.to_vec();
+            let mut remaining = remaining;
+            let list_length = u32::from(virtual_mods).count_ones().try_to_usize()?;
+            let mut vmods_rtrn = Vec::with_capacity(list_length);
+            for _ in 0..list_length {
+                let (v, new_remaining) = u8::try_parse(remaining)?;
+                let v = v.into();
+                remaining = new_remaining;
+                vmods_rtrn.push(v);
+            }
             // Align offset to multiple of 4
             let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
             let misalignment = (4 - (offset % 4)) % 4;
@@ -7928,7 +7987,7 @@ impl GetMapMap {
     #[allow(dead_code)]
     fn serialize(&self, present: u16, n_types: u8, n_key_syms: u8, n_key_actions: u8, total_actions: u16, total_key_behaviors: u8, virtual_mods: u16, total_key_explicit: u8, total_mod_map_keys: u8, total_v_mod_map_keys: u8) -> Vec<u8> {
         let mut result = Vec::new();
-        self.serialize_into(&mut result, present, n_types, n_key_syms, n_key_actions, total_actions, total_key_behaviors, virtual_mods, total_key_explicit, total_mod_map_keys, total_v_mod_map_keys);
+        self.serialize_into(&mut result, u16::from(present), u8::from(n_types), u8::from(n_key_syms), u8::from(n_key_actions), u16::from(total_actions), u8::from(total_key_behaviors), u16::from(virtual_mods), u8::from(total_key_explicit), u8::from(total_mod_map_keys), u8::from(total_v_mod_map_keys));
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, present: u16, n_types: u8, n_key_syms: u8, n_key_actions: u8, total_actions: u16, total_key_behaviors: u8, virtual_mods: u16, total_key_explicit: u8, total_mod_map_keys: u8, total_v_mod_map_keys: u8) {
@@ -7951,15 +8010,17 @@ impl GetMapMap {
             syms_rtrn.serialize_into(bytes);
         }
         if let Some(ref bitcase3) = self.bitcase3 {
-            bitcase3.serialize_into(bytes, n_key_actions, total_actions);
+            bitcase3.serialize_into(bytes, u8::from(n_key_actions), u16::from(total_actions));
         }
         if let Some(ref behaviors_rtrn) = self.behaviors_rtrn {
             assert_eq!(behaviors_rtrn.len(), usize::try_from(total_key_behaviors).unwrap(), "`behaviors_rtrn` has an incorrect length");
             behaviors_rtrn.serialize_into(bytes);
         }
         if let Some(ref vmods_rtrn) = self.vmods_rtrn {
-            assert_eq!(vmods_rtrn.len(), usize::try_from(virtual_mods.count_ones()).unwrap(), "`vmods_rtrn` has an incorrect length");
-            bytes.extend_from_slice(&vmods_rtrn);
+            assert_eq!(vmods_rtrn.len(), usize::try_from(u32::from(virtual_mods).count_ones()).unwrap(), "`vmods_rtrn` has an incorrect length");
+            for element in vmods_rtrn.iter().copied() {
+                (u16::from(element) as u8).serialize_into(bytes);
+            }
             bytes.extend_from_slice(&[0; 3][..(4 - (bytes.len() % 4)) % 4]);
         }
         if let Some(ref explicit_rtrn) = self.explicit_rtrn {
@@ -8038,7 +8099,7 @@ pub struct GetMapReply {
     pub first_v_mod_map_key: xproto::Keycode,
     pub n_v_mod_map_keys: u8,
     pub total_v_mod_map_keys: u8,
-    pub virtual_mods: u16,
+    pub virtual_mods: VMod,
     pub map: GetMapMap,
 }
 impl TryParse for GetMapReply {
@@ -8075,10 +8136,11 @@ impl TryParse for GetMapReply {
         let (total_v_mod_map_keys, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (virtual_mods, remaining) = u16::try_parse(remaining)?;
-        let (map, remaining) = GetMapMap::try_parse(remaining, present, n_types, n_key_syms, n_key_actions, total_actions, total_key_behaviors, virtual_mods, total_key_explicit, total_mod_map_keys, total_v_mod_map_keys)?;
+        let (map, remaining) = GetMapMap::try_parse(remaining, u16::from(present), u8::from(n_types), u8::from(n_key_syms), u8::from(n_key_actions), u16::from(total_actions), u8::from(total_key_behaviors), u16::from(virtual_mods), u8::from(total_key_explicit), u8::from(total_mod_map_keys), u8::from(total_v_mod_map_keys))?;
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
+        let virtual_mods = virtual_mods.into();
         let result = GetMapReply { device_id, sequence, length, min_key_code, max_key_code, first_type, n_types, total_types, first_key_sym, total_syms, n_key_syms, first_key_action, total_actions, n_key_actions, first_key_behavior, n_key_behaviors, total_key_behaviors, first_key_explicit, n_key_explicit, total_key_explicit, first_mod_map_key, n_mod_map_keys, total_mod_map_keys, first_v_mod_map_key, n_v_mod_map_keys, total_v_mod_map_keys, virtual_mods, map };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
@@ -8127,8 +8189,8 @@ impl Serialize for GetMapReply {
         self.n_v_mod_map_keys.serialize_into(bytes);
         self.total_v_mod_map_keys.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 1]);
-        self.virtual_mods.serialize_into(bytes);
-        self.map.serialize_into(bytes, present, self.n_types, self.n_key_syms, self.n_key_actions, self.total_actions, self.total_key_behaviors, self.virtual_mods, self.total_key_explicit, self.total_mod_map_keys, self.total_v_mod_map_keys);
+        u16::from(self.virtual_mods).serialize_into(bytes);
+        self.map.serialize_into(bytes, u16::from(present), u8::from(self.n_types), u8::from(self.n_key_syms), u8::from(self.n_key_actions), u16::from(self.total_actions), u8::from(self.total_key_behaviors), u16::from(self.virtual_mods), u8::from(self.total_key_explicit), u8::from(self.total_mod_map_keys), u8::from(self.total_v_mod_map_keys));
     }
 }
 
@@ -8156,7 +8218,7 @@ impl SetMapAuxBitcase3 {
     #[allow(dead_code)]
     fn serialize(&self, n_key_actions: u8, total_actions: u16) -> Vec<u8> {
         let mut result = Vec::new();
-        self.serialize_into(&mut result, n_key_actions, total_actions);
+        self.serialize_into(&mut result, u8::from(n_key_actions), u16::from(total_actions));
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, n_key_actions: u8, total_actions: u16) {
@@ -8182,7 +8244,7 @@ pub struct SetMapAux {
 }
 impl SetMapAux {
     fn try_parse(value: &[u8], present: u16, n_types: u8, n_key_syms: u8, n_key_actions: u8, total_actions: u16, total_key_behaviors: u8, virtual_mods: u16, total_key_explicit: u8, total_mod_map_keys: u8, total_v_mod_map_keys: u8) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = present;
+        let switch_expr = u16::from(present);
         let mut outer_remaining = value;
         let types = if switch_expr & u16::from(MapPart::KEY_TYPES) != 0 {
             let remaining = outer_remaining;
@@ -8218,7 +8280,7 @@ impl SetMapAux {
         let vmods = if switch_expr & u16::from(MapPart::VIRTUAL_MODS) != 0 {
             let remaining = outer_remaining;
             let value = remaining;
-            let (vmods, remaining) = crate::x11_utils::parse_u8_list(remaining, virtual_mods.count_ones().try_to_usize()?)?;
+            let (vmods, remaining) = crate::x11_utils::parse_u8_list(remaining, u32::from(virtual_mods).count_ones().try_to_usize()?)?;
             let vmods = vmods.to_vec();
             // Align offset to multiple of 4
             let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
@@ -8261,7 +8323,7 @@ impl SetMapAux {
     #[allow(dead_code)]
     fn serialize(&self, present: u16, n_types: u8, n_key_syms: u8, n_key_actions: u8, total_actions: u16, total_key_behaviors: u8, virtual_mods: u16, total_key_explicit: u8, total_mod_map_keys: u8, total_v_mod_map_keys: u8) -> Vec<u8> {
         let mut result = Vec::new();
-        self.serialize_into(&mut result, present, n_types, n_key_syms, n_key_actions, total_actions, total_key_behaviors, virtual_mods, total_key_explicit, total_mod_map_keys, total_v_mod_map_keys);
+        self.serialize_into(&mut result, u16::from(present), u8::from(n_types), u8::from(n_key_syms), u8::from(n_key_actions), u16::from(total_actions), u8::from(total_key_behaviors), u16::from(virtual_mods), u8::from(total_key_explicit), u8::from(total_mod_map_keys), u8::from(total_v_mod_map_keys));
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, present: u16, n_types: u8, n_key_syms: u8, n_key_actions: u8, total_actions: u16, total_key_behaviors: u8, virtual_mods: u16, total_key_explicit: u8, total_mod_map_keys: u8, total_v_mod_map_keys: u8) {
@@ -8284,14 +8346,14 @@ impl SetMapAux {
             syms.serialize_into(bytes);
         }
         if let Some(ref bitcase3) = self.bitcase3 {
-            bitcase3.serialize_into(bytes, n_key_actions, total_actions);
+            bitcase3.serialize_into(bytes, u8::from(n_key_actions), u16::from(total_actions));
         }
         if let Some(ref behaviors) = self.behaviors {
             assert_eq!(behaviors.len(), usize::try_from(total_key_behaviors).unwrap(), "`behaviors` has an incorrect length");
             behaviors.serialize_into(bytes);
         }
         if let Some(ref vmods) = self.vmods {
-            assert_eq!(vmods.len(), usize::try_from(virtual_mods.count_ones()).unwrap(), "`vmods` has an incorrect length");
+            assert_eq!(vmods.len(), usize::try_from(u32::from(virtual_mods).count_ones()).unwrap(), "`vmods` has an incorrect length");
             bytes.extend_from_slice(&vmods);
             bytes.extend_from_slice(&[0; 3][..(4 - (bytes.len() % 4)) % 4]);
         }
@@ -8400,7 +8462,7 @@ pub const SET_MAP_REQUEST: u8 = 9;
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetMapRequest<'input> {
     pub device_spec: DeviceSpec,
-    pub flags: u16,
+    pub flags: SetMapFlags,
     pub min_key_code: xproto::Keycode,
     pub max_key_code: xproto::Keycode,
     pub first_type: u8,
@@ -8423,7 +8485,7 @@ pub struct SetMapRequest<'input> {
     pub first_v_mod_map_key: xproto::Keycode,
     pub n_v_mod_map_keys: u8,
     pub total_v_mod_map_keys: u8,
-    pub virtual_mods: u16,
+    pub virtual_mods: VMod,
     pub values: Cow<'input, SetMapAux>,
 }
 impl<'input> SetMapRequest<'input> {
@@ -8433,7 +8495,7 @@ impl<'input> SetMapRequest<'input> {
         let device_spec_bytes = self.device_spec.serialize();
         let present: u16 = self.values.switch_expr();
         let present_bytes = present.serialize();
-        let flags_bytes = self.flags.serialize();
+        let flags_bytes = u16::from(self.flags).serialize();
         let min_key_code_bytes = self.min_key_code.serialize();
         let max_key_code_bytes = self.max_key_code.serialize();
         let first_type_bytes = self.first_type.serialize();
@@ -8456,7 +8518,7 @@ impl<'input> SetMapRequest<'input> {
         let first_v_mod_map_key_bytes = self.first_v_mod_map_key.serialize();
         let n_v_mod_map_keys_bytes = self.n_v_mod_map_keys.serialize();
         let total_v_mod_map_keys_bytes = self.total_v_mod_map_keys.serialize();
-        let virtual_mods_bytes = self.virtual_mods.serialize();
+        let virtual_mods_bytes = u16::from(self.virtual_mods).serialize();
         let mut request0 = vec![
             major_opcode,
             SET_MAP_REQUEST,
@@ -8496,7 +8558,7 @@ impl<'input> SetMapRequest<'input> {
             virtual_mods_bytes[1],
         ];
         let length_so_far = length_so_far + request0.len();
-        let values_bytes = self.values.serialize(present, self.n_types, self.n_key_syms, self.n_key_actions, self.total_actions, self.total_key_behaviors, self.virtual_mods, self.total_key_explicit, self.total_mod_map_keys, self.total_v_mod_map_keys);
+        let values_bytes = self.values.serialize(u16::from(present), u8::from(self.n_types), u8::from(self.n_key_syms), u8::from(self.n_key_actions), u16::from(self.total_actions), u8::from(self.total_key_behaviors), u16::from(self.virtual_mods), u8::from(self.total_key_explicit), u8::from(self.total_mod_map_keys), u8::from(self.total_v_mod_map_keys));
         let length_so_far = length_so_far + values_bytes.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
@@ -8513,6 +8575,7 @@ impl<'input> SetMapRequest<'input> {
         let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
         let (present, remaining) = u16::try_parse(remaining)?;
         let (flags, remaining) = u16::try_parse(remaining)?;
+        let flags = flags.into();
         let (min_key_code, remaining) = xproto::Keycode::try_parse(remaining)?;
         let (max_key_code, remaining) = xproto::Keycode::try_parse(remaining)?;
         let (first_type, remaining) = u8::try_parse(remaining)?;
@@ -8536,7 +8599,8 @@ impl<'input> SetMapRequest<'input> {
         let (n_v_mod_map_keys, remaining) = u8::try_parse(remaining)?;
         let (total_v_mod_map_keys, remaining) = u8::try_parse(remaining)?;
         let (virtual_mods, remaining) = u16::try_parse(remaining)?;
-        let (values, remaining) = SetMapAux::try_parse(remaining, present, n_types, n_key_syms, n_key_actions, total_actions, total_key_behaviors, virtual_mods, total_key_explicit, total_mod_map_keys, total_v_mod_map_keys)?;
+        let virtual_mods = virtual_mods.into();
+        let (values, remaining) = SetMapAux::try_parse(remaining, u16::from(present), u8::from(n_types), u8::from(n_key_syms), u8::from(n_key_actions), u16::from(total_actions), u8::from(total_key_behaviors), u16::from(virtual_mods), u8::from(total_key_explicit), u8::from(total_mod_map_keys), u8::from(total_v_mod_map_keys))?;
         let _ = remaining;
         Ok(SetMapRequest {
             device_spec,
@@ -8618,7 +8682,7 @@ pub const GET_COMPAT_MAP_REQUEST: u8 = 10;
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetCompatMapRequest {
     pub device_spec: DeviceSpec,
-    pub groups: u8,
+    pub groups: SetOfGroup,
     pub get_all_si: bool,
     pub first_si: u16,
     pub n_si: u16,
@@ -8628,7 +8692,7 @@ impl GetCompatMapRequest {
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
         let length_so_far = 0;
         let device_spec_bytes = self.device_spec.serialize();
-        let groups_bytes = self.groups.serialize();
+        let groups_bytes = u8::from(self.groups).serialize();
         let get_all_si_bytes = self.get_all_si.serialize();
         let first_si_bytes = self.first_si.serialize();
         let n_si_bytes = self.n_si.serialize();
@@ -8659,6 +8723,7 @@ impl GetCompatMapRequest {
         }
         let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
         let (groups, remaining) = u8::try_parse(remaining)?;
+        let groups = groups.into();
         let (get_all_si, remaining) = bool::try_parse(remaining)?;
         let (first_si, remaining) = u16::try_parse(remaining)?;
         let (n_si, remaining) = u16::try_parse(remaining)?;
@@ -8692,7 +8757,7 @@ pub struct GetCompatMapReply {
     pub device_id: u8,
     pub sequence: u16,
     pub length: u32,
-    pub groups_rtrn: u8,
+    pub groups_rtrn: SetOfGroup,
     pub first_si_rtrn: u16,
     pub n_total_si: u16,
     pub si_rtrn: Vec<SymInterpret>,
@@ -8712,10 +8777,11 @@ impl TryParse for GetCompatMapReply {
         let (n_total_si, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(16..).ok_or(ParseError::InsufficientData)?;
         let (si_rtrn, remaining) = crate::x11_utils::parse_list::<SymInterpret>(remaining, n_si_rtrn.try_to_usize()?)?;
-        let (group_rtrn, remaining) = crate::x11_utils::parse_list::<ModDef>(remaining, groups_rtrn.count_ones().try_to_usize()?)?;
+        let (group_rtrn, remaining) = crate::x11_utils::parse_list::<ModDef>(remaining, u32::from(groups_rtrn).count_ones().try_to_usize()?)?;
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
+        let groups_rtrn = groups_rtrn.into();
         let result = GetCompatMapReply { device_id, sequence, length, groups_rtrn, first_si_rtrn, n_total_si, si_rtrn, group_rtrn };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
@@ -8737,7 +8803,7 @@ impl Serialize for GetCompatMapReply {
         self.device_id.serialize_into(bytes);
         self.sequence.serialize_into(bytes);
         self.length.serialize_into(bytes);
-        self.groups_rtrn.serialize_into(bytes);
+        u8::from(self.groups_rtrn).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 1]);
         self.first_si_rtrn.serialize_into(bytes);
         let n_si_rtrn = u16::try_from(self.si_rtrn.len()).expect("`si_rtrn` has too many elements");
@@ -8745,7 +8811,7 @@ impl Serialize for GetCompatMapReply {
         self.n_total_si.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 16]);
         self.si_rtrn.serialize_into(bytes);
-        assert_eq!(self.group_rtrn.len(), usize::try_from(self.groups_rtrn.count_ones()).unwrap(), "`group_rtrn` has an incorrect length");
+        assert_eq!(self.group_rtrn.len(), usize::try_from(u32::from(self.groups_rtrn).count_ones()).unwrap(), "`group_rtrn` has an incorrect length");
         self.group_rtrn.serialize_into(bytes);
     }
 }
@@ -8773,7 +8839,7 @@ pub struct SetCompatMapRequest<'input> {
     pub device_spec: DeviceSpec,
     pub recompute_actions: bool,
     pub truncate_si: bool,
-    pub groups: u8,
+    pub groups: SetOfGroup,
     pub first_si: u16,
     pub si: Cow<'input, [SymInterpret]>,
     pub group_maps: Cow<'input, [ModDef]>,
@@ -8785,7 +8851,7 @@ impl<'input> SetCompatMapRequest<'input> {
         let device_spec_bytes = self.device_spec.serialize();
         let recompute_actions_bytes = self.recompute_actions.serialize();
         let truncate_si_bytes = self.truncate_si.serialize();
-        let groups_bytes = self.groups.serialize();
+        let groups_bytes = u8::from(self.groups).serialize();
         let first_si_bytes = self.first_si.serialize();
         let n_si = u16::try_from(self.si.len()).expect("`si` has too many elements");
         let n_si_bytes = n_si.serialize();
@@ -8810,7 +8876,7 @@ impl<'input> SetCompatMapRequest<'input> {
         let length_so_far = length_so_far + request0.len();
         let si_bytes = self.si.serialize();
         let length_so_far = length_so_far + si_bytes.len();
-        assert_eq!(self.group_maps.len(), usize::try_from(self.groups.count_ones()).unwrap(), "`group_maps` has an incorrect length");
+        assert_eq!(self.group_maps.len(), usize::try_from(u32::from(self.groups).count_ones()).unwrap(), "`group_maps` has an incorrect length");
         let group_maps_bytes = self.group_maps.serialize();
         let length_so_far = length_so_far + group_maps_bytes.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
@@ -8830,11 +8896,12 @@ impl<'input> SetCompatMapRequest<'input> {
         let (recompute_actions, remaining) = bool::try_parse(remaining)?;
         let (truncate_si, remaining) = bool::try_parse(remaining)?;
         let (groups, remaining) = u8::try_parse(remaining)?;
+        let groups = groups.into();
         let (first_si, remaining) = u16::try_parse(remaining)?;
         let (n_si, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (si, remaining) = crate::x11_utils::parse_list::<SymInterpret>(remaining, n_si.try_to_usize()?)?;
-        let (group_maps, remaining) = crate::x11_utils::parse_list::<ModDef>(remaining, groups.count_ones().try_to_usize()?)?;
+        let (group_maps, remaining) = crate::x11_utils::parse_list::<ModDef>(remaining, u32::from(groups).count_ones().try_to_usize()?)?;
         let _ = remaining;
         Ok(SetCompatMapRequest {
             device_spec,
@@ -9094,7 +9161,7 @@ impl TryParse for GetIndicatorMapReply {
         let (real_indicators, remaining) = u32::try_parse(remaining)?;
         let (n_indicators, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(15..).ok_or(ParseError::InsufficientData)?;
-        let (maps, remaining) = crate::x11_utils::parse_list::<IndicatorMap>(remaining, which.count_ones().try_to_usize()?)?;
+        let (maps, remaining) = crate::x11_utils::parse_list::<IndicatorMap>(remaining, u32::from(which).count_ones().try_to_usize()?)?;
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
@@ -9123,7 +9190,7 @@ impl Serialize for GetIndicatorMapReply {
         self.real_indicators.serialize_into(bytes);
         self.n_indicators.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 15]);
-        assert_eq!(self.maps.len(), usize::try_from(self.which.count_ones()).unwrap(), "`maps` has an incorrect length");
+        assert_eq!(self.maps.len(), usize::try_from(u32::from(self.which).count_ones()).unwrap(), "`maps` has an incorrect length");
         self.maps.serialize_into(bytes);
     }
 }
@@ -9158,7 +9225,7 @@ impl<'input> SetIndicatorMapRequest<'input> {
             which_bytes[3],
         ];
         let length_so_far = length_so_far + request0.len();
-        assert_eq!(self.maps.len(), usize::try_from(self.which.count_ones()).unwrap(), "`maps` has an incorrect length");
+        assert_eq!(self.maps.len(), usize::try_from(u32::from(self.which).count_ones()).unwrap(), "`maps` has an incorrect length");
         let maps_bytes = self.maps.serialize();
         let length_so_far = length_so_far + maps_bytes.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
@@ -9176,7 +9243,7 @@ impl<'input> SetIndicatorMapRequest<'input> {
         let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (which, remaining) = u32::try_parse(remaining)?;
-        let (maps, remaining) = crate::x11_utils::parse_list::<IndicatorMap>(remaining, which.count_ones().try_to_usize()?)?;
+        let (maps, remaining) = crate::x11_utils::parse_list::<IndicatorMap>(remaining, u32::from(which).count_ones().try_to_usize()?)?;
         let _ = remaining;
         Ok(SetIndicatorMapRequest {
             device_spec,
@@ -9293,14 +9360,14 @@ pub struct GetNamedIndicatorReply {
     pub on: bool,
     pub real_indicator: bool,
     pub ndx: u8,
-    pub map_flags: u8,
-    pub map_which_groups: u8,
-    pub map_groups: u8,
-    pub map_which_mods: u8,
-    pub map_mods: u8,
-    pub map_real_mods: u8,
-    pub map_vmod: u16,
-    pub map_ctrls: u32,
+    pub map_flags: IMFlag,
+    pub map_which_groups: IMGroupsWhich,
+    pub map_groups: SetOfGroups,
+    pub map_which_mods: IMModsWhich,
+    pub map_mods: xproto::ModMask,
+    pub map_real_mods: xproto::ModMask,
+    pub map_vmod: VMod,
+    pub map_ctrls: BoolCtrl,
     pub supported: bool,
 }
 impl TryParse for GetNamedIndicatorReply {
@@ -9328,6 +9395,14 @@ impl TryParse for GetNamedIndicatorReply {
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
+        let map_flags = map_flags.into();
+        let map_which_groups = map_which_groups.into();
+        let map_groups = map_groups.into();
+        let map_which_mods = map_which_mods.into();
+        let map_mods = map_mods.into();
+        let map_real_mods = map_real_mods.into();
+        let map_vmod = map_vmod.into();
+        let map_ctrls = map_ctrls.into();
         let result = GetNamedIndicatorReply { device_id, sequence, length, indicator, found, on, real_indicator, ndx, map_flags, map_which_groups, map_groups, map_which_mods, map_mods, map_real_mods, map_vmod, map_ctrls, supported };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
@@ -9347,14 +9422,14 @@ impl Serialize for GetNamedIndicatorReply {
         let on_bytes = self.on.serialize();
         let real_indicator_bytes = self.real_indicator.serialize();
         let ndx_bytes = self.ndx.serialize();
-        let map_flags_bytes = self.map_flags.serialize();
-        let map_which_groups_bytes = self.map_which_groups.serialize();
-        let map_groups_bytes = self.map_groups.serialize();
-        let map_which_mods_bytes = self.map_which_mods.serialize();
-        let map_mods_bytes = self.map_mods.serialize();
-        let map_real_mods_bytes = self.map_real_mods.serialize();
-        let map_vmod_bytes = self.map_vmod.serialize();
-        let map_ctrls_bytes = self.map_ctrls.serialize();
+        let map_flags_bytes = u8::from(self.map_flags).serialize();
+        let map_which_groups_bytes = u8::from(self.map_which_groups).serialize();
+        let map_groups_bytes = u8::from(self.map_groups).serialize();
+        let map_which_mods_bytes = u8::from(self.map_which_mods).serialize();
+        let map_mods_bytes = (u16::from(self.map_mods) as u8).serialize();
+        let map_real_mods_bytes = (u16::from(self.map_real_mods) as u8).serialize();
+        let map_vmod_bytes = u16::from(self.map_vmod).serialize();
+        let map_ctrls_bytes = u32::from(self.map_ctrls).serialize();
         let supported_bytes = self.supported.serialize();
         [
             response_type_bytes[0],
@@ -9403,14 +9478,14 @@ impl Serialize for GetNamedIndicatorReply {
         self.on.serialize_into(bytes);
         self.real_indicator.serialize_into(bytes);
         self.ndx.serialize_into(bytes);
-        self.map_flags.serialize_into(bytes);
-        self.map_which_groups.serialize_into(bytes);
-        self.map_groups.serialize_into(bytes);
-        self.map_which_mods.serialize_into(bytes);
-        self.map_mods.serialize_into(bytes);
-        self.map_real_mods.serialize_into(bytes);
-        self.map_vmod.serialize_into(bytes);
-        self.map_ctrls.serialize_into(bytes);
+        u8::from(self.map_flags).serialize_into(bytes);
+        u8::from(self.map_which_groups).serialize_into(bytes);
+        u8::from(self.map_groups).serialize_into(bytes);
+        u8::from(self.map_which_mods).serialize_into(bytes);
+        (u16::from(self.map_mods) as u8).serialize_into(bytes);
+        (u16::from(self.map_real_mods) as u8).serialize_into(bytes);
+        u16::from(self.map_vmod).serialize_into(bytes);
+        u32::from(self.map_ctrls).serialize_into(bytes);
         self.supported.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 3]);
     }
@@ -9429,13 +9504,13 @@ pub struct SetNamedIndicatorRequest {
     pub on: bool,
     pub set_map: bool,
     pub create_map: bool,
-    pub map_flags: u8,
-    pub map_which_groups: u8,
-    pub map_groups: u8,
-    pub map_which_mods: u8,
-    pub map_real_mods: u8,
-    pub map_vmods: u16,
-    pub map_ctrls: u32,
+    pub map_flags: IMFlag,
+    pub map_which_groups: IMGroupsWhich,
+    pub map_groups: SetOfGroups,
+    pub map_which_mods: IMModsWhich,
+    pub map_real_mods: xproto::ModMask,
+    pub map_vmods: VMod,
+    pub map_ctrls: BoolCtrl,
 }
 impl SetNamedIndicatorRequest {
     /// Serialize this request into bytes for the provided connection
@@ -9449,13 +9524,13 @@ impl SetNamedIndicatorRequest {
         let on_bytes = self.on.serialize();
         let set_map_bytes = self.set_map.serialize();
         let create_map_bytes = self.create_map.serialize();
-        let map_flags_bytes = self.map_flags.serialize();
-        let map_which_groups_bytes = self.map_which_groups.serialize();
-        let map_groups_bytes = self.map_groups.serialize();
-        let map_which_mods_bytes = self.map_which_mods.serialize();
-        let map_real_mods_bytes = self.map_real_mods.serialize();
-        let map_vmods_bytes = self.map_vmods.serialize();
-        let map_ctrls_bytes = self.map_ctrls.serialize();
+        let map_flags_bytes = u8::from(self.map_flags).serialize();
+        let map_which_groups_bytes = u8::from(self.map_which_groups).serialize();
+        let map_groups_bytes = u8::from(self.map_groups).serialize();
+        let map_which_mods_bytes = u8::from(self.map_which_mods).serialize();
+        let map_real_mods_bytes = (u16::from(self.map_real_mods) as u8).serialize();
+        let map_vmods_bytes = u16::from(self.map_vmods).serialize();
+        let map_ctrls_bytes = u32::from(self.map_ctrls).serialize();
         let mut request0 = vec![
             major_opcode,
             SET_NAMED_INDICATOR_REQUEST,
@@ -9513,12 +9588,19 @@ impl SetNamedIndicatorRequest {
         let (create_map, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (map_flags, remaining) = u8::try_parse(remaining)?;
+        let map_flags = map_flags.into();
         let (map_which_groups, remaining) = u8::try_parse(remaining)?;
+        let map_which_groups = map_which_groups.into();
         let (map_groups, remaining) = u8::try_parse(remaining)?;
+        let map_groups = map_groups.into();
         let (map_which_mods, remaining) = u8::try_parse(remaining)?;
+        let map_which_mods = map_which_mods.into();
         let (map_real_mods, remaining) = u8::try_parse(remaining)?;
+        let map_real_mods = map_real_mods.into();
         let (map_vmods, remaining) = u16::try_parse(remaining)?;
+        let map_vmods = map_vmods.into();
         let (map_ctrls, remaining) = u32::try_parse(remaining)?;
+        let map_ctrls = map_ctrls.into();
         let _ = remaining;
         Ok(SetNamedIndicatorRequest {
             device_spec,
@@ -9558,14 +9640,14 @@ pub const GET_NAMES_REQUEST: u8 = 17;
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetNamesRequest {
     pub device_spec: DeviceSpec,
-    pub which: u32,
+    pub which: NameDetail,
 }
 impl GetNamesRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
         let length_so_far = 0;
         let device_spec_bytes = self.device_spec.serialize();
-        let which_bytes = self.which.serialize();
+        let which_bytes = u32::from(self.which).serialize();
         let mut request0 = vec![
             major_opcode,
             GET_NAMES_REQUEST,
@@ -9594,6 +9676,7 @@ impl GetNamesRequest {
         let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (which, remaining) = u32::try_parse(remaining)?;
+        let which = which.into();
         let _ = remaining;
         Ok(GetNamesRequest {
             device_spec,
@@ -9639,7 +9722,7 @@ impl GetNamesValueListBitcase8 {
     #[allow(dead_code)]
     fn serialize(&self, n_types: u8) -> Vec<u8> {
         let mut result = Vec::new();
-        self.serialize_into(&mut result, n_types);
+        self.serialize_into(&mut result, u8::from(n_types));
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, n_types: u8) {
@@ -9670,7 +9753,7 @@ pub struct GetNamesValueList {
 }
 impl GetNamesValueList {
     fn try_parse(value: &[u8], which: u32, n_types: u8, indicators: u32, virtual_mods: u16, group_names: u8, n_keys: u8, n_key_aliases: u8, n_radio_groups: u8) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = which;
+        let switch_expr = u32::from(which);
         let mut outer_remaining = value;
         let keycodes_name = if switch_expr & u32::from(NameDetail::KEYCODES) != 0 {
             let remaining = outer_remaining;
@@ -9737,7 +9820,7 @@ impl GetNamesValueList {
         };
         let indicator_names = if switch_expr & u32::from(NameDetail::INDICATOR_NAMES) != 0 {
             let remaining = outer_remaining;
-            let (indicator_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, indicators.count_ones().try_to_usize()?)?;
+            let (indicator_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, u32::from(indicators).count_ones().try_to_usize()?)?;
             outer_remaining = remaining;
             Some(indicator_names)
         } else {
@@ -9745,7 +9828,7 @@ impl GetNamesValueList {
         };
         let virtual_mod_names = if switch_expr & u32::from(NameDetail::VIRTUAL_MOD_NAMES) != 0 {
             let remaining = outer_remaining;
-            let (virtual_mod_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, virtual_mods.count_ones().try_to_usize()?)?;
+            let (virtual_mod_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, u32::from(virtual_mods).count_ones().try_to_usize()?)?;
             outer_remaining = remaining;
             Some(virtual_mod_names)
         } else {
@@ -9753,7 +9836,7 @@ impl GetNamesValueList {
         };
         let groups = if switch_expr & u32::from(NameDetail::GROUP_NAMES) != 0 {
             let remaining = outer_remaining;
-            let (groups, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, group_names.count_ones().try_to_usize()?)?;
+            let (groups, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, u32::from(group_names).count_ones().try_to_usize()?)?;
             outer_remaining = remaining;
             Some(groups)
         } else {
@@ -9791,7 +9874,7 @@ impl GetNamesValueList {
     #[allow(dead_code)]
     fn serialize(&self, which: u32, n_types: u8, indicators: u32, virtual_mods: u16, group_names: u8, n_keys: u8, n_key_aliases: u8, n_radio_groups: u8) -> Vec<u8> {
         let mut result = Vec::new();
-        self.serialize_into(&mut result, which, n_types, indicators, virtual_mods, group_names, n_keys, n_key_aliases, n_radio_groups);
+        self.serialize_into(&mut result, u32::from(which), u8::from(n_types), u32::from(indicators), u16::from(virtual_mods), u8::from(group_names), u8::from(n_keys), u8::from(n_key_aliases), u8::from(n_radio_groups));
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, which: u32, n_types: u8, indicators: u32, virtual_mods: u16, group_names: u8, n_keys: u8, n_key_aliases: u8, n_radio_groups: u8) {
@@ -9826,18 +9909,18 @@ impl GetNamesValueList {
             type_names.serialize_into(bytes);
         }
         if let Some(ref bitcase8) = self.bitcase8 {
-            bitcase8.serialize_into(bytes, n_types);
+            bitcase8.serialize_into(bytes, u8::from(n_types));
         }
         if let Some(ref indicator_names) = self.indicator_names {
-            assert_eq!(indicator_names.len(), usize::try_from(indicators.count_ones()).unwrap(), "`indicator_names` has an incorrect length");
+            assert_eq!(indicator_names.len(), usize::try_from(u32::from(indicators).count_ones()).unwrap(), "`indicator_names` has an incorrect length");
             indicator_names.serialize_into(bytes);
         }
         if let Some(ref virtual_mod_names) = self.virtual_mod_names {
-            assert_eq!(virtual_mod_names.len(), usize::try_from(virtual_mods.count_ones()).unwrap(), "`virtual_mod_names` has an incorrect length");
+            assert_eq!(virtual_mod_names.len(), usize::try_from(u32::from(virtual_mods).count_ones()).unwrap(), "`virtual_mod_names` has an incorrect length");
             virtual_mod_names.serialize_into(bytes);
         }
         if let Some(ref groups) = self.groups {
-            assert_eq!(groups.len(), usize::try_from(group_names.count_ones()).unwrap(), "`groups` has an incorrect length");
+            assert_eq!(groups.len(), usize::try_from(u32::from(group_names).count_ones()).unwrap(), "`groups` has an incorrect length");
             groups.serialize_into(bytes);
         }
         if let Some(ref key_names) = self.key_names {
@@ -9912,8 +9995,8 @@ pub struct GetNamesReply {
     pub min_key_code: xproto::Keycode,
     pub max_key_code: xproto::Keycode,
     pub n_types: u8,
-    pub group_names: u8,
-    pub virtual_mods: u16,
+    pub group_names: SetOfGroup,
+    pub virtual_mods: VMod,
     pub first_key: xproto::Keycode,
     pub n_keys: u8,
     pub indicators: u32,
@@ -9942,10 +10025,12 @@ impl TryParse for GetNamesReply {
         let (n_key_aliases, remaining) = u8::try_parse(remaining)?;
         let (n_kt_levels, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(4..).ok_or(ParseError::InsufficientData)?;
-        let (value_list, remaining) = GetNamesValueList::try_parse(remaining, which, n_types, indicators, virtual_mods, group_names, n_keys, n_key_aliases, n_radio_groups)?;
+        let (value_list, remaining) = GetNamesValueList::try_parse(remaining, u32::from(which), u8::from(n_types), u32::from(indicators), u16::from(virtual_mods), u8::from(group_names), u8::from(n_keys), u8::from(n_key_aliases), u8::from(n_radio_groups))?;
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
+        let group_names = group_names.into();
+        let virtual_mods = virtual_mods.into();
         let result = GetNamesReply { device_id, sequence, length, min_key_code, max_key_code, n_types, group_names, virtual_mods, first_key, n_keys, indicators, n_radio_groups, n_key_aliases, n_kt_levels, value_list };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
@@ -9972,8 +10057,8 @@ impl Serialize for GetNamesReply {
         self.min_key_code.serialize_into(bytes);
         self.max_key_code.serialize_into(bytes);
         self.n_types.serialize_into(bytes);
-        self.group_names.serialize_into(bytes);
-        self.virtual_mods.serialize_into(bytes);
+        u8::from(self.group_names).serialize_into(bytes);
+        u16::from(self.virtual_mods).serialize_into(bytes);
         self.first_key.serialize_into(bytes);
         self.n_keys.serialize_into(bytes);
         self.indicators.serialize_into(bytes);
@@ -9981,7 +10066,7 @@ impl Serialize for GetNamesReply {
         self.n_key_aliases.serialize_into(bytes);
         self.n_kt_levels.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 4]);
-        self.value_list.serialize_into(bytes, which, self.n_types, self.indicators, self.virtual_mods, self.group_names, self.n_keys, self.n_key_aliases, self.n_radio_groups);
+        self.value_list.serialize_into(bytes, u32::from(which), u8::from(self.n_types), u32::from(self.indicators), u16::from(self.virtual_mods), u8::from(self.group_names), u8::from(self.n_keys), u8::from(self.n_key_aliases), u8::from(self.n_radio_groups));
     }
 }
 
@@ -10009,7 +10094,7 @@ impl SetNamesAuxBitcase8 {
     #[allow(dead_code)]
     fn serialize(&self, n_types: u8) -> Vec<u8> {
         let mut result = Vec::new();
-        self.serialize_into(&mut result, n_types);
+        self.serialize_into(&mut result, u8::from(n_types));
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, n_types: u8) {
@@ -10041,7 +10126,7 @@ pub struct SetNamesAux {
 }
 impl SetNamesAux {
     fn try_parse(value: &[u8], which: u32, n_types: u8, indicators: u32, virtual_mods: u16, group_names: u8, n_keys: u8, n_key_aliases: u8, n_radio_groups: u8) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = which;
+        let switch_expr = u32::from(which);
         let mut outer_remaining = value;
         let keycodes_name = if switch_expr & u32::from(NameDetail::KEYCODES) != 0 {
             let remaining = outer_remaining;
@@ -10108,7 +10193,7 @@ impl SetNamesAux {
         };
         let indicator_names = if switch_expr & u32::from(NameDetail::INDICATOR_NAMES) != 0 {
             let remaining = outer_remaining;
-            let (indicator_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, indicators.count_ones().try_to_usize()?)?;
+            let (indicator_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, u32::from(indicators).count_ones().try_to_usize()?)?;
             outer_remaining = remaining;
             Some(indicator_names)
         } else {
@@ -10116,7 +10201,7 @@ impl SetNamesAux {
         };
         let virtual_mod_names = if switch_expr & u32::from(NameDetail::VIRTUAL_MOD_NAMES) != 0 {
             let remaining = outer_remaining;
-            let (virtual_mod_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, virtual_mods.count_ones().try_to_usize()?)?;
+            let (virtual_mod_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, u32::from(virtual_mods).count_ones().try_to_usize()?)?;
             outer_remaining = remaining;
             Some(virtual_mod_names)
         } else {
@@ -10124,7 +10209,7 @@ impl SetNamesAux {
         };
         let groups = if switch_expr & u32::from(NameDetail::GROUP_NAMES) != 0 {
             let remaining = outer_remaining;
-            let (groups, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, group_names.count_ones().try_to_usize()?)?;
+            let (groups, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, u32::from(group_names).count_ones().try_to_usize()?)?;
             outer_remaining = remaining;
             Some(groups)
         } else {
@@ -10162,7 +10247,7 @@ impl SetNamesAux {
     #[allow(dead_code)]
     fn serialize(&self, which: u32, n_types: u8, indicators: u32, virtual_mods: u16, group_names: u8, n_keys: u8, n_key_aliases: u8, n_radio_groups: u8) -> Vec<u8> {
         let mut result = Vec::new();
-        self.serialize_into(&mut result, which, n_types, indicators, virtual_mods, group_names, n_keys, n_key_aliases, n_radio_groups);
+        self.serialize_into(&mut result, u32::from(which), u8::from(n_types), u32::from(indicators), u16::from(virtual_mods), u8::from(group_names), u8::from(n_keys), u8::from(n_key_aliases), u8::from(n_radio_groups));
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, which: u32, n_types: u8, indicators: u32, virtual_mods: u16, group_names: u8, n_keys: u8, n_key_aliases: u8, n_radio_groups: u8) {
@@ -10197,18 +10282,18 @@ impl SetNamesAux {
             type_names.serialize_into(bytes);
         }
         if let Some(ref bitcase8) = self.bitcase8 {
-            bitcase8.serialize_into(bytes, n_types);
+            bitcase8.serialize_into(bytes, u8::from(n_types));
         }
         if let Some(ref indicator_names) = self.indicator_names {
-            assert_eq!(indicator_names.len(), usize::try_from(indicators.count_ones()).unwrap(), "`indicator_names` has an incorrect length");
+            assert_eq!(indicator_names.len(), usize::try_from(u32::from(indicators).count_ones()).unwrap(), "`indicator_names` has an incorrect length");
             indicator_names.serialize_into(bytes);
         }
         if let Some(ref virtual_mod_names) = self.virtual_mod_names {
-            assert_eq!(virtual_mod_names.len(), usize::try_from(virtual_mods.count_ones()).unwrap(), "`virtual_mod_names` has an incorrect length");
+            assert_eq!(virtual_mod_names.len(), usize::try_from(u32::from(virtual_mods).count_ones()).unwrap(), "`virtual_mod_names` has an incorrect length");
             virtual_mod_names.serialize_into(bytes);
         }
         if let Some(ref groups) = self.groups {
-            assert_eq!(groups.len(), usize::try_from(group_names.count_ones()).unwrap(), "`groups` has an incorrect length");
+            assert_eq!(groups.len(), usize::try_from(u32::from(group_names).count_ones()).unwrap(), "`groups` has an incorrect length");
             groups.serialize_into(bytes);
         }
         if let Some(ref key_names) = self.key_names {
@@ -10370,13 +10455,13 @@ pub const SET_NAMES_REQUEST: u8 = 18;
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetNamesRequest<'input> {
     pub device_spec: DeviceSpec,
-    pub virtual_mods: u16,
+    pub virtual_mods: VMod,
     pub first_type: u8,
     pub n_types: u8,
     pub first_kt_levelt: u8,
     pub n_kt_levels: u8,
     pub indicators: u32,
-    pub group_names: u8,
+    pub group_names: SetOfGroup,
     pub n_radio_groups: u8,
     pub first_key: xproto::Keycode,
     pub n_keys: u8,
@@ -10389,7 +10474,7 @@ impl<'input> SetNamesRequest<'input> {
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'input>> {
         let length_so_far = 0;
         let device_spec_bytes = self.device_spec.serialize();
-        let virtual_mods_bytes = self.virtual_mods.serialize();
+        let virtual_mods_bytes = u16::from(self.virtual_mods).serialize();
         let which: u32 = self.values.switch_expr();
         let which_bytes = which.serialize();
         let first_type_bytes = self.first_type.serialize();
@@ -10397,7 +10482,7 @@ impl<'input> SetNamesRequest<'input> {
         let first_kt_levelt_bytes = self.first_kt_levelt.serialize();
         let n_kt_levels_bytes = self.n_kt_levels.serialize();
         let indicators_bytes = self.indicators.serialize();
-        let group_names_bytes = self.group_names.serialize();
+        let group_names_bytes = u8::from(self.group_names).serialize();
         let n_radio_groups_bytes = self.n_radio_groups.serialize();
         let first_key_bytes = self.first_key.serialize();
         let n_keys_bytes = self.n_keys.serialize();
@@ -10434,7 +10519,7 @@ impl<'input> SetNamesRequest<'input> {
             total_kt_level_names_bytes[1],
         ];
         let length_so_far = length_so_far + request0.len();
-        let values_bytes = self.values.serialize(which, self.n_types, self.indicators, self.virtual_mods, self.group_names, self.n_keys, self.n_key_aliases, self.n_radio_groups);
+        let values_bytes = self.values.serialize(u32::from(which), u8::from(self.n_types), u32::from(self.indicators), u16::from(self.virtual_mods), u8::from(self.group_names), u8::from(self.n_keys), u8::from(self.n_key_aliases), u8::from(self.n_radio_groups));
         let length_so_far = length_so_far + values_bytes.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
@@ -10450,6 +10535,7 @@ impl<'input> SetNamesRequest<'input> {
         }
         let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
         let (virtual_mods, remaining) = u16::try_parse(remaining)?;
+        let virtual_mods = virtual_mods.into();
         let (which, remaining) = u32::try_parse(remaining)?;
         let (first_type, remaining) = u8::try_parse(remaining)?;
         let (n_types, remaining) = u8::try_parse(remaining)?;
@@ -10457,13 +10543,14 @@ impl<'input> SetNamesRequest<'input> {
         let (n_kt_levels, remaining) = u8::try_parse(remaining)?;
         let (indicators, remaining) = u32::try_parse(remaining)?;
         let (group_names, remaining) = u8::try_parse(remaining)?;
+        let group_names = group_names.into();
         let (n_radio_groups, remaining) = u8::try_parse(remaining)?;
         let (first_key, remaining) = xproto::Keycode::try_parse(remaining)?;
         let (n_keys, remaining) = u8::try_parse(remaining)?;
         let (n_key_aliases, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (total_kt_level_names, remaining) = u16::try_parse(remaining)?;
-        let (values, remaining) = SetNamesAux::try_parse(remaining, which, n_types, indicators, virtual_mods, group_names, n_keys, n_key_aliases, n_radio_groups)?;
+        let (values, remaining) = SetNamesAux::try_parse(remaining, u32::from(which), u8::from(n_types), u32::from(indicators), u16::from(virtual_mods), u8::from(group_names), u8::from(n_keys), u8::from(n_key_aliases), u8::from(n_radio_groups))?;
         let _ = remaining;
         Ok(SetNamesRequest {
             device_spec,
@@ -10521,22 +10608,22 @@ pub const PER_CLIENT_FLAGS_REQUEST: u8 = 21;
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PerClientFlagsRequest {
     pub device_spec: DeviceSpec,
-    pub change: u32,
-    pub value: u32,
-    pub ctrls_to_change: u32,
-    pub auto_ctrls: u32,
-    pub auto_ctrls_values: u32,
+    pub change: PerClientFlag,
+    pub value: PerClientFlag,
+    pub ctrls_to_change: BoolCtrl,
+    pub auto_ctrls: BoolCtrl,
+    pub auto_ctrls_values: BoolCtrl,
 }
 impl PerClientFlagsRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
         let length_so_far = 0;
         let device_spec_bytes = self.device_spec.serialize();
-        let change_bytes = self.change.serialize();
-        let value_bytes = self.value.serialize();
-        let ctrls_to_change_bytes = self.ctrls_to_change.serialize();
-        let auto_ctrls_bytes = self.auto_ctrls.serialize();
-        let auto_ctrls_values_bytes = self.auto_ctrls_values.serialize();
+        let change_bytes = u32::from(self.change).serialize();
+        let value_bytes = u32::from(self.value).serialize();
+        let ctrls_to_change_bytes = u32::from(self.ctrls_to_change).serialize();
+        let auto_ctrls_bytes = u32::from(self.auto_ctrls).serialize();
+        let auto_ctrls_values_bytes = u32::from(self.auto_ctrls_values).serialize();
         let mut request0 = vec![
             major_opcode,
             PER_CLIENT_FLAGS_REQUEST,
@@ -10581,10 +10668,15 @@ impl PerClientFlagsRequest {
         let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (change, remaining) = u32::try_parse(remaining)?;
+        let change = change.into();
         let (value, remaining) = u32::try_parse(remaining)?;
+        let value = value.into();
         let (ctrls_to_change, remaining) = u32::try_parse(remaining)?;
+        let ctrls_to_change = ctrls_to_change.into();
         let (auto_ctrls, remaining) = u32::try_parse(remaining)?;
+        let auto_ctrls = auto_ctrls.into();
         let (auto_ctrls_values, remaining) = u32::try_parse(remaining)?;
+        let auto_ctrls_values = auto_ctrls_values.into();
         let _ = remaining;
         Ok(PerClientFlagsRequest {
             device_spec,
@@ -10616,10 +10708,10 @@ pub struct PerClientFlagsReply {
     pub device_id: u8,
     pub sequence: u16,
     pub length: u32,
-    pub supported: u32,
-    pub value: u32,
-    pub auto_ctrls: u32,
-    pub auto_ctrls_values: u32,
+    pub supported: PerClientFlag,
+    pub value: PerClientFlag,
+    pub auto_ctrls: BoolCtrl,
+    pub auto_ctrls_values: BoolCtrl,
 }
 impl TryParse for PerClientFlagsReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -10636,6 +10728,10 @@ impl TryParse for PerClientFlagsReply {
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
+        let supported = supported.into();
+        let value = value.into();
+        let auto_ctrls = auto_ctrls.into();
+        let auto_ctrls_values = auto_ctrls_values.into();
         let result = PerClientFlagsReply { device_id, sequence, length, supported, value, auto_ctrls, auto_ctrls_values };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
@@ -10650,10 +10746,10 @@ impl Serialize for PerClientFlagsReply {
         let device_id_bytes = self.device_id.serialize();
         let sequence_bytes = self.sequence.serialize();
         let length_bytes = self.length.serialize();
-        let supported_bytes = self.supported.serialize();
-        let value_bytes = self.value.serialize();
-        let auto_ctrls_bytes = self.auto_ctrls.serialize();
-        let auto_ctrls_values_bytes = self.auto_ctrls_values.serialize();
+        let supported_bytes = u32::from(self.supported).serialize();
+        let value_bytes = u32::from(self.value).serialize();
+        let auto_ctrls_bytes = u32::from(self.auto_ctrls).serialize();
+        let auto_ctrls_values_bytes = u32::from(self.auto_ctrls_values).serialize();
         [
             response_type_bytes[0],
             device_id_bytes[0],
@@ -10696,10 +10792,10 @@ impl Serialize for PerClientFlagsReply {
         self.device_id.serialize_into(bytes);
         self.sequence.serialize_into(bytes);
         self.length.serialize_into(bytes);
-        self.supported.serialize_into(bytes);
-        self.value.serialize_into(bytes);
-        self.auto_ctrls.serialize_into(bytes);
-        self.auto_ctrls_values.serialize_into(bytes);
+        u32::from(self.supported).serialize_into(bytes);
+        u32::from(self.value).serialize_into(bytes);
+        u32::from(self.auto_ctrls).serialize_into(bytes);
+        u32::from(self.auto_ctrls_values).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 8]);
     }
 }
@@ -10930,8 +11026,8 @@ pub const GET_KBD_BY_NAME_REQUEST: u8 = 23;
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetKbdByNameRequest {
     pub device_spec: DeviceSpec,
-    pub need: u16,
-    pub want: u16,
+    pub need: GBNDetail,
+    pub want: GBNDetail,
     pub load: bool,
 }
 impl GetKbdByNameRequest {
@@ -10939,8 +11035,8 @@ impl GetKbdByNameRequest {
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
         let length_so_far = 0;
         let device_spec_bytes = self.device_spec.serialize();
-        let need_bytes = self.need.serialize();
-        let want_bytes = self.want.serialize();
+        let need_bytes = u16::from(self.need).serialize();
+        let want_bytes = u16::from(self.want).serialize();
         let load_bytes = self.load.serialize();
         let mut request0 = vec![
             major_opcode,
@@ -10969,7 +11065,9 @@ impl GetKbdByNameRequest {
         }
         let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
         let (need, remaining) = u16::try_parse(remaining)?;
+        let need = need.into();
         let (want, remaining) = u16::try_parse(remaining)?;
+        let want = want.into();
         let (load, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let _ = remaining;
@@ -11019,7 +11117,7 @@ impl GetKbdByNameRepliesTypesMapBitcase3 {
     #[allow(dead_code)]
     fn serialize(&self, n_key_actions: u8, total_actions: u16) -> Vec<u8> {
         let mut result = Vec::new();
-        self.serialize_into(&mut result, n_key_actions, total_actions);
+        self.serialize_into(&mut result, u8::from(n_key_actions), u16::from(total_actions));
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, n_key_actions: u8, total_actions: u16) {
@@ -11037,14 +11135,14 @@ pub struct GetKbdByNameRepliesTypesMap {
     pub syms_rtrn: Option<Vec<KeySymMap>>,
     pub bitcase3: Option<GetKbdByNameRepliesTypesMapBitcase3>,
     pub behaviors_rtrn: Option<Vec<SetBehavior>>,
-    pub vmods_rtrn: Option<Vec<u8>>,
+    pub vmods_rtrn: Option<Vec<xproto::ModMask>>,
     pub explicit_rtrn: Option<Vec<SetExplicit>>,
     pub modmap_rtrn: Option<Vec<KeyModMap>>,
     pub vmodmap_rtrn: Option<Vec<KeyVModMap>>,
 }
 impl GetKbdByNameRepliesTypesMap {
     fn try_parse(value: &[u8], present: u16, n_types: u8, n_key_syms: u8, n_key_actions: u8, total_actions: u16, total_key_behaviors: u8, virtual_mods: u16, total_key_explicit: u8, total_mod_map_keys: u8, total_v_mod_map_keys: u8) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = present;
+        let switch_expr = u16::from(present);
         let mut outer_remaining = value;
         let types_rtrn = if switch_expr & u16::from(MapPart::KEY_TYPES) != 0 {
             let remaining = outer_remaining;
@@ -11080,8 +11178,15 @@ impl GetKbdByNameRepliesTypesMap {
         let vmods_rtrn = if switch_expr & u16::from(MapPart::VIRTUAL_MODS) != 0 {
             let remaining = outer_remaining;
             let value = remaining;
-            let (vmods_rtrn, remaining) = crate::x11_utils::parse_u8_list(remaining, virtual_mods.count_ones().try_to_usize()?)?;
-            let vmods_rtrn = vmods_rtrn.to_vec();
+            let mut remaining = remaining;
+            let list_length = u32::from(virtual_mods).count_ones().try_to_usize()?;
+            let mut vmods_rtrn = Vec::with_capacity(list_length);
+            for _ in 0..list_length {
+                let (v, new_remaining) = u8::try_parse(remaining)?;
+                let v = v.into();
+                remaining = new_remaining;
+                vmods_rtrn.push(v);
+            }
             // Align offset to multiple of 4
             let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
             let misalignment = (4 - (offset % 4)) % 4;
@@ -11133,7 +11238,7 @@ impl GetKbdByNameRepliesTypesMap {
     #[allow(dead_code)]
     fn serialize(&self, present: u16, n_types: u8, n_key_syms: u8, n_key_actions: u8, total_actions: u16, total_key_behaviors: u8, virtual_mods: u16, total_key_explicit: u8, total_mod_map_keys: u8, total_v_mod_map_keys: u8) -> Vec<u8> {
         let mut result = Vec::new();
-        self.serialize_into(&mut result, present, n_types, n_key_syms, n_key_actions, total_actions, total_key_behaviors, virtual_mods, total_key_explicit, total_mod_map_keys, total_v_mod_map_keys);
+        self.serialize_into(&mut result, u16::from(present), u8::from(n_types), u8::from(n_key_syms), u8::from(n_key_actions), u16::from(total_actions), u8::from(total_key_behaviors), u16::from(virtual_mods), u8::from(total_key_explicit), u8::from(total_mod_map_keys), u8::from(total_v_mod_map_keys));
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, present: u16, n_types: u8, n_key_syms: u8, n_key_actions: u8, total_actions: u16, total_key_behaviors: u8, virtual_mods: u16, total_key_explicit: u8, total_mod_map_keys: u8, total_v_mod_map_keys: u8) {
@@ -11156,15 +11261,17 @@ impl GetKbdByNameRepliesTypesMap {
             syms_rtrn.serialize_into(bytes);
         }
         if let Some(ref bitcase3) = self.bitcase3 {
-            bitcase3.serialize_into(bytes, n_key_actions, total_actions);
+            bitcase3.serialize_into(bytes, u8::from(n_key_actions), u16::from(total_actions));
         }
         if let Some(ref behaviors_rtrn) = self.behaviors_rtrn {
             assert_eq!(behaviors_rtrn.len(), usize::try_from(total_key_behaviors).unwrap(), "`behaviors_rtrn` has an incorrect length");
             behaviors_rtrn.serialize_into(bytes);
         }
         if let Some(ref vmods_rtrn) = self.vmods_rtrn {
-            assert_eq!(vmods_rtrn.len(), usize::try_from(virtual_mods.count_ones()).unwrap(), "`vmods_rtrn` has an incorrect length");
-            bytes.extend_from_slice(&vmods_rtrn);
+            assert_eq!(vmods_rtrn.len(), usize::try_from(u32::from(virtual_mods).count_ones()).unwrap(), "`vmods_rtrn` has an incorrect length");
+            for element in vmods_rtrn.iter().copied() {
+                (u16::from(element) as u8).serialize_into(bytes);
+            }
             bytes.extend_from_slice(&[0; 3][..(4 - (bytes.len() % 4)) % 4]);
         }
         if let Some(ref explicit_rtrn) = self.explicit_rtrn {
@@ -11244,7 +11351,7 @@ pub struct GetKbdByNameRepliesTypes {
     pub first_v_mod_map_key: xproto::Keycode,
     pub n_v_mod_map_keys: u8,
     pub total_v_mod_map_keys: u8,
-    pub virtual_mods: u16,
+    pub virtual_mods: VMod,
     pub map: GetKbdByNameRepliesTypesMap,
 }
 impl TryParse for GetKbdByNameRepliesTypes {
@@ -11280,7 +11387,8 @@ impl TryParse for GetKbdByNameRepliesTypes {
         let (total_v_mod_map_keys, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (virtual_mods, remaining) = u16::try_parse(remaining)?;
-        let (map, remaining) = GetKbdByNameRepliesTypesMap::try_parse(remaining, present, n_types, n_key_syms, n_key_actions, total_actions, total_key_behaviors, virtual_mods, total_key_explicit, total_mod_map_keys, total_v_mod_map_keys)?;
+        let (map, remaining) = GetKbdByNameRepliesTypesMap::try_parse(remaining, u16::from(present), u8::from(n_types), u8::from(n_key_syms), u8::from(n_key_actions), u16::from(total_actions), u8::from(total_key_behaviors), u16::from(virtual_mods), u8::from(total_key_explicit), u8::from(total_mod_map_keys), u8::from(total_v_mod_map_keys))?;
+        let virtual_mods = virtual_mods.into();
         let result = GetKbdByNameRepliesTypes { getmap_type, type_device_id, getmap_sequence, getmap_length, type_min_key_code, type_max_key_code, first_type, n_types, total_types, first_key_sym, total_syms, n_key_syms, first_key_action, total_actions, n_key_actions, first_key_behavior, n_key_behaviors, total_key_behaviors, first_key_explicit, n_key_explicit, total_key_explicit, first_mod_map_key, n_mod_map_keys, total_mod_map_keys, first_v_mod_map_key, n_v_mod_map_keys, total_v_mod_map_keys, virtual_mods, map };
         Ok((result, remaining))
     }
@@ -11325,8 +11433,8 @@ impl Serialize for GetKbdByNameRepliesTypes {
         self.n_v_mod_map_keys.serialize_into(bytes);
         self.total_v_mod_map_keys.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 1]);
-        self.virtual_mods.serialize_into(bytes);
-        self.map.serialize_into(bytes, present, self.n_types, self.n_key_syms, self.n_key_actions, self.total_actions, self.total_key_behaviors, self.virtual_mods, self.total_key_explicit, self.total_mod_map_keys, self.total_v_mod_map_keys);
+        u16::from(self.virtual_mods).serialize_into(bytes);
+        self.map.serialize_into(bytes, u16::from(present), u8::from(self.n_types), u8::from(self.n_key_syms), u8::from(self.n_key_actions), u16::from(self.total_actions), u8::from(self.total_key_behaviors), u16::from(self.virtual_mods), u8::from(self.total_key_explicit), u8::from(self.total_mod_map_keys), u8::from(self.total_v_mod_map_keys));
     }
 }
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -11336,7 +11444,7 @@ pub struct GetKbdByNameRepliesCompatMap {
     pub compat_device_id: u8,
     pub compatmap_sequence: u16,
     pub compatmap_length: u32,
-    pub groups_rtrn: u8,
+    pub groups_rtrn: SetOfGroup,
     pub first_si_rtrn: u16,
     pub n_total_si: u16,
     pub si_rtrn: Vec<SymInterpret>,
@@ -11355,7 +11463,8 @@ impl TryParse for GetKbdByNameRepliesCompatMap {
         let (n_total_si, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(16..).ok_or(ParseError::InsufficientData)?;
         let (si_rtrn, remaining) = crate::x11_utils::parse_list::<SymInterpret>(remaining, n_si_rtrn.try_to_usize()?)?;
-        let (group_rtrn, remaining) = crate::x11_utils::parse_list::<ModDef>(remaining, groups_rtrn.count_ones().try_to_usize()?)?;
+        let (group_rtrn, remaining) = crate::x11_utils::parse_list::<ModDef>(remaining, u32::from(groups_rtrn).count_ones().try_to_usize()?)?;
+        let groups_rtrn = groups_rtrn.into();
         let result = GetKbdByNameRepliesCompatMap { compatmap_type, compat_device_id, compatmap_sequence, compatmap_length, groups_rtrn, first_si_rtrn, n_total_si, si_rtrn, group_rtrn };
         Ok((result, remaining))
     }
@@ -11373,7 +11482,7 @@ impl Serialize for GetKbdByNameRepliesCompatMap {
         self.compat_device_id.serialize_into(bytes);
         self.compatmap_sequence.serialize_into(bytes);
         self.compatmap_length.serialize_into(bytes);
-        self.groups_rtrn.serialize_into(bytes);
+        u8::from(self.groups_rtrn).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 1]);
         self.first_si_rtrn.serialize_into(bytes);
         let n_si_rtrn = u16::try_from(self.si_rtrn.len()).expect("`si_rtrn` has too many elements");
@@ -11381,7 +11490,7 @@ impl Serialize for GetKbdByNameRepliesCompatMap {
         self.n_total_si.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 16]);
         self.si_rtrn.serialize_into(bytes);
-        assert_eq!(self.group_rtrn.len(), usize::try_from(self.groups_rtrn.count_ones()).unwrap(), "`group_rtrn` has an incorrect length");
+        assert_eq!(self.group_rtrn.len(), usize::try_from(u32::from(self.groups_rtrn).count_ones()).unwrap(), "`group_rtrn` has an incorrect length");
         self.group_rtrn.serialize_into(bytes);
     }
 }
@@ -11486,7 +11595,7 @@ impl GetKbdByNameRepliesKeyNamesValueListBitcase8 {
     #[allow(dead_code)]
     fn serialize(&self, n_types: u8) -> Vec<u8> {
         let mut result = Vec::new();
-        self.serialize_into(&mut result, n_types);
+        self.serialize_into(&mut result, u8::from(n_types));
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, n_types: u8) {
@@ -11517,7 +11626,7 @@ pub struct GetKbdByNameRepliesKeyNamesValueList {
 }
 impl GetKbdByNameRepliesKeyNamesValueList {
     fn try_parse(value: &[u8], which: u32, n_types: u8, indicators: u32, virtual_mods: u16, group_names: u8, n_keys: u8, n_key_aliases: u8, n_radio_groups: u8) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = which;
+        let switch_expr = u32::from(which);
         let mut outer_remaining = value;
         let keycodes_name = if switch_expr & u32::from(NameDetail::KEYCODES) != 0 {
             let remaining = outer_remaining;
@@ -11584,7 +11693,7 @@ impl GetKbdByNameRepliesKeyNamesValueList {
         };
         let indicator_names = if switch_expr & u32::from(NameDetail::INDICATOR_NAMES) != 0 {
             let remaining = outer_remaining;
-            let (indicator_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, indicators.count_ones().try_to_usize()?)?;
+            let (indicator_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, u32::from(indicators).count_ones().try_to_usize()?)?;
             outer_remaining = remaining;
             Some(indicator_names)
         } else {
@@ -11592,7 +11701,7 @@ impl GetKbdByNameRepliesKeyNamesValueList {
         };
         let virtual_mod_names = if switch_expr & u32::from(NameDetail::VIRTUAL_MOD_NAMES) != 0 {
             let remaining = outer_remaining;
-            let (virtual_mod_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, virtual_mods.count_ones().try_to_usize()?)?;
+            let (virtual_mod_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, u32::from(virtual_mods).count_ones().try_to_usize()?)?;
             outer_remaining = remaining;
             Some(virtual_mod_names)
         } else {
@@ -11600,7 +11709,7 @@ impl GetKbdByNameRepliesKeyNamesValueList {
         };
         let groups = if switch_expr & u32::from(NameDetail::GROUP_NAMES) != 0 {
             let remaining = outer_remaining;
-            let (groups, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, group_names.count_ones().try_to_usize()?)?;
+            let (groups, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, u32::from(group_names).count_ones().try_to_usize()?)?;
             outer_remaining = remaining;
             Some(groups)
         } else {
@@ -11638,7 +11747,7 @@ impl GetKbdByNameRepliesKeyNamesValueList {
     #[allow(dead_code)]
     fn serialize(&self, which: u32, n_types: u8, indicators: u32, virtual_mods: u16, group_names: u8, n_keys: u8, n_key_aliases: u8, n_radio_groups: u8) -> Vec<u8> {
         let mut result = Vec::new();
-        self.serialize_into(&mut result, which, n_types, indicators, virtual_mods, group_names, n_keys, n_key_aliases, n_radio_groups);
+        self.serialize_into(&mut result, u32::from(which), u8::from(n_types), u32::from(indicators), u16::from(virtual_mods), u8::from(group_names), u8::from(n_keys), u8::from(n_key_aliases), u8::from(n_radio_groups));
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, which: u32, n_types: u8, indicators: u32, virtual_mods: u16, group_names: u8, n_keys: u8, n_key_aliases: u8, n_radio_groups: u8) {
@@ -11673,18 +11782,18 @@ impl GetKbdByNameRepliesKeyNamesValueList {
             type_names.serialize_into(bytes);
         }
         if let Some(ref bitcase8) = self.bitcase8 {
-            bitcase8.serialize_into(bytes, n_types);
+            bitcase8.serialize_into(bytes, u8::from(n_types));
         }
         if let Some(ref indicator_names) = self.indicator_names {
-            assert_eq!(indicator_names.len(), usize::try_from(indicators.count_ones()).unwrap(), "`indicator_names` has an incorrect length");
+            assert_eq!(indicator_names.len(), usize::try_from(u32::from(indicators).count_ones()).unwrap(), "`indicator_names` has an incorrect length");
             indicator_names.serialize_into(bytes);
         }
         if let Some(ref virtual_mod_names) = self.virtual_mod_names {
-            assert_eq!(virtual_mod_names.len(), usize::try_from(virtual_mods.count_ones()).unwrap(), "`virtual_mod_names` has an incorrect length");
+            assert_eq!(virtual_mod_names.len(), usize::try_from(u32::from(virtual_mods).count_ones()).unwrap(), "`virtual_mod_names` has an incorrect length");
             virtual_mod_names.serialize_into(bytes);
         }
         if let Some(ref groups) = self.groups {
-            assert_eq!(groups.len(), usize::try_from(group_names.count_ones()).unwrap(), "`groups` has an incorrect length");
+            assert_eq!(groups.len(), usize::try_from(u32::from(group_names).count_ones()).unwrap(), "`groups` has an incorrect length");
             groups.serialize_into(bytes);
         }
         if let Some(ref key_names) = self.key_names {
@@ -11760,8 +11869,8 @@ pub struct GetKbdByNameRepliesKeyNames {
     pub key_min_key_code: xproto::Keycode,
     pub key_max_key_code: xproto::Keycode,
     pub n_types: u8,
-    pub group_names: u8,
-    pub virtual_mods: u16,
+    pub group_names: SetOfGroup,
+    pub virtual_mods: VMod,
     pub first_key: xproto::Keycode,
     pub n_keys: u8,
     pub indicators: u32,
@@ -11789,7 +11898,9 @@ impl TryParse for GetKbdByNameRepliesKeyNames {
         let (n_key_aliases, remaining) = u8::try_parse(remaining)?;
         let (n_kt_levels, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(4..).ok_or(ParseError::InsufficientData)?;
-        let (value_list, remaining) = GetKbdByNameRepliesKeyNamesValueList::try_parse(remaining, which, n_types, indicators, virtual_mods, group_names, n_keys, n_key_aliases, n_radio_groups)?;
+        let (value_list, remaining) = GetKbdByNameRepliesKeyNamesValueList::try_parse(remaining, u32::from(which), u8::from(n_types), u32::from(indicators), u16::from(virtual_mods), u8::from(group_names), u8::from(n_keys), u8::from(n_key_aliases), u8::from(n_radio_groups))?;
+        let group_names = group_names.into();
+        let virtual_mods = virtual_mods.into();
         let result = GetKbdByNameRepliesKeyNames { keyname_type, key_device_id, keyname_sequence, keyname_length, key_min_key_code, key_max_key_code, n_types, group_names, virtual_mods, first_key, n_keys, indicators, n_radio_groups, n_key_aliases, n_kt_levels, value_list };
         Ok((result, remaining))
     }
@@ -11812,8 +11923,8 @@ impl Serialize for GetKbdByNameRepliesKeyNames {
         self.key_min_key_code.serialize_into(bytes);
         self.key_max_key_code.serialize_into(bytes);
         self.n_types.serialize_into(bytes);
-        self.group_names.serialize_into(bytes);
-        self.virtual_mods.serialize_into(bytes);
+        u8::from(self.group_names).serialize_into(bytes);
+        u16::from(self.virtual_mods).serialize_into(bytes);
         self.first_key.serialize_into(bytes);
         self.n_keys.serialize_into(bytes);
         self.indicators.serialize_into(bytes);
@@ -11821,7 +11932,7 @@ impl Serialize for GetKbdByNameRepliesKeyNames {
         self.n_key_aliases.serialize_into(bytes);
         self.n_kt_levels.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 4]);
-        self.value_list.serialize_into(bytes, which, self.n_types, self.indicators, self.virtual_mods, self.group_names, self.n_keys, self.n_key_aliases, self.n_radio_groups);
+        self.value_list.serialize_into(bytes, u32::from(which), u8::from(self.n_types), u32::from(self.indicators), u16::from(self.virtual_mods), u8::from(self.group_names), u8::from(self.n_keys), u8::from(self.n_key_aliases), u8::from(self.n_radio_groups));
     }
 }
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -11909,7 +12020,7 @@ pub struct GetKbdByNameReplies {
 }
 impl GetKbdByNameReplies {
     fn try_parse(value: &[u8], reported: u16) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = reported;
+        let switch_expr = u16::from(reported);
         let mut outer_remaining = value;
         let types = if switch_expr & u16::from(GBNDetail::TYPES) != 0 || switch_expr & u16::from(GBNDetail::CLIENT_SYMBOLS) != 0 || switch_expr & u16::from(GBNDetail::SERVER_SYMBOLS) != 0 {
             let (types, new_remaining) = GetKbdByNameRepliesTypes::try_parse(outer_remaining)?;
@@ -11954,7 +12065,7 @@ impl GetKbdByNameReplies {
     #[allow(dead_code)]
     fn serialize(&self, reported: u16) -> Vec<u8> {
         let mut result = Vec::new();
-        self.serialize_into(&mut result, reported);
+        self.serialize_into(&mut result, u16::from(reported));
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, reported: u16) {
@@ -11987,8 +12098,8 @@ pub struct GetKbdByNameReply {
     pub max_key_code: xproto::Keycode,
     pub loaded: bool,
     pub new_keyboard: bool,
-    pub found: u16,
-    pub reported: u16,
+    pub found: GBNDetail,
+    pub reported: GBNDetail,
     pub replies: GetKbdByNameReplies,
 }
 impl TryParse for GetKbdByNameReply {
@@ -12005,10 +12116,12 @@ impl TryParse for GetKbdByNameReply {
         let (found, remaining) = u16::try_parse(remaining)?;
         let (reported, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(16..).ok_or(ParseError::InsufficientData)?;
-        let (replies, remaining) = GetKbdByNameReplies::try_parse(remaining, reported)?;
+        let (replies, remaining) = GetKbdByNameReplies::try_parse(remaining, u16::from(reported))?;
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
+        let found = found.into();
+        let reported = reported.into();
         let result = GetKbdByNameReply { device_id, sequence, length, min_key_code, max_key_code, loaded, new_keyboard, found, reported, replies };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
@@ -12034,10 +12147,10 @@ impl Serialize for GetKbdByNameReply {
         self.max_key_code.serialize_into(bytes);
         self.loaded.serialize_into(bytes);
         self.new_keyboard.serialize_into(bytes);
-        self.found.serialize_into(bytes);
-        self.reported.serialize_into(bytes);
+        u16::from(self.found).serialize_into(bytes);
+        u16::from(self.reported).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 16]);
-        self.replies.serialize_into(bytes, self.reported);
+        self.replies.serialize_into(bytes, u16::from(self.reported));
     }
 }
 
@@ -12047,7 +12160,7 @@ pub const GET_DEVICE_INFO_REQUEST: u8 = 24;
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetDeviceInfoRequest {
     pub device_spec: DeviceSpec,
-    pub wanted: u16,
+    pub wanted: XIFeature,
     pub all_buttons: bool,
     pub first_button: u8,
     pub n_buttons: u8,
@@ -12059,7 +12172,7 @@ impl GetDeviceInfoRequest {
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
         let length_so_far = 0;
         let device_spec_bytes = self.device_spec.serialize();
-        let wanted_bytes = self.wanted.serialize();
+        let wanted_bytes = u16::from(self.wanted).serialize();
         let all_buttons_bytes = self.all_buttons.serialize();
         let first_button_bytes = self.first_button.serialize();
         let n_buttons_bytes = self.n_buttons.serialize();
@@ -12096,6 +12209,7 @@ impl GetDeviceInfoRequest {
         }
         let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
         let (wanted, remaining) = u16::try_parse(remaining)?;
+        let wanted = wanted.into();
         let (all_buttons, remaining) = bool::try_parse(remaining)?;
         let (first_button, remaining) = u8::try_parse(remaining)?;
         let (n_buttons, remaining) = u8::try_parse(remaining)?;
@@ -12135,9 +12249,9 @@ pub struct GetDeviceInfoReply {
     pub device_id: u8,
     pub sequence: u16,
     pub length: u32,
-    pub present: u16,
-    pub supported: u16,
-    pub unsupported: u16,
+    pub present: XIFeature,
+    pub supported: XIFeature,
+    pub unsupported: XIFeature,
     pub first_btn_wanted: u8,
     pub n_btns_wanted: u8,
     pub first_btn_rtrn: u8,
@@ -12184,6 +12298,9 @@ impl TryParse for GetDeviceInfoReply {
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
+        let present = present.into();
+        let supported = supported.into();
+        let unsupported = unsupported.into();
         let result = GetDeviceInfoReply { device_id, sequence, length, present, supported, unsupported, first_btn_wanted, n_btns_wanted, first_btn_rtrn, total_btns, has_own_state, dflt_kbd_fb, dflt_led_fb, dev_type, name, btn_actions, leds };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
@@ -12205,9 +12322,9 @@ impl Serialize for GetDeviceInfoReply {
         self.device_id.serialize_into(bytes);
         self.sequence.serialize_into(bytes);
         self.length.serialize_into(bytes);
-        self.present.serialize_into(bytes);
-        self.supported.serialize_into(bytes);
-        self.unsupported.serialize_into(bytes);
+        u16::from(self.present).serialize_into(bytes);
+        u16::from(self.supported).serialize_into(bytes);
+        u16::from(self.unsupported).serialize_into(bytes);
         let n_device_led_f_bs = u16::try_from(self.leds.len()).expect("`leds` has too many elements");
         n_device_led_f_bs.serialize_into(bytes);
         self.first_btn_wanted.serialize_into(bytes);
@@ -12278,7 +12395,7 @@ pub const SET_DEVICE_INFO_REQUEST: u8 = 25;
 pub struct SetDeviceInfoRequest<'input> {
     pub device_spec: DeviceSpec,
     pub first_btn: u8,
-    pub change: u16,
+    pub change: XIFeature,
     pub btn_actions: Cow<'input, [Action]>,
     pub leds: Cow<'input, [DeviceLedInfo]>,
 }
@@ -12290,7 +12407,7 @@ impl<'input> SetDeviceInfoRequest<'input> {
         let first_btn_bytes = self.first_btn.serialize();
         let n_btns = u8::try_from(self.btn_actions.len()).expect("`btn_actions` has too many elements");
         let n_btns_bytes = n_btns.serialize();
-        let change_bytes = self.change.serialize();
+        let change_bytes = u16::from(self.change).serialize();
         let n_device_led_f_bs = u16::try_from(self.leds.len()).expect("`leds` has too many elements");
         let n_device_led_f_bs_bytes = n_device_led_f_bs.serialize();
         let mut request0 = vec![
@@ -12328,6 +12445,7 @@ impl<'input> SetDeviceInfoRequest<'input> {
         let (first_btn, remaining) = u8::try_parse(remaining)?;
         let (n_btns, remaining) = u8::try_parse(remaining)?;
         let (change, remaining) = u16::try_parse(remaining)?;
+        let change = change.into();
         let (n_device_led_f_bs, remaining) = u16::try_parse(remaining)?;
         let (btn_actions, remaining) = crate::x11_utils::parse_list::<Action>(remaining, n_btns.try_to_usize()?)?;
         let (leds, remaining) = crate::x11_utils::parse_list::<DeviceLedInfo>(remaining, n_device_led_f_bs.try_to_usize()?)?;
@@ -12575,7 +12693,7 @@ pub struct NewKeyboardNotifyEvent {
     pub old_max_key_code: xproto::Keycode,
     pub request_major: u8,
     pub request_minor: u8,
-    pub changed: u16,
+    pub changed: NKNDetail,
 }
 impl TryParse for NewKeyboardNotifyEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -12594,6 +12712,7 @@ impl TryParse for NewKeyboardNotifyEvent {
         let (request_minor, remaining) = u8::try_parse(remaining)?;
         let (changed, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(14..).ok_or(ParseError::InsufficientData)?;
+        let changed = changed.into();
         let result = NewKeyboardNotifyEvent { response_type, xkb_type, sequence, time, device_id, old_device_id, min_key_code, max_key_code, old_min_key_code, old_max_key_code, request_major, request_minor, changed };
         let _ = remaining;
         let remaining = initial_value.get(32..)
@@ -12616,7 +12735,7 @@ impl Serialize for NewKeyboardNotifyEvent {
         let old_max_key_code_bytes = self.old_max_key_code.serialize();
         let request_major_bytes = self.request_major.serialize();
         let request_minor_bytes = self.request_minor.serialize();
-        let changed_bytes = self.changed.serialize();
+        let changed_bytes = u16::from(self.changed).serialize();
         [
             response_type_bytes[0],
             xkb_type_bytes[0],
@@ -12666,7 +12785,7 @@ impl Serialize for NewKeyboardNotifyEvent {
         self.old_max_key_code.serialize_into(bytes);
         self.request_major.serialize_into(bytes);
         self.request_minor.serialize_into(bytes);
-        self.changed.serialize_into(bytes);
+        u16::from(self.changed).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 14]);
     }
 }
@@ -12684,7 +12803,7 @@ impl From<&NewKeyboardNotifyEvent> for [u8; 32] {
         let old_max_key_code_bytes = input.old_max_key_code.serialize();
         let request_major_bytes = input.request_major.serialize();
         let request_minor_bytes = input.request_minor.serialize();
-        let changed_bytes = input.changed.serialize();
+        let changed_bytes = u16::from(input.changed).serialize();
         [
             response_type_bytes[0],
             xkb_type_bytes[0],
@@ -12738,7 +12857,7 @@ pub struct MapNotifyEvent {
     pub time: xproto::Timestamp,
     pub device_id: u8,
     pub ptr_btn_actions: u8,
-    pub changed: u16,
+    pub changed: MapPart,
     pub min_key_code: xproto::Keycode,
     pub max_key_code: xproto::Keycode,
     pub first_type: u8,
@@ -12755,7 +12874,7 @@ pub struct MapNotifyEvent {
     pub n_mod_map_keys: u8,
     pub first_v_mod_map_key: xproto::Keycode,
     pub n_v_mod_map_keys: u8,
-    pub virtual_mods: u16,
+    pub virtual_mods: VMod,
 }
 impl TryParse for MapNotifyEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -12785,6 +12904,8 @@ impl TryParse for MapNotifyEvent {
         let (n_v_mod_map_keys, remaining) = u8::try_parse(remaining)?;
         let (virtual_mods, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
+        let changed = changed.into();
+        let virtual_mods = virtual_mods.into();
         let result = MapNotifyEvent { response_type, xkb_type, sequence, time, device_id, ptr_btn_actions, changed, min_key_code, max_key_code, first_type, n_types, first_key_sym, n_key_syms, first_key_act, n_key_acts, first_key_behavior, n_key_behavior, first_key_explicit, n_key_explicit, first_mod_map_key, n_mod_map_keys, first_v_mod_map_key, n_v_mod_map_keys, virtual_mods };
         let _ = remaining;
         let remaining = initial_value.get(32..)
@@ -12801,7 +12922,7 @@ impl Serialize for MapNotifyEvent {
         let time_bytes = self.time.serialize();
         let device_id_bytes = self.device_id.serialize();
         let ptr_btn_actions_bytes = self.ptr_btn_actions.serialize();
-        let changed_bytes = self.changed.serialize();
+        let changed_bytes = u16::from(self.changed).serialize();
         let min_key_code_bytes = self.min_key_code.serialize();
         let max_key_code_bytes = self.max_key_code.serialize();
         let first_type_bytes = self.first_type.serialize();
@@ -12818,7 +12939,7 @@ impl Serialize for MapNotifyEvent {
         let n_mod_map_keys_bytes = self.n_mod_map_keys.serialize();
         let first_v_mod_map_key_bytes = self.first_v_mod_map_key.serialize();
         let n_v_mod_map_keys_bytes = self.n_v_mod_map_keys.serialize();
-        let virtual_mods_bytes = self.virtual_mods.serialize();
+        let virtual_mods_bytes = u16::from(self.virtual_mods).serialize();
         [
             response_type_bytes[0],
             xkb_type_bytes[0],
@@ -12862,7 +12983,7 @@ impl Serialize for MapNotifyEvent {
         self.time.serialize_into(bytes);
         self.device_id.serialize_into(bytes);
         self.ptr_btn_actions.serialize_into(bytes);
-        self.changed.serialize_into(bytes);
+        u16::from(self.changed).serialize_into(bytes);
         self.min_key_code.serialize_into(bytes);
         self.max_key_code.serialize_into(bytes);
         self.first_type.serialize_into(bytes);
@@ -12879,7 +13000,7 @@ impl Serialize for MapNotifyEvent {
         self.n_mod_map_keys.serialize_into(bytes);
         self.first_v_mod_map_key.serialize_into(bytes);
         self.n_v_mod_map_keys.serialize_into(bytes);
-        self.virtual_mods.serialize_into(bytes);
+        u16::from(self.virtual_mods).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 2]);
     }
 }
@@ -12891,7 +13012,7 @@ impl From<&MapNotifyEvent> for [u8; 32] {
         let time_bytes = input.time.serialize();
         let device_id_bytes = input.device_id.serialize();
         let ptr_btn_actions_bytes = input.ptr_btn_actions.serialize();
-        let changed_bytes = input.changed.serialize();
+        let changed_bytes = u16::from(input.changed).serialize();
         let min_key_code_bytes = input.min_key_code.serialize();
         let max_key_code_bytes = input.max_key_code.serialize();
         let first_type_bytes = input.first_type.serialize();
@@ -12908,7 +13029,7 @@ impl From<&MapNotifyEvent> for [u8; 32] {
         let n_mod_map_keys_bytes = input.n_mod_map_keys.serialize();
         let first_v_mod_map_key_bytes = input.first_v_mod_map_key.serialize();
         let n_v_mod_map_keys_bytes = input.n_v_mod_map_keys.serialize();
-        let virtual_mods_bytes = input.virtual_mods.serialize();
+        let virtual_mods_bytes = u16::from(input.virtual_mods).serialize();
         [
             response_type_bytes[0],
             xkb_type_bytes[0],
@@ -12961,21 +13082,21 @@ pub struct StateNotifyEvent {
     pub sequence: u16,
     pub time: xproto::Timestamp,
     pub device_id: u8,
-    pub mods: u8,
-    pub base_mods: u8,
-    pub latched_mods: u8,
-    pub locked_mods: u8,
+    pub mods: xproto::ModMask,
+    pub base_mods: xproto::ModMask,
+    pub latched_mods: xproto::ModMask,
+    pub locked_mods: xproto::ModMask,
     pub group: Group,
     pub base_group: i16,
     pub latched_group: i16,
     pub locked_group: Group,
-    pub compat_state: u8,
-    pub grab_mods: u8,
-    pub compat_grab_mods: u8,
-    pub lookup_mods: u8,
-    pub compat_loockup_mods: u8,
-    pub ptr_btn_state: u16,
-    pub changed: u16,
+    pub compat_state: xproto::ModMask,
+    pub grab_mods: xproto::ModMask,
+    pub compat_grab_mods: xproto::ModMask,
+    pub lookup_mods: xproto::ModMask,
+    pub compat_loockup_mods: xproto::ModMask,
+    pub ptr_btn_state: xproto::KeyButMask,
+    pub changed: StatePart,
     pub keycode: xproto::Keycode,
     pub event_type: u8,
     pub request_major: u8,
@@ -13008,8 +13129,19 @@ impl TryParse for StateNotifyEvent {
         let (event_type, remaining) = u8::try_parse(remaining)?;
         let (request_major, remaining) = u8::try_parse(remaining)?;
         let (request_minor, remaining) = u8::try_parse(remaining)?;
+        let mods = mods.into();
+        let base_mods = base_mods.into();
+        let latched_mods = latched_mods.into();
+        let locked_mods = locked_mods.into();
         let group = group.into();
         let locked_group = locked_group.into();
+        let compat_state = compat_state.into();
+        let grab_mods = grab_mods.into();
+        let compat_grab_mods = compat_grab_mods.into();
+        let lookup_mods = lookup_mods.into();
+        let compat_loockup_mods = compat_loockup_mods.into();
+        let ptr_btn_state = ptr_btn_state.into();
+        let changed = changed.into();
         let result = StateNotifyEvent { response_type, xkb_type, sequence, time, device_id, mods, base_mods, latched_mods, locked_mods, group, base_group, latched_group, locked_group, compat_state, grab_mods, compat_grab_mods, lookup_mods, compat_loockup_mods, ptr_btn_state, changed, keycode, event_type, request_major, request_minor };
         let _ = remaining;
         let remaining = initial_value.get(32..)
@@ -13025,21 +13157,21 @@ impl Serialize for StateNotifyEvent {
         let sequence_bytes = self.sequence.serialize();
         let time_bytes = self.time.serialize();
         let device_id_bytes = self.device_id.serialize();
-        let mods_bytes = self.mods.serialize();
-        let base_mods_bytes = self.base_mods.serialize();
-        let latched_mods_bytes = self.latched_mods.serialize();
-        let locked_mods_bytes = self.locked_mods.serialize();
+        let mods_bytes = (u16::from(self.mods) as u8).serialize();
+        let base_mods_bytes = (u16::from(self.base_mods) as u8).serialize();
+        let latched_mods_bytes = (u16::from(self.latched_mods) as u8).serialize();
+        let locked_mods_bytes = (u16::from(self.locked_mods) as u8).serialize();
         let group_bytes = u8::from(self.group).serialize();
         let base_group_bytes = self.base_group.serialize();
         let latched_group_bytes = self.latched_group.serialize();
         let locked_group_bytes = u8::from(self.locked_group).serialize();
-        let compat_state_bytes = self.compat_state.serialize();
-        let grab_mods_bytes = self.grab_mods.serialize();
-        let compat_grab_mods_bytes = self.compat_grab_mods.serialize();
-        let lookup_mods_bytes = self.lookup_mods.serialize();
-        let compat_loockup_mods_bytes = self.compat_loockup_mods.serialize();
-        let ptr_btn_state_bytes = self.ptr_btn_state.serialize();
-        let changed_bytes = self.changed.serialize();
+        let compat_state_bytes = (u16::from(self.compat_state) as u8).serialize();
+        let grab_mods_bytes = (u16::from(self.grab_mods) as u8).serialize();
+        let compat_grab_mods_bytes = (u16::from(self.compat_grab_mods) as u8).serialize();
+        let lookup_mods_bytes = (u16::from(self.lookup_mods) as u8).serialize();
+        let compat_loockup_mods_bytes = (u16::from(self.compat_loockup_mods) as u8).serialize();
+        let ptr_btn_state_bytes = u16::from(self.ptr_btn_state).serialize();
+        let changed_bytes = u16::from(self.changed).serialize();
         let keycode_bytes = self.keycode.serialize();
         let event_type_bytes = self.event_type.serialize();
         let request_major_bytes = self.request_major.serialize();
@@ -13086,21 +13218,21 @@ impl Serialize for StateNotifyEvent {
         self.sequence.serialize_into(bytes);
         self.time.serialize_into(bytes);
         self.device_id.serialize_into(bytes);
-        self.mods.serialize_into(bytes);
-        self.base_mods.serialize_into(bytes);
-        self.latched_mods.serialize_into(bytes);
-        self.locked_mods.serialize_into(bytes);
+        (u16::from(self.mods) as u8).serialize_into(bytes);
+        (u16::from(self.base_mods) as u8).serialize_into(bytes);
+        (u16::from(self.latched_mods) as u8).serialize_into(bytes);
+        (u16::from(self.locked_mods) as u8).serialize_into(bytes);
         u8::from(self.group).serialize_into(bytes);
         self.base_group.serialize_into(bytes);
         self.latched_group.serialize_into(bytes);
         u8::from(self.locked_group).serialize_into(bytes);
-        self.compat_state.serialize_into(bytes);
-        self.grab_mods.serialize_into(bytes);
-        self.compat_grab_mods.serialize_into(bytes);
-        self.lookup_mods.serialize_into(bytes);
-        self.compat_loockup_mods.serialize_into(bytes);
-        self.ptr_btn_state.serialize_into(bytes);
-        self.changed.serialize_into(bytes);
+        (u16::from(self.compat_state) as u8).serialize_into(bytes);
+        (u16::from(self.grab_mods) as u8).serialize_into(bytes);
+        (u16::from(self.compat_grab_mods) as u8).serialize_into(bytes);
+        (u16::from(self.lookup_mods) as u8).serialize_into(bytes);
+        (u16::from(self.compat_loockup_mods) as u8).serialize_into(bytes);
+        u16::from(self.ptr_btn_state).serialize_into(bytes);
+        u16::from(self.changed).serialize_into(bytes);
         self.keycode.serialize_into(bytes);
         self.event_type.serialize_into(bytes);
         self.request_major.serialize_into(bytes);
@@ -13114,21 +13246,21 @@ impl From<&StateNotifyEvent> for [u8; 32] {
         let sequence_bytes = input.sequence.serialize();
         let time_bytes = input.time.serialize();
         let device_id_bytes = input.device_id.serialize();
-        let mods_bytes = input.mods.serialize();
-        let base_mods_bytes = input.base_mods.serialize();
-        let latched_mods_bytes = input.latched_mods.serialize();
-        let locked_mods_bytes = input.locked_mods.serialize();
+        let mods_bytes = (u16::from(input.mods) as u8).serialize();
+        let base_mods_bytes = (u16::from(input.base_mods) as u8).serialize();
+        let latched_mods_bytes = (u16::from(input.latched_mods) as u8).serialize();
+        let locked_mods_bytes = (u16::from(input.locked_mods) as u8).serialize();
         let group_bytes = u8::from(input.group).serialize();
         let base_group_bytes = input.base_group.serialize();
         let latched_group_bytes = input.latched_group.serialize();
         let locked_group_bytes = u8::from(input.locked_group).serialize();
-        let compat_state_bytes = input.compat_state.serialize();
-        let grab_mods_bytes = input.grab_mods.serialize();
-        let compat_grab_mods_bytes = input.compat_grab_mods.serialize();
-        let lookup_mods_bytes = input.lookup_mods.serialize();
-        let compat_loockup_mods_bytes = input.compat_loockup_mods.serialize();
-        let ptr_btn_state_bytes = input.ptr_btn_state.serialize();
-        let changed_bytes = input.changed.serialize();
+        let compat_state_bytes = (u16::from(input.compat_state) as u8).serialize();
+        let grab_mods_bytes = (u16::from(input.grab_mods) as u8).serialize();
+        let compat_grab_mods_bytes = (u16::from(input.compat_grab_mods) as u8).serialize();
+        let lookup_mods_bytes = (u16::from(input.lookup_mods) as u8).serialize();
+        let compat_loockup_mods_bytes = (u16::from(input.compat_loockup_mods) as u8).serialize();
+        let ptr_btn_state_bytes = u16::from(input.ptr_btn_state).serialize();
+        let changed_bytes = u16::from(input.changed).serialize();
         let keycode_bytes = input.keycode.serialize();
         let event_type_bytes = input.event_type.serialize();
         let request_major_bytes = input.request_major.serialize();
@@ -13186,9 +13318,9 @@ pub struct ControlsNotifyEvent {
     pub time: xproto::Timestamp,
     pub device_id: u8,
     pub num_groups: u8,
-    pub changed_controls: u32,
-    pub enabled_controls: u32,
-    pub enabled_control_changes: u32,
+    pub changed_controls: Control,
+    pub enabled_controls: BoolCtrl,
+    pub enabled_control_changes: BoolCtrl,
     pub keycode: xproto::Keycode,
     pub event_type: u8,
     pub request_major: u8,
@@ -13212,6 +13344,9 @@ impl TryParse for ControlsNotifyEvent {
         let (request_major, remaining) = u8::try_parse(remaining)?;
         let (request_minor, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(4..).ok_or(ParseError::InsufficientData)?;
+        let changed_controls = changed_controls.into();
+        let enabled_controls = enabled_controls.into();
+        let enabled_control_changes = enabled_control_changes.into();
         let result = ControlsNotifyEvent { response_type, xkb_type, sequence, time, device_id, num_groups, changed_controls, enabled_controls, enabled_control_changes, keycode, event_type, request_major, request_minor };
         let _ = remaining;
         let remaining = initial_value.get(32..)
@@ -13228,9 +13363,9 @@ impl Serialize for ControlsNotifyEvent {
         let time_bytes = self.time.serialize();
         let device_id_bytes = self.device_id.serialize();
         let num_groups_bytes = self.num_groups.serialize();
-        let changed_controls_bytes = self.changed_controls.serialize();
-        let enabled_controls_bytes = self.enabled_controls.serialize();
-        let enabled_control_changes_bytes = self.enabled_control_changes.serialize();
+        let changed_controls_bytes = u32::from(self.changed_controls).serialize();
+        let enabled_controls_bytes = u32::from(self.enabled_controls).serialize();
+        let enabled_control_changes_bytes = u32::from(self.enabled_control_changes).serialize();
         let keycode_bytes = self.keycode.serialize();
         let event_type_bytes = self.event_type.serialize();
         let request_major_bytes = self.request_major.serialize();
@@ -13279,9 +13414,9 @@ impl Serialize for ControlsNotifyEvent {
         self.device_id.serialize_into(bytes);
         self.num_groups.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 2]);
-        self.changed_controls.serialize_into(bytes);
-        self.enabled_controls.serialize_into(bytes);
-        self.enabled_control_changes.serialize_into(bytes);
+        u32::from(self.changed_controls).serialize_into(bytes);
+        u32::from(self.enabled_controls).serialize_into(bytes);
+        u32::from(self.enabled_control_changes).serialize_into(bytes);
         self.keycode.serialize_into(bytes);
         self.event_type.serialize_into(bytes);
         self.request_major.serialize_into(bytes);
@@ -13297,9 +13432,9 @@ impl From<&ControlsNotifyEvent> for [u8; 32] {
         let time_bytes = input.time.serialize();
         let device_id_bytes = input.device_id.serialize();
         let num_groups_bytes = input.num_groups.serialize();
-        let changed_controls_bytes = input.changed_controls.serialize();
-        let enabled_controls_bytes = input.enabled_controls.serialize();
-        let enabled_control_changes_bytes = input.enabled_control_changes.serialize();
+        let changed_controls_bytes = u32::from(input.changed_controls).serialize();
+        let enabled_controls_bytes = u32::from(input.enabled_controls).serialize();
+        let enabled_control_changes_bytes = u32::from(input.enabled_control_changes).serialize();
         let keycode_bytes = input.keycode.serialize();
         let event_type_bytes = input.event_type.serialize();
         let request_major_bytes = input.request_major.serialize();
@@ -13638,15 +13773,15 @@ pub struct NamesNotifyEvent {
     pub sequence: u16,
     pub time: xproto::Timestamp,
     pub device_id: u8,
-    pub changed: u16,
+    pub changed: NameDetail,
     pub first_type: u8,
     pub n_types: u8,
     pub first_level_name: u8,
     pub n_level_names: u8,
     pub n_radio_groups: u8,
     pub n_key_aliases: u8,
-    pub changed_group_names: u8,
-    pub changed_virtual_mods: u16,
+    pub changed_group_names: SetOfGroup,
+    pub changed_virtual_mods: VMod,
     pub first_key: xproto::Keycode,
     pub n_keys: u8,
     pub changed_indicators: u32,
@@ -13674,6 +13809,9 @@ impl TryParse for NamesNotifyEvent {
         let (n_keys, remaining) = u8::try_parse(remaining)?;
         let (changed_indicators, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(4..).ok_or(ParseError::InsufficientData)?;
+        let changed = changed.into();
+        let changed_group_names = changed_group_names.into();
+        let changed_virtual_mods = changed_virtual_mods.into();
         let result = NamesNotifyEvent { response_type, xkb_type, sequence, time, device_id, changed, first_type, n_types, first_level_name, n_level_names, n_radio_groups, n_key_aliases, changed_group_names, changed_virtual_mods, first_key, n_keys, changed_indicators };
         let _ = remaining;
         let remaining = initial_value.get(32..)
@@ -13689,15 +13827,15 @@ impl Serialize for NamesNotifyEvent {
         let sequence_bytes = self.sequence.serialize();
         let time_bytes = self.time.serialize();
         let device_id_bytes = self.device_id.serialize();
-        let changed_bytes = self.changed.serialize();
+        let changed_bytes = (u32::from(self.changed) as u16).serialize();
         let first_type_bytes = self.first_type.serialize();
         let n_types_bytes = self.n_types.serialize();
         let first_level_name_bytes = self.first_level_name.serialize();
         let n_level_names_bytes = self.n_level_names.serialize();
         let n_radio_groups_bytes = self.n_radio_groups.serialize();
         let n_key_aliases_bytes = self.n_key_aliases.serialize();
-        let changed_group_names_bytes = self.changed_group_names.serialize();
-        let changed_virtual_mods_bytes = self.changed_virtual_mods.serialize();
+        let changed_group_names_bytes = u8::from(self.changed_group_names).serialize();
+        let changed_virtual_mods_bytes = u16::from(self.changed_virtual_mods).serialize();
         let first_key_bytes = self.first_key.serialize();
         let n_keys_bytes = self.n_keys.serialize();
         let changed_indicators_bytes = self.changed_indicators.serialize();
@@ -13744,7 +13882,7 @@ impl Serialize for NamesNotifyEvent {
         self.time.serialize_into(bytes);
         self.device_id.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 1]);
-        self.changed.serialize_into(bytes);
+        (u32::from(self.changed) as u16).serialize_into(bytes);
         self.first_type.serialize_into(bytes);
         self.n_types.serialize_into(bytes);
         self.first_level_name.serialize_into(bytes);
@@ -13752,8 +13890,8 @@ impl Serialize for NamesNotifyEvent {
         bytes.extend_from_slice(&[0; 1]);
         self.n_radio_groups.serialize_into(bytes);
         self.n_key_aliases.serialize_into(bytes);
-        self.changed_group_names.serialize_into(bytes);
-        self.changed_virtual_mods.serialize_into(bytes);
+        u8::from(self.changed_group_names).serialize_into(bytes);
+        u16::from(self.changed_virtual_mods).serialize_into(bytes);
         self.first_key.serialize_into(bytes);
         self.n_keys.serialize_into(bytes);
         self.changed_indicators.serialize_into(bytes);
@@ -13767,15 +13905,15 @@ impl From<&NamesNotifyEvent> for [u8; 32] {
         let sequence_bytes = input.sequence.serialize();
         let time_bytes = input.time.serialize();
         let device_id_bytes = input.device_id.serialize();
-        let changed_bytes = input.changed.serialize();
+        let changed_bytes = (u32::from(input.changed) as u16).serialize();
         let first_type_bytes = input.first_type.serialize();
         let n_types_bytes = input.n_types.serialize();
         let first_level_name_bytes = input.first_level_name.serialize();
         let n_level_names_bytes = input.n_level_names.serialize();
         let n_radio_groups_bytes = input.n_radio_groups.serialize();
         let n_key_aliases_bytes = input.n_key_aliases.serialize();
-        let changed_group_names_bytes = input.changed_group_names.serialize();
-        let changed_virtual_mods_bytes = input.changed_virtual_mods.serialize();
+        let changed_group_names_bytes = u8::from(input.changed_group_names).serialize();
+        let changed_virtual_mods_bytes = u16::from(input.changed_virtual_mods).serialize();
         let first_key_bytes = input.first_key.serialize();
         let n_keys_bytes = input.n_keys.serialize();
         let changed_indicators_bytes = input.changed_indicators.serialize();
@@ -13831,7 +13969,7 @@ pub struct CompatMapNotifyEvent {
     pub sequence: u16,
     pub time: xproto::Timestamp,
     pub device_id: u8,
-    pub changed_groups: u8,
+    pub changed_groups: SetOfGroup,
     pub first_si: u16,
     pub n_si: u16,
     pub n_total_si: u16,
@@ -13849,6 +13987,7 @@ impl TryParse for CompatMapNotifyEvent {
         let (n_si, remaining) = u16::try_parse(remaining)?;
         let (n_total_si, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(16..).ok_or(ParseError::InsufficientData)?;
+        let changed_groups = changed_groups.into();
         let result = CompatMapNotifyEvent { response_type, xkb_type, sequence, time, device_id, changed_groups, first_si, n_si, n_total_si };
         let _ = remaining;
         let remaining = initial_value.get(32..)
@@ -13864,7 +14003,7 @@ impl Serialize for CompatMapNotifyEvent {
         let sequence_bytes = self.sequence.serialize();
         let time_bytes = self.time.serialize();
         let device_id_bytes = self.device_id.serialize();
-        let changed_groups_bytes = self.changed_groups.serialize();
+        let changed_groups_bytes = u8::from(self.changed_groups).serialize();
         let first_si_bytes = self.first_si.serialize();
         let n_si_bytes = self.n_si.serialize();
         let n_total_si_bytes = self.n_total_si.serialize();
@@ -13910,7 +14049,7 @@ impl Serialize for CompatMapNotifyEvent {
         self.sequence.serialize_into(bytes);
         self.time.serialize_into(bytes);
         self.device_id.serialize_into(bytes);
-        self.changed_groups.serialize_into(bytes);
+        u8::from(self.changed_groups).serialize_into(bytes);
         self.first_si.serialize_into(bytes);
         self.n_si.serialize_into(bytes);
         self.n_total_si.serialize_into(bytes);
@@ -13924,7 +14063,7 @@ impl From<&CompatMapNotifyEvent> for [u8; 32] {
         let sequence_bytes = input.sequence.serialize();
         let time_bytes = input.time.serialize();
         let device_id_bytes = input.device_id.serialize();
-        let changed_groups_bytes = input.changed_groups.serialize();
+        let changed_groups_bytes = u8::from(input.changed_groups).serialize();
         let first_si_bytes = input.first_si.serialize();
         let n_si_bytes = input.n_si.serialize();
         let n_total_si_bytes = input.n_total_si.serialize();
@@ -14153,7 +14292,7 @@ pub struct ActionMessageEvent {
     pub keycode: xproto::Keycode,
     pub press: bool,
     pub key_event_follows: bool,
-    pub mods: u8,
+    pub mods: xproto::ModMask,
     pub group: Group,
     pub message: [String8; 8],
 }
@@ -14173,6 +14312,7 @@ impl TryParse for ActionMessageEvent {
         let (message, remaining) = crate::x11_utils::parse_u8_list(remaining, 8)?;
         let message = <[u8; 8]>::try_from(message).unwrap();
         let remaining = remaining.get(10..).ok_or(ParseError::InsufficientData)?;
+        let mods = mods.into();
         let group = group.into();
         let result = ActionMessageEvent { response_type, xkb_type, sequence, time, device_id, keycode, press, key_event_follows, mods, group, message };
         let _ = remaining;
@@ -14192,7 +14332,7 @@ impl Serialize for ActionMessageEvent {
         let keycode_bytes = self.keycode.serialize();
         let press_bytes = self.press.serialize();
         let key_event_follows_bytes = self.key_event_follows.serialize();
-        let mods_bytes = self.mods.serialize();
+        let mods_bytes = (u16::from(self.mods) as u8).serialize();
         let group_bytes = u8::from(self.group).serialize();
         [
             response_type_bytes[0],
@@ -14239,7 +14379,7 @@ impl Serialize for ActionMessageEvent {
         self.keycode.serialize_into(bytes);
         self.press.serialize_into(bytes);
         self.key_event_follows.serialize_into(bytes);
-        self.mods.serialize_into(bytes);
+        (u16::from(self.mods) as u8).serialize_into(bytes);
         u8::from(self.group).serialize_into(bytes);
         bytes.extend_from_slice(&self.message);
         bytes.extend_from_slice(&[0; 10]);
@@ -14255,7 +14395,7 @@ impl From<&ActionMessageEvent> for [u8; 32] {
         let keycode_bytes = input.keycode.serialize();
         let press_bytes = input.press.serialize();
         let key_event_follows_bytes = input.key_event_follows.serialize();
-        let mods_bytes = input.mods.serialize();
+        let mods_bytes = (u16::from(input.mods) as u8).serialize();
         let group_bytes = u8::from(input.group).serialize();
         [
             response_type_bytes[0],
@@ -14310,7 +14450,7 @@ pub struct AccessXNotifyEvent {
     pub time: xproto::Timestamp,
     pub device_id: u8,
     pub keycode: xproto::Keycode,
-    pub detailt: u16,
+    pub detailt: AXNDetail,
     pub slow_keys_delay: u16,
     pub debounce_delay: u16,
 }
@@ -14327,6 +14467,7 @@ impl TryParse for AccessXNotifyEvent {
         let (slow_keys_delay, remaining) = u16::try_parse(remaining)?;
         let (debounce_delay, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(16..).ok_or(ParseError::InsufficientData)?;
+        let detailt = detailt.into();
         let result = AccessXNotifyEvent { response_type, xkb_type, sequence, time, device_id, keycode, detailt, slow_keys_delay, debounce_delay };
         let _ = remaining;
         let remaining = initial_value.get(32..)
@@ -14343,7 +14484,7 @@ impl Serialize for AccessXNotifyEvent {
         let time_bytes = self.time.serialize();
         let device_id_bytes = self.device_id.serialize();
         let keycode_bytes = self.keycode.serialize();
-        let detailt_bytes = self.detailt.serialize();
+        let detailt_bytes = u16::from(self.detailt).serialize();
         let slow_keys_delay_bytes = self.slow_keys_delay.serialize();
         let debounce_delay_bytes = self.debounce_delay.serialize();
         [
@@ -14389,7 +14530,7 @@ impl Serialize for AccessXNotifyEvent {
         self.time.serialize_into(bytes);
         self.device_id.serialize_into(bytes);
         self.keycode.serialize_into(bytes);
-        self.detailt.serialize_into(bytes);
+        u16::from(self.detailt).serialize_into(bytes);
         self.slow_keys_delay.serialize_into(bytes);
         self.debounce_delay.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 16]);
@@ -14403,7 +14544,7 @@ impl From<&AccessXNotifyEvent> for [u8; 32] {
         let time_bytes = input.time.serialize();
         let device_id_bytes = input.device_id.serialize();
         let keycode_bytes = input.keycode.serialize();
-        let detailt_bytes = input.detailt.serialize();
+        let detailt_bytes = u16::from(input.detailt).serialize();
         let slow_keys_delay_bytes = input.slow_keys_delay.serialize();
         let debounce_delay_bytes = input.debounce_delay.serialize();
         [
@@ -14458,15 +14599,15 @@ pub struct ExtensionDeviceNotifyEvent {
     pub sequence: u16,
     pub time: xproto::Timestamp,
     pub device_id: u8,
-    pub reason: u16,
+    pub reason: XIFeature,
     pub led_class: LedClassResult,
     pub led_id: u16,
     pub leds_defined: u32,
     pub led_state: u32,
     pub first_button: u8,
     pub n_buttons: u8,
-    pub supported: u16,
-    pub unsupported: u16,
+    pub supported: XIFeature,
+    pub unsupported: XIFeature,
 }
 impl TryParse for ExtensionDeviceNotifyEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -14487,7 +14628,10 @@ impl TryParse for ExtensionDeviceNotifyEvent {
         let (supported, remaining) = u16::try_parse(remaining)?;
         let (unsupported, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
+        let reason = reason.into();
         let led_class = led_class.into();
+        let supported = supported.into();
+        let unsupported = unsupported.into();
         let result = ExtensionDeviceNotifyEvent { response_type, xkb_type, sequence, time, device_id, reason, led_class, led_id, leds_defined, led_state, first_button, n_buttons, supported, unsupported };
         let _ = remaining;
         let remaining = initial_value.get(32..)
@@ -14503,15 +14647,15 @@ impl Serialize for ExtensionDeviceNotifyEvent {
         let sequence_bytes = self.sequence.serialize();
         let time_bytes = self.time.serialize();
         let device_id_bytes = self.device_id.serialize();
-        let reason_bytes = self.reason.serialize();
+        let reason_bytes = u16::from(self.reason).serialize();
         let led_class_bytes = u16::from(self.led_class).serialize();
         let led_id_bytes = self.led_id.serialize();
         let leds_defined_bytes = self.leds_defined.serialize();
         let led_state_bytes = self.led_state.serialize();
         let first_button_bytes = self.first_button.serialize();
         let n_buttons_bytes = self.n_buttons.serialize();
-        let supported_bytes = self.supported.serialize();
-        let unsupported_bytes = self.unsupported.serialize();
+        let supported_bytes = u16::from(self.supported).serialize();
+        let unsupported_bytes = u16::from(self.unsupported).serialize();
         [
             response_type_bytes[0],
             xkb_type_bytes[0],
@@ -14555,15 +14699,15 @@ impl Serialize for ExtensionDeviceNotifyEvent {
         self.time.serialize_into(bytes);
         self.device_id.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 1]);
-        self.reason.serialize_into(bytes);
+        u16::from(self.reason).serialize_into(bytes);
         u16::from(self.led_class).serialize_into(bytes);
         self.led_id.serialize_into(bytes);
         self.leds_defined.serialize_into(bytes);
         self.led_state.serialize_into(bytes);
         self.first_button.serialize_into(bytes);
         self.n_buttons.serialize_into(bytes);
-        self.supported.serialize_into(bytes);
-        self.unsupported.serialize_into(bytes);
+        u16::from(self.supported).serialize_into(bytes);
+        u16::from(self.unsupported).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 2]);
     }
 }
@@ -14574,15 +14718,15 @@ impl From<&ExtensionDeviceNotifyEvent> for [u8; 32] {
         let sequence_bytes = input.sequence.serialize();
         let time_bytes = input.time.serialize();
         let device_id_bytes = input.device_id.serialize();
-        let reason_bytes = input.reason.serialize();
+        let reason_bytes = u16::from(input.reason).serialize();
         let led_class_bytes = u16::from(input.led_class).serialize();
         let led_id_bytes = input.led_id.serialize();
         let leds_defined_bytes = input.leds_defined.serialize();
         let led_state_bytes = input.led_state.serialize();
         let first_button_bytes = input.first_button.serialize();
         let n_buttons_bytes = input.n_buttons.serialize();
-        let supported_bytes = input.supported.serialize();
-        let unsupported_bytes = input.unsupported.serialize();
+        let supported_bytes = u16::from(input.supported).serialize();
+        let unsupported_bytes = u16::from(input.unsupported).serialize();
         [
             response_type_bytes[0],
             xkb_type_bytes[0],

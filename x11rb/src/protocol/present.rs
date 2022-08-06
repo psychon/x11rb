@@ -95,12 +95,10 @@ where
     conn.send_request_without_reply(&slices, fds)
 }
 
-pub fn select_input<Conn, A>(conn: &Conn, eid: Event, window: xproto::Window, event_mask: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn select_input<Conn>(conn: &Conn, eid: Event, window: xproto::Window, event_mask: EventMask) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u32>,
 {
-    let event_mask: u32 = event_mask.into();
     let request0 = SelectInputRequest {
         eid,
         window,
@@ -137,9 +135,7 @@ pub trait ConnectionExt: RequestConnection {
     {
         notify_msc(self, window, serial, target_msc, divisor, remainder)
     }
-    fn present_select_input<A>(&self, eid: Event, window: xproto::Window, event_mask: A) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where
-        A: Into<u32>,
+    fn present_select_input(&self, eid: Event, window: xproto::Window, event_mask: EventMask) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         select_input(self, eid, window, event_mask)
     }

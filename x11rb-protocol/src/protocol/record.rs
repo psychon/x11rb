@@ -4,6 +4,8 @@
 //! Bindings to the `Record` X11 extension.
 
 #![allow(clippy::too_many_arguments)]
+// The code generator is simpler if it can always use conversions
+#![allow(clippy::useless_conversion)]
 
 #[allow(unused_imports)]
 use alloc::borrow::Cow;
@@ -981,7 +983,7 @@ impl TryParse for EnableContextReply {
         let (server_time, remaining) = u32::try_parse(remaining)?;
         let (rec_sequence_num, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(8..).ok_or(ParseError::InsufficientData)?;
-        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, length.checked_mul(4u32).ok_or(ParseError::InvalidExpression)?.try_to_usize()?)?;
+        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, u32::from(length).checked_mul(4u32).ok_or(ParseError::InvalidExpression)?.try_to_usize()?)?;
         let data = data.to_vec();
         if response_type != 1 {
             return Err(ParseError::InvalidValue);

@@ -2,6 +2,7 @@
 
 use std::cell::RefCell;
 use std::collections::{HashMap, HashSet};
+use std::fmt::Write;
 use std::rc::Rc;
 
 use xcbgen::defs as xcbdefs;
@@ -1016,14 +1017,15 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         &self,
         type_: &xcbdefs::FieldValueType,
     ) -> Option<Rc<xcbdefs::EnumDef>> {
-        if let xcbdefs::FieldValueSet::Enum(ref enum_) = type_.value_set {
-            let enum_def = match enum_.get_resolved() {
-                xcbdefs::TypeRef::Enum(enum_def) => enum_def.upgrade().unwrap(),
-                _ => unreachable!(),
-            };
-            Some(enum_def)
-        } else {
-            None
+        match type_.value_set {
+            xcbdefs::FieldValueSet::Enum(ref enum_) | xcbdefs::FieldValueSet::Mask(ref enum_) => {
+                let enum_def = match enum_.get_resolved() {
+                    xcbdefs::TypeRef::Enum(enum_def) => enum_def.upgrade().unwrap(),
+                    _ => unreachable!(),
+                };
+                Some(enum_def)
+            }
+            _ => None,
         }
     }
 
@@ -1246,7 +1248,17 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             if i != 0 || begin_with_comma {
                 s.push_str(", ");
             }
+            let wire_type = match ext_param.type_ {
+                xcbdefs::TypeRef::BuiltIn(_) => Some(self.type_to_rust_type(&ext_param.type_)),
+                _ => None,
+            };
+            if let Some(ref type_) = wire_type {
+                write!(s, "{}::from(", type_).unwrap();
+            }
             s.push_str(&wrap_name(&ext_param.name));
+            if wire_type.is_some() {
+                s.push(')');
+            }
         }
         s
     }

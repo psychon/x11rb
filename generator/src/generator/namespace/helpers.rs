@@ -3,7 +3,7 @@ use std::collections::HashMap;
 
 use xcbgen::defs as xcbdefs;
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 pub(crate) struct EnumInfo {
     // The size needed to hold all defined values for the enum
     pub(super) max_value_size: Option<u8>,
@@ -156,7 +156,8 @@ impl Caches {
     fn gather_enum_infos_in_field_value_type(&mut self, value_type: &xcbdefs::FieldValueType) {
         match value_type.value_set {
             xcbdefs::FieldValueSet::None => {}
-            xcbdefs::FieldValueSet::Enum(ref enum_type) => {
+            xcbdefs::FieldValueSet::Enum(ref enum_type)
+            | xcbdefs::FieldValueSet::Mask(ref enum_type) => {
                 let enum_def = match enum_type.get_resolved().get_original_type() {
                     xcbdefs::TypeRef::Enum(enum_type) => enum_type.upgrade().unwrap(),
                     _ => unreachable!(),
@@ -173,7 +174,6 @@ impl Caches {
                 self.put_enum_wire_size(&enum_def, size);
             }
             xcbdefs::FieldValueSet::AltEnum(_) => {}
-            xcbdefs::FieldValueSet::Mask(_) => {}
             xcbdefs::FieldValueSet::AltMask(_) => {}
         }
     }

@@ -4,6 +4,8 @@
 //! Bindings to the `RandR` X11 extension.
 
 #![allow(clippy::too_many_arguments)]
+// The code generator is simpler if it can always use conversions
+#![allow(clippy::useless_conversion)]
 
 #[allow(unused_imports)]
 use alloc::borrow::Cow;
@@ -60,7 +62,7 @@ pub const BAD_PROVIDER_ERROR: u8 = 3;
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct Rotation(u8);
+pub struct Rotation(u16);
 impl Rotation {
     pub const ROTATE0: Self = Self(1 << 0);
     pub const ROTATE90: Self = Self(1 << 1);
@@ -69,28 +71,16 @@ impl Rotation {
     pub const REFLECT_X: Self = Self(1 << 4);
     pub const REFLECT_Y: Self = Self(1 << 5);
 }
-impl From<Rotation> for u8 {
+impl From<Rotation> for u16 {
     #[inline]
     fn from(input: Rotation) -> Self {
         input.0
     }
 }
-impl From<Rotation> for Option<u8> {
-    #[inline]
-    fn from(input: Rotation) -> Self {
-        Some(input.0)
-    }
-}
-impl From<Rotation> for u16 {
-    #[inline]
-    fn from(input: Rotation) -> Self {
-        u16::from(input.0)
-    }
-}
 impl From<Rotation> for Option<u16> {
     #[inline]
     fn from(input: Rotation) -> Self {
-        Some(u16::from(input.0))
+        Some(input.0)
     }
 }
 impl From<Rotation> for u32 {
@@ -108,6 +98,12 @@ impl From<Rotation> for Option<u32> {
 impl From<u8> for Rotation {
     #[inline]
     fn from(value: u8) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u16> for Rotation {
+    #[inline]
+    fn from(value: u16) -> Self {
         Self(value)
     }
 }
@@ -124,7 +120,7 @@ impl core::fmt::Debug for Rotation  {
         pretty_print_bitmask(fmt, self.0.into(), &variants)
     }
 }
-bitmask_binop!(Rotation, u8);
+bitmask_binop!(Rotation, u16);
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -431,7 +427,7 @@ pub struct SetScreenConfigRequest {
     pub timestamp: xproto::Timestamp,
     pub config_timestamp: xproto::Timestamp,
     pub size_id: u16,
-    pub rotation: u16,
+    pub rotation: Rotation,
     pub rate: u16,
 }
 impl SetScreenConfigRequest {
@@ -442,7 +438,7 @@ impl SetScreenConfigRequest {
         let timestamp_bytes = self.timestamp.serialize();
         let config_timestamp_bytes = self.config_timestamp.serialize();
         let size_id_bytes = self.size_id.serialize();
-        let rotation_bytes = self.rotation.serialize();
+        let rotation_bytes = u16::from(self.rotation).serialize();
         let rate_bytes = self.rate.serialize();
         let mut request0 = vec![
             major_opcode,
@@ -486,6 +482,7 @@ impl SetScreenConfigRequest {
         let (config_timestamp, remaining) = xproto::Timestamp::try_parse(remaining)?;
         let (size_id, remaining) = u16::try_parse(remaining)?;
         let (rotation, remaining) = u16::try_parse(remaining)?;
+        let rotation = rotation.into();
         let (rate, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let _ = remaining;
@@ -611,7 +608,7 @@ impl Serialize for SetScreenConfigReply {
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct NotifyMask(u8);
+pub struct NotifyMask(u16);
 impl NotifyMask {
     pub const SCREEN_CHANGE: Self = Self(1 << 0);
     pub const CRTC_CHANGE: Self = Self(1 << 1);
@@ -622,28 +619,16 @@ impl NotifyMask {
     pub const RESOURCE_CHANGE: Self = Self(1 << 6);
     pub const LEASE: Self = Self(1 << 7);
 }
-impl From<NotifyMask> for u8 {
+impl From<NotifyMask> for u16 {
     #[inline]
     fn from(input: NotifyMask) -> Self {
         input.0
     }
 }
-impl From<NotifyMask> for Option<u8> {
-    #[inline]
-    fn from(input: NotifyMask) -> Self {
-        Some(input.0)
-    }
-}
-impl From<NotifyMask> for u16 {
-    #[inline]
-    fn from(input: NotifyMask) -> Self {
-        u16::from(input.0)
-    }
-}
 impl From<NotifyMask> for Option<u16> {
     #[inline]
     fn from(input: NotifyMask) -> Self {
-        Some(u16::from(input.0))
+        Some(input.0)
     }
 }
 impl From<NotifyMask> for u32 {
@@ -661,6 +646,12 @@ impl From<NotifyMask> for Option<u32> {
 impl From<u8> for NotifyMask {
     #[inline]
     fn from(value: u8) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u16> for NotifyMask {
+    #[inline]
+    fn from(value: u16) -> Self {
         Self(value)
     }
 }
@@ -679,7 +670,7 @@ impl core::fmt::Debug for NotifyMask  {
         pretty_print_bitmask(fmt, self.0.into(), &variants)
     }
 }
-bitmask_binop!(NotifyMask, u8);
+bitmask_binop!(NotifyMask, u16);
 
 /// Opcode for the SelectInput request
 pub const SELECT_INPUT_REQUEST: u8 = 4;
@@ -687,14 +678,14 @@ pub const SELECT_INPUT_REQUEST: u8 = 4;
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SelectInputRequest {
     pub window: xproto::Window,
-    pub enable: u16,
+    pub enable: NotifyMask,
 }
 impl SelectInputRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
         let length_so_far = 0;
         let window_bytes = self.window.serialize();
-        let enable_bytes = self.enable.serialize();
+        let enable_bytes = u16::from(self.enable).serialize();
         let mut request0 = vec![
             major_opcode,
             SELECT_INPUT_REQUEST,
@@ -722,6 +713,7 @@ impl SelectInputRequest {
         }
         let (window, remaining) = xproto::Window::try_parse(value)?;
         let (enable, remaining) = u16::try_parse(remaining)?;
+        let enable = enable.into();
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let _ = remaining;
         Ok(SelectInputRequest {
@@ -800,14 +792,14 @@ impl crate::x11_utils::ReplyRequest for GetScreenInfoRequest {
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetScreenInfoReply {
-    pub rotations: u8,
+    pub rotations: Rotation,
     pub sequence: u16,
     pub length: u32,
     pub root: xproto::Window,
     pub timestamp: xproto::Timestamp,
     pub config_timestamp: xproto::Timestamp,
     pub size_id: u16,
-    pub rotation: u16,
+    pub rotation: Rotation,
     pub rate: u16,
     pub n_info: u16,
     pub sizes: Vec<ScreenSize>,
@@ -834,6 +826,8 @@ impl TryParse for GetScreenInfoReply {
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
+        let rotations = rotations.into();
+        let rotation = rotation.into();
         let result = GetScreenInfoReply { rotations, sequence, length, root, timestamp, config_timestamp, size_id, rotation, rate, n_info, sizes, rates };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
@@ -852,7 +846,7 @@ impl Serialize for GetScreenInfoReply {
         bytes.reserve(32);
         let response_type_bytes = &[1];
         bytes.push(response_type_bytes[0]);
-        self.rotations.serialize_into(bytes);
+        (u16::from(self.rotations) as u8).serialize_into(bytes);
         self.sequence.serialize_into(bytes);
         self.length.serialize_into(bytes);
         self.root.serialize_into(bytes);
@@ -861,7 +855,7 @@ impl Serialize for GetScreenInfoReply {
         let n_sizes = u16::try_from(self.sizes.len()).expect("`sizes` has too many elements");
         n_sizes.serialize_into(bytes);
         self.size_id.serialize_into(bytes);
-        self.rotation.serialize_into(bytes);
+        u16::from(self.rotation).serialize_into(bytes);
         self.rate.serialize_into(bytes);
         self.n_info.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 2]);
@@ -1115,7 +1109,7 @@ impl crate::x11_utils::VoidRequest for SetScreenSizeRequest {
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct ModeFlag(u16);
+pub struct ModeFlag(u32);
 impl ModeFlag {
     pub const HSYNC_POSITIVE: Self = Self(1 << 0);
     pub const HSYNC_NEGATIVE: Self = Self(1 << 1);
@@ -1132,28 +1126,16 @@ impl ModeFlag {
     pub const DOUBLE_CLOCK: Self = Self(1 << 12);
     pub const HALVE_CLOCK: Self = Self(1 << 13);
 }
-impl From<ModeFlag> for u16 {
+impl From<ModeFlag> for u32 {
     #[inline]
     fn from(input: ModeFlag) -> Self {
         input.0
     }
 }
-impl From<ModeFlag> for Option<u16> {
-    #[inline]
-    fn from(input: ModeFlag) -> Self {
-        Some(input.0)
-    }
-}
-impl From<ModeFlag> for u32 {
-    #[inline]
-    fn from(input: ModeFlag) -> Self {
-        u32::from(input.0)
-    }
-}
 impl From<ModeFlag> for Option<u32> {
     #[inline]
     fn from(input: ModeFlag) -> Self {
-        Some(u32::from(input.0))
+        Some(input.0)
     }
 }
 impl From<u8> for ModeFlag {
@@ -1165,31 +1147,37 @@ impl From<u8> for ModeFlag {
 impl From<u16> for ModeFlag {
     #[inline]
     fn from(value: u16) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u32> for ModeFlag {
+    #[inline]
+    fn from(value: u32) -> Self {
         Self(value)
     }
 }
 impl core::fmt::Debug for ModeFlag  {
     fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
-            (Self::HSYNC_POSITIVE.0.into(), "HSYNC_POSITIVE", "HsyncPositive"),
-            (Self::HSYNC_NEGATIVE.0.into(), "HSYNC_NEGATIVE", "HsyncNegative"),
-            (Self::VSYNC_POSITIVE.0.into(), "VSYNC_POSITIVE", "VsyncPositive"),
-            (Self::VSYNC_NEGATIVE.0.into(), "VSYNC_NEGATIVE", "VsyncNegative"),
-            (Self::INTERLACE.0.into(), "INTERLACE", "Interlace"),
-            (Self::DOUBLE_SCAN.0.into(), "DOUBLE_SCAN", "DoubleScan"),
-            (Self::CSYNC.0.into(), "CSYNC", "Csync"),
-            (Self::CSYNC_POSITIVE.0.into(), "CSYNC_POSITIVE", "CsyncPositive"),
-            (Self::CSYNC_NEGATIVE.0.into(), "CSYNC_NEGATIVE", "CsyncNegative"),
-            (Self::HSKEW_PRESENT.0.into(), "HSKEW_PRESENT", "HskewPresent"),
-            (Self::BCAST.0.into(), "BCAST", "Bcast"),
-            (Self::PIXEL_MULTIPLEX.0.into(), "PIXEL_MULTIPLEX", "PixelMultiplex"),
-            (Self::DOUBLE_CLOCK.0.into(), "DOUBLE_CLOCK", "DoubleClock"),
-            (Self::HALVE_CLOCK.0.into(), "HALVE_CLOCK", "HalveClock"),
+            (Self::HSYNC_POSITIVE.0, "HSYNC_POSITIVE", "HsyncPositive"),
+            (Self::HSYNC_NEGATIVE.0, "HSYNC_NEGATIVE", "HsyncNegative"),
+            (Self::VSYNC_POSITIVE.0, "VSYNC_POSITIVE", "VsyncPositive"),
+            (Self::VSYNC_NEGATIVE.0, "VSYNC_NEGATIVE", "VsyncNegative"),
+            (Self::INTERLACE.0, "INTERLACE", "Interlace"),
+            (Self::DOUBLE_SCAN.0, "DOUBLE_SCAN", "DoubleScan"),
+            (Self::CSYNC.0, "CSYNC", "Csync"),
+            (Self::CSYNC_POSITIVE.0, "CSYNC_POSITIVE", "CsyncPositive"),
+            (Self::CSYNC_NEGATIVE.0, "CSYNC_NEGATIVE", "CsyncNegative"),
+            (Self::HSKEW_PRESENT.0, "HSKEW_PRESENT", "HskewPresent"),
+            (Self::BCAST.0, "BCAST", "Bcast"),
+            (Self::PIXEL_MULTIPLEX.0, "PIXEL_MULTIPLEX", "PixelMultiplex"),
+            (Self::DOUBLE_CLOCK.0, "DOUBLE_CLOCK", "DoubleClock"),
+            (Self::HALVE_CLOCK.0, "HALVE_CLOCK", "HalveClock"),
         ];
-        pretty_print_bitmask(fmt, self.0.into(), &variants)
+        pretty_print_bitmask(fmt, self.0, &variants)
     }
 }
-bitmask_binop!(ModeFlag, u16);
+bitmask_binop!(ModeFlag, u32);
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -1206,7 +1194,7 @@ pub struct ModeInfo {
     pub vsync_end: u16,
     pub vtotal: u16,
     pub name_len: u16,
-    pub mode_flags: u32,
+    pub mode_flags: ModeFlag,
 }
 impl TryParse for ModeInfo {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -1223,6 +1211,7 @@ impl TryParse for ModeInfo {
         let (vtotal, remaining) = u16::try_parse(remaining)?;
         let (name_len, remaining) = u16::try_parse(remaining)?;
         let (mode_flags, remaining) = u32::try_parse(remaining)?;
+        let mode_flags = mode_flags.into();
         let result = ModeInfo { id, width, height, dot_clock, hsync_start, hsync_end, htotal, hskew, vsync_start, vsync_end, vtotal, name_len, mode_flags };
         Ok((result, remaining))
     }
@@ -1242,7 +1231,7 @@ impl Serialize for ModeInfo {
         let vsync_end_bytes = self.vsync_end.serialize();
         let vtotal_bytes = self.vtotal.serialize();
         let name_len_bytes = self.name_len.serialize();
-        let mode_flags_bytes = self.mode_flags.serialize();
+        let mode_flags_bytes = u32::from(self.mode_flags).serialize();
         [
             id_bytes[0],
             id_bytes[1],
@@ -1292,7 +1281,7 @@ impl Serialize for ModeInfo {
         self.vsync_end.serialize_into(bytes);
         self.vtotal.serialize_into(bytes);
         self.name_len.serialize_into(bytes);
-        self.mode_flags.serialize_into(bytes);
+        u32::from(self.mode_flags).serialize_into(bytes);
     }
 }
 
@@ -2140,7 +2129,7 @@ impl<'input> ChangeOutputPropertyRequest<'input> {
             num_units_bytes[3],
         ];
         let length_so_far = length_so_far + request0.len();
-        assert_eq!(self.data.len(), usize::try_from(self.num_units.checked_mul(u32::from(self.format)).unwrap().checked_div(8u32).unwrap()).unwrap(), "`data` has an incorrect length");
+        assert_eq!(self.data.len(), usize::try_from(u32::from(self.num_units).checked_mul(u32::from(self.format)).unwrap().checked_div(8u32).unwrap()).unwrap(), "`data` has an incorrect length");
         let length_so_far = length_so_far + self.data.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
@@ -2162,7 +2151,7 @@ impl<'input> ChangeOutputPropertyRequest<'input> {
         let mode = mode.into();
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (num_units, remaining) = u32::try_parse(remaining)?;
-        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, num_units.checked_mul(u32::from(format)).ok_or(ParseError::InvalidExpression)?.checked_div(8u32).ok_or(ParseError::InvalidExpression)?.try_to_usize()?)?;
+        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, u32::from(num_units).checked_mul(u32::from(format)).ok_or(ParseError::InvalidExpression)?.checked_div(8u32).ok_or(ParseError::InvalidExpression)?.try_to_usize()?)?;
         let _ = remaining;
         Ok(ChangeOutputPropertyRequest {
             output,
@@ -2382,7 +2371,7 @@ impl TryParse for GetOutputPropertyReply {
         let (bytes_after, remaining) = u32::try_parse(remaining)?;
         let (num_items, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::InsufficientData)?;
-        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, num_items.checked_mul(u32::from(format).checked_div(8u32).ok_or(ParseError::InvalidExpression)?).ok_or(ParseError::InvalidExpression)?.try_to_usize()?)?;
+        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, u32::from(num_items).checked_mul(u32::from(format).checked_div(8u32).ok_or(ParseError::InvalidExpression)?).ok_or(ParseError::InvalidExpression)?.try_to_usize()?)?;
         let data = data.to_vec();
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
@@ -2412,7 +2401,7 @@ impl Serialize for GetOutputPropertyReply {
         self.bytes_after.serialize_into(bytes);
         self.num_items.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 12]);
-        assert_eq!(self.data.len(), usize::try_from(self.num_items.checked_mul(u32::from(self.format).checked_div(8u32).unwrap()).unwrap()).unwrap(), "`data` has an incorrect length");
+        assert_eq!(self.data.len(), usize::try_from(u32::from(self.num_items).checked_mul(u32::from(self.format).checked_div(8u32).unwrap()).unwrap()).unwrap(), "`data` has an incorrect length");
         bytes.extend_from_slice(&self.data);
     }
 }
@@ -2850,8 +2839,8 @@ pub struct GetCrtcInfoReply {
     pub width: u16,
     pub height: u16,
     pub mode: Mode,
-    pub rotation: u16,
-    pub rotations: u16,
+    pub rotation: Rotation,
+    pub rotations: Rotation,
     pub outputs: Vec<Output>,
     pub possible: Vec<Output>,
 }
@@ -2878,6 +2867,8 @@ impl TryParse for GetCrtcInfoReply {
             return Err(ParseError::InvalidValue);
         }
         let status = status.into();
+        let rotation = rotation.into();
+        let rotations = rotations.into();
         let result = GetCrtcInfoReply { status, sequence, length, timestamp, x, y, width, height, mode, rotation, rotations, outputs, possible };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
@@ -2905,8 +2896,8 @@ impl Serialize for GetCrtcInfoReply {
         self.width.serialize_into(bytes);
         self.height.serialize_into(bytes);
         self.mode.serialize_into(bytes);
-        self.rotation.serialize_into(bytes);
-        self.rotations.serialize_into(bytes);
+        u16::from(self.rotation).serialize_into(bytes);
+        u16::from(self.rotations).serialize_into(bytes);
         let num_outputs = u16::try_from(self.outputs.len()).expect("`outputs` has too many elements");
         num_outputs.serialize_into(bytes);
         let num_possible_outputs = u16::try_from(self.possible.len()).expect("`possible` has too many elements");
@@ -2955,7 +2946,7 @@ pub struct SetCrtcConfigRequest<'input> {
     pub x: i16,
     pub y: i16,
     pub mode: Mode,
-    pub rotation: u16,
+    pub rotation: Rotation,
     pub outputs: Cow<'input, [Output]>,
 }
 impl<'input> SetCrtcConfigRequest<'input> {
@@ -2968,7 +2959,7 @@ impl<'input> SetCrtcConfigRequest<'input> {
         let x_bytes = self.x.serialize();
         let y_bytes = self.y.serialize();
         let mode_bytes = self.mode.serialize();
-        let rotation_bytes = self.rotation.serialize();
+        let rotation_bytes = u16::from(self.rotation).serialize();
         let mut request0 = vec![
             major_opcode,
             SET_CRTC_CONFIG_REQUEST,
@@ -3021,6 +3012,7 @@ impl<'input> SetCrtcConfigRequest<'input> {
         let (y, remaining) = i16::try_parse(remaining)?;
         let (mode, remaining) = Mode::try_parse(remaining)?;
         let (rotation, remaining) = u16::try_parse(remaining)?;
+        let rotation = rotation.into();
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let mut remaining = remaining;
         // Length is 'everything left in the input'
@@ -4755,67 +4747,55 @@ impl GetProvidersReply {
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct ProviderCapability(u8);
+pub struct ProviderCapability(u32);
 impl ProviderCapability {
     pub const SOURCE_OUTPUT: Self = Self(1 << 0);
     pub const SINK_OUTPUT: Self = Self(1 << 1);
     pub const SOURCE_OFFLOAD: Self = Self(1 << 2);
     pub const SINK_OFFLOAD: Self = Self(1 << 3);
 }
-impl From<ProviderCapability> for u8 {
+impl From<ProviderCapability> for u32 {
     #[inline]
     fn from(input: ProviderCapability) -> Self {
         input.0
     }
 }
-impl From<ProviderCapability> for Option<u8> {
+impl From<ProviderCapability> for Option<u32> {
     #[inline]
     fn from(input: ProviderCapability) -> Self {
         Some(input.0)
     }
 }
-impl From<ProviderCapability> for u16 {
-    #[inline]
-    fn from(input: ProviderCapability) -> Self {
-        u16::from(input.0)
-    }
-}
-impl From<ProviderCapability> for Option<u16> {
-    #[inline]
-    fn from(input: ProviderCapability) -> Self {
-        Some(u16::from(input.0))
-    }
-}
-impl From<ProviderCapability> for u32 {
-    #[inline]
-    fn from(input: ProviderCapability) -> Self {
-        u32::from(input.0)
-    }
-}
-impl From<ProviderCapability> for Option<u32> {
-    #[inline]
-    fn from(input: ProviderCapability) -> Self {
-        Some(u32::from(input.0))
-    }
-}
 impl From<u8> for ProviderCapability {
     #[inline]
     fn from(value: u8) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u16> for ProviderCapability {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u32> for ProviderCapability {
+    #[inline]
+    fn from(value: u32) -> Self {
         Self(value)
     }
 }
 impl core::fmt::Debug for ProviderCapability  {
     fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
-            (Self::SOURCE_OUTPUT.0.into(), "SOURCE_OUTPUT", "SourceOutput"),
-            (Self::SINK_OUTPUT.0.into(), "SINK_OUTPUT", "SinkOutput"),
-            (Self::SOURCE_OFFLOAD.0.into(), "SOURCE_OFFLOAD", "SourceOffload"),
-            (Self::SINK_OFFLOAD.0.into(), "SINK_OFFLOAD", "SinkOffload"),
+            (Self::SOURCE_OUTPUT.0, "SOURCE_OUTPUT", "SourceOutput"),
+            (Self::SINK_OUTPUT.0, "SINK_OUTPUT", "SinkOutput"),
+            (Self::SOURCE_OFFLOAD.0, "SOURCE_OFFLOAD", "SourceOffload"),
+            (Self::SINK_OFFLOAD.0, "SINK_OFFLOAD", "SinkOffload"),
         ];
-        pretty_print_bitmask(fmt, self.0.into(), &variants)
+        pretty_print_bitmask(fmt, self.0, &variants)
     }
 }
-bitmask_binop!(ProviderCapability, u8);
+bitmask_binop!(ProviderCapability, u32);
 
 /// Opcode for the GetProviderInfo request
 pub const GET_PROVIDER_INFO_REQUEST: u8 = 33;
@@ -4886,7 +4866,7 @@ pub struct GetProviderInfoReply {
     pub sequence: u16,
     pub length: u32,
     pub timestamp: xproto::Timestamp,
-    pub capabilities: u32,
+    pub capabilities: ProviderCapability,
     pub crtcs: Vec<Crtc>,
     pub outputs: Vec<Output>,
     pub associated_providers: Vec<Provider>,
@@ -4916,6 +4896,7 @@ impl TryParse for GetProviderInfoReply {
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
+        let capabilities = capabilities.into();
         let result = GetProviderInfoReply { status, sequence, length, timestamp, capabilities, crtcs, outputs, associated_providers, associated_capability, name };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
@@ -4938,7 +4919,7 @@ impl Serialize for GetProviderInfoReply {
         self.sequence.serialize_into(bytes);
         self.length.serialize_into(bytes);
         self.timestamp.serialize_into(bytes);
-        self.capabilities.serialize_into(bytes);
+        u32::from(self.capabilities).serialize_into(bytes);
         let num_crtcs = u16::try_from(self.crtcs.len()).expect("`crtcs` has too many elements");
         num_crtcs.serialize_into(bytes);
         let num_outputs = u16::try_from(self.outputs.len()).expect("`outputs` has too many elements");
@@ -5545,7 +5526,7 @@ impl<'input> ChangeProviderPropertyRequest<'input> {
             num_items_bytes[3],
         ];
         let length_so_far = length_so_far + request0.len();
-        assert_eq!(self.data.len(), usize::try_from(self.num_items.checked_mul(u32::from(self.format).checked_div(8u32).unwrap()).unwrap()).unwrap(), "`data` has an incorrect length");
+        assert_eq!(self.data.len(), usize::try_from(u32::from(self.num_items).checked_mul(u32::from(self.format).checked_div(8u32).unwrap()).unwrap()).unwrap(), "`data` has an incorrect length");
         let length_so_far = length_so_far + self.data.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
@@ -5566,7 +5547,7 @@ impl<'input> ChangeProviderPropertyRequest<'input> {
         let (mode, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (num_items, remaining) = u32::try_parse(remaining)?;
-        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, num_items.checked_mul(u32::from(format).checked_div(8u32).ok_or(ParseError::InvalidExpression)?).ok_or(ParseError::InvalidExpression)?.try_to_usize()?)?;
+        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, u32::from(num_items).checked_mul(u32::from(format).checked_div(8u32).ok_or(ParseError::InvalidExpression)?).ok_or(ParseError::InvalidExpression)?.try_to_usize()?)?;
         let _ = remaining;
         Ok(ChangeProviderPropertyRequest {
             provider,
@@ -5786,7 +5767,7 @@ impl TryParse for GetProviderPropertyReply {
         let (bytes_after, remaining) = u32::try_parse(remaining)?;
         let (num_items, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::InsufficientData)?;
-        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, num_items.checked_mul(u32::from(format).checked_div(8u32).ok_or(ParseError::InvalidExpression)?).ok_or(ParseError::InvalidExpression)?.try_to_usize()?)?;
+        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, u32::from(num_items).checked_mul(u32::from(format).checked_div(8u32).ok_or(ParseError::InvalidExpression)?).ok_or(ParseError::InvalidExpression)?.try_to_usize()?)?;
         let data = data.to_vec();
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
@@ -5816,7 +5797,7 @@ impl Serialize for GetProviderPropertyReply {
         self.bytes_after.serialize_into(bytes);
         self.num_items.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 12]);
-        assert_eq!(self.data.len(), usize::try_from(self.num_items.checked_mul(u32::from(self.format).checked_div(8u32).unwrap()).unwrap()).unwrap(), "`data` has an incorrect length");
+        assert_eq!(self.data.len(), usize::try_from(u32::from(self.num_items).checked_mul(u32::from(self.format).checked_div(8u32).unwrap()).unwrap()).unwrap(), "`data` has an incorrect length");
         bytes.extend_from_slice(&self.data);
     }
 }
@@ -5827,7 +5808,7 @@ pub const SCREEN_CHANGE_NOTIFY_EVENT: u8 = 0;
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ScreenChangeNotifyEvent {
     pub response_type: u8,
-    pub rotation: u8,
+    pub rotation: Rotation,
     pub sequence: u16,
     pub timestamp: xproto::Timestamp,
     pub config_timestamp: xproto::Timestamp,
@@ -5856,6 +5837,7 @@ impl TryParse for ScreenChangeNotifyEvent {
         let (height, remaining) = u16::try_parse(remaining)?;
         let (mwidth, remaining) = u16::try_parse(remaining)?;
         let (mheight, remaining) = u16::try_parse(remaining)?;
+        let rotation = rotation.into();
         let subpixel_order = subpixel_order.into();
         let result = ScreenChangeNotifyEvent { response_type, rotation, sequence, timestamp, config_timestamp, root, request_window, size_id, subpixel_order, width, height, mwidth, mheight };
         let _ = remaining;
@@ -5868,7 +5850,7 @@ impl Serialize for ScreenChangeNotifyEvent {
     type Bytes = [u8; 32];
     fn serialize(&self) -> [u8; 32] {
         let response_type_bytes = self.response_type.serialize();
-        let rotation_bytes = self.rotation.serialize();
+        let rotation_bytes = (u16::from(self.rotation) as u8).serialize();
         let sequence_bytes = self.sequence.serialize();
         let timestamp_bytes = self.timestamp.serialize();
         let config_timestamp_bytes = self.config_timestamp.serialize();
@@ -5918,7 +5900,7 @@ impl Serialize for ScreenChangeNotifyEvent {
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(32);
         self.response_type.serialize_into(bytes);
-        self.rotation.serialize_into(bytes);
+        (u16::from(self.rotation) as u8).serialize_into(bytes);
         self.sequence.serialize_into(bytes);
         self.timestamp.serialize_into(bytes);
         self.config_timestamp.serialize_into(bytes);
@@ -5935,7 +5917,7 @@ impl Serialize for ScreenChangeNotifyEvent {
 impl From<&ScreenChangeNotifyEvent> for [u8; 32] {
     fn from(input: &ScreenChangeNotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
-        let rotation_bytes = input.rotation.serialize();
+        let rotation_bytes = (u16::from(input.rotation) as u8).serialize();
         let sequence_bytes = input.sequence.serialize();
         let timestamp_bytes = input.timestamp.serialize();
         let config_timestamp_bytes = input.config_timestamp.serialize();
@@ -6065,7 +6047,7 @@ pub struct CrtcChange {
     pub window: xproto::Window,
     pub crtc: Crtc,
     pub mode: Mode,
-    pub rotation: u16,
+    pub rotation: Rotation,
     pub x: i16,
     pub y: i16,
     pub width: u16,
@@ -6083,6 +6065,7 @@ impl TryParse for CrtcChange {
         let (y, remaining) = i16::try_parse(remaining)?;
         let (width, remaining) = u16::try_parse(remaining)?;
         let (height, remaining) = u16::try_parse(remaining)?;
+        let rotation = rotation.into();
         let result = CrtcChange { timestamp, window, crtc, mode, rotation, x, y, width, height };
         Ok((result, remaining))
     }
@@ -6094,7 +6077,7 @@ impl Serialize for CrtcChange {
         let window_bytes = self.window.serialize();
         let crtc_bytes = self.crtc.serialize();
         let mode_bytes = self.mode.serialize();
-        let rotation_bytes = self.rotation.serialize();
+        let rotation_bytes = u16::from(self.rotation).serialize();
         let x_bytes = self.x.serialize();
         let y_bytes = self.y.serialize();
         let width_bytes = self.width.serialize();
@@ -6136,7 +6119,7 @@ impl Serialize for CrtcChange {
         self.window.serialize_into(bytes);
         self.crtc.serialize_into(bytes);
         self.mode.serialize_into(bytes);
-        self.rotation.serialize_into(bytes);
+        u16::from(self.rotation).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 2]);
         self.x.serialize_into(bytes);
         self.y.serialize_into(bytes);
@@ -6154,7 +6137,7 @@ pub struct OutputChange {
     pub output: Output,
     pub crtc: Crtc,
     pub mode: Mode,
-    pub rotation: u16,
+    pub rotation: Rotation,
     pub connection: Connection,
     pub subpixel_order: render::SubPixel,
 }
@@ -6169,6 +6152,7 @@ impl TryParse for OutputChange {
         let (rotation, remaining) = u16::try_parse(remaining)?;
         let (connection, remaining) = u8::try_parse(remaining)?;
         let (subpixel_order, remaining) = u8::try_parse(remaining)?;
+        let rotation = rotation.into();
         let connection = connection.into();
         let subpixel_order = subpixel_order.into();
         let result = OutputChange { timestamp, config_timestamp, window, output, crtc, mode, rotation, connection, subpixel_order };
@@ -6184,7 +6168,7 @@ impl Serialize for OutputChange {
         let output_bytes = self.output.serialize();
         let crtc_bytes = self.crtc.serialize();
         let mode_bytes = self.mode.serialize();
-        let rotation_bytes = self.rotation.serialize();
+        let rotation_bytes = u16::from(self.rotation).serialize();
         let connection_bytes = u8::from(self.connection).serialize();
         let subpixel_order_bytes = (u32::from(self.subpixel_order) as u8).serialize();
         [
@@ -6226,7 +6210,7 @@ impl Serialize for OutputChange {
         self.output.serialize_into(bytes);
         self.crtc.serialize_into(bytes);
         self.mode.serialize_into(bytes);
-        self.rotation.serialize_into(bytes);
+        u16::from(self.rotation).serialize_into(bytes);
         u8::from(self.connection).serialize_into(bytes);
         (u32::from(self.subpixel_order) as u8).serialize_into(bytes);
     }

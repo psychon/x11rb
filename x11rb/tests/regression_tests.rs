@@ -260,13 +260,13 @@ fn test_send_event() -> Result<(), ConnectionError> {
     let conn = FakeConnection::default();
     let propagate = true;
     let destination: u32 = 0x1337;
-    let event_mask: u32 = 7;
+    let event_mask = x11rb_protocol::protocol::xproto::EventMask::BUTTON3_MOTION;
     conn.send_event(propagate, destination, event_mask, event)?;
 
     let mut expected = vec![x11rb::protocol::xproto::SEND_EVENT_REQUEST, propagate as _];
     expected.extend(&((12u16 + 32u16) / 4).to_ne_bytes());
     expected.extend(&destination.to_ne_bytes());
-    expected.extend(&event_mask.to_ne_bytes());
+    expected.extend(&u32::from(event_mask).to_ne_bytes());
     expected.extend(buffer.iter());
     conn.check_requests(&[(false, expected)]);
     Ok(())

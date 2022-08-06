@@ -9,6 +9,8 @@
 //! specific errors, events, or requests.
 
 #![allow(clippy::too_many_arguments)]
+// The code generator is simpler if it can always use conversions
+#![allow(clippy::useless_conversion)]
 
 #[allow(unused_imports)]
 use alloc::borrow::Cow;
@@ -612,7 +614,7 @@ pub struct Screen {
     pub default_colormap: Colormap,
     pub white_pixel: u32,
     pub black_pixel: u32,
-    pub current_input_masks: u32,
+    pub current_input_masks: EventMask,
     pub width_in_pixels: u16,
     pub height_in_pixels: u16,
     pub width_in_millimeters: u16,
@@ -644,6 +646,7 @@ impl TryParse for Screen {
         let (root_depth, remaining) = u8::try_parse(remaining)?;
         let (allowed_depths_len, remaining) = u8::try_parse(remaining)?;
         let (allowed_depths, remaining) = crate::x11_utils::parse_list::<Depth>(remaining, allowed_depths_len.try_to_usize()?)?;
+        let current_input_masks = current_input_masks.into();
         let backing_stores = backing_stores.into();
         let result = Screen { root, default_colormap, white_pixel, black_pixel, current_input_masks, width_in_pixels, height_in_pixels, width_in_millimeters, height_in_millimeters, min_installed_maps, max_installed_maps, root_visual, backing_stores, save_unders, root_depth, allowed_depths };
         Ok((result, remaining))
@@ -662,7 +665,7 @@ impl Serialize for Screen {
         self.default_colormap.serialize_into(bytes);
         self.white_pixel.serialize_into(bytes);
         self.black_pixel.serialize_into(bytes);
-        self.current_input_masks.serialize_into(bytes);
+        u32::from(self.current_input_masks).serialize_into(bytes);
         self.width_in_pixels.serialize_into(bytes);
         self.height_in_pixels.serialize_into(bytes);
         self.width_in_millimeters.serialize_into(bytes);
@@ -1328,7 +1331,7 @@ pub struct KeyPressEvent {
     pub root_y: i16,
     pub event_x: i16,
     pub event_y: i16,
-    pub state: u16,
+    pub state: KeyButMask,
     pub same_screen: bool,
 }
 impl TryParse for KeyPressEvent {
@@ -1348,6 +1351,7 @@ impl TryParse for KeyPressEvent {
         let (state, remaining) = u16::try_parse(remaining)?;
         let (same_screen, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
+        let state = state.into();
         let result = KeyPressEvent { response_type, detail, sequence, time, root, event, child, root_x, root_y, event_x, event_y, state, same_screen };
         let _ = remaining;
         let remaining = initial_value.get(32..)
@@ -1369,7 +1373,7 @@ impl Serialize for KeyPressEvent {
         let root_y_bytes = self.root_y.serialize();
         let event_x_bytes = self.event_x.serialize();
         let event_y_bytes = self.event_y.serialize();
-        let state_bytes = self.state.serialize();
+        let state_bytes = u16::from(self.state).serialize();
         let same_screen_bytes = self.same_screen.serialize();
         [
             response_type_bytes[0],
@@ -1419,7 +1423,7 @@ impl Serialize for KeyPressEvent {
         self.root_y.serialize_into(bytes);
         self.event_x.serialize_into(bytes);
         self.event_y.serialize_into(bytes);
-        self.state.serialize_into(bytes);
+        u16::from(self.state).serialize_into(bytes);
         self.same_screen.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 1]);
     }
@@ -1437,7 +1441,7 @@ impl From<&KeyPressEvent> for [u8; 32] {
         let root_y_bytes = input.root_y.serialize();
         let event_x_bytes = input.event_x.serialize();
         let event_y_bytes = input.event_y.serialize();
-        let state_bytes = input.state.serialize();
+        let state_bytes = u16::from(input.state).serialize();
         let same_screen_bytes = input.same_screen.serialize();
         [
             response_type_bytes[0],
@@ -1587,7 +1591,7 @@ pub struct ButtonPressEvent {
     pub root_y: i16,
     pub event_x: i16,
     pub event_y: i16,
-    pub state: u16,
+    pub state: KeyButMask,
     pub same_screen: bool,
 }
 impl TryParse for ButtonPressEvent {
@@ -1607,6 +1611,7 @@ impl TryParse for ButtonPressEvent {
         let (state, remaining) = u16::try_parse(remaining)?;
         let (same_screen, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
+        let state = state.into();
         let result = ButtonPressEvent { response_type, detail, sequence, time, root, event, child, root_x, root_y, event_x, event_y, state, same_screen };
         let _ = remaining;
         let remaining = initial_value.get(32..)
@@ -1628,7 +1633,7 @@ impl Serialize for ButtonPressEvent {
         let root_y_bytes = self.root_y.serialize();
         let event_x_bytes = self.event_x.serialize();
         let event_y_bytes = self.event_y.serialize();
-        let state_bytes = self.state.serialize();
+        let state_bytes = u16::from(self.state).serialize();
         let same_screen_bytes = self.same_screen.serialize();
         [
             response_type_bytes[0],
@@ -1678,7 +1683,7 @@ impl Serialize for ButtonPressEvent {
         self.root_y.serialize_into(bytes);
         self.event_x.serialize_into(bytes);
         self.event_y.serialize_into(bytes);
-        self.state.serialize_into(bytes);
+        u16::from(self.state).serialize_into(bytes);
         self.same_screen.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 1]);
     }
@@ -1696,7 +1701,7 @@ impl From<&ButtonPressEvent> for [u8; 32] {
         let root_y_bytes = input.root_y.serialize();
         let event_x_bytes = input.event_x.serialize();
         let event_y_bytes = input.event_y.serialize();
-        let state_bytes = input.state.serialize();
+        let state_bytes = u16::from(input.state).serialize();
         let same_screen_bytes = input.same_screen.serialize();
         [
             response_type_bytes[0],
@@ -1843,7 +1848,7 @@ pub struct MotionNotifyEvent {
     pub root_y: i16,
     pub event_x: i16,
     pub event_y: i16,
-    pub state: u16,
+    pub state: KeyButMask,
     pub same_screen: bool,
 }
 impl TryParse for MotionNotifyEvent {
@@ -1864,6 +1869,7 @@ impl TryParse for MotionNotifyEvent {
         let (same_screen, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let detail = detail.into();
+        let state = state.into();
         let result = MotionNotifyEvent { response_type, detail, sequence, time, root, event, child, root_x, root_y, event_x, event_y, state, same_screen };
         let _ = remaining;
         let remaining = initial_value.get(32..)
@@ -1885,7 +1891,7 @@ impl Serialize for MotionNotifyEvent {
         let root_y_bytes = self.root_y.serialize();
         let event_x_bytes = self.event_x.serialize();
         let event_y_bytes = self.event_y.serialize();
-        let state_bytes = self.state.serialize();
+        let state_bytes = u16::from(self.state).serialize();
         let same_screen_bytes = self.same_screen.serialize();
         [
             response_type_bytes[0],
@@ -1935,7 +1941,7 @@ impl Serialize for MotionNotifyEvent {
         self.root_y.serialize_into(bytes);
         self.event_x.serialize_into(bytes);
         self.event_y.serialize_into(bytes);
-        self.state.serialize_into(bytes);
+        u16::from(self.state).serialize_into(bytes);
         self.same_screen.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 1]);
     }
@@ -1953,7 +1959,7 @@ impl From<&MotionNotifyEvent> for [u8; 32] {
         let root_y_bytes = input.root_y.serialize();
         let event_x_bytes = input.event_x.serialize();
         let event_y_bytes = input.event_y.serialize();
-        let state_bytes = input.state.serialize();
+        let state_bytes = u16::from(input.state).serialize();
         let same_screen_bytes = input.same_screen.serialize();
         [
             response_type_bytes[0],
@@ -2162,7 +2168,7 @@ pub struct EnterNotifyEvent {
     pub root_y: i16,
     pub event_x: i16,
     pub event_y: i16,
-    pub state: u16,
+    pub state: KeyButMask,
     pub mode: NotifyMode,
     pub same_screen_focus: u8,
 }
@@ -2184,6 +2190,7 @@ impl TryParse for EnterNotifyEvent {
         let (mode, remaining) = u8::try_parse(remaining)?;
         let (same_screen_focus, remaining) = u8::try_parse(remaining)?;
         let detail = detail.into();
+        let state = state.into();
         let mode = mode.into();
         let result = EnterNotifyEvent { response_type, detail, sequence, time, root, event, child, root_x, root_y, event_x, event_y, state, mode, same_screen_focus };
         let _ = remaining;
@@ -2206,7 +2213,7 @@ impl Serialize for EnterNotifyEvent {
         let root_y_bytes = self.root_y.serialize();
         let event_x_bytes = self.event_x.serialize();
         let event_y_bytes = self.event_y.serialize();
-        let state_bytes = self.state.serialize();
+        let state_bytes = u16::from(self.state).serialize();
         let mode_bytes = u8::from(self.mode).serialize();
         let same_screen_focus_bytes = self.same_screen_focus.serialize();
         [
@@ -2257,7 +2264,7 @@ impl Serialize for EnterNotifyEvent {
         self.root_y.serialize_into(bytes);
         self.event_x.serialize_into(bytes);
         self.event_y.serialize_into(bytes);
-        self.state.serialize_into(bytes);
+        u16::from(self.state).serialize_into(bytes);
         u8::from(self.mode).serialize_into(bytes);
         self.same_screen_focus.serialize_into(bytes);
     }
@@ -2275,7 +2282,7 @@ impl From<&EnterNotifyEvent> for [u8; 32] {
         let root_y_bytes = input.root_y.serialize();
         let event_x_bytes = input.event_x.serialize();
         let event_y_bytes = input.event_y.serialize();
-        let state_bytes = input.state.serialize();
+        let state_bytes = u16::from(input.state).serialize();
         let mode_bytes = u8::from(input.mode).serialize();
         let same_screen_focus_bytes = input.same_screen_focus.serialize();
         [
@@ -4111,7 +4118,7 @@ pub struct ConfigureRequestEvent {
     pub width: u16,
     pub height: u16,
     pub border_width: u16,
-    pub value_mask: u16,
+    pub value_mask: ConfigWindow,
 }
 impl TryParse for ConfigureRequestEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -4129,6 +4136,7 @@ impl TryParse for ConfigureRequestEvent {
         let (border_width, remaining) = u16::try_parse(remaining)?;
         let (value_mask, remaining) = u16::try_parse(remaining)?;
         let stack_mode = stack_mode.into();
+        let value_mask = value_mask.into();
         let result = ConfigureRequestEvent { response_type, stack_mode, sequence, parent, window, sibling, x, y, width, height, border_width, value_mask };
         let _ = remaining;
         let remaining = initial_value.get(32..)
@@ -4150,7 +4158,7 @@ impl Serialize for ConfigureRequestEvent {
         let width_bytes = self.width.serialize();
         let height_bytes = self.height.serialize();
         let border_width_bytes = self.border_width.serialize();
-        let value_mask_bytes = self.value_mask.serialize();
+        let value_mask_bytes = u16::from(self.value_mask).serialize();
         [
             response_type_bytes[0],
             stack_mode_bytes[0],
@@ -4195,7 +4203,7 @@ impl Serialize for ConfigureRequestEvent {
         self.width.serialize_into(bytes);
         self.height.serialize_into(bytes);
         self.border_width.serialize_into(bytes);
-        self.value_mask.serialize_into(bytes);
+        u16::from(self.value_mask).serialize_into(bytes);
     }
 }
 impl From<&ConfigureRequestEvent> for [u8; 32] {
@@ -4211,7 +4219,7 @@ impl From<&ConfigureRequestEvent> for [u8; 32] {
         let width_bytes = input.width.serialize();
         let height_bytes = input.height.serialize();
         let border_width_bytes = input.border_width.serialize();
-        let value_mask_bytes = input.value_mask.serialize();
+        let value_mask_bytes = u16::from(input.value_mask).serialize();
         [
             response_type_bytes[0],
             stack_mode_bytes[0],
@@ -6545,7 +6553,7 @@ impl core::fmt::Debug for WindowClass  {
 /// parent's cursor will cause an immediate change in the displayed cursor.
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct CW(u16);
+pub struct CW(u32);
 impl CW {
     pub const BACK_PIXMAP: Self = Self(1 << 0);
     pub const BACK_PIXEL: Self = Self(1 << 1);
@@ -6563,28 +6571,16 @@ impl CW {
     pub const COLORMAP: Self = Self(1 << 13);
     pub const CURSOR: Self = Self(1 << 14);
 }
-impl From<CW> for u16 {
+impl From<CW> for u32 {
     #[inline]
     fn from(input: CW) -> Self {
         input.0
     }
 }
-impl From<CW> for Option<u16> {
-    #[inline]
-    fn from(input: CW) -> Self {
-        Some(input.0)
-    }
-}
-impl From<CW> for u32 {
-    #[inline]
-    fn from(input: CW) -> Self {
-        u32::from(input.0)
-    }
-}
 impl From<CW> for Option<u32> {
     #[inline]
     fn from(input: CW) -> Self {
-        Some(u32::from(input.0))
+        Some(input.0)
     }
 }
 impl From<u8> for CW {
@@ -6596,32 +6592,38 @@ impl From<u8> for CW {
 impl From<u16> for CW {
     #[inline]
     fn from(value: u16) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u32> for CW {
+    #[inline]
+    fn from(value: u32) -> Self {
         Self(value)
     }
 }
 impl core::fmt::Debug for CW  {
     fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
-            (Self::BACK_PIXMAP.0.into(), "BACK_PIXMAP", "BackPixmap"),
-            (Self::BACK_PIXEL.0.into(), "BACK_PIXEL", "BackPixel"),
-            (Self::BORDER_PIXMAP.0.into(), "BORDER_PIXMAP", "BorderPixmap"),
-            (Self::BORDER_PIXEL.0.into(), "BORDER_PIXEL", "BorderPixel"),
-            (Self::BIT_GRAVITY.0.into(), "BIT_GRAVITY", "BitGravity"),
-            (Self::WIN_GRAVITY.0.into(), "WIN_GRAVITY", "WinGravity"),
-            (Self::BACKING_STORE.0.into(), "BACKING_STORE", "BackingStore"),
-            (Self::BACKING_PLANES.0.into(), "BACKING_PLANES", "BackingPlanes"),
-            (Self::BACKING_PIXEL.0.into(), "BACKING_PIXEL", "BackingPixel"),
-            (Self::OVERRIDE_REDIRECT.0.into(), "OVERRIDE_REDIRECT", "OverrideRedirect"),
-            (Self::SAVE_UNDER.0.into(), "SAVE_UNDER", "SaveUnder"),
-            (Self::EVENT_MASK.0.into(), "EVENT_MASK", "EventMask"),
-            (Self::DONT_PROPAGATE.0.into(), "DONT_PROPAGATE", "DontPropagate"),
-            (Self::COLORMAP.0.into(), "COLORMAP", "Colormap"),
-            (Self::CURSOR.0.into(), "CURSOR", "Cursor"),
+            (Self::BACK_PIXMAP.0, "BACK_PIXMAP", "BackPixmap"),
+            (Self::BACK_PIXEL.0, "BACK_PIXEL", "BackPixel"),
+            (Self::BORDER_PIXMAP.0, "BORDER_PIXMAP", "BorderPixmap"),
+            (Self::BORDER_PIXEL.0, "BORDER_PIXEL", "BorderPixel"),
+            (Self::BIT_GRAVITY.0, "BIT_GRAVITY", "BitGravity"),
+            (Self::WIN_GRAVITY.0, "WIN_GRAVITY", "WinGravity"),
+            (Self::BACKING_STORE.0, "BACKING_STORE", "BackingStore"),
+            (Self::BACKING_PLANES.0, "BACKING_PLANES", "BackingPlanes"),
+            (Self::BACKING_PIXEL.0, "BACKING_PIXEL", "BackingPixel"),
+            (Self::OVERRIDE_REDIRECT.0, "OVERRIDE_REDIRECT", "OverrideRedirect"),
+            (Self::SAVE_UNDER.0, "SAVE_UNDER", "SaveUnder"),
+            (Self::EVENT_MASK.0, "EVENT_MASK", "EventMask"),
+            (Self::DONT_PROPAGATE.0, "DONT_PROPAGATE", "DontPropagate"),
+            (Self::COLORMAP.0, "COLORMAP", "Colormap"),
+            (Self::CURSOR.0, "CURSOR", "Cursor"),
         ];
-        pretty_print_bitmask(fmt, self.0.into(), &variants)
+        pretty_print_bitmask(fmt, self.0, &variants)
     }
 }
-bitmask_binop!(CW, u16);
+bitmask_binop!(CW, u32);
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -6776,14 +6778,14 @@ pub struct CreateWindowAux {
     pub backing_pixel: Option<u32>,
     pub override_redirect: Option<Bool32>,
     pub save_under: Option<Bool32>,
-    pub event_mask: Option<u32>,
-    pub do_not_propogate_mask: Option<u32>,
+    pub event_mask: Option<EventMask>,
+    pub do_not_propogate_mask: Option<EventMask>,
     pub colormap: Option<Colormap>,
     pub cursor: Option<Cursor>,
 }
 impl CreateWindowAux {
     fn try_parse(value: &[u8], value_mask: u32) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = value_mask;
+        let switch_expr = u32::from(value_mask);
         let mut outer_remaining = value;
         let background_pixmap = if switch_expr & u32::from(CW::BACK_PIXMAP) != 0 {
             let remaining = outer_remaining;
@@ -6879,6 +6881,7 @@ impl CreateWindowAux {
         let event_mask = if switch_expr & u32::from(CW::EVENT_MASK) != 0 {
             let remaining = outer_remaining;
             let (event_mask, remaining) = u32::try_parse(remaining)?;
+            let event_mask = event_mask.into();
             outer_remaining = remaining;
             Some(event_mask)
         } else {
@@ -6887,6 +6890,7 @@ impl CreateWindowAux {
         let do_not_propogate_mask = if switch_expr & u32::from(CW::DONT_PROPAGATE) != 0 {
             let remaining = outer_remaining;
             let (do_not_propogate_mask, remaining) = u32::try_parse(remaining)?;
+            let do_not_propogate_mask = do_not_propogate_mask.into();
             outer_remaining = remaining;
             Some(do_not_propogate_mask)
         } else {
@@ -6916,7 +6920,7 @@ impl CreateWindowAux {
     #[allow(dead_code)]
     fn serialize(&self, value_mask: u32) -> Vec<u8> {
         let mut result = Vec::new();
-        self.serialize_into(&mut result, value_mask);
+        self.serialize_into(&mut result, u32::from(value_mask));
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, value_mask: u32) {
@@ -6955,10 +6959,10 @@ impl CreateWindowAux {
             save_under.serialize_into(bytes);
         }
         if let Some(event_mask) = self.event_mask {
-            event_mask.serialize_into(bytes);
+            u32::from(event_mask).serialize_into(bytes);
         }
         if let Some(do_not_propogate_mask) = self.do_not_propogate_mask {
-            do_not_propogate_mask.serialize_into(bytes);
+            u32::from(do_not_propogate_mask).serialize_into(bytes);
         }
         if let Some(colormap) = self.colormap {
             colormap.serialize_into(bytes);
@@ -7092,13 +7096,13 @@ impl CreateWindowAux {
     }
     /// Set the `event_mask` field of this structure.
     #[must_use]
-    pub fn event_mask<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+    pub fn event_mask<I>(mut self, value: I) -> Self where I: Into<Option<EventMask>> {
         self.event_mask = value.into();
         self
     }
     /// Set the `do_not_propogate_mask` field of this structure.
     #[must_use]
-    pub fn do_not_propogate_mask<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+    pub fn do_not_propogate_mask<I>(mut self, value: I) -> Self where I: Into<Option<EventMask>> {
         self.do_not_propogate_mask = value.into();
         self
     }
@@ -7238,7 +7242,7 @@ impl<'input> CreateWindowRequest<'input> {
             value_mask_bytes[3],
         ];
         let length_so_far = length_so_far + request0.len();
-        let value_list_bytes = self.value_list.serialize(value_mask);
+        let value_list_bytes = self.value_list.serialize(u32::from(value_mask));
         let length_so_far = length_so_far + value_list_bytes.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
@@ -7266,7 +7270,7 @@ impl<'input> CreateWindowRequest<'input> {
         let class = class.into();
         let (visual, remaining) = Visualid::try_parse(remaining)?;
         let (value_mask, remaining) = u32::try_parse(remaining)?;
-        let (value_list, remaining) = CreateWindowAux::try_parse(remaining, value_mask)?;
+        let (value_list, remaining) = CreateWindowAux::try_parse(remaining, u32::from(value_mask))?;
         let _ = remaining;
         Ok(CreateWindowRequest {
             depth,
@@ -7327,14 +7331,14 @@ pub struct ChangeWindowAttributesAux {
     pub backing_pixel: Option<u32>,
     pub override_redirect: Option<Bool32>,
     pub save_under: Option<Bool32>,
-    pub event_mask: Option<u32>,
-    pub do_not_propogate_mask: Option<u32>,
+    pub event_mask: Option<EventMask>,
+    pub do_not_propogate_mask: Option<EventMask>,
     pub colormap: Option<Colormap>,
     pub cursor: Option<Cursor>,
 }
 impl ChangeWindowAttributesAux {
     fn try_parse(value: &[u8], value_mask: u32) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = value_mask;
+        let switch_expr = u32::from(value_mask);
         let mut outer_remaining = value;
         let background_pixmap = if switch_expr & u32::from(CW::BACK_PIXMAP) != 0 {
             let remaining = outer_remaining;
@@ -7430,6 +7434,7 @@ impl ChangeWindowAttributesAux {
         let event_mask = if switch_expr & u32::from(CW::EVENT_MASK) != 0 {
             let remaining = outer_remaining;
             let (event_mask, remaining) = u32::try_parse(remaining)?;
+            let event_mask = event_mask.into();
             outer_remaining = remaining;
             Some(event_mask)
         } else {
@@ -7438,6 +7443,7 @@ impl ChangeWindowAttributesAux {
         let do_not_propogate_mask = if switch_expr & u32::from(CW::DONT_PROPAGATE) != 0 {
             let remaining = outer_remaining;
             let (do_not_propogate_mask, remaining) = u32::try_parse(remaining)?;
+            let do_not_propogate_mask = do_not_propogate_mask.into();
             outer_remaining = remaining;
             Some(do_not_propogate_mask)
         } else {
@@ -7467,7 +7473,7 @@ impl ChangeWindowAttributesAux {
     #[allow(dead_code)]
     fn serialize(&self, value_mask: u32) -> Vec<u8> {
         let mut result = Vec::new();
-        self.serialize_into(&mut result, value_mask);
+        self.serialize_into(&mut result, u32::from(value_mask));
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, value_mask: u32) {
@@ -7506,10 +7512,10 @@ impl ChangeWindowAttributesAux {
             save_under.serialize_into(bytes);
         }
         if let Some(event_mask) = self.event_mask {
-            event_mask.serialize_into(bytes);
+            u32::from(event_mask).serialize_into(bytes);
         }
         if let Some(do_not_propogate_mask) = self.do_not_propogate_mask {
-            do_not_propogate_mask.serialize_into(bytes);
+            u32::from(do_not_propogate_mask).serialize_into(bytes);
         }
         if let Some(colormap) = self.colormap {
             colormap.serialize_into(bytes);
@@ -7643,13 +7649,13 @@ impl ChangeWindowAttributesAux {
     }
     /// Set the `event_mask` field of this structure.
     #[must_use]
-    pub fn event_mask<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+    pub fn event_mask<I>(mut self, value: I) -> Self where I: Into<Option<EventMask>> {
         self.event_mask = value.into();
         self
     }
     /// Set the `do_not_propogate_mask` field of this structure.
     #[must_use]
-    pub fn do_not_propogate_mask<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+    pub fn do_not_propogate_mask<I>(mut self, value: I) -> Self where I: Into<Option<EventMask>> {
         self.do_not_propogate_mask = value.into();
         self
     }
@@ -7717,7 +7723,7 @@ impl<'input> ChangeWindowAttributesRequest<'input> {
             value_mask_bytes[3],
         ];
         let length_so_far = length_so_far + request0.len();
-        let value_list_bytes = self.value_list.serialize(value_mask);
+        let value_list_bytes = self.value_list.serialize(u32::from(value_mask));
         let length_so_far = length_so_far + value_list_bytes.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
@@ -7736,7 +7742,7 @@ impl<'input> ChangeWindowAttributesRequest<'input> {
         let _ = remaining;
         let (window, remaining) = Window::try_parse(value)?;
         let (value_mask, remaining) = u32::try_parse(remaining)?;
-        let (value_list, remaining) = ChangeWindowAttributesAux::try_parse(remaining, value_mask)?;
+        let (value_list, remaining) = ChangeWindowAttributesAux::try_parse(remaining, u32::from(value_mask))?;
         let _ = remaining;
         Ok(ChangeWindowAttributesRequest {
             window,
@@ -7927,9 +7933,9 @@ pub struct GetWindowAttributesReply {
     pub map_state: MapState,
     pub override_redirect: bool,
     pub colormap: Colormap,
-    pub all_event_masks: u32,
-    pub your_event_mask: u32,
-    pub do_not_propagate_mask: u16,
+    pub all_event_masks: EventMask,
+    pub your_event_mask: EventMask,
+    pub do_not_propagate_mask: EventMask,
 }
 impl TryParse for GetWindowAttributesReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -7961,6 +7967,9 @@ impl TryParse for GetWindowAttributesReply {
         let bit_gravity = bit_gravity.into();
         let win_gravity = win_gravity.into();
         let map_state = map_state.into();
+        let all_event_masks = all_event_masks.into();
+        let your_event_mask = your_event_mask.into();
+        let do_not_propagate_mask = do_not_propagate_mask.into();
         let result = GetWindowAttributesReply { backing_store, sequence, length, visual, class, bit_gravity, win_gravity, backing_planes, backing_pixel, save_under, map_is_installed, map_state, override_redirect, colormap, all_event_masks, your_event_mask, do_not_propagate_mask };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
@@ -7986,9 +7995,9 @@ impl Serialize for GetWindowAttributesReply {
         let map_state_bytes = u8::from(self.map_state).serialize();
         let override_redirect_bytes = self.override_redirect.serialize();
         let colormap_bytes = self.colormap.serialize();
-        let all_event_masks_bytes = self.all_event_masks.serialize();
-        let your_event_mask_bytes = self.your_event_mask.serialize();
-        let do_not_propagate_mask_bytes = self.do_not_propagate_mask.serialize();
+        let all_event_masks_bytes = u32::from(self.all_event_masks).serialize();
+        let your_event_mask_bytes = u32::from(self.your_event_mask).serialize();
+        let do_not_propagate_mask_bytes = (u32::from(self.do_not_propagate_mask) as u16).serialize();
         [
             response_type_bytes[0],
             backing_store_bytes[0],
@@ -8054,9 +8063,9 @@ impl Serialize for GetWindowAttributesReply {
         u8::from(self.map_state).serialize_into(bytes);
         self.override_redirect.serialize_into(bytes);
         self.colormap.serialize_into(bytes);
-        self.all_event_masks.serialize_into(bytes);
-        self.your_event_mask.serialize_into(bytes);
-        self.do_not_propagate_mask.serialize_into(bytes);
+        u32::from(self.all_event_masks).serialize_into(bytes);
+        u32::from(self.your_event_mask).serialize_into(bytes);
+        (u32::from(self.do_not_propagate_mask) as u16).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 2]);
     }
 }
@@ -8726,7 +8735,7 @@ impl crate::x11_utils::VoidRequest for UnmapSubwindowsRequest {
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct ConfigWindow(u8);
+pub struct ConfigWindow(u16);
 impl ConfigWindow {
     pub const X: Self = Self(1 << 0);
     pub const Y: Self = Self(1 << 1);
@@ -8736,28 +8745,16 @@ impl ConfigWindow {
     pub const SIBLING: Self = Self(1 << 5);
     pub const STACK_MODE: Self = Self(1 << 6);
 }
-impl From<ConfigWindow> for u8 {
+impl From<ConfigWindow> for u16 {
     #[inline]
     fn from(input: ConfigWindow) -> Self {
         input.0
     }
 }
-impl From<ConfigWindow> for Option<u8> {
-    #[inline]
-    fn from(input: ConfigWindow) -> Self {
-        Some(input.0)
-    }
-}
-impl From<ConfigWindow> for u16 {
-    #[inline]
-    fn from(input: ConfigWindow) -> Self {
-        u16::from(input.0)
-    }
-}
 impl From<ConfigWindow> for Option<u16> {
     #[inline]
     fn from(input: ConfigWindow) -> Self {
-        Some(u16::from(input.0))
+        Some(input.0)
     }
 }
 impl From<ConfigWindow> for u32 {
@@ -8775,6 +8772,12 @@ impl From<ConfigWindow> for Option<u32> {
 impl From<u8> for ConfigWindow {
     #[inline]
     fn from(value: u8) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u16> for ConfigWindow {
+    #[inline]
+    fn from(value: u16) -> Self {
         Self(value)
     }
 }
@@ -8792,7 +8795,7 @@ impl core::fmt::Debug for ConfigWindow  {
         pretty_print_bitmask(fmt, self.0.into(), &variants)
     }
 }
-bitmask_binop!(ConfigWindow, u8);
+bitmask_binop!(ConfigWindow, u16);
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -8861,7 +8864,7 @@ pub struct ConfigureWindowAux {
 }
 impl ConfigureWindowAux {
     fn try_parse(value: &[u8], value_mask: u16) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = value_mask;
+        let switch_expr = u16::from(value_mask);
         let mut outer_remaining = value;
         let x = if switch_expr & u16::from(ConfigWindow::X) != 0 {
             let remaining = outer_remaining;
@@ -8928,7 +8931,7 @@ impl ConfigureWindowAux {
     #[allow(dead_code)]
     fn serialize(&self, value_mask: u16) -> Vec<u8> {
         let mut result = Vec::new();
-        self.serialize_into(&mut result, value_mask);
+        self.serialize_into(&mut result, u16::from(value_mask));
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, value_mask: u16) {
@@ -9039,25 +9042,26 @@ impl ConfigureWindowAux {
     /// to handle `ConfigureRequestEvent`s.
     pub fn from_configure_request(event: &ConfigureRequestEvent) -> Self {
         let mut result = Self::new();
-        if event.value_mask & u16::from(ConfigWindow::X) != 0 {
+        let value_mask = u16::from(event.value_mask);
+        if value_mask & u16::from(ConfigWindow::X) != 0 {
             result = result.x(i32::from(event.x));
         }
-        if event.value_mask & u16::from(ConfigWindow::Y) != 0 {
+        if value_mask & u16::from(ConfigWindow::Y) != 0 {
             result = result.y(i32::from(event.y));
         }
-        if event.value_mask & u16::from(ConfigWindow::WIDTH) != 0 {
+        if value_mask & u16::from(ConfigWindow::WIDTH) != 0 {
             result = result.width(u32::from(event.width));
         }
-        if event.value_mask & u16::from(ConfigWindow::HEIGHT) != 0 {
+        if value_mask & u16::from(ConfigWindow::HEIGHT) != 0 {
             result = result.height(u32::from(event.height));
         }
-        if event.value_mask & u16::from(ConfigWindow::BORDER_WIDTH) != 0 {
+        if value_mask & u16::from(ConfigWindow::BORDER_WIDTH) != 0 {
             result = result.border_width(u32::from(event.border_width));
         }
-        if event.value_mask & u16::from(ConfigWindow::SIBLING) != 0 {
+        if value_mask & u16::from(ConfigWindow::SIBLING) != 0 {
             result = result.sibling(event.sibling);
         }
-        if event.value_mask & u16::from(ConfigWindow::STACK_MODE) != 0 {
+        if value_mask & u16::from(ConfigWindow::STACK_MODE) != 0 {
             result = result.stack_mode(event.stack_mode);
         }
         result
@@ -9143,7 +9147,7 @@ impl<'input> ConfigureWindowRequest<'input> {
             0,
         ];
         let length_so_far = length_so_far + request0.len();
-        let value_list_bytes = self.value_list.serialize(value_mask);
+        let value_list_bytes = self.value_list.serialize(u16::from(value_mask));
         let length_so_far = length_so_far + value_list_bytes.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
@@ -9163,7 +9167,7 @@ impl<'input> ConfigureWindowRequest<'input> {
         let (window, remaining) = Window::try_parse(value)?;
         let (value_mask, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
-        let (value_list, remaining) = ConfigureWindowAux::try_parse(remaining, value_mask)?;
+        let (value_list, remaining) = ConfigureWindowAux::try_parse(remaining, u16::from(value_mask))?;
         let _ = remaining;
         Ok(ConfigureWindowRequest {
             window,
@@ -10161,7 +10165,7 @@ impl<'input> ChangePropertyRequest<'input> {
             data_len_bytes[3],
         ];
         let length_so_far = length_so_far + request0.len();
-        assert_eq!(self.data.len(), usize::try_from(self.data_len.checked_mul(u32::from(self.format)).unwrap().checked_div(8u32).unwrap()).unwrap(), "`data` has an incorrect length");
+        assert_eq!(self.data.len(), usize::try_from(u32::from(self.data_len).checked_mul(u32::from(self.format)).unwrap().checked_div(8u32).unwrap()).unwrap(), "`data` has an incorrect length");
         let length_so_far = length_so_far + self.data.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
@@ -10185,7 +10189,7 @@ impl<'input> ChangePropertyRequest<'input> {
         let (format, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let (data_len, remaining) = u32::try_parse(remaining)?;
-        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, data_len.checked_mul(u32::from(format)).ok_or(ParseError::InvalidExpression)?.checked_div(8u32).ok_or(ParseError::InvalidExpression)?.try_to_usize()?)?;
+        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, u32::from(data_len).checked_mul(u32::from(format)).ok_or(ParseError::InvalidExpression)?.checked_div(8u32).ok_or(ParseError::InvalidExpression)?.try_to_usize()?)?;
         let _ = remaining;
         Ok(ChangePropertyRequest {
             mode,
@@ -10693,7 +10697,7 @@ impl TryParse for GetPropertyReply {
         let (bytes_after, remaining) = u32::try_parse(remaining)?;
         let (value_len, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::InsufficientData)?;
-        let (value, remaining) = crate::x11_utils::parse_u8_list(remaining, value_len.checked_mul(u32::from(format).checked_div(8u32).ok_or(ParseError::InvalidExpression)?).ok_or(ParseError::InvalidExpression)?.try_to_usize()?)?;
+        let (value, remaining) = crate::x11_utils::parse_u8_list(remaining, u32::from(value_len).checked_mul(u32::from(format).checked_div(8u32).ok_or(ParseError::InvalidExpression)?).ok_or(ParseError::InvalidExpression)?.try_to_usize()?)?;
         let value = value.to_vec();
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
@@ -10723,7 +10727,7 @@ impl Serialize for GetPropertyReply {
         self.bytes_after.serialize_into(bytes);
         self.value_len.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 12]);
-        assert_eq!(self.value.len(), usize::try_from(self.value_len.checked_mul(u32::from(self.format).checked_div(8u32).unwrap()).unwrap()).unwrap(), "`value` has an incorrect length");
+        assert_eq!(self.value.len(), usize::try_from(u32::from(self.value_len).checked_mul(u32::from(self.format).checked_div(8u32).unwrap()).unwrap()).unwrap(), "`value` has an incorrect length");
         bytes.extend_from_slice(&self.value);
     }
 }
@@ -11323,7 +11327,7 @@ pub const SEND_EVENT_REQUEST: u8 = 25;
 pub struct SendEventRequest<'input> {
     pub propagate: bool,
     pub destination: Window,
-    pub event_mask: u32,
+    pub event_mask: EventMask,
     pub event: Cow<'input, [u8; 32]>,
 }
 impl<'input> SendEventRequest<'input> {
@@ -11332,7 +11336,7 @@ impl<'input> SendEventRequest<'input> {
         let length_so_far = 0;
         let propagate_bytes = self.propagate.serialize();
         let destination_bytes = self.destination.serialize();
-        let event_mask_bytes = self.event_mask.serialize();
+        let event_mask_bytes = u32::from(self.event_mask).serialize();
         let mut request0 = vec![
             SEND_EVENT_REQUEST,
             propagate_bytes[0],
@@ -11364,6 +11368,7 @@ impl<'input> SendEventRequest<'input> {
         let _ = remaining;
         let (destination, remaining) = Window::try_parse(value)?;
         let (event_mask, remaining) = u32::try_parse(remaining)?;
+        let event_mask = event_mask.into();
         let (event, remaining) = crate::x11_utils::parse_u8_list(remaining, 32)?;
         let event = <&[u8; 32]>::try_from(event).unwrap();
         let _ = remaining;
@@ -11662,7 +11667,7 @@ pub const GRAB_POINTER_REQUEST: u8 = 26;
 pub struct GrabPointerRequest {
     pub owner_events: bool,
     pub grab_window: Window,
-    pub event_mask: u16,
+    pub event_mask: EventMask,
     pub pointer_mode: GrabMode,
     pub keyboard_mode: GrabMode,
     pub confine_to: Window,
@@ -11675,7 +11680,7 @@ impl GrabPointerRequest {
         let length_so_far = 0;
         let owner_events_bytes = self.owner_events.serialize();
         let grab_window_bytes = self.grab_window.serialize();
-        let event_mask_bytes = self.event_mask.serialize();
+        let event_mask_bytes = (u32::from(self.event_mask) as u16).serialize();
         let pointer_mode_bytes = u8::from(self.pointer_mode).serialize();
         let keyboard_mode_bytes = u8::from(self.keyboard_mode).serialize();
         let confine_to_bytes = self.confine_to.serialize();
@@ -11723,6 +11728,7 @@ impl GrabPointerRequest {
         let _ = remaining;
         let (grab_window, remaining) = Window::try_parse(value)?;
         let (event_mask, remaining) = u16::try_parse(remaining)?;
+        let event_mask = event_mask.into();
         let (pointer_mode, remaining) = u8::try_parse(remaining)?;
         let pointer_mode = pointer_mode.into();
         let (keyboard_mode, remaining) = u8::try_parse(remaining)?;
@@ -12038,13 +12044,13 @@ pub const GRAB_BUTTON_REQUEST: u8 = 28;
 pub struct GrabButtonRequest {
     pub owner_events: bool,
     pub grab_window: Window,
-    pub event_mask: u16,
+    pub event_mask: EventMask,
     pub pointer_mode: GrabMode,
     pub keyboard_mode: GrabMode,
     pub confine_to: Window,
     pub cursor: Cursor,
     pub button: ButtonIndex,
-    pub modifiers: u16,
+    pub modifiers: ModMask,
 }
 impl GrabButtonRequest {
     /// Serialize this request into bytes for the provided connection
@@ -12052,13 +12058,13 @@ impl GrabButtonRequest {
         let length_so_far = 0;
         let owner_events_bytes = self.owner_events.serialize();
         let grab_window_bytes = self.grab_window.serialize();
-        let event_mask_bytes = self.event_mask.serialize();
+        let event_mask_bytes = (u32::from(self.event_mask) as u16).serialize();
         let pointer_mode_bytes = u8::from(self.pointer_mode).serialize();
         let keyboard_mode_bytes = u8::from(self.keyboard_mode).serialize();
         let confine_to_bytes = self.confine_to.serialize();
         let cursor_bytes = self.cursor.serialize();
         let button_bytes = u8::from(self.button).serialize();
-        let modifiers_bytes = self.modifiers.serialize();
+        let modifiers_bytes = u16::from(self.modifiers).serialize();
         let mut request0 = vec![
             GRAB_BUTTON_REQUEST,
             owner_events_bytes[0],
@@ -12101,6 +12107,7 @@ impl GrabButtonRequest {
         let _ = remaining;
         let (grab_window, remaining) = Window::try_parse(value)?;
         let (event_mask, remaining) = u16::try_parse(remaining)?;
+        let event_mask = event_mask.into();
         let (pointer_mode, remaining) = u8::try_parse(remaining)?;
         let pointer_mode = pointer_mode.into();
         let (keyboard_mode, remaining) = u8::try_parse(remaining)?;
@@ -12111,6 +12118,7 @@ impl GrabButtonRequest {
         let button = button.into();
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (modifiers, remaining) = u16::try_parse(remaining)?;
+        let modifiers = modifiers.into();
         let _ = remaining;
         Ok(GrabButtonRequest {
             owner_events,
@@ -12145,7 +12153,7 @@ pub const UNGRAB_BUTTON_REQUEST: u8 = 29;
 pub struct UngrabButtonRequest {
     pub button: ButtonIndex,
     pub grab_window: Window,
-    pub modifiers: u16,
+    pub modifiers: ModMask,
 }
 impl UngrabButtonRequest {
     /// Serialize this request into bytes for the provided connection
@@ -12153,7 +12161,7 @@ impl UngrabButtonRequest {
         let length_so_far = 0;
         let button_bytes = u8::from(self.button).serialize();
         let grab_window_bytes = self.grab_window.serialize();
-        let modifiers_bytes = self.modifiers.serialize();
+        let modifiers_bytes = u16::from(self.modifiers).serialize();
         let mut request0 = vec![
             UNGRAB_BUTTON_REQUEST,
             button_bytes[0],
@@ -12185,6 +12193,7 @@ impl UngrabButtonRequest {
         let _ = remaining;
         let (grab_window, remaining) = Window::try_parse(value)?;
         let (modifiers, remaining) = u16::try_parse(remaining)?;
+        let modifiers = modifiers.into();
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let _ = remaining;
         Ok(UngrabButtonRequest {
@@ -12214,7 +12223,7 @@ pub const CHANGE_ACTIVE_POINTER_GRAB_REQUEST: u8 = 30;
 pub struct ChangeActivePointerGrabRequest {
     pub cursor: Cursor,
     pub time: Timestamp,
-    pub event_mask: u16,
+    pub event_mask: EventMask,
 }
 impl ChangeActivePointerGrabRequest {
     /// Serialize this request into bytes for the provided connection
@@ -12222,7 +12231,7 @@ impl ChangeActivePointerGrabRequest {
         let length_so_far = 0;
         let cursor_bytes = self.cursor.serialize();
         let time_bytes = self.time.serialize();
-        let event_mask_bytes = self.event_mask.serialize();
+        let event_mask_bytes = (u32::from(self.event_mask) as u16).serialize();
         let mut request0 = vec![
             CHANGE_ACTIVE_POINTER_GRAB_REQUEST,
             0,
@@ -12258,6 +12267,7 @@ impl ChangeActivePointerGrabRequest {
         let (cursor, remaining) = Cursor::try_parse(value)?;
         let (time, remaining) = Timestamp::try_parse(remaining)?;
         let (event_mask, remaining) = u16::try_parse(remaining)?;
+        let event_mask = event_mask.into();
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let _ = remaining;
         Ok(ChangeActivePointerGrabRequest {
@@ -12658,7 +12668,7 @@ pub const GRAB_KEY_REQUEST: u8 = 33;
 pub struct GrabKeyRequest {
     pub owner_events: bool,
     pub grab_window: Window,
-    pub modifiers: u16,
+    pub modifiers: ModMask,
     pub key: Keycode,
     pub pointer_mode: GrabMode,
     pub keyboard_mode: GrabMode,
@@ -12669,7 +12679,7 @@ impl GrabKeyRequest {
         let length_so_far = 0;
         let owner_events_bytes = self.owner_events.serialize();
         let grab_window_bytes = self.grab_window.serialize();
-        let modifiers_bytes = self.modifiers.serialize();
+        let modifiers_bytes = u16::from(self.modifiers).serialize();
         let key_bytes = self.key.serialize();
         let pointer_mode_bytes = u8::from(self.pointer_mode).serialize();
         let keyboard_mode_bytes = u8::from(self.keyboard_mode).serialize();
@@ -12707,6 +12717,7 @@ impl GrabKeyRequest {
         let _ = remaining;
         let (grab_window, remaining) = Window::try_parse(value)?;
         let (modifiers, remaining) = u16::try_parse(remaining)?;
+        let modifiers = modifiers.into();
         let (key, remaining) = Keycode::try_parse(remaining)?;
         let (pointer_mode, remaining) = u8::try_parse(remaining)?;
         let pointer_mode = pointer_mode.into();
@@ -12769,7 +12780,7 @@ pub const UNGRAB_KEY_REQUEST: u8 = 34;
 pub struct UngrabKeyRequest {
     pub key: Keycode,
     pub grab_window: Window,
-    pub modifiers: u16,
+    pub modifiers: ModMask,
 }
 impl UngrabKeyRequest {
     /// Serialize this request into bytes for the provided connection
@@ -12777,7 +12788,7 @@ impl UngrabKeyRequest {
         let length_so_far = 0;
         let key_bytes = self.key.serialize();
         let grab_window_bytes = self.grab_window.serialize();
-        let modifiers_bytes = self.modifiers.serialize();
+        let modifiers_bytes = u16::from(self.modifiers).serialize();
         let mut request0 = vec![
             UNGRAB_KEY_REQUEST,
             key_bytes[0],
@@ -12808,6 +12819,7 @@ impl UngrabKeyRequest {
         let _ = remaining;
         let (grab_window, remaining) = Window::try_parse(value)?;
         let (modifiers, remaining) = u16::try_parse(remaining)?;
+        let modifiers = modifiers.into();
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let _ = remaining;
         Ok(UngrabKeyRequest {
@@ -13233,7 +13245,7 @@ pub struct QueryPointerReply {
     pub root_y: i16,
     pub win_x: i16,
     pub win_y: i16,
-    pub mask: u16,
+    pub mask: KeyButMask,
 }
 impl TryParse for QueryPointerReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -13253,6 +13265,7 @@ impl TryParse for QueryPointerReply {
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
+        let mask = mask.into();
         let result = QueryPointerReply { same_screen, sequence, length, root, child, root_x, root_y, win_x, win_y, mask };
         let _ = remaining;
         let remaining = initial_value.get(32 + length as usize * 4..)
@@ -13273,7 +13286,7 @@ impl Serialize for QueryPointerReply {
         let root_y_bytes = self.root_y.serialize();
         let win_x_bytes = self.win_x.serialize();
         let win_y_bytes = self.win_y.serialize();
-        let mask_bytes = self.mask.serialize();
+        let mask_bytes = u16::from(self.mask).serialize();
         [
             response_type_bytes[0],
             same_screen_bytes[0],
@@ -13318,7 +13331,7 @@ impl Serialize for QueryPointerReply {
         self.root_y.serialize_into(bytes);
         self.win_x.serialize_into(bytes);
         self.win_y.serialize_into(bytes);
-        self.mask.serialize_into(bytes);
+        u16::from(self.mask).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 2]);
     }
 }
@@ -14744,7 +14757,7 @@ impl<'input> QueryTextExtentsRequest<'input> {
     pub fn serialize(self) -> BufWithFds<PiecewiseBuf<'input>> {
         let string_len = u32::try_from(self.string.len()).unwrap();
         let length_so_far = 0;
-        let odd_length = (string_len & 1u32) != 0;
+        let odd_length = (u32::from(string_len) & 1u32) != 0;
         let odd_length_bytes = odd_length.serialize();
         let font_bytes = self.font.serialize();
         let mut request0 = vec![
@@ -16319,7 +16332,7 @@ pub struct CreateGCAux {
 }
 impl CreateGCAux {
     fn try_parse(value: &[u8], value_mask: u32) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = value_mask;
+        let switch_expr = u32::from(value_mask);
         let mut outer_remaining = value;
         let function = if switch_expr & u32::from(GC::FUNCTION) != 0 {
             let remaining = outer_remaining;
@@ -16521,7 +16534,7 @@ impl CreateGCAux {
     #[allow(dead_code)]
     fn serialize(&self, value_mask: u32) -> Vec<u8> {
         let mut result = Vec::new();
-        self.serialize_into(&mut result, value_mask);
+        self.serialize_into(&mut result, u32::from(value_mask));
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, value_mask: u32) {
@@ -16876,7 +16889,7 @@ impl<'input> CreateGCRequest<'input> {
             value_mask_bytes[3],
         ];
         let length_so_far = length_so_far + request0.len();
-        let value_list_bytes = self.value_list.serialize(value_mask);
+        let value_list_bytes = self.value_list.serialize(u32::from(value_mask));
         let length_so_far = length_so_far + value_list_bytes.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
@@ -16896,7 +16909,7 @@ impl<'input> CreateGCRequest<'input> {
         let (cid, remaining) = Gcontext::try_parse(value)?;
         let (drawable, remaining) = Drawable::try_parse(remaining)?;
         let (value_mask, remaining) = u32::try_parse(remaining)?;
-        let (value_list, remaining) = CreateGCAux::try_parse(remaining, value_mask)?;
+        let (value_list, remaining) = CreateGCAux::try_parse(remaining, u32::from(value_mask))?;
         let _ = remaining;
         Ok(CreateGCRequest {
             cid,
@@ -16956,7 +16969,7 @@ pub struct ChangeGCAux {
 }
 impl ChangeGCAux {
     fn try_parse(value: &[u8], value_mask: u32) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = value_mask;
+        let switch_expr = u32::from(value_mask);
         let mut outer_remaining = value;
         let function = if switch_expr & u32::from(GC::FUNCTION) != 0 {
             let remaining = outer_remaining;
@@ -17158,7 +17171,7 @@ impl ChangeGCAux {
     #[allow(dead_code)]
     fn serialize(&self, value_mask: u32) -> Vec<u8> {
         let mut result = Vec::new();
-        self.serialize_into(&mut result, value_mask);
+        self.serialize_into(&mut result, u32::from(value_mask));
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, value_mask: u32) {
@@ -17528,7 +17541,7 @@ impl<'input> ChangeGCRequest<'input> {
             value_mask_bytes[3],
         ];
         let length_so_far = length_so_far + request0.len();
-        let value_list_bytes = self.value_list.serialize(value_mask);
+        let value_list_bytes = self.value_list.serialize(u32::from(value_mask));
         let length_so_far = length_so_far + value_list_bytes.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
@@ -17547,7 +17560,7 @@ impl<'input> ChangeGCRequest<'input> {
         let _ = remaining;
         let (gc, remaining) = Gcontext::try_parse(value)?;
         let (value_mask, remaining) = u32::try_parse(remaining)?;
-        let (value_list, remaining) = ChangeGCAux::try_parse(remaining, value_mask)?;
+        let (value_list, remaining) = ChangeGCAux::try_parse(remaining, u32::from(value_mask))?;
         let _ = remaining;
         Ok(ChangeGCRequest {
             gc,
@@ -17582,7 +17595,7 @@ pub const COPY_GC_REQUEST: u8 = 57;
 pub struct CopyGCRequest {
     pub src_gc: Gcontext,
     pub dst_gc: Gcontext,
-    pub value_mask: u32,
+    pub value_mask: GC,
 }
 impl CopyGCRequest {
     /// Serialize this request into bytes for the provided connection
@@ -17590,7 +17603,7 @@ impl CopyGCRequest {
         let length_so_far = 0;
         let src_gc_bytes = self.src_gc.serialize();
         let dst_gc_bytes = self.dst_gc.serialize();
-        let value_mask_bytes = self.value_mask.serialize();
+        let value_mask_bytes = u32::from(self.value_mask).serialize();
         let mut request0 = vec![
             COPY_GC_REQUEST,
             0,
@@ -17626,6 +17639,7 @@ impl CopyGCRequest {
         let (src_gc, remaining) = Gcontext::try_parse(value)?;
         let (dst_gc, remaining) = Gcontext::try_parse(remaining)?;
         let (value_mask, remaining) = u32::try_parse(remaining)?;
+        let value_mask = value_mask.into();
         let _ = remaining;
         Ok(CopyGCRequest {
             src_gc,
@@ -19553,7 +19567,7 @@ impl TryParse for GetImageReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (visual, remaining) = Visualid::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::InsufficientData)?;
-        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, length.checked_mul(4u32).ok_or(ParseError::InvalidExpression)?.try_to_usize()?)?;
+        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, u32::from(length).checked_mul(4u32).ok_or(ParseError::InvalidExpression)?.try_to_usize()?)?;
         let data = data.to_vec();
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
@@ -21343,7 +21357,7 @@ pub struct Coloritem {
     pub red: u16,
     pub green: u16,
     pub blue: u16,
-    pub flags: u8,
+    pub flags: ColorFlag,
 }
 impl TryParse for Coloritem {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -21353,6 +21367,7 @@ impl TryParse for Coloritem {
         let (blue, remaining) = u16::try_parse(remaining)?;
         let (flags, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
+        let flags = flags.into();
         let result = Coloritem { pixel, red, green, blue, flags };
         Ok((result, remaining))
     }
@@ -21364,7 +21379,7 @@ impl Serialize for Coloritem {
         let red_bytes = self.red.serialize();
         let green_bytes = self.green.serialize();
         let blue_bytes = self.blue.serialize();
-        let flags_bytes = self.flags.serialize();
+        let flags_bytes = u8::from(self.flags).serialize();
         [
             pixel_bytes[0],
             pixel_bytes[1],
@@ -21386,7 +21401,7 @@ impl Serialize for Coloritem {
         self.red.serialize_into(bytes);
         self.green.serialize_into(bytes);
         self.blue.serialize_into(bytes);
-        self.flags.serialize_into(bytes);
+        u8::from(self.flags).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 1]);
     }
 }
@@ -21473,7 +21488,7 @@ pub const STORE_NAMED_COLOR_REQUEST: u8 = 90;
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct StoreNamedColorRequest<'input> {
-    pub flags: u8,
+    pub flags: ColorFlag,
     pub cmap: Colormap,
     pub pixel: u32,
     pub name: Cow<'input, [u8]>,
@@ -21482,7 +21497,7 @@ impl<'input> StoreNamedColorRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<PiecewiseBuf<'input>> {
         let length_so_far = 0;
-        let flags_bytes = self.flags.serialize();
+        let flags_bytes = u8::from(self.flags).serialize();
         let cmap_bytes = self.cmap.serialize();
         let pixel_bytes = self.pixel.serialize();
         let name_len = u16::try_from(self.name.len()).expect("`name` has too many elements");
@@ -21521,6 +21536,7 @@ impl<'input> StoreNamedColorRequest<'input> {
         }
         let remaining = &[header.minor_opcode];
         let (flags, remaining) = u8::try_parse(remaining)?;
+        let flags = flags.into();
         let _ = remaining;
         let (cmap, remaining) = Colormap::try_parse(value)?;
         let (pixel, remaining) = u32::try_parse(remaining)?;
@@ -23129,7 +23145,7 @@ impl GetKeyboardMappingReply {
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct KB(u8);
+pub struct KB(u32);
 impl KB {
     pub const KEY_CLICK_PERCENT: Self = Self(1 << 0);
     pub const BELL_PERCENT: Self = Self(1 << 1);
@@ -23140,64 +23156,52 @@ impl KB {
     pub const KEY: Self = Self(1 << 6);
     pub const AUTO_REPEAT_MODE: Self = Self(1 << 7);
 }
-impl From<KB> for u8 {
+impl From<KB> for u32 {
     #[inline]
     fn from(input: KB) -> Self {
         input.0
     }
 }
-impl From<KB> for Option<u8> {
+impl From<KB> for Option<u32> {
     #[inline]
     fn from(input: KB) -> Self {
         Some(input.0)
     }
 }
-impl From<KB> for u16 {
-    #[inline]
-    fn from(input: KB) -> Self {
-        u16::from(input.0)
-    }
-}
-impl From<KB> for Option<u16> {
-    #[inline]
-    fn from(input: KB) -> Self {
-        Some(u16::from(input.0))
-    }
-}
-impl From<KB> for u32 {
-    #[inline]
-    fn from(input: KB) -> Self {
-        u32::from(input.0)
-    }
-}
-impl From<KB> for Option<u32> {
-    #[inline]
-    fn from(input: KB) -> Self {
-        Some(u32::from(input.0))
-    }
-}
 impl From<u8> for KB {
     #[inline]
     fn from(value: u8) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u16> for KB {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u32> for KB {
+    #[inline]
+    fn from(value: u32) -> Self {
         Self(value)
     }
 }
 impl core::fmt::Debug for KB  {
     fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
-            (Self::KEY_CLICK_PERCENT.0.into(), "KEY_CLICK_PERCENT", "KeyClickPercent"),
-            (Self::BELL_PERCENT.0.into(), "BELL_PERCENT", "BellPercent"),
-            (Self::BELL_PITCH.0.into(), "BELL_PITCH", "BellPitch"),
-            (Self::BELL_DURATION.0.into(), "BELL_DURATION", "BellDuration"),
-            (Self::LED.0.into(), "LED", "Led"),
-            (Self::LED_MODE.0.into(), "LED_MODE", "LedMode"),
-            (Self::KEY.0.into(), "KEY", "Key"),
-            (Self::AUTO_REPEAT_MODE.0.into(), "AUTO_REPEAT_MODE", "AutoRepeatMode"),
+            (Self::KEY_CLICK_PERCENT.0, "KEY_CLICK_PERCENT", "KeyClickPercent"),
+            (Self::BELL_PERCENT.0, "BELL_PERCENT", "BellPercent"),
+            (Self::BELL_PITCH.0, "BELL_PITCH", "BellPitch"),
+            (Self::BELL_DURATION.0, "BELL_DURATION", "BellDuration"),
+            (Self::LED.0, "LED", "Led"),
+            (Self::LED_MODE.0, "LED_MODE", "LedMode"),
+            (Self::KEY.0, "KEY", "Key"),
+            (Self::AUTO_REPEAT_MODE.0, "AUTO_REPEAT_MODE", "AutoRepeatMode"),
         ];
-        pretty_print_bitmask(fmt, self.0.into(), &variants)
+        pretty_print_bitmask(fmt, self.0, &variants)
     }
 }
-bitmask_binop!(KB, u8);
+bitmask_binop!(KB, u32);
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -23310,7 +23314,7 @@ pub struct ChangeKeyboardControlAux {
 }
 impl ChangeKeyboardControlAux {
     fn try_parse(value: &[u8], value_mask: u32) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = value_mask;
+        let switch_expr = u32::from(value_mask);
         let mut outer_remaining = value;
         let key_click_percent = if switch_expr & u32::from(KB::KEY_CLICK_PERCENT) != 0 {
             let remaining = outer_remaining;
@@ -23386,7 +23390,7 @@ impl ChangeKeyboardControlAux {
     #[allow(dead_code)]
     fn serialize(&self, value_mask: u32) -> Vec<u8> {
         let mut result = Vec::new();
-        self.serialize_into(&mut result, value_mask);
+        self.serialize_into(&mut result, u32::from(value_mask));
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, value_mask: u32) {
@@ -23526,7 +23530,7 @@ impl<'input> ChangeKeyboardControlRequest<'input> {
             value_mask_bytes[3],
         ];
         let length_so_far = length_so_far + request0.len();
-        let value_list_bytes = self.value_list.serialize(value_mask);
+        let value_list_bytes = self.value_list.serialize(u32::from(value_mask));
         let length_so_far = length_so_far + value_list_bytes.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
@@ -23544,7 +23548,7 @@ impl<'input> ChangeKeyboardControlRequest<'input> {
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let _ = remaining;
         let (value_mask, remaining) = u32::try_parse(value)?;
-        let (value_list, remaining) = ChangeKeyboardControlAux::try_parse(remaining, value_mask)?;
+        let (value_list, remaining) = ChangeKeyboardControlAux::try_parse(remaining, u32::from(value_mask))?;
         let _ = remaining;
         Ok(ChangeKeyboardControlRequest {
             value_list: Cow::Owned(value_list),

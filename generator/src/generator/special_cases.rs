@@ -101,7 +101,8 @@ pub(super) fn handle_request_switch(
 /// changes from a `ConfigureRequestEvent`. This function is useful for window managers that want
 /// to handle `ConfigureRequestEvent`s.
 pub fn from_configure_request(event: &ConfigureRequestEvent) -> Self {{
-    let mut result = Self::new();"
+    let mut result = Self::new();
+    let value_mask = u16::from(event.value_mask);"
             );
             out.indented(|out| {
                 for case in switch_field.cases.iter() {
@@ -115,7 +116,7 @@ pub fn from_configure_request(event: &ConfigureRequestEvent) -> Self {{
                     let flag = super::camel_case_to_upper_snake(name);
                     outln!(
                         out,
-                        "if event.value_mask & u16::from(ConfigWindow::{}) != 0 {{",
+                        "if value_mask & u16::from(ConfigWindow::{}) != 0 {{",
                         flag,
                     );
                     if name == "stack_mode" || name == "sibling" {

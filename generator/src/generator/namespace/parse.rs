@@ -207,7 +207,15 @@ pub(super) fn emit_field_parse(
             };
             let mut parse_params = vec![String::from("remaining")];
             for ext_param in switch_field.external_params.borrow().iter() {
-                parse_params.push(to_rust_variable_name(&ext_param.name));
+                let mut variable = to_rust_variable_name(&ext_param.name);
+                if let xcbdefs::TypeRef::BuiltIn(_) = ext_param.type_ {
+                    variable = format!(
+                        "{}::from({})",
+                        generator.type_to_rust_type(&ext_param.type_),
+                        variable
+                    );
+                }
+                parse_params.push(variable);
             }
             outln!(
                 out,
@@ -310,14 +318,17 @@ fn emit_value_parse(
 }
 
 fn emit_value_post_parse(type_: &xcbdefs::FieldValueType, var_name: &str, out: &mut Output) {
-    if let xcbdefs::FieldValueSet::Enum(_) = type_.value_set {
+    if let xcbdefs::FieldValueSet::Enum(_) | xcbdefs::FieldValueSet::Mask(_) = type_.value_set {
         // Handle turning things into enum instances.
         outln!(out, "let {var} = {var}.into();", var = var_name);
     }
 }
 
 fn needs_post_parse(type_: &xcbdefs::FieldValueType) -> bool {
-    matches!(type_.value_set, xcbdefs::FieldValueSet::Enum(_))
+    matches!(
+        type_.value_set,
+        xcbdefs::FieldValueSet::Enum(_) | xcbdefs::FieldValueSet::Mask(_)
+    )
 }
 
 pub(super) fn can_use_simple_list_parsing(

@@ -4,6 +4,8 @@
 //! Bindings to the `Render` X11 extension.
 
 #![allow(clippy::too_many_arguments)]
+// The code generator is simpler if it can always use conversions
+#![allow(clippy::useless_conversion)]
 
 #[allow(unused_imports)]
 use alloc::borrow::Cow;
@@ -407,7 +409,7 @@ impl core::fmt::Debug for PolyMode  {
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct CP(u16);
+pub struct CP(u32);
 impl CP {
     pub const REPEAT: Self = Self(1 << 0);
     pub const ALPHA_MAP: Self = Self(1 << 1);
@@ -423,28 +425,16 @@ impl CP {
     pub const DITHER: Self = Self(1 << 11);
     pub const COMPONENT_ALPHA: Self = Self(1 << 12);
 }
-impl From<CP> for u16 {
+impl From<CP> for u32 {
     #[inline]
     fn from(input: CP) -> Self {
         input.0
     }
 }
-impl From<CP> for Option<u16> {
-    #[inline]
-    fn from(input: CP) -> Self {
-        Some(input.0)
-    }
-}
-impl From<CP> for u32 {
-    #[inline]
-    fn from(input: CP) -> Self {
-        u32::from(input.0)
-    }
-}
 impl From<CP> for Option<u32> {
     #[inline]
     fn from(input: CP) -> Self {
-        Some(u32::from(input.0))
+        Some(input.0)
     }
 }
 impl From<u8> for CP {
@@ -456,30 +446,36 @@ impl From<u8> for CP {
 impl From<u16> for CP {
     #[inline]
     fn from(value: u16) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u32> for CP {
+    #[inline]
+    fn from(value: u32) -> Self {
         Self(value)
     }
 }
 impl core::fmt::Debug for CP  {
     fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
-            (Self::REPEAT.0.into(), "REPEAT", "Repeat"),
-            (Self::ALPHA_MAP.0.into(), "ALPHA_MAP", "AlphaMap"),
-            (Self::ALPHA_X_ORIGIN.0.into(), "ALPHA_X_ORIGIN", "AlphaXOrigin"),
-            (Self::ALPHA_Y_ORIGIN.0.into(), "ALPHA_Y_ORIGIN", "AlphaYOrigin"),
-            (Self::CLIP_X_ORIGIN.0.into(), "CLIP_X_ORIGIN", "ClipXOrigin"),
-            (Self::CLIP_Y_ORIGIN.0.into(), "CLIP_Y_ORIGIN", "ClipYOrigin"),
-            (Self::CLIP_MASK.0.into(), "CLIP_MASK", "ClipMask"),
-            (Self::GRAPHICS_EXPOSURE.0.into(), "GRAPHICS_EXPOSURE", "GraphicsExposure"),
-            (Self::SUBWINDOW_MODE.0.into(), "SUBWINDOW_MODE", "SubwindowMode"),
-            (Self::POLY_EDGE.0.into(), "POLY_EDGE", "PolyEdge"),
-            (Self::POLY_MODE.0.into(), "POLY_MODE", "PolyMode"),
-            (Self::DITHER.0.into(), "DITHER", "Dither"),
-            (Self::COMPONENT_ALPHA.0.into(), "COMPONENT_ALPHA", "ComponentAlpha"),
+            (Self::REPEAT.0, "REPEAT", "Repeat"),
+            (Self::ALPHA_MAP.0, "ALPHA_MAP", "AlphaMap"),
+            (Self::ALPHA_X_ORIGIN.0, "ALPHA_X_ORIGIN", "AlphaXOrigin"),
+            (Self::ALPHA_Y_ORIGIN.0, "ALPHA_Y_ORIGIN", "AlphaYOrigin"),
+            (Self::CLIP_X_ORIGIN.0, "CLIP_X_ORIGIN", "ClipXOrigin"),
+            (Self::CLIP_Y_ORIGIN.0, "CLIP_Y_ORIGIN", "ClipYOrigin"),
+            (Self::CLIP_MASK.0, "CLIP_MASK", "ClipMask"),
+            (Self::GRAPHICS_EXPOSURE.0, "GRAPHICS_EXPOSURE", "GraphicsExposure"),
+            (Self::SUBWINDOW_MODE.0, "SUBWINDOW_MODE", "SubwindowMode"),
+            (Self::POLY_EDGE.0, "POLY_EDGE", "PolyEdge"),
+            (Self::POLY_MODE.0, "POLY_MODE", "PolyMode"),
+            (Self::DITHER.0, "DITHER", "Dither"),
+            (Self::COMPONENT_ALPHA.0, "COMPONENT_ALPHA", "ComponentAlpha"),
         ];
-        pretty_print_bitmask(fmt, self.0.into(), &variants)
+        pretty_print_bitmask(fmt, self.0, &variants)
     }
 }
-bitmask_binop!(CP, u16);
+bitmask_binop!(CP, u32);
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -1702,7 +1698,7 @@ pub struct CreatePictureAux {
 }
 impl CreatePictureAux {
     fn try_parse(value: &[u8], value_mask: u32) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = value_mask;
+        let switch_expr = u32::from(value_mask);
         let mut outer_remaining = value;
         let repeat = if switch_expr & u32::from(CP::REPEAT) != 0 {
             let remaining = outer_remaining;
@@ -1820,7 +1816,7 @@ impl CreatePictureAux {
     #[allow(dead_code)]
     fn serialize(&self, value_mask: u32) -> Vec<u8> {
         let mut result = Vec::new();
-        self.serialize_into(&mut result, value_mask);
+        self.serialize_into(&mut result, u32::from(value_mask));
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, value_mask: u32) {
@@ -2038,7 +2034,7 @@ impl<'input> CreatePictureRequest<'input> {
             value_mask_bytes[3],
         ];
         let length_so_far = length_so_far + request0.len();
-        let value_list_bytes = self.value_list.serialize(value_mask);
+        let value_list_bytes = self.value_list.serialize(u32::from(value_mask));
         let length_so_far = length_so_far + value_list_bytes.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
@@ -2056,7 +2052,7 @@ impl<'input> CreatePictureRequest<'input> {
         let (drawable, remaining) = xproto::Drawable::try_parse(remaining)?;
         let (format, remaining) = Pictformat::try_parse(remaining)?;
         let (value_mask, remaining) = u32::try_parse(remaining)?;
-        let (value_list, remaining) = CreatePictureAux::try_parse(remaining, value_mask)?;
+        let (value_list, remaining) = CreatePictureAux::try_parse(remaining, u32::from(value_mask))?;
         let _ = remaining;
         Ok(CreatePictureRequest {
             pid,
@@ -2108,7 +2104,7 @@ pub struct ChangePictureAux {
 }
 impl ChangePictureAux {
     fn try_parse(value: &[u8], value_mask: u32) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = value_mask;
+        let switch_expr = u32::from(value_mask);
         let mut outer_remaining = value;
         let repeat = if switch_expr & u32::from(CP::REPEAT) != 0 {
             let remaining = outer_remaining;
@@ -2226,7 +2222,7 @@ impl ChangePictureAux {
     #[allow(dead_code)]
     fn serialize(&self, value_mask: u32) -> Vec<u8> {
         let mut result = Vec::new();
-        self.serialize_into(&mut result, value_mask);
+        self.serialize_into(&mut result, u32::from(value_mask));
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, value_mask: u32) {
@@ -2432,7 +2428,7 @@ impl<'input> ChangePictureRequest<'input> {
             value_mask_bytes[3],
         ];
         let length_so_far = length_so_far + request0.len();
-        let value_list_bytes = self.value_list.serialize(value_mask);
+        let value_list_bytes = self.value_list.serialize(u32::from(value_mask));
         let length_so_far = length_so_far + value_list_bytes.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
@@ -2448,7 +2444,7 @@ impl<'input> ChangePictureRequest<'input> {
         }
         let (picture, remaining) = Picture::try_parse(value)?;
         let (value_mask, remaining) = u32::try_parse(remaining)?;
-        let (value_list, remaining) = ChangePictureAux::try_parse(remaining, value_mask)?;
+        let (value_list, remaining) = ChangePictureAux::try_parse(remaining, u32::from(value_mask))?;
         let _ = remaining;
         Ok(ChangePictureRequest {
             picture,

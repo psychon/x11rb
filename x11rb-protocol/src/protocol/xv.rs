@@ -4,6 +4,8 @@
 //! Bindings to the `Xv` X11 extension.
 
 #![allow(clippy::too_many_arguments)]
+// The code generator is simpler if it can always use conversions
+#![allow(clippy::useless_conversion)]
 
 #[allow(unused_imports)]
 use alloc::borrow::Cow;
@@ -226,63 +228,51 @@ impl core::fmt::Debug for ImageFormatInfoFormat  {
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct AttributeFlag(u8);
+pub struct AttributeFlag(u32);
 impl AttributeFlag {
     pub const GETTABLE: Self = Self(1 << 0);
     pub const SETTABLE: Self = Self(1 << 1);
 }
-impl From<AttributeFlag> for u8 {
+impl From<AttributeFlag> for u32 {
     #[inline]
     fn from(input: AttributeFlag) -> Self {
         input.0
     }
 }
-impl From<AttributeFlag> for Option<u8> {
+impl From<AttributeFlag> for Option<u32> {
     #[inline]
     fn from(input: AttributeFlag) -> Self {
         Some(input.0)
     }
 }
-impl From<AttributeFlag> for u16 {
-    #[inline]
-    fn from(input: AttributeFlag) -> Self {
-        u16::from(input.0)
-    }
-}
-impl From<AttributeFlag> for Option<u16> {
-    #[inline]
-    fn from(input: AttributeFlag) -> Self {
-        Some(u16::from(input.0))
-    }
-}
-impl From<AttributeFlag> for u32 {
-    #[inline]
-    fn from(input: AttributeFlag) -> Self {
-        u32::from(input.0)
-    }
-}
-impl From<AttributeFlag> for Option<u32> {
-    #[inline]
-    fn from(input: AttributeFlag) -> Self {
-        Some(u32::from(input.0))
-    }
-}
 impl From<u8> for AttributeFlag {
     #[inline]
     fn from(value: u8) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u16> for AttributeFlag {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u32> for AttributeFlag {
+    #[inline]
+    fn from(value: u32) -> Self {
         Self(value)
     }
 }
 impl core::fmt::Debug for AttributeFlag  {
     fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
-            (Self::GETTABLE.0.into(), "GETTABLE", "Gettable"),
-            (Self::SETTABLE.0.into(), "SETTABLE", "Settable"),
+            (Self::GETTABLE.0, "GETTABLE", "Gettable"),
+            (Self::SETTABLE.0, "SETTABLE", "Settable"),
         ];
-        pretty_print_bitmask(fmt, self.0.into(), &variants)
+        pretty_print_bitmask(fmt, self.0, &variants)
     }
 }
-bitmask_binop!(AttributeFlag, u8);
+bitmask_binop!(AttributeFlag, u32);
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -556,7 +546,7 @@ impl Serialize for Format {
 pub struct AdaptorInfo {
     pub base_id: Port,
     pub num_ports: u16,
-    pub type_: u8,
+    pub type_: Type,
     pub name: Vec<u8>,
     pub formats: Vec<Format>,
 }
@@ -576,6 +566,7 @@ impl TryParse for AdaptorInfo {
         let misalignment = (4 - (offset % 4)) % 4;
         let remaining = remaining.get(misalignment..).ok_or(ParseError::InsufficientData)?;
         let (formats, remaining) = crate::x11_utils::parse_list::<Format>(remaining, num_formats.try_to_usize()?)?;
+        let type_ = type_.into();
         let result = AdaptorInfo { base_id, num_ports, type_, name, formats };
         Ok((result, remaining))
     }
@@ -595,7 +586,7 @@ impl Serialize for AdaptorInfo {
         self.num_ports.serialize_into(bytes);
         let num_formats = u16::try_from(self.formats.len()).expect("`formats` has too many elements");
         num_formats.serialize_into(bytes);
-        self.type_.serialize_into(bytes);
+        u8::from(self.type_).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 1]);
         bytes.extend_from_slice(&self.name);
         bytes.extend_from_slice(&[0; 3][..(4 - (bytes.len() % 4)) % 4]);
@@ -774,7 +765,7 @@ impl Image {
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct AttributeInfo {
-    pub flags: u32,
+    pub flags: AttributeFlag,
     pub min: i32,
     pub max: i32,
     pub name: Vec<u8>,
@@ -792,6 +783,7 @@ impl TryParse for AttributeInfo {
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
         let remaining = remaining.get(misalignment..).ok_or(ParseError::InsufficientData)?;
+        let flags = flags.into();
         let result = AttributeInfo { flags, min, max, name };
         Ok((result, remaining))
     }
@@ -805,7 +797,7 @@ impl Serialize for AttributeInfo {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(16);
-        self.flags.serialize_into(bytes);
+        u32::from(self.flags).serialize_into(bytes);
         self.min.serialize_into(bytes);
         self.max.serialize_into(bytes);
         let size = u32::try_from(self.name.len()).expect("`name` has too many elements");
