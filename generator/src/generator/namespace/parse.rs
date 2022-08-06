@@ -207,7 +207,15 @@ pub(super) fn emit_field_parse(
             };
             let mut parse_params = vec![String::from("remaining")];
             for ext_param in switch_field.external_params.borrow().iter() {
-                parse_params.push(to_rust_variable_name(&ext_param.name));
+                let mut variable = to_rust_variable_name(&ext_param.name);
+                if let xcbdefs::TypeRef::BuiltIn(_) = ext_param.type_ {
+                    variable = format!(
+                        "{}::from({})",
+                        generator.type_to_rust_type(&ext_param.type_),
+                        variable
+                    );
+                }
+                parse_params.push(variable);
             }
             outln!(
                 out,

@@ -1360,7 +1360,7 @@ impl<'input> CreateAlarmRequest<'input> {
         }
         let (id, remaining) = Alarm::try_parse(value)?;
         let (value_mask, remaining) = u32::try_parse(remaining)?;
-        let (value_list, remaining) = CreateAlarmAux::try_parse(remaining, value_mask)?;
+        let (value_list, remaining) = CreateAlarmAux::try_parse(remaining, u32::from(value_mask))?;
         let _ = remaining;
         Ok(CreateAlarmRequest {
             id,
@@ -1599,7 +1599,7 @@ impl<'input> ChangeAlarmRequest<'input> {
         }
         let (id, remaining) = Alarm::try_parse(value)?;
         let (value_mask, remaining) = u32::try_parse(remaining)?;
-        let (value_list, remaining) = ChangeAlarmAux::try_parse(remaining, value_mask)?;
+        let (value_list, remaining) = ChangeAlarmAux::try_parse(remaining, u32::from(value_mask))?;
         let _ = remaining;
         Ok(ChangeAlarmRequest {
             id,

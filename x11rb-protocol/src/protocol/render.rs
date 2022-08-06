@@ -2050,7 +2050,7 @@ impl<'input> CreatePictureRequest<'input> {
         let (drawable, remaining) = xproto::Drawable::try_parse(remaining)?;
         let (format, remaining) = Pictformat::try_parse(remaining)?;
         let (value_mask, remaining) = u32::try_parse(remaining)?;
-        let (value_list, remaining) = CreatePictureAux::try_parse(remaining, value_mask)?;
+        let (value_list, remaining) = CreatePictureAux::try_parse(remaining, u32::from(value_mask))?;
         let _ = remaining;
         Ok(CreatePictureRequest {
             pid,
@@ -2442,7 +2442,7 @@ impl<'input> ChangePictureRequest<'input> {
         }
         let (picture, remaining) = Picture::try_parse(value)?;
         let (value_mask, remaining) = u32::try_parse(remaining)?;
-        let (value_list, remaining) = ChangePictureAux::try_parse(remaining, value_mask)?;
+        let (value_list, remaining) = ChangePictureAux::try_parse(remaining, u32::from(value_mask))?;
         let _ = remaining;
         Ok(ChangePictureRequest {
             picture,

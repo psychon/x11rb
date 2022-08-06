@@ -888,7 +888,7 @@ impl TryParse for InputInfo {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (class_id, remaining) = u8::try_parse(remaining)?;
         let (len, remaining) = u8::try_parse(remaining)?;
-        let (info, remaining) = InputInfoInfo::try_parse(remaining, class_id)?;
+        let (info, remaining) = InputInfoInfo::try_parse(remaining, u8::from(class_id))?;
         let result = InputInfo { len, info };
         Ok((result, remaining))
     }
@@ -4372,7 +4372,7 @@ impl TryParse for FeedbackState {
         let (class_id, remaining) = u8::try_parse(remaining)?;
         let (feedback_id, remaining) = u8::try_parse(remaining)?;
         let (len, remaining) = u16::try_parse(remaining)?;
-        let (data, remaining) = FeedbackStateData::try_parse(remaining, class_id)?;
+        let (data, remaining) = FeedbackStateData::try_parse(remaining, u8::from(class_id))?;
         let result = FeedbackState { feedback_id, len, data };
         Ok((result, remaining))
     }
@@ -5284,7 +5284,7 @@ impl TryParse for FeedbackCtl {
         let (class_id, remaining) = u8::try_parse(remaining)?;
         let (feedback_id, remaining) = u8::try_parse(remaining)?;
         let (len, remaining) = u16::try_parse(remaining)?;
-        let (data, remaining) = FeedbackCtlData::try_parse(remaining, class_id)?;
+        let (data, remaining) = FeedbackCtlData::try_parse(remaining, u8::from(class_id))?;
         let result = FeedbackCtl { feedback_id, len, data };
         Ok((result, remaining))
     }
@@ -6760,7 +6760,7 @@ impl TryParse for InputState {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (class_id, remaining) = u8::try_parse(remaining)?;
         let (len, remaining) = u8::try_parse(remaining)?;
-        let (data, remaining) = InputStateData::try_parse(remaining, class_id)?;
+        let (data, remaining) = InputStateData::try_parse(remaining, u8::from(class_id))?;
         let result = InputState { len, data };
         Ok((result, remaining))
     }
@@ -7888,7 +7888,7 @@ impl TryParse for DeviceState {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (control_id, remaining) = u16::try_parse(remaining)?;
         let (len, remaining) = u16::try_parse(remaining)?;
-        let (data, remaining) = DeviceStateData::try_parse(remaining, control_id)?;
+        let (data, remaining) = DeviceStateData::try_parse(remaining, u16::from(control_id))?;
         let result = DeviceState { len, data };
         Ok((result, remaining))
     }
@@ -8709,7 +8709,7 @@ impl TryParse for DeviceCtl {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (control_id, remaining) = u16::try_parse(remaining)?;
         let (len, remaining) = u16::try_parse(remaining)?;
-        let (data, remaining) = DeviceCtlData::try_parse(remaining, control_id)?;
+        let (data, remaining) = DeviceCtlData::try_parse(remaining, u16::from(control_id))?;
         let result = DeviceCtl { len, data };
         Ok((result, remaining))
     }
@@ -9246,7 +9246,7 @@ impl<'input> ChangeDevicePropertyRequest<'input> {
         let mode = mode.into();
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (num_items, remaining) = u32::try_parse(remaining)?;
-        let (items, remaining) = ChangeDevicePropertyAux::try_parse(remaining, format, num_items)?;
+        let (items, remaining) = ChangeDevicePropertyAux::try_parse(remaining, u8::from(format), u32::from(num_items))?;
         let _ = remaining;
         Ok(ChangeDevicePropertyRequest {
             property,
@@ -9579,7 +9579,7 @@ impl TryParse for GetDevicePropertyReply {
         let (format, remaining) = u8::try_parse(remaining)?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(10..).ok_or(ParseError::InsufficientData)?;
-        let (items, remaining) = GetDevicePropertyItems::try_parse(remaining, format, num_items)?;
+        let (items, remaining) = GetDevicePropertyItems::try_parse(remaining, u8::from(format), u32::from(num_items))?;
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
@@ -10729,7 +10729,7 @@ impl TryParse for HierarchyChange {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (type_, remaining) = u16::try_parse(remaining)?;
         let (len, remaining) = u16::try_parse(remaining)?;
-        let (data, remaining) = HierarchyChangeData::try_parse(remaining, type_)?;
+        let (data, remaining) = HierarchyChangeData::try_parse(remaining, u16::from(type_))?;
         let result = HierarchyChange { len, data };
         Ok((result, remaining))
     }
@@ -12412,7 +12412,7 @@ impl TryParse for DeviceClass {
         let (type_, remaining) = u16::try_parse(remaining)?;
         let (len, remaining) = u16::try_parse(remaining)?;
         let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
-        let (data, remaining) = DeviceClassData::try_parse(remaining, type_)?;
+        let (data, remaining) = DeviceClassData::try_parse(remaining, u16::from(type_))?;
         let result = DeviceClass { len, sourceid, data };
         Ok((result, remaining))
     }
@@ -14157,7 +14157,7 @@ impl<'input> XIChangePropertyRequest<'input> {
         let (property, remaining) = xproto::Atom::try_parse(remaining)?;
         let (type_, remaining) = xproto::Atom::try_parse(remaining)?;
         let (num_items, remaining) = u32::try_parse(remaining)?;
-        let (items, remaining) = XIChangePropertyAux::try_parse(remaining, format, num_items)?;
+        let (items, remaining) = XIChangePropertyAux::try_parse(remaining, u8::from(format), u32::from(num_items))?;
         let _ = remaining;
         Ok(XIChangePropertyRequest {
             deviceid,
@@ -14487,7 +14487,7 @@ impl TryParse for XIGetPropertyReply {
         let (num_items, remaining) = u32::try_parse(remaining)?;
         let (format, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(11..).ok_or(ParseError::InsufficientData)?;
-        let (items, remaining) = XIGetPropertyItems::try_parse(remaining, format, num_items)?;
+        let (items, remaining) = XIGetPropertyItems::try_parse(remaining, u8::from(format), u32::from(num_items))?;
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }

@@ -6656,7 +6656,7 @@ impl<'input> SelectEventsRequest<'input> {
         let affect_map = affect_map.into();
         let (map, remaining) = u16::try_parse(remaining)?;
         let map = map.into();
-        let (details, remaining) = SelectEventsAux::try_parse(remaining, affect_which, clear, select_all)?;
+        let (details, remaining) = SelectEventsAux::try_parse(remaining, u16::from(affect_which), u16::from(clear), u16::from(select_all))?;
         let _ = remaining;
         Ok(SelectEventsRequest {
             device_spec,
@@ -8134,7 +8134,7 @@ impl TryParse for GetMapReply {
         let (total_v_mod_map_keys, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (virtual_mods, remaining) = u16::try_parse(remaining)?;
-        let (map, remaining) = GetMapMap::try_parse(remaining, present, n_types, n_key_syms, n_key_actions, total_actions, total_key_behaviors, virtual_mods, total_key_explicit, total_mod_map_keys, total_v_mod_map_keys)?;
+        let (map, remaining) = GetMapMap::try_parse(remaining, u16::from(present), u8::from(n_types), u8::from(n_key_syms), u8::from(n_key_actions), u16::from(total_actions), u8::from(total_key_behaviors), u16::from(virtual_mods), u8::from(total_key_explicit), u8::from(total_mod_map_keys), u8::from(total_v_mod_map_keys))?;
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
@@ -8598,7 +8598,7 @@ impl<'input> SetMapRequest<'input> {
         let (total_v_mod_map_keys, remaining) = u8::try_parse(remaining)?;
         let (virtual_mods, remaining) = u16::try_parse(remaining)?;
         let virtual_mods = virtual_mods.into();
-        let (values, remaining) = SetMapAux::try_parse(remaining, present, n_types, n_key_syms, n_key_actions, total_actions, total_key_behaviors, virtual_mods, total_key_explicit, total_mod_map_keys, total_v_mod_map_keys)?;
+        let (values, remaining) = SetMapAux::try_parse(remaining, u16::from(present), u8::from(n_types), u8::from(n_key_syms), u8::from(n_key_actions), u16::from(total_actions), u8::from(total_key_behaviors), u16::from(virtual_mods), u8::from(total_key_explicit), u8::from(total_mod_map_keys), u8::from(total_v_mod_map_keys))?;
         let _ = remaining;
         Ok(SetMapRequest {
             device_spec,
@@ -10023,7 +10023,7 @@ impl TryParse for GetNamesReply {
         let (n_key_aliases, remaining) = u8::try_parse(remaining)?;
         let (n_kt_levels, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(4..).ok_or(ParseError::InsufficientData)?;
-        let (value_list, remaining) = GetNamesValueList::try_parse(remaining, which, n_types, indicators, virtual_mods, group_names, n_keys, n_key_aliases, n_radio_groups)?;
+        let (value_list, remaining) = GetNamesValueList::try_parse(remaining, u32::from(which), u8::from(n_types), u32::from(indicators), u16::from(virtual_mods), u8::from(group_names), u8::from(n_keys), u8::from(n_key_aliases), u8::from(n_radio_groups))?;
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
@@ -10548,7 +10548,7 @@ impl<'input> SetNamesRequest<'input> {
         let (n_key_aliases, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (total_kt_level_names, remaining) = u16::try_parse(remaining)?;
-        let (values, remaining) = SetNamesAux::try_parse(remaining, which, n_types, indicators, virtual_mods, group_names, n_keys, n_key_aliases, n_radio_groups)?;
+        let (values, remaining) = SetNamesAux::try_parse(remaining, u32::from(which), u8::from(n_types), u32::from(indicators), u16::from(virtual_mods), u8::from(group_names), u8::from(n_keys), u8::from(n_key_aliases), u8::from(n_radio_groups))?;
         let _ = remaining;
         Ok(SetNamesRequest {
             device_spec,
@@ -11385,7 +11385,7 @@ impl TryParse for GetKbdByNameRepliesTypes {
         let (total_v_mod_map_keys, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (virtual_mods, remaining) = u16::try_parse(remaining)?;
-        let (map, remaining) = GetKbdByNameRepliesTypesMap::try_parse(remaining, present, n_types, n_key_syms, n_key_actions, total_actions, total_key_behaviors, virtual_mods, total_key_explicit, total_mod_map_keys, total_v_mod_map_keys)?;
+        let (map, remaining) = GetKbdByNameRepliesTypesMap::try_parse(remaining, u16::from(present), u8::from(n_types), u8::from(n_key_syms), u8::from(n_key_actions), u16::from(total_actions), u8::from(total_key_behaviors), u16::from(virtual_mods), u8::from(total_key_explicit), u8::from(total_mod_map_keys), u8::from(total_v_mod_map_keys))?;
         let virtual_mods = virtual_mods.into();
         let result = GetKbdByNameRepliesTypes { getmap_type, type_device_id, getmap_sequence, getmap_length, type_min_key_code, type_max_key_code, first_type, n_types, total_types, first_key_sym, total_syms, n_key_syms, first_key_action, total_actions, n_key_actions, first_key_behavior, n_key_behaviors, total_key_behaviors, first_key_explicit, n_key_explicit, total_key_explicit, first_mod_map_key, n_mod_map_keys, total_mod_map_keys, first_v_mod_map_key, n_v_mod_map_keys, total_v_mod_map_keys, virtual_mods, map };
         Ok((result, remaining))
@@ -11896,7 +11896,7 @@ impl TryParse for GetKbdByNameRepliesKeyNames {
         let (n_key_aliases, remaining) = u8::try_parse(remaining)?;
         let (n_kt_levels, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(4..).ok_or(ParseError::InsufficientData)?;
-        let (value_list, remaining) = GetKbdByNameRepliesKeyNamesValueList::try_parse(remaining, which, n_types, indicators, virtual_mods, group_names, n_keys, n_key_aliases, n_radio_groups)?;
+        let (value_list, remaining) = GetKbdByNameRepliesKeyNamesValueList::try_parse(remaining, u32::from(which), u8::from(n_types), u32::from(indicators), u16::from(virtual_mods), u8::from(group_names), u8::from(n_keys), u8::from(n_key_aliases), u8::from(n_radio_groups))?;
         let group_names = group_names.into();
         let virtual_mods = virtual_mods.into();
         let result = GetKbdByNameRepliesKeyNames { keyname_type, key_device_id, keyname_sequence, keyname_length, key_min_key_code, key_max_key_code, n_types, group_names, virtual_mods, first_key, n_keys, indicators, n_radio_groups, n_key_aliases, n_kt_levels, value_list };
@@ -12114,7 +12114,7 @@ impl TryParse for GetKbdByNameReply {
         let (found, remaining) = u16::try_parse(remaining)?;
         let (reported, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(16..).ok_or(ParseError::InsufficientData)?;
-        let (replies, remaining) = GetKbdByNameReplies::try_parse(remaining, reported)?;
+        let (replies, remaining) = GetKbdByNameReplies::try_parse(remaining, u16::from(reported))?;
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }

@@ -7268,7 +7268,7 @@ impl<'input> CreateWindowRequest<'input> {
         let class = class.into();
         let (visual, remaining) = Visualid::try_parse(remaining)?;
         let (value_mask, remaining) = u32::try_parse(remaining)?;
-        let (value_list, remaining) = CreateWindowAux::try_parse(remaining, value_mask)?;
+        let (value_list, remaining) = CreateWindowAux::try_parse(remaining, u32::from(value_mask))?;
         let _ = remaining;
         Ok(CreateWindowRequest {
             depth,
@@ -7740,7 +7740,7 @@ impl<'input> ChangeWindowAttributesRequest<'input> {
         let _ = remaining;
         let (window, remaining) = Window::try_parse(value)?;
         let (value_mask, remaining) = u32::try_parse(remaining)?;
-        let (value_list, remaining) = ChangeWindowAttributesAux::try_parse(remaining, value_mask)?;
+        let (value_list, remaining) = ChangeWindowAttributesAux::try_parse(remaining, u32::from(value_mask))?;
         let _ = remaining;
         Ok(ChangeWindowAttributesRequest {
             window,
@@ -9165,7 +9165,7 @@ impl<'input> ConfigureWindowRequest<'input> {
         let (window, remaining) = Window::try_parse(value)?;
         let (value_mask, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
-        let (value_list, remaining) = ConfigureWindowAux::try_parse(remaining, value_mask)?;
+        let (value_list, remaining) = ConfigureWindowAux::try_parse(remaining, u16::from(value_mask))?;
         let _ = remaining;
         Ok(ConfigureWindowRequest {
             window,
@@ -16907,7 +16907,7 @@ impl<'input> CreateGCRequest<'input> {
         let (cid, remaining) = Gcontext::try_parse(value)?;
         let (drawable, remaining) = Drawable::try_parse(remaining)?;
         let (value_mask, remaining) = u32::try_parse(remaining)?;
-        let (value_list, remaining) = CreateGCAux::try_parse(remaining, value_mask)?;
+        let (value_list, remaining) = CreateGCAux::try_parse(remaining, u32::from(value_mask))?;
         let _ = remaining;
         Ok(CreateGCRequest {
             cid,
@@ -17558,7 +17558,7 @@ impl<'input> ChangeGCRequest<'input> {
         let _ = remaining;
         let (gc, remaining) = Gcontext::try_parse(value)?;
         let (value_mask, remaining) = u32::try_parse(remaining)?;
-        let (value_list, remaining) = ChangeGCAux::try_parse(remaining, value_mask)?;
+        let (value_list, remaining) = ChangeGCAux::try_parse(remaining, u32::from(value_mask))?;
         let _ = remaining;
         Ok(ChangeGCRequest {
             gc,
@@ -23546,7 +23546,7 @@ impl<'input> ChangeKeyboardControlRequest<'input> {
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let _ = remaining;
         let (value_mask, remaining) = u32::try_parse(value)?;
-        let (value_list, remaining) = ChangeKeyboardControlAux::try_parse(remaining, value_mask)?;
+        let (value_list, remaining) = ChangeKeyboardControlAux::try_parse(remaining, u32::from(value_mask))?;
         let _ = remaining;
         Ok(ChangeKeyboardControlRequest {
             value_list: Cow::Owned(value_list),

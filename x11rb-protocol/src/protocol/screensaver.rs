@@ -1008,7 +1008,7 @@ impl<'input> SetAttributesRequest<'input> {
         let (depth, remaining) = u8::try_parse(remaining)?;
         let (visual, remaining) = xproto::Visualid::try_parse(remaining)?;
         let (value_mask, remaining) = u32::try_parse(remaining)?;
-        let (value_list, remaining) = SetAttributesAux::try_parse(remaining, value_mask)?;
+        let (value_list, remaining) = SetAttributesAux::try_parse(remaining, u32::from(value_mask))?;
         let _ = remaining;
         Ok(SetAttributesRequest {
             drawable,
