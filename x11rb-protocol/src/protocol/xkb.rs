@@ -6349,7 +6349,7 @@ pub struct SelectEventsAux {
 }
 impl SelectEventsAux {
     fn try_parse(value: &[u8], affect_which: u16, clear: u16, select_all: u16) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = affect_which & ((!clear) & (!select_all));
+        let switch_expr = u16::from(affect_which) & ((!u16::from(clear)) & (!u16::from(select_all)));
         let mut outer_remaining = value;
         let bitcase1 = if switch_expr & u16::from(EventType::NEW_KEYBOARD_NOTIFY) != 0 {
             let (bitcase1, new_remaining) = SelectEventsAuxBitcase1::try_parse(outer_remaining)?;
@@ -6607,7 +6607,7 @@ impl<'input> SelectEventsRequest<'input> {
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'input>> {
         let length_so_far = 0;
         let device_spec_bytes = self.device_spec.serialize();
-        let affect_which: u16 = self.details.switch_expr() | (self.clear | self.select_all);
+        let affect_which: u16 = self.details.switch_expr() | (u16::from(self.clear) | u16::from(self.select_all));
         let affect_which_bytes = affect_which.serialize();
         let clear_bytes = u16::from(self.clear).serialize();
         let select_all_bytes = u16::from(self.select_all).serialize();
@@ -7889,7 +7889,7 @@ pub struct GetMapMap {
 }
 impl GetMapMap {
     fn try_parse(value: &[u8], present: u16, n_types: u8, n_key_syms: u8, n_key_actions: u8, total_actions: u16, total_key_behaviors: u8, virtual_mods: u16, total_key_explicit: u8, total_mod_map_keys: u8, total_v_mod_map_keys: u8) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = present;
+        let switch_expr = u16::from(present);
         let mut outer_remaining = value;
         let types_rtrn = if switch_expr & u16::from(MapPart::KEY_TYPES) != 0 {
             let remaining = outer_remaining;
@@ -8242,7 +8242,7 @@ pub struct SetMapAux {
 }
 impl SetMapAux {
     fn try_parse(value: &[u8], present: u16, n_types: u8, n_key_syms: u8, n_key_actions: u8, total_actions: u16, total_key_behaviors: u8, virtual_mods: u16, total_key_explicit: u8, total_mod_map_keys: u8, total_v_mod_map_keys: u8) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = present;
+        let switch_expr = u16::from(present);
         let mut outer_remaining = value;
         let types = if switch_expr & u16::from(MapPart::KEY_TYPES) != 0 {
             let remaining = outer_remaining;
@@ -9751,7 +9751,7 @@ pub struct GetNamesValueList {
 }
 impl GetNamesValueList {
     fn try_parse(value: &[u8], which: u32, n_types: u8, indicators: u32, virtual_mods: u16, group_names: u8, n_keys: u8, n_key_aliases: u8, n_radio_groups: u8) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = which;
+        let switch_expr = u32::from(which);
         let mut outer_remaining = value;
         let keycodes_name = if switch_expr & u32::from(NameDetail::KEYCODES) != 0 {
             let remaining = outer_remaining;
@@ -10124,7 +10124,7 @@ pub struct SetNamesAux {
 }
 impl SetNamesAux {
     fn try_parse(value: &[u8], which: u32, n_types: u8, indicators: u32, virtual_mods: u16, group_names: u8, n_keys: u8, n_key_aliases: u8, n_radio_groups: u8) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = which;
+        let switch_expr = u32::from(which);
         let mut outer_remaining = value;
         let keycodes_name = if switch_expr & u32::from(NameDetail::KEYCODES) != 0 {
             let remaining = outer_remaining;
@@ -11140,7 +11140,7 @@ pub struct GetKbdByNameRepliesTypesMap {
 }
 impl GetKbdByNameRepliesTypesMap {
     fn try_parse(value: &[u8], present: u16, n_types: u8, n_key_syms: u8, n_key_actions: u8, total_actions: u16, total_key_behaviors: u8, virtual_mods: u16, total_key_explicit: u8, total_mod_map_keys: u8, total_v_mod_map_keys: u8) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = present;
+        let switch_expr = u16::from(present);
         let mut outer_remaining = value;
         let types_rtrn = if switch_expr & u16::from(MapPart::KEY_TYPES) != 0 {
             let remaining = outer_remaining;
@@ -11624,7 +11624,7 @@ pub struct GetKbdByNameRepliesKeyNamesValueList {
 }
 impl GetKbdByNameRepliesKeyNamesValueList {
     fn try_parse(value: &[u8], which: u32, n_types: u8, indicators: u32, virtual_mods: u16, group_names: u8, n_keys: u8, n_key_aliases: u8, n_radio_groups: u8) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = which;
+        let switch_expr = u32::from(which);
         let mut outer_remaining = value;
         let keycodes_name = if switch_expr & u32::from(NameDetail::KEYCODES) != 0 {
             let remaining = outer_remaining;
@@ -12018,7 +12018,7 @@ pub struct GetKbdByNameReplies {
 }
 impl GetKbdByNameReplies {
     fn try_parse(value: &[u8], reported: u16) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = reported;
+        let switch_expr = u16::from(reported);
         let mut outer_remaining = value;
         let types = if switch_expr & u16::from(GBNDetail::TYPES) != 0 || switch_expr & u16::from(GBNDetail::CLIENT_SYMBOLS) != 0 || switch_expr & u16::from(GBNDetail::SERVER_SYMBOLS) != 0 {
             let (types, new_remaining) = GetKbdByNameRepliesTypes::try_parse(outer_remaining)?;

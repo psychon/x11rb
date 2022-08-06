@@ -1696,7 +1696,7 @@ pub struct CreatePictureAux {
 }
 impl CreatePictureAux {
     fn try_parse(value: &[u8], value_mask: u32) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = value_mask;
+        let switch_expr = u32::from(value_mask);
         let mut outer_remaining = value;
         let repeat = if switch_expr & u32::from(CP::REPEAT) != 0 {
             let remaining = outer_remaining;
@@ -2102,7 +2102,7 @@ pub struct ChangePictureAux {
 }
 impl ChangePictureAux {
     fn try_parse(value: &[u8], value_mask: u32) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = value_mask;
+        let switch_expr = u32::from(value_mask);
         let mut outer_remaining = value;
         let repeat = if switch_expr & u32::from(CP::REPEAT) != 0 {
             let remaining = outer_remaining;

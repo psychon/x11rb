@@ -204,7 +204,7 @@ impl TryParse for ClientIdValue {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (spec, remaining) = ClientIdSpec::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
-        let (value, remaining) = crate::x11_utils::parse_list::<u32>(remaining, length.checked_div(4u32).ok_or(ParseError::InvalidExpression)?.try_to_usize()?)?;
+        let (value, remaining) = crate::x11_utils::parse_list::<u32>(remaining, u32::from(length).checked_div(4u32).ok_or(ParseError::InvalidExpression)?.try_to_usize()?)?;
         let result = ClientIdValue { spec, value };
         Ok((result, remaining))
     }

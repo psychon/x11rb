@@ -803,7 +803,7 @@ pub enum InputInfoInfo {
 }
 impl InputInfoInfo {
     fn try_parse(value: &[u8], class_id: u8) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = class_id;
+        let switch_expr = u8::from(class_id);
         let mut outer_remaining = value;
         let mut parse_result = None;
         if switch_expr == u8::from(InputClass::KEY) {
@@ -4243,7 +4243,7 @@ pub enum FeedbackStateData {
 }
 impl FeedbackStateData {
     fn try_parse(value: &[u8], class_id: u8) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = class_id;
+        let switch_expr = u8::from(class_id);
         let mut outer_remaining = value;
         let mut parse_result = None;
         if switch_expr == u8::from(FeedbackClass::KEYBOARD) {
@@ -5155,7 +5155,7 @@ pub enum FeedbackCtlData {
 }
 impl FeedbackCtlData {
     fn try_parse(value: &[u8], class_id: u8) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = class_id;
+        let switch_expr = u8::from(class_id);
         let mut outer_remaining = value;
         let mut parse_result = None;
         if switch_expr == u8::from(FeedbackClass::KEYBOARD) {
@@ -6675,7 +6675,7 @@ pub enum InputStateData {
 }
 impl InputStateData {
     fn try_parse(value: &[u8], class_id: u8) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = class_id;
+        let switch_expr = u8::from(class_id);
         let mut outer_remaining = value;
         let mut parse_result = None;
         if switch_expr == u8::from(InputClass::KEY) {
@@ -7769,7 +7769,7 @@ pub enum DeviceStateData {
 }
 impl DeviceStateData {
     fn try_parse(value: &[u8], control_id: u16) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = control_id;
+        let switch_expr = u16::from(control_id);
         let mut outer_remaining = value;
         let mut parse_result = None;
         if switch_expr == u16::from(DeviceControl::RESOLUTION) {
@@ -8590,7 +8590,7 @@ pub enum DeviceCtlData {
 }
 impl DeviceCtlData {
     fn try_parse(value: &[u8], control_id: u16) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = control_id;
+        let switch_expr = u16::from(control_id);
         let mut outer_remaining = value;
         let mut parse_result = None;
         if switch_expr == u16::from(DeviceControl::RESOLUTION) {
@@ -9077,7 +9077,7 @@ pub enum ChangeDevicePropertyAux {
 }
 impl ChangeDevicePropertyAux {
     fn try_parse(value: &[u8], format: u8, num_items: u32) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = format;
+        let switch_expr = u8::from(format);
         let mut outer_remaining = value;
         let mut parse_result = None;
         if switch_expr == u8::from(PropertyFormat::M8_BITS) {
@@ -9453,7 +9453,7 @@ pub enum GetDevicePropertyItems {
 }
 impl GetDevicePropertyItems {
     fn try_parse(value: &[u8], format: u8, num_items: u32) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = format;
+        let switch_expr = u8::from(format);
         let mut outer_remaining = value;
         let mut parse_result = None;
         if switch_expr == u8::from(PropertyFormat::M8_BITS) {
@@ -10630,7 +10630,7 @@ pub enum HierarchyChangeData {
 }
 impl HierarchyChangeData {
     fn try_parse(value: &[u8], type_: u16) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = type_;
+        let switch_expr = u16::from(type_);
         let mut outer_remaining = value;
         let mut parse_result = None;
         if switch_expr == u16::from(HierarchyChangeType::ADD_MASTER) {
@@ -12297,7 +12297,7 @@ pub enum DeviceClassData {
 }
 impl DeviceClassData {
     fn try_parse(value: &[u8], type_: u16) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = type_;
+        let switch_expr = u16::from(type_);
         let mut outer_remaining = value;
         let mut parse_result = None;
         if switch_expr == u16::from(DeviceClassType::KEY) {
@@ -13989,7 +13989,7 @@ pub enum XIChangePropertyAux {
 }
 impl XIChangePropertyAux {
     fn try_parse(value: &[u8], format: u8, num_items: u32) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = format;
+        let switch_expr = u8::from(format);
         let mut outer_remaining = value;
         let mut parse_result = None;
         if switch_expr == u8::from(PropertyFormat::M8_BITS) {
@@ -14364,7 +14364,7 @@ pub enum XIGetPropertyItems {
 }
 impl XIGetPropertyItems {
     fn try_parse(value: &[u8], format: u8, num_items: u32) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = format;
+        let switch_expr = u8::from(format);
         let mut outer_remaining = value;
         let mut parse_result = None;
         if switch_expr == u8::from(PropertyFormat::M8_BITS) {

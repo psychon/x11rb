@@ -586,7 +586,7 @@ pub struct SetAttributesAux {
 }
 impl SetAttributesAux {
     fn try_parse(value: &[u8], value_mask: u32) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = value_mask;
+        let switch_expr = u32::from(value_mask);
         let mut outer_remaining = value;
         let background_pixmap = if switch_expr & u32::from(xproto::CW::BACK_PIXMAP) != 0 {
             let remaining = outer_remaining;

@@ -2231,7 +2231,7 @@ impl TryParse for FetchRegionReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (extents, remaining) = xproto::Rectangle::try_parse(remaining)?;
         let remaining = remaining.get(16..).ok_or(ParseError::InsufficientData)?;
-        let (rectangles, remaining) = crate::x11_utils::parse_list::<xproto::Rectangle>(remaining, length.checked_div(2u32).ok_or(ParseError::InvalidExpression)?.try_to_usize()?)?;
+        let (rectangles, remaining) = crate::x11_utils::parse_list::<xproto::Rectangle>(remaining, u32::from(length).checked_div(2u32).ok_or(ParseError::InvalidExpression)?.try_to_usize()?)?;
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }

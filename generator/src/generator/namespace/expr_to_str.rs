@@ -194,10 +194,7 @@ fn expr_to_str_impl(
                     format!("x.{}", to_rust_variable_name(&field_ref_expr.field_name))
                 }
             };
-            if cast_to_type == Some(expr_type(expr, "unknown")) {
-                // Field already has the expected type, so no cast needed
-                value
-            } else if let Some(t) = cast_to_type {
+            if let Some(t) = cast_to_type {
                 format!("{}::from({})", t, value)
             } else {
                 value

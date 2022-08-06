@@ -6783,7 +6783,7 @@ pub struct CreateWindowAux {
 }
 impl CreateWindowAux {
     fn try_parse(value: &[u8], value_mask: u32) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = value_mask;
+        let switch_expr = u32::from(value_mask);
         let mut outer_remaining = value;
         let background_pixmap = if switch_expr & u32::from(CW::BACK_PIXMAP) != 0 {
             let remaining = outer_remaining;
@@ -7336,7 +7336,7 @@ pub struct ChangeWindowAttributesAux {
 }
 impl ChangeWindowAttributesAux {
     fn try_parse(value: &[u8], value_mask: u32) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = value_mask;
+        let switch_expr = u32::from(value_mask);
         let mut outer_remaining = value;
         let background_pixmap = if switch_expr & u32::from(CW::BACK_PIXMAP) != 0 {
             let remaining = outer_remaining;
@@ -8862,7 +8862,7 @@ pub struct ConfigureWindowAux {
 }
 impl ConfigureWindowAux {
     fn try_parse(value: &[u8], value_mask: u16) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = value_mask;
+        let switch_expr = u16::from(value_mask);
         let mut outer_remaining = value;
         let x = if switch_expr & u16::from(ConfigWindow::X) != 0 {
             let remaining = outer_remaining;
@@ -10163,7 +10163,7 @@ impl<'input> ChangePropertyRequest<'input> {
             data_len_bytes[3],
         ];
         let length_so_far = length_so_far + request0.len();
-        assert_eq!(self.data.len(), usize::try_from(self.data_len.checked_mul(u32::from(self.format)).unwrap().checked_div(8u32).unwrap()).unwrap(), "`data` has an incorrect length");
+        assert_eq!(self.data.len(), usize::try_from(u32::from(self.data_len).checked_mul(u32::from(self.format)).unwrap().checked_div(8u32).unwrap()).unwrap(), "`data` has an incorrect length");
         let length_so_far = length_so_far + self.data.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
@@ -10187,7 +10187,7 @@ impl<'input> ChangePropertyRequest<'input> {
         let (format, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::InsufficientData)?;
         let (data_len, remaining) = u32::try_parse(remaining)?;
-        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, data_len.checked_mul(u32::from(format)).ok_or(ParseError::InvalidExpression)?.checked_div(8u32).ok_or(ParseError::InvalidExpression)?.try_to_usize()?)?;
+        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, u32::from(data_len).checked_mul(u32::from(format)).ok_or(ParseError::InvalidExpression)?.checked_div(8u32).ok_or(ParseError::InvalidExpression)?.try_to_usize()?)?;
         let _ = remaining;
         Ok(ChangePropertyRequest {
             mode,
@@ -10695,7 +10695,7 @@ impl TryParse for GetPropertyReply {
         let (bytes_after, remaining) = u32::try_parse(remaining)?;
         let (value_len, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::InsufficientData)?;
-        let (value, remaining) = crate::x11_utils::parse_u8_list(remaining, value_len.checked_mul(u32::from(format).checked_div(8u32).ok_or(ParseError::InvalidExpression)?).ok_or(ParseError::InvalidExpression)?.try_to_usize()?)?;
+        let (value, remaining) = crate::x11_utils::parse_u8_list(remaining, u32::from(value_len).checked_mul(u32::from(format).checked_div(8u32).ok_or(ParseError::InvalidExpression)?).ok_or(ParseError::InvalidExpression)?.try_to_usize()?)?;
         let value = value.to_vec();
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
@@ -10725,7 +10725,7 @@ impl Serialize for GetPropertyReply {
         self.bytes_after.serialize_into(bytes);
         self.value_len.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 12]);
-        assert_eq!(self.value.len(), usize::try_from(self.value_len.checked_mul(u32::from(self.format).checked_div(8u32).unwrap()).unwrap()).unwrap(), "`value` has an incorrect length");
+        assert_eq!(self.value.len(), usize::try_from(u32::from(self.value_len).checked_mul(u32::from(self.format).checked_div(8u32).unwrap()).unwrap()).unwrap(), "`value` has an incorrect length");
         bytes.extend_from_slice(&self.value);
     }
 }
@@ -14755,7 +14755,7 @@ impl<'input> QueryTextExtentsRequest<'input> {
     pub fn serialize(self) -> BufWithFds<PiecewiseBuf<'input>> {
         let string_len = u32::try_from(self.string.len()).unwrap();
         let length_so_far = 0;
-        let odd_length = (string_len & 1u32) != 0;
+        let odd_length = (u32::from(string_len) & 1u32) != 0;
         let odd_length_bytes = odd_length.serialize();
         let font_bytes = self.font.serialize();
         let mut request0 = vec![
@@ -16330,7 +16330,7 @@ pub struct CreateGCAux {
 }
 impl CreateGCAux {
     fn try_parse(value: &[u8], value_mask: u32) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = value_mask;
+        let switch_expr = u32::from(value_mask);
         let mut outer_remaining = value;
         let function = if switch_expr & u32::from(GC::FUNCTION) != 0 {
             let remaining = outer_remaining;
@@ -16967,7 +16967,7 @@ pub struct ChangeGCAux {
 }
 impl ChangeGCAux {
     fn try_parse(value: &[u8], value_mask: u32) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = value_mask;
+        let switch_expr = u32::from(value_mask);
         let mut outer_remaining = value;
         let function = if switch_expr & u32::from(GC::FUNCTION) != 0 {
             let remaining = outer_remaining;
@@ -19565,7 +19565,7 @@ impl TryParse for GetImageReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (visual, remaining) = Visualid::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::InsufficientData)?;
-        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, length.checked_mul(4u32).ok_or(ParseError::InvalidExpression)?.try_to_usize()?)?;
+        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, u32::from(length).checked_mul(4u32).ok_or(ParseError::InvalidExpression)?.try_to_usize()?)?;
         let data = data.to_vec();
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
@@ -23312,7 +23312,7 @@ pub struct ChangeKeyboardControlAux {
 }
 impl ChangeKeyboardControlAux {
     fn try_parse(value: &[u8], value_mask: u32) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = value_mask;
+        let switch_expr = u32::from(value_mask);
         let mut outer_remaining = value;
         let key_click_percent = if switch_expr & u32::from(KB::KEY_CLICK_PERCENT) != 0 {
             let remaining = outer_remaining;

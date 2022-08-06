@@ -2127,7 +2127,7 @@ impl<'input> ChangeOutputPropertyRequest<'input> {
             num_units_bytes[3],
         ];
         let length_so_far = length_so_far + request0.len();
-        assert_eq!(self.data.len(), usize::try_from(self.num_units.checked_mul(u32::from(self.format)).unwrap().checked_div(8u32).unwrap()).unwrap(), "`data` has an incorrect length");
+        assert_eq!(self.data.len(), usize::try_from(u32::from(self.num_units).checked_mul(u32::from(self.format)).unwrap().checked_div(8u32).unwrap()).unwrap(), "`data` has an incorrect length");
         let length_so_far = length_so_far + self.data.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
@@ -2149,7 +2149,7 @@ impl<'input> ChangeOutputPropertyRequest<'input> {
         let mode = mode.into();
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (num_units, remaining) = u32::try_parse(remaining)?;
-        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, num_units.checked_mul(u32::from(format)).ok_or(ParseError::InvalidExpression)?.checked_div(8u32).ok_or(ParseError::InvalidExpression)?.try_to_usize()?)?;
+        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, u32::from(num_units).checked_mul(u32::from(format)).ok_or(ParseError::InvalidExpression)?.checked_div(8u32).ok_or(ParseError::InvalidExpression)?.try_to_usize()?)?;
         let _ = remaining;
         Ok(ChangeOutputPropertyRequest {
             output,
@@ -2369,7 +2369,7 @@ impl TryParse for GetOutputPropertyReply {
         let (bytes_after, remaining) = u32::try_parse(remaining)?;
         let (num_items, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::InsufficientData)?;
-        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, num_items.checked_mul(u32::from(format).checked_div(8u32).ok_or(ParseError::InvalidExpression)?).ok_or(ParseError::InvalidExpression)?.try_to_usize()?)?;
+        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, u32::from(num_items).checked_mul(u32::from(format).checked_div(8u32).ok_or(ParseError::InvalidExpression)?).ok_or(ParseError::InvalidExpression)?.try_to_usize()?)?;
         let data = data.to_vec();
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
@@ -2399,7 +2399,7 @@ impl Serialize for GetOutputPropertyReply {
         self.bytes_after.serialize_into(bytes);
         self.num_items.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 12]);
-        assert_eq!(self.data.len(), usize::try_from(self.num_items.checked_mul(u32::from(self.format).checked_div(8u32).unwrap()).unwrap()).unwrap(), "`data` has an incorrect length");
+        assert_eq!(self.data.len(), usize::try_from(u32::from(self.num_items).checked_mul(u32::from(self.format).checked_div(8u32).unwrap()).unwrap()).unwrap(), "`data` has an incorrect length");
         bytes.extend_from_slice(&self.data);
     }
 }
@@ -5524,7 +5524,7 @@ impl<'input> ChangeProviderPropertyRequest<'input> {
             num_items_bytes[3],
         ];
         let length_so_far = length_so_far + request0.len();
-        assert_eq!(self.data.len(), usize::try_from(self.num_items.checked_mul(u32::from(self.format).checked_div(8u32).unwrap()).unwrap()).unwrap(), "`data` has an incorrect length");
+        assert_eq!(self.data.len(), usize::try_from(u32::from(self.num_items).checked_mul(u32::from(self.format).checked_div(8u32).unwrap()).unwrap()).unwrap(), "`data` has an incorrect length");
         let length_so_far = length_so_far + self.data.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
@@ -5545,7 +5545,7 @@ impl<'input> ChangeProviderPropertyRequest<'input> {
         let (mode, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (num_items, remaining) = u32::try_parse(remaining)?;
-        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, num_items.checked_mul(u32::from(format).checked_div(8u32).ok_or(ParseError::InvalidExpression)?).ok_or(ParseError::InvalidExpression)?.try_to_usize()?)?;
+        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, u32::from(num_items).checked_mul(u32::from(format).checked_div(8u32).ok_or(ParseError::InvalidExpression)?).ok_or(ParseError::InvalidExpression)?.try_to_usize()?)?;
         let _ = remaining;
         Ok(ChangeProviderPropertyRequest {
             provider,
@@ -5765,7 +5765,7 @@ impl TryParse for GetProviderPropertyReply {
         let (bytes_after, remaining) = u32::try_parse(remaining)?;
         let (num_items, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::InsufficientData)?;
-        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, num_items.checked_mul(u32::from(format).checked_div(8u32).ok_or(ParseError::InvalidExpression)?).ok_or(ParseError::InvalidExpression)?.try_to_usize()?)?;
+        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, u32::from(num_items).checked_mul(u32::from(format).checked_div(8u32).ok_or(ParseError::InvalidExpression)?).ok_or(ParseError::InvalidExpression)?.try_to_usize()?)?;
         let data = data.to_vec();
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
@@ -5795,7 +5795,7 @@ impl Serialize for GetProviderPropertyReply {
         self.bytes_after.serialize_into(bytes);
         self.num_items.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 12]);
-        assert_eq!(self.data.len(), usize::try_from(self.num_items.checked_mul(u32::from(self.format).checked_div(8u32).unwrap()).unwrap()).unwrap(), "`data` has an incorrect length");
+        assert_eq!(self.data.len(), usize::try_from(u32::from(self.num_items).checked_mul(u32::from(self.format).checked_div(8u32).unwrap()).unwrap()).unwrap(), "`data` has an incorrect length");
         bytes.extend_from_slice(&self.data);
     }
 }

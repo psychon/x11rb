@@ -2308,7 +2308,7 @@ impl TryParse for GetDotClocksReply {
         let (clocks, remaining) = u32::try_parse(remaining)?;
         let (maxclocks, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::InsufficientData)?;
-        let (clock, remaining) = crate::x11_utils::parse_list::<u32>(remaining, 1u32.checked_sub(flags & 1u32).ok_or(ParseError::InvalidExpression)?.checked_mul(clocks).ok_or(ParseError::InvalidExpression)?.try_to_usize()?)?;
+        let (clock, remaining) = crate::x11_utils::parse_list::<u32>(remaining, 1u32.checked_sub(u32::from(flags) & 1u32).ok_or(ParseError::InvalidExpression)?.checked_mul(u32::from(clocks)).ok_or(ParseError::InvalidExpression)?.try_to_usize()?)?;
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
@@ -2338,7 +2338,7 @@ impl Serialize for GetDotClocksReply {
         self.clocks.serialize_into(bytes);
         self.maxclocks.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 12]);
-        assert_eq!(self.clock.len(), usize::try_from(1u32.checked_sub(self.flags & 1u32).unwrap().checked_mul(self.clocks).unwrap()).unwrap(), "`clock` has an incorrect length");
+        assert_eq!(self.clock.len(), usize::try_from(1u32.checked_sub(u32::from(self.flags) & 1u32).unwrap().checked_mul(u32::from(self.clocks)).unwrap()).unwrap(), "`clock` has an incorrect length");
         self.clock.serialize_into(bytes);
     }
 }

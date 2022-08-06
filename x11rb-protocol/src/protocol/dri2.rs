@@ -513,7 +513,7 @@ impl TryParse for ConnectReply {
         let remaining = remaining.get(16..).ok_or(ParseError::InsufficientData)?;
         let (driver_name, remaining) = crate::x11_utils::parse_u8_list(remaining, driver_name_length.try_to_usize()?)?;
         let driver_name = driver_name.to_vec();
-        let (alignment_pad, remaining) = crate::x11_utils::parse_u8_list(remaining, (driver_name_length.checked_add(3u32).ok_or(ParseError::InvalidExpression)? & (!3u32)).checked_sub(driver_name_length).ok_or(ParseError::InvalidExpression)?.try_to_usize()?)?;
+        let (alignment_pad, remaining) = crate::x11_utils::parse_u8_list(remaining, (u32::from(driver_name_length).checked_add(3u32).ok_or(ParseError::InvalidExpression)? & (!3u32)).checked_sub(u32::from(driver_name_length)).ok_or(ParseError::InvalidExpression)?.try_to_usize()?)?;
         let alignment_pad = alignment_pad.to_vec();
         let (device_name, remaining) = crate::x11_utils::parse_u8_list(remaining, device_name_length.try_to_usize()?)?;
         let device_name = device_name.to_vec();
@@ -547,7 +547,7 @@ impl Serialize for ConnectReply {
         device_name_length.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 16]);
         bytes.extend_from_slice(&self.driver_name);
-        assert_eq!(self.alignment_pad.len(), usize::try_from((driver_name_length.checked_add(3u32).unwrap() & (!3u32)).checked_sub(driver_name_length).unwrap()).unwrap(), "`alignment_pad` has an incorrect length");
+        assert_eq!(self.alignment_pad.len(), usize::try_from((u32::from(driver_name_length).checked_add(3u32).unwrap() & (!3u32)).checked_sub(u32::from(driver_name_length)).unwrap()).unwrap(), "`alignment_pad` has an incorrect length");
         bytes.extend_from_slice(&self.alignment_pad);
         bytes.extend_from_slice(&self.device_name);
     }
