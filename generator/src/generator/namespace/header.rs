@@ -36,6 +36,13 @@ pub(super) fn write_header(out: &mut Output, ns: &xcbdefs::Namespace, mode: Mode
 
     outln!(out, "");
     outln!(out, "#![allow(clippy::too_many_arguments)]");
+    if mode == Mode::Protocol {
+        outln!(
+            out,
+            "// The code generator is simpler if it can always use conversions"
+        );
+        outln!(out, "#![allow(clippy::useless_conversion)]");
+    }
     outln!(out, "");
     outln!(out, "#[allow(unused_imports)]");
     outln!(out, "use {}::borrow::Cow;", alloc_name);
