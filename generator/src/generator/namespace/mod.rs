@@ -1256,7 +1256,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             }
             s.push_str(&wrap_name(&ext_param.name));
             if wire_type.is_some() {
-                s.push_str(")");
+                s.push(')');
             }
         }
         s
