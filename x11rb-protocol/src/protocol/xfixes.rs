@@ -697,7 +697,7 @@ pub const SELECT_SELECTION_INPUT_REQUEST: u8 = 2;
 pub struct SelectSelectionInputRequest {
     pub window: xproto::Window,
     pub selection: xproto::Atom,
-    pub event_mask: u32,
+    pub event_mask: SelectionEventMask,
 }
 impl SelectSelectionInputRequest {
     /// Serialize this request into bytes for the provided connection
@@ -705,7 +705,7 @@ impl SelectSelectionInputRequest {
         let length_so_far = 0;
         let window_bytes = self.window.serialize();
         let selection_bytes = self.selection.serialize();
-        let event_mask_bytes = self.event_mask.serialize();
+        let event_mask_bytes = u32::from(self.event_mask).serialize();
         let mut request0 = vec![
             major_opcode,
             SELECT_SELECTION_INPUT_REQUEST,
@@ -1009,14 +1009,14 @@ pub const SELECT_CURSOR_INPUT_REQUEST: u8 = 3;
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SelectCursorInputRequest {
     pub window: xproto::Window,
-    pub event_mask: u32,
+    pub event_mask: CursorNotifyMask,
 }
 impl SelectCursorInputRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
         let length_so_far = 0;
         let window_bytes = self.window.serialize();
-        let event_mask_bytes = self.event_mask.serialize();
+        let event_mask_bytes = u32::from(self.event_mask).serialize();
         let mut request0 = vec![
             major_opcode,
             SELECT_CURSOR_INPUT_REQUEST,
@@ -3231,7 +3231,7 @@ pub struct CreatePointerBarrierRequest<'input> {
     pub y1: u16,
     pub x2: u16,
     pub y2: u16,
-    pub directions: u32,
+    pub directions: BarrierDirections,
     pub devices: Cow<'input, [u16]>,
 }
 impl<'input> CreatePointerBarrierRequest<'input> {
@@ -3244,7 +3244,7 @@ impl<'input> CreatePointerBarrierRequest<'input> {
         let y1_bytes = self.y1.serialize();
         let x2_bytes = self.x2.serialize();
         let y2_bytes = self.y2.serialize();
-        let directions_bytes = self.directions.serialize();
+        let directions_bytes = u32::from(self.directions).serialize();
         let num_devices = u16::try_from(self.devices.len()).expect("`devices` has too many elements");
         let num_devices_bytes = num_devices.serialize();
         let mut request0 = vec![

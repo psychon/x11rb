@@ -59,12 +59,10 @@ where
     conn.send_request_with_reply(&slices, fds)
 }
 
-pub fn select_input<Conn, A>(conn: &Conn, drawable: xproto::Drawable, event_mask: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn select_input<Conn>(conn: &Conn, drawable: xproto::Drawable, event_mask: Event) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u32>,
 {
-    let event_mask: u32 = event_mask.into();
     let request0 = SelectInputRequest {
         drawable,
         event_mask,
@@ -129,9 +127,7 @@ pub trait ConnectionExt: RequestConnection {
     {
         query_info(self, drawable)
     }
-    fn screensaver_select_input<A>(&self, drawable: xproto::Drawable, event_mask: A) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where
-        A: Into<u32>,
+    fn screensaver_select_input(&self, drawable: xproto::Drawable, event_mask: Event) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         select_input(self, drawable, event_mask)
     }

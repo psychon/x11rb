@@ -66,12 +66,10 @@ where
     conn.send_request_without_reply(&slices, fds)
 }
 
-pub fn select_selection_input<Conn, A>(conn: &Conn, window: xproto::Window, selection: xproto::Atom, event_mask: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn select_selection_input<Conn>(conn: &Conn, window: xproto::Window, selection: xproto::Atom, event_mask: SelectionEventMask) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u32>,
 {
-    let event_mask: u32 = event_mask.into();
     let request0 = SelectSelectionInputRequest {
         window,
         selection,
@@ -82,12 +80,10 @@ where
     conn.send_request_without_reply(&slices, fds)
 }
 
-pub fn select_cursor_input<Conn, A>(conn: &Conn, window: xproto::Window, event_mask: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn select_cursor_input<Conn>(conn: &Conn, window: xproto::Window, event_mask: CursorNotifyMask) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u32>,
 {
-    let event_mask: u32 = event_mask.into();
     let request0 = SelectCursorInputRequest {
         window,
         event_mask,
@@ -460,12 +456,10 @@ where
     conn.send_request_without_reply(&slices, fds)
 }
 
-pub fn create_pointer_barrier<'c, 'input, Conn, A>(conn: &'c Conn, barrier: Barrier, window: xproto::Window, x1: u16, y1: u16, x2: u16, y2: u16, directions: A, devices: &'input [u16]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn create_pointer_barrier<'c, 'input, Conn>(conn: &'c Conn, barrier: Barrier, window: xproto::Window, x1: u16, y1: u16, x2: u16, y2: u16, directions: BarrierDirections, devices: &'input [u16]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u32>,
 {
-    let directions: u32 = directions.into();
     let request0 = CreatePointerBarrierRequest {
         barrier,
         window,
@@ -503,15 +497,11 @@ pub trait ConnectionExt: RequestConnection {
     {
         change_save_set(self, mode, target, map, window)
     }
-    fn xfixes_select_selection_input<A>(&self, window: xproto::Window, selection: xproto::Atom, event_mask: A) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where
-        A: Into<u32>,
+    fn xfixes_select_selection_input(&self, window: xproto::Window, selection: xproto::Atom, event_mask: SelectionEventMask) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         select_selection_input(self, window, selection, event_mask)
     }
-    fn xfixes_select_cursor_input<A>(&self, window: xproto::Window, event_mask: A) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where
-        A: Into<u32>,
+    fn xfixes_select_cursor_input(&self, window: xproto::Window, event_mask: CursorNotifyMask) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         select_cursor_input(self, window, event_mask)
     }
@@ -629,9 +619,7 @@ pub trait ConnectionExt: RequestConnection {
     {
         show_cursor(self, window)
     }
-    fn xfixes_create_pointer_barrier<'c, 'input, A>(&'c self, barrier: Barrier, window: xproto::Window, x1: u16, y1: u16, x2: u16, y2: u16, directions: A, devices: &'input [u16]) -> Result<VoidCookie<'c, Self>, ConnectionError>
-    where
-        A: Into<u32>,
+    fn xfixes_create_pointer_barrier<'c, 'input>(&'c self, barrier: Barrier, window: xproto::Window, x1: u16, y1: u16, x2: u16, y2: u16, directions: BarrierDirections, devices: &'input [u16]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         create_pointer_barrier(self, barrier, window, x1, y1, x2, y2, directions, devices)
     }

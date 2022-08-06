@@ -508,14 +508,14 @@ pub const SELECT_INPUT_REQUEST: u8 = 2;
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SelectInputRequest {
     pub drawable: xproto::Drawable,
-    pub event_mask: u32,
+    pub event_mask: Event,
 }
 impl SelectInputRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
         let length_so_far = 0;
         let drawable_bytes = self.drawable.serialize();
-        let event_mask_bytes = self.event_mask.serialize();
+        let event_mask_bytes = u32::from(self.event_mask).serialize();
         let mut request0 = vec![
             major_opcode,
             SELECT_INPUT_REQUEST,
@@ -579,8 +579,8 @@ pub struct SetAttributesAux {
     pub backing_pixel: Option<u32>,
     pub override_redirect: Option<xproto::Bool32>,
     pub save_under: Option<xproto::Bool32>,
-    pub event_mask: Option<u32>,
-    pub do_not_propogate_mask: Option<u32>,
+    pub event_mask: Option<xproto::EventMask>,
+    pub do_not_propogate_mask: Option<xproto::EventMask>,
     pub colormap: Option<xproto::Colormap>,
     pub cursor: Option<xproto::Cursor>,
 }
@@ -760,10 +760,10 @@ impl SetAttributesAux {
             save_under.serialize_into(bytes);
         }
         if let Some(event_mask) = self.event_mask {
-            event_mask.serialize_into(bytes);
+            u32::from(event_mask).serialize_into(bytes);
         }
         if let Some(do_not_propogate_mask) = self.do_not_propogate_mask {
-            do_not_propogate_mask.serialize_into(bytes);
+            u32::from(do_not_propogate_mask).serialize_into(bytes);
         }
         if let Some(colormap) = self.colormap {
             colormap.serialize_into(bytes);
@@ -897,13 +897,13 @@ impl SetAttributesAux {
     }
     /// Set the `event_mask` field of this structure.
     #[must_use]
-    pub fn event_mask<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+    pub fn event_mask<I>(mut self, value: I) -> Self where I: Into<Option<xproto::EventMask>> {
         self.event_mask = value.into();
         self
     }
     /// Set the `do_not_propogate_mask` field of this structure.
     #[must_use]
-    pub fn do_not_propogate_mask<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+    pub fn do_not_propogate_mask<I>(mut self, value: I) -> Self where I: Into<Option<xproto::EventMask>> {
         self.do_not_propogate_mask = value.into();
         self
     }

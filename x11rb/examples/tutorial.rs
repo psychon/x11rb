@@ -1237,7 +1237,7 @@ pub struct RenamedKeyPressEvent {
 // characteristics of the event. With this code, it should be easy to add drawing operations, like
 // those which have been described above.
 
-fn print_modifiers(mask: u16) {
+fn print_modifiers(mask: x11rb::protocol::xproto::KeyButMask) {
     let mods = [
         (KeyButMask::SHIFT, "Shift"),
         (KeyButMask::LOCK, "Lock"),
@@ -1256,7 +1256,7 @@ fn print_modifiers(mask: u16) {
 
     let active = mods
         .iter()
-        .filter(|(m, _)| mask & u16::from(*m) != 0) // FIXME: This should be made nicer
+        .filter(|(m, _)| u16::from(mask) & u16::from(*m) != 0) // FIXME: This should be made nicer
         .map(|(_, name)| name)
         .collect::<Vec<_>>();
     println!("Modifier mask: {:?}", active);

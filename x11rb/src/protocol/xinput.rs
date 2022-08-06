@@ -223,14 +223,12 @@ where
     conn.send_request_without_reply(&slices, fds)
 }
 
-pub fn grab_device_key<'c, 'input, Conn, A, B, C>(conn: &'c Conn, grab_window: xproto::Window, modifiers: A, modifier_device: B, grabbed_device: u8, key: C, this_device_mode: xproto::GrabMode, other_device_mode: xproto::GrabMode, owner_events: bool, classes: &'input [EventClass]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn grab_device_key<'c, 'input, Conn, A, B>(conn: &'c Conn, grab_window: xproto::Window, modifiers: xproto::ModMask, modifier_device: A, grabbed_device: u8, key: B, this_device_mode: xproto::GrabMode, other_device_mode: xproto::GrabMode, owner_events: bool, classes: &'input [EventClass]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u16>,
+    A: Into<u8>,
     B: Into<u8>,
-    C: Into<u8>,
 {
-    let modifiers: u16 = modifiers.into();
     let modifier_device: u8 = modifier_device.into();
     let key: u8 = key.into();
     let request0 = GrabDeviceKeyRequest {
@@ -249,14 +247,12 @@ where
     conn.send_request_without_reply(&slices, fds)
 }
 
-pub fn ungrab_device_key<Conn, A, B, C>(conn: &Conn, grab_window: xproto::Window, modifiers: A, modifier_device: B, key: C, grabbed_device: u8) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn ungrab_device_key<Conn, A, B>(conn: &Conn, grab_window: xproto::Window, modifiers: xproto::ModMask, modifier_device: A, key: B, grabbed_device: u8) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u16>,
+    A: Into<u8>,
     B: Into<u8>,
-    C: Into<u8>,
 {
-    let modifiers: u16 = modifiers.into();
     let modifier_device: u8 = modifier_device.into();
     let key: u8 = key.into();
     let request0 = UngrabDeviceKeyRequest {
@@ -271,15 +267,13 @@ where
     conn.send_request_without_reply(&slices, fds)
 }
 
-pub fn grab_device_button<'c, 'input, Conn, A, B, C>(conn: &'c Conn, grab_window: xproto::Window, grabbed_device: u8, modifier_device: A, modifiers: B, this_device_mode: xproto::GrabMode, other_device_mode: xproto::GrabMode, button: C, owner_events: bool, classes: &'input [EventClass]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn grab_device_button<'c, 'input, Conn, A, B>(conn: &'c Conn, grab_window: xproto::Window, grabbed_device: u8, modifier_device: A, modifiers: xproto::ModMask, this_device_mode: xproto::GrabMode, other_device_mode: xproto::GrabMode, button: B, owner_events: bool, classes: &'input [EventClass]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
     A: Into<u8>,
-    B: Into<u16>,
-    C: Into<u8>,
+    B: Into<u8>,
 {
     let modifier_device: u8 = modifier_device.into();
-    let modifiers: u16 = modifiers.into();
     let button: u8 = button.into();
     let request0 = GrabDeviceButtonRequest {
         grab_window,
@@ -297,14 +291,12 @@ where
     conn.send_request_without_reply(&slices, fds)
 }
 
-pub fn ungrab_device_button<Conn, A, B, C>(conn: &Conn, grab_window: xproto::Window, modifiers: A, modifier_device: B, button: C, grabbed_device: u8) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn ungrab_device_button<Conn, A, B>(conn: &Conn, grab_window: xproto::Window, modifiers: xproto::ModMask, modifier_device: A, button: B, grabbed_device: u8) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u16>,
+    A: Into<u8>,
     B: Into<u8>,
-    C: Into<u8>,
 {
-    let modifiers: u16 = modifiers.into();
     let modifier_device: u8 = modifier_device.into();
     let button: u8 = button.into();
     let request0 = UngrabDeviceButtonRequest {
@@ -378,12 +370,10 @@ where
     conn.send_request_with_reply(&slices, fds)
 }
 
-pub fn change_feedback_control<Conn, A>(conn: &Conn, mask: A, device_id: u8, feedback_id: u8, feedback: FeedbackCtl) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn change_feedback_control<Conn>(conn: &Conn, mask: ChangeFeedbackControlMask, device_id: u8, feedback_id: u8, feedback: FeedbackCtl) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u32>,
 {
-    let mask: u32 = mask.into();
     let request0 = ChangeFeedbackControlRequest {
         mask,
         device_id,
@@ -1041,35 +1031,31 @@ pub trait ConnectionExt: RequestConnection {
     {
         ungrab_device(self, time, device_id)
     }
-    fn xinput_grab_device_key<'c, 'input, A, B, C>(&'c self, grab_window: xproto::Window, modifiers: A, modifier_device: B, grabbed_device: u8, key: C, this_device_mode: xproto::GrabMode, other_device_mode: xproto::GrabMode, owner_events: bool, classes: &'input [EventClass]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn xinput_grab_device_key<'c, 'input, A, B>(&'c self, grab_window: xproto::Window, modifiers: xproto::ModMask, modifier_device: A, grabbed_device: u8, key: B, this_device_mode: xproto::GrabMode, other_device_mode: xproto::GrabMode, owner_events: bool, classes: &'input [EventClass]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     where
-        A: Into<u16>,
+        A: Into<u8>,
         B: Into<u8>,
-        C: Into<u8>,
     {
         grab_device_key(self, grab_window, modifiers, modifier_device, grabbed_device, key, this_device_mode, other_device_mode, owner_events, classes)
     }
-    fn xinput_ungrab_device_key<A, B, C>(&self, grab_window: xproto::Window, modifiers: A, modifier_device: B, key: C, grabbed_device: u8) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn xinput_ungrab_device_key<A, B>(&self, grab_window: xproto::Window, modifiers: xproto::ModMask, modifier_device: A, key: B, grabbed_device: u8) -> Result<VoidCookie<'_, Self>, ConnectionError>
     where
-        A: Into<u16>,
+        A: Into<u8>,
         B: Into<u8>,
-        C: Into<u8>,
     {
         ungrab_device_key(self, grab_window, modifiers, modifier_device, key, grabbed_device)
     }
-    fn xinput_grab_device_button<'c, 'input, A, B, C>(&'c self, grab_window: xproto::Window, grabbed_device: u8, modifier_device: A, modifiers: B, this_device_mode: xproto::GrabMode, other_device_mode: xproto::GrabMode, button: C, owner_events: bool, classes: &'input [EventClass]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn xinput_grab_device_button<'c, 'input, A, B>(&'c self, grab_window: xproto::Window, grabbed_device: u8, modifier_device: A, modifiers: xproto::ModMask, this_device_mode: xproto::GrabMode, other_device_mode: xproto::GrabMode, button: B, owner_events: bool, classes: &'input [EventClass]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     where
         A: Into<u8>,
-        B: Into<u16>,
-        C: Into<u8>,
+        B: Into<u8>,
     {
         grab_device_button(self, grab_window, grabbed_device, modifier_device, modifiers, this_device_mode, other_device_mode, button, owner_events, classes)
     }
-    fn xinput_ungrab_device_button<A, B, C>(&self, grab_window: xproto::Window, modifiers: A, modifier_device: B, button: C, grabbed_device: u8) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn xinput_ungrab_device_button<A, B>(&self, grab_window: xproto::Window, modifiers: xproto::ModMask, modifier_device: A, button: B, grabbed_device: u8) -> Result<VoidCookie<'_, Self>, ConnectionError>
     where
-        A: Into<u16>,
+        A: Into<u8>,
         B: Into<u8>,
-        C: Into<u8>,
     {
         ungrab_device_button(self, grab_window, modifiers, modifier_device, button, grabbed_device)
     }
@@ -1094,9 +1080,7 @@ pub trait ConnectionExt: RequestConnection {
     {
         get_feedback_control(self, device_id)
     }
-    fn xinput_change_feedback_control<A>(&self, mask: A, device_id: u8, feedback_id: u8, feedback: FeedbackCtl) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where
-        A: Into<u32>,
+    fn xinput_change_feedback_control(&self, mask: ChangeFeedbackControlMask, device_id: u8, feedback_id: u8, feedback: FeedbackCtl) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         change_feedback_control(self, mask, device_id, feedback_id, feedback)
     }

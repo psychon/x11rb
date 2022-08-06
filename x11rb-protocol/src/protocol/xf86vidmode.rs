@@ -213,7 +213,7 @@ pub struct ModeInfo {
     pub vsyncstart: u16,
     pub vsyncend: u16,
     pub vtotal: u16,
-    pub flags: u32,
+    pub flags: ModeFlag,
     pub privsize: u32,
 }
 impl TryParse for ModeInfo {
@@ -250,7 +250,7 @@ impl Serialize for ModeInfo {
         let vsyncstart_bytes = self.vsyncstart.serialize();
         let vsyncend_bytes = self.vsyncend.serialize();
         let vtotal_bytes = self.vtotal.serialize();
-        let flags_bytes = self.flags.serialize();
+        let flags_bytes = u32::from(self.flags).serialize();
         let privsize_bytes = self.privsize.serialize();
         [
             dotclock_bytes[0],
@@ -316,7 +316,7 @@ impl Serialize for ModeInfo {
         self.vsyncend.serialize_into(bytes);
         self.vtotal.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 4]);
-        self.flags.serialize_into(bytes);
+        u32::from(self.flags).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 12]);
         self.privsize.serialize_into(bytes);
     }
@@ -499,7 +499,7 @@ pub struct GetModeLineReply {
     pub vsyncstart: u16,
     pub vsyncend: u16,
     pub vtotal: u16,
-    pub flags: u32,
+    pub flags: ModeFlag,
     pub private: Vec<u8>,
 }
 impl TryParse for GetModeLineReply {
@@ -561,7 +561,7 @@ impl Serialize for GetModeLineReply {
         self.vsyncend.serialize_into(bytes);
         self.vtotal.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 2]);
-        self.flags.serialize_into(bytes);
+        u32::from(self.flags).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 12]);
         let privsize = u32::try_from(self.private.len()).expect("`private` has too many elements");
         privsize.serialize_into(bytes);
@@ -599,7 +599,7 @@ pub struct ModModeLineRequest<'input> {
     pub vsyncstart: u16,
     pub vsyncend: u16,
     pub vtotal: u16,
-    pub flags: u32,
+    pub flags: ModeFlag,
     pub private: Cow<'input, [u8]>,
 }
 impl<'input> ModModeLineRequest<'input> {
@@ -616,7 +616,7 @@ impl<'input> ModModeLineRequest<'input> {
         let vsyncstart_bytes = self.vsyncstart.serialize();
         let vsyncend_bytes = self.vsyncend.serialize();
         let vtotal_bytes = self.vtotal.serialize();
-        let flags_bytes = self.flags.serialize();
+        let flags_bytes = u32::from(self.flags).serialize();
         let privsize = u32::try_from(self.private.len()).expect("`private` has too many elements");
         let privsize_bytes = privsize.serialize();
         let mut request0 = vec![
@@ -1176,7 +1176,7 @@ pub struct AddModeLineRequest<'input> {
     pub vsyncstart: u16,
     pub vsyncend: u16,
     pub vtotal: u16,
-    pub flags: u32,
+    pub flags: ModeFlag,
     pub after_dotclock: Dotclock,
     pub after_hdisplay: u16,
     pub after_hsyncstart: u16,
@@ -1187,7 +1187,7 @@ pub struct AddModeLineRequest<'input> {
     pub after_vsyncstart: u16,
     pub after_vsyncend: u16,
     pub after_vtotal: u16,
-    pub after_flags: u32,
+    pub after_flags: ModeFlag,
     pub private: Cow<'input, [u8]>,
 }
 impl<'input> AddModeLineRequest<'input> {
@@ -1205,7 +1205,7 @@ impl<'input> AddModeLineRequest<'input> {
         let vsyncstart_bytes = self.vsyncstart.serialize();
         let vsyncend_bytes = self.vsyncend.serialize();
         let vtotal_bytes = self.vtotal.serialize();
-        let flags_bytes = self.flags.serialize();
+        let flags_bytes = u32::from(self.flags).serialize();
         let privsize = u32::try_from(self.private.len()).expect("`private` has too many elements");
         let privsize_bytes = privsize.serialize();
         let after_dotclock_bytes = self.after_dotclock.serialize();
@@ -1218,7 +1218,7 @@ impl<'input> AddModeLineRequest<'input> {
         let after_vsyncstart_bytes = self.after_vsyncstart.serialize();
         let after_vsyncend_bytes = self.after_vsyncend.serialize();
         let after_vtotal_bytes = self.after_vtotal.serialize();
-        let after_flags_bytes = self.after_flags.serialize();
+        let after_flags_bytes = u32::from(self.after_flags).serialize();
         let mut request0 = vec![
             major_opcode,
             ADD_MODE_LINE_REQUEST,
@@ -1445,7 +1445,7 @@ pub struct DeleteModeLineRequest<'input> {
     pub vsyncstart: u16,
     pub vsyncend: u16,
     pub vtotal: u16,
-    pub flags: u32,
+    pub flags: ModeFlag,
     pub private: Cow<'input, [u8]>,
 }
 impl<'input> DeleteModeLineRequest<'input> {
@@ -1463,7 +1463,7 @@ impl<'input> DeleteModeLineRequest<'input> {
         let vsyncstart_bytes = self.vsyncstart.serialize();
         let vsyncend_bytes = self.vsyncend.serialize();
         let vtotal_bytes = self.vtotal.serialize();
-        let flags_bytes = self.flags.serialize();
+        let flags_bytes = u32::from(self.flags).serialize();
         let privsize = u32::try_from(self.private.len()).expect("`private` has too many elements");
         let privsize_bytes = privsize.serialize();
         let mut request0 = vec![
@@ -1616,7 +1616,7 @@ pub struct ValidateModeLineRequest<'input> {
     pub vsyncstart: u16,
     pub vsyncend: u16,
     pub vtotal: u16,
-    pub flags: u32,
+    pub flags: ModeFlag,
     pub private: Cow<'input, [u8]>,
 }
 impl<'input> ValidateModeLineRequest<'input> {
@@ -1634,7 +1634,7 @@ impl<'input> ValidateModeLineRequest<'input> {
         let vsyncstart_bytes = self.vsyncstart.serialize();
         let vsyncend_bytes = self.vsyncend.serialize();
         let vtotal_bytes = self.vtotal.serialize();
-        let flags_bytes = self.flags.serialize();
+        let flags_bytes = u32::from(self.flags).serialize();
         let privsize = u32::try_from(self.private.len()).expect("`private` has too many elements");
         let privsize_bytes = privsize.serialize();
         let mut request0 = vec![
@@ -1868,7 +1868,7 @@ pub struct SwitchToModeRequest<'input> {
     pub vsyncstart: u16,
     pub vsyncend: u16,
     pub vtotal: u16,
-    pub flags: u32,
+    pub flags: ModeFlag,
     pub private: Cow<'input, [u8]>,
 }
 impl<'input> SwitchToModeRequest<'input> {
@@ -1886,7 +1886,7 @@ impl<'input> SwitchToModeRequest<'input> {
         let vsyncstart_bytes = self.vsyncstart.serialize();
         let vsyncend_bytes = self.vsyncend.serialize();
         let vtotal_bytes = self.vtotal.serialize();
-        let flags_bytes = self.flags.serialize();
+        let flags_bytes = u32::from(self.flags).serialize();
         let privsize = u32::try_from(self.private.len()).expect("`private` has too many elements");
         let privsize_bytes = privsize.serialize();
         let mut request0 = vec![
@@ -2292,7 +2292,7 @@ impl crate::x11_utils::ReplyRequest for GetDotClocksRequest {
 pub struct GetDotClocksReply {
     pub sequence: u16,
     pub length: u32,
-    pub flags: u32,
+    pub flags: ClockFlag,
     pub clocks: u32,
     pub maxclocks: u32,
     pub clock: Vec<u32>,
@@ -2334,7 +2334,7 @@ impl Serialize for GetDotClocksReply {
         bytes.extend_from_slice(&[0; 1]);
         self.sequence.serialize_into(bytes);
         self.length.serialize_into(bytes);
-        self.flags.serialize_into(bytes);
+        u32::from(self.flags).serialize_into(bytes);
         self.clocks.serialize_into(bytes);
         self.maxclocks.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 12]);
@@ -3055,7 +3055,7 @@ impl crate::x11_utils::ReplyRequest for GetPermissionsRequest {
 pub struct GetPermissionsReply {
     pub sequence: u16,
     pub length: u32,
-    pub permissions: u32,
+    pub permissions: Permission,
 }
 impl TryParse for GetPermissionsReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -3083,7 +3083,7 @@ impl Serialize for GetPermissionsReply {
         let response_type_bytes = &[1];
         let sequence_bytes = self.sequence.serialize();
         let length_bytes = self.length.serialize();
-        let permissions_bytes = self.permissions.serialize();
+        let permissions_bytes = u32::from(self.permissions).serialize();
         [
             response_type_bytes[0],
             0,
@@ -3126,7 +3126,7 @@ impl Serialize for GetPermissionsReply {
         bytes.extend_from_slice(&[0; 1]);
         self.sequence.serialize_into(bytes);
         self.length.serialize_into(bytes);
-        self.permissions.serialize_into(bytes);
+        u32::from(self.permissions).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 20]);
     }
 }

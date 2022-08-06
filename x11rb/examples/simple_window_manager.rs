@@ -339,7 +339,7 @@ impl<'a, C: Connection> WmState<'a, C> {
     }
 
     fn handle_button_press(&mut self, event: ButtonPressEvent) {
-        if event.detail != DRAG_BUTTON || event.state != 0 {
+        if event.detail != DRAG_BUTTON || u16::from(event.state) != 0 {
             return;
         }
         if let Some(state) = self.find_window_by_id(event.event) {

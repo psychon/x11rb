@@ -1016,14 +1016,15 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         &self,
         type_: &xcbdefs::FieldValueType,
     ) -> Option<Rc<xcbdefs::EnumDef>> {
-        if let xcbdefs::FieldValueSet::Enum(ref enum_) = type_.value_set {
-            let enum_def = match enum_.get_resolved() {
-                xcbdefs::TypeRef::Enum(enum_def) => enum_def.upgrade().unwrap(),
-                _ => unreachable!(),
-            };
-            Some(enum_def)
-        } else {
-            None
+        match type_.value_set {
+            xcbdefs::FieldValueSet::Enum(ref enum_) | xcbdefs::FieldValueSet::Mask(ref enum_) => {
+                let enum_def = match enum_.get_resolved() {
+                    xcbdefs::TypeRef::Enum(enum_def) => enum_def.upgrade().unwrap(),
+                    _ => unreachable!(),
+                };
+                Some(enum_def)
+            }
+            _ => None,
         }
     }
 

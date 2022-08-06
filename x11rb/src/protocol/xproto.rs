@@ -1013,15 +1013,13 @@ where
 ///     free(event);
 /// }
 /// ```
-pub fn send_event<Conn, A, B, C>(conn: &Conn, propagate: bool, destination: A, event_mask: B, event: C) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn send_event<Conn, A, B>(conn: &Conn, propagate: bool, destination: A, event_mask: EventMask, event: B) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
     A: Into<Window>,
-    B: Into<u32>,
-    C: Into<[u8; 32]>,
+    B: Into<[u8; 32]>,
 {
     let destination: Window = destination.into();
-    let event_mask: u32 = event_mask.into();
     let event = Cow::Owned(event.into());
     let request0 = SendEventRequest {
         propagate,
@@ -1105,15 +1103,13 @@ where
 ///     }
 /// }
 /// ```
-pub fn grab_pointer<Conn, A, B, C, D>(conn: &Conn, owner_events: bool, grab_window: Window, event_mask: A, pointer_mode: GrabMode, keyboard_mode: GrabMode, confine_to: B, cursor: C, time: D) -> Result<Cookie<'_, Conn, GrabPointerReply>, ConnectionError>
+pub fn grab_pointer<Conn, A, B, C>(conn: &Conn, owner_events: bool, grab_window: Window, event_mask: EventMask, pointer_mode: GrabMode, keyboard_mode: GrabMode, confine_to: A, cursor: B, time: C) -> Result<Cookie<'_, Conn, GrabPointerReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u16>,
-    B: Into<Window>,
-    C: Into<Cursor>,
-    D: Into<Timestamp>,
+    A: Into<Window>,
+    B: Into<Cursor>,
+    C: Into<Timestamp>,
 {
-    let event_mask: u16 = event_mask.into();
     let confine_to: Window = confine_to.into();
     let cursor: Cursor = cursor.into();
     let time: Timestamp = time.into();
@@ -1236,18 +1232,14 @@ where
 /// * `Value` - TODO: reasons?
 /// * `Cursor` - The specified `cursor` does not exist.
 /// * `Window` - The specified `window` does not exist.
-pub fn grab_button<Conn, A, B, C, D>(conn: &Conn, owner_events: bool, grab_window: Window, event_mask: A, pointer_mode: GrabMode, keyboard_mode: GrabMode, confine_to: B, cursor: C, button: ButtonIndex, modifiers: D) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn grab_button<Conn, A, B>(conn: &Conn, owner_events: bool, grab_window: Window, event_mask: EventMask, pointer_mode: GrabMode, keyboard_mode: GrabMode, confine_to: A, cursor: B, button: ButtonIndex, modifiers: ModMask) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u16>,
-    B: Into<Window>,
-    C: Into<Cursor>,
-    D: Into<u16>,
+    A: Into<Window>,
+    B: Into<Cursor>,
 {
-    let event_mask: u16 = event_mask.into();
     let confine_to: Window = confine_to.into();
     let cursor: Cursor = cursor.into();
-    let modifiers: u16 = modifiers.into();
     let request0 = GrabButtonRequest {
         owner_events,
         grab_window,
@@ -1264,12 +1256,10 @@ where
     conn.send_request_without_reply(&slices, fds)
 }
 
-pub fn ungrab_button<Conn, A>(conn: &Conn, button: ButtonIndex, grab_window: Window, modifiers: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn ungrab_button<Conn>(conn: &Conn, button: ButtonIndex, grab_window: Window, modifiers: ModMask) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u16>,
 {
-    let modifiers: u16 = modifiers.into();
     let request0 = UngrabButtonRequest {
         button,
         grab_window,
@@ -1280,16 +1270,14 @@ where
     conn.send_request_without_reply(&slices, fds)
 }
 
-pub fn change_active_pointer_grab<Conn, A, B, C>(conn: &Conn, cursor: A, time: B, event_mask: C) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn change_active_pointer_grab<Conn, A, B>(conn: &Conn, cursor: A, time: B, event_mask: EventMask) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
     A: Into<Cursor>,
     B: Into<Timestamp>,
-    C: Into<u16>,
 {
     let cursor: Cursor = cursor.into();
     let time: Timestamp = time.into();
-    let event_mask: u16 = event_mask.into();
     let request0 = ChangeActivePointerGrabRequest {
         cursor,
         time,
@@ -1454,13 +1442,11 @@ where
 /// # See
 ///
 /// * `GrabKeyboard`: request
-pub fn grab_key<Conn, A, B>(conn: &Conn, owner_events: bool, grab_window: Window, modifiers: A, key: B, pointer_mode: GrabMode, keyboard_mode: GrabMode) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn grab_key<Conn, A>(conn: &Conn, owner_events: bool, grab_window: Window, modifiers: ModMask, key: A, pointer_mode: GrabMode, keyboard_mode: GrabMode) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u16>,
-    B: Into<Keycode>,
+    A: Into<Keycode>,
 {
-    let modifiers: u16 = modifiers.into();
     let key: Keycode = key.into();
     let request0 = GrabKeyRequest {
         owner_events,
@@ -1500,14 +1486,12 @@ where
 ///
 /// * `GrabKey`: request
 /// * `xev`: program
-pub fn ungrab_key<Conn, A, B>(conn: &Conn, key: A, grab_window: Window, modifiers: B) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn ungrab_key<Conn, A>(conn: &Conn, key: A, grab_window: Window, modifiers: ModMask) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
     A: Into<Keycode>,
-    B: Into<u16>,
 {
     let key: Keycode = key.into();
-    let modifiers: u16 = modifiers.into();
     let request0 = UngrabKeyRequest {
         key,
         grab_window,
@@ -2100,12 +2084,10 @@ where
     conn.send_request_without_reply(&slices, fds)
 }
 
-pub fn copy_gc<Conn, A>(conn: &Conn, src_gc: Gcontext, dst_gc: Gcontext, value_mask: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn copy_gc<Conn>(conn: &Conn, src_gc: Gcontext, dst_gc: Gcontext, value_mask: GC) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u32>,
 {
-    let value_mask: u32 = value_mask.into();
     let request0 = CopyGCRequest {
         src_gc,
         dst_gc,
@@ -2807,12 +2789,10 @@ where
     conn.send_request_without_reply(&slices, fds)
 }
 
-pub fn store_named_color<'c, 'input, Conn, A>(conn: &'c Conn, flags: A, cmap: Colormap, pixel: u32, name: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn store_named_color<'c, 'input, Conn>(conn: &'c Conn, flags: ColorFlag, cmap: Colormap, pixel: u32, name: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
 {
-    let flags: u8 = flags.into();
     let request0 = StoreNamedColorRequest {
         flags,
         cmap,
@@ -4058,11 +4038,10 @@ pub trait ConnectionExt: RequestConnection {
     ///     free(event);
     /// }
     /// ```
-    fn send_event<A, B, C>(&self, propagate: bool, destination: A, event_mask: B, event: C) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn send_event<A, B>(&self, propagate: bool, destination: A, event_mask: EventMask, event: B) -> Result<VoidCookie<'_, Self>, ConnectionError>
     where
         A: Into<Window>,
-        B: Into<u32>,
-        C: Into<[u8; 32]>,
+        B: Into<[u8; 32]>,
     {
         send_event(self, propagate, destination, event_mask, event)
     }
@@ -4137,12 +4116,11 @@ pub trait ConnectionExt: RequestConnection {
     ///     }
     /// }
     /// ```
-    fn grab_pointer<A, B, C, D>(&self, owner_events: bool, grab_window: Window, event_mask: A, pointer_mode: GrabMode, keyboard_mode: GrabMode, confine_to: B, cursor: C, time: D) -> Result<Cookie<'_, Self, GrabPointerReply>, ConnectionError>
+    fn grab_pointer<A, B, C>(&self, owner_events: bool, grab_window: Window, event_mask: EventMask, pointer_mode: GrabMode, keyboard_mode: GrabMode, confine_to: A, cursor: B, time: C) -> Result<Cookie<'_, Self, GrabPointerReply>, ConnectionError>
     where
-        A: Into<u16>,
-        B: Into<Window>,
-        C: Into<Cursor>,
-        D: Into<Timestamp>,
+        A: Into<Window>,
+        B: Into<Cursor>,
+        C: Into<Timestamp>,
     {
         grab_pointer(self, owner_events, grab_window, event_mask, pointer_mode, keyboard_mode, confine_to, cursor, time)
     }
@@ -4242,26 +4220,21 @@ pub trait ConnectionExt: RequestConnection {
     /// * `Value` - TODO: reasons?
     /// * `Cursor` - The specified `cursor` does not exist.
     /// * `Window` - The specified `window` does not exist.
-    fn grab_button<A, B, C, D>(&self, owner_events: bool, grab_window: Window, event_mask: A, pointer_mode: GrabMode, keyboard_mode: GrabMode, confine_to: B, cursor: C, button: ButtonIndex, modifiers: D) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn grab_button<A, B>(&self, owner_events: bool, grab_window: Window, event_mask: EventMask, pointer_mode: GrabMode, keyboard_mode: GrabMode, confine_to: A, cursor: B, button: ButtonIndex, modifiers: ModMask) -> Result<VoidCookie<'_, Self>, ConnectionError>
     where
-        A: Into<u16>,
-        B: Into<Window>,
-        C: Into<Cursor>,
-        D: Into<u16>,
+        A: Into<Window>,
+        B: Into<Cursor>,
     {
         grab_button(self, owner_events, grab_window, event_mask, pointer_mode, keyboard_mode, confine_to, cursor, button, modifiers)
     }
-    fn ungrab_button<A>(&self, button: ButtonIndex, grab_window: Window, modifiers: A) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where
-        A: Into<u16>,
+    fn ungrab_button(&self, button: ButtonIndex, grab_window: Window, modifiers: ModMask) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         ungrab_button(self, button, grab_window, modifiers)
     }
-    fn change_active_pointer_grab<A, B, C>(&self, cursor: A, time: B, event_mask: C) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn change_active_pointer_grab<A, B>(&self, cursor: A, time: B, event_mask: EventMask) -> Result<VoidCookie<'_, Self>, ConnectionError>
     where
         A: Into<Cursor>,
         B: Into<Timestamp>,
-        C: Into<u16>,
     {
         change_active_pointer_grab(self, cursor, time, event_mask)
     }
@@ -4399,10 +4372,9 @@ pub trait ConnectionExt: RequestConnection {
     /// # See
     ///
     /// * `GrabKeyboard`: request
-    fn grab_key<A, B>(&self, owner_events: bool, grab_window: Window, modifiers: A, key: B, pointer_mode: GrabMode, keyboard_mode: GrabMode) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn grab_key<A>(&self, owner_events: bool, grab_window: Window, modifiers: ModMask, key: A, pointer_mode: GrabMode, keyboard_mode: GrabMode) -> Result<VoidCookie<'_, Self>, ConnectionError>
     where
-        A: Into<u16>,
-        B: Into<Keycode>,
+        A: Into<Keycode>,
     {
         grab_key(self, owner_events, grab_window, modifiers, key, pointer_mode, keyboard_mode)
     }
@@ -4431,10 +4403,9 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// * `GrabKey`: request
     /// * `xev`: program
-    fn ungrab_key<A, B>(&self, key: A, grab_window: Window, modifiers: B) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn ungrab_key<A>(&self, key: A, grab_window: Window, modifiers: ModMask) -> Result<VoidCookie<'_, Self>, ConnectionError>
     where
         A: Into<Keycode>,
-        B: Into<u16>,
     {
         ungrab_key(self, key, grab_window, modifiers)
     }
@@ -4825,9 +4796,7 @@ pub trait ConnectionExt: RequestConnection {
     {
         change_gc(self, gc, value_list)
     }
-    fn copy_gc<A>(&self, src_gc: Gcontext, dst_gc: Gcontext, value_mask: A) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where
-        A: Into<u32>,
+    fn copy_gc(&self, src_gc: Gcontext, dst_gc: Gcontext, value_mask: GC) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         copy_gc(self, src_gc, dst_gc, value_mask)
     }
@@ -5168,9 +5137,7 @@ pub trait ConnectionExt: RequestConnection {
     {
         store_colors(self, cmap, items)
     }
-    fn store_named_color<'c, 'input, A>(&'c self, flags: A, cmap: Colormap, pixel: u32, name: &'input [u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
-    where
-        A: Into<u8>,
+    fn store_named_color<'c, 'input>(&'c self, flags: ColorFlag, cmap: Colormap, pixel: u32, name: &'input [u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         store_named_color(self, flags, cmap, pixel, name)
     }

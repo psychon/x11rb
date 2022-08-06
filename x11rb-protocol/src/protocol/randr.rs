@@ -425,7 +425,7 @@ pub struct SetScreenConfigRequest {
     pub timestamp: xproto::Timestamp,
     pub config_timestamp: xproto::Timestamp,
     pub size_id: u16,
-    pub rotation: u16,
+    pub rotation: Rotation,
     pub rate: u16,
 }
 impl SetScreenConfigRequest {
@@ -436,7 +436,7 @@ impl SetScreenConfigRequest {
         let timestamp_bytes = self.timestamp.serialize();
         let config_timestamp_bytes = self.config_timestamp.serialize();
         let size_id_bytes = self.size_id.serialize();
-        let rotation_bytes = self.rotation.serialize();
+        let rotation_bytes = u16::from(self.rotation).serialize();
         let rate_bytes = self.rate.serialize();
         let mut request0 = vec![
             major_opcode,
@@ -676,14 +676,14 @@ pub const SELECT_INPUT_REQUEST: u8 = 4;
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SelectInputRequest {
     pub window: xproto::Window,
-    pub enable: u16,
+    pub enable: NotifyMask,
 }
 impl SelectInputRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
         let length_so_far = 0;
         let window_bytes = self.window.serialize();
-        let enable_bytes = self.enable.serialize();
+        let enable_bytes = u16::from(self.enable).serialize();
         let mut request0 = vec![
             major_opcode,
             SELECT_INPUT_REQUEST,
@@ -790,14 +790,14 @@ impl crate::x11_utils::ReplyRequest for GetScreenInfoRequest {
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetScreenInfoReply {
-    pub rotations: u8,
+    pub rotations: Rotation,
     pub sequence: u16,
     pub length: u32,
     pub root: xproto::Window,
     pub timestamp: xproto::Timestamp,
     pub config_timestamp: xproto::Timestamp,
     pub size_id: u16,
-    pub rotation: u16,
+    pub rotation: Rotation,
     pub rate: u16,
     pub n_info: u16,
     pub sizes: Vec<ScreenSize>,
@@ -844,7 +844,7 @@ impl Serialize for GetScreenInfoReply {
         bytes.reserve(32);
         let response_type_bytes = &[1];
         bytes.push(response_type_bytes[0]);
-        self.rotations.serialize_into(bytes);
+        (u16::from(self.rotations) as u8).serialize_into(bytes);
         self.sequence.serialize_into(bytes);
         self.length.serialize_into(bytes);
         self.root.serialize_into(bytes);
@@ -853,7 +853,7 @@ impl Serialize for GetScreenInfoReply {
         let n_sizes = u16::try_from(self.sizes.len()).expect("`sizes` has too many elements");
         n_sizes.serialize_into(bytes);
         self.size_id.serialize_into(bytes);
-        self.rotation.serialize_into(bytes);
+        u16::from(self.rotation).serialize_into(bytes);
         self.rate.serialize_into(bytes);
         self.n_info.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 2]);
@@ -1192,7 +1192,7 @@ pub struct ModeInfo {
     pub vsync_end: u16,
     pub vtotal: u16,
     pub name_len: u16,
-    pub mode_flags: u32,
+    pub mode_flags: ModeFlag,
 }
 impl TryParse for ModeInfo {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -1229,7 +1229,7 @@ impl Serialize for ModeInfo {
         let vsync_end_bytes = self.vsync_end.serialize();
         let vtotal_bytes = self.vtotal.serialize();
         let name_len_bytes = self.name_len.serialize();
-        let mode_flags_bytes = self.mode_flags.serialize();
+        let mode_flags_bytes = u32::from(self.mode_flags).serialize();
         [
             id_bytes[0],
             id_bytes[1],
@@ -1279,7 +1279,7 @@ impl Serialize for ModeInfo {
         self.vsync_end.serialize_into(bytes);
         self.vtotal.serialize_into(bytes);
         self.name_len.serialize_into(bytes);
-        self.mode_flags.serialize_into(bytes);
+        u32::from(self.mode_flags).serialize_into(bytes);
     }
 }
 
@@ -2837,8 +2837,8 @@ pub struct GetCrtcInfoReply {
     pub width: u16,
     pub height: u16,
     pub mode: Mode,
-    pub rotation: u16,
-    pub rotations: u16,
+    pub rotation: Rotation,
+    pub rotations: Rotation,
     pub outputs: Vec<Output>,
     pub possible: Vec<Output>,
 }
@@ -2894,8 +2894,8 @@ impl Serialize for GetCrtcInfoReply {
         self.width.serialize_into(bytes);
         self.height.serialize_into(bytes);
         self.mode.serialize_into(bytes);
-        self.rotation.serialize_into(bytes);
-        self.rotations.serialize_into(bytes);
+        u16::from(self.rotation).serialize_into(bytes);
+        u16::from(self.rotations).serialize_into(bytes);
         let num_outputs = u16::try_from(self.outputs.len()).expect("`outputs` has too many elements");
         num_outputs.serialize_into(bytes);
         let num_possible_outputs = u16::try_from(self.possible.len()).expect("`possible` has too many elements");
@@ -2944,7 +2944,7 @@ pub struct SetCrtcConfigRequest<'input> {
     pub x: i16,
     pub y: i16,
     pub mode: Mode,
-    pub rotation: u16,
+    pub rotation: Rotation,
     pub outputs: Cow<'input, [Output]>,
 }
 impl<'input> SetCrtcConfigRequest<'input> {
@@ -2957,7 +2957,7 @@ impl<'input> SetCrtcConfigRequest<'input> {
         let x_bytes = self.x.serialize();
         let y_bytes = self.y.serialize();
         let mode_bytes = self.mode.serialize();
-        let rotation_bytes = self.rotation.serialize();
+        let rotation_bytes = u16::from(self.rotation).serialize();
         let mut request0 = vec![
             major_opcode,
             SET_CRTC_CONFIG_REQUEST,
@@ -4864,7 +4864,7 @@ pub struct GetProviderInfoReply {
     pub sequence: u16,
     pub length: u32,
     pub timestamp: xproto::Timestamp,
-    pub capabilities: u32,
+    pub capabilities: ProviderCapability,
     pub crtcs: Vec<Crtc>,
     pub outputs: Vec<Output>,
     pub associated_providers: Vec<Provider>,
@@ -4917,7 +4917,7 @@ impl Serialize for GetProviderInfoReply {
         self.sequence.serialize_into(bytes);
         self.length.serialize_into(bytes);
         self.timestamp.serialize_into(bytes);
-        self.capabilities.serialize_into(bytes);
+        u32::from(self.capabilities).serialize_into(bytes);
         let num_crtcs = u16::try_from(self.crtcs.len()).expect("`crtcs` has too many elements");
         num_crtcs.serialize_into(bytes);
         let num_outputs = u16::try_from(self.outputs.len()).expect("`outputs` has too many elements");
@@ -5806,7 +5806,7 @@ pub const SCREEN_CHANGE_NOTIFY_EVENT: u8 = 0;
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ScreenChangeNotifyEvent {
     pub response_type: u8,
-    pub rotation: u8,
+    pub rotation: Rotation,
     pub sequence: u16,
     pub timestamp: xproto::Timestamp,
     pub config_timestamp: xproto::Timestamp,
@@ -5848,7 +5848,7 @@ impl Serialize for ScreenChangeNotifyEvent {
     type Bytes = [u8; 32];
     fn serialize(&self) -> [u8; 32] {
         let response_type_bytes = self.response_type.serialize();
-        let rotation_bytes = self.rotation.serialize();
+        let rotation_bytes = (u16::from(self.rotation) as u8).serialize();
         let sequence_bytes = self.sequence.serialize();
         let timestamp_bytes = self.timestamp.serialize();
         let config_timestamp_bytes = self.config_timestamp.serialize();
@@ -5898,7 +5898,7 @@ impl Serialize for ScreenChangeNotifyEvent {
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(32);
         self.response_type.serialize_into(bytes);
-        self.rotation.serialize_into(bytes);
+        (u16::from(self.rotation) as u8).serialize_into(bytes);
         self.sequence.serialize_into(bytes);
         self.timestamp.serialize_into(bytes);
         self.config_timestamp.serialize_into(bytes);
@@ -5915,7 +5915,7 @@ impl Serialize for ScreenChangeNotifyEvent {
 impl From<&ScreenChangeNotifyEvent> for [u8; 32] {
     fn from(input: &ScreenChangeNotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
-        let rotation_bytes = input.rotation.serialize();
+        let rotation_bytes = (u16::from(input.rotation) as u8).serialize();
         let sequence_bytes = input.sequence.serialize();
         let timestamp_bytes = input.timestamp.serialize();
         let config_timestamp_bytes = input.config_timestamp.serialize();
@@ -6045,7 +6045,7 @@ pub struct CrtcChange {
     pub window: xproto::Window,
     pub crtc: Crtc,
     pub mode: Mode,
-    pub rotation: u16,
+    pub rotation: Rotation,
     pub x: i16,
     pub y: i16,
     pub width: u16,
@@ -6075,7 +6075,7 @@ impl Serialize for CrtcChange {
         let window_bytes = self.window.serialize();
         let crtc_bytes = self.crtc.serialize();
         let mode_bytes = self.mode.serialize();
-        let rotation_bytes = self.rotation.serialize();
+        let rotation_bytes = u16::from(self.rotation).serialize();
         let x_bytes = self.x.serialize();
         let y_bytes = self.y.serialize();
         let width_bytes = self.width.serialize();
@@ -6117,7 +6117,7 @@ impl Serialize for CrtcChange {
         self.window.serialize_into(bytes);
         self.crtc.serialize_into(bytes);
         self.mode.serialize_into(bytes);
-        self.rotation.serialize_into(bytes);
+        u16::from(self.rotation).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 2]);
         self.x.serialize_into(bytes);
         self.y.serialize_into(bytes);
@@ -6135,7 +6135,7 @@ pub struct OutputChange {
     pub output: Output,
     pub crtc: Crtc,
     pub mode: Mode,
-    pub rotation: u16,
+    pub rotation: Rotation,
     pub connection: Connection,
     pub subpixel_order: render::SubPixel,
 }
@@ -6166,7 +6166,7 @@ impl Serialize for OutputChange {
         let output_bytes = self.output.serialize();
         let crtc_bytes = self.crtc.serialize();
         let mode_bytes = self.mode.serialize();
-        let rotation_bytes = self.rotation.serialize();
+        let rotation_bytes = u16::from(self.rotation).serialize();
         let connection_bytes = u8::from(self.connection).serialize();
         let subpixel_order_bytes = (u32::from(self.subpixel_order) as u8).serialize();
         [
@@ -6208,7 +6208,7 @@ impl Serialize for OutputChange {
         self.output.serialize_into(bytes);
         self.crtc.serialize_into(bytes);
         self.mode.serialize_into(bytes);
-        self.rotation.serialize_into(bytes);
+        u16::from(self.rotation).serialize_into(bytes);
         u8::from(self.connection).serialize_into(bytes);
         (u32::from(self.subpixel_order) as u8).serialize_into(bytes);
     }

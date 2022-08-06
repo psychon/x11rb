@@ -544,7 +544,7 @@ impl Serialize for Format {
 pub struct AdaptorInfo {
     pub base_id: Port,
     pub num_ports: u16,
-    pub type_: u8,
+    pub type_: Type,
     pub name: Vec<u8>,
     pub formats: Vec<Format>,
 }
@@ -584,7 +584,7 @@ impl Serialize for AdaptorInfo {
         self.num_ports.serialize_into(bytes);
         let num_formats = u16::try_from(self.formats.len()).expect("`formats` has too many elements");
         num_formats.serialize_into(bytes);
-        self.type_.serialize_into(bytes);
+        u8::from(self.type_).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 1]);
         bytes.extend_from_slice(&self.name);
         bytes.extend_from_slice(&[0; 3][..(4 - (bytes.len() % 4)) % 4]);
@@ -763,7 +763,7 @@ impl Image {
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct AttributeInfo {
-    pub flags: u32,
+    pub flags: AttributeFlag,
     pub min: i32,
     pub max: i32,
     pub name: Vec<u8>,
@@ -795,7 +795,7 @@ impl Serialize for AttributeInfo {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(16);
-        self.flags.serialize_into(bytes);
+        u32::from(self.flags).serialize_into(bytes);
         self.min.serialize_into(bytes);
         self.max.serialize_into(bytes);
         let size = u32::try_from(self.name.len()).expect("`name` has too many elements");

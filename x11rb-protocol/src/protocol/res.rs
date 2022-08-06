@@ -160,7 +160,7 @@ bitmask_binop!(ClientIdMask, u32);
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ClientIdSpec {
     pub client: u32,
-    pub mask: u32,
+    pub mask: ClientIdMask,
 }
 impl TryParse for ClientIdSpec {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -175,7 +175,7 @@ impl Serialize for ClientIdSpec {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
         let client_bytes = self.client.serialize();
-        let mask_bytes = self.mask.serialize();
+        let mask_bytes = u32::from(self.mask).serialize();
         [
             client_bytes[0],
             client_bytes[1],
@@ -190,7 +190,7 @@ impl Serialize for ClientIdSpec {
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
         self.client.serialize_into(bytes);
-        self.mask.serialize_into(bytes);
+        u32::from(self.mask).serialize_into(bytes);
     }
 }
 

@@ -889,7 +889,7 @@ pub const SELECT_INPUT_REQUEST: u8 = 3;
 pub struct SelectInputRequest {
     pub eid: Event,
     pub window: xproto::Window,
-    pub event_mask: u32,
+    pub event_mask: EventMask,
 }
 impl SelectInputRequest {
     /// Serialize this request into bytes for the provided connection
@@ -897,7 +897,7 @@ impl SelectInputRequest {
         let length_so_far = 0;
         let eid_bytes = self.eid.serialize();
         let window_bytes = self.window.serialize();
-        let event_mask_bytes = self.event_mask.serialize();
+        let event_mask_bytes = u32::from(self.event_mask).serialize();
         let mut request0 = vec![
             major_opcode,
             SELECT_INPUT_REQUEST,

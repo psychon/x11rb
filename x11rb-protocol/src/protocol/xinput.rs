@@ -2684,7 +2684,7 @@ pub const GRAB_DEVICE_KEY_REQUEST: u8 = 15;
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GrabDeviceKeyRequest<'input> {
     pub grab_window: xproto::Window,
-    pub modifiers: u16,
+    pub modifiers: xproto::ModMask,
     pub modifier_device: u8,
     pub grabbed_device: u8,
     pub key: u8,
@@ -2700,7 +2700,7 @@ impl<'input> GrabDeviceKeyRequest<'input> {
         let grab_window_bytes = self.grab_window.serialize();
         let num_classes = u16::try_from(self.classes.len()).expect("`classes` has too many elements");
         let num_classes_bytes = num_classes.serialize();
-        let modifiers_bytes = self.modifiers.serialize();
+        let modifiers_bytes = u16::from(self.modifiers).serialize();
         let modifier_device_bytes = self.modifier_device.serialize();
         let grabbed_device_bytes = self.grabbed_device.serialize();
         let key_bytes = self.key.serialize();
@@ -2805,7 +2805,7 @@ pub const UNGRAB_DEVICE_KEY_REQUEST: u8 = 16;
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct UngrabDeviceKeyRequest {
     pub grab_window: xproto::Window,
-    pub modifiers: u16,
+    pub modifiers: xproto::ModMask,
     pub modifier_device: u8,
     pub key: u8,
     pub grabbed_device: u8,
@@ -2815,7 +2815,7 @@ impl UngrabDeviceKeyRequest {
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
         let length_so_far = 0;
         let grab_window_bytes = self.grab_window.serialize();
-        let modifiers_bytes = self.modifiers.serialize();
+        let modifiers_bytes = u16::from(self.modifiers).serialize();
         let modifier_device_bytes = self.modifier_device.serialize();
         let key_bytes = self.key.serialize();
         let grabbed_device_bytes = self.grabbed_device.serialize();
@@ -2885,7 +2885,7 @@ pub struct GrabDeviceButtonRequest<'input> {
     pub grab_window: xproto::Window,
     pub grabbed_device: u8,
     pub modifier_device: u8,
-    pub modifiers: u16,
+    pub modifiers: xproto::ModMask,
     pub this_device_mode: xproto::GrabMode,
     pub other_device_mode: xproto::GrabMode,
     pub button: u8,
@@ -2901,7 +2901,7 @@ impl<'input> GrabDeviceButtonRequest<'input> {
         let modifier_device_bytes = self.modifier_device.serialize();
         let num_classes = u16::try_from(self.classes.len()).expect("`classes` has too many elements");
         let num_classes_bytes = num_classes.serialize();
-        let modifiers_bytes = self.modifiers.serialize();
+        let modifiers_bytes = u16::from(self.modifiers).serialize();
         let this_device_mode_bytes = u8::from(self.this_device_mode).serialize();
         let other_device_mode_bytes = u8::from(self.other_device_mode).serialize();
         let button_bytes = self.button.serialize();
@@ -3004,7 +3004,7 @@ pub const UNGRAB_DEVICE_BUTTON_REQUEST: u8 = 18;
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct UngrabDeviceButtonRequest {
     pub grab_window: xproto::Window,
-    pub modifiers: u16,
+    pub modifiers: xproto::ModMask,
     pub modifier_device: u8,
     pub button: u8,
     pub grabbed_device: u8,
@@ -3014,7 +3014,7 @@ impl UngrabDeviceButtonRequest {
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
         let length_so_far = 0;
         let grab_window_bytes = self.grab_window.serialize();
-        let modifiers_bytes = self.modifiers.serialize();
+        let modifiers_bytes = u16::from(self.modifiers).serialize();
         let modifier_device_bytes = self.modifier_device.serialize();
         let button_bytes = self.button.serialize();
         let grabbed_device_bytes = self.grabbed_device.serialize();
@@ -5381,7 +5381,7 @@ pub const CHANGE_FEEDBACK_CONTROL_REQUEST: u8 = 23;
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ChangeFeedbackControlRequest {
-    pub mask: u32,
+    pub mask: ChangeFeedbackControlMask,
     pub device_id: u8,
     pub feedback_id: u8,
     pub feedback: FeedbackCtl,
@@ -5390,7 +5390,7 @@ impl ChangeFeedbackControlRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
         let length_so_far = 0;
-        let mask_bytes = self.mask.serialize();
+        let mask_bytes = u32::from(self.mask).serialize();
         let device_id_bytes = self.device_id.serialize();
         let feedback_id_bytes = self.feedback_id.serialize();
         let mut request0 = vec![
@@ -6434,7 +6434,7 @@ bitmask_binop!(ValuatorStateModeMask, u8);
 pub struct ValuatorState {
     pub class_id: InputClass,
     pub len: u8,
-    pub mode: u8,
+    pub mode: ValuatorStateModeMask,
     pub valuators: Vec<i32>,
 }
 impl TryParse for ValuatorState {
@@ -6463,7 +6463,7 @@ impl Serialize for ValuatorState {
         self.len.serialize_into(bytes);
         let num_valuators = u8::try_from(self.valuators.len()).expect("`valuators` has too many elements");
         num_valuators.serialize_into(bytes);
-        self.mode.serialize_into(bytes);
+        u8::from(self.mode).serialize_into(bytes);
         self.valuators.serialize_into(bytes);
     }
 }
@@ -6614,7 +6614,7 @@ impl Serialize for InputStateDataButton {
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct InputStateDataValuator {
-    pub mode: u8,
+    pub mode: ValuatorStateModeMask,
     pub valuators: Vec<i32>,
 }
 impl TryParse for InputStateDataValuator {
@@ -6638,7 +6638,7 @@ impl Serialize for InputStateDataValuator {
         bytes.reserve(2);
         let num_valuators = u8::try_from(self.valuators.len()).expect("`valuators` has too many elements");
         num_valuators.serialize_into(bytes);
-        self.mode.serialize_into(bytes);
+        u8::from(self.mode).serialize_into(bytes);
         self.valuators.serialize_into(bytes);
     }
 }
@@ -11118,7 +11118,7 @@ bitmask_binop!(XIEventMask, u32);
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct EventMask {
     pub deviceid: DeviceId,
-    pub mask: Vec<u32>,
+    pub mask: Vec<XIEventMask>,
 }
 impl TryParse for EventMask {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -11149,8 +11149,8 @@ impl Serialize for EventMask {
         self.deviceid.serialize_into(bytes);
         let mask_len = u16::try_from(self.mask.len()).expect("`mask` has too many elements");
         mask_len.serialize_into(bytes);
-        for element in self.mask.iter() {
-            element.serialize_into(bytes);
+        for element in self.mask.iter().copied() {
+            u32::from(element).serialize_into(bytes);
         }
     }
 }
@@ -11783,7 +11783,7 @@ pub struct ScrollClass {
     pub sourceid: DeviceId,
     pub number: u16,
     pub scroll_type: ScrollType,
-    pub flags: u32,
+    pub flags: ScrollFlags,
     pub increment: Fp3232,
 }
 impl TryParse for ScrollClass {
@@ -11811,7 +11811,7 @@ impl Serialize for ScrollClass {
         let sourceid_bytes = self.sourceid.serialize();
         let number_bytes = self.number.serialize();
         let scroll_type_bytes = u16::from(self.scroll_type).serialize();
-        let flags_bytes = self.flags.serialize();
+        let flags_bytes = u32::from(self.flags).serialize();
         let increment_bytes = self.increment.serialize();
         [
             type_bytes[0],
@@ -11848,7 +11848,7 @@ impl Serialize for ScrollClass {
         self.number.serialize_into(bytes);
         u16::from(self.scroll_type).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 2]);
-        self.flags.serialize_into(bytes);
+        u32::from(self.flags).serialize_into(bytes);
         self.increment.serialize_into(bytes);
     }
 }
@@ -12193,7 +12193,7 @@ impl Serialize for DeviceClassDataValuator {
 pub struct DeviceClassDataScroll {
     pub number: u16,
     pub scroll_type: ScrollType,
-    pub flags: u32,
+    pub flags: ScrollFlags,
     pub increment: Fp3232,
 }
 impl TryParse for DeviceClassDataScroll {
@@ -12214,7 +12214,7 @@ impl Serialize for DeviceClassDataScroll {
     fn serialize(&self) -> [u8; 18] {
         let number_bytes = self.number.serialize();
         let scroll_type_bytes = u16::from(self.scroll_type).serialize();
-        let flags_bytes = self.flags.serialize();
+        let flags_bytes = u32::from(self.flags).serialize();
         let increment_bytes = self.increment.serialize();
         [
             number_bytes[0],
@@ -12242,7 +12242,7 @@ impl Serialize for DeviceClassDataScroll {
         self.number.serialize_into(bytes);
         u16::from(self.scroll_type).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 2]);
-        self.flags.serialize_into(bytes);
+        u32::from(self.flags).serialize_into(bytes);
         self.increment.serialize_into(bytes);
     }
 }
@@ -14985,7 +14985,7 @@ pub struct DeviceKeyPressEvent {
     pub root_y: i16,
     pub event_x: i16,
     pub event_y: i16,
-    pub state: u16,
+    pub state: xproto::KeyButMask,
     pub same_screen: bool,
     pub device_id: u8,
 }
@@ -15028,7 +15028,7 @@ impl Serialize for DeviceKeyPressEvent {
         let root_y_bytes = self.root_y.serialize();
         let event_x_bytes = self.event_x.serialize();
         let event_y_bytes = self.event_y.serialize();
-        let state_bytes = self.state.serialize();
+        let state_bytes = u16::from(self.state).serialize();
         let same_screen_bytes = self.same_screen.serialize();
         let device_id_bytes = self.device_id.serialize();
         [
@@ -15079,7 +15079,7 @@ impl Serialize for DeviceKeyPressEvent {
         self.root_y.serialize_into(bytes);
         self.event_x.serialize_into(bytes);
         self.event_y.serialize_into(bytes);
-        self.state.serialize_into(bytes);
+        u16::from(self.state).serialize_into(bytes);
         self.same_screen.serialize_into(bytes);
         self.device_id.serialize_into(bytes);
     }
@@ -15097,7 +15097,7 @@ impl From<&DeviceKeyPressEvent> for [u8; 32] {
         let root_y_bytes = input.root_y.serialize();
         let event_x_bytes = input.event_x.serialize();
         let event_y_bytes = input.event_y.serialize();
-        let state_bytes = input.state.serialize();
+        let state_bytes = u16::from(input.state).serialize();
         let same_screen_bytes = input.same_screen.serialize();
         let device_id_bytes = input.device_id.serialize();
         [
@@ -15389,7 +15389,7 @@ pub struct DeviceStateNotifyEvent {
     pub num_keys: u8,
     pub num_buttons: u8,
     pub num_valuators: u8,
-    pub classes_reported: u8,
+    pub classes_reported: ClassesReportedMask,
     pub buttons: [u8; 4],
     pub keys: [u8; 4],
     pub valuators: [u32; 3],
@@ -15435,7 +15435,7 @@ impl Serialize for DeviceStateNotifyEvent {
         let num_keys_bytes = self.num_keys.serialize();
         let num_buttons_bytes = self.num_buttons.serialize();
         let num_valuators_bytes = self.num_valuators.serialize();
-        let classes_reported_bytes = self.classes_reported.serialize();
+        let classes_reported_bytes = u8::from(self.classes_reported).serialize();
         let valuators_0_bytes = self.valuators[0].serialize();
         let valuators_1_bytes = self.valuators[1].serialize();
         let valuators_2_bytes = self.valuators[2].serialize();
@@ -15483,7 +15483,7 @@ impl Serialize for DeviceStateNotifyEvent {
         self.num_keys.serialize_into(bytes);
         self.num_buttons.serialize_into(bytes);
         self.num_valuators.serialize_into(bytes);
-        self.classes_reported.serialize_into(bytes);
+        u8::from(self.classes_reported).serialize_into(bytes);
         bytes.extend_from_slice(&self.buttons);
         bytes.extend_from_slice(&self.keys);
         self.valuators.serialize_into(bytes);
@@ -15498,7 +15498,7 @@ impl From<&DeviceStateNotifyEvent> for [u8; 32] {
         let num_keys_bytes = input.num_keys.serialize();
         let num_buttons_bytes = input.num_buttons.serialize();
         let num_valuators_bytes = input.num_valuators.serialize();
-        let classes_reported_bytes = input.classes_reported.serialize();
+        let classes_reported_bytes = u8::from(input.classes_reported).serialize();
         let valuators_0_bytes = input.valuators[0].serialize();
         let valuators_1_bytes = input.valuators[1].serialize();
         let valuators_2_bytes = input.valuators[2].serialize();
@@ -16661,7 +16661,7 @@ pub struct KeyPressEvent {
     pub event_x: Fp1616,
     pub event_y: Fp1616,
     pub sourceid: DeviceId,
-    pub flags: u32,
+    pub flags: KeyEventFlags,
     pub mods: ModifierInfo,
     pub group: GroupInfo,
     pub button_mask: Vec<u32>,
@@ -16734,7 +16734,7 @@ impl Serialize for KeyPressEvent {
         valuators_len.serialize_into(bytes);
         self.sourceid.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 2]);
-        self.flags.serialize_into(bytes);
+        u32::from(self.flags).serialize_into(bytes);
         self.mods.serialize_into(bytes);
         self.group.serialize_into(bytes);
         self.button_mask.serialize_into(bytes);
@@ -16843,7 +16843,7 @@ pub struct ButtonPressEvent {
     pub event_x: Fp1616,
     pub event_y: Fp1616,
     pub sourceid: DeviceId,
-    pub flags: u32,
+    pub flags: PointerEventFlags,
     pub mods: ModifierInfo,
     pub group: GroupInfo,
     pub button_mask: Vec<u32>,
@@ -16916,7 +16916,7 @@ impl Serialize for ButtonPressEvent {
         valuators_len.serialize_into(bytes);
         self.sourceid.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 2]);
-        self.flags.serialize_into(bytes);
+        u32::from(self.flags).serialize_into(bytes);
         self.mods.serialize_into(bytes);
         self.group.serialize_into(bytes);
         self.button_mask.serialize_into(bytes);
@@ -17293,7 +17293,7 @@ pub struct HierarchyInfo {
     pub attachment: DeviceId,
     pub type_: DeviceType,
     pub enabled: bool,
-    pub flags: u32,
+    pub flags: HierarchyMask,
 }
 impl TryParse for HierarchyInfo {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -17316,7 +17316,7 @@ impl Serialize for HierarchyInfo {
         let attachment_bytes = self.attachment.serialize();
         let type_bytes = (u16::from(self.type_) as u8).serialize();
         let enabled_bytes = self.enabled.serialize();
-        let flags_bytes = self.flags.serialize();
+        let flags_bytes = u32::from(self.flags).serialize();
         [
             deviceid_bytes[0],
             deviceid_bytes[1],
@@ -17339,7 +17339,7 @@ impl Serialize for HierarchyInfo {
         (u16::from(self.type_) as u8).serialize_into(bytes);
         self.enabled.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 2]);
-        self.flags.serialize_into(bytes);
+        u32::from(self.flags).serialize_into(bytes);
     }
 }
 
@@ -17355,7 +17355,7 @@ pub struct HierarchyEvent {
     pub event_type: u16,
     pub deviceid: DeviceId,
     pub time: xproto::Timestamp,
-    pub flags: u32,
+    pub flags: HierarchyMask,
     pub infos: Vec<HierarchyInfo>,
 }
 impl TryParse for HierarchyEvent {
@@ -17396,7 +17396,7 @@ impl Serialize for HierarchyEvent {
         self.event_type.serialize_into(bytes);
         self.deviceid.serialize_into(bytes);
         self.time.serialize_into(bytes);
-        self.flags.serialize_into(bytes);
+        u32::from(self.flags).serialize_into(bytes);
         let num_infos = u16::try_from(self.infos.len()).expect("`infos` has too many elements");
         num_infos.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 10]);
@@ -17592,7 +17592,7 @@ pub struct RawKeyPressEvent {
     pub time: xproto::Timestamp,
     pub detail: u32,
     pub sourceid: DeviceId,
-    pub flags: u32,
+    pub flags: KeyEventFlags,
     pub valuator_mask: Vec<u32>,
     pub axisvalues: Vec<Fp3232>,
     pub axisvalues_raw: Vec<Fp3232>,
@@ -17643,7 +17643,7 @@ impl Serialize for RawKeyPressEvent {
         self.sourceid.serialize_into(bytes);
         let valuators_len = u16::try_from(self.valuator_mask.len()).expect("`valuator_mask` has too many elements");
         valuators_len.serialize_into(bytes);
-        self.flags.serialize_into(bytes);
+        u32::from(self.flags).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 4]);
         self.valuator_mask.serialize_into(bytes);
         assert_eq!(self.axisvalues.len(), usize::try_from(self.valuator_mask.iter().fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).unwrap())).unwrap(), "`axisvalues` has an incorrect length");
@@ -17686,7 +17686,7 @@ pub struct RawButtonPressEvent {
     pub time: xproto::Timestamp,
     pub detail: u32,
     pub sourceid: DeviceId,
-    pub flags: u32,
+    pub flags: PointerEventFlags,
     pub valuator_mask: Vec<u32>,
     pub axisvalues: Vec<Fp3232>,
     pub axisvalues_raw: Vec<Fp3232>,
@@ -17737,7 +17737,7 @@ impl Serialize for RawButtonPressEvent {
         self.sourceid.serialize_into(bytes);
         let valuators_len = u16::try_from(self.valuator_mask.len()).expect("`valuator_mask` has too many elements");
         valuators_len.serialize_into(bytes);
-        self.flags.serialize_into(bytes);
+        u32::from(self.flags).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 4]);
         self.valuator_mask.serialize_into(bytes);
         assert_eq!(self.axisvalues.len(), usize::try_from(self.valuator_mask.iter().fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).unwrap())).unwrap(), "`axisvalues` has an incorrect length");
@@ -17839,7 +17839,7 @@ pub struct TouchBeginEvent {
     pub event_x: Fp1616,
     pub event_y: Fp1616,
     pub sourceid: DeviceId,
-    pub flags: u32,
+    pub flags: TouchEventFlags,
     pub mods: ModifierInfo,
     pub group: GroupInfo,
     pub button_mask: Vec<u32>,
@@ -17912,7 +17912,7 @@ impl Serialize for TouchBeginEvent {
         valuators_len.serialize_into(bytes);
         self.sourceid.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 2]);
-        self.flags.serialize_into(bytes);
+        u32::from(self.flags).serialize_into(bytes);
         self.mods.serialize_into(bytes);
         self.group.serialize_into(bytes);
         self.button_mask.serialize_into(bytes);
@@ -18149,7 +18149,7 @@ pub struct RawTouchBeginEvent {
     pub time: xproto::Timestamp,
     pub detail: u32,
     pub sourceid: DeviceId,
-    pub flags: u32,
+    pub flags: TouchEventFlags,
     pub valuator_mask: Vec<u32>,
     pub axisvalues: Vec<Fp3232>,
     pub axisvalues_raw: Vec<Fp3232>,
@@ -18200,7 +18200,7 @@ impl Serialize for RawTouchBeginEvent {
         self.sourceid.serialize_into(bytes);
         let valuators_len = u16::try_from(self.valuator_mask.len()).expect("`valuator_mask` has too many elements");
         valuators_len.serialize_into(bytes);
-        self.flags.serialize_into(bytes);
+        u32::from(self.flags).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 4]);
         self.valuator_mask.serialize_into(bytes);
         assert_eq!(self.axisvalues.len(), usize::try_from(self.valuator_mask.iter().fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).unwrap())).unwrap(), "`axisvalues` has an incorrect length");
@@ -18298,7 +18298,7 @@ pub struct BarrierHitEvent {
     pub event: xproto::Window,
     pub barrier: xfixes::Barrier,
     pub dtime: u32,
-    pub flags: u32,
+    pub flags: BarrierFlags,
     pub sourceid: DeviceId,
     pub root_x: Fp1616,
     pub root_y: Fp1616,
@@ -18350,7 +18350,7 @@ impl Serialize for BarrierHitEvent {
         let event_bytes = self.event.serialize();
         let barrier_bytes = self.barrier.serialize();
         let dtime_bytes = self.dtime.serialize();
-        let flags_bytes = self.flags.serialize();
+        let flags_bytes = u32::from(self.flags).serialize();
         let sourceid_bytes = self.sourceid.serialize();
         let root_x_bytes = self.root_x.serialize();
         let root_y_bytes = self.root_y.serialize();
@@ -18441,7 +18441,7 @@ impl Serialize for BarrierHitEvent {
         self.event.serialize_into(bytes);
         self.barrier.serialize_into(bytes);
         self.dtime.serialize_into(bytes);
-        self.flags.serialize_into(bytes);
+        u32::from(self.flags).serialize_into(bytes);
         self.sourceid.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 2]);
         self.root_x.serialize_into(bytes);
