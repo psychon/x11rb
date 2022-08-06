@@ -854,7 +854,7 @@ impl InputInfoInfo {
     #[allow(dead_code)]
     fn serialize(&self, class_id: u8) -> Vec<u8> {
         let mut result = Vec::new();
-        self.serialize_into(&mut result, class_id);
+        self.serialize_into(&mut result, u8::from(class_id));
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, class_id: u8) {
@@ -905,7 +905,7 @@ impl Serialize for InputInfo {
         let class_id: u8 = self.info.switch_expr();
         class_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
-        self.info.serialize_into(bytes, class_id);
+        self.info.serialize_into(bytes, u8::from(class_id));
     }
 }
 
@@ -1920,7 +1920,7 @@ impl DeviceTimeCoord {
     #[allow(dead_code)]
     fn serialize(&self, num_axes: u8) -> Vec<u8> {
         let mut result = Vec::new();
-        self.serialize_into(&mut result, num_axes);
+        self.serialize_into(&mut result, u8::from(num_axes));
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, num_axes: u8) {
@@ -2061,7 +2061,7 @@ impl Serialize for GetDeviceMotionEventsReply {
         u8::from(self.device_mode).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 18]);
         for element in self.events.iter() {
-            element.serialize_into(bytes, self.num_axes);
+            element.serialize_into(bytes, u8::from(self.num_axes));
         }
     }
 }
@@ -4330,7 +4330,7 @@ impl FeedbackStateData {
     #[allow(dead_code)]
     fn serialize(&self, class_id: u8) -> Vec<u8> {
         let mut result = Vec::new();
-        self.serialize_into(&mut result, class_id);
+        self.serialize_into(&mut result, u8::from(class_id));
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, class_id: u8) {
@@ -4390,7 +4390,7 @@ impl Serialize for FeedbackState {
         class_id.serialize_into(bytes);
         self.feedback_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
-        self.data.serialize_into(bytes, class_id);
+        self.data.serialize_into(bytes, u8::from(class_id));
     }
 }
 
@@ -5242,7 +5242,7 @@ impl FeedbackCtlData {
     #[allow(dead_code)]
     fn serialize(&self, class_id: u8) -> Vec<u8> {
         let mut result = Vec::new();
-        self.serialize_into(&mut result, class_id);
+        self.serialize_into(&mut result, u8::from(class_id));
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, class_id: u8) {
@@ -5302,7 +5302,7 @@ impl Serialize for FeedbackCtl {
         class_id.serialize_into(bytes);
         self.feedback_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
-        self.data.serialize_into(bytes, class_id);
+        self.data.serialize_into(bytes, u8::from(class_id));
     }
 }
 
@@ -6726,7 +6726,7 @@ impl InputStateData {
     #[allow(dead_code)]
     fn serialize(&self, class_id: u8) -> Vec<u8> {
         let mut result = Vec::new();
-        self.serialize_into(&mut result, class_id);
+        self.serialize_into(&mut result, u8::from(class_id));
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, class_id: u8) {
@@ -6777,7 +6777,7 @@ impl Serialize for InputState {
         let class_id: u8 = self.data.switch_expr();
         class_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
-        self.data.serialize_into(bytes, class_id);
+        self.data.serialize_into(bytes, u8::from(class_id));
     }
 }
 
@@ -7846,7 +7846,7 @@ impl DeviceStateData {
     #[allow(dead_code)]
     fn serialize(&self, control_id: u16) -> Vec<u8> {
         let mut result = Vec::new();
-        self.serialize_into(&mut result, control_id);
+        self.serialize_into(&mut result, u16::from(control_id));
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, control_id: u16) {
@@ -7905,7 +7905,7 @@ impl Serialize for DeviceState {
         let control_id: u16 = self.data.switch_expr();
         control_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
-        self.data.serialize_into(bytes, control_id);
+        self.data.serialize_into(bytes, u16::from(control_id));
     }
 }
 
@@ -8667,7 +8667,7 @@ impl DeviceCtlData {
     #[allow(dead_code)]
     fn serialize(&self, control_id: u16) -> Vec<u8> {
         let mut result = Vec::new();
-        self.serialize_into(&mut result, control_id);
+        self.serialize_into(&mut result, u16::from(control_id));
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, control_id: u16) {
@@ -8726,7 +8726,7 @@ impl Serialize for DeviceCtl {
         let control_id: u16 = self.data.switch_expr();
         control_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
-        self.data.serialize_into(bytes, control_id);
+        self.data.serialize_into(bytes, u16::from(control_id));
     }
 }
 
@@ -9142,7 +9142,7 @@ impl ChangeDevicePropertyAux {
     #[allow(dead_code)]
     fn serialize(&self, format: u8, num_items: u32) -> Vec<u8> {
         let mut result = Vec::new();
-        self.serialize_into(&mut result, format, num_items);
+        self.serialize_into(&mut result, u8::from(format), u32::from(num_items));
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, format: u8, num_items: u32) {
@@ -9224,7 +9224,7 @@ impl<'input> ChangeDevicePropertyRequest<'input> {
             num_items_bytes[3],
         ];
         let length_so_far = length_so_far + request0.len();
-        let items_bytes = self.items.serialize(format, self.num_items);
+        let items_bytes = self.items.serialize(u8::from(format), u32::from(self.num_items));
         let length_so_far = length_so_far + items_bytes.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
@@ -9518,7 +9518,7 @@ impl GetDevicePropertyItems {
     #[allow(dead_code)]
     fn serialize(&self, format: u8, num_items: u32) -> Vec<u8> {
         let mut result = Vec::new();
-        self.serialize_into(&mut result, format, num_items);
+        self.serialize_into(&mut result, u8::from(format), u32::from(num_items));
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, format: u8, num_items: u32) {
@@ -9611,7 +9611,7 @@ impl Serialize for GetDevicePropertyReply {
         format.serialize_into(bytes);
         self.device_id.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 10]);
-        self.items.serialize_into(bytes, format, self.num_items);
+        self.items.serialize_into(bytes, u8::from(format), u32::from(self.num_items));
     }
 }
 
@@ -10693,7 +10693,7 @@ impl HierarchyChangeData {
     #[allow(dead_code)]
     fn serialize(&self, type_: u16) -> Vec<u8> {
         let mut result = Vec::new();
-        self.serialize_into(&mut result, type_);
+        self.serialize_into(&mut result, u16::from(type_));
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, type_: u16) {
@@ -10746,7 +10746,7 @@ impl Serialize for HierarchyChange {
         let type_: u16 = self.data.switch_expr();
         type_.serialize_into(bytes);
         self.len.serialize_into(bytes);
-        self.data.serialize_into(bytes, type_);
+        self.data.serialize_into(bytes, u16::from(type_));
     }
 }
 
@@ -12372,7 +12372,7 @@ impl DeviceClassData {
     #[allow(dead_code)]
     fn serialize(&self, type_: u16) -> Vec<u8> {
         let mut result = Vec::new();
-        self.serialize_into(&mut result, type_);
+        self.serialize_into(&mut result, u16::from(type_));
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, type_: u16) {
@@ -12430,7 +12430,7 @@ impl Serialize for DeviceClass {
         type_.serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.sourceid.serialize_into(bytes);
-        self.data.serialize_into(bytes, type_);
+        self.data.serialize_into(bytes, u16::from(type_));
     }
 }
 
@@ -14054,7 +14054,7 @@ impl XIChangePropertyAux {
     #[allow(dead_code)]
     fn serialize(&self, format: u8, num_items: u32) -> Vec<u8> {
         let mut result = Vec::new();
-        self.serialize_into(&mut result, format, num_items);
+        self.serialize_into(&mut result, u8::from(format), u32::from(num_items));
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, format: u8, num_items: u32) {
@@ -14136,7 +14136,7 @@ impl<'input> XIChangePropertyRequest<'input> {
             num_items_bytes[3],
         ];
         let length_so_far = length_so_far + request0.len();
-        let items_bytes = self.items.serialize(format, self.num_items);
+        let items_bytes = self.items.serialize(u8::from(format), u32::from(self.num_items));
         let length_so_far = length_so_far + items_bytes.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
@@ -14429,7 +14429,7 @@ impl XIGetPropertyItems {
     #[allow(dead_code)]
     fn serialize(&self, format: u8, num_items: u32) -> Vec<u8> {
         let mut result = Vec::new();
-        self.serialize_into(&mut result, format, num_items);
+        self.serialize_into(&mut result, u8::from(format), u32::from(num_items));
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, format: u8, num_items: u32) {
@@ -14518,7 +14518,7 @@ impl Serialize for XIGetPropertyReply {
         let format: u8 = self.items.switch_expr();
         format.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 11]);
-        self.items.serialize_into(bytes, format, self.num_items);
+        self.items.serialize_into(bytes, u8::from(format), u32::from(self.num_items));
     }
 }
 

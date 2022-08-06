@@ -1247,7 +1247,17 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             if i != 0 || begin_with_comma {
                 s.push_str(", ");
             }
+            let wire_type = match ext_param.type_ {
+                xcbdefs::TypeRef::BuiltIn(_) => Some(self.type_to_rust_type(&ext_param.type_)),
+                _ => None,
+            };
+            if let Some(ref type_) = wire_type {
+                s.push_str(&format!("{}::from(", type_));
+            }
             s.push_str(&wrap_name(&ext_param.name));
+            if wire_type.is_some() {
+                s.push_str(")");
+            }
         }
         s
     }

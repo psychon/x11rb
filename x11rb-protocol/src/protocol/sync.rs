@@ -1222,7 +1222,7 @@ impl CreateAlarmAux {
     #[allow(dead_code)]
     fn serialize(&self, value_mask: u32) -> Vec<u8> {
         let mut result = Vec::new();
-        self.serialize_into(&mut result, value_mask);
+        self.serialize_into(&mut result, u32::from(value_mask));
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, value_mask: u32) {
@@ -1344,7 +1344,7 @@ impl<'input> CreateAlarmRequest<'input> {
             value_mask_bytes[3],
         ];
         let length_so_far = length_so_far + request0.len();
-        let value_list_bytes = self.value_list.serialize(value_mask);
+        let value_list_bytes = self.value_list.serialize(u32::from(value_mask));
         let length_so_far = length_so_far + value_list_bytes.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
@@ -1461,7 +1461,7 @@ impl ChangeAlarmAux {
     #[allow(dead_code)]
     fn serialize(&self, value_mask: u32) -> Vec<u8> {
         let mut result = Vec::new();
-        self.serialize_into(&mut result, value_mask);
+        self.serialize_into(&mut result, u32::from(value_mask));
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, value_mask: u32) {
@@ -1583,7 +1583,7 @@ impl<'input> ChangeAlarmRequest<'input> {
             value_mask_bytes[3],
         ];
         let length_so_far = length_so_far + request0.len();
-        let value_list_bytes = self.value_list.serialize(value_mask);
+        let value_list_bytes = self.value_list.serialize(u32::from(value_mask));
         let length_so_far = length_so_far + value_list_bytes.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();

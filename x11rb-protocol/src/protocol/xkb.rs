@@ -6436,7 +6436,7 @@ impl SelectEventsAux {
     #[allow(dead_code)]
     fn serialize(&self, affect_which: u16, clear: u16, select_all: u16) -> Vec<u8> {
         let mut result = Vec::new();
-        self.serialize_into(&mut result, affect_which, clear, select_all);
+        self.serialize_into(&mut result, u16::from(affect_which), u16::from(clear), u16::from(select_all));
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, affect_which: u16, clear: u16, select_all: u16) {
@@ -6632,7 +6632,7 @@ impl<'input> SelectEventsRequest<'input> {
             map_bytes[1],
         ];
         let length_so_far = length_so_far + request0.len();
-        let details_bytes = self.details.serialize(affect_which, self.clear, self.select_all);
+        let details_bytes = self.details.serialize(u16::from(affect_which), u16::from(self.clear), u16::from(self.select_all));
         let length_so_far = length_so_far + details_bytes.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
@@ -7864,7 +7864,7 @@ impl GetMapMapBitcase3 {
     #[allow(dead_code)]
     fn serialize(&self, n_key_actions: u8, total_actions: u16) -> Vec<u8> {
         let mut result = Vec::new();
-        self.serialize_into(&mut result, n_key_actions, total_actions);
+        self.serialize_into(&mut result, u8::from(n_key_actions), u16::from(total_actions));
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, n_key_actions: u8, total_actions: u16) {
@@ -7985,7 +7985,7 @@ impl GetMapMap {
     #[allow(dead_code)]
     fn serialize(&self, present: u16, n_types: u8, n_key_syms: u8, n_key_actions: u8, total_actions: u16, total_key_behaviors: u8, virtual_mods: u16, total_key_explicit: u8, total_mod_map_keys: u8, total_v_mod_map_keys: u8) -> Vec<u8> {
         let mut result = Vec::new();
-        self.serialize_into(&mut result, present, n_types, n_key_syms, n_key_actions, total_actions, total_key_behaviors, virtual_mods, total_key_explicit, total_mod_map_keys, total_v_mod_map_keys);
+        self.serialize_into(&mut result, u16::from(present), u8::from(n_types), u8::from(n_key_syms), u8::from(n_key_actions), u16::from(total_actions), u8::from(total_key_behaviors), u16::from(virtual_mods), u8::from(total_key_explicit), u8::from(total_mod_map_keys), u8::from(total_v_mod_map_keys));
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, present: u16, n_types: u8, n_key_syms: u8, n_key_actions: u8, total_actions: u16, total_key_behaviors: u8, virtual_mods: u16, total_key_explicit: u8, total_mod_map_keys: u8, total_v_mod_map_keys: u8) {
@@ -8008,7 +8008,7 @@ impl GetMapMap {
             syms_rtrn.serialize_into(bytes);
         }
         if let Some(ref bitcase3) = self.bitcase3 {
-            bitcase3.serialize_into(bytes, n_key_actions, total_actions);
+            bitcase3.serialize_into(bytes, u8::from(n_key_actions), u16::from(total_actions));
         }
         if let Some(ref behaviors_rtrn) = self.behaviors_rtrn {
             assert_eq!(behaviors_rtrn.len(), usize::try_from(total_key_behaviors).unwrap(), "`behaviors_rtrn` has an incorrect length");
@@ -8188,7 +8188,7 @@ impl Serialize for GetMapReply {
         self.total_v_mod_map_keys.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 1]);
         u16::from(self.virtual_mods).serialize_into(bytes);
-        self.map.serialize_into(bytes, present, self.n_types, self.n_key_syms, self.n_key_actions, self.total_actions, self.total_key_behaviors, self.virtual_mods, self.total_key_explicit, self.total_mod_map_keys, self.total_v_mod_map_keys);
+        self.map.serialize_into(bytes, u16::from(present), u8::from(self.n_types), u8::from(self.n_key_syms), u8::from(self.n_key_actions), u16::from(self.total_actions), u8::from(self.total_key_behaviors), u16::from(self.virtual_mods), u8::from(self.total_key_explicit), u8::from(self.total_mod_map_keys), u8::from(self.total_v_mod_map_keys));
     }
 }
 
@@ -8216,7 +8216,7 @@ impl SetMapAuxBitcase3 {
     #[allow(dead_code)]
     fn serialize(&self, n_key_actions: u8, total_actions: u16) -> Vec<u8> {
         let mut result = Vec::new();
-        self.serialize_into(&mut result, n_key_actions, total_actions);
+        self.serialize_into(&mut result, u8::from(n_key_actions), u16::from(total_actions));
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, n_key_actions: u8, total_actions: u16) {
@@ -8321,7 +8321,7 @@ impl SetMapAux {
     #[allow(dead_code)]
     fn serialize(&self, present: u16, n_types: u8, n_key_syms: u8, n_key_actions: u8, total_actions: u16, total_key_behaviors: u8, virtual_mods: u16, total_key_explicit: u8, total_mod_map_keys: u8, total_v_mod_map_keys: u8) -> Vec<u8> {
         let mut result = Vec::new();
-        self.serialize_into(&mut result, present, n_types, n_key_syms, n_key_actions, total_actions, total_key_behaviors, virtual_mods, total_key_explicit, total_mod_map_keys, total_v_mod_map_keys);
+        self.serialize_into(&mut result, u16::from(present), u8::from(n_types), u8::from(n_key_syms), u8::from(n_key_actions), u16::from(total_actions), u8::from(total_key_behaviors), u16::from(virtual_mods), u8::from(total_key_explicit), u8::from(total_mod_map_keys), u8::from(total_v_mod_map_keys));
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, present: u16, n_types: u8, n_key_syms: u8, n_key_actions: u8, total_actions: u16, total_key_behaviors: u8, virtual_mods: u16, total_key_explicit: u8, total_mod_map_keys: u8, total_v_mod_map_keys: u8) {
@@ -8344,7 +8344,7 @@ impl SetMapAux {
             syms.serialize_into(bytes);
         }
         if let Some(ref bitcase3) = self.bitcase3 {
-            bitcase3.serialize_into(bytes, n_key_actions, total_actions);
+            bitcase3.serialize_into(bytes, u8::from(n_key_actions), u16::from(total_actions));
         }
         if let Some(ref behaviors) = self.behaviors {
             assert_eq!(behaviors.len(), usize::try_from(total_key_behaviors).unwrap(), "`behaviors` has an incorrect length");
@@ -8556,7 +8556,7 @@ impl<'input> SetMapRequest<'input> {
             virtual_mods_bytes[1],
         ];
         let length_so_far = length_so_far + request0.len();
-        let values_bytes = self.values.serialize(present, self.n_types, self.n_key_syms, self.n_key_actions, self.total_actions, self.total_key_behaviors, self.virtual_mods, self.total_key_explicit, self.total_mod_map_keys, self.total_v_mod_map_keys);
+        let values_bytes = self.values.serialize(u16::from(present), u8::from(self.n_types), u8::from(self.n_key_syms), u8::from(self.n_key_actions), u16::from(self.total_actions), u8::from(self.total_key_behaviors), u16::from(self.virtual_mods), u8::from(self.total_key_explicit), u8::from(self.total_mod_map_keys), u8::from(self.total_v_mod_map_keys));
         let length_so_far = length_so_far + values_bytes.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
@@ -9720,7 +9720,7 @@ impl GetNamesValueListBitcase8 {
     #[allow(dead_code)]
     fn serialize(&self, n_types: u8) -> Vec<u8> {
         let mut result = Vec::new();
-        self.serialize_into(&mut result, n_types);
+        self.serialize_into(&mut result, u8::from(n_types));
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, n_types: u8) {
@@ -9872,7 +9872,7 @@ impl GetNamesValueList {
     #[allow(dead_code)]
     fn serialize(&self, which: u32, n_types: u8, indicators: u32, virtual_mods: u16, group_names: u8, n_keys: u8, n_key_aliases: u8, n_radio_groups: u8) -> Vec<u8> {
         let mut result = Vec::new();
-        self.serialize_into(&mut result, which, n_types, indicators, virtual_mods, group_names, n_keys, n_key_aliases, n_radio_groups);
+        self.serialize_into(&mut result, u32::from(which), u8::from(n_types), u32::from(indicators), u16::from(virtual_mods), u8::from(group_names), u8::from(n_keys), u8::from(n_key_aliases), u8::from(n_radio_groups));
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, which: u32, n_types: u8, indicators: u32, virtual_mods: u16, group_names: u8, n_keys: u8, n_key_aliases: u8, n_radio_groups: u8) {
@@ -9907,7 +9907,7 @@ impl GetNamesValueList {
             type_names.serialize_into(bytes);
         }
         if let Some(ref bitcase8) = self.bitcase8 {
-            bitcase8.serialize_into(bytes, n_types);
+            bitcase8.serialize_into(bytes, u8::from(n_types));
         }
         if let Some(ref indicator_names) = self.indicator_names {
             assert_eq!(indicator_names.len(), usize::try_from(indicators.count_ones()).unwrap(), "`indicator_names` has an incorrect length");
@@ -10064,7 +10064,7 @@ impl Serialize for GetNamesReply {
         self.n_key_aliases.serialize_into(bytes);
         self.n_kt_levels.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 4]);
-        self.value_list.serialize_into(bytes, which, self.n_types, self.indicators, self.virtual_mods, self.group_names, self.n_keys, self.n_key_aliases, self.n_radio_groups);
+        self.value_list.serialize_into(bytes, u32::from(which), u8::from(self.n_types), u32::from(self.indicators), u16::from(self.virtual_mods), u8::from(self.group_names), u8::from(self.n_keys), u8::from(self.n_key_aliases), u8::from(self.n_radio_groups));
     }
 }
 
@@ -10092,7 +10092,7 @@ impl SetNamesAuxBitcase8 {
     #[allow(dead_code)]
     fn serialize(&self, n_types: u8) -> Vec<u8> {
         let mut result = Vec::new();
-        self.serialize_into(&mut result, n_types);
+        self.serialize_into(&mut result, u8::from(n_types));
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, n_types: u8) {
@@ -10245,7 +10245,7 @@ impl SetNamesAux {
     #[allow(dead_code)]
     fn serialize(&self, which: u32, n_types: u8, indicators: u32, virtual_mods: u16, group_names: u8, n_keys: u8, n_key_aliases: u8, n_radio_groups: u8) -> Vec<u8> {
         let mut result = Vec::new();
-        self.serialize_into(&mut result, which, n_types, indicators, virtual_mods, group_names, n_keys, n_key_aliases, n_radio_groups);
+        self.serialize_into(&mut result, u32::from(which), u8::from(n_types), u32::from(indicators), u16::from(virtual_mods), u8::from(group_names), u8::from(n_keys), u8::from(n_key_aliases), u8::from(n_radio_groups));
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, which: u32, n_types: u8, indicators: u32, virtual_mods: u16, group_names: u8, n_keys: u8, n_key_aliases: u8, n_radio_groups: u8) {
@@ -10280,7 +10280,7 @@ impl SetNamesAux {
             type_names.serialize_into(bytes);
         }
         if let Some(ref bitcase8) = self.bitcase8 {
-            bitcase8.serialize_into(bytes, n_types);
+            bitcase8.serialize_into(bytes, u8::from(n_types));
         }
         if let Some(ref indicator_names) = self.indicator_names {
             assert_eq!(indicator_names.len(), usize::try_from(indicators.count_ones()).unwrap(), "`indicator_names` has an incorrect length");
@@ -10517,7 +10517,7 @@ impl<'input> SetNamesRequest<'input> {
             total_kt_level_names_bytes[1],
         ];
         let length_so_far = length_so_far + request0.len();
-        let values_bytes = self.values.serialize(which, self.n_types, self.indicators, self.virtual_mods, self.group_names, self.n_keys, self.n_key_aliases, self.n_radio_groups);
+        let values_bytes = self.values.serialize(u32::from(which), u8::from(self.n_types), u32::from(self.indicators), u16::from(self.virtual_mods), u8::from(self.group_names), u8::from(self.n_keys), u8::from(self.n_key_aliases), u8::from(self.n_radio_groups));
         let length_so_far = length_so_far + values_bytes.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
@@ -11115,7 +11115,7 @@ impl GetKbdByNameRepliesTypesMapBitcase3 {
     #[allow(dead_code)]
     fn serialize(&self, n_key_actions: u8, total_actions: u16) -> Vec<u8> {
         let mut result = Vec::new();
-        self.serialize_into(&mut result, n_key_actions, total_actions);
+        self.serialize_into(&mut result, u8::from(n_key_actions), u16::from(total_actions));
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, n_key_actions: u8, total_actions: u16) {
@@ -11236,7 +11236,7 @@ impl GetKbdByNameRepliesTypesMap {
     #[allow(dead_code)]
     fn serialize(&self, present: u16, n_types: u8, n_key_syms: u8, n_key_actions: u8, total_actions: u16, total_key_behaviors: u8, virtual_mods: u16, total_key_explicit: u8, total_mod_map_keys: u8, total_v_mod_map_keys: u8) -> Vec<u8> {
         let mut result = Vec::new();
-        self.serialize_into(&mut result, present, n_types, n_key_syms, n_key_actions, total_actions, total_key_behaviors, virtual_mods, total_key_explicit, total_mod_map_keys, total_v_mod_map_keys);
+        self.serialize_into(&mut result, u16::from(present), u8::from(n_types), u8::from(n_key_syms), u8::from(n_key_actions), u16::from(total_actions), u8::from(total_key_behaviors), u16::from(virtual_mods), u8::from(total_key_explicit), u8::from(total_mod_map_keys), u8::from(total_v_mod_map_keys));
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, present: u16, n_types: u8, n_key_syms: u8, n_key_actions: u8, total_actions: u16, total_key_behaviors: u8, virtual_mods: u16, total_key_explicit: u8, total_mod_map_keys: u8, total_v_mod_map_keys: u8) {
@@ -11259,7 +11259,7 @@ impl GetKbdByNameRepliesTypesMap {
             syms_rtrn.serialize_into(bytes);
         }
         if let Some(ref bitcase3) = self.bitcase3 {
-            bitcase3.serialize_into(bytes, n_key_actions, total_actions);
+            bitcase3.serialize_into(bytes, u8::from(n_key_actions), u16::from(total_actions));
         }
         if let Some(ref behaviors_rtrn) = self.behaviors_rtrn {
             assert_eq!(behaviors_rtrn.len(), usize::try_from(total_key_behaviors).unwrap(), "`behaviors_rtrn` has an incorrect length");
@@ -11432,7 +11432,7 @@ impl Serialize for GetKbdByNameRepliesTypes {
         self.total_v_mod_map_keys.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 1]);
         u16::from(self.virtual_mods).serialize_into(bytes);
-        self.map.serialize_into(bytes, present, self.n_types, self.n_key_syms, self.n_key_actions, self.total_actions, self.total_key_behaviors, self.virtual_mods, self.total_key_explicit, self.total_mod_map_keys, self.total_v_mod_map_keys);
+        self.map.serialize_into(bytes, u16::from(present), u8::from(self.n_types), u8::from(self.n_key_syms), u8::from(self.n_key_actions), u16::from(self.total_actions), u8::from(self.total_key_behaviors), u16::from(self.virtual_mods), u8::from(self.total_key_explicit), u8::from(self.total_mod_map_keys), u8::from(self.total_v_mod_map_keys));
     }
 }
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -11593,7 +11593,7 @@ impl GetKbdByNameRepliesKeyNamesValueListBitcase8 {
     #[allow(dead_code)]
     fn serialize(&self, n_types: u8) -> Vec<u8> {
         let mut result = Vec::new();
-        self.serialize_into(&mut result, n_types);
+        self.serialize_into(&mut result, u8::from(n_types));
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, n_types: u8) {
@@ -11745,7 +11745,7 @@ impl GetKbdByNameRepliesKeyNamesValueList {
     #[allow(dead_code)]
     fn serialize(&self, which: u32, n_types: u8, indicators: u32, virtual_mods: u16, group_names: u8, n_keys: u8, n_key_aliases: u8, n_radio_groups: u8) -> Vec<u8> {
         let mut result = Vec::new();
-        self.serialize_into(&mut result, which, n_types, indicators, virtual_mods, group_names, n_keys, n_key_aliases, n_radio_groups);
+        self.serialize_into(&mut result, u32::from(which), u8::from(n_types), u32::from(indicators), u16::from(virtual_mods), u8::from(group_names), u8::from(n_keys), u8::from(n_key_aliases), u8::from(n_radio_groups));
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, which: u32, n_types: u8, indicators: u32, virtual_mods: u16, group_names: u8, n_keys: u8, n_key_aliases: u8, n_radio_groups: u8) {
@@ -11780,7 +11780,7 @@ impl GetKbdByNameRepliesKeyNamesValueList {
             type_names.serialize_into(bytes);
         }
         if let Some(ref bitcase8) = self.bitcase8 {
-            bitcase8.serialize_into(bytes, n_types);
+            bitcase8.serialize_into(bytes, u8::from(n_types));
         }
         if let Some(ref indicator_names) = self.indicator_names {
             assert_eq!(indicator_names.len(), usize::try_from(indicators.count_ones()).unwrap(), "`indicator_names` has an incorrect length");
@@ -11930,7 +11930,7 @@ impl Serialize for GetKbdByNameRepliesKeyNames {
         self.n_key_aliases.serialize_into(bytes);
         self.n_kt_levels.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 4]);
-        self.value_list.serialize_into(bytes, which, self.n_types, self.indicators, self.virtual_mods, self.group_names, self.n_keys, self.n_key_aliases, self.n_radio_groups);
+        self.value_list.serialize_into(bytes, u32::from(which), u8::from(self.n_types), u32::from(self.indicators), u16::from(self.virtual_mods), u8::from(self.group_names), u8::from(self.n_keys), u8::from(self.n_key_aliases), u8::from(self.n_radio_groups));
     }
 }
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -12063,7 +12063,7 @@ impl GetKbdByNameReplies {
     #[allow(dead_code)]
     fn serialize(&self, reported: u16) -> Vec<u8> {
         let mut result = Vec::new();
-        self.serialize_into(&mut result, reported);
+        self.serialize_into(&mut result, u16::from(reported));
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, reported: u16) {
@@ -12148,7 +12148,7 @@ impl Serialize for GetKbdByNameReply {
         u16::from(self.found).serialize_into(bytes);
         u16::from(self.reported).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 16]);
-        self.replies.serialize_into(bytes, self.reported);
+        self.replies.serialize_into(bytes, u16::from(self.reported));
     }
 }
 
