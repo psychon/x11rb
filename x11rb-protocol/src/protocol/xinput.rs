@@ -16695,7 +16695,7 @@ impl TryParse for KeyPressEvent {
         let (group, remaining) = GroupInfo::try_parse(remaining)?;
         let (button_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, buttons_len.try_to_usize()?)?;
         let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len.try_to_usize()?)?;
-        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).ok_or(ParseError::InvalidExpression))?.try_to_usize()?)?;
+        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add(u32::from(*x).count_ones()).ok_or(ParseError::InvalidExpression))?.try_to_usize()?)?;
         let flags = flags.into();
         let result = KeyPressEvent { response_type, extension, sequence, length, event_type, deviceid, time, detail, root, event, child, root_x, root_y, event_x, event_y, sourceid, flags, mods, group, button_mask, valuator_mask, axisvalues };
         let _ = remaining;
@@ -16739,7 +16739,7 @@ impl Serialize for KeyPressEvent {
         self.group.serialize_into(bytes);
         self.button_mask.serialize_into(bytes);
         self.valuator_mask.serialize_into(bytes);
-        assert_eq!(self.axisvalues.len(), usize::try_from(self.valuator_mask.iter().fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).unwrap())).unwrap(), "`axisvalues` has an incorrect length");
+        assert_eq!(self.axisvalues.len(), usize::try_from(self.valuator_mask.iter().fold(0u32, |acc, x| acc.checked_add(u32::from(*x).count_ones()).unwrap())).unwrap(), "`axisvalues` has an incorrect length");
         self.axisvalues.serialize_into(bytes);
     }
 }
@@ -16877,7 +16877,7 @@ impl TryParse for ButtonPressEvent {
         let (group, remaining) = GroupInfo::try_parse(remaining)?;
         let (button_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, buttons_len.try_to_usize()?)?;
         let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len.try_to_usize()?)?;
-        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).ok_or(ParseError::InvalidExpression))?.try_to_usize()?)?;
+        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add(u32::from(*x).count_ones()).ok_or(ParseError::InvalidExpression))?.try_to_usize()?)?;
         let flags = flags.into();
         let result = ButtonPressEvent { response_type, extension, sequence, length, event_type, deviceid, time, detail, root, event, child, root_x, root_y, event_x, event_y, sourceid, flags, mods, group, button_mask, valuator_mask, axisvalues };
         let _ = remaining;
@@ -16921,7 +16921,7 @@ impl Serialize for ButtonPressEvent {
         self.group.serialize_into(bytes);
         self.button_mask.serialize_into(bytes);
         self.valuator_mask.serialize_into(bytes);
-        assert_eq!(self.axisvalues.len(), usize::try_from(self.valuator_mask.iter().fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).unwrap())).unwrap(), "`axisvalues` has an incorrect length");
+        assert_eq!(self.axisvalues.len(), usize::try_from(self.valuator_mask.iter().fold(0u32, |acc, x| acc.checked_add(u32::from(*x).count_ones()).unwrap())).unwrap(), "`axisvalues` has an incorrect length");
         self.axisvalues.serialize_into(bytes);
     }
 }
@@ -17613,8 +17613,8 @@ impl TryParse for RawKeyPressEvent {
         let (flags, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(4..).ok_or(ParseError::InsufficientData)?;
         let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len.try_to_usize()?)?;
-        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).ok_or(ParseError::InvalidExpression))?.try_to_usize()?)?;
-        let (axisvalues_raw, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).ok_or(ParseError::InvalidExpression))?.try_to_usize()?)?;
+        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add(u32::from(*x).count_ones()).ok_or(ParseError::InvalidExpression))?.try_to_usize()?)?;
+        let (axisvalues_raw, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add(u32::from(*x).count_ones()).ok_or(ParseError::InvalidExpression))?.try_to_usize()?)?;
         let flags = flags.into();
         let result = RawKeyPressEvent { response_type, extension, sequence, length, event_type, deviceid, time, detail, sourceid, flags, valuator_mask, axisvalues, axisvalues_raw };
         let _ = remaining;
@@ -17646,9 +17646,9 @@ impl Serialize for RawKeyPressEvent {
         u32::from(self.flags).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 4]);
         self.valuator_mask.serialize_into(bytes);
-        assert_eq!(self.axisvalues.len(), usize::try_from(self.valuator_mask.iter().fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).unwrap())).unwrap(), "`axisvalues` has an incorrect length");
+        assert_eq!(self.axisvalues.len(), usize::try_from(self.valuator_mask.iter().fold(0u32, |acc, x| acc.checked_add(u32::from(*x).count_ones()).unwrap())).unwrap(), "`axisvalues` has an incorrect length");
         self.axisvalues.serialize_into(bytes);
-        assert_eq!(self.axisvalues_raw.len(), usize::try_from(self.valuator_mask.iter().fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).unwrap())).unwrap(), "`axisvalues_raw` has an incorrect length");
+        assert_eq!(self.axisvalues_raw.len(), usize::try_from(self.valuator_mask.iter().fold(0u32, |acc, x| acc.checked_add(u32::from(*x).count_ones()).unwrap())).unwrap(), "`axisvalues_raw` has an incorrect length");
         self.axisvalues_raw.serialize_into(bytes);
     }
 }
@@ -17707,8 +17707,8 @@ impl TryParse for RawButtonPressEvent {
         let (flags, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(4..).ok_or(ParseError::InsufficientData)?;
         let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len.try_to_usize()?)?;
-        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).ok_or(ParseError::InvalidExpression))?.try_to_usize()?)?;
-        let (axisvalues_raw, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).ok_or(ParseError::InvalidExpression))?.try_to_usize()?)?;
+        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add(u32::from(*x).count_ones()).ok_or(ParseError::InvalidExpression))?.try_to_usize()?)?;
+        let (axisvalues_raw, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add(u32::from(*x).count_ones()).ok_or(ParseError::InvalidExpression))?.try_to_usize()?)?;
         let flags = flags.into();
         let result = RawButtonPressEvent { response_type, extension, sequence, length, event_type, deviceid, time, detail, sourceid, flags, valuator_mask, axisvalues, axisvalues_raw };
         let _ = remaining;
@@ -17740,9 +17740,9 @@ impl Serialize for RawButtonPressEvent {
         u32::from(self.flags).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 4]);
         self.valuator_mask.serialize_into(bytes);
-        assert_eq!(self.axisvalues.len(), usize::try_from(self.valuator_mask.iter().fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).unwrap())).unwrap(), "`axisvalues` has an incorrect length");
+        assert_eq!(self.axisvalues.len(), usize::try_from(self.valuator_mask.iter().fold(0u32, |acc, x| acc.checked_add(u32::from(*x).count_ones()).unwrap())).unwrap(), "`axisvalues` has an incorrect length");
         self.axisvalues.serialize_into(bytes);
-        assert_eq!(self.axisvalues_raw.len(), usize::try_from(self.valuator_mask.iter().fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).unwrap())).unwrap(), "`axisvalues_raw` has an incorrect length");
+        assert_eq!(self.axisvalues_raw.len(), usize::try_from(self.valuator_mask.iter().fold(0u32, |acc, x| acc.checked_add(u32::from(*x).count_ones()).unwrap())).unwrap(), "`axisvalues_raw` has an incorrect length");
         self.axisvalues_raw.serialize_into(bytes);
     }
 }
@@ -17873,7 +17873,7 @@ impl TryParse for TouchBeginEvent {
         let (group, remaining) = GroupInfo::try_parse(remaining)?;
         let (button_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, buttons_len.try_to_usize()?)?;
         let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len.try_to_usize()?)?;
-        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).ok_or(ParseError::InvalidExpression))?.try_to_usize()?)?;
+        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add(u32::from(*x).count_ones()).ok_or(ParseError::InvalidExpression))?.try_to_usize()?)?;
         let flags = flags.into();
         let result = TouchBeginEvent { response_type, extension, sequence, length, event_type, deviceid, time, detail, root, event, child, root_x, root_y, event_x, event_y, sourceid, flags, mods, group, button_mask, valuator_mask, axisvalues };
         let _ = remaining;
@@ -17917,7 +17917,7 @@ impl Serialize for TouchBeginEvent {
         self.group.serialize_into(bytes);
         self.button_mask.serialize_into(bytes);
         self.valuator_mask.serialize_into(bytes);
-        assert_eq!(self.axisvalues.len(), usize::try_from(self.valuator_mask.iter().fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).unwrap())).unwrap(), "`axisvalues` has an incorrect length");
+        assert_eq!(self.axisvalues.len(), usize::try_from(self.valuator_mask.iter().fold(0u32, |acc, x| acc.checked_add(u32::from(*x).count_ones()).unwrap())).unwrap(), "`axisvalues` has an incorrect length");
         self.axisvalues.serialize_into(bytes);
     }
 }
@@ -18170,8 +18170,8 @@ impl TryParse for RawTouchBeginEvent {
         let (flags, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(4..).ok_or(ParseError::InsufficientData)?;
         let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len.try_to_usize()?)?;
-        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).ok_or(ParseError::InvalidExpression))?.try_to_usize()?)?;
-        let (axisvalues_raw, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).ok_or(ParseError::InvalidExpression))?.try_to_usize()?)?;
+        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add(u32::from(*x).count_ones()).ok_or(ParseError::InvalidExpression))?.try_to_usize()?)?;
+        let (axisvalues_raw, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add(u32::from(*x).count_ones()).ok_or(ParseError::InvalidExpression))?.try_to_usize()?)?;
         let flags = flags.into();
         let result = RawTouchBeginEvent { response_type, extension, sequence, length, event_type, deviceid, time, detail, sourceid, flags, valuator_mask, axisvalues, axisvalues_raw };
         let _ = remaining;
@@ -18203,9 +18203,9 @@ impl Serialize for RawTouchBeginEvent {
         u32::from(self.flags).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 4]);
         self.valuator_mask.serialize_into(bytes);
-        assert_eq!(self.axisvalues.len(), usize::try_from(self.valuator_mask.iter().fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).unwrap())).unwrap(), "`axisvalues` has an incorrect length");
+        assert_eq!(self.axisvalues.len(), usize::try_from(self.valuator_mask.iter().fold(0u32, |acc, x| acc.checked_add(u32::from(*x).count_ones()).unwrap())).unwrap(), "`axisvalues` has an incorrect length");
         self.axisvalues.serialize_into(bytes);
-        assert_eq!(self.axisvalues_raw.len(), usize::try_from(self.valuator_mask.iter().fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).unwrap())).unwrap(), "`axisvalues_raw` has an incorrect length");
+        assert_eq!(self.axisvalues_raw.len(), usize::try_from(self.valuator_mask.iter().fold(0u32, |acc, x| acc.checked_add(u32::from(*x).count_ones()).unwrap())).unwrap(), "`axisvalues_raw` has an incorrect length");
         self.axisvalues_raw.serialize_into(bytes);
     }
 }

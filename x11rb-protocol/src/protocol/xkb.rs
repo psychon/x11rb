@@ -3680,8 +3680,8 @@ impl TryParse for DeviceLedInfo {
         let (maps_present, remaining) = u32::try_parse(remaining)?;
         let (phys_indicators, remaining) = u32::try_parse(remaining)?;
         let (state, remaining) = u32::try_parse(remaining)?;
-        let (names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, names_present.count_ones().try_to_usize()?)?;
-        let (maps, remaining) = crate::x11_utils::parse_list::<IndicatorMap>(remaining, maps_present.count_ones().try_to_usize()?)?;
+        let (names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, u32::from(names_present).count_ones().try_to_usize()?)?;
+        let (maps, remaining) = crate::x11_utils::parse_list::<IndicatorMap>(remaining, u32::from(maps_present).count_ones().try_to_usize()?)?;
         let led_class = led_class.into();
         let result = DeviceLedInfo { led_class, led_id, names_present, maps_present, phys_indicators, state, names, maps };
         Ok((result, remaining))
@@ -3702,9 +3702,9 @@ impl Serialize for DeviceLedInfo {
         self.maps_present.serialize_into(bytes);
         self.phys_indicators.serialize_into(bytes);
         self.state.serialize_into(bytes);
-        assert_eq!(self.names.len(), usize::try_from(self.names_present.count_ones()).unwrap(), "`names` has an incorrect length");
+        assert_eq!(self.names.len(), usize::try_from(u32::from(self.names_present).count_ones()).unwrap(), "`names` has an incorrect length");
         self.names.serialize_into(bytes);
-        assert_eq!(self.maps.len(), usize::try_from(self.maps_present.count_ones()).unwrap(), "`maps` has an incorrect length");
+        assert_eq!(self.maps.len(), usize::try_from(u32::from(self.maps_present).count_ones()).unwrap(), "`maps` has an incorrect length");
         self.maps.serialize_into(bytes);
     }
 }
@@ -7926,7 +7926,7 @@ impl GetMapMap {
             let remaining = outer_remaining;
             let value = remaining;
             let mut remaining = remaining;
-            let list_length = virtual_mods.count_ones().try_to_usize()?;
+            let list_length = u32::from(virtual_mods).count_ones().try_to_usize()?;
             let mut vmods_rtrn = Vec::with_capacity(list_length);
             for _ in 0..list_length {
                 let (v, new_remaining) = u8::try_parse(remaining)?;
@@ -8015,7 +8015,7 @@ impl GetMapMap {
             behaviors_rtrn.serialize_into(bytes);
         }
         if let Some(ref vmods_rtrn) = self.vmods_rtrn {
-            assert_eq!(vmods_rtrn.len(), usize::try_from(virtual_mods.count_ones()).unwrap(), "`vmods_rtrn` has an incorrect length");
+            assert_eq!(vmods_rtrn.len(), usize::try_from(u32::from(virtual_mods).count_ones()).unwrap(), "`vmods_rtrn` has an incorrect length");
             for element in vmods_rtrn.iter().copied() {
                 (u16::from(element) as u8).serialize_into(bytes);
             }
@@ -8278,7 +8278,7 @@ impl SetMapAux {
         let vmods = if switch_expr & u16::from(MapPart::VIRTUAL_MODS) != 0 {
             let remaining = outer_remaining;
             let value = remaining;
-            let (vmods, remaining) = crate::x11_utils::parse_u8_list(remaining, virtual_mods.count_ones().try_to_usize()?)?;
+            let (vmods, remaining) = crate::x11_utils::parse_u8_list(remaining, u32::from(virtual_mods).count_ones().try_to_usize()?)?;
             let vmods = vmods.to_vec();
             // Align offset to multiple of 4
             let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
@@ -8351,7 +8351,7 @@ impl SetMapAux {
             behaviors.serialize_into(bytes);
         }
         if let Some(ref vmods) = self.vmods {
-            assert_eq!(vmods.len(), usize::try_from(virtual_mods.count_ones()).unwrap(), "`vmods` has an incorrect length");
+            assert_eq!(vmods.len(), usize::try_from(u32::from(virtual_mods).count_ones()).unwrap(), "`vmods` has an incorrect length");
             bytes.extend_from_slice(&vmods);
             bytes.extend_from_slice(&[0; 3][..(4 - (bytes.len() % 4)) % 4]);
         }
@@ -8775,7 +8775,7 @@ impl TryParse for GetCompatMapReply {
         let (n_total_si, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(16..).ok_or(ParseError::InsufficientData)?;
         let (si_rtrn, remaining) = crate::x11_utils::parse_list::<SymInterpret>(remaining, n_si_rtrn.try_to_usize()?)?;
-        let (group_rtrn, remaining) = crate::x11_utils::parse_list::<ModDef>(remaining, groups_rtrn.count_ones().try_to_usize()?)?;
+        let (group_rtrn, remaining) = crate::x11_utils::parse_list::<ModDef>(remaining, u32::from(groups_rtrn).count_ones().try_to_usize()?)?;
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
@@ -8809,7 +8809,7 @@ impl Serialize for GetCompatMapReply {
         self.n_total_si.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 16]);
         self.si_rtrn.serialize_into(bytes);
-        assert_eq!(self.group_rtrn.len(), usize::try_from(self.groups_rtrn.count_ones()).unwrap(), "`group_rtrn` has an incorrect length");
+        assert_eq!(self.group_rtrn.len(), usize::try_from(u32::from(self.groups_rtrn).count_ones()).unwrap(), "`group_rtrn` has an incorrect length");
         self.group_rtrn.serialize_into(bytes);
     }
 }
@@ -8874,7 +8874,7 @@ impl<'input> SetCompatMapRequest<'input> {
         let length_so_far = length_so_far + request0.len();
         let si_bytes = self.si.serialize();
         let length_so_far = length_so_far + si_bytes.len();
-        assert_eq!(self.group_maps.len(), usize::try_from(self.groups.count_ones()).unwrap(), "`group_maps` has an incorrect length");
+        assert_eq!(self.group_maps.len(), usize::try_from(u32::from(self.groups).count_ones()).unwrap(), "`group_maps` has an incorrect length");
         let group_maps_bytes = self.group_maps.serialize();
         let length_so_far = length_so_far + group_maps_bytes.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
@@ -8899,7 +8899,7 @@ impl<'input> SetCompatMapRequest<'input> {
         let (n_si, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (si, remaining) = crate::x11_utils::parse_list::<SymInterpret>(remaining, n_si.try_to_usize()?)?;
-        let (group_maps, remaining) = crate::x11_utils::parse_list::<ModDef>(remaining, groups.count_ones().try_to_usize()?)?;
+        let (group_maps, remaining) = crate::x11_utils::parse_list::<ModDef>(remaining, u32::from(groups).count_ones().try_to_usize()?)?;
         let _ = remaining;
         Ok(SetCompatMapRequest {
             device_spec,
@@ -9159,7 +9159,7 @@ impl TryParse for GetIndicatorMapReply {
         let (real_indicators, remaining) = u32::try_parse(remaining)?;
         let (n_indicators, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(15..).ok_or(ParseError::InsufficientData)?;
-        let (maps, remaining) = crate::x11_utils::parse_list::<IndicatorMap>(remaining, which.count_ones().try_to_usize()?)?;
+        let (maps, remaining) = crate::x11_utils::parse_list::<IndicatorMap>(remaining, u32::from(which).count_ones().try_to_usize()?)?;
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
@@ -9188,7 +9188,7 @@ impl Serialize for GetIndicatorMapReply {
         self.real_indicators.serialize_into(bytes);
         self.n_indicators.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 15]);
-        assert_eq!(self.maps.len(), usize::try_from(self.which.count_ones()).unwrap(), "`maps` has an incorrect length");
+        assert_eq!(self.maps.len(), usize::try_from(u32::from(self.which).count_ones()).unwrap(), "`maps` has an incorrect length");
         self.maps.serialize_into(bytes);
     }
 }
@@ -9223,7 +9223,7 @@ impl<'input> SetIndicatorMapRequest<'input> {
             which_bytes[3],
         ];
         let length_so_far = length_so_far + request0.len();
-        assert_eq!(self.maps.len(), usize::try_from(self.which.count_ones()).unwrap(), "`maps` has an incorrect length");
+        assert_eq!(self.maps.len(), usize::try_from(u32::from(self.which).count_ones()).unwrap(), "`maps` has an incorrect length");
         let maps_bytes = self.maps.serialize();
         let length_so_far = length_so_far + maps_bytes.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
@@ -9241,7 +9241,7 @@ impl<'input> SetIndicatorMapRequest<'input> {
         let (device_spec, remaining) = DeviceSpec::try_parse(value)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (which, remaining) = u32::try_parse(remaining)?;
-        let (maps, remaining) = crate::x11_utils::parse_list::<IndicatorMap>(remaining, which.count_ones().try_to_usize()?)?;
+        let (maps, remaining) = crate::x11_utils::parse_list::<IndicatorMap>(remaining, u32::from(which).count_ones().try_to_usize()?)?;
         let _ = remaining;
         Ok(SetIndicatorMapRequest {
             device_spec,
@@ -9818,7 +9818,7 @@ impl GetNamesValueList {
         };
         let indicator_names = if switch_expr & u32::from(NameDetail::INDICATOR_NAMES) != 0 {
             let remaining = outer_remaining;
-            let (indicator_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, indicators.count_ones().try_to_usize()?)?;
+            let (indicator_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, u32::from(indicators).count_ones().try_to_usize()?)?;
             outer_remaining = remaining;
             Some(indicator_names)
         } else {
@@ -9826,7 +9826,7 @@ impl GetNamesValueList {
         };
         let virtual_mod_names = if switch_expr & u32::from(NameDetail::VIRTUAL_MOD_NAMES) != 0 {
             let remaining = outer_remaining;
-            let (virtual_mod_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, virtual_mods.count_ones().try_to_usize()?)?;
+            let (virtual_mod_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, u32::from(virtual_mods).count_ones().try_to_usize()?)?;
             outer_remaining = remaining;
             Some(virtual_mod_names)
         } else {
@@ -9834,7 +9834,7 @@ impl GetNamesValueList {
         };
         let groups = if switch_expr & u32::from(NameDetail::GROUP_NAMES) != 0 {
             let remaining = outer_remaining;
-            let (groups, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, group_names.count_ones().try_to_usize()?)?;
+            let (groups, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, u32::from(group_names).count_ones().try_to_usize()?)?;
             outer_remaining = remaining;
             Some(groups)
         } else {
@@ -9910,15 +9910,15 @@ impl GetNamesValueList {
             bitcase8.serialize_into(bytes, u8::from(n_types));
         }
         if let Some(ref indicator_names) = self.indicator_names {
-            assert_eq!(indicator_names.len(), usize::try_from(indicators.count_ones()).unwrap(), "`indicator_names` has an incorrect length");
+            assert_eq!(indicator_names.len(), usize::try_from(u32::from(indicators).count_ones()).unwrap(), "`indicator_names` has an incorrect length");
             indicator_names.serialize_into(bytes);
         }
         if let Some(ref virtual_mod_names) = self.virtual_mod_names {
-            assert_eq!(virtual_mod_names.len(), usize::try_from(virtual_mods.count_ones()).unwrap(), "`virtual_mod_names` has an incorrect length");
+            assert_eq!(virtual_mod_names.len(), usize::try_from(u32::from(virtual_mods).count_ones()).unwrap(), "`virtual_mod_names` has an incorrect length");
             virtual_mod_names.serialize_into(bytes);
         }
         if let Some(ref groups) = self.groups {
-            assert_eq!(groups.len(), usize::try_from(group_names.count_ones()).unwrap(), "`groups` has an incorrect length");
+            assert_eq!(groups.len(), usize::try_from(u32::from(group_names).count_ones()).unwrap(), "`groups` has an incorrect length");
             groups.serialize_into(bytes);
         }
         if let Some(ref key_names) = self.key_names {
@@ -10191,7 +10191,7 @@ impl SetNamesAux {
         };
         let indicator_names = if switch_expr & u32::from(NameDetail::INDICATOR_NAMES) != 0 {
             let remaining = outer_remaining;
-            let (indicator_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, indicators.count_ones().try_to_usize()?)?;
+            let (indicator_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, u32::from(indicators).count_ones().try_to_usize()?)?;
             outer_remaining = remaining;
             Some(indicator_names)
         } else {
@@ -10199,7 +10199,7 @@ impl SetNamesAux {
         };
         let virtual_mod_names = if switch_expr & u32::from(NameDetail::VIRTUAL_MOD_NAMES) != 0 {
             let remaining = outer_remaining;
-            let (virtual_mod_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, virtual_mods.count_ones().try_to_usize()?)?;
+            let (virtual_mod_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, u32::from(virtual_mods).count_ones().try_to_usize()?)?;
             outer_remaining = remaining;
             Some(virtual_mod_names)
         } else {
@@ -10207,7 +10207,7 @@ impl SetNamesAux {
         };
         let groups = if switch_expr & u32::from(NameDetail::GROUP_NAMES) != 0 {
             let remaining = outer_remaining;
-            let (groups, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, group_names.count_ones().try_to_usize()?)?;
+            let (groups, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, u32::from(group_names).count_ones().try_to_usize()?)?;
             outer_remaining = remaining;
             Some(groups)
         } else {
@@ -10283,15 +10283,15 @@ impl SetNamesAux {
             bitcase8.serialize_into(bytes, u8::from(n_types));
         }
         if let Some(ref indicator_names) = self.indicator_names {
-            assert_eq!(indicator_names.len(), usize::try_from(indicators.count_ones()).unwrap(), "`indicator_names` has an incorrect length");
+            assert_eq!(indicator_names.len(), usize::try_from(u32::from(indicators).count_ones()).unwrap(), "`indicator_names` has an incorrect length");
             indicator_names.serialize_into(bytes);
         }
         if let Some(ref virtual_mod_names) = self.virtual_mod_names {
-            assert_eq!(virtual_mod_names.len(), usize::try_from(virtual_mods.count_ones()).unwrap(), "`virtual_mod_names` has an incorrect length");
+            assert_eq!(virtual_mod_names.len(), usize::try_from(u32::from(virtual_mods).count_ones()).unwrap(), "`virtual_mod_names` has an incorrect length");
             virtual_mod_names.serialize_into(bytes);
         }
         if let Some(ref groups) = self.groups {
-            assert_eq!(groups.len(), usize::try_from(group_names.count_ones()).unwrap(), "`groups` has an incorrect length");
+            assert_eq!(groups.len(), usize::try_from(u32::from(group_names).count_ones()).unwrap(), "`groups` has an incorrect length");
             groups.serialize_into(bytes);
         }
         if let Some(ref key_names) = self.key_names {
@@ -11177,7 +11177,7 @@ impl GetKbdByNameRepliesTypesMap {
             let remaining = outer_remaining;
             let value = remaining;
             let mut remaining = remaining;
-            let list_length = virtual_mods.count_ones().try_to_usize()?;
+            let list_length = u32::from(virtual_mods).count_ones().try_to_usize()?;
             let mut vmods_rtrn = Vec::with_capacity(list_length);
             for _ in 0..list_length {
                 let (v, new_remaining) = u8::try_parse(remaining)?;
@@ -11266,7 +11266,7 @@ impl GetKbdByNameRepliesTypesMap {
             behaviors_rtrn.serialize_into(bytes);
         }
         if let Some(ref vmods_rtrn) = self.vmods_rtrn {
-            assert_eq!(vmods_rtrn.len(), usize::try_from(virtual_mods.count_ones()).unwrap(), "`vmods_rtrn` has an incorrect length");
+            assert_eq!(vmods_rtrn.len(), usize::try_from(u32::from(virtual_mods).count_ones()).unwrap(), "`vmods_rtrn` has an incorrect length");
             for element in vmods_rtrn.iter().copied() {
                 (u16::from(element) as u8).serialize_into(bytes);
             }
@@ -11461,7 +11461,7 @@ impl TryParse for GetKbdByNameRepliesCompatMap {
         let (n_total_si, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(16..).ok_or(ParseError::InsufficientData)?;
         let (si_rtrn, remaining) = crate::x11_utils::parse_list::<SymInterpret>(remaining, n_si_rtrn.try_to_usize()?)?;
-        let (group_rtrn, remaining) = crate::x11_utils::parse_list::<ModDef>(remaining, groups_rtrn.count_ones().try_to_usize()?)?;
+        let (group_rtrn, remaining) = crate::x11_utils::parse_list::<ModDef>(remaining, u32::from(groups_rtrn).count_ones().try_to_usize()?)?;
         let groups_rtrn = groups_rtrn.into();
         let result = GetKbdByNameRepliesCompatMap { compatmap_type, compat_device_id, compatmap_sequence, compatmap_length, groups_rtrn, first_si_rtrn, n_total_si, si_rtrn, group_rtrn };
         Ok((result, remaining))
@@ -11488,7 +11488,7 @@ impl Serialize for GetKbdByNameRepliesCompatMap {
         self.n_total_si.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 16]);
         self.si_rtrn.serialize_into(bytes);
-        assert_eq!(self.group_rtrn.len(), usize::try_from(self.groups_rtrn.count_ones()).unwrap(), "`group_rtrn` has an incorrect length");
+        assert_eq!(self.group_rtrn.len(), usize::try_from(u32::from(self.groups_rtrn).count_ones()).unwrap(), "`group_rtrn` has an incorrect length");
         self.group_rtrn.serialize_into(bytes);
     }
 }
@@ -11691,7 +11691,7 @@ impl GetKbdByNameRepliesKeyNamesValueList {
         };
         let indicator_names = if switch_expr & u32::from(NameDetail::INDICATOR_NAMES) != 0 {
             let remaining = outer_remaining;
-            let (indicator_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, indicators.count_ones().try_to_usize()?)?;
+            let (indicator_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, u32::from(indicators).count_ones().try_to_usize()?)?;
             outer_remaining = remaining;
             Some(indicator_names)
         } else {
@@ -11699,7 +11699,7 @@ impl GetKbdByNameRepliesKeyNamesValueList {
         };
         let virtual_mod_names = if switch_expr & u32::from(NameDetail::VIRTUAL_MOD_NAMES) != 0 {
             let remaining = outer_remaining;
-            let (virtual_mod_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, virtual_mods.count_ones().try_to_usize()?)?;
+            let (virtual_mod_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, u32::from(virtual_mods).count_ones().try_to_usize()?)?;
             outer_remaining = remaining;
             Some(virtual_mod_names)
         } else {
@@ -11707,7 +11707,7 @@ impl GetKbdByNameRepliesKeyNamesValueList {
         };
         let groups = if switch_expr & u32::from(NameDetail::GROUP_NAMES) != 0 {
             let remaining = outer_remaining;
-            let (groups, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, group_names.count_ones().try_to_usize()?)?;
+            let (groups, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, u32::from(group_names).count_ones().try_to_usize()?)?;
             outer_remaining = remaining;
             Some(groups)
         } else {
@@ -11783,15 +11783,15 @@ impl GetKbdByNameRepliesKeyNamesValueList {
             bitcase8.serialize_into(bytes, u8::from(n_types));
         }
         if let Some(ref indicator_names) = self.indicator_names {
-            assert_eq!(indicator_names.len(), usize::try_from(indicators.count_ones()).unwrap(), "`indicator_names` has an incorrect length");
+            assert_eq!(indicator_names.len(), usize::try_from(u32::from(indicators).count_ones()).unwrap(), "`indicator_names` has an incorrect length");
             indicator_names.serialize_into(bytes);
         }
         if let Some(ref virtual_mod_names) = self.virtual_mod_names {
-            assert_eq!(virtual_mod_names.len(), usize::try_from(virtual_mods.count_ones()).unwrap(), "`virtual_mod_names` has an incorrect length");
+            assert_eq!(virtual_mod_names.len(), usize::try_from(u32::from(virtual_mods).count_ones()).unwrap(), "`virtual_mod_names` has an incorrect length");
             virtual_mod_names.serialize_into(bytes);
         }
         if let Some(ref groups) = self.groups {
-            assert_eq!(groups.len(), usize::try_from(group_names.count_ones()).unwrap(), "`groups` has an incorrect length");
+            assert_eq!(groups.len(), usize::try_from(u32::from(group_names).count_ones()).unwrap(), "`groups` has an incorrect length");
             groups.serialize_into(bytes);
         }
         if let Some(ref key_names) = self.key_names {

@@ -224,7 +224,7 @@ fn expr_to_str_impl(
                 pop_count_expr,
                 wrap_field_ref,
                 panic_on_overflow,
-                None,
+                Some("u32"),
                 true,
             );
             format!("{}.count_ones()", arg)
