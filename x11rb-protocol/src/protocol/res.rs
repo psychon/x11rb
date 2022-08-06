@@ -110,63 +110,51 @@ impl Serialize for Type {
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct ClientIdMask(u8);
+pub struct ClientIdMask(u32);
 impl ClientIdMask {
     pub const CLIENT_XID: Self = Self(1 << 0);
     pub const LOCAL_CLIENT_PID: Self = Self(1 << 1);
 }
-impl From<ClientIdMask> for u8 {
+impl From<ClientIdMask> for u32 {
     #[inline]
     fn from(input: ClientIdMask) -> Self {
         input.0
     }
 }
-impl From<ClientIdMask> for Option<u8> {
+impl From<ClientIdMask> for Option<u32> {
     #[inline]
     fn from(input: ClientIdMask) -> Self {
         Some(input.0)
     }
 }
-impl From<ClientIdMask> for u16 {
-    #[inline]
-    fn from(input: ClientIdMask) -> Self {
-        u16::from(input.0)
-    }
-}
-impl From<ClientIdMask> for Option<u16> {
-    #[inline]
-    fn from(input: ClientIdMask) -> Self {
-        Some(u16::from(input.0))
-    }
-}
-impl From<ClientIdMask> for u32 {
-    #[inline]
-    fn from(input: ClientIdMask) -> Self {
-        u32::from(input.0)
-    }
-}
-impl From<ClientIdMask> for Option<u32> {
-    #[inline]
-    fn from(input: ClientIdMask) -> Self {
-        Some(u32::from(input.0))
-    }
-}
 impl From<u8> for ClientIdMask {
     #[inline]
     fn from(value: u8) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u16> for ClientIdMask {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u32> for ClientIdMask {
+    #[inline]
+    fn from(value: u32) -> Self {
         Self(value)
     }
 }
 impl core::fmt::Debug for ClientIdMask  {
     fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
-            (Self::CLIENT_XID.0.into(), "CLIENT_XID", "ClientXID"),
-            (Self::LOCAL_CLIENT_PID.0.into(), "LOCAL_CLIENT_PID", "LocalClientPID"),
+            (Self::CLIENT_XID.0, "CLIENT_XID", "ClientXID"),
+            (Self::LOCAL_CLIENT_PID.0, "LOCAL_CLIENT_PID", "LocalClientPID"),
         ];
-        pretty_print_bitmask(fmt, self.0.into(), &variants)
+        pretty_print_bitmask(fmt, self.0, &variants)
     }
 }
-bitmask_binop!(ClientIdMask, u8);
+bitmask_binop!(ClientIdMask, u32);
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]

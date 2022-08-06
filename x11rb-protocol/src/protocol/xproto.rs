@@ -6545,7 +6545,7 @@ impl core::fmt::Debug for WindowClass  {
 /// parent's cursor will cause an immediate change in the displayed cursor.
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct CW(u16);
+pub struct CW(u32);
 impl CW {
     pub const BACK_PIXMAP: Self = Self(1 << 0);
     pub const BACK_PIXEL: Self = Self(1 << 1);
@@ -6563,28 +6563,16 @@ impl CW {
     pub const COLORMAP: Self = Self(1 << 13);
     pub const CURSOR: Self = Self(1 << 14);
 }
-impl From<CW> for u16 {
+impl From<CW> for u32 {
     #[inline]
     fn from(input: CW) -> Self {
         input.0
     }
 }
-impl From<CW> for Option<u16> {
-    #[inline]
-    fn from(input: CW) -> Self {
-        Some(input.0)
-    }
-}
-impl From<CW> for u32 {
-    #[inline]
-    fn from(input: CW) -> Self {
-        u32::from(input.0)
-    }
-}
 impl From<CW> for Option<u32> {
     #[inline]
     fn from(input: CW) -> Self {
-        Some(u32::from(input.0))
+        Some(input.0)
     }
 }
 impl From<u8> for CW {
@@ -6596,32 +6584,38 @@ impl From<u8> for CW {
 impl From<u16> for CW {
     #[inline]
     fn from(value: u16) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u32> for CW {
+    #[inline]
+    fn from(value: u32) -> Self {
         Self(value)
     }
 }
 impl core::fmt::Debug for CW  {
     fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
-            (Self::BACK_PIXMAP.0.into(), "BACK_PIXMAP", "BackPixmap"),
-            (Self::BACK_PIXEL.0.into(), "BACK_PIXEL", "BackPixel"),
-            (Self::BORDER_PIXMAP.0.into(), "BORDER_PIXMAP", "BorderPixmap"),
-            (Self::BORDER_PIXEL.0.into(), "BORDER_PIXEL", "BorderPixel"),
-            (Self::BIT_GRAVITY.0.into(), "BIT_GRAVITY", "BitGravity"),
-            (Self::WIN_GRAVITY.0.into(), "WIN_GRAVITY", "WinGravity"),
-            (Self::BACKING_STORE.0.into(), "BACKING_STORE", "BackingStore"),
-            (Self::BACKING_PLANES.0.into(), "BACKING_PLANES", "BackingPlanes"),
-            (Self::BACKING_PIXEL.0.into(), "BACKING_PIXEL", "BackingPixel"),
-            (Self::OVERRIDE_REDIRECT.0.into(), "OVERRIDE_REDIRECT", "OverrideRedirect"),
-            (Self::SAVE_UNDER.0.into(), "SAVE_UNDER", "SaveUnder"),
-            (Self::EVENT_MASK.0.into(), "EVENT_MASK", "EventMask"),
-            (Self::DONT_PROPAGATE.0.into(), "DONT_PROPAGATE", "DontPropagate"),
-            (Self::COLORMAP.0.into(), "COLORMAP", "Colormap"),
-            (Self::CURSOR.0.into(), "CURSOR", "Cursor"),
+            (Self::BACK_PIXMAP.0, "BACK_PIXMAP", "BackPixmap"),
+            (Self::BACK_PIXEL.0, "BACK_PIXEL", "BackPixel"),
+            (Self::BORDER_PIXMAP.0, "BORDER_PIXMAP", "BorderPixmap"),
+            (Self::BORDER_PIXEL.0, "BORDER_PIXEL", "BorderPixel"),
+            (Self::BIT_GRAVITY.0, "BIT_GRAVITY", "BitGravity"),
+            (Self::WIN_GRAVITY.0, "WIN_GRAVITY", "WinGravity"),
+            (Self::BACKING_STORE.0, "BACKING_STORE", "BackingStore"),
+            (Self::BACKING_PLANES.0, "BACKING_PLANES", "BackingPlanes"),
+            (Self::BACKING_PIXEL.0, "BACKING_PIXEL", "BackingPixel"),
+            (Self::OVERRIDE_REDIRECT.0, "OVERRIDE_REDIRECT", "OverrideRedirect"),
+            (Self::SAVE_UNDER.0, "SAVE_UNDER", "SaveUnder"),
+            (Self::EVENT_MASK.0, "EVENT_MASK", "EventMask"),
+            (Self::DONT_PROPAGATE.0, "DONT_PROPAGATE", "DontPropagate"),
+            (Self::COLORMAP.0, "COLORMAP", "Colormap"),
+            (Self::CURSOR.0, "CURSOR", "Cursor"),
         ];
-        pretty_print_bitmask(fmt, self.0.into(), &variants)
+        pretty_print_bitmask(fmt, self.0, &variants)
     }
 }
-bitmask_binop!(CW, u16);
+bitmask_binop!(CW, u32);
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -8726,7 +8720,7 @@ impl crate::x11_utils::VoidRequest for UnmapSubwindowsRequest {
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct ConfigWindow(u8);
+pub struct ConfigWindow(u16);
 impl ConfigWindow {
     pub const X: Self = Self(1 << 0);
     pub const Y: Self = Self(1 << 1);
@@ -8736,28 +8730,16 @@ impl ConfigWindow {
     pub const SIBLING: Self = Self(1 << 5);
     pub const STACK_MODE: Self = Self(1 << 6);
 }
-impl From<ConfigWindow> for u8 {
+impl From<ConfigWindow> for u16 {
     #[inline]
     fn from(input: ConfigWindow) -> Self {
         input.0
     }
 }
-impl From<ConfigWindow> for Option<u8> {
-    #[inline]
-    fn from(input: ConfigWindow) -> Self {
-        Some(input.0)
-    }
-}
-impl From<ConfigWindow> for u16 {
-    #[inline]
-    fn from(input: ConfigWindow) -> Self {
-        u16::from(input.0)
-    }
-}
 impl From<ConfigWindow> for Option<u16> {
     #[inline]
     fn from(input: ConfigWindow) -> Self {
-        Some(u16::from(input.0))
+        Some(input.0)
     }
 }
 impl From<ConfigWindow> for u32 {
@@ -8775,6 +8757,12 @@ impl From<ConfigWindow> for Option<u32> {
 impl From<u8> for ConfigWindow {
     #[inline]
     fn from(value: u8) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u16> for ConfigWindow {
+    #[inline]
+    fn from(value: u16) -> Self {
         Self(value)
     }
 }
@@ -8792,7 +8780,7 @@ impl core::fmt::Debug for ConfigWindow  {
         pretty_print_bitmask(fmt, self.0.into(), &variants)
     }
 }
-bitmask_binop!(ConfigWindow, u8);
+bitmask_binop!(ConfigWindow, u16);
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -23129,7 +23117,7 @@ impl GetKeyboardMappingReply {
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct KB(u8);
+pub struct KB(u32);
 impl KB {
     pub const KEY_CLICK_PERCENT: Self = Self(1 << 0);
     pub const BELL_PERCENT: Self = Self(1 << 1);
@@ -23140,64 +23128,52 @@ impl KB {
     pub const KEY: Self = Self(1 << 6);
     pub const AUTO_REPEAT_MODE: Self = Self(1 << 7);
 }
-impl From<KB> for u8 {
+impl From<KB> for u32 {
     #[inline]
     fn from(input: KB) -> Self {
         input.0
     }
 }
-impl From<KB> for Option<u8> {
+impl From<KB> for Option<u32> {
     #[inline]
     fn from(input: KB) -> Self {
         Some(input.0)
     }
 }
-impl From<KB> for u16 {
-    #[inline]
-    fn from(input: KB) -> Self {
-        u16::from(input.0)
-    }
-}
-impl From<KB> for Option<u16> {
-    #[inline]
-    fn from(input: KB) -> Self {
-        Some(u16::from(input.0))
-    }
-}
-impl From<KB> for u32 {
-    #[inline]
-    fn from(input: KB) -> Self {
-        u32::from(input.0)
-    }
-}
-impl From<KB> for Option<u32> {
-    #[inline]
-    fn from(input: KB) -> Self {
-        Some(u32::from(input.0))
-    }
-}
 impl From<u8> for KB {
     #[inline]
     fn from(value: u8) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u16> for KB {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u32> for KB {
+    #[inline]
+    fn from(value: u32) -> Self {
         Self(value)
     }
 }
 impl core::fmt::Debug for KB  {
     fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
-            (Self::KEY_CLICK_PERCENT.0.into(), "KEY_CLICK_PERCENT", "KeyClickPercent"),
-            (Self::BELL_PERCENT.0.into(), "BELL_PERCENT", "BellPercent"),
-            (Self::BELL_PITCH.0.into(), "BELL_PITCH", "BellPitch"),
-            (Self::BELL_DURATION.0.into(), "BELL_DURATION", "BellDuration"),
-            (Self::LED.0.into(), "LED", "Led"),
-            (Self::LED_MODE.0.into(), "LED_MODE", "LedMode"),
-            (Self::KEY.0.into(), "KEY", "Key"),
-            (Self::AUTO_REPEAT_MODE.0.into(), "AUTO_REPEAT_MODE", "AutoRepeatMode"),
+            (Self::KEY_CLICK_PERCENT.0, "KEY_CLICK_PERCENT", "KeyClickPercent"),
+            (Self::BELL_PERCENT.0, "BELL_PERCENT", "BellPercent"),
+            (Self::BELL_PITCH.0, "BELL_PITCH", "BellPitch"),
+            (Self::BELL_DURATION.0, "BELL_DURATION", "BellDuration"),
+            (Self::LED.0, "LED", "Led"),
+            (Self::LED_MODE.0, "LED_MODE", "LedMode"),
+            (Self::KEY.0, "KEY", "Key"),
+            (Self::AUTO_REPEAT_MODE.0, "AUTO_REPEAT_MODE", "AutoRepeatMode"),
         ];
-        pretty_print_bitmask(fmt, self.0.into(), &variants)
+        pretty_print_bitmask(fmt, self.0, &variants)
     }
 }
-bitmask_binop!(KB, u8);
+bitmask_binop!(KB, u32);
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]

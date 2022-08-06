@@ -5304,7 +5304,7 @@ impl Serialize for FeedbackCtl {
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct ChangeFeedbackControlMask(u8);
+pub struct ChangeFeedbackControlMask(u32);
 impl ChangeFeedbackControlMask {
     pub const KEY_CLICK_PERCENT: Self = Self(1 << 0);
     pub const PERCENT: Self = Self(1 << 1);
@@ -5320,69 +5320,57 @@ impl ChangeFeedbackControlMask {
     pub const ACCEL_DENOM: Self = Self(1 << 1);
     pub const THRESHOLD: Self = Self(1 << 2);
 }
-impl From<ChangeFeedbackControlMask> for u8 {
+impl From<ChangeFeedbackControlMask> for u32 {
     #[inline]
     fn from(input: ChangeFeedbackControlMask) -> Self {
         input.0
     }
 }
-impl From<ChangeFeedbackControlMask> for Option<u8> {
+impl From<ChangeFeedbackControlMask> for Option<u32> {
     #[inline]
     fn from(input: ChangeFeedbackControlMask) -> Self {
         Some(input.0)
     }
 }
-impl From<ChangeFeedbackControlMask> for u16 {
-    #[inline]
-    fn from(input: ChangeFeedbackControlMask) -> Self {
-        u16::from(input.0)
-    }
-}
-impl From<ChangeFeedbackControlMask> for Option<u16> {
-    #[inline]
-    fn from(input: ChangeFeedbackControlMask) -> Self {
-        Some(u16::from(input.0))
-    }
-}
-impl From<ChangeFeedbackControlMask> for u32 {
-    #[inline]
-    fn from(input: ChangeFeedbackControlMask) -> Self {
-        u32::from(input.0)
-    }
-}
-impl From<ChangeFeedbackControlMask> for Option<u32> {
-    #[inline]
-    fn from(input: ChangeFeedbackControlMask) -> Self {
-        Some(u32::from(input.0))
-    }
-}
 impl From<u8> for ChangeFeedbackControlMask {
     #[inline]
     fn from(value: u8) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u16> for ChangeFeedbackControlMask {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u32> for ChangeFeedbackControlMask {
+    #[inline]
+    fn from(value: u32) -> Self {
         Self(value)
     }
 }
 impl core::fmt::Debug for ChangeFeedbackControlMask  {
     fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
-            (Self::KEY_CLICK_PERCENT.0.into(), "KEY_CLICK_PERCENT", "KeyClickPercent"),
-            (Self::PERCENT.0.into(), "PERCENT", "Percent"),
-            (Self::PITCH.0.into(), "PITCH", "Pitch"),
-            (Self::DURATION.0.into(), "DURATION", "Duration"),
-            (Self::LED.0.into(), "LED", "Led"),
-            (Self::LED_MODE.0.into(), "LED_MODE", "LedMode"),
-            (Self::KEY.0.into(), "KEY", "Key"),
-            (Self::AUTO_REPEAT_MODE.0.into(), "AUTO_REPEAT_MODE", "AutoRepeatMode"),
-            (Self::STRING.0.into(), "STRING", "String"),
-            (Self::INTEGER.0.into(), "INTEGER", "Integer"),
-            (Self::ACCEL_NUM.0.into(), "ACCEL_NUM", "AccelNum"),
-            (Self::ACCEL_DENOM.0.into(), "ACCEL_DENOM", "AccelDenom"),
-            (Self::THRESHOLD.0.into(), "THRESHOLD", "Threshold"),
+            (Self::KEY_CLICK_PERCENT.0, "KEY_CLICK_PERCENT", "KeyClickPercent"),
+            (Self::PERCENT.0, "PERCENT", "Percent"),
+            (Self::PITCH.0, "PITCH", "Pitch"),
+            (Self::DURATION.0, "DURATION", "Duration"),
+            (Self::LED.0, "LED", "Led"),
+            (Self::LED_MODE.0, "LED_MODE", "LedMode"),
+            (Self::KEY.0, "KEY", "Key"),
+            (Self::AUTO_REPEAT_MODE.0, "AUTO_REPEAT_MODE", "AutoRepeatMode"),
+            (Self::STRING.0, "STRING", "String"),
+            (Self::INTEGER.0, "INTEGER", "Integer"),
+            (Self::ACCEL_NUM.0, "ACCEL_NUM", "AccelNum"),
+            (Self::ACCEL_DENOM.0, "ACCEL_DENOM", "AccelDenom"),
+            (Self::THRESHOLD.0, "THRESHOLD", "Threshold"),
         ];
-        pretty_print_bitmask(fmt, self.0.into(), &variants)
+        pretty_print_bitmask(fmt, self.0, &variants)
     }
 }
-bitmask_binop!(ChangeFeedbackControlMask, u8);
+bitmask_binop!(ChangeFeedbackControlMask, u32);
 
 /// Opcode for the ChangeFeedbackControl request
 pub const CHANGE_FEEDBACK_CONTROL_REQUEST: u8 = 23;
@@ -11502,63 +11490,51 @@ impl core::fmt::Debug for DeviceType  {
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct ScrollFlags(u8);
+pub struct ScrollFlags(u32);
 impl ScrollFlags {
     pub const NO_EMULATION: Self = Self(1 << 0);
     pub const PREFERRED: Self = Self(1 << 1);
 }
-impl From<ScrollFlags> for u8 {
+impl From<ScrollFlags> for u32 {
     #[inline]
     fn from(input: ScrollFlags) -> Self {
         input.0
     }
 }
-impl From<ScrollFlags> for Option<u8> {
+impl From<ScrollFlags> for Option<u32> {
     #[inline]
     fn from(input: ScrollFlags) -> Self {
         Some(input.0)
     }
 }
-impl From<ScrollFlags> for u16 {
-    #[inline]
-    fn from(input: ScrollFlags) -> Self {
-        u16::from(input.0)
-    }
-}
-impl From<ScrollFlags> for Option<u16> {
-    #[inline]
-    fn from(input: ScrollFlags) -> Self {
-        Some(u16::from(input.0))
-    }
-}
-impl From<ScrollFlags> for u32 {
-    #[inline]
-    fn from(input: ScrollFlags) -> Self {
-        u32::from(input.0)
-    }
-}
-impl From<ScrollFlags> for Option<u32> {
-    #[inline]
-    fn from(input: ScrollFlags) -> Self {
-        Some(u32::from(input.0))
-    }
-}
 impl From<u8> for ScrollFlags {
     #[inline]
     fn from(value: u8) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u16> for ScrollFlags {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u32> for ScrollFlags {
+    #[inline]
+    fn from(value: u32) -> Self {
         Self(value)
     }
 }
 impl core::fmt::Debug for ScrollFlags  {
     fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
-            (Self::NO_EMULATION.0.into(), "NO_EMULATION", "NoEmulation"),
-            (Self::PREFERRED.0.into(), "PREFERRED", "Preferred"),
+            (Self::NO_EMULATION.0, "NO_EMULATION", "NoEmulation"),
+            (Self::PREFERRED.0, "PREFERRED", "Preferred"),
         ];
-        pretty_print_bitmask(fmt, self.0.into(), &variants)
+        pretty_print_bitmask(fmt, self.0, &variants)
     }
 }
-bitmask_binop!(ScrollFlags, u8);
+bitmask_binop!(ScrollFlags, u32);
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -17229,7 +17205,7 @@ pub type FocusOutEvent = EnterEvent;
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct HierarchyMask(u8);
+pub struct HierarchyMask(u32);
 impl HierarchyMask {
     pub const MASTER_ADDED: Self = Self(1 << 0);
     pub const MASTER_REMOVED: Self = Self(1 << 1);
@@ -17240,64 +17216,52 @@ impl HierarchyMask {
     pub const DEVICE_ENABLED: Self = Self(1 << 6);
     pub const DEVICE_DISABLED: Self = Self(1 << 7);
 }
-impl From<HierarchyMask> for u8 {
+impl From<HierarchyMask> for u32 {
     #[inline]
     fn from(input: HierarchyMask) -> Self {
         input.0
     }
 }
-impl From<HierarchyMask> for Option<u8> {
+impl From<HierarchyMask> for Option<u32> {
     #[inline]
     fn from(input: HierarchyMask) -> Self {
         Some(input.0)
     }
 }
-impl From<HierarchyMask> for u16 {
-    #[inline]
-    fn from(input: HierarchyMask) -> Self {
-        u16::from(input.0)
-    }
-}
-impl From<HierarchyMask> for Option<u16> {
-    #[inline]
-    fn from(input: HierarchyMask) -> Self {
-        Some(u16::from(input.0))
-    }
-}
-impl From<HierarchyMask> for u32 {
-    #[inline]
-    fn from(input: HierarchyMask) -> Self {
-        u32::from(input.0)
-    }
-}
-impl From<HierarchyMask> for Option<u32> {
-    #[inline]
-    fn from(input: HierarchyMask) -> Self {
-        Some(u32::from(input.0))
-    }
-}
 impl From<u8> for HierarchyMask {
     #[inline]
     fn from(value: u8) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u16> for HierarchyMask {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u32> for HierarchyMask {
+    #[inline]
+    fn from(value: u32) -> Self {
         Self(value)
     }
 }
 impl core::fmt::Debug for HierarchyMask  {
     fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
-            (Self::MASTER_ADDED.0.into(), "MASTER_ADDED", "MasterAdded"),
-            (Self::MASTER_REMOVED.0.into(), "MASTER_REMOVED", "MasterRemoved"),
-            (Self::SLAVE_ADDED.0.into(), "SLAVE_ADDED", "SlaveAdded"),
-            (Self::SLAVE_REMOVED.0.into(), "SLAVE_REMOVED", "SlaveRemoved"),
-            (Self::SLAVE_ATTACHED.0.into(), "SLAVE_ATTACHED", "SlaveAttached"),
-            (Self::SLAVE_DETACHED.0.into(), "SLAVE_DETACHED", "SlaveDetached"),
-            (Self::DEVICE_ENABLED.0.into(), "DEVICE_ENABLED", "DeviceEnabled"),
-            (Self::DEVICE_DISABLED.0.into(), "DEVICE_DISABLED", "DeviceDisabled"),
+            (Self::MASTER_ADDED.0, "MASTER_ADDED", "MasterAdded"),
+            (Self::MASTER_REMOVED.0, "MASTER_REMOVED", "MasterRemoved"),
+            (Self::SLAVE_ADDED.0, "SLAVE_ADDED", "SlaveAdded"),
+            (Self::SLAVE_REMOVED.0, "SLAVE_REMOVED", "SlaveRemoved"),
+            (Self::SLAVE_ATTACHED.0, "SLAVE_ATTACHED", "SlaveAttached"),
+            (Self::SLAVE_DETACHED.0, "SLAVE_DETACHED", "SlaveDetached"),
+            (Self::DEVICE_ENABLED.0, "DEVICE_ENABLED", "DeviceEnabled"),
+            (Self::DEVICE_DISABLED.0, "DEVICE_DISABLED", "DeviceDisabled"),
         ];
-        pretty_print_bitmask(fmt, self.0.into(), &variants)
+        pretty_print_bitmask(fmt, self.0, &variants)
     }
 }
-bitmask_binop!(HierarchyMask, u8);
+bitmask_binop!(HierarchyMask, u32);
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -18242,63 +18206,51 @@ pub type RawTouchEndEvent = RawTouchBeginEvent;
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct BarrierFlags(u8);
+pub struct BarrierFlags(u32);
 impl BarrierFlags {
     pub const POINTER_RELEASED: Self = Self(1 << 0);
     pub const DEVICE_IS_GRABBED: Self = Self(1 << 1);
 }
-impl From<BarrierFlags> for u8 {
+impl From<BarrierFlags> for u32 {
     #[inline]
     fn from(input: BarrierFlags) -> Self {
         input.0
     }
 }
-impl From<BarrierFlags> for Option<u8> {
+impl From<BarrierFlags> for Option<u32> {
     #[inline]
     fn from(input: BarrierFlags) -> Self {
         Some(input.0)
     }
 }
-impl From<BarrierFlags> for u16 {
-    #[inline]
-    fn from(input: BarrierFlags) -> Self {
-        u16::from(input.0)
-    }
-}
-impl From<BarrierFlags> for Option<u16> {
-    #[inline]
-    fn from(input: BarrierFlags) -> Self {
-        Some(u16::from(input.0))
-    }
-}
-impl From<BarrierFlags> for u32 {
-    #[inline]
-    fn from(input: BarrierFlags) -> Self {
-        u32::from(input.0)
-    }
-}
-impl From<BarrierFlags> for Option<u32> {
-    #[inline]
-    fn from(input: BarrierFlags) -> Self {
-        Some(u32::from(input.0))
-    }
-}
 impl From<u8> for BarrierFlags {
     #[inline]
     fn from(value: u8) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u16> for BarrierFlags {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u32> for BarrierFlags {
+    #[inline]
+    fn from(value: u32) -> Self {
         Self(value)
     }
 }
 impl core::fmt::Debug for BarrierFlags  {
     fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
-            (Self::POINTER_RELEASED.0.into(), "POINTER_RELEASED", "PointerReleased"),
-            (Self::DEVICE_IS_GRABBED.0.into(), "DEVICE_IS_GRABBED", "DeviceIsGrabbed"),
+            (Self::POINTER_RELEASED.0, "POINTER_RELEASED", "PointerReleased"),
+            (Self::DEVICE_IS_GRABBED.0, "DEVICE_IS_GRABBED", "DeviceIsGrabbed"),
         ];
-        pretty_print_bitmask(fmt, self.0.into(), &variants)
+        pretty_print_bitmask(fmt, self.0, &variants)
     }
 }
-bitmask_binop!(BarrierFlags, u8);
+bitmask_binop!(BarrierFlags, u32);
 
 /// Opcode for the BarrierHit event
 pub const BARRIER_HIT_EVENT: u16 = 25;

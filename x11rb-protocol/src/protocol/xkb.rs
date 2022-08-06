@@ -171,34 +171,22 @@ bitmask_binop!(EventType, u16);
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct NKNDetail(u8);
+pub struct NKNDetail(u16);
 impl NKNDetail {
     pub const KEYCODES: Self = Self(1 << 0);
     pub const GEOMETRY: Self = Self(1 << 1);
     pub const DEVICE_ID: Self = Self(1 << 2);
 }
-impl From<NKNDetail> for u8 {
+impl From<NKNDetail> for u16 {
     #[inline]
     fn from(input: NKNDetail) -> Self {
         input.0
     }
 }
-impl From<NKNDetail> for Option<u8> {
-    #[inline]
-    fn from(input: NKNDetail) -> Self {
-        Some(input.0)
-    }
-}
-impl From<NKNDetail> for u16 {
-    #[inline]
-    fn from(input: NKNDetail) -> Self {
-        u16::from(input.0)
-    }
-}
 impl From<NKNDetail> for Option<u16> {
     #[inline]
     fn from(input: NKNDetail) -> Self {
-        Some(u16::from(input.0))
+        Some(input.0)
     }
 }
 impl From<NKNDetail> for u32 {
@@ -216,6 +204,12 @@ impl From<NKNDetail> for Option<u32> {
 impl From<u8> for NKNDetail {
     #[inline]
     fn from(value: u8) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u16> for NKNDetail {
+    #[inline]
+    fn from(value: u16) -> Self {
         Self(value)
     }
 }
@@ -229,11 +223,11 @@ impl core::fmt::Debug for NKNDetail  {
         pretty_print_bitmask(fmt, self.0.into(), &variants)
     }
 }
-bitmask_binop!(NKNDetail, u8);
+bitmask_binop!(NKNDetail, u16);
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct AXNDetail(u8);
+pub struct AXNDetail(u16);
 impl AXNDetail {
     pub const SK_PRESS: Self = Self(1 << 0);
     pub const SK_ACCEPT: Self = Self(1 << 1);
@@ -243,28 +237,16 @@ impl AXNDetail {
     pub const BK_REJECT: Self = Self(1 << 5);
     pub const AXK_WARNING: Self = Self(1 << 6);
 }
-impl From<AXNDetail> for u8 {
+impl From<AXNDetail> for u16 {
     #[inline]
     fn from(input: AXNDetail) -> Self {
         input.0
     }
 }
-impl From<AXNDetail> for Option<u8> {
-    #[inline]
-    fn from(input: AXNDetail) -> Self {
-        Some(input.0)
-    }
-}
-impl From<AXNDetail> for u16 {
-    #[inline]
-    fn from(input: AXNDetail) -> Self {
-        u16::from(input.0)
-    }
-}
 impl From<AXNDetail> for Option<u16> {
     #[inline]
     fn from(input: AXNDetail) -> Self {
-        Some(u16::from(input.0))
+        Some(input.0)
     }
 }
 impl From<AXNDetail> for u32 {
@@ -282,6 +264,12 @@ impl From<AXNDetail> for Option<u32> {
 impl From<u8> for AXNDetail {
     #[inline]
     fn from(value: u8) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u16> for AXNDetail {
+    #[inline]
+    fn from(value: u16) -> Self {
         Self(value)
     }
 }
@@ -299,11 +287,11 @@ impl core::fmt::Debug for AXNDetail  {
         pretty_print_bitmask(fmt, self.0.into(), &variants)
     }
 }
-bitmask_binop!(AXNDetail, u8);
+bitmask_binop!(AXNDetail, u16);
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct MapPart(u8);
+pub struct MapPart(u16);
 impl MapPart {
     pub const KEY_TYPES: Self = Self(1 << 0);
     pub const KEY_SYMS: Self = Self(1 << 1);
@@ -314,28 +302,16 @@ impl MapPart {
     pub const VIRTUAL_MODS: Self = Self(1 << 6);
     pub const VIRTUAL_MOD_MAP: Self = Self(1 << 7);
 }
-impl From<MapPart> for u8 {
+impl From<MapPart> for u16 {
     #[inline]
     fn from(input: MapPart) -> Self {
         input.0
     }
 }
-impl From<MapPart> for Option<u8> {
-    #[inline]
-    fn from(input: MapPart) -> Self {
-        Some(input.0)
-    }
-}
-impl From<MapPart> for u16 {
-    #[inline]
-    fn from(input: MapPart) -> Self {
-        u16::from(input.0)
-    }
-}
 impl From<MapPart> for Option<u16> {
     #[inline]
     fn from(input: MapPart) -> Self {
-        Some(u16::from(input.0))
+        Some(input.0)
     }
 }
 impl From<MapPart> for u32 {
@@ -353,6 +329,12 @@ impl From<MapPart> for Option<u32> {
 impl From<u8> for MapPart {
     #[inline]
     fn from(value: u8) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u16> for MapPart {
+    #[inline]
+    fn from(value: u16) -> Self {
         Self(value)
     }
 }
@@ -371,37 +353,25 @@ impl core::fmt::Debug for MapPart  {
         pretty_print_bitmask(fmt, self.0.into(), &variants)
     }
 }
-bitmask_binop!(MapPart, u8);
+bitmask_binop!(MapPart, u16);
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct SetMapFlags(u8);
+pub struct SetMapFlags(u16);
 impl SetMapFlags {
     pub const RESIZE_TYPES: Self = Self(1 << 0);
     pub const RECOMPUTE_ACTIONS: Self = Self(1 << 1);
 }
-impl From<SetMapFlags> for u8 {
+impl From<SetMapFlags> for u16 {
     #[inline]
     fn from(input: SetMapFlags) -> Self {
         input.0
     }
 }
-impl From<SetMapFlags> for Option<u8> {
-    #[inline]
-    fn from(input: SetMapFlags) -> Self {
-        Some(input.0)
-    }
-}
-impl From<SetMapFlags> for u16 {
-    #[inline]
-    fn from(input: SetMapFlags) -> Self {
-        u16::from(input.0)
-    }
-}
 impl From<SetMapFlags> for Option<u16> {
     #[inline]
     fn from(input: SetMapFlags) -> Self {
-        Some(u16::from(input.0))
+        Some(input.0)
     }
 }
 impl From<SetMapFlags> for u32 {
@@ -419,6 +389,12 @@ impl From<SetMapFlags> for Option<u32> {
 impl From<u8> for SetMapFlags {
     #[inline]
     fn from(value: u8) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u16> for SetMapFlags {
+    #[inline]
+    fn from(value: u16) -> Self {
         Self(value)
     }
 }
@@ -431,7 +407,7 @@ impl core::fmt::Debug for SetMapFlags  {
         pretty_print_bitmask(fmt, self.0.into(), &variants)
     }
 }
-bitmask_binop!(SetMapFlags, u8);
+bitmask_binop!(SetMapFlags, u16);
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -513,7 +489,7 @@ bitmask_binop!(StatePart, u16);
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct BoolCtrl(u16);
+pub struct BoolCtrl(u32);
 impl BoolCtrl {
     pub const REPEAT_KEYS: Self = Self(1 << 0);
     pub const SLOW_KEYS: Self = Self(1 << 1);
@@ -529,28 +505,16 @@ impl BoolCtrl {
     pub const OVERLAY2_MASK: Self = Self(1 << 11);
     pub const IGNORE_GROUP_LOCK_MASK: Self = Self(1 << 12);
 }
-impl From<BoolCtrl> for u16 {
+impl From<BoolCtrl> for u32 {
     #[inline]
     fn from(input: BoolCtrl) -> Self {
         input.0
     }
 }
-impl From<BoolCtrl> for Option<u16> {
-    #[inline]
-    fn from(input: BoolCtrl) -> Self {
-        Some(input.0)
-    }
-}
-impl From<BoolCtrl> for u32 {
-    #[inline]
-    fn from(input: BoolCtrl) -> Self {
-        u32::from(input.0)
-    }
-}
 impl From<BoolCtrl> for Option<u32> {
     #[inline]
     fn from(input: BoolCtrl) -> Self {
-        Some(u32::from(input.0))
+        Some(input.0)
     }
 }
 impl From<u8> for BoolCtrl {
@@ -562,30 +526,36 @@ impl From<u8> for BoolCtrl {
 impl From<u16> for BoolCtrl {
     #[inline]
     fn from(value: u16) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u32> for BoolCtrl {
+    #[inline]
+    fn from(value: u32) -> Self {
         Self(value)
     }
 }
 impl core::fmt::Debug for BoolCtrl  {
     fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
-            (Self::REPEAT_KEYS.0.into(), "REPEAT_KEYS", "RepeatKeys"),
-            (Self::SLOW_KEYS.0.into(), "SLOW_KEYS", "SlowKeys"),
-            (Self::BOUNCE_KEYS.0.into(), "BOUNCE_KEYS", "BounceKeys"),
-            (Self::STICKY_KEYS.0.into(), "STICKY_KEYS", "StickyKeys"),
-            (Self::MOUSE_KEYS.0.into(), "MOUSE_KEYS", "MouseKeys"),
-            (Self::MOUSE_KEYS_ACCEL.0.into(), "MOUSE_KEYS_ACCEL", "MouseKeysAccel"),
-            (Self::ACCESS_X_KEYS.0.into(), "ACCESS_X_KEYS", "AccessXKeys"),
-            (Self::ACCESS_X_TIMEOUT_MASK.0.into(), "ACCESS_X_TIMEOUT_MASK", "AccessXTimeoutMask"),
-            (Self::ACCESS_X_FEEDBACK_MASK.0.into(), "ACCESS_X_FEEDBACK_MASK", "AccessXFeedbackMask"),
-            (Self::AUDIBLE_BELL_MASK.0.into(), "AUDIBLE_BELL_MASK", "AudibleBellMask"),
-            (Self::OVERLAY1_MASK.0.into(), "OVERLAY1_MASK", "Overlay1Mask"),
-            (Self::OVERLAY2_MASK.0.into(), "OVERLAY2_MASK", "Overlay2Mask"),
-            (Self::IGNORE_GROUP_LOCK_MASK.0.into(), "IGNORE_GROUP_LOCK_MASK", "IgnoreGroupLockMask"),
+            (Self::REPEAT_KEYS.0, "REPEAT_KEYS", "RepeatKeys"),
+            (Self::SLOW_KEYS.0, "SLOW_KEYS", "SlowKeys"),
+            (Self::BOUNCE_KEYS.0, "BOUNCE_KEYS", "BounceKeys"),
+            (Self::STICKY_KEYS.0, "STICKY_KEYS", "StickyKeys"),
+            (Self::MOUSE_KEYS.0, "MOUSE_KEYS", "MouseKeys"),
+            (Self::MOUSE_KEYS_ACCEL.0, "MOUSE_KEYS_ACCEL", "MouseKeysAccel"),
+            (Self::ACCESS_X_KEYS.0, "ACCESS_X_KEYS", "AccessXKeys"),
+            (Self::ACCESS_X_TIMEOUT_MASK.0, "ACCESS_X_TIMEOUT_MASK", "AccessXTimeoutMask"),
+            (Self::ACCESS_X_FEEDBACK_MASK.0, "ACCESS_X_FEEDBACK_MASK", "AccessXFeedbackMask"),
+            (Self::AUDIBLE_BELL_MASK.0, "AUDIBLE_BELL_MASK", "AudibleBellMask"),
+            (Self::OVERLAY1_MASK.0, "OVERLAY1_MASK", "Overlay1Mask"),
+            (Self::OVERLAY2_MASK.0, "OVERLAY2_MASK", "Overlay2Mask"),
+            (Self::IGNORE_GROUP_LOCK_MASK.0, "IGNORE_GROUP_LOCK_MASK", "IgnoreGroupLockMask"),
         ];
-        pretty_print_bitmask(fmt, self.0.into(), &variants)
+        pretty_print_bitmask(fmt, self.0, &variants)
     }
 }
-bitmask_binop!(BoolCtrl, u16);
+bitmask_binop!(BoolCtrl, u32);
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -2063,7 +2033,7 @@ bitmask_binop!(CMDetail, u8);
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct NameDetail(u16);
+pub struct NameDetail(u32);
 impl NameDetail {
     pub const KEYCODES: Self = Self(1 << 0);
     pub const GEOMETRY: Self = Self(1 << 1);
@@ -2080,28 +2050,16 @@ impl NameDetail {
     pub const GROUP_NAMES: Self = Self(1 << 12);
     pub const RG_NAMES: Self = Self(1 << 13);
 }
-impl From<NameDetail> for u16 {
+impl From<NameDetail> for u32 {
     #[inline]
     fn from(input: NameDetail) -> Self {
         input.0
     }
 }
-impl From<NameDetail> for Option<u16> {
-    #[inline]
-    fn from(input: NameDetail) -> Self {
-        Some(input.0)
-    }
-}
-impl From<NameDetail> for u32 {
-    #[inline]
-    fn from(input: NameDetail) -> Self {
-        u32::from(input.0)
-    }
-}
 impl From<NameDetail> for Option<u32> {
     #[inline]
     fn from(input: NameDetail) -> Self {
-        Some(u32::from(input.0))
+        Some(input.0)
     }
 }
 impl From<u8> for NameDetail {
@@ -2113,35 +2071,41 @@ impl From<u8> for NameDetail {
 impl From<u16> for NameDetail {
     #[inline]
     fn from(value: u16) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u32> for NameDetail {
+    #[inline]
+    fn from(value: u32) -> Self {
         Self(value)
     }
 }
 impl core::fmt::Debug for NameDetail  {
     fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
-            (Self::KEYCODES.0.into(), "KEYCODES", "Keycodes"),
-            (Self::GEOMETRY.0.into(), "GEOMETRY", "Geometry"),
-            (Self::SYMBOLS.0.into(), "SYMBOLS", "Symbols"),
-            (Self::PHYS_SYMBOLS.0.into(), "PHYS_SYMBOLS", "PhysSymbols"),
-            (Self::TYPES.0.into(), "TYPES", "Types"),
-            (Self::COMPAT.0.into(), "COMPAT", "Compat"),
-            (Self::KEY_TYPE_NAMES.0.into(), "KEY_TYPE_NAMES", "KeyTypeNames"),
-            (Self::KT_LEVEL_NAMES.0.into(), "KT_LEVEL_NAMES", "KTLevelNames"),
-            (Self::INDICATOR_NAMES.0.into(), "INDICATOR_NAMES", "IndicatorNames"),
-            (Self::KEY_NAMES.0.into(), "KEY_NAMES", "KeyNames"),
-            (Self::KEY_ALIASES.0.into(), "KEY_ALIASES", "KeyAliases"),
-            (Self::VIRTUAL_MOD_NAMES.0.into(), "VIRTUAL_MOD_NAMES", "VirtualModNames"),
-            (Self::GROUP_NAMES.0.into(), "GROUP_NAMES", "GroupNames"),
-            (Self::RG_NAMES.0.into(), "RG_NAMES", "RGNames"),
+            (Self::KEYCODES.0, "KEYCODES", "Keycodes"),
+            (Self::GEOMETRY.0, "GEOMETRY", "Geometry"),
+            (Self::SYMBOLS.0, "SYMBOLS", "Symbols"),
+            (Self::PHYS_SYMBOLS.0, "PHYS_SYMBOLS", "PhysSymbols"),
+            (Self::TYPES.0, "TYPES", "Types"),
+            (Self::COMPAT.0, "COMPAT", "Compat"),
+            (Self::KEY_TYPE_NAMES.0, "KEY_TYPE_NAMES", "KeyTypeNames"),
+            (Self::KT_LEVEL_NAMES.0, "KT_LEVEL_NAMES", "KTLevelNames"),
+            (Self::INDICATOR_NAMES.0, "INDICATOR_NAMES", "IndicatorNames"),
+            (Self::KEY_NAMES.0, "KEY_NAMES", "KeyNames"),
+            (Self::KEY_ALIASES.0, "KEY_ALIASES", "KeyAliases"),
+            (Self::VIRTUAL_MOD_NAMES.0, "VIRTUAL_MOD_NAMES", "VirtualModNames"),
+            (Self::GROUP_NAMES.0, "GROUP_NAMES", "GroupNames"),
+            (Self::RG_NAMES.0, "RG_NAMES", "RGNames"),
         ];
-        pretty_print_bitmask(fmt, self.0.into(), &variants)
+        pretty_print_bitmask(fmt, self.0, &variants)
     }
 }
-bitmask_binop!(NameDetail, u16);
+bitmask_binop!(NameDetail, u32);
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct GBNDetail(u8);
+pub struct GBNDetail(u16);
 impl GBNDetail {
     pub const TYPES: Self = Self(1 << 0);
     pub const COMPAT_MAP: Self = Self(1 << 1);
@@ -2152,28 +2116,16 @@ impl GBNDetail {
     pub const GEOMETRY: Self = Self(1 << 6);
     pub const OTHER_NAMES: Self = Self(1 << 7);
 }
-impl From<GBNDetail> for u8 {
+impl From<GBNDetail> for u16 {
     #[inline]
     fn from(input: GBNDetail) -> Self {
         input.0
     }
 }
-impl From<GBNDetail> for Option<u8> {
-    #[inline]
-    fn from(input: GBNDetail) -> Self {
-        Some(input.0)
-    }
-}
-impl From<GBNDetail> for u16 {
-    #[inline]
-    fn from(input: GBNDetail) -> Self {
-        u16::from(input.0)
-    }
-}
 impl From<GBNDetail> for Option<u16> {
     #[inline]
     fn from(input: GBNDetail) -> Self {
-        Some(u16::from(input.0))
+        Some(input.0)
     }
 }
 impl From<GBNDetail> for u32 {
@@ -2191,6 +2143,12 @@ impl From<GBNDetail> for Option<u32> {
 impl From<u8> for GBNDetail {
     #[inline]
     fn from(value: u8) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u16> for GBNDetail {
+    #[inline]
+    fn from(value: u16) -> Self {
         Self(value)
     }
 }
@@ -2209,11 +2167,11 @@ impl core::fmt::Debug for GBNDetail  {
         pretty_print_bitmask(fmt, self.0.into(), &variants)
     }
 }
-bitmask_binop!(GBNDetail, u8);
+bitmask_binop!(GBNDetail, u16);
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct XIFeature(u8);
+pub struct XIFeature(u16);
 impl XIFeature {
     pub const KEYBOARDS: Self = Self(1 << 0);
     pub const BUTTON_ACTIONS: Self = Self(1 << 1);
@@ -2221,28 +2179,16 @@ impl XIFeature {
     pub const INDICATOR_MAPS: Self = Self(1 << 3);
     pub const INDICATOR_STATE: Self = Self(1 << 4);
 }
-impl From<XIFeature> for u8 {
+impl From<XIFeature> for u16 {
     #[inline]
     fn from(input: XIFeature) -> Self {
         input.0
     }
 }
-impl From<XIFeature> for Option<u8> {
-    #[inline]
-    fn from(input: XIFeature) -> Self {
-        Some(input.0)
-    }
-}
-impl From<XIFeature> for u16 {
-    #[inline]
-    fn from(input: XIFeature) -> Self {
-        u16::from(input.0)
-    }
-}
 impl From<XIFeature> for Option<u16> {
     #[inline]
     fn from(input: XIFeature) -> Self {
-        Some(u16::from(input.0))
+        Some(input.0)
     }
 }
 impl From<XIFeature> for u32 {
@@ -2260,6 +2206,12 @@ impl From<XIFeature> for Option<u32> {
 impl From<u8> for XIFeature {
     #[inline]
     fn from(value: u8) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u16> for XIFeature {
+    #[inline]
+    fn from(value: u16) -> Self {
         Self(value)
     }
 }
@@ -2275,11 +2227,11 @@ impl core::fmt::Debug for XIFeature  {
         pretty_print_bitmask(fmt, self.0.into(), &variants)
     }
 }
-bitmask_binop!(XIFeature, u8);
+bitmask_binop!(XIFeature, u16);
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct PerClientFlag(u8);
+pub struct PerClientFlag(u32);
 impl PerClientFlag {
     pub const DETECTABLE_AUTO_REPEAT: Self = Self(1 << 0);
     pub const GRABS_USE_XKB_STATE: Self = Self(1 << 1);
@@ -2287,61 +2239,49 @@ impl PerClientFlag {
     pub const LOOKUP_STATE_WHEN_GRABBED: Self = Self(1 << 3);
     pub const SEND_EVENT_USES_XKB_STATE: Self = Self(1 << 4);
 }
-impl From<PerClientFlag> for u8 {
+impl From<PerClientFlag> for u32 {
     #[inline]
     fn from(input: PerClientFlag) -> Self {
         input.0
     }
 }
-impl From<PerClientFlag> for Option<u8> {
+impl From<PerClientFlag> for Option<u32> {
     #[inline]
     fn from(input: PerClientFlag) -> Self {
         Some(input.0)
     }
 }
-impl From<PerClientFlag> for u16 {
-    #[inline]
-    fn from(input: PerClientFlag) -> Self {
-        u16::from(input.0)
-    }
-}
-impl From<PerClientFlag> for Option<u16> {
-    #[inline]
-    fn from(input: PerClientFlag) -> Self {
-        Some(u16::from(input.0))
-    }
-}
-impl From<PerClientFlag> for u32 {
-    #[inline]
-    fn from(input: PerClientFlag) -> Self {
-        u32::from(input.0)
-    }
-}
-impl From<PerClientFlag> for Option<u32> {
-    #[inline]
-    fn from(input: PerClientFlag) -> Self {
-        Some(u32::from(input.0))
-    }
-}
 impl From<u8> for PerClientFlag {
     #[inline]
     fn from(value: u8) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u16> for PerClientFlag {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u32> for PerClientFlag {
+    #[inline]
+    fn from(value: u32) -> Self {
         Self(value)
     }
 }
 impl core::fmt::Debug for PerClientFlag  {
     fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
-            (Self::DETECTABLE_AUTO_REPEAT.0.into(), "DETECTABLE_AUTO_REPEAT", "DetectableAutoRepeat"),
-            (Self::GRABS_USE_XKB_STATE.0.into(), "GRABS_USE_XKB_STATE", "GrabsUseXKBState"),
-            (Self::AUTO_RESET_CONTROLS.0.into(), "AUTO_RESET_CONTROLS", "AutoResetControls"),
-            (Self::LOOKUP_STATE_WHEN_GRABBED.0.into(), "LOOKUP_STATE_WHEN_GRABBED", "LookupStateWhenGrabbed"),
-            (Self::SEND_EVENT_USES_XKB_STATE.0.into(), "SEND_EVENT_USES_XKB_STATE", "SendEventUsesXKBState"),
+            (Self::DETECTABLE_AUTO_REPEAT.0, "DETECTABLE_AUTO_REPEAT", "DetectableAutoRepeat"),
+            (Self::GRABS_USE_XKB_STATE.0, "GRABS_USE_XKB_STATE", "GrabsUseXKBState"),
+            (Self::AUTO_RESET_CONTROLS.0, "AUTO_RESET_CONTROLS", "AutoResetControls"),
+            (Self::LOOKUP_STATE_WHEN_GRABBED.0, "LOOKUP_STATE_WHEN_GRABBED", "LookupStateWhenGrabbed"),
+            (Self::SEND_EVENT_USES_XKB_STATE.0, "SEND_EVENT_USES_XKB_STATE", "SendEventUsesXKBState"),
         ];
-        pretty_print_bitmask(fmt, self.0.into(), &variants)
+        pretty_print_bitmask(fmt, self.0, &variants)
     }
 }
-bitmask_binop!(PerClientFlag, u8);
+bitmask_binop!(PerClientFlag, u32);
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]

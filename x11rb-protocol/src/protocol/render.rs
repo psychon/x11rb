@@ -407,7 +407,7 @@ impl core::fmt::Debug for PolyMode  {
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct CP(u16);
+pub struct CP(u32);
 impl CP {
     pub const REPEAT: Self = Self(1 << 0);
     pub const ALPHA_MAP: Self = Self(1 << 1);
@@ -423,28 +423,16 @@ impl CP {
     pub const DITHER: Self = Self(1 << 11);
     pub const COMPONENT_ALPHA: Self = Self(1 << 12);
 }
-impl From<CP> for u16 {
+impl From<CP> for u32 {
     #[inline]
     fn from(input: CP) -> Self {
         input.0
     }
 }
-impl From<CP> for Option<u16> {
-    #[inline]
-    fn from(input: CP) -> Self {
-        Some(input.0)
-    }
-}
-impl From<CP> for u32 {
-    #[inline]
-    fn from(input: CP) -> Self {
-        u32::from(input.0)
-    }
-}
 impl From<CP> for Option<u32> {
     #[inline]
     fn from(input: CP) -> Self {
-        Some(u32::from(input.0))
+        Some(input.0)
     }
 }
 impl From<u8> for CP {
@@ -456,30 +444,36 @@ impl From<u8> for CP {
 impl From<u16> for CP {
     #[inline]
     fn from(value: u16) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u32> for CP {
+    #[inline]
+    fn from(value: u32) -> Self {
         Self(value)
     }
 }
 impl core::fmt::Debug for CP  {
     fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
-            (Self::REPEAT.0.into(), "REPEAT", "Repeat"),
-            (Self::ALPHA_MAP.0.into(), "ALPHA_MAP", "AlphaMap"),
-            (Self::ALPHA_X_ORIGIN.0.into(), "ALPHA_X_ORIGIN", "AlphaXOrigin"),
-            (Self::ALPHA_Y_ORIGIN.0.into(), "ALPHA_Y_ORIGIN", "AlphaYOrigin"),
-            (Self::CLIP_X_ORIGIN.0.into(), "CLIP_X_ORIGIN", "ClipXOrigin"),
-            (Self::CLIP_Y_ORIGIN.0.into(), "CLIP_Y_ORIGIN", "ClipYOrigin"),
-            (Self::CLIP_MASK.0.into(), "CLIP_MASK", "ClipMask"),
-            (Self::GRAPHICS_EXPOSURE.0.into(), "GRAPHICS_EXPOSURE", "GraphicsExposure"),
-            (Self::SUBWINDOW_MODE.0.into(), "SUBWINDOW_MODE", "SubwindowMode"),
-            (Self::POLY_EDGE.0.into(), "POLY_EDGE", "PolyEdge"),
-            (Self::POLY_MODE.0.into(), "POLY_MODE", "PolyMode"),
-            (Self::DITHER.0.into(), "DITHER", "Dither"),
-            (Self::COMPONENT_ALPHA.0.into(), "COMPONENT_ALPHA", "ComponentAlpha"),
+            (Self::REPEAT.0, "REPEAT", "Repeat"),
+            (Self::ALPHA_MAP.0, "ALPHA_MAP", "AlphaMap"),
+            (Self::ALPHA_X_ORIGIN.0, "ALPHA_X_ORIGIN", "AlphaXOrigin"),
+            (Self::ALPHA_Y_ORIGIN.0, "ALPHA_Y_ORIGIN", "AlphaYOrigin"),
+            (Self::CLIP_X_ORIGIN.0, "CLIP_X_ORIGIN", "ClipXOrigin"),
+            (Self::CLIP_Y_ORIGIN.0, "CLIP_Y_ORIGIN", "ClipYOrigin"),
+            (Self::CLIP_MASK.0, "CLIP_MASK", "ClipMask"),
+            (Self::GRAPHICS_EXPOSURE.0, "GRAPHICS_EXPOSURE", "GraphicsExposure"),
+            (Self::SUBWINDOW_MODE.0, "SUBWINDOW_MODE", "SubwindowMode"),
+            (Self::POLY_EDGE.0, "POLY_EDGE", "PolyEdge"),
+            (Self::POLY_MODE.0, "POLY_MODE", "PolyMode"),
+            (Self::DITHER.0, "DITHER", "Dither"),
+            (Self::COMPONENT_ALPHA.0, "COMPONENT_ALPHA", "ComponentAlpha"),
         ];
-        pretty_print_bitmask(fmt, self.0.into(), &variants)
+        pretty_print_bitmask(fmt, self.0, &variants)
     }
 }
-bitmask_binop!(CP, u16);
+bitmask_binop!(CP, u32);
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]

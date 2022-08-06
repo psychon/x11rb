@@ -497,65 +497,53 @@ impl core::fmt::Debug for SelectionEvent  {
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct SelectionEventMask(u8);
+pub struct SelectionEventMask(u32);
 impl SelectionEventMask {
     pub const SET_SELECTION_OWNER: Self = Self(1 << 0);
     pub const SELECTION_WINDOW_DESTROY: Self = Self(1 << 1);
     pub const SELECTION_CLIENT_CLOSE: Self = Self(1 << 2);
 }
-impl From<SelectionEventMask> for u8 {
+impl From<SelectionEventMask> for u32 {
     #[inline]
     fn from(input: SelectionEventMask) -> Self {
         input.0
     }
 }
-impl From<SelectionEventMask> for Option<u8> {
+impl From<SelectionEventMask> for Option<u32> {
     #[inline]
     fn from(input: SelectionEventMask) -> Self {
         Some(input.0)
     }
 }
-impl From<SelectionEventMask> for u16 {
-    #[inline]
-    fn from(input: SelectionEventMask) -> Self {
-        u16::from(input.0)
-    }
-}
-impl From<SelectionEventMask> for Option<u16> {
-    #[inline]
-    fn from(input: SelectionEventMask) -> Self {
-        Some(u16::from(input.0))
-    }
-}
-impl From<SelectionEventMask> for u32 {
-    #[inline]
-    fn from(input: SelectionEventMask) -> Self {
-        u32::from(input.0)
-    }
-}
-impl From<SelectionEventMask> for Option<u32> {
-    #[inline]
-    fn from(input: SelectionEventMask) -> Self {
-        Some(u32::from(input.0))
-    }
-}
 impl From<u8> for SelectionEventMask {
     #[inline]
     fn from(value: u8) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u16> for SelectionEventMask {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u32> for SelectionEventMask {
+    #[inline]
+    fn from(value: u32) -> Self {
         Self(value)
     }
 }
 impl core::fmt::Debug for SelectionEventMask  {
     fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
-            (Self::SET_SELECTION_OWNER.0.into(), "SET_SELECTION_OWNER", "SetSelectionOwner"),
-            (Self::SELECTION_WINDOW_DESTROY.0.into(), "SELECTION_WINDOW_DESTROY", "SelectionWindowDestroy"),
-            (Self::SELECTION_CLIENT_CLOSE.0.into(), "SELECTION_CLIENT_CLOSE", "SelectionClientClose"),
+            (Self::SET_SELECTION_OWNER.0, "SET_SELECTION_OWNER", "SetSelectionOwner"),
+            (Self::SELECTION_WINDOW_DESTROY.0, "SELECTION_WINDOW_DESTROY", "SelectionWindowDestroy"),
+            (Self::SELECTION_CLIENT_CLOSE.0, "SELECTION_CLIENT_CLOSE", "SelectionClientClose"),
         ];
-        pretty_print_bitmask(fmt, self.0.into(), &variants)
+        pretty_print_bitmask(fmt, self.0, &variants)
     }
 }
-bitmask_binop!(SelectionEventMask, u8);
+bitmask_binop!(SelectionEventMask, u32);
 
 /// Opcode for the SelectionNotify event
 pub const SELECTION_NOTIFY_EVENT: u8 = 0;
@@ -830,61 +818,49 @@ impl core::fmt::Debug for CursorNotify  {
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct CursorNotifyMask(u8);
+pub struct CursorNotifyMask(u32);
 impl CursorNotifyMask {
     pub const DISPLAY_CURSOR: Self = Self(1 << 0);
 }
-impl From<CursorNotifyMask> for u8 {
+impl From<CursorNotifyMask> for u32 {
     #[inline]
     fn from(input: CursorNotifyMask) -> Self {
         input.0
     }
 }
-impl From<CursorNotifyMask> for Option<u8> {
+impl From<CursorNotifyMask> for Option<u32> {
     #[inline]
     fn from(input: CursorNotifyMask) -> Self {
         Some(input.0)
     }
 }
-impl From<CursorNotifyMask> for u16 {
-    #[inline]
-    fn from(input: CursorNotifyMask) -> Self {
-        u16::from(input.0)
-    }
-}
-impl From<CursorNotifyMask> for Option<u16> {
-    #[inline]
-    fn from(input: CursorNotifyMask) -> Self {
-        Some(u16::from(input.0))
-    }
-}
-impl From<CursorNotifyMask> for u32 {
-    #[inline]
-    fn from(input: CursorNotifyMask) -> Self {
-        u32::from(input.0)
-    }
-}
-impl From<CursorNotifyMask> for Option<u32> {
-    #[inline]
-    fn from(input: CursorNotifyMask) -> Self {
-        Some(u32::from(input.0))
-    }
-}
 impl From<u8> for CursorNotifyMask {
     #[inline]
     fn from(value: u8) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u16> for CursorNotifyMask {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u32> for CursorNotifyMask {
+    #[inline]
+    fn from(value: u32) -> Self {
         Self(value)
     }
 }
 impl core::fmt::Debug for CursorNotifyMask  {
     fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
-            (Self::DISPLAY_CURSOR.0.into(), "DISPLAY_CURSOR", "DisplayCursor"),
+            (Self::DISPLAY_CURSOR.0, "DISPLAY_CURSOR", "DisplayCursor"),
         ];
-        pretty_print_bitmask(fmt, self.0.into(), &variants)
+        pretty_print_bitmask(fmt, self.0, &variants)
     }
 }
-bitmask_binop!(CursorNotifyMask, u8);
+bitmask_binop!(CursorNotifyMask, u32);
 
 /// Opcode for the CursorNotify event
 pub const CURSOR_NOTIFY_EVENT: u8 = 1;
@@ -3192,67 +3168,55 @@ pub type Barrier = u32;
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct BarrierDirections(u8);
+pub struct BarrierDirections(u32);
 impl BarrierDirections {
     pub const POSITIVE_X: Self = Self(1 << 0);
     pub const POSITIVE_Y: Self = Self(1 << 1);
     pub const NEGATIVE_X: Self = Self(1 << 2);
     pub const NEGATIVE_Y: Self = Self(1 << 3);
 }
-impl From<BarrierDirections> for u8 {
+impl From<BarrierDirections> for u32 {
     #[inline]
     fn from(input: BarrierDirections) -> Self {
         input.0
     }
 }
-impl From<BarrierDirections> for Option<u8> {
+impl From<BarrierDirections> for Option<u32> {
     #[inline]
     fn from(input: BarrierDirections) -> Self {
         Some(input.0)
     }
 }
-impl From<BarrierDirections> for u16 {
-    #[inline]
-    fn from(input: BarrierDirections) -> Self {
-        u16::from(input.0)
-    }
-}
-impl From<BarrierDirections> for Option<u16> {
-    #[inline]
-    fn from(input: BarrierDirections) -> Self {
-        Some(u16::from(input.0))
-    }
-}
-impl From<BarrierDirections> for u32 {
-    #[inline]
-    fn from(input: BarrierDirections) -> Self {
-        u32::from(input.0)
-    }
-}
-impl From<BarrierDirections> for Option<u32> {
-    #[inline]
-    fn from(input: BarrierDirections) -> Self {
-        Some(u32::from(input.0))
-    }
-}
 impl From<u8> for BarrierDirections {
     #[inline]
     fn from(value: u8) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u16> for BarrierDirections {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u32> for BarrierDirections {
+    #[inline]
+    fn from(value: u32) -> Self {
         Self(value)
     }
 }
 impl core::fmt::Debug for BarrierDirections  {
     fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
-            (Self::POSITIVE_X.0.into(), "POSITIVE_X", "PositiveX"),
-            (Self::POSITIVE_Y.0.into(), "POSITIVE_Y", "PositiveY"),
-            (Self::NEGATIVE_X.0.into(), "NEGATIVE_X", "NegativeX"),
-            (Self::NEGATIVE_Y.0.into(), "NEGATIVE_Y", "NegativeY"),
+            (Self::POSITIVE_X.0, "POSITIVE_X", "PositiveX"),
+            (Self::POSITIVE_Y.0, "POSITIVE_Y", "PositiveY"),
+            (Self::NEGATIVE_X.0, "NEGATIVE_X", "NegativeX"),
+            (Self::NEGATIVE_Y.0, "NEGATIVE_Y", "NegativeY"),
         ];
-        pretty_print_bitmask(fmt, self.0.into(), &variants)
+        pretty_print_bitmask(fmt, self.0, &variants)
     }
 }
-bitmask_binop!(BarrierDirections, u8);
+bitmask_binop!(BarrierDirections, u32);
 
 /// Opcode for the CreatePointerBarrier request
 pub const CREATE_POINTER_BARRIER_REQUEST: u8 = 31;

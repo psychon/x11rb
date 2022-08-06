@@ -97,63 +97,51 @@ impl core::fmt::Debug for Kind  {
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct Event(u8);
+pub struct Event(u32);
 impl Event {
     pub const NOTIFY_MASK: Self = Self(1 << 0);
     pub const CYCLE_MASK: Self = Self(1 << 1);
 }
-impl From<Event> for u8 {
+impl From<Event> for u32 {
     #[inline]
     fn from(input: Event) -> Self {
         input.0
     }
 }
-impl From<Event> for Option<u8> {
+impl From<Event> for Option<u32> {
     #[inline]
     fn from(input: Event) -> Self {
         Some(input.0)
     }
 }
-impl From<Event> for u16 {
-    #[inline]
-    fn from(input: Event) -> Self {
-        u16::from(input.0)
-    }
-}
-impl From<Event> for Option<u16> {
-    #[inline]
-    fn from(input: Event) -> Self {
-        Some(u16::from(input.0))
-    }
-}
-impl From<Event> for u32 {
-    #[inline]
-    fn from(input: Event) -> Self {
-        u32::from(input.0)
-    }
-}
-impl From<Event> for Option<u32> {
-    #[inline]
-    fn from(input: Event) -> Self {
-        Some(u32::from(input.0))
-    }
-}
 impl From<u8> for Event {
     #[inline]
     fn from(value: u8) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u16> for Event {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u32> for Event {
+    #[inline]
+    fn from(value: u32) -> Self {
         Self(value)
     }
 }
 impl core::fmt::Debug for Event  {
     fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
-            (Self::NOTIFY_MASK.0.into(), "NOTIFY_MASK", "NotifyMask"),
-            (Self::CYCLE_MASK.0.into(), "CYCLE_MASK", "CycleMask"),
+            (Self::NOTIFY_MASK.0, "NOTIFY_MASK", "NotifyMask"),
+            (Self::CYCLE_MASK.0, "CYCLE_MASK", "CycleMask"),
         ];
-        pretty_print_bitmask(fmt, self.0.into(), &variants)
+        pretty_print_bitmask(fmt, self.0, &variants)
     }
 }
-bitmask_binop!(Event, u8);
+bitmask_binop!(Event, u32);
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]

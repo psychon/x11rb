@@ -60,7 +60,7 @@ pub const BAD_PROVIDER_ERROR: u8 = 3;
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct Rotation(u8);
+pub struct Rotation(u16);
 impl Rotation {
     pub const ROTATE0: Self = Self(1 << 0);
     pub const ROTATE90: Self = Self(1 << 1);
@@ -69,28 +69,16 @@ impl Rotation {
     pub const REFLECT_X: Self = Self(1 << 4);
     pub const REFLECT_Y: Self = Self(1 << 5);
 }
-impl From<Rotation> for u8 {
+impl From<Rotation> for u16 {
     #[inline]
     fn from(input: Rotation) -> Self {
         input.0
     }
 }
-impl From<Rotation> for Option<u8> {
-    #[inline]
-    fn from(input: Rotation) -> Self {
-        Some(input.0)
-    }
-}
-impl From<Rotation> for u16 {
-    #[inline]
-    fn from(input: Rotation) -> Self {
-        u16::from(input.0)
-    }
-}
 impl From<Rotation> for Option<u16> {
     #[inline]
     fn from(input: Rotation) -> Self {
-        Some(u16::from(input.0))
+        Some(input.0)
     }
 }
 impl From<Rotation> for u32 {
@@ -108,6 +96,12 @@ impl From<Rotation> for Option<u32> {
 impl From<u8> for Rotation {
     #[inline]
     fn from(value: u8) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u16> for Rotation {
+    #[inline]
+    fn from(value: u16) -> Self {
         Self(value)
     }
 }
@@ -124,7 +118,7 @@ impl core::fmt::Debug for Rotation  {
         pretty_print_bitmask(fmt, self.0.into(), &variants)
     }
 }
-bitmask_binop!(Rotation, u8);
+bitmask_binop!(Rotation, u16);
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -611,7 +605,7 @@ impl Serialize for SetScreenConfigReply {
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct NotifyMask(u8);
+pub struct NotifyMask(u16);
 impl NotifyMask {
     pub const SCREEN_CHANGE: Self = Self(1 << 0);
     pub const CRTC_CHANGE: Self = Self(1 << 1);
@@ -622,28 +616,16 @@ impl NotifyMask {
     pub const RESOURCE_CHANGE: Self = Self(1 << 6);
     pub const LEASE: Self = Self(1 << 7);
 }
-impl From<NotifyMask> for u8 {
+impl From<NotifyMask> for u16 {
     #[inline]
     fn from(input: NotifyMask) -> Self {
         input.0
     }
 }
-impl From<NotifyMask> for Option<u8> {
-    #[inline]
-    fn from(input: NotifyMask) -> Self {
-        Some(input.0)
-    }
-}
-impl From<NotifyMask> for u16 {
-    #[inline]
-    fn from(input: NotifyMask) -> Self {
-        u16::from(input.0)
-    }
-}
 impl From<NotifyMask> for Option<u16> {
     #[inline]
     fn from(input: NotifyMask) -> Self {
-        Some(u16::from(input.0))
+        Some(input.0)
     }
 }
 impl From<NotifyMask> for u32 {
@@ -661,6 +643,12 @@ impl From<NotifyMask> for Option<u32> {
 impl From<u8> for NotifyMask {
     #[inline]
     fn from(value: u8) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u16> for NotifyMask {
+    #[inline]
+    fn from(value: u16) -> Self {
         Self(value)
     }
 }
@@ -679,7 +667,7 @@ impl core::fmt::Debug for NotifyMask  {
         pretty_print_bitmask(fmt, self.0.into(), &variants)
     }
 }
-bitmask_binop!(NotifyMask, u8);
+bitmask_binop!(NotifyMask, u16);
 
 /// Opcode for the SelectInput request
 pub const SELECT_INPUT_REQUEST: u8 = 4;
@@ -1115,7 +1103,7 @@ impl crate::x11_utils::VoidRequest for SetScreenSizeRequest {
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct ModeFlag(u16);
+pub struct ModeFlag(u32);
 impl ModeFlag {
     pub const HSYNC_POSITIVE: Self = Self(1 << 0);
     pub const HSYNC_NEGATIVE: Self = Self(1 << 1);
@@ -1132,28 +1120,16 @@ impl ModeFlag {
     pub const DOUBLE_CLOCK: Self = Self(1 << 12);
     pub const HALVE_CLOCK: Self = Self(1 << 13);
 }
-impl From<ModeFlag> for u16 {
+impl From<ModeFlag> for u32 {
     #[inline]
     fn from(input: ModeFlag) -> Self {
         input.0
     }
 }
-impl From<ModeFlag> for Option<u16> {
-    #[inline]
-    fn from(input: ModeFlag) -> Self {
-        Some(input.0)
-    }
-}
-impl From<ModeFlag> for u32 {
-    #[inline]
-    fn from(input: ModeFlag) -> Self {
-        u32::from(input.0)
-    }
-}
 impl From<ModeFlag> for Option<u32> {
     #[inline]
     fn from(input: ModeFlag) -> Self {
-        Some(u32::from(input.0))
+        Some(input.0)
     }
 }
 impl From<u8> for ModeFlag {
@@ -1165,31 +1141,37 @@ impl From<u8> for ModeFlag {
 impl From<u16> for ModeFlag {
     #[inline]
     fn from(value: u16) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u32> for ModeFlag {
+    #[inline]
+    fn from(value: u32) -> Self {
         Self(value)
     }
 }
 impl core::fmt::Debug for ModeFlag  {
     fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
-            (Self::HSYNC_POSITIVE.0.into(), "HSYNC_POSITIVE", "HsyncPositive"),
-            (Self::HSYNC_NEGATIVE.0.into(), "HSYNC_NEGATIVE", "HsyncNegative"),
-            (Self::VSYNC_POSITIVE.0.into(), "VSYNC_POSITIVE", "VsyncPositive"),
-            (Self::VSYNC_NEGATIVE.0.into(), "VSYNC_NEGATIVE", "VsyncNegative"),
-            (Self::INTERLACE.0.into(), "INTERLACE", "Interlace"),
-            (Self::DOUBLE_SCAN.0.into(), "DOUBLE_SCAN", "DoubleScan"),
-            (Self::CSYNC.0.into(), "CSYNC", "Csync"),
-            (Self::CSYNC_POSITIVE.0.into(), "CSYNC_POSITIVE", "CsyncPositive"),
-            (Self::CSYNC_NEGATIVE.0.into(), "CSYNC_NEGATIVE", "CsyncNegative"),
-            (Self::HSKEW_PRESENT.0.into(), "HSKEW_PRESENT", "HskewPresent"),
-            (Self::BCAST.0.into(), "BCAST", "Bcast"),
-            (Self::PIXEL_MULTIPLEX.0.into(), "PIXEL_MULTIPLEX", "PixelMultiplex"),
-            (Self::DOUBLE_CLOCK.0.into(), "DOUBLE_CLOCK", "DoubleClock"),
-            (Self::HALVE_CLOCK.0.into(), "HALVE_CLOCK", "HalveClock"),
+            (Self::HSYNC_POSITIVE.0, "HSYNC_POSITIVE", "HsyncPositive"),
+            (Self::HSYNC_NEGATIVE.0, "HSYNC_NEGATIVE", "HsyncNegative"),
+            (Self::VSYNC_POSITIVE.0, "VSYNC_POSITIVE", "VsyncPositive"),
+            (Self::VSYNC_NEGATIVE.0, "VSYNC_NEGATIVE", "VsyncNegative"),
+            (Self::INTERLACE.0, "INTERLACE", "Interlace"),
+            (Self::DOUBLE_SCAN.0, "DOUBLE_SCAN", "DoubleScan"),
+            (Self::CSYNC.0, "CSYNC", "Csync"),
+            (Self::CSYNC_POSITIVE.0, "CSYNC_POSITIVE", "CsyncPositive"),
+            (Self::CSYNC_NEGATIVE.0, "CSYNC_NEGATIVE", "CsyncNegative"),
+            (Self::HSKEW_PRESENT.0, "HSKEW_PRESENT", "HskewPresent"),
+            (Self::BCAST.0, "BCAST", "Bcast"),
+            (Self::PIXEL_MULTIPLEX.0, "PIXEL_MULTIPLEX", "PixelMultiplex"),
+            (Self::DOUBLE_CLOCK.0, "DOUBLE_CLOCK", "DoubleClock"),
+            (Self::HALVE_CLOCK.0, "HALVE_CLOCK", "HalveClock"),
         ];
-        pretty_print_bitmask(fmt, self.0.into(), &variants)
+        pretty_print_bitmask(fmt, self.0, &variants)
     }
 }
-bitmask_binop!(ModeFlag, u16);
+bitmask_binop!(ModeFlag, u32);
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -4755,67 +4737,55 @@ impl GetProvidersReply {
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct ProviderCapability(u8);
+pub struct ProviderCapability(u32);
 impl ProviderCapability {
     pub const SOURCE_OUTPUT: Self = Self(1 << 0);
     pub const SINK_OUTPUT: Self = Self(1 << 1);
     pub const SOURCE_OFFLOAD: Self = Self(1 << 2);
     pub const SINK_OFFLOAD: Self = Self(1 << 3);
 }
-impl From<ProviderCapability> for u8 {
+impl From<ProviderCapability> for u32 {
     #[inline]
     fn from(input: ProviderCapability) -> Self {
         input.0
     }
 }
-impl From<ProviderCapability> for Option<u8> {
+impl From<ProviderCapability> for Option<u32> {
     #[inline]
     fn from(input: ProviderCapability) -> Self {
         Some(input.0)
     }
 }
-impl From<ProviderCapability> for u16 {
-    #[inline]
-    fn from(input: ProviderCapability) -> Self {
-        u16::from(input.0)
-    }
-}
-impl From<ProviderCapability> for Option<u16> {
-    #[inline]
-    fn from(input: ProviderCapability) -> Self {
-        Some(u16::from(input.0))
-    }
-}
-impl From<ProviderCapability> for u32 {
-    #[inline]
-    fn from(input: ProviderCapability) -> Self {
-        u32::from(input.0)
-    }
-}
-impl From<ProviderCapability> for Option<u32> {
-    #[inline]
-    fn from(input: ProviderCapability) -> Self {
-        Some(u32::from(input.0))
-    }
-}
 impl From<u8> for ProviderCapability {
     #[inline]
     fn from(value: u8) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u16> for ProviderCapability {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u32> for ProviderCapability {
+    #[inline]
+    fn from(value: u32) -> Self {
         Self(value)
     }
 }
 impl core::fmt::Debug for ProviderCapability  {
     fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
-            (Self::SOURCE_OUTPUT.0.into(), "SOURCE_OUTPUT", "SourceOutput"),
-            (Self::SINK_OUTPUT.0.into(), "SINK_OUTPUT", "SinkOutput"),
-            (Self::SOURCE_OFFLOAD.0.into(), "SOURCE_OFFLOAD", "SourceOffload"),
-            (Self::SINK_OFFLOAD.0.into(), "SINK_OFFLOAD", "SinkOffload"),
+            (Self::SOURCE_OUTPUT.0, "SOURCE_OUTPUT", "SourceOutput"),
+            (Self::SINK_OUTPUT.0, "SINK_OUTPUT", "SinkOutput"),
+            (Self::SOURCE_OFFLOAD.0, "SOURCE_OFFLOAD", "SourceOffload"),
+            (Self::SINK_OFFLOAD.0, "SINK_OFFLOAD", "SinkOffload"),
         ];
-        pretty_print_bitmask(fmt, self.0.into(), &variants)
+        pretty_print_bitmask(fmt, self.0, &variants)
     }
 }
-bitmask_binop!(ProviderCapability, u8);
+bitmask_binop!(ProviderCapability, u32);
 
 /// Opcode for the GetProviderInfo request
 pub const GET_PROVIDER_INFO_REQUEST: u8 = 33;

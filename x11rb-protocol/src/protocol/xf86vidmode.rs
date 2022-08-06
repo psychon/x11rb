@@ -38,7 +38,7 @@ pub type Dotclock = u32;
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct ModeFlag(u16);
+pub struct ModeFlag(u32);
 impl ModeFlag {
     pub const POSITIVE_H_SYNC: Self = Self(1 << 0);
     pub const NEGATIVE_H_SYNC: Self = Self(1 << 1);
@@ -54,28 +54,16 @@ impl ModeFlag {
     pub const DOUBLE_CLOCK: Self = Self(1 << 11);
     pub const HALF_CLOCK: Self = Self(1 << 12);
 }
-impl From<ModeFlag> for u16 {
+impl From<ModeFlag> for u32 {
     #[inline]
     fn from(input: ModeFlag) -> Self {
         input.0
     }
 }
-impl From<ModeFlag> for Option<u16> {
-    #[inline]
-    fn from(input: ModeFlag) -> Self {
-        Some(input.0)
-    }
-}
-impl From<ModeFlag> for u32 {
-    #[inline]
-    fn from(input: ModeFlag) -> Self {
-        u32::from(input.0)
-    }
-}
 impl From<ModeFlag> for Option<u32> {
     #[inline]
     fn from(input: ModeFlag) -> Self {
-        Some(u32::from(input.0))
+        Some(input.0)
     }
 }
 impl From<u8> for ModeFlag {
@@ -87,148 +75,130 @@ impl From<u8> for ModeFlag {
 impl From<u16> for ModeFlag {
     #[inline]
     fn from(value: u16) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u32> for ModeFlag {
+    #[inline]
+    fn from(value: u32) -> Self {
         Self(value)
     }
 }
 impl core::fmt::Debug for ModeFlag  {
     fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
-            (Self::POSITIVE_H_SYNC.0.into(), "POSITIVE_H_SYNC", "PositiveHSync"),
-            (Self::NEGATIVE_H_SYNC.0.into(), "NEGATIVE_H_SYNC", "NegativeHSync"),
-            (Self::POSITIVE_V_SYNC.0.into(), "POSITIVE_V_SYNC", "PositiveVSync"),
-            (Self::NEGATIVE_V_SYNC.0.into(), "NEGATIVE_V_SYNC", "NegativeVSync"),
-            (Self::INTERLACE.0.into(), "INTERLACE", "Interlace"),
-            (Self::COMPOSITE_SYNC.0.into(), "COMPOSITE_SYNC", "CompositeSync"),
-            (Self::POSITIVE_C_SYNC.0.into(), "POSITIVE_C_SYNC", "PositiveCSync"),
-            (Self::NEGATIVE_C_SYNC.0.into(), "NEGATIVE_C_SYNC", "NegativeCSync"),
-            (Self::H_SKEW.0.into(), "H_SKEW", "HSkew"),
-            (Self::BROADCAST.0.into(), "BROADCAST", "Broadcast"),
-            (Self::PIXMUX.0.into(), "PIXMUX", "Pixmux"),
-            (Self::DOUBLE_CLOCK.0.into(), "DOUBLE_CLOCK", "DoubleClock"),
-            (Self::HALF_CLOCK.0.into(), "HALF_CLOCK", "HalfClock"),
+            (Self::POSITIVE_H_SYNC.0, "POSITIVE_H_SYNC", "PositiveHSync"),
+            (Self::NEGATIVE_H_SYNC.0, "NEGATIVE_H_SYNC", "NegativeHSync"),
+            (Self::POSITIVE_V_SYNC.0, "POSITIVE_V_SYNC", "PositiveVSync"),
+            (Self::NEGATIVE_V_SYNC.0, "NEGATIVE_V_SYNC", "NegativeVSync"),
+            (Self::INTERLACE.0, "INTERLACE", "Interlace"),
+            (Self::COMPOSITE_SYNC.0, "COMPOSITE_SYNC", "CompositeSync"),
+            (Self::POSITIVE_C_SYNC.0, "POSITIVE_C_SYNC", "PositiveCSync"),
+            (Self::NEGATIVE_C_SYNC.0, "NEGATIVE_C_SYNC", "NegativeCSync"),
+            (Self::H_SKEW.0, "H_SKEW", "HSkew"),
+            (Self::BROADCAST.0, "BROADCAST", "Broadcast"),
+            (Self::PIXMUX.0, "PIXMUX", "Pixmux"),
+            (Self::DOUBLE_CLOCK.0, "DOUBLE_CLOCK", "DoubleClock"),
+            (Self::HALF_CLOCK.0, "HALF_CLOCK", "HalfClock"),
         ];
-        pretty_print_bitmask(fmt, self.0.into(), &variants)
+        pretty_print_bitmask(fmt, self.0, &variants)
     }
 }
-bitmask_binop!(ModeFlag, u16);
+bitmask_binop!(ModeFlag, u32);
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct ClockFlag(u8);
+pub struct ClockFlag(u32);
 impl ClockFlag {
     pub const PROGRAMABLE: Self = Self(1 << 0);
 }
-impl From<ClockFlag> for u8 {
+impl From<ClockFlag> for u32 {
     #[inline]
     fn from(input: ClockFlag) -> Self {
         input.0
     }
 }
-impl From<ClockFlag> for Option<u8> {
+impl From<ClockFlag> for Option<u32> {
     #[inline]
     fn from(input: ClockFlag) -> Self {
         Some(input.0)
     }
 }
-impl From<ClockFlag> for u16 {
-    #[inline]
-    fn from(input: ClockFlag) -> Self {
-        u16::from(input.0)
-    }
-}
-impl From<ClockFlag> for Option<u16> {
-    #[inline]
-    fn from(input: ClockFlag) -> Self {
-        Some(u16::from(input.0))
-    }
-}
-impl From<ClockFlag> for u32 {
-    #[inline]
-    fn from(input: ClockFlag) -> Self {
-        u32::from(input.0)
-    }
-}
-impl From<ClockFlag> for Option<u32> {
-    #[inline]
-    fn from(input: ClockFlag) -> Self {
-        Some(u32::from(input.0))
-    }
-}
 impl From<u8> for ClockFlag {
     #[inline]
     fn from(value: u8) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u16> for ClockFlag {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u32> for ClockFlag {
+    #[inline]
+    fn from(value: u32) -> Self {
         Self(value)
     }
 }
 impl core::fmt::Debug for ClockFlag  {
     fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
-            (Self::PROGRAMABLE.0.into(), "PROGRAMABLE", "Programable"),
+            (Self::PROGRAMABLE.0, "PROGRAMABLE", "Programable"),
         ];
-        pretty_print_bitmask(fmt, self.0.into(), &variants)
+        pretty_print_bitmask(fmt, self.0, &variants)
     }
 }
-bitmask_binop!(ClockFlag, u8);
+bitmask_binop!(ClockFlag, u32);
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct Permission(u8);
+pub struct Permission(u32);
 impl Permission {
     pub const READ: Self = Self(1 << 0);
     pub const WRITE: Self = Self(1 << 1);
 }
-impl From<Permission> for u8 {
+impl From<Permission> for u32 {
     #[inline]
     fn from(input: Permission) -> Self {
         input.0
     }
 }
-impl From<Permission> for Option<u8> {
+impl From<Permission> for Option<u32> {
     #[inline]
     fn from(input: Permission) -> Self {
         Some(input.0)
     }
 }
-impl From<Permission> for u16 {
-    #[inline]
-    fn from(input: Permission) -> Self {
-        u16::from(input.0)
-    }
-}
-impl From<Permission> for Option<u16> {
-    #[inline]
-    fn from(input: Permission) -> Self {
-        Some(u16::from(input.0))
-    }
-}
-impl From<Permission> for u32 {
-    #[inline]
-    fn from(input: Permission) -> Self {
-        u32::from(input.0)
-    }
-}
-impl From<Permission> for Option<u32> {
-    #[inline]
-    fn from(input: Permission) -> Self {
-        Some(u32::from(input.0))
-    }
-}
 impl From<u8> for Permission {
     #[inline]
     fn from(value: u8) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u16> for Permission {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u32> for Permission {
+    #[inline]
+    fn from(value: u32) -> Self {
         Self(value)
     }
 }
 impl core::fmt::Debug for Permission  {
     fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
-            (Self::READ.0.into(), "READ", "Read"),
-            (Self::WRITE.0.into(), "WRITE", "Write"),
+            (Self::READ.0, "READ", "Read"),
+            (Self::WRITE.0, "WRITE", "Write"),
         ];
-        pretty_print_bitmask(fmt, self.0.into(), &variants)
+        pretty_print_bitmask(fmt, self.0, &variants)
     }
 }
-bitmask_binop!(Permission, u8);
+bitmask_binop!(Permission, u32);
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]

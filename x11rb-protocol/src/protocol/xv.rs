@@ -226,63 +226,51 @@ impl core::fmt::Debug for ImageFormatInfoFormat  {
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct AttributeFlag(u8);
+pub struct AttributeFlag(u32);
 impl AttributeFlag {
     pub const GETTABLE: Self = Self(1 << 0);
     pub const SETTABLE: Self = Self(1 << 1);
 }
-impl From<AttributeFlag> for u8 {
+impl From<AttributeFlag> for u32 {
     #[inline]
     fn from(input: AttributeFlag) -> Self {
         input.0
     }
 }
-impl From<AttributeFlag> for Option<u8> {
+impl From<AttributeFlag> for Option<u32> {
     #[inline]
     fn from(input: AttributeFlag) -> Self {
         Some(input.0)
     }
 }
-impl From<AttributeFlag> for u16 {
-    #[inline]
-    fn from(input: AttributeFlag) -> Self {
-        u16::from(input.0)
-    }
-}
-impl From<AttributeFlag> for Option<u16> {
-    #[inline]
-    fn from(input: AttributeFlag) -> Self {
-        Some(u16::from(input.0))
-    }
-}
-impl From<AttributeFlag> for u32 {
-    #[inline]
-    fn from(input: AttributeFlag) -> Self {
-        u32::from(input.0)
-    }
-}
-impl From<AttributeFlag> for Option<u32> {
-    #[inline]
-    fn from(input: AttributeFlag) -> Self {
-        Some(u32::from(input.0))
-    }
-}
 impl From<u8> for AttributeFlag {
     #[inline]
     fn from(value: u8) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u16> for AttributeFlag {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u32> for AttributeFlag {
+    #[inline]
+    fn from(value: u32) -> Self {
         Self(value)
     }
 }
 impl core::fmt::Debug for AttributeFlag  {
     fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let variants = [
-            (Self::GETTABLE.0.into(), "GETTABLE", "Gettable"),
-            (Self::SETTABLE.0.into(), "SETTABLE", "Settable"),
+            (Self::GETTABLE.0, "GETTABLE", "Gettable"),
+            (Self::SETTABLE.0, "SETTABLE", "Settable"),
         ];
-        pretty_print_bitmask(fmt, self.0.into(), &variants)
+        pretty_print_bitmask(fmt, self.0, &variants)
     }
 }
-bitmask_binop!(AttributeFlag, u8);
+bitmask_binop!(AttributeFlag, u32);
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
