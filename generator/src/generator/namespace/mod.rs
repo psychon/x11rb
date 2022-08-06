@@ -2,6 +2,7 @@
 
 use std::cell::RefCell;
 use std::collections::{HashMap, HashSet};
+use std::fmt::Write;
 use std::rc::Rc;
 
 use xcbgen::defs as xcbdefs;
@@ -1252,7 +1253,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 _ => None,
             };
             if let Some(ref type_) = wire_type {
-                s.push_str(&format!("{}::from(", type_));
+                write!(s, "{}::from(", type_).unwrap();
             }
             s.push_str(&wrap_name(&ext_param.name));
             if wire_type.is_some() {
