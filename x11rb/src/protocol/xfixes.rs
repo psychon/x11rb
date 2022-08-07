@@ -487,6 +487,28 @@ where
     conn.send_request_without_reply(&slices, fds)
 }
 
+pub fn set_client_disconnect_mode<Conn>(conn: &Conn, disconnect_mode: ClientDisconnectFlags) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+where
+    Conn: RequestConnection + ?Sized,
+{
+    let request0 = SetClientDisconnectModeRequest {
+        disconnect_mode,
+    };
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
+    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
+    conn.send_request_without_reply(&slices, fds)
+}
+
+pub fn get_client_disconnect_mode<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetClientDisconnectModeReply>, ConnectionError>
+where
+    Conn: RequestConnection + ?Sized,
+{
+    let request0 = GetClientDisconnectModeRequest;
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
+    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
+    conn.send_request_with_reply(&slices, fds)
+}
+
 /// Extension trait defining the requests of this extension.
 pub trait ConnectionExt: RequestConnection {
     fn xfixes_query_version(&self, client_major_version: u32, client_minor_version: u32) -> Result<Cookie<'_, Self, QueryVersionReply>, ConnectionError>
@@ -626,6 +648,14 @@ pub trait ConnectionExt: RequestConnection {
     fn xfixes_delete_pointer_barrier(&self, barrier: Barrier) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         delete_pointer_barrier(self, barrier)
+    }
+    fn xfixes_set_client_disconnect_mode(&self, disconnect_mode: ClientDisconnectFlags) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    {
+        set_client_disconnect_mode(self, disconnect_mode)
+    }
+    fn xfixes_get_client_disconnect_mode(&self) -> Result<Cookie<'_, Self, GetClientDisconnectModeReply>, ConnectionError>
+    {
+        get_client_disconnect_mode(self)
     }
 }
 

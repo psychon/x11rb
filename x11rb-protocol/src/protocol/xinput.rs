@@ -36,7 +36,7 @@ pub const X11_EXTENSION_NAME: &str = "XInputExtension";
 /// by this build of x11rb. For most things, it does not make sense to use this
 /// information. If you need to send a `QueryVersion`, it is recommended to instead
 /// send the maximum version of the extension that you need.
-pub const X11_XML_VERSION: (u32, u32) = (2, 3);
+pub const X11_XML_VERSION: (u32, u32) = (2, 4);
 
 pub type EventClass = u32;
 
@@ -11398,6 +11398,7 @@ impl DeviceClassType {
     pub const VALUATOR: Self = Self(2);
     pub const SCROLL: Self = Self(3);
     pub const TOUCH: Self = Self(8);
+    pub const GESTURE: Self = Self(9);
 }
 impl From<DeviceClassType> for u16 {
     #[inline]
@@ -11443,6 +11444,7 @@ impl core::fmt::Debug for DeviceClassType  {
             (Self::VALUATOR.0.into(), "VALUATOR", "Valuator"),
             (Self::SCROLL.0.into(), "SCROLL", "Scroll"),
             (Self::TOUCH.0.into(), "TOUCH", "Touch"),
+            (Self::GESTURE.0.into(), "GESTURE", "Gesture"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
@@ -11908,6 +11910,54 @@ impl Serialize for TouchClass {
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct GestureClass {
+    pub type_: DeviceClassType,
+    pub len: u16,
+    pub sourceid: DeviceId,
+    pub num_touches: u8,
+}
+impl TryParse for GestureClass {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (type_, remaining) = u16::try_parse(remaining)?;
+        let (len, remaining) = u16::try_parse(remaining)?;
+        let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
+        let (num_touches, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
+        let type_ = type_.into();
+        let result = GestureClass { type_, len, sourceid, num_touches };
+        Ok((result, remaining))
+    }
+}
+impl Serialize for GestureClass {
+    type Bytes = [u8; 8];
+    fn serialize(&self) -> [u8; 8] {
+        let type_bytes = u16::from(self.type_).serialize();
+        let len_bytes = self.len.serialize();
+        let sourceid_bytes = self.sourceid.serialize();
+        let num_touches_bytes = self.num_touches.serialize();
+        [
+            type_bytes[0],
+            type_bytes[1],
+            len_bytes[0],
+            len_bytes[1],
+            sourceid_bytes[0],
+            sourceid_bytes[1],
+            num_touches_bytes[0],
+            0,
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(8);
+        u16::from(self.type_).serialize_into(bytes);
+        self.len.serialize_into(bytes);
+        self.sourceid.serialize_into(bytes);
+        self.num_touches.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 1]);
+    }
+}
+
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ValuatorClass {
     pub type_: DeviceClassType,
     pub len: u16,
@@ -12279,6 +12329,34 @@ impl Serialize for DeviceClassDataTouch {
         self.num_touches.serialize_into(bytes);
     }
 }
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct DeviceClassDataGesture {
+    pub num_touches: u8,
+}
+impl TryParse for DeviceClassDataGesture {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (num_touches, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
+        let result = DeviceClassDataGesture { num_touches };
+        Ok((result, remaining))
+    }
+}
+impl Serialize for DeviceClassDataGesture {
+    type Bytes = [u8; 2];
+    fn serialize(&self) -> [u8; 2] {
+        let num_touches_bytes = self.num_touches.serialize();
+        [
+            num_touches_bytes[0],
+            0,
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(2);
+        self.num_touches.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 1]);
+    }
+}
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum DeviceClassData {
@@ -12287,6 +12365,7 @@ pub enum DeviceClassData {
     Valuator(DeviceClassDataValuator),
     Scroll(DeviceClassDataScroll),
     Touch(DeviceClassDataTouch),
+    Gesture(DeviceClassDataGesture),
     /// This variant is returned when the server sends a discriminant
     /// value that does not match any of the defined by the protocol.
     ///
@@ -12332,6 +12411,12 @@ impl DeviceClassData {
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceClassData::Touch(touch));
         }
+        if switch_expr == u16::from(DeviceClassType::GESTURE) {
+            let (gesture, new_remaining) = DeviceClassDataGesture::try_parse(outer_remaining)?;
+            outer_remaining = new_remaining;
+            assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
+            parse_result = Some(DeviceClassData::Gesture(gesture));
+        }
         match parse_result {
             None => Ok((DeviceClassData::InvalidValue(switch_expr), &[])),
             Some(result) => Ok((result, outer_remaining)),
@@ -12369,6 +12454,12 @@ impl DeviceClassData {
             _ => None,
         }
     }
+    pub fn as_gesture(&self) -> Option<&DeviceClassDataGesture> {
+        match self {
+            DeviceClassData::Gesture(value) => Some(value),
+            _ => None,
+        }
+    }
 }
 impl DeviceClassData {
     #[allow(dead_code)]
@@ -12385,6 +12476,7 @@ impl DeviceClassData {
             DeviceClassData::Valuator(valuator) => valuator.serialize_into(bytes),
             DeviceClassData::Scroll(scroll) => scroll.serialize_into(bytes),
             DeviceClassData::Touch(touch) => touch.serialize_into(bytes),
+            DeviceClassData::Gesture(gesture) => gesture.serialize_into(bytes),
             DeviceClassData::InvalidValue(_) => panic!("attempted to serialize invalid switch case"),
         }
     }
@@ -12397,6 +12489,7 @@ impl DeviceClassData {
             DeviceClassData::Valuator(_) => u16::from(DeviceClassType::VALUATOR),
             DeviceClassData::Scroll(_) => u16::from(DeviceClassType::SCROLL),
             DeviceClassData::Touch(_) => u16::from(DeviceClassType::TOUCH),
+            DeviceClassData::Gesture(_) => u16::from(DeviceClassType::GESTURE),
             DeviceClassData::InvalidValue(switch_expr) => *switch_expr,
         }
     }
@@ -12410,12 +12503,17 @@ pub struct DeviceClass {
     pub data: DeviceClassData,
 }
 impl TryParse for DeviceClass {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (type_, remaining) = u16::try_parse(remaining)?;
         let (len, remaining) = u16::try_parse(remaining)?;
         let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
         let (data, remaining) = DeviceClassData::try_parse(remaining, u16::from(type_))?;
         let result = DeviceClass { len, sourceid, data };
+        let length = u32::from(len).checked_mul(4u32).ok_or(ParseError::InvalidExpression)?.try_to_usize()?;
+        let _ = remaining;
+        let remaining = initial_value.get(length..)
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
@@ -13402,6 +13500,8 @@ impl GrabType {
     pub const ENTER: Self = Self(2);
     pub const FOCUS_IN: Self = Self(3);
     pub const TOUCH_BEGIN: Self = Self(4);
+    pub const GESTURE_PINCH_BEGIN: Self = Self(5);
+    pub const GESTURE_SWIPE_BEGIN: Self = Self(6);
 }
 impl From<GrabType> for u8 {
     #[inline]
@@ -13453,6 +13553,8 @@ impl core::fmt::Debug for GrabType  {
             (Self::ENTER.0.into(), "ENTER", "Enter"),
             (Self::FOCUS_IN.0.into(), "FOCUS_IN", "FocusIn"),
             (Self::TOUCH_BEGIN.0.into(), "TOUCH_BEGIN", "TouchBegin"),
+            (Self::GESTURE_PINCH_BEGIN.0.into(), "GESTURE_PINCH_BEGIN", "GesturePinchBegin"),
+            (Self::GESTURE_SWIPE_BEGIN.0.into(), "GESTURE_SWIPE_BEGIN", "GestureSwipeBegin"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
@@ -18456,6 +18558,558 @@ impl Serialize for BarrierHitEvent {
 /// Opcode for the BarrierLeave event
 pub const BARRIER_LEAVE_EVENT: u16 = 26;
 pub type BarrierLeaveEvent = BarrierHitEvent;
+
+#[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct GesturePinchEventFlags(u32);
+impl GesturePinchEventFlags {
+    pub const GESTURE_PINCH_CANCELLED: Self = Self(1 << 0);
+}
+impl From<GesturePinchEventFlags> for u32 {
+    #[inline]
+    fn from(input: GesturePinchEventFlags) -> Self {
+        input.0
+    }
+}
+impl From<GesturePinchEventFlags> for Option<u32> {
+    #[inline]
+    fn from(input: GesturePinchEventFlags) -> Self {
+        Some(input.0)
+    }
+}
+impl From<u8> for GesturePinchEventFlags {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u16> for GesturePinchEventFlags {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u32> for GesturePinchEventFlags {
+    #[inline]
+    fn from(value: u32) -> Self {
+        Self(value)
+    }
+}
+impl core::fmt::Debug for GesturePinchEventFlags  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        let variants = [
+            (Self::GESTURE_PINCH_CANCELLED.0, "GESTURE_PINCH_CANCELLED", "GesturePinchCancelled"),
+        ];
+        pretty_print_bitmask(fmt, self.0, &variants)
+    }
+}
+bitmask_binop!(GesturePinchEventFlags, u32);
+
+/// Opcode for the GesturePinchBegin event
+pub const GESTURE_PINCH_BEGIN_EVENT: u16 = 27;
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct GesturePinchBeginEvent {
+    pub response_type: u8,
+    pub extension: u8,
+    pub sequence: u16,
+    pub length: u32,
+    pub event_type: u16,
+    pub deviceid: DeviceId,
+    pub time: xproto::Timestamp,
+    pub detail: u32,
+    pub root: xproto::Window,
+    pub event: xproto::Window,
+    pub child: xproto::Window,
+    pub root_x: Fp1616,
+    pub root_y: Fp1616,
+    pub event_x: Fp1616,
+    pub event_y: Fp1616,
+    pub delta_x: Fp1616,
+    pub delta_y: Fp1616,
+    pub delta_unaccel_x: Fp1616,
+    pub delta_unaccel_y: Fp1616,
+    pub scale: Fp1616,
+    pub delta_angle: Fp1616,
+    pub sourceid: DeviceId,
+    pub mods: ModifierInfo,
+    pub group: GroupInfo,
+    pub flags: GesturePinchEventFlags,
+}
+impl TryParse for GesturePinchBeginEvent {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (extension, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (event_type, remaining) = u16::try_parse(remaining)?;
+        let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
+        let (time, remaining) = xproto::Timestamp::try_parse(remaining)?;
+        let (detail, remaining) = u32::try_parse(remaining)?;
+        let (root, remaining) = xproto::Window::try_parse(remaining)?;
+        let (event, remaining) = xproto::Window::try_parse(remaining)?;
+        let (child, remaining) = xproto::Window::try_parse(remaining)?;
+        let (root_x, remaining) = Fp1616::try_parse(remaining)?;
+        let (root_y, remaining) = Fp1616::try_parse(remaining)?;
+        let (event_x, remaining) = Fp1616::try_parse(remaining)?;
+        let (event_y, remaining) = Fp1616::try_parse(remaining)?;
+        let (delta_x, remaining) = Fp1616::try_parse(remaining)?;
+        let (delta_y, remaining) = Fp1616::try_parse(remaining)?;
+        let (delta_unaccel_x, remaining) = Fp1616::try_parse(remaining)?;
+        let (delta_unaccel_y, remaining) = Fp1616::try_parse(remaining)?;
+        let (scale, remaining) = Fp1616::try_parse(remaining)?;
+        let (delta_angle, remaining) = Fp1616::try_parse(remaining)?;
+        let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
+        let (mods, remaining) = ModifierInfo::try_parse(remaining)?;
+        let (group, remaining) = GroupInfo::try_parse(remaining)?;
+        let (flags, remaining) = u32::try_parse(remaining)?;
+        let flags = flags.into();
+        let result = GesturePinchBeginEvent { response_type, extension, sequence, length, event_type, deviceid, time, detail, root, event, child, root_x, root_y, event_x, event_y, delta_x, delta_y, delta_unaccel_x, delta_unaccel_y, scale, delta_angle, sourceid, mods, group, flags };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::InsufficientData)?;
+        Ok((result, remaining))
+    }
+}
+impl Serialize for GesturePinchBeginEvent {
+    type Bytes = [u8; 100];
+    fn serialize(&self) -> [u8; 100] {
+        let response_type_bytes = self.response_type.serialize();
+        let extension_bytes = self.extension.serialize();
+        let sequence_bytes = self.sequence.serialize();
+        let length_bytes = self.length.serialize();
+        let event_type_bytes = self.event_type.serialize();
+        let deviceid_bytes = self.deviceid.serialize();
+        let time_bytes = self.time.serialize();
+        let detail_bytes = self.detail.serialize();
+        let root_bytes = self.root.serialize();
+        let event_bytes = self.event.serialize();
+        let child_bytes = self.child.serialize();
+        let root_x_bytes = self.root_x.serialize();
+        let root_y_bytes = self.root_y.serialize();
+        let event_x_bytes = self.event_x.serialize();
+        let event_y_bytes = self.event_y.serialize();
+        let delta_x_bytes = self.delta_x.serialize();
+        let delta_y_bytes = self.delta_y.serialize();
+        let delta_unaccel_x_bytes = self.delta_unaccel_x.serialize();
+        let delta_unaccel_y_bytes = self.delta_unaccel_y.serialize();
+        let scale_bytes = self.scale.serialize();
+        let delta_angle_bytes = self.delta_angle.serialize();
+        let sourceid_bytes = self.sourceid.serialize();
+        let mods_bytes = self.mods.serialize();
+        let group_bytes = self.group.serialize();
+        let flags_bytes = u32::from(self.flags).serialize();
+        [
+            response_type_bytes[0],
+            extension_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            length_bytes[0],
+            length_bytes[1],
+            length_bytes[2],
+            length_bytes[3],
+            event_type_bytes[0],
+            event_type_bytes[1],
+            deviceid_bytes[0],
+            deviceid_bytes[1],
+            time_bytes[0],
+            time_bytes[1],
+            time_bytes[2],
+            time_bytes[3],
+            detail_bytes[0],
+            detail_bytes[1],
+            detail_bytes[2],
+            detail_bytes[3],
+            root_bytes[0],
+            root_bytes[1],
+            root_bytes[2],
+            root_bytes[3],
+            event_bytes[0],
+            event_bytes[1],
+            event_bytes[2],
+            event_bytes[3],
+            child_bytes[0],
+            child_bytes[1],
+            child_bytes[2],
+            child_bytes[3],
+            root_x_bytes[0],
+            root_x_bytes[1],
+            root_x_bytes[2],
+            root_x_bytes[3],
+            root_y_bytes[0],
+            root_y_bytes[1],
+            root_y_bytes[2],
+            root_y_bytes[3],
+            event_x_bytes[0],
+            event_x_bytes[1],
+            event_x_bytes[2],
+            event_x_bytes[3],
+            event_y_bytes[0],
+            event_y_bytes[1],
+            event_y_bytes[2],
+            event_y_bytes[3],
+            delta_x_bytes[0],
+            delta_x_bytes[1],
+            delta_x_bytes[2],
+            delta_x_bytes[3],
+            delta_y_bytes[0],
+            delta_y_bytes[1],
+            delta_y_bytes[2],
+            delta_y_bytes[3],
+            delta_unaccel_x_bytes[0],
+            delta_unaccel_x_bytes[1],
+            delta_unaccel_x_bytes[2],
+            delta_unaccel_x_bytes[3],
+            delta_unaccel_y_bytes[0],
+            delta_unaccel_y_bytes[1],
+            delta_unaccel_y_bytes[2],
+            delta_unaccel_y_bytes[3],
+            scale_bytes[0],
+            scale_bytes[1],
+            scale_bytes[2],
+            scale_bytes[3],
+            delta_angle_bytes[0],
+            delta_angle_bytes[1],
+            delta_angle_bytes[2],
+            delta_angle_bytes[3],
+            sourceid_bytes[0],
+            sourceid_bytes[1],
+            0,
+            0,
+            mods_bytes[0],
+            mods_bytes[1],
+            mods_bytes[2],
+            mods_bytes[3],
+            mods_bytes[4],
+            mods_bytes[5],
+            mods_bytes[6],
+            mods_bytes[7],
+            mods_bytes[8],
+            mods_bytes[9],
+            mods_bytes[10],
+            mods_bytes[11],
+            mods_bytes[12],
+            mods_bytes[13],
+            mods_bytes[14],
+            mods_bytes[15],
+            group_bytes[0],
+            group_bytes[1],
+            group_bytes[2],
+            group_bytes[3],
+            flags_bytes[0],
+            flags_bytes[1],
+            flags_bytes[2],
+            flags_bytes[3],
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(100);
+        self.response_type.serialize_into(bytes);
+        self.extension.serialize_into(bytes);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.event_type.serialize_into(bytes);
+        self.deviceid.serialize_into(bytes);
+        self.time.serialize_into(bytes);
+        self.detail.serialize_into(bytes);
+        self.root.serialize_into(bytes);
+        self.event.serialize_into(bytes);
+        self.child.serialize_into(bytes);
+        self.root_x.serialize_into(bytes);
+        self.root_y.serialize_into(bytes);
+        self.event_x.serialize_into(bytes);
+        self.event_y.serialize_into(bytes);
+        self.delta_x.serialize_into(bytes);
+        self.delta_y.serialize_into(bytes);
+        self.delta_unaccel_x.serialize_into(bytes);
+        self.delta_unaccel_y.serialize_into(bytes);
+        self.scale.serialize_into(bytes);
+        self.delta_angle.serialize_into(bytes);
+        self.sourceid.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 2]);
+        self.mods.serialize_into(bytes);
+        self.group.serialize_into(bytes);
+        u32::from(self.flags).serialize_into(bytes);
+    }
+}
+
+/// Opcode for the GesturePinchUpdate event
+pub const GESTURE_PINCH_UPDATE_EVENT: u16 = 28;
+pub type GesturePinchUpdateEvent = GesturePinchBeginEvent;
+
+/// Opcode for the GesturePinchEnd event
+pub const GESTURE_PINCH_END_EVENT: u16 = 29;
+pub type GesturePinchEndEvent = GesturePinchBeginEvent;
+
+#[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct GestureSwipeEventFlags(u32);
+impl GestureSwipeEventFlags {
+    pub const GESTURE_SWIPE_CANCELLED: Self = Self(1 << 0);
+}
+impl From<GestureSwipeEventFlags> for u32 {
+    #[inline]
+    fn from(input: GestureSwipeEventFlags) -> Self {
+        input.0
+    }
+}
+impl From<GestureSwipeEventFlags> for Option<u32> {
+    #[inline]
+    fn from(input: GestureSwipeEventFlags) -> Self {
+        Some(input.0)
+    }
+}
+impl From<u8> for GestureSwipeEventFlags {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u16> for GestureSwipeEventFlags {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u32> for GestureSwipeEventFlags {
+    #[inline]
+    fn from(value: u32) -> Self {
+        Self(value)
+    }
+}
+impl core::fmt::Debug for GestureSwipeEventFlags  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        let variants = [
+            (Self::GESTURE_SWIPE_CANCELLED.0, "GESTURE_SWIPE_CANCELLED", "GestureSwipeCancelled"),
+        ];
+        pretty_print_bitmask(fmt, self.0, &variants)
+    }
+}
+bitmask_binop!(GestureSwipeEventFlags, u32);
+
+/// Opcode for the GestureSwipeBegin event
+pub const GESTURE_SWIPE_BEGIN_EVENT: u16 = 30;
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct GestureSwipeBeginEvent {
+    pub response_type: u8,
+    pub extension: u8,
+    pub sequence: u16,
+    pub length: u32,
+    pub event_type: u16,
+    pub deviceid: DeviceId,
+    pub time: xproto::Timestamp,
+    pub detail: u32,
+    pub root: xproto::Window,
+    pub event: xproto::Window,
+    pub child: xproto::Window,
+    pub root_x: Fp1616,
+    pub root_y: Fp1616,
+    pub event_x: Fp1616,
+    pub event_y: Fp1616,
+    pub delta_x: Fp1616,
+    pub delta_y: Fp1616,
+    pub delta_unaccel_x: Fp1616,
+    pub delta_unaccel_y: Fp1616,
+    pub sourceid: DeviceId,
+    pub mods: ModifierInfo,
+    pub group: GroupInfo,
+    pub flags: GestureSwipeEventFlags,
+}
+impl TryParse for GestureSwipeBeginEvent {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (extension, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (event_type, remaining) = u16::try_parse(remaining)?;
+        let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
+        let (time, remaining) = xproto::Timestamp::try_parse(remaining)?;
+        let (detail, remaining) = u32::try_parse(remaining)?;
+        let (root, remaining) = xproto::Window::try_parse(remaining)?;
+        let (event, remaining) = xproto::Window::try_parse(remaining)?;
+        let (child, remaining) = xproto::Window::try_parse(remaining)?;
+        let (root_x, remaining) = Fp1616::try_parse(remaining)?;
+        let (root_y, remaining) = Fp1616::try_parse(remaining)?;
+        let (event_x, remaining) = Fp1616::try_parse(remaining)?;
+        let (event_y, remaining) = Fp1616::try_parse(remaining)?;
+        let (delta_x, remaining) = Fp1616::try_parse(remaining)?;
+        let (delta_y, remaining) = Fp1616::try_parse(remaining)?;
+        let (delta_unaccel_x, remaining) = Fp1616::try_parse(remaining)?;
+        let (delta_unaccel_y, remaining) = Fp1616::try_parse(remaining)?;
+        let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
+        let (mods, remaining) = ModifierInfo::try_parse(remaining)?;
+        let (group, remaining) = GroupInfo::try_parse(remaining)?;
+        let (flags, remaining) = u32::try_parse(remaining)?;
+        let flags = flags.into();
+        let result = GestureSwipeBeginEvent { response_type, extension, sequence, length, event_type, deviceid, time, detail, root, event, child, root_x, root_y, event_x, event_y, delta_x, delta_y, delta_unaccel_x, delta_unaccel_y, sourceid, mods, group, flags };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::InsufficientData)?;
+        Ok((result, remaining))
+    }
+}
+impl Serialize for GestureSwipeBeginEvent {
+    type Bytes = [u8; 92];
+    fn serialize(&self) -> [u8; 92] {
+        let response_type_bytes = self.response_type.serialize();
+        let extension_bytes = self.extension.serialize();
+        let sequence_bytes = self.sequence.serialize();
+        let length_bytes = self.length.serialize();
+        let event_type_bytes = self.event_type.serialize();
+        let deviceid_bytes = self.deviceid.serialize();
+        let time_bytes = self.time.serialize();
+        let detail_bytes = self.detail.serialize();
+        let root_bytes = self.root.serialize();
+        let event_bytes = self.event.serialize();
+        let child_bytes = self.child.serialize();
+        let root_x_bytes = self.root_x.serialize();
+        let root_y_bytes = self.root_y.serialize();
+        let event_x_bytes = self.event_x.serialize();
+        let event_y_bytes = self.event_y.serialize();
+        let delta_x_bytes = self.delta_x.serialize();
+        let delta_y_bytes = self.delta_y.serialize();
+        let delta_unaccel_x_bytes = self.delta_unaccel_x.serialize();
+        let delta_unaccel_y_bytes = self.delta_unaccel_y.serialize();
+        let sourceid_bytes = self.sourceid.serialize();
+        let mods_bytes = self.mods.serialize();
+        let group_bytes = self.group.serialize();
+        let flags_bytes = u32::from(self.flags).serialize();
+        [
+            response_type_bytes[0],
+            extension_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            length_bytes[0],
+            length_bytes[1],
+            length_bytes[2],
+            length_bytes[3],
+            event_type_bytes[0],
+            event_type_bytes[1],
+            deviceid_bytes[0],
+            deviceid_bytes[1],
+            time_bytes[0],
+            time_bytes[1],
+            time_bytes[2],
+            time_bytes[3],
+            detail_bytes[0],
+            detail_bytes[1],
+            detail_bytes[2],
+            detail_bytes[3],
+            root_bytes[0],
+            root_bytes[1],
+            root_bytes[2],
+            root_bytes[3],
+            event_bytes[0],
+            event_bytes[1],
+            event_bytes[2],
+            event_bytes[3],
+            child_bytes[0],
+            child_bytes[1],
+            child_bytes[2],
+            child_bytes[3],
+            root_x_bytes[0],
+            root_x_bytes[1],
+            root_x_bytes[2],
+            root_x_bytes[3],
+            root_y_bytes[0],
+            root_y_bytes[1],
+            root_y_bytes[2],
+            root_y_bytes[3],
+            event_x_bytes[0],
+            event_x_bytes[1],
+            event_x_bytes[2],
+            event_x_bytes[3],
+            event_y_bytes[0],
+            event_y_bytes[1],
+            event_y_bytes[2],
+            event_y_bytes[3],
+            delta_x_bytes[0],
+            delta_x_bytes[1],
+            delta_x_bytes[2],
+            delta_x_bytes[3],
+            delta_y_bytes[0],
+            delta_y_bytes[1],
+            delta_y_bytes[2],
+            delta_y_bytes[3],
+            delta_unaccel_x_bytes[0],
+            delta_unaccel_x_bytes[1],
+            delta_unaccel_x_bytes[2],
+            delta_unaccel_x_bytes[3],
+            delta_unaccel_y_bytes[0],
+            delta_unaccel_y_bytes[1],
+            delta_unaccel_y_bytes[2],
+            delta_unaccel_y_bytes[3],
+            sourceid_bytes[0],
+            sourceid_bytes[1],
+            0,
+            0,
+            mods_bytes[0],
+            mods_bytes[1],
+            mods_bytes[2],
+            mods_bytes[3],
+            mods_bytes[4],
+            mods_bytes[5],
+            mods_bytes[6],
+            mods_bytes[7],
+            mods_bytes[8],
+            mods_bytes[9],
+            mods_bytes[10],
+            mods_bytes[11],
+            mods_bytes[12],
+            mods_bytes[13],
+            mods_bytes[14],
+            mods_bytes[15],
+            group_bytes[0],
+            group_bytes[1],
+            group_bytes[2],
+            group_bytes[3],
+            flags_bytes[0],
+            flags_bytes[1],
+            flags_bytes[2],
+            flags_bytes[3],
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(92);
+        self.response_type.serialize_into(bytes);
+        self.extension.serialize_into(bytes);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.event_type.serialize_into(bytes);
+        self.deviceid.serialize_into(bytes);
+        self.time.serialize_into(bytes);
+        self.detail.serialize_into(bytes);
+        self.root.serialize_into(bytes);
+        self.event.serialize_into(bytes);
+        self.child.serialize_into(bytes);
+        self.root_x.serialize_into(bytes);
+        self.root_y.serialize_into(bytes);
+        self.event_x.serialize_into(bytes);
+        self.event_y.serialize_into(bytes);
+        self.delta_x.serialize_into(bytes);
+        self.delta_y.serialize_into(bytes);
+        self.delta_unaccel_x.serialize_into(bytes);
+        self.delta_unaccel_y.serialize_into(bytes);
+        self.sourceid.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 2]);
+        self.mods.serialize_into(bytes);
+        self.group.serialize_into(bytes);
+        u32::from(self.flags).serialize_into(bytes);
+    }
+}
+
+/// Opcode for the GestureSwipeUpdate event
+pub const GESTURE_SWIPE_UPDATE_EVENT: u16 = 31;
+pub type GestureSwipeUpdateEvent = GestureSwipeBeginEvent;
+
+/// Opcode for the GestureSwipeEnd event
+pub const GESTURE_SWIPE_END_EVENT: u16 = 32;
+pub type GestureSwipeEndEvent = GestureSwipeBeginEvent;
 
 #[derive(Debug, Copy, Clone)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]

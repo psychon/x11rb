@@ -391,6 +391,7 @@ impl Parser {
 
         let name = get_attr(node, "name")?;
 
+        let mut length_expr = None;
         let mut fields = Vec::new();
 
         for child_node in node.children() {
@@ -398,7 +399,16 @@ impl Parser {
                 continue;
             }
 
-            if let Some(field) = self.try_parse_field_def(child_node)? {
+            if child_node.has_tag_name("length") {
+                if length_expr.is_some() {
+                    return Err(ParseError::InvalidXml);
+                }
+
+                let expr_node = child_node
+                    .first_element_child()
+                    .ok_or(ParseError::InvalidXml)?;
+                length_expr = Some(self.parse_expression(expr_node)?);
+            } else if let Some(field) = self.try_parse_field_def(child_node)? {
                 fields.push(field);
             } else {
                 return Err(ParseError::InvalidXml);
@@ -409,6 +419,7 @@ impl Parser {
             namespace: Rc::downgrade(ns),
             name: name.into(),
             alignment: OnceCell::new(),
+            length_expr,
             fields: RefCell::new(fields),
             external_params: RefCell::new(Vec::new()),
         });

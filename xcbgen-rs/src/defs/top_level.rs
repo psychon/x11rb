@@ -3,7 +3,9 @@ use std::rc::{Rc, Weak};
 
 use once_cell::unsync::OnceCell;
 
-use super::{Alignment, BuiltInType, ComplexAlignment, Doc, ExternalParam, FieldDef, Namespace};
+use super::{
+    Alignment, BuiltInType, ComplexAlignment, Doc, Expression, ExternalParam, FieldDef, Namespace,
+};
 
 /// Any kind of definition in a namespace.
 #[derive(Debug)]
@@ -327,6 +329,11 @@ pub struct StructDef {
     ///
     /// This information is not available before the struct was resolved.
     pub alignment: OnceCell<ComplexAlignment>,
+
+    /// Length expression that overrides the implicit length of the struct.
+    ///
+    /// The implicit length is derived from the actual fields of the struct.
+    pub length_expr: Option<Expression>,
 
     /// The list of fields of this struct.
     ///

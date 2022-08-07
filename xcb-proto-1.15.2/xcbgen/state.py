@@ -2,7 +2,12 @@
 This module contains the namespace class and the singleton module class.
 '''
 from os.path import dirname, basename
-from xml.etree.cElementTree import parse
+from sys import version_info
+
+if version_info[:2] >= (3, 3):
+    from xml.etree.ElementTree import parse
+else:
+    from xml.etree.cElementTree import parse
 
 from xcbgen import matcher
 from xcbgen.error import *

@@ -38,7 +38,7 @@ pub const X11_EXTENSION_NAME: &str = "XFIXES";
 /// by this build of x11rb. For most things, it does not make sense to use this
 /// information. If you need to send a `QueryVersion`, it is recommended to instead
 /// send the maximum version of the extension that you need.
-pub const X11_XML_VERSION: (u32, u32) = (5, 0);
+pub const X11_XML_VERSION: (u32, u32) = (6, 0);
 
 /// Opcode for the QueryVersion request
 pub const QUERY_VERSION_REQUEST: u8 = 0;
@@ -3395,5 +3395,233 @@ impl Request for DeletePointerBarrierRequest {
     }
 }
 impl crate::x11_utils::VoidRequest for DeletePointerBarrierRequest {
+}
+
+#[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct ClientDisconnectFlags(u32);
+impl ClientDisconnectFlags {
+    pub const DEFAULT: Self = Self(0);
+    pub const TERMINATE: Self = Self(1 << 0);
+}
+impl From<ClientDisconnectFlags> for u32 {
+    #[inline]
+    fn from(input: ClientDisconnectFlags) -> Self {
+        input.0
+    }
+}
+impl From<ClientDisconnectFlags> for Option<u32> {
+    #[inline]
+    fn from(input: ClientDisconnectFlags) -> Self {
+        Some(input.0)
+    }
+}
+impl From<u8> for ClientDisconnectFlags {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u16> for ClientDisconnectFlags {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u32> for ClientDisconnectFlags {
+    #[inline]
+    fn from(value: u32) -> Self {
+        Self(value)
+    }
+}
+impl core::fmt::Debug for ClientDisconnectFlags  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        let variants = [
+            (Self::DEFAULT.0, "DEFAULT", "Default"),
+            (Self::TERMINATE.0, "TERMINATE", "Terminate"),
+        ];
+        pretty_print_bitmask(fmt, self.0, &variants)
+    }
+}
+bitmask_binop!(ClientDisconnectFlags, u32);
+
+/// Opcode for the SetClientDisconnectMode request
+pub const SET_CLIENT_DISCONNECT_MODE_REQUEST: u8 = 33;
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct SetClientDisconnectModeRequest {
+    pub disconnect_mode: ClientDisconnectFlags,
+}
+impl SetClientDisconnectModeRequest {
+    /// Serialize this request into bytes for the provided connection
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+        let length_so_far = 0;
+        let disconnect_mode_bytes = u32::from(self.disconnect_mode).serialize();
+        let mut request0 = vec![
+            major_opcode,
+            SET_CLIENT_DISCONNECT_MODE_REQUEST,
+            0,
+            0,
+            disconnect_mode_bytes[0],
+            disconnect_mode_bytes[1],
+            disconnect_mode_bytes[2],
+            disconnect_mode_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        (vec![request0.into()], vec![])
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != SET_CLIENT_DISCONNECT_MODE_REQUEST {
+            return Err(ParseError::InvalidValue);
+        }
+        let (disconnect_mode, remaining) = u32::try_parse(value)?;
+        let disconnect_mode = disconnect_mode.into();
+        let _ = remaining;
+        Ok(SetClientDisconnectModeRequest {
+            disconnect_mode,
+        })
+    }
+}
+impl Request for SetClientDisconnectModeRequest {
+    const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
+
+    fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
+        let (bufs, fds) = self.serialize(major_opcode);
+        // Flatten the buffers into a single vector
+        let buf = bufs.iter().flat_map(|buf| buf.iter().copied()).collect();
+        (buf, fds)
+    }
+}
+impl crate::x11_utils::VoidRequest for SetClientDisconnectModeRequest {
+}
+
+/// Opcode for the GetClientDisconnectMode request
+pub const GET_CLIENT_DISCONNECT_MODE_REQUEST: u8 = 34;
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct GetClientDisconnectModeRequest;
+impl GetClientDisconnectModeRequest {
+    /// Serialize this request into bytes for the provided connection
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+        let length_so_far = 0;
+        let mut request0 = vec![
+            major_opcode,
+            GET_CLIENT_DISCONNECT_MODE_REQUEST,
+            0,
+            0,
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        (vec![request0.into()], vec![])
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != GET_CLIENT_DISCONNECT_MODE_REQUEST {
+            return Err(ParseError::InvalidValue);
+        }
+        let _ = value;
+        Ok(GetClientDisconnectModeRequest
+        )
+    }
+}
+impl Request for GetClientDisconnectModeRequest {
+    const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
+
+    fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
+        let (bufs, fds) = self.serialize(major_opcode);
+        // Flatten the buffers into a single vector
+        let buf = bufs.iter().flat_map(|buf| buf.iter().copied()).collect();
+        (buf, fds)
+    }
+}
+impl crate::x11_utils::ReplyRequest for GetClientDisconnectModeRequest {
+    type Reply = GetClientDisconnectModeReply;
+}
+
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct GetClientDisconnectModeReply {
+    pub sequence: u16,
+    pub length: u32,
+    pub disconnect_mode: ClientDisconnectFlags,
+}
+impl TryParse for GetClientDisconnectModeReply {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (disconnect_mode, remaining) = u32::try_parse(remaining)?;
+        let remaining = remaining.get(20..).ok_or(ParseError::InsufficientData)?;
+        if response_type != 1 {
+            return Err(ParseError::InvalidValue);
+        }
+        let disconnect_mode = disconnect_mode.into();
+        let result = GetClientDisconnectModeReply { sequence, length, disconnect_mode };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::InsufficientData)?;
+        Ok((result, remaining))
+    }
+}
+impl Serialize for GetClientDisconnectModeReply {
+    type Bytes = [u8; 32];
+    fn serialize(&self) -> [u8; 32] {
+        let response_type_bytes = &[1];
+        let sequence_bytes = self.sequence.serialize();
+        let length_bytes = self.length.serialize();
+        let disconnect_mode_bytes = u32::from(self.disconnect_mode).serialize();
+        [
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            length_bytes[0],
+            length_bytes[1],
+            length_bytes[2],
+            length_bytes[3],
+            disconnect_mode_bytes[0],
+            disconnect_mode_bytes[1],
+            disconnect_mode_bytes[2],
+            disconnect_mode_bytes[3],
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        bytes.extend_from_slice(&[0; 1]);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        u32::from(self.disconnect_mode).serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 20]);
+    }
 }
 

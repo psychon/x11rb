@@ -522,13 +522,15 @@ impl<'input> PrintGetPrinterListRequest<'input> {
         ];
         let length_so_far = length_so_far + request0.len();
         let length_so_far = length_so_far + self.printer_name.len();
-        let length_so_far = length_so_far + self.locale.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
+        let length_so_far = length_so_far + self.locale.len();
+        let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+        let length_so_far = length_so_far + padding1.len();
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into(), self.printer_name, self.locale, padding0.into()], vec![])
+        (vec![request0.into(), self.printer_name, padding0.into(), self.locale, padding1.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -538,6 +540,10 @@ impl<'input> PrintGetPrinterListRequest<'input> {
         let (printer_name_len, remaining) = u32::try_parse(value)?;
         let (locale_len, remaining) = u32::try_parse(remaining)?;
         let (printer_name, remaining) = crate::x11_utils::parse_u8_list(remaining, printer_name_len.try_to_usize()?)?;
+        // Align offset to multiple of 4
+        let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
+        let misalignment = (4 - (offset % 4)) % 4;
+        let remaining = remaining.get(misalignment..).ok_or(ParseError::InsufficientData)?;
         let (locale, remaining) = crate::x11_utils::parse_u8_list(remaining, locale_len.try_to_usize()?)?;
         let _ = remaining;
         Ok(PrintGetPrinterListRequest {
@@ -712,13 +718,15 @@ impl<'input> CreateContextRequest<'input> {
         ];
         let length_so_far = length_so_far + request0.len();
         let length_so_far = length_so_far + self.printer_name.len();
-        let length_so_far = length_so_far + self.locale.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
+        let length_so_far = length_so_far + self.locale.len();
+        let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+        let length_so_far = length_so_far + padding1.len();
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into(), self.printer_name, self.locale, padding0.into()], vec![])
+        (vec![request0.into(), self.printer_name, padding0.into(), self.locale, padding1.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -729,6 +737,10 @@ impl<'input> CreateContextRequest<'input> {
         let (printer_name_len, remaining) = u32::try_parse(remaining)?;
         let (locale_len, remaining) = u32::try_parse(remaining)?;
         let (printer_name, remaining) = crate::x11_utils::parse_u8_list(remaining, printer_name_len.try_to_usize()?)?;
+        // Align offset to multiple of 4
+        let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
+        let misalignment = (4 - (offset % 4)) % 4;
+        let remaining = remaining.get(misalignment..).ok_or(ParseError::InsufficientData)?;
         let (locale, remaining) = crate::x11_utils::parse_u8_list(remaining, locale_len.try_to_usize()?)?;
         let _ = remaining;
         Ok(CreateContextRequest {
@@ -1324,14 +1336,18 @@ impl<'input> PrintPutDocumentDataRequest<'input> {
         ];
         let length_so_far = length_so_far + request0.len();
         let length_so_far = length_so_far + self.data.len();
-        let length_so_far = length_so_far + self.doc_format.len();
-        let length_so_far = length_so_far + self.options.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
+        let length_so_far = length_so_far + self.doc_format.len();
+        let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+        let length_so_far = length_so_far + padding1.len();
+        let length_so_far = length_so_far + self.options.len();
+        let padding2 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+        let length_so_far = length_so_far + padding2.len();
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into(), self.data, self.doc_format, self.options, padding0.into()], vec![])
+        (vec![request0.into(), self.data, padding0.into(), self.doc_format, padding1.into(), self.options, padding2.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -1343,7 +1359,15 @@ impl<'input> PrintPutDocumentDataRequest<'input> {
         let (len_fmt, remaining) = u16::try_parse(remaining)?;
         let (len_options, remaining) = u16::try_parse(remaining)?;
         let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, len_data.try_to_usize()?)?;
+        // Align offset to multiple of 4
+        let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
+        let misalignment = (4 - (offset % 4)) % 4;
+        let remaining = remaining.get(misalignment..).ok_or(ParseError::InsufficientData)?;
         let (doc_format, remaining) = crate::x11_utils::parse_u8_list(remaining, len_fmt.try_to_usize()?)?;
+        // Align offset to multiple of 4
+        let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
+        let misalignment = (4 - (offset % 4)) % 4;
+        let remaining = remaining.get(misalignment..).ok_or(ParseError::InsufficientData)?;
         let (options, remaining) = crate::x11_utils::parse_u8_list(remaining, len_options.try_to_usize()?)?;
         let _ = remaining;
         Ok(PrintPutDocumentDataRequest {

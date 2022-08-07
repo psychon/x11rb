@@ -119,6 +119,9 @@ impl<'a> TypeResolver<'a> {
     ) -> Result<(), ResolveError> {
         match type_def {
             defs::TypeDef::Struct(struct_def) => {
+                if let Some(ref length_expr) = struct_def.length_expr {
+                    self.resolve_expr(length_expr, ns)?;
+                }
                 let fields = struct_def.fields.borrow();
                 Self::check_repeated_fields(&fields)?;
                 for field in fields.iter() {

@@ -230,6 +230,16 @@ fn resolve_field_refs_in_error(error_def: &defs::ErrorFullDef) -> Result<(), Res
 fn resolve_field_refs_in_struct(struct_def: &defs::StructDef) -> Result<(), ResolveError> {
     let ext_fields_gatherer = RefCell::new(ExternalParamGatherer::new());
     resolve_field_refs_in_fields(&struct_def.fields.borrow(), None, &ext_fields_gatherer)?;
+    if let Some(ref length_expr) = struct_def.length_expr {
+        let fields = struct_def.fields.borrow();
+        let scope = FieldRefResolveScope::Normal(NormalFieldRefResolveScope {
+            parent: None,
+            prev_fields: &fields,
+            all_fields: &fields,
+            ext_param_gatherer: &ext_fields_gatherer,
+        });
+        resolve_field_refs_in_expr(length_expr, &scope)?;
+    }
     // FIXME: Not needed
     struct_def
         .external_params

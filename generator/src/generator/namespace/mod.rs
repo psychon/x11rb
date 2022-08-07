@@ -348,6 +348,13 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
 
         let rust_name = self.get_struct_rust_name(struct_def);
         let derives = self.get_derives_for_struct_def(struct_def);
+
+        let size_constraint = if let Some(ref length_expr) = struct_def.length_expr {
+            StructSizeConstraint::LengthExpr(length_expr)
+        } else {
+            StructSizeConstraint::None
+        };
+
         struct_type::emit_struct_type(
             self,
             &rust_name,
@@ -357,7 +364,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             &*struct_def.external_params.borrow(),
             false,
             true,
-            StructSizeConstraint::None,
+            size_constraint,
             true,
             true,
             None,

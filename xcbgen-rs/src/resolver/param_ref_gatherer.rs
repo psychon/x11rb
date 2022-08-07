@@ -39,6 +39,10 @@ impl StructParamRefGatherer {
             external_params: Vec::new(),
         };
 
+        if let Some(ref length_expr) = struct_def.length_expr {
+            gatherer.gather_param_refs_in_expr(length_expr)?;
+        }
+
         for field in struct_def.fields.borrow().iter() {
             gatherer.gather_param_refs_in_field(field)?;
         }

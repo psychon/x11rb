@@ -16,6 +16,8 @@ pub mod bigreq;
 pub mod composite;
 #[cfg(feature = "damage")]
 pub mod damage;
+#[cfg(feature = "dbe")]
+pub mod dbe;
 #[cfg(feature = "dpms")]
 pub mod dpms;
 #[cfg(feature = "dri2")]

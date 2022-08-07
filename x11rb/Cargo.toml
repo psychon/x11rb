@@ -13,7 +13,7 @@ edition = "2018"
 license = "MIT OR Apache-2.0"
 keywords = ["xcb", "X11"]
 exclude = [
-    "/xcb-proto-1.14-1-g2b3559c",
+    "/xcb-proto-1.15.2",
     "/Makefile",
     "/.mergify.yml",
     "/appveyor.yml",
@@ -60,6 +60,7 @@ all-extensions = [
     "x11rb-protocol/all-extensions",
     "composite",
     "damage",
+    "dbe",
     "dpms",
     "dri2",
     "dri3",
@@ -90,6 +91,7 @@ all-extensions = [
 # Features to enable individual X11 extensions
 composite = ["x11rb-protocol/composite", "xfixes"]
 damage = ["x11rb-protocol/damage", "xfixes"]
+dbe = ["x11rb-protocol/dbe"]
 dpms = ["x11rb-protocol/dpms"]
 dri2 = ["x11rb-protocol/dri2"]
 dri3 = ["x11rb-protocol/dri3"]

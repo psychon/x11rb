@@ -1,4 +1,4 @@
-PROTO=xcb-proto-1.14-1-g2b3559c
+PROTO=xcb-proto-1.15.2
 PROTO_OUT=x11rb-protocol/src/protocol
 X11RB_OUT=x11rb/src/protocol
 
