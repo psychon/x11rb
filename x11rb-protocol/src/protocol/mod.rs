@@ -35,6 +35,8 @@ pub mod bigreq;
 pub mod composite;
 #[cfg(feature = "damage")]
 pub mod damage;
+#[cfg(feature = "dbe")]
+pub mod dbe;
 #[cfg(feature = "dpms")]
 pub mod dpms;
 #[cfg(feature = "dri2")]
@@ -243,6 +245,22 @@ pub enum Request<'input> {
     DamageSubtract(damage::SubtractRequest),
     #[cfg(feature = "damage")]
     DamageAdd(damage::AddRequest),
+    #[cfg(feature = "dbe")]
+    DbeQueryVersion(dbe::QueryVersionRequest),
+    #[cfg(feature = "dbe")]
+    DbeAllocateBackBuffer(dbe::AllocateBackBufferRequest),
+    #[cfg(feature = "dbe")]
+    DbeDeallocateBackBuffer(dbe::DeallocateBackBufferRequest),
+    #[cfg(feature = "dbe")]
+    DbeSwapBuffers(dbe::SwapBuffersRequest<'input>),
+    #[cfg(feature = "dbe")]
+    DbeBeginIdiom(dbe::BeginIdiomRequest),
+    #[cfg(feature = "dbe")]
+    DbeEndIdiom(dbe::EndIdiomRequest),
+    #[cfg(feature = "dbe")]
+    DbeGetVisualInfo(dbe::GetVisualInfoRequest<'input>),
+    #[cfg(feature = "dbe")]
+    DbeGetBackBufferAttributes(dbe::GetBackBufferAttributesRequest),
     #[cfg(feature = "dpms")]
     DpmsGetVersion(dpms::GetVersionRequest),
     #[cfg(feature = "dpms")]
@@ -305,6 +323,8 @@ pub enum Request<'input> {
     Dri3PixmapFromBuffers(dri3::PixmapFromBuffersRequest),
     #[cfg(feature = "dri3")]
     Dri3BuffersFromPixmap(dri3::BuffersFromPixmapRequest),
+    #[cfg(feature = "dri3")]
+    Dri3SetDRMDeviceInUse(dri3::SetDRMDeviceInUseRequest),
     GeQueryVersion(ge::QueryVersionRequest),
     #[cfg(feature = "glx")]
     GlxRender(glx::RenderRequest<'input>),
@@ -929,6 +949,10 @@ pub enum Request<'input> {
     XfixesCreatePointerBarrier(xfixes::CreatePointerBarrierRequest<'input>),
     #[cfg(feature = "xfixes")]
     XfixesDeletePointerBarrier(xfixes::DeletePointerBarrierRequest),
+    #[cfg(feature = "xfixes")]
+    XfixesSetClientDisconnectMode(xfixes::SetClientDisconnectModeRequest),
+    #[cfg(feature = "xfixes")]
+    XfixesGetClientDisconnectMode(xfixes::GetClientDisconnectModeRequest),
     #[cfg(feature = "xinerama")]
     XineramaQueryVersion(xinerama::QueryVersionRequest),
     #[cfg(feature = "xinerama")]
@@ -1446,6 +1470,20 @@ impl<'input> Request<'input> {
                     _ => (),
                 }
             }
+            #[cfg(feature = "dbe")]
+            Some((dbe::X11_EXTENSION_NAME, _)) => {
+                match header.minor_opcode {
+                    dbe::QUERY_VERSION_REQUEST => return Ok(Request::DbeQueryVersion(dbe::QueryVersionRequest::try_parse_request(header, remaining)?)),
+                    dbe::ALLOCATE_BACK_BUFFER_REQUEST => return Ok(Request::DbeAllocateBackBuffer(dbe::AllocateBackBufferRequest::try_parse_request(header, remaining)?)),
+                    dbe::DEALLOCATE_BACK_BUFFER_REQUEST => return Ok(Request::DbeDeallocateBackBuffer(dbe::DeallocateBackBufferRequest::try_parse_request(header, remaining)?)),
+                    dbe::SWAP_BUFFERS_REQUEST => return Ok(Request::DbeSwapBuffers(dbe::SwapBuffersRequest::try_parse_request(header, remaining)?)),
+                    dbe::BEGIN_IDIOM_REQUEST => return Ok(Request::DbeBeginIdiom(dbe::BeginIdiomRequest::try_parse_request(header, remaining)?)),
+                    dbe::END_IDIOM_REQUEST => return Ok(Request::DbeEndIdiom(dbe::EndIdiomRequest::try_parse_request(header, remaining)?)),
+                    dbe::GET_VISUAL_INFO_REQUEST => return Ok(Request::DbeGetVisualInfo(dbe::GetVisualInfoRequest::try_parse_request(header, remaining)?)),
+                    dbe::GET_BACK_BUFFER_ATTRIBUTES_REQUEST => return Ok(Request::DbeGetBackBufferAttributes(dbe::GetBackBufferAttributesRequest::try_parse_request(header, remaining)?)),
+                    _ => (),
+                }
+            }
             #[cfg(feature = "dpms")]
             Some((dpms::X11_EXTENSION_NAME, _)) => {
                 match header.minor_opcode {
@@ -1492,6 +1530,7 @@ impl<'input> Request<'input> {
                     dri3::GET_SUPPORTED_MODIFIERS_REQUEST => return Ok(Request::Dri3GetSupportedModifiers(dri3::GetSupportedModifiersRequest::try_parse_request(header, remaining)?)),
                     dri3::PIXMAP_FROM_BUFFERS_REQUEST => return Ok(Request::Dri3PixmapFromBuffers(dri3::PixmapFromBuffersRequest::try_parse_request_fd(header, remaining, fds)?)),
                     dri3::BUFFERS_FROM_PIXMAP_REQUEST => return Ok(Request::Dri3BuffersFromPixmap(dri3::BuffersFromPixmapRequest::try_parse_request(header, remaining)?)),
+                    dri3::SET_DRM_DEVICE_IN_USE_REQUEST => return Ok(Request::Dri3SetDRMDeviceInUse(dri3::SetDRMDeviceInUseRequest::try_parse_request(header, remaining)?)),
                     _ => (),
                 }
             }
@@ -1900,6 +1939,8 @@ impl<'input> Request<'input> {
                     xfixes::SHOW_CURSOR_REQUEST => return Ok(Request::XfixesShowCursor(xfixes::ShowCursorRequest::try_parse_request(header, remaining)?)),
                     xfixes::CREATE_POINTER_BARRIER_REQUEST => return Ok(Request::XfixesCreatePointerBarrier(xfixes::CreatePointerBarrierRequest::try_parse_request(header, remaining)?)),
                     xfixes::DELETE_POINTER_BARRIER_REQUEST => return Ok(Request::XfixesDeletePointerBarrier(xfixes::DeletePointerBarrierRequest::try_parse_request(header, remaining)?)),
+                    xfixes::SET_CLIENT_DISCONNECT_MODE_REQUEST => return Ok(Request::XfixesSetClientDisconnectMode(xfixes::SetClientDisconnectModeRequest::try_parse_request(header, remaining)?)),
+                    xfixes::GET_CLIENT_DISCONNECT_MODE_REQUEST => return Ok(Request::XfixesGetClientDisconnectMode(xfixes::GetClientDisconnectModeRequest::try_parse_request(header, remaining)?)),
                     _ => (),
                 }
             }
@@ -2281,6 +2322,22 @@ impl<'input> Request<'input> {
             Request::DamageSubtract(_) => None,
             #[cfg(feature = "damage")]
             Request::DamageAdd(_) => None,
+            #[cfg(feature = "dbe")]
+            Request::DbeQueryVersion(_) => Some(parse_reply::<dbe::QueryVersionRequest>),
+            #[cfg(feature = "dbe")]
+            Request::DbeAllocateBackBuffer(_) => None,
+            #[cfg(feature = "dbe")]
+            Request::DbeDeallocateBackBuffer(_) => None,
+            #[cfg(feature = "dbe")]
+            Request::DbeSwapBuffers(_) => None,
+            #[cfg(feature = "dbe")]
+            Request::DbeBeginIdiom(_) => None,
+            #[cfg(feature = "dbe")]
+            Request::DbeEndIdiom(_) => None,
+            #[cfg(feature = "dbe")]
+            Request::DbeGetVisualInfo(_) => Some(parse_reply::<dbe::GetVisualInfoRequest<'_>>),
+            #[cfg(feature = "dbe")]
+            Request::DbeGetBackBufferAttributes(_) => Some(parse_reply::<dbe::GetBackBufferAttributesRequest>),
             #[cfg(feature = "dpms")]
             Request::DpmsGetVersion(_) => Some(parse_reply::<dpms::GetVersionRequest>),
             #[cfg(feature = "dpms")]
@@ -2343,6 +2400,8 @@ impl<'input> Request<'input> {
             Request::Dri3PixmapFromBuffers(_) => None,
             #[cfg(feature = "dri3")]
             Request::Dri3BuffersFromPixmap(_) => Some(parse_reply_fds::<dri3::BuffersFromPixmapRequest>),
+            #[cfg(feature = "dri3")]
+            Request::Dri3SetDRMDeviceInUse(_) => None,
             Request::GeQueryVersion(_) => Some(parse_reply::<ge::QueryVersionRequest>),
             #[cfg(feature = "glx")]
             Request::GlxRender(_) => None,
@@ -2967,6 +3026,10 @@ impl<'input> Request<'input> {
             Request::XfixesCreatePointerBarrier(_) => None,
             #[cfg(feature = "xfixes")]
             Request::XfixesDeletePointerBarrier(_) => None,
+            #[cfg(feature = "xfixes")]
+            Request::XfixesSetClientDisconnectMode(_) => None,
+            #[cfg(feature = "xfixes")]
+            Request::XfixesGetClientDisconnectMode(_) => Some(parse_reply::<xfixes::GetClientDisconnectModeRequest>),
             #[cfg(feature = "xinerama")]
             Request::XineramaQueryVersion(_) => Some(parse_reply::<xinerama::QueryVersionRequest>),
             #[cfg(feature = "xinerama")]
@@ -3466,6 +3529,22 @@ impl<'input> Request<'input> {
             Request::DamageSubtract(req) => Request::DamageSubtract(req),
             #[cfg(feature = "damage")]
             Request::DamageAdd(req) => Request::DamageAdd(req),
+            #[cfg(feature = "dbe")]
+            Request::DbeQueryVersion(req) => Request::DbeQueryVersion(req),
+            #[cfg(feature = "dbe")]
+            Request::DbeAllocateBackBuffer(req) => Request::DbeAllocateBackBuffer(req),
+            #[cfg(feature = "dbe")]
+            Request::DbeDeallocateBackBuffer(req) => Request::DbeDeallocateBackBuffer(req),
+            #[cfg(feature = "dbe")]
+            Request::DbeSwapBuffers(req) => Request::DbeSwapBuffers(req.into_owned()),
+            #[cfg(feature = "dbe")]
+            Request::DbeBeginIdiom(req) => Request::DbeBeginIdiom(req),
+            #[cfg(feature = "dbe")]
+            Request::DbeEndIdiom(req) => Request::DbeEndIdiom(req),
+            #[cfg(feature = "dbe")]
+            Request::DbeGetVisualInfo(req) => Request::DbeGetVisualInfo(req.into_owned()),
+            #[cfg(feature = "dbe")]
+            Request::DbeGetBackBufferAttributes(req) => Request::DbeGetBackBufferAttributes(req),
             #[cfg(feature = "dpms")]
             Request::DpmsGetVersion(req) => Request::DpmsGetVersion(req),
             #[cfg(feature = "dpms")]
@@ -3528,6 +3607,8 @@ impl<'input> Request<'input> {
             Request::Dri3PixmapFromBuffers(req) => Request::Dri3PixmapFromBuffers(req),
             #[cfg(feature = "dri3")]
             Request::Dri3BuffersFromPixmap(req) => Request::Dri3BuffersFromPixmap(req),
+            #[cfg(feature = "dri3")]
+            Request::Dri3SetDRMDeviceInUse(req) => Request::Dri3SetDRMDeviceInUse(req),
             Request::GeQueryVersion(req) => Request::GeQueryVersion(req),
             #[cfg(feature = "glx")]
             Request::GlxRender(req) => Request::GlxRender(req.into_owned()),
@@ -4152,6 +4233,10 @@ impl<'input> Request<'input> {
             Request::XfixesCreatePointerBarrier(req) => Request::XfixesCreatePointerBarrier(req.into_owned()),
             #[cfg(feature = "xfixes")]
             Request::XfixesDeletePointerBarrier(req) => Request::XfixesDeletePointerBarrier(req),
+            #[cfg(feature = "xfixes")]
+            Request::XfixesSetClientDisconnectMode(req) => Request::XfixesSetClientDisconnectMode(req),
+            #[cfg(feature = "xfixes")]
+            Request::XfixesGetClientDisconnectMode(req) => Request::XfixesGetClientDisconnectMode(req),
             #[cfg(feature = "xinerama")]
             Request::XineramaQueryVersion(req) => Request::XineramaQueryVersion(req),
             #[cfg(feature = "xinerama")]
@@ -4553,6 +4638,12 @@ pub enum Reply {
     CompositeGetOverlayWindow(composite::GetOverlayWindowReply),
     #[cfg(feature = "damage")]
     DamageQueryVersion(damage::QueryVersionReply),
+    #[cfg(feature = "dbe")]
+    DbeQueryVersion(dbe::QueryVersionReply),
+    #[cfg(feature = "dbe")]
+    DbeGetVisualInfo(dbe::GetVisualInfoReply),
+    #[cfg(feature = "dbe")]
+    DbeGetBackBufferAttributes(dbe::GetBackBufferAttributesReply),
     #[cfg(feature = "dpms")]
     DpmsGetVersion(dpms::GetVersionReply),
     #[cfg(feature = "dpms")]
@@ -4905,6 +4996,8 @@ pub enum Reply {
     XfixesGetCursorName(xfixes::GetCursorNameReply),
     #[cfg(feature = "xfixes")]
     XfixesGetCursorImageAndName(xfixes::GetCursorImageAndNameReply),
+    #[cfg(feature = "xfixes")]
+    XfixesGetClientDisconnectMode(xfixes::GetClientDisconnectModeReply),
     #[cfg(feature = "xinerama")]
     XineramaQueryVersion(xinerama::QueryVersionReply),
     #[cfg(feature = "xinerama")]
@@ -5328,6 +5421,24 @@ impl From<composite::GetOverlayWindowReply> for Reply {
 impl From<damage::QueryVersionReply> for Reply {
   fn from(reply: damage::QueryVersionReply) -> Reply {
     Reply::DamageQueryVersion(reply)
+  }
+}
+#[cfg(feature = "dbe")]
+impl From<dbe::QueryVersionReply> for Reply {
+  fn from(reply: dbe::QueryVersionReply) -> Reply {
+    Reply::DbeQueryVersion(reply)
+  }
+}
+#[cfg(feature = "dbe")]
+impl From<dbe::GetVisualInfoReply> for Reply {
+  fn from(reply: dbe::GetVisualInfoReply) -> Reply {
+    Reply::DbeGetVisualInfo(reply)
+  }
+}
+#[cfg(feature = "dbe")]
+impl From<dbe::GetBackBufferAttributesReply> for Reply {
+  fn from(reply: dbe::GetBackBufferAttributesReply) -> Reply {
+    Reply::DbeGetBackBufferAttributes(reply)
   }
 }
 #[cfg(feature = "dpms")]
@@ -6394,6 +6505,12 @@ impl From<xfixes::GetCursorImageAndNameReply> for Reply {
     Reply::XfixesGetCursorImageAndName(reply)
   }
 }
+#[cfg(feature = "xfixes")]
+impl From<xfixes::GetClientDisconnectModeReply> for Reply {
+  fn from(reply: xfixes::GetClientDisconnectModeReply) -> Reply {
+    Reply::XfixesGetClientDisconnectMode(reply)
+  }
+}
 #[cfg(feature = "xinerama")]
 impl From<xinerama::QueryVersionReply> for Reply {
   fn from(reply: xinerama::QueryVersionReply) -> Reply {
@@ -7140,6 +7257,22 @@ pub(crate) fn request_name(extension: Option<&str>, major_opcode: u8, minor_opco
         (Some(damage::X11_EXTENSION_NAME), 3) => Some("Subtract"),
         #[cfg(feature = "damage")]
         (Some(damage::X11_EXTENSION_NAME), 4) => Some("Add"),
+        #[cfg(feature = "dbe")]
+        (Some(dbe::X11_EXTENSION_NAME), 0) => Some("QueryVersion"),
+        #[cfg(feature = "dbe")]
+        (Some(dbe::X11_EXTENSION_NAME), 1) => Some("AllocateBackBuffer"),
+        #[cfg(feature = "dbe")]
+        (Some(dbe::X11_EXTENSION_NAME), 2) => Some("DeallocateBackBuffer"),
+        #[cfg(feature = "dbe")]
+        (Some(dbe::X11_EXTENSION_NAME), 3) => Some("SwapBuffers"),
+        #[cfg(feature = "dbe")]
+        (Some(dbe::X11_EXTENSION_NAME), 4) => Some("BeginIdiom"),
+        #[cfg(feature = "dbe")]
+        (Some(dbe::X11_EXTENSION_NAME), 5) => Some("EndIdiom"),
+        #[cfg(feature = "dbe")]
+        (Some(dbe::X11_EXTENSION_NAME), 6) => Some("GetVisualInfo"),
+        #[cfg(feature = "dbe")]
+        (Some(dbe::X11_EXTENSION_NAME), 7) => Some("GetBackBufferAttributes"),
         #[cfg(feature = "dpms")]
         (Some(dpms::X11_EXTENSION_NAME), 0) => Some("GetVersion"),
         #[cfg(feature = "dpms")]
@@ -7202,6 +7335,8 @@ pub(crate) fn request_name(extension: Option<&str>, major_opcode: u8, minor_opco
         (Some(dri3::X11_EXTENSION_NAME), 7) => Some("PixmapFromBuffers"),
         #[cfg(feature = "dri3")]
         (Some(dri3::X11_EXTENSION_NAME), 8) => Some("BuffersFromPixmap"),
+        #[cfg(feature = "dri3")]
+        (Some(dri3::X11_EXTENSION_NAME), 9) => Some("SetDRMDeviceInUse"),
         (Some(ge::X11_EXTENSION_NAME), 0) => Some("QueryVersion"),
         #[cfg(feature = "glx")]
         (Some(glx::X11_EXTENSION_NAME), 1) => Some("Render"),
@@ -7826,6 +7961,10 @@ pub(crate) fn request_name(extension: Option<&str>, major_opcode: u8, minor_opco
         (Some(xfixes::X11_EXTENSION_NAME), 31) => Some("CreatePointerBarrier"),
         #[cfg(feature = "xfixes")]
         (Some(xfixes::X11_EXTENSION_NAME), 32) => Some("DeletePointerBarrier"),
+        #[cfg(feature = "xfixes")]
+        (Some(xfixes::X11_EXTENSION_NAME), 33) => Some("SetClientDisconnectMode"),
+        #[cfg(feature = "xfixes")]
+        (Some(xfixes::X11_EXTENSION_NAME), 34) => Some("GetClientDisconnectMode"),
         #[cfg(feature = "xinerama")]
         (Some(xinerama::X11_EXTENSION_NAME), 0) => Some("QueryVersion"),
         #[cfg(feature = "xinerama")]
@@ -8198,6 +8337,8 @@ pub enum ErrorKind {
     Window,
     #[cfg(feature = "damage")]
     DamageBadDamage,
+    #[cfg(feature = "dbe")]
+    DbeBadBuffer,
     #[cfg(feature = "glx")]
     GlxBadContext,
     #[cfg(feature = "glx")]
@@ -8327,6 +8468,13 @@ impl ErrorKind {
             Some((damage::X11_EXTENSION_NAME, ext_info)) => {
                 match error_code - ext_info.first_error {
                     damage::BAD_DAMAGE_ERROR => Self::DamageBadDamage,
+                    _ => Self::Unknown(error_code),
+                }
+            }
+            #[cfg(feature = "dbe")]
+            Some((dbe::X11_EXTENSION_NAME, ext_info)) => {
+                match error_code - ext_info.first_error {
+                    dbe::BAD_BUFFER_ERROR => Self::DbeBadBuffer,
                     _ => Self::Unknown(error_code),
                 }
             }
@@ -8578,6 +8726,18 @@ pub enum Event {
     XinputFocusIn(xinput::FocusInEvent),
     #[cfg(feature = "xinput")]
     XinputFocusOut(xinput::FocusOutEvent),
+    #[cfg(feature = "xinput")]
+    XinputGesturePinchBegin(xinput::GesturePinchBeginEvent),
+    #[cfg(feature = "xinput")]
+    XinputGesturePinchEnd(xinput::GesturePinchEndEvent),
+    #[cfg(feature = "xinput")]
+    XinputGesturePinchUpdate(xinput::GesturePinchUpdateEvent),
+    #[cfg(feature = "xinput")]
+    XinputGestureSwipeBegin(xinput::GestureSwipeBeginEvent),
+    #[cfg(feature = "xinput")]
+    XinputGestureSwipeEnd(xinput::GestureSwipeEndEvent),
+    #[cfg(feature = "xinput")]
+    XinputGestureSwipeUpdate(xinput::GestureSwipeUpdateEvent),
     #[cfg(feature = "xinput")]
     XinputHierarchy(xinput::HierarchyEvent),
     #[cfg(feature = "xinput")]
@@ -8873,6 +9033,12 @@ impl Event {
                     xinput::ENTER_EVENT => Ok(Self::XinputEnter(TryParse::try_parse(event)?.0)),
                     xinput::FOCUS_IN_EVENT => Ok(Self::XinputFocusIn(TryParse::try_parse(event)?.0)),
                     xinput::FOCUS_OUT_EVENT => Ok(Self::XinputFocusOut(TryParse::try_parse(event)?.0)),
+                    xinput::GESTURE_PINCH_BEGIN_EVENT => Ok(Self::XinputGesturePinchBegin(TryParse::try_parse(event)?.0)),
+                    xinput::GESTURE_PINCH_END_EVENT => Ok(Self::XinputGesturePinchEnd(TryParse::try_parse(event)?.0)),
+                    xinput::GESTURE_PINCH_UPDATE_EVENT => Ok(Self::XinputGesturePinchUpdate(TryParse::try_parse(event)?.0)),
+                    xinput::GESTURE_SWIPE_BEGIN_EVENT => Ok(Self::XinputGestureSwipeBegin(TryParse::try_parse(event)?.0)),
+                    xinput::GESTURE_SWIPE_END_EVENT => Ok(Self::XinputGestureSwipeEnd(TryParse::try_parse(event)?.0)),
+                    xinput::GESTURE_SWIPE_UPDATE_EVENT => Ok(Self::XinputGestureSwipeUpdate(TryParse::try_parse(event)?.0)),
                     xinput::HIERARCHY_EVENT => Ok(Self::XinputHierarchy(TryParse::try_parse(event)?.0)),
                     xinput::KEY_PRESS_EVENT => Ok(Self::XinputKeyPress(TryParse::try_parse(event)?.0)),
                     xinput::KEY_RELEASE_EVENT => Ok(Self::XinputKeyRelease(TryParse::try_parse(event)?.0)),
@@ -9021,6 +9187,18 @@ impl Event {
             Event::XinputFocusIn(value) => Some(value.sequence),
             #[cfg(feature = "xinput")]
             Event::XinputFocusOut(value) => Some(value.sequence),
+            #[cfg(feature = "xinput")]
+            Event::XinputGesturePinchBegin(value) => Some(value.sequence),
+            #[cfg(feature = "xinput")]
+            Event::XinputGesturePinchEnd(value) => Some(value.sequence),
+            #[cfg(feature = "xinput")]
+            Event::XinputGesturePinchUpdate(value) => Some(value.sequence),
+            #[cfg(feature = "xinput")]
+            Event::XinputGestureSwipeBegin(value) => Some(value.sequence),
+            #[cfg(feature = "xinput")]
+            Event::XinputGestureSwipeEnd(value) => Some(value.sequence),
+            #[cfg(feature = "xinput")]
+            Event::XinputGestureSwipeUpdate(value) => Some(value.sequence),
             #[cfg(feature = "xinput")]
             Event::XinputHierarchy(value) => Some(value.sequence),
             #[cfg(feature = "xinput")]
@@ -9225,6 +9403,18 @@ impl Event {
             Event::XinputFocusIn(value) => value.response_type,
             #[cfg(feature = "xinput")]
             Event::XinputFocusOut(value) => value.response_type,
+            #[cfg(feature = "xinput")]
+            Event::XinputGesturePinchBegin(value) => value.response_type,
+            #[cfg(feature = "xinput")]
+            Event::XinputGesturePinchEnd(value) => value.response_type,
+            #[cfg(feature = "xinput")]
+            Event::XinputGesturePinchUpdate(value) => value.response_type,
+            #[cfg(feature = "xinput")]
+            Event::XinputGestureSwipeBegin(value) => value.response_type,
+            #[cfg(feature = "xinput")]
+            Event::XinputGestureSwipeEnd(value) => value.response_type,
+            #[cfg(feature = "xinput")]
+            Event::XinputGestureSwipeUpdate(value) => value.response_type,
             #[cfg(feature = "xinput")]
             Event::XinputHierarchy(value) => value.response_type,
             #[cfg(feature = "xinput")]

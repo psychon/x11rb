@@ -177,6 +177,20 @@ where
     conn.send_request_with_reply_with_fds(&slices, fds)
 }
 
+pub fn set_drm_device_in_use<Conn>(conn: &Conn, window: xproto::Window, drm_major: u32, drm_minor: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+where
+    Conn: RequestConnection + ?Sized,
+{
+    let request0 = SetDRMDeviceInUseRequest {
+        window,
+        drm_major,
+        drm_minor,
+    };
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
+    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
+    conn.send_request_without_reply(&slices, fds)
+}
+
 /// Extension trait defining the requests of this extension.
 pub trait ConnectionExt: RequestConnection {
     fn dri3_query_version(&self, major_version: u32, minor_version: u32) -> Result<Cookie<'_, Self, QueryVersionReply>, ConnectionError>
@@ -218,6 +232,10 @@ pub trait ConnectionExt: RequestConnection {
     fn dri3_buffers_from_pixmap(&self, pixmap: xproto::Pixmap) -> Result<CookieWithFds<'_, Self, BuffersFromPixmapReply>, ConnectionError>
     {
         buffers_from_pixmap(self, pixmap)
+    }
+    fn dri3_set_drm_device_in_use(&self, window: xproto::Window, drm_major: u32, drm_minor: u32) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    {
+        set_drm_device_in_use(self, window, drm_major, drm_minor)
     }
 }
 

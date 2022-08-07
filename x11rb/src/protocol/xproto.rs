@@ -1099,7 +1099,7 @@ where
 ///     if ((reply = xcb_grab_pointer_reply(conn, cookie, NULL))) {
 ///         if (reply->status == XCB_GRAB_STATUS_SUCCESS)
 ///             printf("successfully grabbed the pointer\\n");
-///         free(preply);
+///         free(reply);
 ///     }
 /// }
 /// ```
@@ -1417,17 +1417,15 @@ where
 ///
 /// # Fields
 ///
-/// * `owner_events` - If 1, the `grab_window` will still get the pointer events. If 0, events are not
+/// * `owner_events` - If 1, the `grab_window` will still get the key events. If 0, events are not
 /// reported to the `grab_window`.
-/// * `grab_window` - Specifies the window on which the pointer should be grabbed.
+/// * `grab_window` - Specifies the window on which the key should be grabbed.
 /// * `key` - The keycode of the key to grab.
 ///
 /// The special value `XCB_GRAB_ANY` means grab any key.
-/// * `cursor` - Specifies the cursor that should be displayed or `XCB_NONE` to not change the
-/// cursor.
 /// * `modifiers` - The modifiers to grab.
 ///
-/// Using the special value `XCB_MOD_MASK_ANY` means grab the pointer with all
+/// Using the special value `XCB_MOD_MASK_ANY` means grab the key with all
 /// possible modifier combinations.
 /// * `pointer_mode` -
 /// * `keyboard_mode` -
@@ -1436,7 +1434,8 @@ where
 ///
 /// * `Access` - Another client has already issued a GrabKey with the same button/key
 /// combination on the same window.
-/// * `Value` - TODO: reasons?
+/// * `Value` - The key is not `XCB_GRAB_ANY` and not in the range specified by `min_keycode`
+/// and `max_keycode` in the connection setup.
 /// * `Window` - The specified `window` does not exist.
 ///
 /// # See
@@ -4112,7 +4111,7 @@ pub trait ConnectionExt: RequestConnection {
     ///     if ((reply = xcb_grab_pointer_reply(conn, cookie, NULL))) {
     ///         if (reply->status == XCB_GRAB_STATUS_SUCCESS)
     ///             printf("successfully grabbed the pointer\\n");
-    ///         free(preply);
+    ///         free(reply);
     ///     }
     /// }
     /// ```
@@ -4347,17 +4346,15 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # Fields
     ///
-    /// * `owner_events` - If 1, the `grab_window` will still get the pointer events. If 0, events are not
+    /// * `owner_events` - If 1, the `grab_window` will still get the key events. If 0, events are not
     /// reported to the `grab_window`.
-    /// * `grab_window` - Specifies the window on which the pointer should be grabbed.
+    /// * `grab_window` - Specifies the window on which the key should be grabbed.
     /// * `key` - The keycode of the key to grab.
     ///
     /// The special value `XCB_GRAB_ANY` means grab any key.
-    /// * `cursor` - Specifies the cursor that should be displayed or `XCB_NONE` to not change the
-    /// cursor.
     /// * `modifiers` - The modifiers to grab.
     ///
-    /// Using the special value `XCB_MOD_MASK_ANY` means grab the pointer with all
+    /// Using the special value `XCB_MOD_MASK_ANY` means grab the key with all
     /// possible modifier combinations.
     /// * `pointer_mode` -
     /// * `keyboard_mode` -
@@ -4366,7 +4363,8 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// * `Access` - Another client has already issued a GrabKey with the same button/key
     /// combination on the same window.
-    /// * `Value` - TODO: reasons?
+    /// * `Value` - The key is not `XCB_GRAB_ANY` and not in the range specified by `min_keycode`
+    /// and `max_keycode` in the connection setup.
     /// * `Window` - The specified `window` does not exist.
     ///
     /// # See

@@ -34,7 +34,7 @@ pub const X11_EXTENSION_NAME: &str = "DRI3";
 /// by this build of x11rb. For most things, it does not make sense to use this
 /// information. If you need to send a `QueryVersion`, it is recommended to instead
 /// send the maximum version of the extension that you need.
-pub const X11_XML_VERSION: (u32, u32) = (1, 2);
+pub const X11_XML_VERSION: (u32, u32) = (1, 3);
 
 /// Opcode for the QueryVersion request
 pub const QUERY_VERSION_REQUEST: u8 = 0;
@@ -1242,5 +1242,74 @@ impl BuffersFromPixmapReply {
         self.strides.len()
             .try_into().unwrap()
     }
+}
+
+/// Opcode for the SetDRMDeviceInUse request
+pub const SET_DRM_DEVICE_IN_USE_REQUEST: u8 = 9;
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct SetDRMDeviceInUseRequest {
+    pub window: xproto::Window,
+    pub drm_major: u32,
+    pub drm_minor: u32,
+}
+impl SetDRMDeviceInUseRequest {
+    /// Serialize this request into bytes for the provided connection
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+        let length_so_far = 0;
+        let window_bytes = self.window.serialize();
+        let drm_major_bytes = self.drm_major.serialize();
+        let drm_minor_bytes = self.drm_minor.serialize();
+        let mut request0 = vec![
+            major_opcode,
+            SET_DRM_DEVICE_IN_USE_REQUEST,
+            0,
+            0,
+            window_bytes[0],
+            window_bytes[1],
+            window_bytes[2],
+            window_bytes[3],
+            drm_major_bytes[0],
+            drm_major_bytes[1],
+            drm_major_bytes[2],
+            drm_major_bytes[3],
+            drm_minor_bytes[0],
+            drm_minor_bytes[1],
+            drm_minor_bytes[2],
+            drm_minor_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        (vec![request0.into()], vec![])
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != SET_DRM_DEVICE_IN_USE_REQUEST {
+            return Err(ParseError::InvalidValue);
+        }
+        let (window, remaining) = xproto::Window::try_parse(value)?;
+        let (drm_major, remaining) = u32::try_parse(remaining)?;
+        let (drm_minor, remaining) = u32::try_parse(remaining)?;
+        let _ = remaining;
+        Ok(SetDRMDeviceInUseRequest {
+            window,
+            drm_major,
+            drm_minor,
+        })
+    }
+}
+impl Request for SetDRMDeviceInUseRequest {
+    const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
+
+    fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
+        let (bufs, fds) = self.serialize(major_opcode);
+        // Flatten the buffers into a single vector
+        let buf = bufs.iter().flat_map(|buf| buf.iter().copied()).collect();
+        (buf, fds)
+    }
+}
+impl crate::x11_utils::VoidRequest for SetDRMDeviceInUseRequest {
 }
 

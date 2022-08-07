@@ -37,6 +37,7 @@ resource_manager = ["std"]
 all-extensions = [
     "composite",
     "damage",
+    "dbe",
     "dpms",
     "dri2",
     "dri3",
@@ -67,6 +68,7 @@ all-extensions = [
 # Features to enable individual X11 extensions
 composite = ["xfixes"]
 damage = ["xfixes"]
+dbe = []
 dpms = []
 dri2 = []
 dri3 = []

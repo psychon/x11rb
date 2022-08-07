@@ -3668,13 +3668,15 @@ impl<'input> SetClientInfoARBRequest<'input> {
         let gl_versions_bytes = self.gl_versions.serialize();
         let length_so_far = length_so_far + gl_versions_bytes.len();
         let length_so_far = length_so_far + self.gl_extension_string.len();
-        let length_so_far = length_so_far + self.glx_extension_string.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
+        let length_so_far = length_so_far + self.glx_extension_string.len();
+        let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+        let length_so_far = length_so_far + padding1.len();
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into(), gl_versions_bytes.into(), self.gl_extension_string, self.glx_extension_string, padding0.into()], vec![])
+        (vec![request0.into(), gl_versions_bytes.into(), self.gl_extension_string, padding0.into(), self.glx_extension_string, padding1.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -3688,6 +3690,10 @@ impl<'input> SetClientInfoARBRequest<'input> {
         let (glx_str_len, remaining) = u32::try_parse(remaining)?;
         let (gl_versions, remaining) = crate::x11_utils::parse_list::<u32>(remaining, u32::from(num_versions).checked_mul(2u32).ok_or(ParseError::InvalidExpression)?.try_to_usize()?)?;
         let (gl_extension_string, remaining) = crate::x11_utils::parse_u8_list(remaining, gl_str_len.try_to_usize()?)?;
+        // Align offset to multiple of 4
+        let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
+        let misalignment = (4 - (offset % 4)) % 4;
+        let remaining = remaining.get(misalignment..).ok_or(ParseError::InsufficientData)?;
         let (glx_extension_string, remaining) = crate::x11_utils::parse_u8_list(remaining, glx_str_len.try_to_usize()?)?;
         let _ = remaining;
         Ok(SetClientInfoARBRequest {
@@ -3888,13 +3894,15 @@ impl<'input> SetClientInfo2ARBRequest<'input> {
         let gl_versions_bytes = self.gl_versions.serialize();
         let length_so_far = length_so_far + gl_versions_bytes.len();
         let length_so_far = length_so_far + self.gl_extension_string.len();
-        let length_so_far = length_so_far + self.glx_extension_string.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
+        let length_so_far = length_so_far + self.glx_extension_string.len();
+        let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+        let length_so_far = length_so_far + padding1.len();
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into(), gl_versions_bytes.into(), self.gl_extension_string, self.glx_extension_string, padding0.into()], vec![])
+        (vec![request0.into(), gl_versions_bytes.into(), self.gl_extension_string, padding0.into(), self.glx_extension_string, padding1.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -3908,6 +3916,10 @@ impl<'input> SetClientInfo2ARBRequest<'input> {
         let (glx_str_len, remaining) = u32::try_parse(remaining)?;
         let (gl_versions, remaining) = crate::x11_utils::parse_list::<u32>(remaining, u32::from(num_versions).checked_mul(3u32).ok_or(ParseError::InvalidExpression)?.try_to_usize()?)?;
         let (gl_extension_string, remaining) = crate::x11_utils::parse_u8_list(remaining, gl_str_len.try_to_usize()?)?;
+        // Align offset to multiple of 4
+        let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
+        let misalignment = (4 - (offset % 4)) % 4;
+        let remaining = remaining.get(misalignment..).ok_or(ParseError::InsufficientData)?;
         let (glx_extension_string, remaining) = crate::x11_utils::parse_u8_list(remaining, glx_str_len.try_to_usize()?)?;
         let _ = remaining;
         Ok(SetClientInfo2ARBRequest {
