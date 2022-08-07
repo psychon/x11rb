@@ -280,8 +280,8 @@ impl Derives {
 }
 
 /// Constraints on the wire format of a struct.
-#[derive(Debug, PartialEq, Eq)]
-pub(super) enum StructSizeConstraint {
+#[derive(Debug)]
+pub(super) enum StructSizeConstraint<'a> {
     /// No code constraining the size is emitted.
     None,
     /// This is a fixed size struct.
@@ -292,6 +292,8 @@ pub(super) enum StructSizeConstraint {
         /// The minimum size.
         minimum: u8,
     },
+    /// The size of the struct is calculated from a <length> expression
+    LengthExpr(&'a xcbdefs::Expression),
 }
 
 /// Information about a switch case

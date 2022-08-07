@@ -3,8 +3,8 @@ use std::collections::HashMap;
 use xcbgen::defs as xcbdefs;
 
 use super::{
-    gather_deducible_fields, parse, serialize, switch, to_rust_variable_name, DeducibleField,
-    DeducibleLengthFieldOp, Derives, FieldContainer, NamespaceGenerator, Output,
+    expr_to_str, gather_deducible_fields, parse, serialize, switch, to_rust_variable_name,
+    DeducibleField, DeducibleLengthFieldOp, Derives, FieldContainer, NamespaceGenerator, Output,
     StructSizeConstraint,
 };
 
@@ -18,14 +18,14 @@ pub(super) fn emit_struct_type(
     external_params: &[xcbdefs::ExternalParam],
     skip_length_field: bool,
     generate_try_parse: bool,
-    parse_size_constraint: StructSizeConstraint,
+    parse_size_constraint: StructSizeConstraint<'_>,
     generate_serialize: bool,
     fields_need_serialize: bool,
     doc: Option<&xcbdefs::Doc>,
     out: &mut Output,
 ) {
     assert!(!generate_serialize || fields_need_serialize);
-    assert!(parse_size_constraint == StructSizeConstraint::None || generate_try_parse);
+    assert!(matches!(parse_size_constraint, StructSizeConstraint::None) || generate_try_parse);
 
     let deducible_fields = gather_deducible_fields(fields);
 
@@ -76,7 +76,7 @@ pub(super) fn emit_struct_type(
     outln!(out, "}}");
 
     if generate_try_parse {
-        let input_name = if parse_size_constraint != StructSizeConstraint::None {
+        let input_name = if !matches!(parse_size_constraint, StructSizeConstraint::None) {
             "initial_value"
         } else {
             "remaining"
@@ -119,7 +119,7 @@ pub(super) fn emit_struct_type(
 
         out.indented(|out| {
             out.indented(|out| {
-                if parse_size_constraint != StructSizeConstraint::None {
+                if !matches!(parse_size_constraint, StructSizeConstraint::None) {
                     outln!(out, "let remaining = initial_value;");
                 }
                 NamespaceGenerator::emit_let_value_for_dynamic_align(fields, out);
@@ -172,6 +172,23 @@ pub(super) fn emit_struct_type(
                             "let remaining = initial_value.get({} + length as usize * 4..)",
                             minimum
                         );
+                        outln!(out.indent(), ".ok_or(ParseError::InsufficientData)?;");
+                    }
+                    StructSizeConstraint::LengthExpr(length_expr) => {
+                        outln!(
+                            out,
+                            "let length = {}.try_to_usize()?;",
+                            expr_to_str(
+                                generator,
+                                length_expr,
+                                to_rust_variable_name,
+                                false,
+                                None,
+                                true,
+                            ),
+                        );
+                        outln!(out, "let _ = remaining;");
+                        outln!(out, "let remaining = initial_value.get(length..)");
                         outln!(out.indent(), ".ok_or(ParseError::InsufficientData)?;");
                     }
                 }

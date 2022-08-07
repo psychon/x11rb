@@ -12503,12 +12503,17 @@ pub struct DeviceClass {
     pub data: DeviceClassData,
 }
 impl TryParse for DeviceClass {
-    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
         let (type_, remaining) = u16::try_parse(remaining)?;
         let (len, remaining) = u16::try_parse(remaining)?;
         let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
         let (data, remaining) = DeviceClassData::try_parse(remaining, u16::from(type_))?;
         let result = DeviceClass { len, sourceid, data };
+        let length = u32::from(len).checked_mul(4u32).ok_or(ParseError::InvalidExpression)?.try_to_usize()?;
+        let _ = remaining;
+        let remaining = initial_value.get(length..)
+            .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
     }
 }
