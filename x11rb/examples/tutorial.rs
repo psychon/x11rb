@@ -1238,28 +1238,7 @@ pub struct RenamedKeyPressEvent {
 // those which have been described above.
 
 fn print_modifiers(mask: x11rb::protocol::xproto::KeyButMask) {
-    let mods = [
-        (KeyButMask::SHIFT, "Shift"),
-        (KeyButMask::LOCK, "Lock"),
-        (KeyButMask::CONTROL, "Ctrl"),
-        (KeyButMask::MOD1, "Alt"),
-        (KeyButMask::MOD2, "Mod2"),
-        (KeyButMask::MOD3, "Mod3"),
-        (KeyButMask::MOD4, "Mod4"),
-        (KeyButMask::MOD5, "Mod5"),
-        (KeyButMask::BUTTON1, "Button1"),
-        (KeyButMask::BUTTON2, "Button2"),
-        (KeyButMask::BUTTON3, "Button3"),
-        (KeyButMask::BUTTON4, "Button4"),
-        (KeyButMask::BUTTON5, "Button5"),
-    ];
-
-    let active = mods
-        .iter()
-        .filter(|(m, _)| u16::from(mask) & u16::from(*m) != 0) // FIXME: This should be made nicer
-        .map(|(_, name)| name)
-        .collect::<Vec<_>>();
-    println!("Modifier mask: {:?}", active);
+    println!("Modifier mask: {:#?}", mask);
 }
 
 fn example7() -> Result<(), Box<dyn Error>> {
