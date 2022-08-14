@@ -30,7 +30,7 @@ pub(super) fn handle_request(request_def: &xcbdefs::RequestDef, out: &mut Output
 /// ```
 /// // First, we have to 'invent' a GetPropertyReply.
 /// let reply = x11rb_protocol::protocol::xproto::GetPropertyReply {{
-///     format: {},
+///     format: {width},
 ///     sequence: 0,
 ///     length: 0, // This value is incorrect
 ///     type_: 0, // This value is incorrect
