@@ -76,7 +76,7 @@ fn enqueue_packet_test(c: &mut Criterion) {
                     v[0] = ind;
 
                     // copy our_seqno to bytes 3 and 4
-                    (&mut v[2..4]).copy_from_slice(&our_seqno.to_ne_bytes());
+                    v[2..4].copy_from_slice(&our_seqno.to_ne_bytes());
 
                     v
                 };
@@ -190,7 +190,7 @@ fn send_and_receive_request(c: &mut Criterion) {
                     let seq_trunc = seq as u16;
 
                     // insert the sequence number at positions 2 and 3
-                    (&mut packet[2..4]).copy_from_slice(&seq_trunc.to_ne_bytes());
+                    packet[2..4].copy_from_slice(&seq_trunc.to_ne_bytes());
 
                     // enqueue the packet
                     conn.enqueue_packet(black_box(replace(&mut packet, vec![0u8; 32])));
