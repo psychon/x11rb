@@ -21,7 +21,7 @@ serde = { version = "1", features = ["derive"], optional = true }
 criterion = "0.3"
 
 [target.'cfg(unix)'.dependencies.nix]
-version = "0.24"
+version = "0.25"
 default-features = false
 features = ["fs"]
 optional = true
