@@ -1488,12 +1488,7 @@ fn example8() -> Result<(), Box<dyn Error>> {
     let window = conn.generate_id()?;
     let values = CreateWindowAux::default()
         .background_pixel(screen.white_pixel)
-        .event_mask(
-            EventMask::KEY_RELEASE
-                | EventMask::BUTTON_PRESS
-                | EventMask::EXPOSURE
-                | EventMask::POINTER_MOTION,
-        );
+        .event_mask(EventMask::KEY_RELEASE | EventMask::EXPOSURE);
     conn.create_window(
         screen.root_depth,
         window,
