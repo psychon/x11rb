@@ -83,7 +83,7 @@ fn get_setup_data() -> Vec<u8> {
 #[test]
 fn parse_setup() -> Result<(), ParseError> {
     let setup = get_setup_data();
-    let (setup, remaining) = Setup::try_parse(&*setup)?;
+    let (setup, remaining) = Setup::try_parse(&setup)?;
 
     assert_eq!(remaining.len(), 0);
 
