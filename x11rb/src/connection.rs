@@ -97,7 +97,7 @@ pub trait RequestConnection {
             }
         };
         let (buf, fds) = request.serialize(opcode);
-        self.send_request_with_reply(&[IoSlice::new(&*buf)], fds)
+        self.send_request_with_reply(&[IoSlice::new(&buf)], fds)
     }
 
     /// Send a request with a reply containing file descriptors to the server.
@@ -147,7 +147,7 @@ pub trait RequestConnection {
             }
         };
         let (buf, fds) = request.serialize(opcode);
-        self.send_request_with_reply_with_fds(&[IoSlice::new(&*buf)], fds)
+        self.send_request_with_reply_with_fds(&[IoSlice::new(&buf)], fds)
     }
 
     /// Send a request without a reply to the server.
@@ -195,7 +195,7 @@ pub trait RequestConnection {
             }
         };
         let (buf, fds) = request.serialize(opcode);
-        self.send_request_without_reply(&[IoSlice::new(&*buf)], fds)
+        self.send_request_without_reply(&[IoSlice::new(&buf)], fds)
     }
 
     /// A reply to an error should be discarded.

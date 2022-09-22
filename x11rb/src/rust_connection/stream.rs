@@ -165,7 +165,7 @@ pub trait Stream {
     fn write_vectored(&self, bufs: &[IoSlice<'_>], fds: &mut Vec<RawFdContainer>) -> Result<usize> {
         for buf in bufs {
             if !buf.is_empty() {
-                return self.write(&**buf, fds);
+                return self.write(buf, fds);
             }
         }
         Ok(0)
