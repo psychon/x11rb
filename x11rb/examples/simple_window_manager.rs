@@ -363,7 +363,7 @@ impl<'a, C: Connection> WmState<'a, C> {
                     [self.wm_delete_window, 0, 0, 0, 0],
                 );
                 self.conn
-                    .send_event(false, state.window, EventMask::NO_EVENT, &event)?;
+                    .send_event(false, state.window, EventMask::NO_EVENT, event)?;
             }
         }
         Ok(())
