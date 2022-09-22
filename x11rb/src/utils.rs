@@ -73,7 +73,7 @@ mod unsafe_code {
 
     impl AsRef<[u8]> for CSlice {
         fn as_ref(&self) -> &[u8] {
-            &**self
+            self
         }
     }
 
