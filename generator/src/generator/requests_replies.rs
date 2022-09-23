@@ -259,7 +259,7 @@ pub(super) fn generate(out: &mut Output, module: &xcbdefs::Module, mut enum_case
         outln!(out, "match major_opcode {{");
         out.indented(|out| {
             let xproto_ns = module.namespace("xproto").unwrap();
-            for def in sorted_requests(&*xproto_ns) {
+            for def in sorted_requests(&xproto_ns) {
                 outln!(out, "{} => return Some(\"{}\"),", def.opcode, def.name);
             }
             outln!(out, "_ => (),");

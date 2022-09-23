@@ -30,7 +30,7 @@ pub(super) fn emit_switch_type(
         assert!(case_align.internal_align <= case_align.begin.align());
         assert_eq!(case_align.begin.offset() % case_align.internal_align, 0);
 
-        let case_deducible_fields = gather_deducible_fields(&*case.fields.borrow());
+        let case_deducible_fields = gather_deducible_fields(&case.fields.borrow());
         let mut single_field_index =
             if case_has_single_visible_field(generator, case, &case_deducible_fields) {
                 Some(
@@ -88,14 +88,14 @@ pub(super) fn emit_switch_type(
             let case_fields = case.fields.borrow();
             let ext_params = case.external_params.borrow();
 
-            generator.filter_derives_for_fields(&mut derives, &*case_fields, false);
+            generator.filter_derives_for_fields(&mut derives, &case_fields, false);
             struct_type::emit_struct_type(
                 generator,
                 &type_name,
                 &type_name,
                 derives,
-                &*case_fields,
-                &*ext_params,
+                &case_fields,
+                &ext_params,
                 false,
                 generate_try_parse,
                 StructSizeConstraint::None,
@@ -119,7 +119,7 @@ pub(super) fn emit_switch_type(
     let mut derives = Derives::all();
     derives.default_ = false;
     for case in switch.cases.iter() {
-        generator.filter_derives_for_fields(&mut derives, &*case.fields.borrow(), false);
+        generator.filter_derives_for_fields(&mut derives, &case.fields.borrow(), false);
     }
     let mut derives = derives.to_list();
     if switch.kind == xcbdefs::SwitchKind::BitCase {
@@ -455,7 +455,7 @@ fn emit_switch_try_parse(
                                 outln!(out, "let remaining = outer_remaining;");
                                 let case_fields = case.fields.borrow();
                                 NamespaceGenerator::emit_let_value_for_dynamic_align(
-                                    &*case_fields,
+                                    &case_fields,
                                     out,
                                 );
                                 for field in case_fields.iter() {
@@ -552,7 +552,7 @@ fn emit_switch_try_parse(
                                 outln!(out, "let remaining = outer_remaining;");
                                 let case_fields = case.fields.borrow();
                                 NamespaceGenerator::emit_let_value_for_dynamic_align(
-                                    &*case_fields,
+                                    &case_fields,
                                     out,
                                 );
                                 for field in case_fields.iter() {
@@ -628,7 +628,7 @@ fn emit_fixed_size_switch_serialize(
     assert!(switch.kind == xcbdefs::SwitchKind::Case);
 
     let external_params = switch.external_params.borrow();
-    let ext_params_arg_defs = generator.ext_params_to_arg_defs(true, &*external_params);
+    let ext_params_arg_defs = generator.ext_params_to_arg_defs(true, &external_params);
     //let ext_params_call_args =
     //    self.ext_params_to_call_args(true, to_rust_variable_name, &*external_params);
 
@@ -657,7 +657,7 @@ fn emit_fixed_size_switch_serialize(
                             let fields = case.fields.borrow();
                             let single_field = &fields[*index];
                             let single_field_name = single_field.name().unwrap();
-                            let deducible_fields = gather_deducible_fields(&*fields);
+                            let deducible_fields = gather_deducible_fields(&fields);
                             outln!(
                                 out,
                                 "{}::{}({}) => {{",
@@ -715,7 +715,7 @@ fn emit_fixed_size_switch_serialize(
                         let fields = case.fields.borrow();
                         let single_field = &fields[*index];
                         let single_field_name = single_field.name().unwrap();
-                        let deducible_fields = gather_deducible_fields(&*fields);
+                        let deducible_fields = gather_deducible_fields(&fields);
                         let qual = if needs_match_by_value(single_field) {
                             ""
                         } else {
@@ -772,9 +772,9 @@ fn emit_variable_size_switch_serialize(
     out: &mut Output,
 ) {
     let external_params = switch.external_params.borrow();
-    let ext_params_arg_defs = generator.ext_params_to_arg_defs(true, &*external_params);
+    let ext_params_arg_defs = generator.ext_params_to_arg_defs(true, &external_params);
     let ext_params_call_args =
-        generator.ext_params_to_call_args(true, to_rust_variable_name, &*external_params);
+        generator.ext_params_to_call_args(true, to_rust_variable_name, &external_params);
 
     if external_params.is_empty() {
         outln!(out, "impl Serialize for {} {{", name);
@@ -834,7 +834,7 @@ fn emit_variable_size_switch_serialize(
                             let single_field = &fields[*index];
                             let single_field_name = single_field.name().unwrap();
                             let rust_single_field_name = to_rust_variable_name(single_field_name);
-                            let deducible_fields = gather_deducible_fields(&*fields);
+                            let deducible_fields = gather_deducible_fields(&fields);
                             let qual = if needs_match_by_value(single_field) {
                                 ""
                             } else {
@@ -883,7 +883,7 @@ fn emit_variable_size_switch_serialize(
                             let ext_params_call_args = generator.ext_params_to_call_args(
                                 true,
                                 to_rust_variable_name,
-                                &*case.external_params.borrow(),
+                                &case.external_params.borrow(),
                             );
                             outln!(
                                 out,
@@ -912,7 +912,7 @@ fn emit_variable_size_switch_serialize(
                                 let single_field_name = single_field.name().unwrap();
                                 let rust_single_field_name =
                                     to_rust_variable_name(single_field_name);
-                                let deducible_fields = gather_deducible_fields(&*fields);
+                                let deducible_fields = gather_deducible_fields(&fields);
                                 outln!(
                                     out,
                                     "{}::{}({}) => {{",
