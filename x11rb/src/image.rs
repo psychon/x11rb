@@ -484,7 +484,7 @@ impl TryFrom<XprotoImageOrder> for ImageOrder {
 }
 
 /// The description of an image.
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub struct Image<'a> {
     /// Width in pixels.
     width: u16,
@@ -508,23 +508,6 @@ pub struct Image<'a> {
 
     /// The image data.
     data: Cow<'a, [u8]>,
-}
-
-impl<'a> ToOwned for Image<'a> {
-    // TODO: Can this somehow be turned into Image<'static>?
-    type Owned = Self;
-
-    fn to_owned(&self) -> Self::Owned {
-        Image {
-            width: self.width,
-            height: self.height,
-            scanline_pad: self.scanline_pad,
-            depth: self.depth,
-            bits_per_pixel: self.bits_per_pixel,
-            byte_order: self.byte_order,
-            data: self.data.into_owned(),
-        }
-    }
 }
 
 impl<'a> Image<'a> {
