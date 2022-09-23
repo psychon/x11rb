@@ -39,7 +39,7 @@ mod test {
         let mut file_path = PathBuf::from(base.as_ref());
         file_path.push(path.as_ref());
         if let Some(parent) = file_path.parent() {
-            fs::create_dir_all(&parent).unwrap();
+            fs::create_dir_all(parent).unwrap();
         }
         fs::write(&file_path, content).unwrap();
         file_path
