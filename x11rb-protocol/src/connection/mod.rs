@@ -122,8 +122,8 @@ impl Connection {
 
     /// Ignore the reply for a request that was previously sent.
     pub fn discard_reply(&mut self, seqno: SequenceNumber, mode: DiscardMode) {
-        if let Some(entry) = self.sent_requests.iter_mut().find(|r| r.seqno == seqno) {
-            entry.discard_mode = Some(mode);
+        if let Ok(index) = self.sent_requests.binary_search_by_key(&seqno, |r| r.seqno) {
+            self.sent_requests[index].discard_mode = Some(mode);
         }
         match mode {
             DiscardMode::DiscardReplyAndError => self.pending_replies.retain(|r| r.0 != seqno),
