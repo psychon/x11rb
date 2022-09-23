@@ -203,7 +203,7 @@ impl XCBConnection {
             count: new_bufs.len(),
             ext: null_mut(), // Not needed since we always use raw
             opcode: 0,
-            isvoid: if has_reply { 0 } else { 1 },
+            isvoid: u8::from(!has_reply),
         };
         let mut flags = raw_ffi::send_request_flags::RAW;
         assert!(has_reply || !reply_has_fds);
