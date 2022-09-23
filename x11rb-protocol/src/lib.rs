@@ -9,7 +9,7 @@
 #![forbid(
     missing_copy_implementations,
     missing_debug_implementations,
-    private_doc_tests,
+    rustdoc::private_doc_tests,
     //single_use_lifetimes,
     trivial_casts,
     trivial_numeric_casts,
