@@ -522,7 +522,7 @@ impl<'a> ToOwned for Image<'a> {
             depth: self.depth,
             bits_per_pixel: self.bits_per_pixel,
             byte_order: self.byte_order,
-            data: self.data.to_owned(),
+            data: self.data.into_owned(),
         }
     }
 }
