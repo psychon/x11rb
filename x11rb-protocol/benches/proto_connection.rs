@@ -1,7 +1,7 @@
 //! Benchmark the `x11rb_protocol::Connection` type's method, at varying levels of
 //! capacity.
 
-use criterion::{black_box, criterion_group, criterion_main, Criterion};
+use criterion::{black_box, criterion_group, criterion_main, BatchSize, Criterion};
 use std::{
     io::{Read, Write},
     mem::{replace, size_of},
@@ -12,6 +12,7 @@ use x11rb_protocol::{
     connection::{Connection, ReplyFdKind},
     protocol::xproto::{Depth, Rectangle, Screen},
     x11_utils::{Serialize, TryParse},
+    DiscardMode, SequenceNumber,
 };
 
 #[cfg(unix)]
@@ -324,12 +325,70 @@ fn serialize_struct(c: &mut Criterion) {
     }
 }
 
+fn discard_reply(c: &mut Criterion) {
+    // Measure the performance of discard_reply()
+
+    fn get_connection_and_seqnos() -> (Connection, Vec<SequenceNumber>) {
+        let mut conn = Connection::new();
+
+        let seqnos = (0..pow(2, 13))
+            .map(|_| conn.send_request(ReplyFdKind::NoReply).unwrap())
+            .collect();
+
+        (conn, seqnos)
+    }
+
+    let mut group = c.benchmark_group("discard_reply");
+
+    group.bench_function("discard oldest", |b| {
+        b.iter_batched(
+            get_connection_and_seqnos,
+            |(mut conn, seqnos)| {
+                conn.discard_reply(*seqnos.first().unwrap(), DiscardMode::DiscardReply)
+            },
+            BatchSize::SmallInput,
+        );
+    });
+    group.bench_function("discard newest", |b| {
+        b.iter_batched(
+            get_connection_and_seqnos,
+            |(mut conn, seqnos)| {
+                conn.discard_reply(*seqnos.last().unwrap(), DiscardMode::DiscardReply)
+            },
+            BatchSize::SmallInput,
+        );
+    });
+    group.bench_function("discard all forward", |b| {
+        b.iter_batched(
+            get_connection_and_seqnos,
+            |(mut conn, seqnos)| {
+                for seqno in seqnos {
+                    conn.discard_reply(seqno, DiscardMode::DiscardReply)
+                }
+            },
+            BatchSize::SmallInput,
+        );
+    });
+    group.bench_function("discard all backward", |b| {
+        b.iter_batched(
+            get_connection_and_seqnos,
+            |(mut conn, seqnos)| {
+                for seqno in seqnos.into_iter().rev() {
+                    conn.discard_reply(seqno, DiscardMode::DiscardReply)
+                }
+            },
+            BatchSize::SmallInput,
+        );
+    });
+}
+
 criterion_group!(
     benches,
     enqueue_packet_test,
     send_and_receive_request,
     try_parse_small_struct,
     try_parse_large_struct,
-    serialize_struct
+    serialize_struct,
+    discard_reply,
 );
 criterion_main!(benches);
