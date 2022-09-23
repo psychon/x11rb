@@ -186,12 +186,12 @@ fn test_poly_segment() -> Result<(), ReplyError> {
         x11rb::protocol::xproto::POLY_SEGMENT_REQUEST,
         0, // padding
     ];
-    expected.extend(&length.to_ne_bytes()); // length, not in the xml
-    expected.extend(&drawable.to_ne_bytes());
-    expected.extend(&gc.to_ne_bytes());
+    expected.extend(length.to_ne_bytes()); // length, not in the xml
+    expected.extend(drawable.to_ne_bytes());
+    expected.extend(gc.to_ne_bytes());
     // Segments
     for x in 1u16..9u16 {
-        expected.extend(&x.to_ne_bytes());
+        expected.extend(x.to_ne_bytes());
     }
     conn.check_requests(&[(false, expected)]);
     Ok(())
@@ -219,12 +219,12 @@ fn test_big_requests() -> Result<(), ConnectionError> {
         0,
     ];
     // Actual length
-    expected.extend(&length.to_ne_bytes());
+    expected.extend(length.to_ne_bytes());
 
-    expected.extend(&drawable.to_ne_bytes());
-    expected.extend(&gc.to_ne_bytes());
-    expected.extend(&x.to_ne_bytes());
-    expected.extend(&y.to_ne_bytes());
+    expected.extend(drawable.to_ne_bytes());
+    expected.extend(gc.to_ne_bytes());
+    expected.extend(x.to_ne_bytes());
+    expected.extend(y.to_ne_bytes());
     expected.extend(big_buffer.iter());
     expected.extend((0..padding).map(|_| 0));
 
@@ -264,9 +264,9 @@ fn test_send_event() -> Result<(), ConnectionError> {
     conn.send_event(propagate, destination, event_mask, event)?;
 
     let mut expected = vec![x11rb::protocol::xproto::SEND_EVENT_REQUEST, propagate as _];
-    expected.extend(&((12u16 + 32u16) / 4).to_ne_bytes());
-    expected.extend(&destination.to_ne_bytes());
-    expected.extend(&u32::from(event_mask).to_ne_bytes());
+    expected.extend(((12u16 + 32u16) / 4).to_ne_bytes());
+    expected.extend(destination.to_ne_bytes());
+    expected.extend(u32::from(event_mask).to_ne_bytes());
     expected.extend(buffer.iter());
     conn.check_requests(&[(false, expected)]);
     Ok(())
@@ -284,10 +284,10 @@ fn test_get_keyboard_mapping() -> Result<(), ConnectionError> {
     let length: u16 = 2;
     expected.push(101); // request major code
     expected.push(0); // padding
-    expected.extend(&length.to_ne_bytes()); // length, not in the xml
+    expected.extend(length.to_ne_bytes()); // length, not in the xml
     expected.push(1); // first keycode
     expected.push(2); // length
-    expected.extend(&[0, 0]); // padding
+    expected.extend([0, 0]); // padding
 
     conn.check_requests(&[(false, expected)]);
     Ok(())
@@ -313,7 +313,7 @@ fn test_set_modifier_mapping() -> Result<(), ConnectionError> {
     let length: u16 = 5;
     expected.push(118); // request major code
     expected.push(2); // keycodes per modifier
-    expected.extend(&length.to_ne_bytes()); // length, not in the xml
+    expected.extend(length.to_ne_bytes()); // length, not in the xml
     expected.extend(1u8..17u8);
 
     conn.check_requests(&[(false, expected)]);

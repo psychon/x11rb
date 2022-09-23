@@ -47,7 +47,7 @@ pub trait ConnectionExt: XProtoConnectionExt {
     {
         let mut data_u8 = Vec::with_capacity(data.len() * 2);
         for item in data {
-            data_u8.extend(&item.to_ne_bytes());
+            data_u8.extend(item.to_ne_bytes());
         }
         self.change_property(
             mode,
@@ -75,7 +75,7 @@ pub trait ConnectionExt: XProtoConnectionExt {
     {
         let mut data_u8 = Vec::with_capacity(data.len() * 4);
         for item in data {
-            data_u8.extend(&item.to_ne_bytes());
+            data_u8.extend(item.to_ne_bytes());
         }
         self.change_property(
             mode,
