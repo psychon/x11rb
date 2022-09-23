@@ -201,7 +201,7 @@ fn test_query_text_extents() {
     };
     let mut body = vec![];
     add_ne!(body, 0x1234_5678u32);
-    body.extend(&[0xbc, 0x9a, 0xf0, 0xde]);
+    body.extend([0xbc, 0x9a, 0xf0, 0xde]);
     let r = QueryTextExtentsRequest::try_parse_request(header, &body).unwrap();
     assert_eq!(
         r,
@@ -231,7 +231,7 @@ fn test_query_text_extents_odd_length() {
     };
     let mut body = vec![];
     add_ne!(body, 0x1234_5678u32);
-    body.extend(&[0xbc, 0x9a, 0xf0, 0xde]);
+    body.extend([0xbc, 0x9a, 0xf0, 0xde]);
     let r = QueryTextExtentsRequest::try_parse_request(header, &body).unwrap();
     assert_eq!(
         r,

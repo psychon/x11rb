@@ -144,7 +144,7 @@ pub(super) fn generate_request(
         request_def.name,
     );
 
-    let deducible_fields = gather_deducible_fields(&*request_fields);
+    let deducible_fields = gather_deducible_fields(&request_fields);
 
     if switch_fields.len() == 1 {
         if let Some(aux_start_align) = switch_fields[0].required_start_align {
@@ -265,13 +265,13 @@ pub(super) fn generate_request(
         ));
         let reply_fields = reply.fields.borrow();
         let mut reply_derives = Derives::all();
-        generator.filter_derives_for_fields(&mut reply_derives, &*reply_fields, false);
+        generator.filter_derives_for_fields(&mut reply_derives, &reply_fields, false);
         struct_type::emit_struct_type(
             generator,
             &reply_struct_name,
             &name,
             reply_derives,
-            &*reply_fields,
+            &reply_fields,
             &[],
             false,
             true,
@@ -674,7 +674,7 @@ fn emit_request_struct(
                                         format!("self.{}", to_rust_variable_name(name))
                                     }
                                 },
-                                &*switch_field.external_params.borrow(),
+                                &switch_field.external_params.borrow(),
                             )
                         );
                         if let Some(field_size) = switch_field.size() {

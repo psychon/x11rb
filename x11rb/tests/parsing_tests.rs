@@ -12,16 +12,16 @@ fn get_setup_data() -> Vec<u8> {
     let length: u16 =
         header + vendor_len + 2 * u16::from(num_pixmap_formats) + u16::from(roots_len);
 
-    s.extend(&[1, 0]); // Status "success" and padding
-    s.extend(&11u16.to_ne_bytes()); // major version
-    s.extend(&0u16.to_ne_bytes()); // minor version
-    s.extend(&length.to_ne_bytes()); // length
-    s.extend(&0x1234_5678u32.to_ne_bytes()); // release number
-    s.extend(&0x1000_0000u32.to_ne_bytes()); // resource id base
-    s.extend(&0x0000_00ffu32.to_ne_bytes()); // resource id mask
-    s.extend(&0u32.to_ne_bytes()); // motion buffer size
-    s.extend(&6u16.to_ne_bytes()); // vendor length
-    s.extend(&0x100u16.to_ne_bytes()); // maximum request length
+    s.extend([1, 0]); // Status "success" and padding
+    s.extend(11u16.to_ne_bytes()); // major version
+    s.extend(0u16.to_ne_bytes()); // minor version
+    s.extend(length.to_ne_bytes()); // length
+    s.extend(0x1234_5678u32.to_ne_bytes()); // release number
+    s.extend(0x1000_0000u32.to_ne_bytes()); // resource id base
+    s.extend(0x0000_00ffu32.to_ne_bytes()); // resource id mask
+    s.extend(0u32.to_ne_bytes()); // motion buffer size
+    s.extend(6u16.to_ne_bytes()); // vendor length
+    s.extend(0x100u16.to_ne_bytes()); // maximum request length
     s.push(1); // roots length
     s.push(num_pixmap_formats); // pixmap formats length
     s.push(1); // image byte order: MSB first
@@ -30,7 +30,7 @@ fn get_setup_data() -> Vec<u8> {
     s.push(0); // scanline pad
     s.push(0); // min keycode
     s.push(0xff); // max keycode
-    s.extend(&[0, 0, 0, 0]); // padding
+    s.extend([0, 0, 0, 0]); // padding
     assert_eq!(s.len(), usize::from(header) * 4);
 
     s.extend("Vendor  ".bytes()); // vendor + padding
@@ -40,40 +40,40 @@ fn get_setup_data() -> Vec<u8> {
     s.push(15); // depth
     s.push(42); // bits per pixel
     s.push(21); // scanline pad
-    s.extend(&[0, 0, 0, 0, 0]); // padding
+    s.extend([0, 0, 0, 0, 0]); // padding
     assert_eq!(
         s.len(),
         4 * usize::from(header + vendor_len + 2 * u16::from(num_pixmap_formats))
     );
 
     // Screens, we said above there is one entry
-    s.extend(&1u32.to_ne_bytes()); // root window
-    s.extend(&2u32.to_ne_bytes()); // default colormap
-    s.extend(&3u32.to_ne_bytes()); // white pixel
-    s.extend(&4u32.to_ne_bytes()); // black pixel
-    s.extend(&0u32.to_ne_bytes()); // current input masks
-    s.extend(&0u16.to_ne_bytes()); // width in pixels
-    s.extend(&0u16.to_ne_bytes()); // height in pixels
-    s.extend(&0u16.to_ne_bytes()); // width in mm
-    s.extend(&0u16.to_ne_bytes()); // height in mm
-    s.extend(&0u16.to_ne_bytes()); // min installed maps
-    s.extend(&0u16.to_ne_bytes()); // max installed maps
-    s.extend(&0u32.to_ne_bytes()); // root visual
-    s.extend(&[0, 0, 0, 1]); // backing stores, save unders, root depths, allowed depths len
+    s.extend(1u32.to_ne_bytes()); // root window
+    s.extend(2u32.to_ne_bytes()); // default colormap
+    s.extend(3u32.to_ne_bytes()); // white pixel
+    s.extend(4u32.to_ne_bytes()); // black pixel
+    s.extend(0u32.to_ne_bytes()); // current input masks
+    s.extend(0u16.to_ne_bytes()); // width in pixels
+    s.extend(0u16.to_ne_bytes()); // height in pixels
+    s.extend(0u16.to_ne_bytes()); // width in mm
+    s.extend(0u16.to_ne_bytes()); // height in mm
+    s.extend(0u16.to_ne_bytes()); // min installed maps
+    s.extend(0u16.to_ne_bytes()); // max installed maps
+    s.extend(0u32.to_ne_bytes()); // root visual
+    s.extend([0, 0, 0, 1]); // backing stores, save unders, root depths, allowed depths len
 
     // one depth entry
-    s.extend(&[99, 0]); // depth and padding
-    s.extend(&1u16.to_ne_bytes()); // width visuals len
-    s.extend(&[0, 0, 0, 0]); // padding
+    s.extend([99, 0]); // depth and padding
+    s.extend(1u16.to_ne_bytes()); // width visuals len
+    s.extend([0, 0, 0, 0]); // padding
 
     // one visualtype entry
-    s.extend(&80u32.to_ne_bytes()); // visualid
-    s.extend(&[2, 4]); // class and bits per rgb value
-    s.extend(&81u16.to_ne_bytes()); // colormap entries
-    s.extend(&82u32.to_ne_bytes()); // red mask
-    s.extend(&83u32.to_ne_bytes()); // green mask
-    s.extend(&84u32.to_ne_bytes()); // blue mask
-    s.extend(&[0, 0, 0, 0]); // padding
+    s.extend(80u32.to_ne_bytes()); // visualid
+    s.extend([2, 4]); // class and bits per rgb value
+    s.extend(81u16.to_ne_bytes()); // colormap entries
+    s.extend(82u32.to_ne_bytes()); // red mask
+    s.extend(83u32.to_ne_bytes()); // green mask
+    s.extend(84u32.to_ne_bytes()); // blue mask
+    s.extend([0, 0, 0, 0]); // padding
 
     assert_eq!(s.len(), usize::from(length) * 4);
 
@@ -83,7 +83,7 @@ fn get_setup_data() -> Vec<u8> {
 #[test]
 fn parse_setup() -> Result<(), ParseError> {
     let setup = get_setup_data();
-    let (setup, remaining) = Setup::try_parse(&*setup)?;
+    let (setup, remaining) = Setup::try_parse(&setup)?;
 
     assert_eq!(remaining.len(), 0);
 
@@ -141,13 +141,13 @@ fn parse_xi_get_property_reply_format_0() {
         1, // response_type
         0, // pad
     ];
-    s.extend(&0u16.to_ne_bytes()); // sequence
-    s.extend(&0u32.to_ne_bytes()); // length
-    s.extend(&0u32.to_ne_bytes()); // type
-    s.extend(&0u32.to_ne_bytes()); // bytes_after
-    s.extend(&0u32.to_ne_bytes()); // num_items
+    s.extend(0u16.to_ne_bytes()); // sequence
+    s.extend(0u32.to_ne_bytes()); // length
+    s.extend(0u32.to_ne_bytes()); // type
+    s.extend(0u32.to_ne_bytes()); // bytes_after
+    s.extend(0u32.to_ne_bytes()); // num_items
     s.push(0); // format
-    s.extend(&[0; 11]); // pad
+    s.extend([0; 11]); // pad
 
     use x11rb::protocol::xinput::{XIGetPropertyItems, XIGetPropertyReply};
     let empty: &[u8] = &[];

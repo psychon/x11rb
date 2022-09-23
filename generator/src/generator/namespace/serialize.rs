@@ -265,7 +265,7 @@ pub(super) fn emit_field_serialize_into(
                         wrap_field_ref(&to_rust_variable_name(name))
                     }
                 },
-                &*switch_field.external_params.borrow(),
+                &switch_field.external_params.borrow(),
             );
             outln!(
                 out,

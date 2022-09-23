@@ -184,7 +184,7 @@ fn generate_creator(
             }),
     );
     let request_fields = request_def.fields.borrow();
-    let deducible_fields = gather_deducible_fields(&*request_fields);
+    let deducible_fields = gather_deducible_fields(&request_fields);
 
     if request_ext.is_some() {
         uses.insert(request_ns.header.clone());

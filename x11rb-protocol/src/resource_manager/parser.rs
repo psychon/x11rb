@@ -295,7 +295,7 @@ mod test {
             ),
         ];
         for (data, expected) in tests.iter() {
-            let result = parse_query(*data);
+            let result = parse_query(data);
             assert_eq!(result.as_ref(), Some(expected), "while parsing {:?}", data);
         }
     }
@@ -310,7 +310,7 @@ mod test {
             b"?.second",
         ];
         for data in tests.iter() {
-            let result = parse_query(*data);
+            let result = parse_query(data);
             assert!(
                 result.is_none(),
                 "Unexpected success parsing '{:?}': {:?}",
@@ -558,7 +558,7 @@ mod test {
             b"F~rst: 1",
         ];
         for data in tests.iter() {
-            match parse_entry(*data) {
+            match parse_entry(data) {
                 (Ok(v), _) => panic!("Unexpected success parsing '{:?}': {:?}", data, v),
                 (Err(_), b"") => {}
                 (Err(_), remaining) => panic!(

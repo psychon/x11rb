@@ -200,14 +200,14 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
 
         let fields = event_full_def.fields.borrow();
         let mut derives = Derives::all();
-        self.filter_derives_for_fields(&mut derives, &*fields, false);
+        self.filter_derives_for_fields(&mut derives, &fields, false);
 
         struct_type::emit_struct_type(
             self,
             &full_name,
             name,
             derives,
-            &*fields,
+            &fields,
             &[],
             false,
             true,
@@ -219,8 +219,8 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         );
 
         if !event_full_def.xge {
-            let deducible_fields = gather_deducible_fields(&*fields);
-            self.emit_event_or_error_serialize(&full_name, &*fields, &deducible_fields, out);
+            let deducible_fields = gather_deducible_fields(&fields);
+            self.emit_event_or_error_serialize(&full_name, &fields, &deducible_fields, out);
         }
 
         special_cases::handle_event(name, event_full_def, out);
@@ -360,8 +360,8 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             &rust_name,
             &rust_name,
             derives,
-            &*struct_def.fields.borrow(),
-            &*struct_def.external_params.borrow(),
+            &struct_def.fields.borrow(),
+            &struct_def.external_params.borrow(),
             false,
             true,
             size_constraint,
@@ -1422,7 +1422,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         } else {
             drop(caches);
             let mut derives = Derives::all();
-            self.filter_derives_for_fields(&mut derives, &*struct_def.fields.borrow(), false);
+            self.filter_derives_for_fields(&mut derives, &struct_def.fields.borrow(), false);
             self.caches.borrow_mut().derives.insert(id, derives);
             derives
         }
@@ -1465,7 +1465,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                     for case in switch_field.cases.iter() {
                         self.filter_derives_for_fields(
                             derives,
-                            &*case.fields.borrow(),
+                            &case.fields.borrow(),
                             will_use_cows,
                         );
                     }

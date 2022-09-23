@@ -259,7 +259,7 @@ where
                 let mut theme_dir = PathBuf::new();
                 // Does the path begin with '~'?
                 if let Some(mut path) = path.strip_prefix('~') {
-                    theme_dir.push(&home);
+                    theme_dir.push(home);
                     // Skip a path separator if there is one
                     if path.chars().next().map(std::path::is_separator) == Some(true) {
                         path = &path[1..];

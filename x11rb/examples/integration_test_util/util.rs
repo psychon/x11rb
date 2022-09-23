@@ -38,14 +38,14 @@ mod util {
                 [wm_delete_window.reply().unwrap().atom, 0, 0, 0, 0],
             );
 
-            if let Err(err) = conn.send_event(false, window, EventMask::NO_EVENT, &event) {
+            if let Err(err) = conn.send_event(false, window, EventMask::NO_EVENT, event) {
                 eprintln!("Error while sending event: {:?}", err);
             }
             if let Err(err) = conn.send_event(
                 false,
                 window,
                 EventMask::SUBSTRUCTURE_REDIRECT,
-                &event,
+                event,
             ) {
                 eprintln!("Error while sending event: {:?}", err);
             }
