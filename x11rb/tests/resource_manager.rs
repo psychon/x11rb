@@ -93,7 +93,7 @@ mod test {
     fn include_loop() {
         let dir = get_temporary_dir("include_loop");
         let file = write_file(
-            &dir,
+            dir,
             "loop.xresources",
             b"First: 1\n! Provoke an endless chain of self-inclusion\n#include \"loop.xresources\"\nSecond: 2\n",
         );
