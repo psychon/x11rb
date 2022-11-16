@@ -1,3 +1,36 @@
+# Version 0.11.0 (2022-XX-XX)
+
+New features:
+* All extensions are available in no-std mode.
+* Replies and events now implement `Serialize`.
+* Support length expressions in structs in the protocol XML representation.
+* Updated to xcb-proto 1.15.2 which brings support for the double buffering
+  extension, dri3 1.3, xfixes 6.0, xinput 2.4, among other things.
+* `x11rb::image::Image` now implements `Clone`.
+
+Fixes:
+* Fixed a broken link in the documentation.
+* The cairo-example now also works under KDE.
+
+Breaking changes:
+* Consider use of enums as masks when determining enum sizes and then use our
+  enum wrappers for mask fields. For example, all values of
+  `xproto::ConfigWindow` fit into `u8`, so previously this was the type used for
+  representing this enumeration. However, it is used as a mask for the
+  `value_mask` field of `ConfigureRequestEvent`, which has 16 bits. Thus,
+  `ConfigWindow` is now represented as `u16` and the `value_mask` field of
+  `ConfigureRequestEvent` now has type `ConfigWindow`.
+* Bump MSRV to 1.56 since `once_cell` switched to the 2021 edition.
+
+Minor changes:
+* Disable default features of nix crate.
+* Deal with warnings from newest clippy.
+* Improved unit test code coverage.
+* Updated versions of dependencies.
+* Switch to 2021 rust edition.
+* Speed up `discard_reply()` implementation in Rust for cases with many pending
+  replies via a binary search.
+
 # Version 0.10.1 (2022-06-15)
 
 Fixes:
