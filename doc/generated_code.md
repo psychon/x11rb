@@ -28,6 +28,8 @@ The following code is generated at the beginning of a module (example for
 //! specific errors, events, or requests.
 
 #![allow(clippy::too_many_arguments)]
+// The code generator is simpler if it can always use conversions
+#![allow(clippy::useless_conversion)]
 
 #[allow(unused_imports)]
 use alloc::borrow::Cow;
@@ -81,6 +83,7 @@ We must also be able to send structs to the server. This is handled through the
 
 ```rust
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Point {
     pub x: i16,
     pub y: i16,
@@ -133,6 +136,7 @@ represented implicitly as the length of the `visuals` `Vec`. To make this less
 confusing, a function `visuals_len` is generated.
 ```rust
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Depth {
     pub depth: u8,
     pub visuals: Vec<Visualtype>,
@@ -203,6 +207,7 @@ are generated.
 
 ```rust
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct BackingStore(u32);
 impl BackingStore {
     pub const NOT_USEFUL: Self = Self(0);
@@ -269,7 +274,8 @@ implementations of `BitOr` and `BitOrAssign`.
 
 ```rust
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct ConfigWindow(u8);
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct ConfigWindow(u16);
 impl ConfigWindow {
     pub const X: Self = Self(1 << 0);
     pub const Y: Self = Self(1 << 1);
@@ -279,28 +285,16 @@ impl ConfigWindow {
     pub const SIBLING: Self = Self(1 << 5);
     pub const STACK_MODE: Self = Self(1 << 6);
 }
-impl From<ConfigWindow> for u8 {
+impl From<ConfigWindow> for u16 {
     #[inline]
     fn from(input: ConfigWindow) -> Self {
         input.0
     }
 }
-impl From<ConfigWindow> for Option<u8> {
-    #[inline]
-    fn from(input: ConfigWindow) -> Self {
-        Some(input.0)
-    }
-}
-impl From<ConfigWindow> for u16 {
-    #[inline]
-    fn from(input: ConfigWindow) -> Self {
-        u16::from(input.0)
-    }
-}
 impl From<ConfigWindow> for Option<u16> {
     #[inline]
     fn from(input: ConfigWindow) -> Self {
-        Some(u16::from(input.0))
+        Some(input.0)
     }
 }
 impl From<ConfigWindow> for u32 {
@@ -318,6 +312,12 @@ impl From<ConfigWindow> for Option<u32> {
 impl From<u8> for ConfigWindow {
     #[inline]
     fn from(value: u8) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u16> for ConfigWindow {
+    #[inline]
+    fn from(value: u16) -> Self {
         Self(value)
     }
 }
@@ -335,7 +335,7 @@ impl core::fmt::Debug for ConfigWindow  {
         pretty_print_bitmask(fmt, self.0.into(), &variants)
     }
 }
-bitmask_binop!(ConfigWindow, u8);
+bitmask_binop!(ConfigWindow, u16);
 ```
 
 ## Unions
@@ -358,6 +358,7 @@ requested type in the accessor functions.
 
 ```rust
 #[derive(Debug, Copy, Clone)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ClientMessageData([u8; 20]);
 impl ClientMessageData {
     pub fn as_data8(&self) -> [u8; 20] {
@@ -538,6 +539,7 @@ impl From<[u32; 5]> for ClientMessageData {
 pub const KEY_PRESS_EVENT: u8 = 2;
 /// [SNIP]
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct KeyPressEvent {
     pub response_type: u8,
     pub detail: Keycode,
@@ -550,7 +552,7 @@ pub struct KeyPressEvent {
     pub root_y: i16,
     pub event_x: i16,
     pub event_y: i16,
-    pub state: u16,
+    pub state: KeyButMask,
     pub same_screen: bool,
 }
 impl TryParse for KeyPressEvent {
@@ -570,11 +572,81 @@ impl TryParse for KeyPressEvent {
         let (state, remaining) = u16::try_parse(remaining)?;
         let (same_screen, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
+        let state = state.into();
         let result = KeyPressEvent { response_type, detail, sequence, time, root, event, child, root_x, root_y, event_x, event_y, state, same_screen };
         let _ = remaining;
         let remaining = initial_value.get(32..)
             .ok_or(ParseError::InsufficientData)?;
         Ok((result, remaining))
+    }
+}
+impl Serialize for KeyPressEvent {
+    type Bytes = [u8; 32];
+    fn serialize(&self) -> [u8; 32] {
+        let response_type_bytes = self.response_type.serialize();
+        let detail_bytes = self.detail.serialize();
+        let sequence_bytes = self.sequence.serialize();
+        let time_bytes = self.time.serialize();
+        let root_bytes = self.root.serialize();
+        let event_bytes = self.event.serialize();
+        let child_bytes = self.child.serialize();
+        let root_x_bytes = self.root_x.serialize();
+        let root_y_bytes = self.root_y.serialize();
+        let event_x_bytes = self.event_x.serialize();
+        let event_y_bytes = self.event_y.serialize();
+        let state_bytes = u16::from(self.state).serialize();
+        let same_screen_bytes = self.same_screen.serialize();
+        [
+            response_type_bytes[0],
+            detail_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            time_bytes[0],
+            time_bytes[1],
+            time_bytes[2],
+            time_bytes[3],
+            root_bytes[0],
+            root_bytes[1],
+            root_bytes[2],
+            root_bytes[3],
+            event_bytes[0],
+            event_bytes[1],
+            event_bytes[2],
+            event_bytes[3],
+            child_bytes[0],
+            child_bytes[1],
+            child_bytes[2],
+            child_bytes[3],
+            root_x_bytes[0],
+            root_x_bytes[1],
+            root_y_bytes[0],
+            root_y_bytes[1],
+            event_x_bytes[0],
+            event_x_bytes[1],
+            event_y_bytes[0],
+            event_y_bytes[1],
+            state_bytes[0],
+            state_bytes[1],
+            same_screen_bytes[0],
+            0,
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(32);
+        self.response_type.serialize_into(bytes);
+        self.detail.serialize_into(bytes);
+        self.sequence.serialize_into(bytes);
+        self.time.serialize_into(bytes);
+        self.root.serialize_into(bytes);
+        self.event.serialize_into(bytes);
+        self.child.serialize_into(bytes);
+        self.root_x.serialize_into(bytes);
+        self.root_y.serialize_into(bytes);
+        self.event_x.serialize_into(bytes);
+        self.event_y.serialize_into(bytes);
+        u16::from(self.state).serialize_into(bytes);
+        self.same_screen.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 1]);
     }
 }
 impl From<&KeyPressEvent> for [u8; 32] {
@@ -590,7 +662,7 @@ impl From<&KeyPressEvent> for [u8; 32] {
         let root_y_bytes = input.root_y.serialize();
         let event_x_bytes = input.event_x.serialize();
         let event_y_bytes = input.event_y.serialize();
-        let state_bytes = input.state.serialize();
+        let state_bytes = u16::from(input.state).serialize();
         let same_screen_bytes = input.same_screen.serialize();
         [
             response_type_bytes[0],
@@ -682,6 +754,7 @@ This code is generated in the module in `x11rb-protocol`:
 /// Opcode for the NoOperation request
 pub const NO_OPERATION_REQUEST: u8 = 127;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct NoOperationRequest;
 impl NoOperationRequest {
     /// Serialize this request into bytes for the provided connection
@@ -734,7 +807,7 @@ where
 {
     let request0 = NoOperationRequest;
     let (bytes, fds) = request0.serialize();
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
 ```
@@ -761,6 +834,7 @@ There is again a structure generated in `x11rb-protocol` that represents the req
 /// Opcode for the GetInputFocus request
 pub const GET_INPUT_FOCUS_REQUEST: u8 = 43;
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetInputFocusRequest;
 impl GetInputFocusRequest {
     /// Serialize this request into bytes for the provided connection
@@ -808,6 +882,7 @@ impl crate::x11_utils::ReplyRequest for GetInputFocusRequest {
 The reply is handled similar to a `struct`:
 ```rust
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetInputFocusReply {
     pub revert_to: InputFocus,
     pub sequence: u16,
@@ -833,6 +908,39 @@ impl TryParse for GetInputFocusReply {
         Ok((result, remaining))
     }
 }
+impl Serialize for GetInputFocusReply {
+    type Bytes = [u8; 12];
+    fn serialize(&self) -> [u8; 12] {
+        let response_type_bytes = &[1];
+        let revert_to_bytes = u8::from(self.revert_to).serialize();
+        let sequence_bytes = self.sequence.serialize();
+        let length_bytes = self.length.serialize();
+        let focus_bytes = self.focus.serialize();
+        [
+            response_type_bytes[0],
+            revert_to_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            length_bytes[0],
+            length_bytes[1],
+            length_bytes[2],
+            length_bytes[3],
+            focus_bytes[0],
+            focus_bytes[1],
+            focus_bytes[2],
+            focus_bytes[3],
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(12);
+        let response_type_bytes = &[1];
+        bytes.push(response_type_bytes[0]);
+        u8::from(self.revert_to).serialize_into(bytes);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.focus.serialize_into(bytes);
+    }
+}
 ```
 In `x11rb`, there is a function to send the request:
 ```rust
@@ -842,7 +950,7 @@ where
 {
     let request0 = GetInputFocusRequest;
     let (bytes, fds) = request0.serialize();
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
     conn.send_request_with_reply(&slices, fds)
 }
 ```
@@ -891,6 +999,7 @@ The switch is represented via a helper struct:
 ```rust
 /// Auxiliary and optional information for the `create_window` function
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CreateWindowAux {
     pub background_pixmap: Option<Pixmap>,
     pub background_pixel: Option<u32>,
@@ -898,7 +1007,7 @@ pub struct CreateWindowAux {
 }
 impl CreateWindowAux {
     fn try_parse(value: &[u8], value_mask: u32) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = value_mask;
+        let switch_expr = u32::from(value_mask);
         let mut outer_remaining = value;
         let background_pixmap = if switch_expr & u32::from(CW::BACK_PIXMAP) != 0 {
             let remaining = outer_remaining;
@@ -925,11 +1034,11 @@ impl CreateWindowAux {
     #[allow(dead_code)]
     fn serialize(&self, value_mask: u32) -> Vec<u8> {
         let mut result = Vec::new();
-        self.serialize_into(&mut result, value_mask);
+        self.serialize_into(&mut result, u32::from(value_mask));
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, value_mask: u32) {
-        assert_eq!(self.switch_expr(), value_mask, "switch `value_list` has an inconsistent discriminant");
+        assert_eq!(self.switch_expr(), u32::from(value_mask), "switch `value_list` has an inconsistent discriminant");
         if let Some(background_pixmap) = self.background_pixmap {
             background_pixmap.serialize_into(bytes);
         }
@@ -978,6 +1087,7 @@ This code is generated for the actual request:
 pub const CREATE_WINDOW_REQUEST: u8 = 1;
 /// [SNIP]
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CreateWindowRequest<'input> {
     pub depth: u8,
     pub wid: Window,
@@ -1042,7 +1152,7 @@ impl<'input> CreateWindowRequest<'input> {
             value_mask_bytes[3],
         ];
         let length_so_far = length_so_far + request0.len();
-        let value_list_bytes = self.value_list.serialize(value_mask);
+        let value_list_bytes = self.value_list.serialize(u32::from(value_mask));
         let length_so_far = length_so_far + value_list_bytes.len();
         let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
         let length_so_far = length_so_far + padding0.len();
@@ -1070,7 +1180,7 @@ impl<'input> CreateWindowRequest<'input> {
         let class = class.into();
         let (visual, remaining) = Visualid::try_parse(remaining)?;
         let (value_mask, remaining) = u32::try_parse(remaining)?;
-        let (value_list, remaining) = CreateWindowAux::try_parse(remaining, value_mask)?;
+        let (value_list, remaining) = CreateWindowAux::try_parse(remaining, u32::from(value_mask))?;
         let _ = remaining;
         Ok(CreateWindowRequest {
             depth,
@@ -1137,7 +1247,7 @@ where
         value_list: Cow::Borrowed(value_list),
     };
     let (bytes, fds) = request0.serialize();
-    let slices = bytes.iter().map(|b| IoSlice::new(&*b)).collect::<Vec<_>>();
+    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
     conn.send_request_without_reply(&slices, fds)
 }
 ```
