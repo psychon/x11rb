@@ -727,7 +727,7 @@ impl SetAttributesAux {
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, value_mask: u32) {
-        let _ = value_mask;
+        assert_eq!(self.switch_expr(), u32::from(value_mask), "switch `value_list` has an inconsistent discriminant");
         if let Some(background_pixmap) = self.background_pixmap {
             background_pixmap.serialize_into(bytes);
         }

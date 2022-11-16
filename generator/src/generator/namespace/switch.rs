@@ -261,6 +261,9 @@ pub(super) fn emit_switch_type(
         outln!(out, "}}");
     }
 
+    let generate_switch_expr_fn =
+        generate_serialize && switch.cases.iter().all(|case| case.exprs.len() == 1);
+
     if generate_serialize {
         if let Some(size) = switch.size() {
             emit_fixed_size_switch_serialize(
@@ -279,13 +282,11 @@ pub(super) fn emit_switch_type(
                 name,
                 &case_infos,
                 switch_expr_type,
+                generate_switch_expr_fn,
                 out,
             );
         }
     }
-
-    let generate_switch_expr_fn =
-        generate_serialize && switch.cases.iter().all(|case| case.exprs.len() == 1);
 
     if generate_switch_expr_fn {
         outln!(out, "impl {} {{", name);
@@ -769,6 +770,7 @@ fn emit_variable_size_switch_serialize(
     name: &str,
     case_infos: &[CaseInfo],
     switch_expr_type: &str,
+    has_switch_expr_fn: bool,
     out: &mut Output,
 ) {
     let external_params = switch.external_params.borrow();
@@ -808,21 +810,23 @@ fn emit_variable_size_switch_serialize(
             ext_params_arg_defs
         );
         out.indented(|out| {
-            // TODO: emit an assertion checking that the switch case has
-            // been set properly
-            //
-            // omitted here because some expressions do not have a
-            // `switch_expr()` function
-            let _ = switch_expr_type;
-
-            // eat the parameters for now
-            if !external_params.is_empty() {
-                for external_param in external_params.iter() {
-                    outln!(
-                        out,
-                        "let _ = {};",
-                        to_rust_variable_name(&external_param.name)
-                    );
+            if has_switch_expr_fn {
+                serialize::emit_assert_for_switch_serialize(
+                    generator,
+                    switch,
+                    switch_expr_type,
+                    out,
+                );
+            } else {
+                // eat unused parameters
+                if !external_params.is_empty() {
+                    for external_param in external_params.iter() {
+                        outln!(
+                            out,
+                            "let _ = {};",
+                            to_rust_variable_name(&external_param.name)
+                        );
+                    }
                 }
             }
 

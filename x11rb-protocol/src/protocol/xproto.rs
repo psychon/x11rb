@@ -6924,7 +6924,7 @@ impl CreateWindowAux {
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, value_mask: u32) {
-        let _ = value_mask;
+        assert_eq!(self.switch_expr(), u32::from(value_mask), "switch `value_list` has an inconsistent discriminant");
         if let Some(background_pixmap) = self.background_pixmap {
             background_pixmap.serialize_into(bytes);
         }
@@ -7477,7 +7477,7 @@ impl ChangeWindowAttributesAux {
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, value_mask: u32) {
-        let _ = value_mask;
+        assert_eq!(self.switch_expr(), u32::from(value_mask), "switch `value_list` has an inconsistent discriminant");
         if let Some(background_pixmap) = self.background_pixmap {
             background_pixmap.serialize_into(bytes);
         }
@@ -8935,7 +8935,7 @@ impl ConfigureWindowAux {
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, value_mask: u16) {
-        let _ = value_mask;
+        assert_eq!(self.switch_expr(), u16::from(value_mask), "switch `value_list` has an inconsistent discriminant");
         if let Some(x) = self.x {
             x.serialize_into(bytes);
         }
@@ -16537,7 +16537,7 @@ impl CreateGCAux {
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, value_mask: u32) {
-        let _ = value_mask;
+        assert_eq!(self.switch_expr(), u32::from(value_mask), "switch `value_list` has an inconsistent discriminant");
         if let Some(function) = self.function {
             u32::from(function).serialize_into(bytes);
         }
@@ -17174,7 +17174,7 @@ impl ChangeGCAux {
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, value_mask: u32) {
-        let _ = value_mask;
+        assert_eq!(self.switch_expr(), u32::from(value_mask), "switch `value_list` has an inconsistent discriminant");
         if let Some(function) = self.function {
             u32::from(function).serialize_into(bytes);
         }
@@ -23393,7 +23393,7 @@ impl ChangeKeyboardControlAux {
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, value_mask: u32) {
-        let _ = value_mask;
+        assert_eq!(self.switch_expr(), u32::from(value_mask), "switch `value_list` has an inconsistent discriminant");
         if let Some(key_click_percent) = self.key_click_percent {
             key_click_percent.serialize_into(bytes);
         }
