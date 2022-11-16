@@ -6442,9 +6442,7 @@ impl SelectEventsAux {
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, affect_which: u16, clear: u16, select_all: u16) {
-        let _ = affect_which;
-        let _ = clear;
-        let _ = select_all;
+        assert_eq!(self.switch_expr(), u16::from(affect_which) & ((!u16::from(clear)) & (!u16::from(select_all))), "switch `details` has an inconsistent discriminant");
         if let Some(ref bitcase1) = self.bitcase1 {
             bitcase1.serialize_into(bytes);
         }
@@ -7991,16 +7989,7 @@ impl GetMapMap {
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, present: u16, n_types: u8, n_key_syms: u8, n_key_actions: u8, total_actions: u16, total_key_behaviors: u8, virtual_mods: u16, total_key_explicit: u8, total_mod_map_keys: u8, total_v_mod_map_keys: u8) {
-        let _ = present;
-        let _ = n_types;
-        let _ = n_key_syms;
-        let _ = n_key_actions;
-        let _ = total_actions;
-        let _ = total_key_behaviors;
-        let _ = virtual_mods;
-        let _ = total_key_explicit;
-        let _ = total_mod_map_keys;
-        let _ = total_v_mod_map_keys;
+        assert_eq!(self.switch_expr(), u16::from(present), "switch `map` has an inconsistent discriminant");
         if let Some(ref types_rtrn) = self.types_rtrn {
             assert_eq!(types_rtrn.len(), usize::try_from(n_types).unwrap(), "`types_rtrn` has an incorrect length");
             types_rtrn.serialize_into(bytes);
@@ -8327,16 +8316,7 @@ impl SetMapAux {
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, present: u16, n_types: u8, n_key_syms: u8, n_key_actions: u8, total_actions: u16, total_key_behaviors: u8, virtual_mods: u16, total_key_explicit: u8, total_mod_map_keys: u8, total_v_mod_map_keys: u8) {
-        let _ = present;
-        let _ = n_types;
-        let _ = n_key_syms;
-        let _ = n_key_actions;
-        let _ = total_actions;
-        let _ = total_key_behaviors;
-        let _ = virtual_mods;
-        let _ = total_key_explicit;
-        let _ = total_mod_map_keys;
-        let _ = total_v_mod_map_keys;
+        assert_eq!(self.switch_expr(), u16::from(present), "switch `values` has an inconsistent discriminant");
         if let Some(ref types) = self.types {
             assert_eq!(types.len(), usize::try_from(n_types).unwrap(), "`types` has an incorrect length");
             types.serialize_into(bytes);
@@ -9878,14 +9858,7 @@ impl GetNamesValueList {
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, which: u32, n_types: u8, indicators: u32, virtual_mods: u16, group_names: u8, n_keys: u8, n_key_aliases: u8, n_radio_groups: u8) {
-        let _ = which;
-        let _ = n_types;
-        let _ = indicators;
-        let _ = virtual_mods;
-        let _ = group_names;
-        let _ = n_keys;
-        let _ = n_key_aliases;
-        let _ = n_radio_groups;
+        assert_eq!(self.switch_expr(), u32::from(which), "switch `value_list` has an inconsistent discriminant");
         if let Some(keycodes_name) = self.keycodes_name {
             keycodes_name.serialize_into(bytes);
         }
@@ -10251,14 +10224,7 @@ impl SetNamesAux {
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, which: u32, n_types: u8, indicators: u32, virtual_mods: u16, group_names: u8, n_keys: u8, n_key_aliases: u8, n_radio_groups: u8) {
-        let _ = which;
-        let _ = n_types;
-        let _ = indicators;
-        let _ = virtual_mods;
-        let _ = group_names;
-        let _ = n_keys;
-        let _ = n_key_aliases;
-        let _ = n_radio_groups;
+        assert_eq!(self.switch_expr(), u32::from(which), "switch `values` has an inconsistent discriminant");
         if let Some(keycodes_name) = self.keycodes_name {
             keycodes_name.serialize_into(bytes);
         }
@@ -11242,16 +11208,7 @@ impl GetKbdByNameRepliesTypesMap {
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, present: u16, n_types: u8, n_key_syms: u8, n_key_actions: u8, total_actions: u16, total_key_behaviors: u8, virtual_mods: u16, total_key_explicit: u8, total_mod_map_keys: u8, total_v_mod_map_keys: u8) {
-        let _ = present;
-        let _ = n_types;
-        let _ = n_key_syms;
-        let _ = n_key_actions;
-        let _ = total_actions;
-        let _ = total_key_behaviors;
-        let _ = virtual_mods;
-        let _ = total_key_explicit;
-        let _ = total_mod_map_keys;
-        let _ = total_v_mod_map_keys;
+        assert_eq!(self.switch_expr(), u16::from(present), "switch `map` has an inconsistent discriminant");
         if let Some(ref types_rtrn) = self.types_rtrn {
             assert_eq!(types_rtrn.len(), usize::try_from(n_types).unwrap(), "`types_rtrn` has an incorrect length");
             types_rtrn.serialize_into(bytes);
@@ -11751,14 +11708,7 @@ impl GetKbdByNameRepliesKeyNamesValueList {
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, which: u32, n_types: u8, indicators: u32, virtual_mods: u16, group_names: u8, n_keys: u8, n_key_aliases: u8, n_radio_groups: u8) {
-        let _ = which;
-        let _ = n_types;
-        let _ = indicators;
-        let _ = virtual_mods;
-        let _ = group_names;
-        let _ = n_keys;
-        let _ = n_key_aliases;
-        let _ = n_radio_groups;
+        assert_eq!(self.switch_expr(), u32::from(which), "switch `value_list` has an inconsistent discriminant");
         if let Some(keycodes_name) = self.keycodes_name {
             keycodes_name.serialize_into(bytes);
         }
