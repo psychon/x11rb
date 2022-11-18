@@ -1,4 +1,4 @@
-# Version 0.11.0 (2022-XX-XX)
+# Version 0.11.0 (2022-11-18)
 
 New features:
 * All extensions are available in no-std mode.
