@@ -604,7 +604,35 @@ macro_rules! bitmask_binop {
         }
         impl core::ops::BitOrAssign<$u> for $t {
             fn bitor_assign(&mut self, other: $u) {
-                *self = *self | Self::from(other)
+                self.0 |= other
+            }
+        }
+        impl core::ops::BitAnd for $t {
+            type Output = $t;
+            fn bitand(self, other: Self) -> Self::Output {
+                Self::from(<$u>::from(self) & <$u>::from(other))
+            }
+        }
+        impl core::ops::BitAnd<$u> for $t {
+            type Output = $t;
+            fn bitand(self, other: $u) -> Self::Output {
+                self & Self::from(other)
+            }
+        }
+        impl core::ops::BitAnd<$t> for $u {
+            type Output = $t;
+            fn bitand(self, other: $t) -> Self::Output {
+                <$t>::from(self) & other
+            }
+        }
+        impl core::ops::BitAndAssign<$t> for $u {
+            fn bitand_assign(&mut self, other: $t) {
+                *self &= Self::from(other)
+            }
+        }
+        impl core::ops::BitAndAssign<$u> for $t {
+            fn bitand_assign(&mut self, other: $u) {
+                self.0 &= other
             }
         }
     };
