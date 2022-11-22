@@ -29,7 +29,7 @@ fn test_bit_or() {
 
     let mut mask = 1u32;
     mask |= EventMask::BUTTON_PRESS;
-    assert_eq!(5, u32::from(mask));
+    assert_eq!(5, mask);
 }
 
 #[test]
@@ -59,7 +59,7 @@ fn test_bit_and() {
 
     let mut mask = 7u32;
     mask &= EventMask::from(21u32);
-    assert_eq!(5, u32::from(mask));
+    assert_eq!(5, mask);
 }
 
 #[test]
