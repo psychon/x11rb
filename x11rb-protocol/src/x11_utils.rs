@@ -575,7 +575,7 @@ impl<T: Serialize> Serialize for [T] {
     }
 }
 
-// This macro is used by the generated code to implement `std::ops::BitOr` and
+// This macro is used by the generated code to implement e.g. `std::ops::BitOr` and
 // `std::ops::BitOrAssign`.
 macro_rules! bitmask_binop {
     ($t:ty, $u:ty) => {
@@ -595,6 +595,11 @@ macro_rules! bitmask_binop {
             type Output = $t;
             fn bitor(self, other: $t) -> Self::Output {
                 <$t>::from(self) | other
+            }
+        }
+        impl core::ops::BitOrAssign for $t {
+            fn bitor_assign(&mut self, other: $t) {
+                *self = *self | Self::from(other)
             }
         }
         impl core::ops::BitOrAssign<$t> for $u {
@@ -625,6 +630,11 @@ macro_rules! bitmask_binop {
                 <$t>::from(self) & other
             }
         }
+        impl core::ops::BitAndAssign for $t {
+            fn bitand_assign(&mut self, other: $t) {
+                self.0 &= other
+            }
+        }
         impl core::ops::BitAndAssign<$t> for $u {
             fn bitand_assign(&mut self, other: $t) {
                 *self &= Self::from(other)
@@ -633,6 +643,23 @@ macro_rules! bitmask_binop {
         impl core::ops::BitAndAssign<$u> for $t {
             fn bitand_assign(&mut self, other: $u) {
                 self.0 &= other
+            }
+        }
+        impl $t {
+            /// Check if this object has all bits set that are also set in `flag`.
+            ///
+            /// `flag` can be a single enum variant or a whole other mask.
+            pub fn contains(self, flag: impl Into<$u>) -> bool {
+                let flag = flag.into();
+                (<$u>::from(self) & flag) == flag
+            }
+
+            /// Check if this object has some bits set that are also set in `flag`.
+            ///
+            /// `flag` can be a single enum variant or a whole other mask.
+            pub fn intersects(self, flag: impl Into<$u>) -> bool {
+                let flag = flag.into();
+                (<$u>::from(self) & flag) != 0
             }
         }
     };
