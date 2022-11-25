@@ -83,3 +83,25 @@ fn test_contains() {
     assert!(!mask.contains(16u32));
     assert!(!mask.contains(20u32));
 }
+
+#[test]
+fn test_intersects() {
+    let mask = EventMask::KEY_PRESS;
+    assert!(mask.intersects(EventMask::KEY_PRESS));
+    assert!(!mask.intersects(EventMask::NO_EVENT));
+    assert!(mask.intersects(EventMask::KEY_PRESS | EventMask::BUTTON_PRESS));
+    assert!(!mask.intersects(EventMask::BUTTON_PRESS));
+
+    let mask = EventMask::KEY_PRESS | EventMask::BUTTON_PRESS;
+    assert!(mask.intersects(EventMask::KEY_PRESS));
+    assert!(mask.intersects(EventMask::BUTTON_PRESS));
+    assert!(mask.intersects(EventMask::KEY_PRESS | EventMask::BUTTON_PRESS));
+    assert!(!mask.intersects(EventMask::ENTER_WINDOW));
+    assert!(mask.intersects(EventMask::ENTER_WINDOW | EventMask::BUTTON_PRESS));
+
+    assert!(mask.intersects(1u32));
+    assert!(mask.intersects(4u32));
+    assert!(mask.intersects(5u32));
+    assert!(!mask.intersects(16u32));
+    assert!(mask.intersects(20u32));
+}

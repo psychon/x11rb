@@ -646,12 +646,20 @@ macro_rules! bitmask_binop {
             }
         }
         impl $t {
-            //! Check if this object has all bits set that are also set in `flag`.
-            //!
-            //! `flag` can be a single enum variant or a whole other mask.
+            /// Check if this object has all bits set that are also set in `flag`.
+            ///
+            /// `flag` can be a single enum variant or a whole other mask.
             pub fn contains(self, flag: impl Into<$u>) -> bool {
                 let flag = flag.into();
                 (<$u>::from(self) & flag) == flag
+            }
+
+            /// Check if this object has some bits set that are also set in `flag`.
+            ///
+            /// `flag` can be a single enum variant or a whole other mask.
+            pub fn intersects(self, flag: impl Into<$u>) -> bool {
+                let flag = flag.into();
+                (<$u>::from(self) & flag) != 0
             }
         }
     };
