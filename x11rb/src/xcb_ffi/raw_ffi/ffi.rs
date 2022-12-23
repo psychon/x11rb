@@ -103,7 +103,7 @@ macro_rules! make_ffi_fn_defs {
         struct LibxcbFuncs {
             $(
                 $(#[$fn_attr])*
-                $fn_name: fn($($fn_arg_name: $fn_arg_type),*) $(-> $fn_ret_ty)?,
+                $fn_name: unsafe extern "C" fn($($fn_arg_name: $fn_arg_type),*) $(-> $fn_ret_ty)?,
             )*
         }
 
