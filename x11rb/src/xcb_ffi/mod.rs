@@ -592,6 +592,30 @@ impl AsRawFd for XCBConnection {
     }
 }
 
+#[cfg(feature = "raw-window-handle")]
+unsafe impl raw_window_handle::HasRawDisplayHandle for XCBConnection {
+    #[inline]
+    fn raw_display_handle(&self) -> raw_window_handle::RawDisplayHandle {
+        let mut handle = raw_window_handle::XcbDisplayHandle::empty();
+        handle.connection = self.get_raw_xcb_connection();
+
+        raw_window_handle::RawDisplayHandle::Xcb(handle)
+    }
+}
+
+#[cfg(feature = "raw-window-handle")]
+unsafe impl raw_window_handle::HasRawWindowHandle
+    for crate::protocol::xproto::WindowWrapper<'_, XCBConnection>
+{
+    #[inline]
+    fn raw_window_handle(&self) -> raw_window_handle::RawWindowHandle {
+        let mut handle = raw_window_handle::XcbWindowHandle::empty();
+        handle.window = self.window();
+
+        raw_window_handle::RawWindowHandle::Xcb(handle)
+    }
+}
+
 /// Reconstruct a partial sequence number based on a recently received 'full' sequence number.
 ///
 /// The new sequence number may be before or after the `recent` sequence number.
