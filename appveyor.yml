@@ -1,11 +1,14 @@
+platform:
+- x64
+
 install:
   - curl -sSf -o rustup-init.exe https://win.rustup.rs/
-  - rustup-init.exe -y --default-host i686-pc-windows-msvc --profile minimal
+  - rustup-init.exe -y --default-host x86_64-pc-windows-msvc --profile minimal
   - set PATH=%PATH%;C:\Users\appveyor\.cargo\bin
   - rustc -V
   - cargo -V
-  - curl -sSf -o C:\cygwin\setup-x86.exe https://cygwin.com/setup-x86.exe
-  - C:\cygwin\setup-x86.exe --quiet-mode --no-shortcuts --no-startmenu --no-desktop --upgrade-also --root c:\cygwin --packages xorg-server-extra
+  - curl -sSf -o C:\cygwin64\setup.exe https://cygwin.com/setup-x86_64.exe
+  - C:\cygwin64\setup.exe --quiet-mode --no-shortcuts --no-startmenu --no-desktop --upgrade-also --root c:\cygwin64 --packages xorg-server-extra
   # This uses libc::mmap and thus is Unix-only
   - del x11rb\examples\shared_memory.rs
   # HACK: Create a fake "shared_memory" because it is referenced in Cargo.toml
@@ -27,7 +30,7 @@ test_script:
   - cargo doc --verbose --package x11rb --features all-extensions,cursor,image
 
   # Start an X11 server in the background
-  - ps: $Server = Start-Process -PassThru -FilePath C:\cygwin\bin\Xvfb.exe -ArgumentList "-listen tcp :0"
+  - ps: $Server = Start-Process -PassThru -FilePath C:\cygwin64\bin\Xvfb.exe -ArgumentList "-listen tcp :0"
   - set "DISPLAY=127.0.0.1:0"
   - set "X11RB_EXAMPLE_TIMEOUT=1"
 
