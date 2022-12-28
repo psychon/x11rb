@@ -18,10 +18,10 @@ keywords = ["xcb", "X11"]
 serde = { version = "1", features = ["derive"], optional = true }
 
 [dev-dependencies]
-criterion = "0.3"
+criterion = "0.4"
 
 [target.'cfg(unix)'.dependencies.nix]
-version = "0.25"
+version = "0.26"
 default-features = false
 features = ["fs"]
 optional = true

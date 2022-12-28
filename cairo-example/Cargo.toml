@@ -11,5 +11,5 @@ path = "../x11rb"
 features = ["allow-unsafe-code", "render"]
 
 [dependencies.cairo-rs]
-version = "0.15"
+version = "0.16"
 features = ["xcb"]
