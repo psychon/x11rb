@@ -584,16 +584,15 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                     let rust_event_type = self.event_to_rust_type(event);
                     outln!(
                         out,
-                        "pub fn {}(&self) -> {} {{",
+                        "pub fn {}(&self) -> Result<{}, ParseError> {{",
                         prefix_var_name(&to_rust_variable_name(&rust_event_name), "as"),
                         rust_event_type,
                     );
                     // coerce `&[u8; 32]` to `&[u8]`
                     outln!(out.indent(), "let value: &[u8] = &self.0;");
-                    outln!(out.indent(), "// FIXME: event parsing can fail");
                     outln!(
                         out.indent(),
-                        "{}::try_parse(value).unwrap().0",
+                        "{}::try_parse(value).map(|(result, _remaining)| result)",
                         rust_event_type,
                     );
                     outln!(out, "}}");
