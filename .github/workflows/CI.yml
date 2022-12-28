@@ -31,20 +31,31 @@ jobs:
     - name: Check for changes
       run: if ! git diff --exit-code; then exit 1; fi
 
+  clippy:
+     runs-on: ubuntu-latest
+     steps:
+       - uses: actions/checkout@v2
+       - name: Install clippy
+         uses: actions-rs/toolchain@v1
+         with:
+           profile: minimal
+           toolchain: beta
+           override: true
+           components: clippy
+       - uses: actions-rs/clippy-check@v1
+         with:
+           token: ${{ secrets.GITHUB_TOKEN }}
+           args: --workspace --all-targets --all-features
+
   clippy-rustfmt:
      runs-on: ubuntu-latest
-     strategy:
-       matrix:
-         include:
-           - rust: stable
-           - rust: beta
      steps:
        - uses: actions/checkout@v2
        - name: Install rustfmt and clippy
          uses: actions-rs/toolchain@v1
          with:
            profile: minimal
-           toolchain: ${{ matrix.rust }}
+           toolchain: stable
            override: true
            components: rustfmt, clippy
 

@@ -7,7 +7,7 @@ pull_request_rules:
       - status-success=big-endian-test
       - status-success=msrv-check
       - status-success=build (stable)
-      - status-success=clippy-rustfmt (stable)
+      - status-success=clippy-rustfmt
       - status-success=code_gen
     actions:
       merge:
