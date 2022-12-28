@@ -1,4 +1,4 @@
-use std::io::{IoSlice, IoSliceMut, Result};
+use std::io::{IoSlice, Result};
 use std::net::{Ipv4Addr, SocketAddr, TcpStream};
 #[cfg(any(target_os = "linux", target_os = "android"))]
 use std::os::unix::ffi::OsStrExt as _;
@@ -439,6 +439,7 @@ impl Stream for DefaultStream {
         #[cfg(unix)]
         {
             use nix::sys::socket::{recvmsg, ControlMessageOwned};
+            use std::io::IoSliceMut;
 
             // Chosen by checking what libxcb does
             const MAX_FDS_RECEIVED: usize = 16;
