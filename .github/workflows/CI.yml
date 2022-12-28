@@ -200,7 +200,7 @@ jobs:
     - name: Install cross rust
       run: rustup target add "$CROSS_TARGET"
     - name: Install cross
-      run: cargo install cross --force
+      uses: taiki-e/install-action@cross
     - name: cargo test
       run: cross test --target "$CROSS_TARGET" --verbose --package x11rb --features "$MOST_FEATURES"
 
