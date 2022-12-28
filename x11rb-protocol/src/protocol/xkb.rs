@@ -5963,21 +5963,21 @@ impl Serialize for UseExtensionReply {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct SelectEventsAuxBitcase1 {
+pub struct SelectEventsAuxNewKeyboardNotify {
     pub affect_new_keyboard: NKNDetail,
     pub new_keyboard_details: NKNDetail,
 }
-impl TryParse for SelectEventsAuxBitcase1 {
+impl TryParse for SelectEventsAuxNewKeyboardNotify {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (affect_new_keyboard, remaining) = u16::try_parse(remaining)?;
         let (new_keyboard_details, remaining) = u16::try_parse(remaining)?;
         let affect_new_keyboard = affect_new_keyboard.into();
         let new_keyboard_details = new_keyboard_details.into();
-        let result = SelectEventsAuxBitcase1 { affect_new_keyboard, new_keyboard_details };
+        let result = SelectEventsAuxNewKeyboardNotify { affect_new_keyboard, new_keyboard_details };
         Ok((result, remaining))
     }
 }
-impl Serialize for SelectEventsAuxBitcase1 {
+impl Serialize for SelectEventsAuxNewKeyboardNotify {
     type Bytes = [u8; 4];
     fn serialize(&self) -> [u8; 4] {
         let affect_new_keyboard_bytes = u16::from(self.affect_new_keyboard).serialize();
@@ -5997,21 +5997,21 @@ impl Serialize for SelectEventsAuxBitcase1 {
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct SelectEventsAuxBitcase2 {
+pub struct SelectEventsAuxStateNotify {
     pub affect_state: StatePart,
     pub state_details: StatePart,
 }
-impl TryParse for SelectEventsAuxBitcase2 {
+impl TryParse for SelectEventsAuxStateNotify {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (affect_state, remaining) = u16::try_parse(remaining)?;
         let (state_details, remaining) = u16::try_parse(remaining)?;
         let affect_state = affect_state.into();
         let state_details = state_details.into();
-        let result = SelectEventsAuxBitcase2 { affect_state, state_details };
+        let result = SelectEventsAuxStateNotify { affect_state, state_details };
         Ok((result, remaining))
     }
 }
-impl Serialize for SelectEventsAuxBitcase2 {
+impl Serialize for SelectEventsAuxStateNotify {
     type Bytes = [u8; 4];
     fn serialize(&self) -> [u8; 4] {
         let affect_state_bytes = u16::from(self.affect_state).serialize();
@@ -6031,21 +6031,21 @@ impl Serialize for SelectEventsAuxBitcase2 {
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct SelectEventsAuxBitcase3 {
+pub struct SelectEventsAuxControlsNotify {
     pub affect_ctrls: Control,
     pub ctrl_details: Control,
 }
-impl TryParse for SelectEventsAuxBitcase3 {
+impl TryParse for SelectEventsAuxControlsNotify {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (affect_ctrls, remaining) = u32::try_parse(remaining)?;
         let (ctrl_details, remaining) = u32::try_parse(remaining)?;
         let affect_ctrls = affect_ctrls.into();
         let ctrl_details = ctrl_details.into();
-        let result = SelectEventsAuxBitcase3 { affect_ctrls, ctrl_details };
+        let result = SelectEventsAuxControlsNotify { affect_ctrls, ctrl_details };
         Ok((result, remaining))
     }
 }
-impl Serialize for SelectEventsAuxBitcase3 {
+impl Serialize for SelectEventsAuxControlsNotify {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
         let affect_ctrls_bytes = u32::from(self.affect_ctrls).serialize();
@@ -6069,19 +6069,19 @@ impl Serialize for SelectEventsAuxBitcase3 {
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct SelectEventsAuxBitcase4 {
+pub struct SelectEventsAuxIndicatorStateNotify {
     pub affect_indicator_state: u32,
     pub indicator_state_details: u32,
 }
-impl TryParse for SelectEventsAuxBitcase4 {
+impl TryParse for SelectEventsAuxIndicatorStateNotify {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (affect_indicator_state, remaining) = u32::try_parse(remaining)?;
         let (indicator_state_details, remaining) = u32::try_parse(remaining)?;
-        let result = SelectEventsAuxBitcase4 { affect_indicator_state, indicator_state_details };
+        let result = SelectEventsAuxIndicatorStateNotify { affect_indicator_state, indicator_state_details };
         Ok((result, remaining))
     }
 }
-impl Serialize for SelectEventsAuxBitcase4 {
+impl Serialize for SelectEventsAuxIndicatorStateNotify {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
         let affect_indicator_state_bytes = self.affect_indicator_state.serialize();
@@ -6105,19 +6105,19 @@ impl Serialize for SelectEventsAuxBitcase4 {
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct SelectEventsAuxBitcase5 {
+pub struct SelectEventsAuxIndicatorMapNotify {
     pub affect_indicator_map: u32,
     pub indicator_map_details: u32,
 }
-impl TryParse for SelectEventsAuxBitcase5 {
+impl TryParse for SelectEventsAuxIndicatorMapNotify {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (affect_indicator_map, remaining) = u32::try_parse(remaining)?;
         let (indicator_map_details, remaining) = u32::try_parse(remaining)?;
-        let result = SelectEventsAuxBitcase5 { affect_indicator_map, indicator_map_details };
+        let result = SelectEventsAuxIndicatorMapNotify { affect_indicator_map, indicator_map_details };
         Ok((result, remaining))
     }
 }
-impl Serialize for SelectEventsAuxBitcase5 {
+impl Serialize for SelectEventsAuxIndicatorMapNotify {
     type Bytes = [u8; 8];
     fn serialize(&self) -> [u8; 8] {
         let affect_indicator_map_bytes = self.affect_indicator_map.serialize();
@@ -6141,21 +6141,21 @@ impl Serialize for SelectEventsAuxBitcase5 {
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct SelectEventsAuxBitcase6 {
+pub struct SelectEventsAuxNamesNotify {
     pub affect_names: NameDetail,
     pub names_details: NameDetail,
 }
-impl TryParse for SelectEventsAuxBitcase6 {
+impl TryParse for SelectEventsAuxNamesNotify {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (affect_names, remaining) = u16::try_parse(remaining)?;
         let (names_details, remaining) = u16::try_parse(remaining)?;
         let affect_names = affect_names.into();
         let names_details = names_details.into();
-        let result = SelectEventsAuxBitcase6 { affect_names, names_details };
+        let result = SelectEventsAuxNamesNotify { affect_names, names_details };
         Ok((result, remaining))
     }
 }
-impl Serialize for SelectEventsAuxBitcase6 {
+impl Serialize for SelectEventsAuxNamesNotify {
     type Bytes = [u8; 4];
     fn serialize(&self) -> [u8; 4] {
         let affect_names_bytes = (u32::from(self.affect_names) as u16).serialize();
@@ -6175,21 +6175,21 @@ impl Serialize for SelectEventsAuxBitcase6 {
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct SelectEventsAuxBitcase7 {
+pub struct SelectEventsAuxCompatMapNotify {
     pub affect_compat: CMDetail,
     pub compat_details: CMDetail,
 }
-impl TryParse for SelectEventsAuxBitcase7 {
+impl TryParse for SelectEventsAuxCompatMapNotify {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (affect_compat, remaining) = u8::try_parse(remaining)?;
         let (compat_details, remaining) = u8::try_parse(remaining)?;
         let affect_compat = affect_compat.into();
         let compat_details = compat_details.into();
-        let result = SelectEventsAuxBitcase7 { affect_compat, compat_details };
+        let result = SelectEventsAuxCompatMapNotify { affect_compat, compat_details };
         Ok((result, remaining))
     }
 }
-impl Serialize for SelectEventsAuxBitcase7 {
+impl Serialize for SelectEventsAuxCompatMapNotify {
     type Bytes = [u8; 2];
     fn serialize(&self) -> [u8; 2] {
         let affect_compat_bytes = u8::from(self.affect_compat).serialize();
@@ -6207,19 +6207,19 @@ impl Serialize for SelectEventsAuxBitcase7 {
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct SelectEventsAuxBitcase8 {
+pub struct SelectEventsAuxBellNotify {
     pub affect_bell: u8,
     pub bell_details: u8,
 }
-impl TryParse for SelectEventsAuxBitcase8 {
+impl TryParse for SelectEventsAuxBellNotify {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (affect_bell, remaining) = u8::try_parse(remaining)?;
         let (bell_details, remaining) = u8::try_parse(remaining)?;
-        let result = SelectEventsAuxBitcase8 { affect_bell, bell_details };
+        let result = SelectEventsAuxBellNotify { affect_bell, bell_details };
         Ok((result, remaining))
     }
 }
-impl Serialize for SelectEventsAuxBitcase8 {
+impl Serialize for SelectEventsAuxBellNotify {
     type Bytes = [u8; 2];
     fn serialize(&self) -> [u8; 2] {
         let affect_bell_bytes = self.affect_bell.serialize();
@@ -6237,19 +6237,19 @@ impl Serialize for SelectEventsAuxBitcase8 {
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct SelectEventsAuxBitcase9 {
+pub struct SelectEventsAuxActionMessage {
     pub affect_msg_details: u8,
     pub msg_details: u8,
 }
-impl TryParse for SelectEventsAuxBitcase9 {
+impl TryParse for SelectEventsAuxActionMessage {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (affect_msg_details, remaining) = u8::try_parse(remaining)?;
         let (msg_details, remaining) = u8::try_parse(remaining)?;
-        let result = SelectEventsAuxBitcase9 { affect_msg_details, msg_details };
+        let result = SelectEventsAuxActionMessage { affect_msg_details, msg_details };
         Ok((result, remaining))
     }
 }
-impl Serialize for SelectEventsAuxBitcase9 {
+impl Serialize for SelectEventsAuxActionMessage {
     type Bytes = [u8; 2];
     fn serialize(&self) -> [u8; 2] {
         let affect_msg_details_bytes = self.affect_msg_details.serialize();
@@ -6267,21 +6267,21 @@ impl Serialize for SelectEventsAuxBitcase9 {
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct SelectEventsAuxBitcase10 {
+pub struct SelectEventsAuxAccessXNotify {
     pub affect_access_x: AXNDetail,
     pub access_x_details: AXNDetail,
 }
-impl TryParse for SelectEventsAuxBitcase10 {
+impl TryParse for SelectEventsAuxAccessXNotify {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (affect_access_x, remaining) = u16::try_parse(remaining)?;
         let (access_x_details, remaining) = u16::try_parse(remaining)?;
         let affect_access_x = affect_access_x.into();
         let access_x_details = access_x_details.into();
-        let result = SelectEventsAuxBitcase10 { affect_access_x, access_x_details };
+        let result = SelectEventsAuxAccessXNotify { affect_access_x, access_x_details };
         Ok((result, remaining))
     }
 }
-impl Serialize for SelectEventsAuxBitcase10 {
+impl Serialize for SelectEventsAuxAccessXNotify {
     type Bytes = [u8; 4];
     fn serialize(&self) -> [u8; 4] {
         let affect_access_x_bytes = u16::from(self.affect_access_x).serialize();
@@ -6301,21 +6301,21 @@ impl Serialize for SelectEventsAuxBitcase10 {
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct SelectEventsAuxBitcase11 {
+pub struct SelectEventsAuxExtensionDeviceNotify {
     pub affect_ext_dev: XIFeature,
     pub extdev_details: XIFeature,
 }
-impl TryParse for SelectEventsAuxBitcase11 {
+impl TryParse for SelectEventsAuxExtensionDeviceNotify {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (affect_ext_dev, remaining) = u16::try_parse(remaining)?;
         let (extdev_details, remaining) = u16::try_parse(remaining)?;
         let affect_ext_dev = affect_ext_dev.into();
         let extdev_details = extdev_details.into();
-        let result = SelectEventsAuxBitcase11 { affect_ext_dev, extdev_details };
+        let result = SelectEventsAuxExtensionDeviceNotify { affect_ext_dev, extdev_details };
         Ok((result, remaining))
     }
 }
-impl Serialize for SelectEventsAuxBitcase11 {
+impl Serialize for SelectEventsAuxExtensionDeviceNotify {
     type Bytes = [u8; 4];
     fn serialize(&self) -> [u8; 4] {
         let affect_ext_dev_bytes = u16::from(self.affect_ext_dev).serialize();
@@ -6337,100 +6337,100 @@ impl Serialize for SelectEventsAuxBitcase11 {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SelectEventsAux {
-    pub bitcase1: Option<SelectEventsAuxBitcase1>,
-    pub bitcase2: Option<SelectEventsAuxBitcase2>,
-    pub bitcase3: Option<SelectEventsAuxBitcase3>,
-    pub bitcase4: Option<SelectEventsAuxBitcase4>,
-    pub bitcase5: Option<SelectEventsAuxBitcase5>,
-    pub bitcase6: Option<SelectEventsAuxBitcase6>,
-    pub bitcase7: Option<SelectEventsAuxBitcase7>,
-    pub bitcase8: Option<SelectEventsAuxBitcase8>,
-    pub bitcase9: Option<SelectEventsAuxBitcase9>,
-    pub bitcase10: Option<SelectEventsAuxBitcase10>,
-    pub bitcase11: Option<SelectEventsAuxBitcase11>,
+    pub new_keyboard_notify: Option<SelectEventsAuxNewKeyboardNotify>,
+    pub state_notify: Option<SelectEventsAuxStateNotify>,
+    pub controls_notify: Option<SelectEventsAuxControlsNotify>,
+    pub indicator_state_notify: Option<SelectEventsAuxIndicatorStateNotify>,
+    pub indicator_map_notify: Option<SelectEventsAuxIndicatorMapNotify>,
+    pub names_notify: Option<SelectEventsAuxNamesNotify>,
+    pub compat_map_notify: Option<SelectEventsAuxCompatMapNotify>,
+    pub bell_notify: Option<SelectEventsAuxBellNotify>,
+    pub action_message: Option<SelectEventsAuxActionMessage>,
+    pub access_x_notify: Option<SelectEventsAuxAccessXNotify>,
+    pub extension_device_notify: Option<SelectEventsAuxExtensionDeviceNotify>,
 }
 impl SelectEventsAux {
     fn try_parse(value: &[u8], affect_which: u16, clear: u16, select_all: u16) -> Result<(Self, &[u8]), ParseError> {
         let switch_expr = u16::from(affect_which) & ((!u16::from(clear)) & (!u16::from(select_all)));
         let mut outer_remaining = value;
-        let bitcase1 = if switch_expr & u16::from(EventType::NEW_KEYBOARD_NOTIFY) != 0 {
-            let (bitcase1, new_remaining) = SelectEventsAuxBitcase1::try_parse(outer_remaining)?;
+        let new_keyboard_notify = if switch_expr & u16::from(EventType::NEW_KEYBOARD_NOTIFY) != 0 {
+            let (new_keyboard_notify, new_remaining) = SelectEventsAuxNewKeyboardNotify::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
-            Some(bitcase1)
+            Some(new_keyboard_notify)
         } else {
             None
         };
-        let bitcase2 = if switch_expr & u16::from(EventType::STATE_NOTIFY) != 0 {
-            let (bitcase2, new_remaining) = SelectEventsAuxBitcase2::try_parse(outer_remaining)?;
+        let state_notify = if switch_expr & u16::from(EventType::STATE_NOTIFY) != 0 {
+            let (state_notify, new_remaining) = SelectEventsAuxStateNotify::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
-            Some(bitcase2)
+            Some(state_notify)
         } else {
             None
         };
-        let bitcase3 = if switch_expr & u16::from(EventType::CONTROLS_NOTIFY) != 0 {
-            let (bitcase3, new_remaining) = SelectEventsAuxBitcase3::try_parse(outer_remaining)?;
+        let controls_notify = if switch_expr & u16::from(EventType::CONTROLS_NOTIFY) != 0 {
+            let (controls_notify, new_remaining) = SelectEventsAuxControlsNotify::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
-            Some(bitcase3)
+            Some(controls_notify)
         } else {
             None
         };
-        let bitcase4 = if switch_expr & u16::from(EventType::INDICATOR_STATE_NOTIFY) != 0 {
-            let (bitcase4, new_remaining) = SelectEventsAuxBitcase4::try_parse(outer_remaining)?;
+        let indicator_state_notify = if switch_expr & u16::from(EventType::INDICATOR_STATE_NOTIFY) != 0 {
+            let (indicator_state_notify, new_remaining) = SelectEventsAuxIndicatorStateNotify::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
-            Some(bitcase4)
+            Some(indicator_state_notify)
         } else {
             None
         };
-        let bitcase5 = if switch_expr & u16::from(EventType::INDICATOR_MAP_NOTIFY) != 0 {
-            let (bitcase5, new_remaining) = SelectEventsAuxBitcase5::try_parse(outer_remaining)?;
+        let indicator_map_notify = if switch_expr & u16::from(EventType::INDICATOR_MAP_NOTIFY) != 0 {
+            let (indicator_map_notify, new_remaining) = SelectEventsAuxIndicatorMapNotify::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
-            Some(bitcase5)
+            Some(indicator_map_notify)
         } else {
             None
         };
-        let bitcase6 = if switch_expr & u16::from(EventType::NAMES_NOTIFY) != 0 {
-            let (bitcase6, new_remaining) = SelectEventsAuxBitcase6::try_parse(outer_remaining)?;
+        let names_notify = if switch_expr & u16::from(EventType::NAMES_NOTIFY) != 0 {
+            let (names_notify, new_remaining) = SelectEventsAuxNamesNotify::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
-            Some(bitcase6)
+            Some(names_notify)
         } else {
             None
         };
-        let bitcase7 = if switch_expr & u16::from(EventType::COMPAT_MAP_NOTIFY) != 0 {
-            let (bitcase7, new_remaining) = SelectEventsAuxBitcase7::try_parse(outer_remaining)?;
+        let compat_map_notify = if switch_expr & u16::from(EventType::COMPAT_MAP_NOTIFY) != 0 {
+            let (compat_map_notify, new_remaining) = SelectEventsAuxCompatMapNotify::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
-            Some(bitcase7)
+            Some(compat_map_notify)
         } else {
             None
         };
-        let bitcase8 = if switch_expr & u16::from(EventType::BELL_NOTIFY) != 0 {
-            let (bitcase8, new_remaining) = SelectEventsAuxBitcase8::try_parse(outer_remaining)?;
+        let bell_notify = if switch_expr & u16::from(EventType::BELL_NOTIFY) != 0 {
+            let (bell_notify, new_remaining) = SelectEventsAuxBellNotify::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
-            Some(bitcase8)
+            Some(bell_notify)
         } else {
             None
         };
-        let bitcase9 = if switch_expr & u16::from(EventType::ACTION_MESSAGE) != 0 {
-            let (bitcase9, new_remaining) = SelectEventsAuxBitcase9::try_parse(outer_remaining)?;
+        let action_message = if switch_expr & u16::from(EventType::ACTION_MESSAGE) != 0 {
+            let (action_message, new_remaining) = SelectEventsAuxActionMessage::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
-            Some(bitcase9)
+            Some(action_message)
         } else {
             None
         };
-        let bitcase10 = if switch_expr & u16::from(EventType::ACCESS_X_NOTIFY) != 0 {
-            let (bitcase10, new_remaining) = SelectEventsAuxBitcase10::try_parse(outer_remaining)?;
+        let access_x_notify = if switch_expr & u16::from(EventType::ACCESS_X_NOTIFY) != 0 {
+            let (access_x_notify, new_remaining) = SelectEventsAuxAccessXNotify::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
-            Some(bitcase10)
+            Some(access_x_notify)
         } else {
             None
         };
-        let bitcase11 = if switch_expr & u16::from(EventType::EXTENSION_DEVICE_NOTIFY) != 0 {
-            let (bitcase11, new_remaining) = SelectEventsAuxBitcase11::try_parse(outer_remaining)?;
+        let extension_device_notify = if switch_expr & u16::from(EventType::EXTENSION_DEVICE_NOTIFY) != 0 {
+            let (extension_device_notify, new_remaining) = SelectEventsAuxExtensionDeviceNotify::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
-            Some(bitcase11)
+            Some(extension_device_notify)
         } else {
             None
         };
-        let result = SelectEventsAux { bitcase1, bitcase2, bitcase3, bitcase4, bitcase5, bitcase6, bitcase7, bitcase8, bitcase9, bitcase10, bitcase11 };
+        let result = SelectEventsAux { new_keyboard_notify, state_notify, controls_notify, indicator_state_notify, indicator_map_notify, names_notify, compat_map_notify, bell_notify, action_message, access_x_notify, extension_device_notify };
         Ok((result, outer_remaining))
     }
 }
@@ -6443,75 +6443,75 @@ impl SelectEventsAux {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>, affect_which: u16, clear: u16, select_all: u16) {
         assert_eq!(self.switch_expr(), u16::from(affect_which) & ((!u16::from(clear)) & (!u16::from(select_all))), "switch `details` has an inconsistent discriminant");
-        if let Some(ref bitcase1) = self.bitcase1 {
-            bitcase1.serialize_into(bytes);
+        if let Some(ref new_keyboard_notify) = self.new_keyboard_notify {
+            new_keyboard_notify.serialize_into(bytes);
         }
-        if let Some(ref bitcase2) = self.bitcase2 {
-            bitcase2.serialize_into(bytes);
+        if let Some(ref state_notify) = self.state_notify {
+            state_notify.serialize_into(bytes);
         }
-        if let Some(ref bitcase3) = self.bitcase3 {
-            bitcase3.serialize_into(bytes);
+        if let Some(ref controls_notify) = self.controls_notify {
+            controls_notify.serialize_into(bytes);
         }
-        if let Some(ref bitcase4) = self.bitcase4 {
-            bitcase4.serialize_into(bytes);
+        if let Some(ref indicator_state_notify) = self.indicator_state_notify {
+            indicator_state_notify.serialize_into(bytes);
         }
-        if let Some(ref bitcase5) = self.bitcase5 {
-            bitcase5.serialize_into(bytes);
+        if let Some(ref indicator_map_notify) = self.indicator_map_notify {
+            indicator_map_notify.serialize_into(bytes);
         }
-        if let Some(ref bitcase6) = self.bitcase6 {
-            bitcase6.serialize_into(bytes);
+        if let Some(ref names_notify) = self.names_notify {
+            names_notify.serialize_into(bytes);
         }
-        if let Some(ref bitcase7) = self.bitcase7 {
-            bitcase7.serialize_into(bytes);
+        if let Some(ref compat_map_notify) = self.compat_map_notify {
+            compat_map_notify.serialize_into(bytes);
         }
-        if let Some(ref bitcase8) = self.bitcase8 {
-            bitcase8.serialize_into(bytes);
+        if let Some(ref bell_notify) = self.bell_notify {
+            bell_notify.serialize_into(bytes);
         }
-        if let Some(ref bitcase9) = self.bitcase9 {
-            bitcase9.serialize_into(bytes);
+        if let Some(ref action_message) = self.action_message {
+            action_message.serialize_into(bytes);
         }
-        if let Some(ref bitcase10) = self.bitcase10 {
-            bitcase10.serialize_into(bytes);
+        if let Some(ref access_x_notify) = self.access_x_notify {
+            access_x_notify.serialize_into(bytes);
         }
-        if let Some(ref bitcase11) = self.bitcase11 {
-            bitcase11.serialize_into(bytes);
+        if let Some(ref extension_device_notify) = self.extension_device_notify {
+            extension_device_notify.serialize_into(bytes);
         }
     }
 }
 impl SelectEventsAux {
     fn switch_expr(&self) -> u16 {
         let mut expr_value = 0;
-        if self.bitcase1.is_some() {
+        if self.new_keyboard_notify.is_some() {
             expr_value |= u16::from(EventType::NEW_KEYBOARD_NOTIFY);
         }
-        if self.bitcase2.is_some() {
+        if self.state_notify.is_some() {
             expr_value |= u16::from(EventType::STATE_NOTIFY);
         }
-        if self.bitcase3.is_some() {
+        if self.controls_notify.is_some() {
             expr_value |= u16::from(EventType::CONTROLS_NOTIFY);
         }
-        if self.bitcase4.is_some() {
+        if self.indicator_state_notify.is_some() {
             expr_value |= u16::from(EventType::INDICATOR_STATE_NOTIFY);
         }
-        if self.bitcase5.is_some() {
+        if self.indicator_map_notify.is_some() {
             expr_value |= u16::from(EventType::INDICATOR_MAP_NOTIFY);
         }
-        if self.bitcase6.is_some() {
+        if self.names_notify.is_some() {
             expr_value |= u16::from(EventType::NAMES_NOTIFY);
         }
-        if self.bitcase7.is_some() {
+        if self.compat_map_notify.is_some() {
             expr_value |= u16::from(EventType::COMPAT_MAP_NOTIFY);
         }
-        if self.bitcase8.is_some() {
+        if self.bell_notify.is_some() {
             expr_value |= u16::from(EventType::BELL_NOTIFY);
         }
-        if self.bitcase9.is_some() {
+        if self.action_message.is_some() {
             expr_value |= u16::from(EventType::ACTION_MESSAGE);
         }
-        if self.bitcase10.is_some() {
+        if self.access_x_notify.is_some() {
             expr_value |= u16::from(EventType::ACCESS_X_NOTIFY);
         }
-        if self.bitcase11.is_some() {
+        if self.extension_device_notify.is_some() {
             expr_value |= u16::from(EventType::EXTENSION_DEVICE_NOTIFY);
         }
         expr_value
@@ -6522,70 +6522,70 @@ impl SelectEventsAux {
     pub fn new() -> Self {
         Default::default()
     }
-    /// Set the `bitcase1` field of this structure.
+    /// Set the `new_keyboard_notify` field of this structure.
     #[must_use]
-    pub fn bitcase1<I>(mut self, value: I) -> Self where I: Into<Option<SelectEventsAuxBitcase1>> {
-        self.bitcase1 = value.into();
+    pub fn new_keyboard_notify<I>(mut self, value: I) -> Self where I: Into<Option<SelectEventsAuxNewKeyboardNotify>> {
+        self.new_keyboard_notify = value.into();
         self
     }
-    /// Set the `bitcase2` field of this structure.
+    /// Set the `state_notify` field of this structure.
     #[must_use]
-    pub fn bitcase2<I>(mut self, value: I) -> Self where I: Into<Option<SelectEventsAuxBitcase2>> {
-        self.bitcase2 = value.into();
+    pub fn state_notify<I>(mut self, value: I) -> Self where I: Into<Option<SelectEventsAuxStateNotify>> {
+        self.state_notify = value.into();
         self
     }
-    /// Set the `bitcase3` field of this structure.
+    /// Set the `controls_notify` field of this structure.
     #[must_use]
-    pub fn bitcase3<I>(mut self, value: I) -> Self where I: Into<Option<SelectEventsAuxBitcase3>> {
-        self.bitcase3 = value.into();
+    pub fn controls_notify<I>(mut self, value: I) -> Self where I: Into<Option<SelectEventsAuxControlsNotify>> {
+        self.controls_notify = value.into();
         self
     }
-    /// Set the `bitcase4` field of this structure.
+    /// Set the `indicator_state_notify` field of this structure.
     #[must_use]
-    pub fn bitcase4<I>(mut self, value: I) -> Self where I: Into<Option<SelectEventsAuxBitcase4>> {
-        self.bitcase4 = value.into();
+    pub fn indicator_state_notify<I>(mut self, value: I) -> Self where I: Into<Option<SelectEventsAuxIndicatorStateNotify>> {
+        self.indicator_state_notify = value.into();
         self
     }
-    /// Set the `bitcase5` field of this structure.
+    /// Set the `indicator_map_notify` field of this structure.
     #[must_use]
-    pub fn bitcase5<I>(mut self, value: I) -> Self where I: Into<Option<SelectEventsAuxBitcase5>> {
-        self.bitcase5 = value.into();
+    pub fn indicator_map_notify<I>(mut self, value: I) -> Self where I: Into<Option<SelectEventsAuxIndicatorMapNotify>> {
+        self.indicator_map_notify = value.into();
         self
     }
-    /// Set the `bitcase6` field of this structure.
+    /// Set the `names_notify` field of this structure.
     #[must_use]
-    pub fn bitcase6<I>(mut self, value: I) -> Self where I: Into<Option<SelectEventsAuxBitcase6>> {
-        self.bitcase6 = value.into();
+    pub fn names_notify<I>(mut self, value: I) -> Self where I: Into<Option<SelectEventsAuxNamesNotify>> {
+        self.names_notify = value.into();
         self
     }
-    /// Set the `bitcase7` field of this structure.
+    /// Set the `compat_map_notify` field of this structure.
     #[must_use]
-    pub fn bitcase7<I>(mut self, value: I) -> Self where I: Into<Option<SelectEventsAuxBitcase7>> {
-        self.bitcase7 = value.into();
+    pub fn compat_map_notify<I>(mut self, value: I) -> Self where I: Into<Option<SelectEventsAuxCompatMapNotify>> {
+        self.compat_map_notify = value.into();
         self
     }
-    /// Set the `bitcase8` field of this structure.
+    /// Set the `bell_notify` field of this structure.
     #[must_use]
-    pub fn bitcase8<I>(mut self, value: I) -> Self where I: Into<Option<SelectEventsAuxBitcase8>> {
-        self.bitcase8 = value.into();
+    pub fn bell_notify<I>(mut self, value: I) -> Self where I: Into<Option<SelectEventsAuxBellNotify>> {
+        self.bell_notify = value.into();
         self
     }
-    /// Set the `bitcase9` field of this structure.
+    /// Set the `action_message` field of this structure.
     #[must_use]
-    pub fn bitcase9<I>(mut self, value: I) -> Self where I: Into<Option<SelectEventsAuxBitcase9>> {
-        self.bitcase9 = value.into();
+    pub fn action_message<I>(mut self, value: I) -> Self where I: Into<Option<SelectEventsAuxActionMessage>> {
+        self.action_message = value.into();
         self
     }
-    /// Set the `bitcase10` field of this structure.
+    /// Set the `access_x_notify` field of this structure.
     #[must_use]
-    pub fn bitcase10<I>(mut self, value: I) -> Self where I: Into<Option<SelectEventsAuxBitcase10>> {
-        self.bitcase10 = value.into();
+    pub fn access_x_notify<I>(mut self, value: I) -> Self where I: Into<Option<SelectEventsAuxAccessXNotify>> {
+        self.access_x_notify = value.into();
         self
     }
-    /// Set the `bitcase11` field of this structure.
+    /// Set the `extension_device_notify` field of this structure.
     #[must_use]
-    pub fn bitcase11<I>(mut self, value: I) -> Self where I: Into<Option<SelectEventsAuxBitcase11>> {
-        self.bitcase11 = value.into();
+    pub fn extension_device_notify<I>(mut self, value: I) -> Self where I: Into<Option<SelectEventsAuxExtensionDeviceNotify>> {
+        self.extension_device_notify = value.into();
         self
     }
 }
@@ -7842,11 +7842,11 @@ impl crate::x11_utils::ReplyRequest for GetMapRequest {
 
 #[derive(Debug, Clone)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct GetMapMapBitcase3 {
+pub struct GetMapMapKeyActions {
     pub acts_rtrn_count: Vec<u8>,
     pub acts_rtrn_acts: Vec<Action>,
 }
-impl GetMapMapBitcase3 {
+impl GetMapMapKeyActions {
     pub fn try_parse(remaining: &[u8], n_key_actions: u8, total_actions: u16) -> Result<(Self, &[u8]), ParseError> {
         let value = remaining;
         let (acts_rtrn_count, remaining) = crate::x11_utils::parse_u8_list(remaining, n_key_actions.try_to_usize()?)?;
@@ -7856,11 +7856,11 @@ impl GetMapMapBitcase3 {
         let misalignment = (4 - (offset % 4)) % 4;
         let remaining = remaining.get(misalignment..).ok_or(ParseError::InsufficientData)?;
         let (acts_rtrn_acts, remaining) = crate::x11_utils::parse_list::<Action>(remaining, total_actions.try_to_usize()?)?;
-        let result = GetMapMapBitcase3 { acts_rtrn_count, acts_rtrn_acts };
+        let result = GetMapMapKeyActions { acts_rtrn_count, acts_rtrn_acts };
         Ok((result, remaining))
     }
 }
-impl GetMapMapBitcase3 {
+impl GetMapMapKeyActions {
     #[allow(dead_code)]
     fn serialize(&self, n_key_actions: u8, total_actions: u16) -> Vec<u8> {
         let mut result = Vec::new();
@@ -7880,7 +7880,7 @@ impl GetMapMapBitcase3 {
 pub struct GetMapMap {
     pub types_rtrn: Option<Vec<KeyType>>,
     pub syms_rtrn: Option<Vec<KeySymMap>>,
-    pub bitcase3: Option<GetMapMapBitcase3>,
+    pub key_actions: Option<GetMapMapKeyActions>,
     pub behaviors_rtrn: Option<Vec<SetBehavior>>,
     pub vmods_rtrn: Option<Vec<xproto::ModMask>>,
     pub explicit_rtrn: Option<Vec<SetExplicit>>,
@@ -7907,10 +7907,10 @@ impl GetMapMap {
         } else {
             None
         };
-        let bitcase3 = if switch_expr & u16::from(MapPart::KEY_ACTIONS) != 0 {
-            let (bitcase3, new_remaining) = GetMapMapBitcase3::try_parse(outer_remaining, n_key_actions, total_actions)?;
+        let key_actions = if switch_expr & u16::from(MapPart::KEY_ACTIONS) != 0 {
+            let (key_actions, new_remaining) = GetMapMapKeyActions::try_parse(outer_remaining, n_key_actions, total_actions)?;
             outer_remaining = new_remaining;
-            Some(bitcase3)
+            Some(key_actions)
         } else {
             None
         };
@@ -7977,7 +7977,7 @@ impl GetMapMap {
         } else {
             None
         };
-        let result = GetMapMap { types_rtrn, syms_rtrn, bitcase3, behaviors_rtrn, vmods_rtrn, explicit_rtrn, modmap_rtrn, vmodmap_rtrn };
+        let result = GetMapMap { types_rtrn, syms_rtrn, key_actions, behaviors_rtrn, vmods_rtrn, explicit_rtrn, modmap_rtrn, vmodmap_rtrn };
         Ok((result, outer_remaining))
     }
 }
@@ -7998,8 +7998,8 @@ impl GetMapMap {
             assert_eq!(syms_rtrn.len(), usize::try_from(n_key_syms).unwrap(), "`syms_rtrn` has an incorrect length");
             syms_rtrn.serialize_into(bytes);
         }
-        if let Some(ref bitcase3) = self.bitcase3 {
-            bitcase3.serialize_into(bytes, u8::from(n_key_actions), u16::from(total_actions));
+        if let Some(ref key_actions) = self.key_actions {
+            key_actions.serialize_into(bytes, u8::from(n_key_actions), u16::from(total_actions));
         }
         if let Some(ref behaviors_rtrn) = self.behaviors_rtrn {
             assert_eq!(behaviors_rtrn.len(), usize::try_from(total_key_behaviors).unwrap(), "`behaviors_rtrn` has an incorrect length");
@@ -8037,7 +8037,7 @@ impl GetMapMap {
         if self.syms_rtrn.is_some() {
             expr_value |= u16::from(MapPart::KEY_SYMS);
         }
-        if self.bitcase3.is_some() {
+        if self.key_actions.is_some() {
             expr_value |= u16::from(MapPart::KEY_ACTIONS);
         }
         if self.behaviors_rtrn.is_some() {
@@ -8185,11 +8185,11 @@ impl Serialize for GetMapReply {
 
 #[derive(Debug, Clone)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct SetMapAuxBitcase3 {
+pub struct SetMapAuxKeyActions {
     pub actions_count: Vec<u8>,
     pub actions: Vec<Action>,
 }
-impl SetMapAuxBitcase3 {
+impl SetMapAuxKeyActions {
     pub fn try_parse(remaining: &[u8], n_key_actions: u8, total_actions: u16) -> Result<(Self, &[u8]), ParseError> {
         let value = remaining;
         let (actions_count, remaining) = crate::x11_utils::parse_u8_list(remaining, n_key_actions.try_to_usize()?)?;
@@ -8199,11 +8199,11 @@ impl SetMapAuxBitcase3 {
         let misalignment = (4 - (offset % 4)) % 4;
         let remaining = remaining.get(misalignment..).ok_or(ParseError::InsufficientData)?;
         let (actions, remaining) = crate::x11_utils::parse_list::<Action>(remaining, total_actions.try_to_usize()?)?;
-        let result = SetMapAuxBitcase3 { actions_count, actions };
+        let result = SetMapAuxKeyActions { actions_count, actions };
         Ok((result, remaining))
     }
 }
-impl SetMapAuxBitcase3 {
+impl SetMapAuxKeyActions {
     #[allow(dead_code)]
     fn serialize(&self, n_key_actions: u8, total_actions: u16) -> Vec<u8> {
         let mut result = Vec::new();
@@ -8224,7 +8224,7 @@ impl SetMapAuxBitcase3 {
 pub struct SetMapAux {
     pub types: Option<Vec<SetKeyType>>,
     pub syms: Option<Vec<KeySymMap>>,
-    pub bitcase3: Option<SetMapAuxBitcase3>,
+    pub key_actions: Option<SetMapAuxKeyActions>,
     pub behaviors: Option<Vec<SetBehavior>>,
     pub vmods: Option<Vec<u8>>,
     pub explicit: Option<Vec<SetExplicit>>,
@@ -8251,10 +8251,10 @@ impl SetMapAux {
         } else {
             None
         };
-        let bitcase3 = if switch_expr & u16::from(MapPart::KEY_ACTIONS) != 0 {
-            let (bitcase3, new_remaining) = SetMapAuxBitcase3::try_parse(outer_remaining, n_key_actions, total_actions)?;
+        let key_actions = if switch_expr & u16::from(MapPart::KEY_ACTIONS) != 0 {
+            let (key_actions, new_remaining) = SetMapAuxKeyActions::try_parse(outer_remaining, n_key_actions, total_actions)?;
             outer_remaining = new_remaining;
-            Some(bitcase3)
+            Some(key_actions)
         } else {
             None
         };
@@ -8304,7 +8304,7 @@ impl SetMapAux {
         } else {
             None
         };
-        let result = SetMapAux { types, syms, bitcase3, behaviors, vmods, explicit, modmap, vmodmap };
+        let result = SetMapAux { types, syms, key_actions, behaviors, vmods, explicit, modmap, vmodmap };
         Ok((result, outer_remaining))
     }
 }
@@ -8325,8 +8325,8 @@ impl SetMapAux {
             assert_eq!(syms.len(), usize::try_from(n_key_syms).unwrap(), "`syms` has an incorrect length");
             syms.serialize_into(bytes);
         }
-        if let Some(ref bitcase3) = self.bitcase3 {
-            bitcase3.serialize_into(bytes, u8::from(n_key_actions), u16::from(total_actions));
+        if let Some(ref key_actions) = self.key_actions {
+            key_actions.serialize_into(bytes, u8::from(n_key_actions), u16::from(total_actions));
         }
         if let Some(ref behaviors) = self.behaviors {
             assert_eq!(behaviors.len(), usize::try_from(total_key_behaviors).unwrap(), "`behaviors` has an incorrect length");
@@ -8360,7 +8360,7 @@ impl SetMapAux {
         if self.syms.is_some() {
             expr_value |= u16::from(MapPart::KEY_SYMS);
         }
-        if self.bitcase3.is_some() {
+        if self.key_actions.is_some() {
             expr_value |= u16::from(MapPart::KEY_ACTIONS);
         }
         if self.behaviors.is_some() {
@@ -8398,10 +8398,10 @@ impl SetMapAux {
         self.syms = value.into();
         self
     }
-    /// Set the `bitcase3` field of this structure.
+    /// Set the `key_actions` field of this structure.
     #[must_use]
-    pub fn bitcase3<I>(mut self, value: I) -> Self where I: Into<Option<SetMapAuxBitcase3>> {
-        self.bitcase3 = value.into();
+    pub fn key_actions<I>(mut self, value: I) -> Self where I: Into<Option<SetMapAuxKeyActions>> {
+        self.key_actions = value.into();
         self
     }
     /// Set the `behaviors` field of this structure.
@@ -9680,11 +9680,11 @@ impl crate::x11_utils::ReplyRequest for GetNamesRequest {
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct GetNamesValueListBitcase8 {
+pub struct GetNamesValueListKTLevelNames {
     pub n_levels_per_type: Vec<u8>,
     pub kt_level_names: Vec<xproto::Atom>,
 }
-impl GetNamesValueListBitcase8 {
+impl GetNamesValueListKTLevelNames {
     pub fn try_parse(remaining: &[u8], n_types: u8) -> Result<(Self, &[u8]), ParseError> {
         let value = remaining;
         let (n_levels_per_type, remaining) = crate::x11_utils::parse_u8_list(remaining, n_types.try_to_usize()?)?;
@@ -9694,11 +9694,11 @@ impl GetNamesValueListBitcase8 {
         let misalignment = (4 - (offset % 4)) % 4;
         let remaining = remaining.get(misalignment..).ok_or(ParseError::InsufficientData)?;
         let (kt_level_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, n_levels_per_type.iter().try_fold(0u32, |acc, x| acc.checked_add(u32::from(*x)).ok_or(ParseError::InvalidExpression))?.try_to_usize()?)?;
-        let result = GetNamesValueListBitcase8 { n_levels_per_type, kt_level_names };
+        let result = GetNamesValueListKTLevelNames { n_levels_per_type, kt_level_names };
         Ok((result, remaining))
     }
 }
-impl GetNamesValueListBitcase8 {
+impl GetNamesValueListKTLevelNames {
     #[allow(dead_code)]
     fn serialize(&self, n_types: u8) -> Vec<u8> {
         let mut result = Vec::new();
@@ -9723,7 +9723,7 @@ pub struct GetNamesValueList {
     pub types_name: Option<xproto::Atom>,
     pub compat_name: Option<xproto::Atom>,
     pub type_names: Option<Vec<xproto::Atom>>,
-    pub bitcase8: Option<GetNamesValueListBitcase8>,
+    pub kt_level_names: Option<GetNamesValueListKTLevelNames>,
     pub indicator_names: Option<Vec<xproto::Atom>>,
     pub virtual_mod_names: Option<Vec<xproto::Atom>>,
     pub groups: Option<Vec<xproto::Atom>>,
@@ -9791,10 +9791,10 @@ impl GetNamesValueList {
         } else {
             None
         };
-        let bitcase8 = if switch_expr & u32::from(NameDetail::KT_LEVEL_NAMES) != 0 {
-            let (bitcase8, new_remaining) = GetNamesValueListBitcase8::try_parse(outer_remaining, n_types)?;
+        let kt_level_names = if switch_expr & u32::from(NameDetail::KT_LEVEL_NAMES) != 0 {
+            let (kt_level_names, new_remaining) = GetNamesValueListKTLevelNames::try_parse(outer_remaining, n_types)?;
             outer_remaining = new_remaining;
-            Some(bitcase8)
+            Some(kt_level_names)
         } else {
             None
         };
@@ -9846,7 +9846,7 @@ impl GetNamesValueList {
         } else {
             None
         };
-        let result = GetNamesValueList { keycodes_name, geometry_name, symbols_name, phys_symbols_name, types_name, compat_name, type_names, bitcase8, indicator_names, virtual_mod_names, groups, key_names, key_aliases, radio_group_names };
+        let result = GetNamesValueList { keycodes_name, geometry_name, symbols_name, phys_symbols_name, types_name, compat_name, type_names, kt_level_names, indicator_names, virtual_mod_names, groups, key_names, key_aliases, radio_group_names };
         Ok((result, outer_remaining))
     }
 }
@@ -9881,8 +9881,8 @@ impl GetNamesValueList {
             assert_eq!(type_names.len(), usize::try_from(n_types).unwrap(), "`type_names` has an incorrect length");
             type_names.serialize_into(bytes);
         }
-        if let Some(ref bitcase8) = self.bitcase8 {
-            bitcase8.serialize_into(bytes, u8::from(n_types));
+        if let Some(ref kt_level_names) = self.kt_level_names {
+            kt_level_names.serialize_into(bytes, u8::from(n_types));
         }
         if let Some(ref indicator_names) = self.indicator_names {
             assert_eq!(indicator_names.len(), usize::try_from(u32::from(indicators).count_ones()).unwrap(), "`indicator_names` has an incorrect length");
@@ -9934,7 +9934,7 @@ impl GetNamesValueList {
         if self.type_names.is_some() {
             expr_value |= u32::from(NameDetail::KEY_TYPE_NAMES);
         }
-        if self.bitcase8.is_some() {
+        if self.kt_level_names.is_some() {
             expr_value |= u32::from(NameDetail::KT_LEVEL_NAMES);
         }
         if self.indicator_names.is_some() {
@@ -10045,11 +10045,11 @@ impl Serialize for GetNamesReply {
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct SetNamesAuxBitcase8 {
+pub struct SetNamesAuxKTLevelNames {
     pub n_levels_per_type: Vec<u8>,
     pub kt_level_names: Vec<xproto::Atom>,
 }
-impl SetNamesAuxBitcase8 {
+impl SetNamesAuxKTLevelNames {
     pub fn try_parse(remaining: &[u8], n_types: u8) -> Result<(Self, &[u8]), ParseError> {
         let value = remaining;
         let (n_levels_per_type, remaining) = crate::x11_utils::parse_u8_list(remaining, n_types.try_to_usize()?)?;
@@ -10059,11 +10059,11 @@ impl SetNamesAuxBitcase8 {
         let misalignment = (4 - (offset % 4)) % 4;
         let remaining = remaining.get(misalignment..).ok_or(ParseError::InsufficientData)?;
         let (kt_level_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, n_levels_per_type.iter().try_fold(0u32, |acc, x| acc.checked_add(u32::from(*x)).ok_or(ParseError::InvalidExpression))?.try_to_usize()?)?;
-        let result = SetNamesAuxBitcase8 { n_levels_per_type, kt_level_names };
+        let result = SetNamesAuxKTLevelNames { n_levels_per_type, kt_level_names };
         Ok((result, remaining))
     }
 }
-impl SetNamesAuxBitcase8 {
+impl SetNamesAuxKTLevelNames {
     #[allow(dead_code)]
     fn serialize(&self, n_types: u8) -> Vec<u8> {
         let mut result = Vec::new();
@@ -10089,7 +10089,7 @@ pub struct SetNamesAux {
     pub types_name: Option<xproto::Atom>,
     pub compat_name: Option<xproto::Atom>,
     pub type_names: Option<Vec<xproto::Atom>>,
-    pub bitcase8: Option<SetNamesAuxBitcase8>,
+    pub kt_level_names: Option<SetNamesAuxKTLevelNames>,
     pub indicator_names: Option<Vec<xproto::Atom>>,
     pub virtual_mod_names: Option<Vec<xproto::Atom>>,
     pub groups: Option<Vec<xproto::Atom>>,
@@ -10157,10 +10157,10 @@ impl SetNamesAux {
         } else {
             None
         };
-        let bitcase8 = if switch_expr & u32::from(NameDetail::KT_LEVEL_NAMES) != 0 {
-            let (bitcase8, new_remaining) = SetNamesAuxBitcase8::try_parse(outer_remaining, n_types)?;
+        let kt_level_names = if switch_expr & u32::from(NameDetail::KT_LEVEL_NAMES) != 0 {
+            let (kt_level_names, new_remaining) = SetNamesAuxKTLevelNames::try_parse(outer_remaining, n_types)?;
             outer_remaining = new_remaining;
-            Some(bitcase8)
+            Some(kt_level_names)
         } else {
             None
         };
@@ -10212,7 +10212,7 @@ impl SetNamesAux {
         } else {
             None
         };
-        let result = SetNamesAux { keycodes_name, geometry_name, symbols_name, phys_symbols_name, types_name, compat_name, type_names, bitcase8, indicator_names, virtual_mod_names, groups, key_names, key_aliases, radio_group_names };
+        let result = SetNamesAux { keycodes_name, geometry_name, symbols_name, phys_symbols_name, types_name, compat_name, type_names, kt_level_names, indicator_names, virtual_mod_names, groups, key_names, key_aliases, radio_group_names };
         Ok((result, outer_remaining))
     }
 }
@@ -10247,8 +10247,8 @@ impl SetNamesAux {
             assert_eq!(type_names.len(), usize::try_from(n_types).unwrap(), "`type_names` has an incorrect length");
             type_names.serialize_into(bytes);
         }
-        if let Some(ref bitcase8) = self.bitcase8 {
-            bitcase8.serialize_into(bytes, u8::from(n_types));
+        if let Some(ref kt_level_names) = self.kt_level_names {
+            kt_level_names.serialize_into(bytes, u8::from(n_types));
         }
         if let Some(ref indicator_names) = self.indicator_names {
             assert_eq!(indicator_names.len(), usize::try_from(u32::from(indicators).count_ones()).unwrap(), "`indicator_names` has an incorrect length");
@@ -10300,7 +10300,7 @@ impl SetNamesAux {
         if self.type_names.is_some() {
             expr_value |= u32::from(NameDetail::KEY_TYPE_NAMES);
         }
-        if self.bitcase8.is_some() {
+        if self.kt_level_names.is_some() {
             expr_value |= u32::from(NameDetail::KT_LEVEL_NAMES);
         }
         if self.indicator_names.is_some() {
@@ -10371,10 +10371,10 @@ impl SetNamesAux {
         self.type_names = value.into();
         self
     }
-    /// Set the `bitcase8` field of this structure.
+    /// Set the `kt_level_names` field of this structure.
     #[must_use]
-    pub fn bitcase8<I>(mut self, value: I) -> Self where I: Into<Option<SetNamesAuxBitcase8>> {
-        self.bitcase8 = value.into();
+    pub fn kt_level_names<I>(mut self, value: I) -> Self where I: Into<Option<SetNamesAuxKTLevelNames>> {
+        self.kt_level_names = value.into();
         self
     }
     /// Set the `indicator_names` field of this structure.
@@ -11061,11 +11061,11 @@ impl crate::x11_utils::ReplyRequest for GetKbdByNameRequest {
 
 #[derive(Debug, Clone)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct GetKbdByNameRepliesTypesMapBitcase3 {
+pub struct GetKbdByNameRepliesTypesMapKeyActions {
     pub acts_rtrn_count: Vec<u8>,
     pub acts_rtrn_acts: Vec<Action>,
 }
-impl GetKbdByNameRepliesTypesMapBitcase3 {
+impl GetKbdByNameRepliesTypesMapKeyActions {
     pub fn try_parse(remaining: &[u8], n_key_actions: u8, total_actions: u16) -> Result<(Self, &[u8]), ParseError> {
         let value = remaining;
         let (acts_rtrn_count, remaining) = crate::x11_utils::parse_u8_list(remaining, n_key_actions.try_to_usize()?)?;
@@ -11075,11 +11075,11 @@ impl GetKbdByNameRepliesTypesMapBitcase3 {
         let misalignment = (4 - (offset % 4)) % 4;
         let remaining = remaining.get(misalignment..).ok_or(ParseError::InsufficientData)?;
         let (acts_rtrn_acts, remaining) = crate::x11_utils::parse_list::<Action>(remaining, total_actions.try_to_usize()?)?;
-        let result = GetKbdByNameRepliesTypesMapBitcase3 { acts_rtrn_count, acts_rtrn_acts };
+        let result = GetKbdByNameRepliesTypesMapKeyActions { acts_rtrn_count, acts_rtrn_acts };
         Ok((result, remaining))
     }
 }
-impl GetKbdByNameRepliesTypesMapBitcase3 {
+impl GetKbdByNameRepliesTypesMapKeyActions {
     #[allow(dead_code)]
     fn serialize(&self, n_key_actions: u8, total_actions: u16) -> Vec<u8> {
         let mut result = Vec::new();
@@ -11099,7 +11099,7 @@ impl GetKbdByNameRepliesTypesMapBitcase3 {
 pub struct GetKbdByNameRepliesTypesMap {
     pub types_rtrn: Option<Vec<KeyType>>,
     pub syms_rtrn: Option<Vec<KeySymMap>>,
-    pub bitcase3: Option<GetKbdByNameRepliesTypesMapBitcase3>,
+    pub key_actions: Option<GetKbdByNameRepliesTypesMapKeyActions>,
     pub behaviors_rtrn: Option<Vec<SetBehavior>>,
     pub vmods_rtrn: Option<Vec<xproto::ModMask>>,
     pub explicit_rtrn: Option<Vec<SetExplicit>>,
@@ -11126,10 +11126,10 @@ impl GetKbdByNameRepliesTypesMap {
         } else {
             None
         };
-        let bitcase3 = if switch_expr & u16::from(MapPart::KEY_ACTIONS) != 0 {
-            let (bitcase3, new_remaining) = GetKbdByNameRepliesTypesMapBitcase3::try_parse(outer_remaining, n_key_actions, total_actions)?;
+        let key_actions = if switch_expr & u16::from(MapPart::KEY_ACTIONS) != 0 {
+            let (key_actions, new_remaining) = GetKbdByNameRepliesTypesMapKeyActions::try_parse(outer_remaining, n_key_actions, total_actions)?;
             outer_remaining = new_remaining;
-            Some(bitcase3)
+            Some(key_actions)
         } else {
             None
         };
@@ -11196,7 +11196,7 @@ impl GetKbdByNameRepliesTypesMap {
         } else {
             None
         };
-        let result = GetKbdByNameRepliesTypesMap { types_rtrn, syms_rtrn, bitcase3, behaviors_rtrn, vmods_rtrn, explicit_rtrn, modmap_rtrn, vmodmap_rtrn };
+        let result = GetKbdByNameRepliesTypesMap { types_rtrn, syms_rtrn, key_actions, behaviors_rtrn, vmods_rtrn, explicit_rtrn, modmap_rtrn, vmodmap_rtrn };
         Ok((result, outer_remaining))
     }
 }
@@ -11217,8 +11217,8 @@ impl GetKbdByNameRepliesTypesMap {
             assert_eq!(syms_rtrn.len(), usize::try_from(n_key_syms).unwrap(), "`syms_rtrn` has an incorrect length");
             syms_rtrn.serialize_into(bytes);
         }
-        if let Some(ref bitcase3) = self.bitcase3 {
-            bitcase3.serialize_into(bytes, u8::from(n_key_actions), u16::from(total_actions));
+        if let Some(ref key_actions) = self.key_actions {
+            key_actions.serialize_into(bytes, u8::from(n_key_actions), u16::from(total_actions));
         }
         if let Some(ref behaviors_rtrn) = self.behaviors_rtrn {
             assert_eq!(behaviors_rtrn.len(), usize::try_from(total_key_behaviors).unwrap(), "`behaviors_rtrn` has an incorrect length");
@@ -11256,7 +11256,7 @@ impl GetKbdByNameRepliesTypesMap {
         if self.syms_rtrn.is_some() {
             expr_value |= u16::from(MapPart::KEY_SYMS);
         }
-        if self.bitcase3.is_some() {
+        if self.key_actions.is_some() {
             expr_value |= u16::from(MapPart::KEY_ACTIONS);
         }
         if self.behaviors_rtrn.is_some() {
@@ -11530,11 +11530,11 @@ impl GetKbdByNameRepliesIndicatorMaps {
 }
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct GetKbdByNameRepliesKeyNamesValueListBitcase8 {
+pub struct GetKbdByNameRepliesKeyNamesValueListKTLevelNames {
     pub n_levels_per_type: Vec<u8>,
     pub kt_level_names: Vec<xproto::Atom>,
 }
-impl GetKbdByNameRepliesKeyNamesValueListBitcase8 {
+impl GetKbdByNameRepliesKeyNamesValueListKTLevelNames {
     pub fn try_parse(remaining: &[u8], n_types: u8) -> Result<(Self, &[u8]), ParseError> {
         let value = remaining;
         let (n_levels_per_type, remaining) = crate::x11_utils::parse_u8_list(remaining, n_types.try_to_usize()?)?;
@@ -11544,11 +11544,11 @@ impl GetKbdByNameRepliesKeyNamesValueListBitcase8 {
         let misalignment = (4 - (offset % 4)) % 4;
         let remaining = remaining.get(misalignment..).ok_or(ParseError::InsufficientData)?;
         let (kt_level_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, n_levels_per_type.iter().try_fold(0u32, |acc, x| acc.checked_add(u32::from(*x)).ok_or(ParseError::InvalidExpression))?.try_to_usize()?)?;
-        let result = GetKbdByNameRepliesKeyNamesValueListBitcase8 { n_levels_per_type, kt_level_names };
+        let result = GetKbdByNameRepliesKeyNamesValueListKTLevelNames { n_levels_per_type, kt_level_names };
         Ok((result, remaining))
     }
 }
-impl GetKbdByNameRepliesKeyNamesValueListBitcase8 {
+impl GetKbdByNameRepliesKeyNamesValueListKTLevelNames {
     #[allow(dead_code)]
     fn serialize(&self, n_types: u8) -> Vec<u8> {
         let mut result = Vec::new();
@@ -11573,7 +11573,7 @@ pub struct GetKbdByNameRepliesKeyNamesValueList {
     pub types_name: Option<xproto::Atom>,
     pub compat_name: Option<xproto::Atom>,
     pub type_names: Option<Vec<xproto::Atom>>,
-    pub bitcase8: Option<GetKbdByNameRepliesKeyNamesValueListBitcase8>,
+    pub kt_level_names: Option<GetKbdByNameRepliesKeyNamesValueListKTLevelNames>,
     pub indicator_names: Option<Vec<xproto::Atom>>,
     pub virtual_mod_names: Option<Vec<xproto::Atom>>,
     pub groups: Option<Vec<xproto::Atom>>,
@@ -11641,10 +11641,10 @@ impl GetKbdByNameRepliesKeyNamesValueList {
         } else {
             None
         };
-        let bitcase8 = if switch_expr & u32::from(NameDetail::KT_LEVEL_NAMES) != 0 {
-            let (bitcase8, new_remaining) = GetKbdByNameRepliesKeyNamesValueListBitcase8::try_parse(outer_remaining, n_types)?;
+        let kt_level_names = if switch_expr & u32::from(NameDetail::KT_LEVEL_NAMES) != 0 {
+            let (kt_level_names, new_remaining) = GetKbdByNameRepliesKeyNamesValueListKTLevelNames::try_parse(outer_remaining, n_types)?;
             outer_remaining = new_remaining;
-            Some(bitcase8)
+            Some(kt_level_names)
         } else {
             None
         };
@@ -11696,7 +11696,7 @@ impl GetKbdByNameRepliesKeyNamesValueList {
         } else {
             None
         };
-        let result = GetKbdByNameRepliesKeyNamesValueList { keycodes_name, geometry_name, symbols_name, phys_symbols_name, types_name, compat_name, type_names, bitcase8, indicator_names, virtual_mod_names, groups, key_names, key_aliases, radio_group_names };
+        let result = GetKbdByNameRepliesKeyNamesValueList { keycodes_name, geometry_name, symbols_name, phys_symbols_name, types_name, compat_name, type_names, kt_level_names, indicator_names, virtual_mod_names, groups, key_names, key_aliases, radio_group_names };
         Ok((result, outer_remaining))
     }
 }
@@ -11731,8 +11731,8 @@ impl GetKbdByNameRepliesKeyNamesValueList {
             assert_eq!(type_names.len(), usize::try_from(n_types).unwrap(), "`type_names` has an incorrect length");
             type_names.serialize_into(bytes);
         }
-        if let Some(ref bitcase8) = self.bitcase8 {
-            bitcase8.serialize_into(bytes, u8::from(n_types));
+        if let Some(ref kt_level_names) = self.kt_level_names {
+            kt_level_names.serialize_into(bytes, u8::from(n_types));
         }
         if let Some(ref indicator_names) = self.indicator_names {
             assert_eq!(indicator_names.len(), usize::try_from(u32::from(indicators).count_ones()).unwrap(), "`indicator_names` has an incorrect length");
@@ -11784,7 +11784,7 @@ impl GetKbdByNameRepliesKeyNamesValueList {
         if self.type_names.is_some() {
             expr_value |= u32::from(NameDetail::KEY_TYPE_NAMES);
         }
-        if self.bitcase8.is_some() {
+        if self.kt_level_names.is_some() {
             expr_value |= u32::from(NameDetail::KT_LEVEL_NAMES);
         }
         if self.indicator_names.is_some() {
