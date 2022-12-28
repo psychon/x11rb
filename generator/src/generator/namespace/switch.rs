@@ -75,7 +75,9 @@ pub(super) fn emit_switch_type(
             // field, a helper struct to ensure that these
             // fields are only specified together.
             let field_name = case.name.as_ref().cloned().unwrap_or_else(|| {
-                if switch.kind == xcbdefs::SwitchKind::Case {
+                if let [xcbdefs::Expression::EnumRef(expr)] = &case.exprs[..] {
+                    expr.variant.clone()
+                } else if switch.kind == xcbdefs::SwitchKind::Case {
                     format!("case{}", i + 1)
                 } else {
                     format!("bitcase{}", i + 1)
