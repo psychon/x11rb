@@ -2336,8 +2336,7 @@ pub struct KeyName {
 }
 impl TryParse for KeyName {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, 4)?;
-        let name = <[u8; 4]>::try_from(name).unwrap();
+        let (name, remaining) = crate::x11_utils::parse_u8_array::<4>(remaining)?;
         let result = KeyName { name };
         Ok((result, remaining))
     }
@@ -2366,10 +2365,8 @@ pub struct KeyAlias {
 }
 impl TryParse for KeyAlias {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let (real, remaining) = crate::x11_utils::parse_u8_list(remaining, 4)?;
-        let real = <[u8; 4]>::try_from(real).unwrap();
-        let (alias, remaining) = crate::x11_utils::parse_u8_list(remaining, 4)?;
-        let alias = <[u8; 4]>::try_from(alias).unwrap();
+        let (real, remaining) = crate::x11_utils::parse_u8_array::<4>(remaining)?;
+        let (alias, remaining) = crate::x11_utils::parse_u8_array::<4>(remaining)?;
         let result = KeyAlias { real, alias };
         Ok((result, remaining))
     }
@@ -2574,8 +2571,7 @@ pub struct KeySymMap {
 }
 impl TryParse for KeySymMap {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let (kt_index, remaining) = crate::x11_utils::parse_u8_list(remaining, 4)?;
-        let kt_index = <[u8; 4]>::try_from(kt_index).unwrap();
+        let (kt_index, remaining) = crate::x11_utils::parse_u8_array::<4>(remaining)?;
         let (group_info, remaining) = u8::try_parse(remaining)?;
         let (width, remaining) = u8::try_parse(remaining)?;
         let (n_syms, remaining) = u16::try_parse(remaining)?;
@@ -3322,8 +3318,7 @@ pub struct Key {
 }
 impl TryParse for Key {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, 4)?;
-        let name = <[u8; 4]>::try_from(name).unwrap();
+        let (name, remaining) = crate::x11_utils::parse_u8_array::<4>(remaining)?;
         let (gap, remaining) = i16::try_parse(remaining)?;
         let (shape_ndx, remaining) = u8::try_parse(remaining)?;
         let (color_ndx, remaining) = u8::try_parse(remaining)?;
@@ -3365,10 +3360,8 @@ pub struct OverlayKey {
 }
 impl TryParse for OverlayKey {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let (over, remaining) = crate::x11_utils::parse_u8_list(remaining, 4)?;
-        let over = <[u8; 4]>::try_from(over).unwrap();
-        let (under, remaining) = crate::x11_utils::parse_u8_list(remaining, 4)?;
-        let under = <[u8; 4]>::try_from(under).unwrap();
+        let (over, remaining) = crate::x11_utils::parse_u8_array::<4>(remaining)?;
+        let (under, remaining) = crate::x11_utils::parse_u8_array::<4>(remaining)?;
         let result = OverlayKey { over, under };
         Ok((result, remaining))
     }
@@ -5008,8 +5001,7 @@ impl TryParse for SAActionMessage {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (type_, remaining) = u8::try_parse(remaining)?;
         let (flags, remaining) = u8::try_parse(remaining)?;
-        let (message, remaining) = crate::x11_utils::parse_u8_list(remaining, 6)?;
-        let message = <[u8; 6]>::try_from(message).unwrap();
+        let (message, remaining) = crate::x11_utils::parse_u8_array::<6>(remaining)?;
         let type_ = type_.into();
         let flags = flags.into();
         let result = SAActionMessage { type_, flags, message };
@@ -5411,8 +5403,7 @@ pub struct SIAction {
 impl TryParse for SIAction {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (type_, remaining) = u8::try_parse(remaining)?;
-        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, 7)?;
-        let data = <[u8; 7]>::try_from(data).unwrap();
+        let (data, remaining) = crate::x11_utils::parse_u8_array::<7>(remaining)?;
         let type_ = type_.into();
         let result = SIAction { type_, data };
         Ok((result, remaining))
@@ -7223,8 +7214,7 @@ impl TryParse for GetControlsReply {
         let (access_x_timeout_mask, remaining) = u32::try_parse(remaining)?;
         let (access_x_timeout_values, remaining) = u32::try_parse(remaining)?;
         let (enabled_controls, remaining) = u32::try_parse(remaining)?;
-        let (per_key_repeat, remaining) = crate::x11_utils::parse_u8_list(remaining, 32)?;
-        let per_key_repeat = <[u8; 32]>::try_from(per_key_repeat).unwrap();
+        let (per_key_repeat, remaining) = crate::x11_utils::parse_u8_array::<32>(remaining)?;
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
@@ -7609,8 +7599,7 @@ impl<'input> SetControlsRequest<'input> {
         let access_x_timeout_options_mask = access_x_timeout_options_mask.into();
         let (access_x_timeout_options_values, remaining) = u16::try_parse(remaining)?;
         let access_x_timeout_options_values = access_x_timeout_options_values.into();
-        let (per_key_repeat, remaining) = crate::x11_utils::parse_u8_list(remaining, 32)?;
-        let per_key_repeat = <&[u8; 32]>::try_from(per_key_repeat).unwrap();
+        let (per_key_repeat, remaining) = crate::x11_utils::parse_u8_array_ref::<32>(remaining)?;
         let _ = remaining;
         Ok(SetControlsRequest {
             device_spec,
@@ -14259,8 +14248,7 @@ impl TryParse for ActionMessageEvent {
         let (key_event_follows, remaining) = bool::try_parse(remaining)?;
         let (mods, remaining) = u8::try_parse(remaining)?;
         let (group, remaining) = u8::try_parse(remaining)?;
-        let (message, remaining) = crate::x11_utils::parse_u8_list(remaining, 8)?;
-        let message = <[u8; 8]>::try_from(message).unwrap();
+        let (message, remaining) = crate::x11_utils::parse_u8_array::<8>(remaining)?;
         let remaining = remaining.get(10..).ok_or(ParseError::InsufficientData)?;
         let mods = mods.into();
         let group = group.into();

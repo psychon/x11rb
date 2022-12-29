@@ -2467,8 +2467,7 @@ impl TryParse for KeymapNotifyEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
         let (response_type, remaining) = u8::try_parse(remaining)?;
-        let (keys, remaining) = crate::x11_utils::parse_u8_list(remaining, 31)?;
-        let keys = <[u8; 31]>::try_from(keys).unwrap();
+        let (keys, remaining) = crate::x11_utils::parse_u8_array::<31>(remaining)?;
         let result = KeymapNotifyEvent { response_type, keys };
         let _ = remaining;
         let remaining = initial_value.get(32..)
@@ -5791,8 +5790,7 @@ pub struct ClientMessageData([u8; 20]);
 impl ClientMessageData {
     pub fn as_data8(&self) -> [u8; 20] {
         fn do_the_parse(remaining: &[u8]) -> Result<[u8; 20], ParseError> {
-            let (data8, remaining) = crate::x11_utils::parse_u8_list(remaining, 20)?;
-            let data8 = <[u8; 20]>::try_from(data8).unwrap();
+            let (data8, remaining) = crate::x11_utils::parse_u8_array::<20>(remaining)?;
             let _ = remaining;
             Ok(data8)
         }
@@ -11369,8 +11367,7 @@ impl<'input> SendEventRequest<'input> {
         let (destination, remaining) = Window::try_parse(value)?;
         let (event_mask, remaining) = u32::try_parse(remaining)?;
         let event_mask = event_mask.into();
-        let (event, remaining) = crate::x11_utils::parse_u8_list(remaining, 32)?;
-        let event = <&[u8; 32]>::try_from(event).unwrap();
+        let (event, remaining) = crate::x11_utils::parse_u8_array_ref::<32>(remaining)?;
         let _ = remaining;
         Ok(SendEventRequest {
             propagate,
@@ -14139,8 +14136,7 @@ impl TryParse for QueryKeymapReply {
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
-        let (keys, remaining) = crate::x11_utils::parse_u8_list(remaining, 32)?;
-        let keys = <[u8; 32]>::try_from(keys).unwrap();
+        let (keys, remaining) = crate::x11_utils::parse_u8_array::<32>(remaining)?;
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
@@ -23647,8 +23643,7 @@ impl TryParse for GetKeyboardControlReply {
         let (bell_pitch, remaining) = u16::try_parse(remaining)?;
         let (bell_duration, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
-        let (auto_repeats, remaining) = crate::x11_utils::parse_u8_list(remaining, 32)?;
-        let auto_repeats = <[u8; 32]>::try_from(auto_repeats).unwrap();
+        let (auto_repeats, remaining) = crate::x11_utils::parse_u8_array::<32>(remaining)?;
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }

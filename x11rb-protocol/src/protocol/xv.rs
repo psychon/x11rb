@@ -854,8 +854,7 @@ impl TryParse for ImageFormatInfo {
         let (type_, remaining) = u8::try_parse(remaining)?;
         let (byte_order, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
-        let (guid, remaining) = crate::x11_utils::parse_u8_list(remaining, 16)?;
-        let guid = <[u8; 16]>::try_from(guid).unwrap();
+        let (guid, remaining) = crate::x11_utils::parse_u8_array::<16>(remaining)?;
         let (bpp, remaining) = u8::try_parse(remaining)?;
         let (num_planes, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
@@ -875,8 +874,7 @@ impl TryParse for ImageFormatInfo {
         let (vvert_y_period, remaining) = u32::try_parse(remaining)?;
         let (vvert_u_period, remaining) = u32::try_parse(remaining)?;
         let (vvert_v_period, remaining) = u32::try_parse(remaining)?;
-        let (vcomp_order, remaining) = crate::x11_utils::parse_u8_list(remaining, 32)?;
-        let vcomp_order = <[u8; 32]>::try_from(vcomp_order).unwrap();
+        let (vcomp_order, remaining) = crate::x11_utils::parse_u8_array::<32>(remaining)?;
         let (vscanline_order, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(11..).ok_or(ParseError::InsufficientData)?;
         let type_ = type_.into();

@@ -553,12 +553,32 @@ where
 }
 
 /// Parse a list of `u8` from the given data.
+#[inline]
 pub(crate) fn parse_u8_list(data: &[u8], list_length: usize) -> Result<(&[u8], &[u8]), ParseError> {
     if data.len() < list_length {
         Err(ParseError::InsufficientData)
     } else {
         Ok(data.split_at(list_length))
     }
+}
+
+/// Parse an array of `u8` from the given data.
+#[inline]
+pub(crate) fn parse_u8_array_ref<const N: usize>(
+    data: &[u8],
+) -> Result<(&[u8; N], &[u8]), ParseError> {
+    let (slice, remaining) = parse_u8_list(data, N)?;
+    let slice = slice
+        .try_into()
+        .expect("Cannot fail since slice has expected length");
+    Ok((slice, remaining))
+}
+
+/// Parse an array of `u8` from the given data.
+#[inline]
+pub(crate) fn parse_u8_array<const N: usize>(data: &[u8]) -> Result<([u8; N], &[u8]), ParseError> {
+    let (array, remaining) = parse_u8_array_ref(data)?;
+    Ok((*array, remaining))
 }
 
 impl<T: Serialize> Serialize for [T] {

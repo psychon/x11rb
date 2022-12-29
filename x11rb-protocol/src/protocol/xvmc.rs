@@ -842,8 +842,7 @@ impl TryParse for CreateSubpictureReply {
         let (height_actual, remaining) = u16::try_parse(remaining)?;
         let (num_palette_entries, remaining) = u16::try_parse(remaining)?;
         let (entry_bytes, remaining) = u16::try_parse(remaining)?;
-        let (component_order, remaining) = crate::x11_utils::parse_u8_list(remaining, 4)?;
-        let component_order = <[u8; 4]>::try_from(component_order).unwrap();
+        let (component_order, remaining) = crate::x11_utils::parse_u8_array::<4>(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::InsufficientData)?;
         let (priv_data, remaining) = crate::x11_utils::parse_list::<u32>(remaining, length.try_to_usize()?)?;
         if response_type != 1 {
