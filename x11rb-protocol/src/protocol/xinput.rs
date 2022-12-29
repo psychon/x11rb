@@ -3529,8 +3529,7 @@ impl TryParse for KbdFeedbackState {
         let (click, remaining) = u8::try_parse(remaining)?;
         let (percent, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
-        let (auto_repeats, remaining) = crate::x11_utils::parse_u8_list(remaining, 32)?;
-        let auto_repeats = <[u8; 32]>::try_from(auto_repeats).unwrap();
+        let (auto_repeats, remaining) = crate::x11_utils::parse_u8_array::<32>(remaining)?;
         let class_id = class_id.into();
         let result = KbdFeedbackState { class_id, feedback_id, len, pitch, duration, led_mask, led_values, global_auto_repeat, click, percent, auto_repeats };
         Ok((result, remaining))
@@ -3935,8 +3934,7 @@ impl TryParse for FeedbackStateDataKeyboard {
         let (click, remaining) = u8::try_parse(remaining)?;
         let (percent, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
-        let (auto_repeats, remaining) = crate::x11_utils::parse_u8_list(remaining, 32)?;
-        let auto_repeats = <[u8; 32]>::try_from(auto_repeats).unwrap();
+        let (auto_repeats, remaining) = crate::x11_utils::parse_u8_array::<32>(remaining)?;
         let result = FeedbackStateDataKeyboard { pitch, duration, led_mask, led_values, global_auto_repeat, click, percent, auto_repeats };
         Ok((result, remaining))
     }
@@ -6233,8 +6231,7 @@ impl TryParse for KeyState {
         let (len, remaining) = u8::try_parse(remaining)?;
         let (num_keys, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
-        let (keys, remaining) = crate::x11_utils::parse_u8_list(remaining, 32)?;
-        let keys = <[u8; 32]>::try_from(keys).unwrap();
+        let (keys, remaining) = crate::x11_utils::parse_u8_array::<32>(remaining)?;
         let class_id = class_id.into();
         let result = KeyState { class_id, len, num_keys, keys };
         Ok((result, remaining))
@@ -6309,8 +6306,7 @@ impl TryParse for ButtonState {
         let (len, remaining) = u8::try_parse(remaining)?;
         let (num_buttons, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
-        let (buttons, remaining) = crate::x11_utils::parse_u8_list(remaining, 32)?;
-        let buttons = <[u8; 32]>::try_from(buttons).unwrap();
+        let (buttons, remaining) = crate::x11_utils::parse_u8_array::<32>(remaining)?;
         let class_id = class_id.into();
         let result = ButtonState { class_id, len, num_buttons, buttons };
         Ok((result, remaining))
@@ -6495,8 +6491,7 @@ impl TryParse for InputStateDataKey {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (num_keys, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
-        let (keys, remaining) = crate::x11_utils::parse_u8_list(remaining, 32)?;
-        let keys = <[u8; 32]>::try_from(keys).unwrap();
+        let (keys, remaining) = crate::x11_utils::parse_u8_array::<32>(remaining)?;
         let result = InputStateDataKey { num_keys, keys };
         Ok((result, remaining))
     }
@@ -6559,8 +6554,7 @@ impl TryParse for InputStateDataButton {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (num_buttons, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::InsufficientData)?;
-        let (buttons, remaining) = crate::x11_utils::parse_u8_list(remaining, 32)?;
-        let buttons = <[u8; 32]>::try_from(buttons).unwrap();
+        let (buttons, remaining) = crate::x11_utils::parse_u8_array::<32>(remaining)?;
         let result = InputStateDataButton { num_buttons, buttons };
         Ok((result, remaining))
     }
@@ -15505,10 +15499,8 @@ impl TryParse for DeviceStateNotifyEvent {
         let (num_buttons, remaining) = u8::try_parse(remaining)?;
         let (num_valuators, remaining) = u8::try_parse(remaining)?;
         let (classes_reported, remaining) = u8::try_parse(remaining)?;
-        let (buttons, remaining) = crate::x11_utils::parse_u8_list(remaining, 4)?;
-        let buttons = <[u8; 4]>::try_from(buttons).unwrap();
-        let (keys, remaining) = crate::x11_utils::parse_u8_list(remaining, 4)?;
-        let keys = <[u8; 4]>::try_from(keys).unwrap();
+        let (buttons, remaining) = crate::x11_utils::parse_u8_array::<4>(remaining)?;
+        let (keys, remaining) = crate::x11_utils::parse_u8_array::<4>(remaining)?;
         let (valuators_0, remaining) = u32::try_parse(remaining)?;
         let (valuators_1, remaining) = u32::try_parse(remaining)?;
         let (valuators_2, remaining) = u32::try_parse(remaining)?;
@@ -15991,8 +15983,7 @@ impl TryParse for DeviceKeyStateNotifyEvent {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let (keys, remaining) = crate::x11_utils::parse_u8_list(remaining, 28)?;
-        let keys = <[u8; 28]>::try_from(keys).unwrap();
+        let (keys, remaining) = crate::x11_utils::parse_u8_array::<28>(remaining)?;
         let result = DeviceKeyStateNotifyEvent { response_type, device_id, sequence, keys };
         let _ = remaining;
         let remaining = initial_value.get(32..)
@@ -16112,8 +16103,7 @@ impl TryParse for DeviceButtonStateNotifyEvent {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let (buttons, remaining) = crate::x11_utils::parse_u8_list(remaining, 28)?;
-        let buttons = <[u8; 28]>::try_from(buttons).unwrap();
+        let (buttons, remaining) = crate::x11_utils::parse_u8_array::<28>(remaining)?;
         let result = DeviceButtonStateNotifyEvent { response_type, device_id, sequence, buttons };
         let _ = remaining;
         let remaining = initial_value.get(32..)

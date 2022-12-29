@@ -57,30 +57,17 @@ pub(super) fn emit_field_parse(
             if generator.rust_value_type_is_u8(&list_field.element_type) {
                 // List of `u8`, use simple parsing
                 if let Some(list_length) = list_field.length() {
-                    outln!(
-                        out,
-                        "let ({}, remaining) = crate::x11_utils::parse_u8_list({}, {})?;",
-                        rust_field_name,
-                        from,
-                        list_length,
-                    );
-                    let ownership = if container == FieldContainer::Other {
+                    let function_suffix = if container == FieldContainer::Other {
                         // Only force taking ownership for non-request types.
                         ""
                     } else {
                         // Otherwise convert this into a reference to a fixed length array.
-                        // It's basically dumb luck that the largest list in the X11 protocol
-                        // and the largest fixed length array that Rust has a builtin conversion
-                        // for going from &[T] to &[T; N] both happen to be 32.
-                        assert!(list_length <= 32);
-                        "&"
+                        "_ref"
                     };
                     outln!(
                         out,
-                        "let {field} = <{ownership}[u8; \
-                         {length}]>::try_from({field}).unwrap();",
+                        "let ({field}, remaining) = crate::x11_utils::parse_u8_array{function_suffix}::<{length}>({from})?;",
                         field = rust_field_name,
-                        ownership = ownership,
                         length = list_length,
                     );
                 } else if let Some(ref length_expr) = list_field.length_expr {

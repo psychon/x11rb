@@ -2075,8 +2075,7 @@ impl TryParse for VendorPrivateWithReplyReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (retval, remaining) = u32::try_parse(remaining)?;
-        let (data1, remaining) = crate::x11_utils::parse_u8_list(remaining, 24)?;
-        let data1 = <[u8; 24]>::try_from(data1).unwrap();
+        let (data1, remaining) = crate::x11_utils::parse_u8_array::<24>(remaining)?;
         let (data2, remaining) = crate::x11_utils::parse_u8_list(remaining, u32::from(length).checked_mul(4u32).ok_or(ParseError::InvalidExpression)?.try_to_usize()?)?;
         let data2 = data2.to_vec();
         if response_type != 1 {
