@@ -94,7 +94,7 @@ impl Connection {
             ReplyFdKind::ReplyWithoutFDs => true,
             ReplyFdKind::ReplyWithFDs => true,
         };
-        if self.next_reply_expected + SequenceNumber::from(u16::max_value())
+        if self.next_reply_expected + SequenceNumber::from(u16::max_value()) - 1
             <= self.last_sequence_written
             && !has_response
         {
@@ -327,24 +327,24 @@ mod test {
 
     #[test]
     fn insert_sync_no_reply() {
-        // The connection must send a sync (GetInputFocus) request every 2^16 requests (that do not
+        // The connection must send a sync (GetInputFocus) request every 2^16-1 requests (that do not
         // have a reply). Thus, this test sends more than that and tests for the sync to appear.
 
         let mut connection = Connection::new();
 
-        for num in 1..0x10000 {
+        for num in 1..0xffff {
             let seqno = connection.send_request(ReplyFdKind::NoReply);
             assert_eq!(Some(num), seqno);
         }
-        // request 0x10000 should be a sync, hence the next one is 0x10001
+        // request 0xffff should be a sync, hence the next one is 0x10000
         let seqno = connection.send_request(ReplyFdKind::NoReply);
         assert_eq!(None, seqno);
 
         let seqno = connection.send_request(ReplyFdKind::ReplyWithoutFDs);
-        assert_eq!(Some(0x10000), seqno);
+        assert_eq!(Some(0xffff), seqno);
 
         let seqno = connection.send_request(ReplyFdKind::NoReply);
-        assert_eq!(Some(0x10001), seqno);
+        assert_eq!(Some(0x10000), seqno);
     }
 
     #[test]
@@ -368,12 +368,72 @@ mod test {
 
         let mut connection = Connection::new();
 
-        for num in 1..0x10000 {
+        for num in 1..0xffff {
             let seqno = connection.send_request(ReplyFdKind::NoReply);
             assert_eq!(Some(num), seqno);
         }
 
         let seqno = connection.send_request(ReplyFdKind::ReplyWithoutFDs);
-        assert_eq!(Some(0x10000), seqno);
+        assert_eq!(Some(0xffff), seqno);
+    }
+
+    #[test]
+    fn get_sync_replies() {
+        // This sends requests with a reply with seqno 1 and 1+2^16 and then checks that their
+        // replies are correctly mapped to the requests.
+
+        let mut connection = Connection::new();
+
+        let first_reply = 1;
+        let second_reply = 0x10001;
+
+        // First, send all the requests
+
+        // First request is one with a reply
+        let seqno = connection.send_request(ReplyFdKind::ReplyWithoutFDs);
+        assert_eq!(Some(first_reply), seqno);
+
+        // Then, there should be enough requests so that the next request will end up with sequence
+        // number 'second_reply'
+        for num in (first_reply + 1)..(second_reply - 1) {
+            let seqno = connection.send_request(ReplyFdKind::NoReply);
+            assert_eq!(Some(num), seqno);
+        }
+
+        // Send one more request. This needs to be a sync request so that sequence numbers can be
+        // reconstructed correctly. The bug that we testing was that no sync was required, so this
+        // test handles both cases correctly.
+        let requested_extra_sync = connection.send_request(ReplyFdKind::NoReply).is_none();
+        if requested_extra_sync {
+            let _ = connection.send_request(ReplyFdKind::ReplyWithoutFDs);
+        }
+
+        let seqno = connection.send_request(ReplyFdKind::ReplyWithoutFDs);
+        assert_eq!(Some(second_reply), seqno);
+
+        // Prepare a reply packet
+        let mut packet = [0; 32];
+        // It is a reply
+        packet[0] = 1;
+        // Set the sequence number to 1
+        packet[2..4].copy_from_slice(&1u16.to_ne_bytes());
+
+        // Enqueue the first reply.
+        connection.enqueue_packet(packet.to_vec());
+
+        // Send an extra reply if the code wanted one. This extra reply allows to detect that all
+        // replies to the first request were received (remember, there can be multiple replies to a
+        // single request!)
+        if requested_extra_sync {
+            packet[2..4].copy_from_slice(&((second_reply - 1) as u16).to_ne_bytes());
+            connection.enqueue_packet(packet.to_vec());
+        }
+
+        // Set the sequence number for the second reply
+        packet[2..4].copy_from_slice(&(second_reply as u16).to_ne_bytes());
+        connection.enqueue_packet(packet.to_vec());
+
+        // Now check that the sequence number for the last packet was reconstructed correctly.
+        assert!(connection.poll_for_reply_or_error(second_reply).is_some());
     }
 }
