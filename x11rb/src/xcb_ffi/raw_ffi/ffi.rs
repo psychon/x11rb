@@ -34,10 +34,18 @@ pub(crate) mod libxcb_library {
             // TODO: Names for non-unix platforms
             #[cfg(unix)]
             const LIB_NAME: &str = "libxcb.so.1";
+            #[cfg(unix)]
+            const OTHER_LIB_NAME: &str = "libxcb.so";
             #[cfg(not(unix))]
             compile_error!("dl-libxcb feature is not supported on non-unix");
 
-            let library = libloading::Library::new(LIB_NAME)
+            let mut library = libloading::Library::new(LIB_NAME);
+
+            // For some reason, libxcb.so.1 is not always available on NetBSD.
+            // https://github.com/psychon/x11rb/issues/785
+            library = library.or_else(|_| libloading::Library::new(OTHER_LIB_NAME));
+
+            let library = library
                 .map_err(|e| LibxcbLoadError::OpenLibError(LIB_NAME.into(), e.to_string()))?;
             let funcs = LibxcbFuncs::new(&library).map_err(|(symbol, e)| {
                 LibxcbLoadError::GetSymbolError(symbol.into(), e.to_string())
