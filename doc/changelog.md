@@ -1,3 +1,10 @@
+# Version 0.11.1 (2023-01-06)
+
+Fixes:
+* Fix connection breakage after sending 2^16 requests without a reply.
+* Enable features on docs.rs to have better docs.
+* Fix dl-libxcb feature on NetBSD not finding libxcb.so.
+
 # Version 0.11.0 (2022-11-18)
 
 New features:

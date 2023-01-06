@@ -1,6 +1,6 @@
 [package]
 name = "x11rb"
-version = "0.11.0"
+version = "0.11.1"
 description = "Rust bindings to X11"
 authors = [
     "Uli Schlachter <psychon@znc.in>",
@@ -21,7 +21,7 @@ exclude = [
 ]
 
 [dependencies]
-x11rb-protocol = { version = "0.11.0", path = "../x11rb-protocol" }
+x11rb-protocol = { version = "0.11.1", path = "../x11rb-protocol" }
 libc = { version = "0.2", optional = true }
 libloading = { version = "0.7.0", optional = true }
 once_cell = { version = "1.16", optional = true }
