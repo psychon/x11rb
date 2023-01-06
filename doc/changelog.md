@@ -1,4 +1,4 @@
-# Version 0.11.1 (2023-XX-XX)
+# Version 0.11.1 (2023-01-06)
 
 Fixes:
 * Fix connection breakage after sending 2^16 requests without a reply.
