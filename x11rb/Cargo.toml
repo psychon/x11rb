@@ -27,6 +27,7 @@ libloading = { version = "0.7.0", optional = true }
 once_cell = { version = "1.16", optional = true }
 gethostname = "0.3.0"
 raw-window-handle = { version = "0.5.0", optional = true }
+as-raw-xcb-connection = { version = "1.0", optional = true }
 
 [target.'cfg(unix)'.dependencies.nix]
 version = "0.26"
@@ -43,7 +44,7 @@ features = ["winsock2"]
 [features]
 # Without this feature, all uses of `unsafe` in the crate are forbidden via
 # #![deny(unsafe_code)]. This has the effect of disabling the XCB FFI bindings.
-allow-unsafe-code = ["libc"]
+allow-unsafe-code = ["libc", "as-raw-xcb-connection"]
 
 # Enable utility functions in `x11rb::cursor` for loading mouse cursors.
 cursor = ["render", "resource_manager"]

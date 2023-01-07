@@ -616,6 +616,13 @@ unsafe impl raw_window_handle::HasRawWindowHandle
     }
 }
 
+// SAFETY: We provide a valid xcb_connection_t that is valid for as long as required by the trait.
+unsafe impl as_raw_xcb_connection::AsRawXcbConnection for XCBConnection {
+    fn as_raw_xcb_connection(&self) -> *mut as_raw_xcb_connection::xcb_connection_t {
+        self.get_raw_xcb_connection().cast()
+    }
+}
+
 /// Reconstruct a partial sequence number based on a recently received 'full' sequence number.
 ///
 /// The new sequence number may be before or after the `recent` sequence number.
