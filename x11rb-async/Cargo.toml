@@ -1,0 +1,23 @@
+[package]
+name = "x11rb-async"
+version = "0.1.0"
+description = "Async Rust bindings to X11"
+edition = "2021"
+authors = [
+    "Uli Schlachter <psychon@znc.in>",
+    "Eduardo Sánchez Muñoz <eduardosm-dev@e64.io>",
+    "notgull <jtnunley01@gmail.com>",
+]
+repository = "https://github.com/psychon/x11rb"
+license = "MIT OR Apache-2.0"
+keywords = ["xcb", "x11", "async"]
+
+[dependencies]
+async-io = "1.12.0"
+async-lock = "2.6.0"
+blocking = "1.3.0"
+futures-lite = "1.12.0"
+scoped-tls = "1.0.1"
+x11rb = { version = "0.11.1", path = "../x11rb", default-features = false }
+x11rb-protocol = { version = "0.11.1", path = "../x11rb-protocol" }
+
