@@ -6,6 +6,9 @@
 
 pub mod blocking;
 pub mod connection;
+#[allow(clippy::type_complexity)]
+#[rustfmt::skip]
+pub mod protocol;
 pub mod rust_connection;
 
 // -- Private Modules --
@@ -23,3 +26,7 @@ pub use x11rb::{
     utils::RawFdContainer,
     x11_utils,
 };
+
+mod utils {
+    pub use crate::RawFdContainer;
+}

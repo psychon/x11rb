@@ -16,6 +16,7 @@ pub(crate) struct Generated {
     pub(crate) file_name: PathBuf,
     pub(crate) proto: String,
     pub(crate) x11rb: String,
+    pub(crate) async_: String,
 }
 
 pub(crate) fn generate(module: &xcbgen::defs::Module) -> Vec<Generated> {
@@ -23,7 +24,12 @@ pub(crate) fn generate(module: &xcbgen::defs::Module) -> Vec<Generated> {
 
     let mut main_proto_out = Output::new();
     let mut main_x11rb_out = Output::new();
-    for out in [&mut main_proto_out, &mut main_x11rb_out] {
+    let mut main_async_out = Output::new();
+    for out in [
+        &mut main_proto_out,
+        &mut main_x11rb_out,
+        &mut main_async_out,
+    ] {
         write_code_header(out);
         outln!(out, "//! Bindings to the X11 protocol.");
         outln!(out, "//!");
@@ -86,6 +92,7 @@ pub(crate) fn generate(module: &xcbgen::defs::Module) -> Vec<Generated> {
     for ns in module.sorted_namespaces() {
         let mut ns_proto_out = Output::new();
         let mut ns_x11rb_out = Output::new();
+        let mut ns_async_out = Output::new();
         let wrapper_info = resources::for_extension(&ns.header);
         namespace::generate(
             module,
@@ -93,6 +100,7 @@ pub(crate) fn generate(module: &xcbgen::defs::Module) -> Vec<Generated> {
             &caches,
             &mut ns_proto_out,
             &mut ns_x11rb_out,
+            &mut ns_async_out,
             &mut enum_cases,
             wrapper_info,
         );
@@ -100,9 +108,14 @@ pub(crate) fn generate(module: &xcbgen::defs::Module) -> Vec<Generated> {
             file_name: PathBuf::from(format!("{}.rs", ns.header)),
             proto: ns_proto_out.into_data(),
             x11rb: ns_x11rb_out.into_data(),
+            async_: ns_async_out.into_data(),
         });
 
-        for out in [&mut main_proto_out, &mut main_x11rb_out] {
+        for out in [
+            &mut main_proto_out,
+            &mut main_x11rb_out,
+            &mut main_async_out,
+        ] {
             if ext_has_feature(&ns.header) {
                 outln!(out, "#[cfg(feature = \"{}\")]", ns.header);
             }
@@ -114,19 +127,19 @@ pub(crate) fn generate(module: &xcbgen::defs::Module) -> Vec<Generated> {
     requests_replies::generate(&mut main_proto_out, module, enum_cases);
     error_events::generate(&mut main_proto_out, module);
 
-    outln!(main_x11rb_out, "");
-    outln!(main_x11rb_out, "pub use x11rb_protocol::protocol::Request;");
-    outln!(main_x11rb_out, "pub use x11rb_protocol::protocol::Reply;");
-    outln!(
-        main_x11rb_out,
-        "pub use x11rb_protocol::protocol::ErrorKind;"
-    );
-    outln!(main_x11rb_out, "pub use x11rb_protocol::protocol::Event;");
+    for out in [&mut main_async_out, &mut main_x11rb_out] {
+        outln!(out, "");
+        outln!(out, "pub use x11rb_protocol::protocol::Request;");
+        outln!(out, "pub use x11rb_protocol::protocol::Reply;");
+        outln!(out, "pub use x11rb_protocol::protocol::ErrorKind;");
+        outln!(out, "pub use x11rb_protocol::protocol::Event;");
+    }
 
     out_map.push(Generated {
         file_name: PathBuf::from("mod.rs"),
         proto: main_proto_out.into_data(),
         x11rb: main_x11rb_out.into_data(),
+        async_: main_async_out.into_data(),
     });
     out_map
 }

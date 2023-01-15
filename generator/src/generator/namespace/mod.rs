@@ -11,6 +11,7 @@ use super::output::Output;
 use super::requests_replies::{EnumCases, PerModuleEnumCases};
 use super::{get_ns_name_prefix, special_cases};
 
+mod async_switch;
 mod expr_to_str;
 mod header;
 pub(super) mod helpers;
@@ -37,12 +38,14 @@ pub(super) fn generate(
     caches: &RefCell<Caches>,
     proto_out: &mut Output,
     x11rb_out: &mut Output,
+    async_out: &mut Output,
     enum_cases: &mut EnumCases,
     resource_info: &[super::ResourceInfo<'_>],
 ) {
     NamespaceGenerator::new(module, ns, caches).generate(
         proto_out,
         x11rb_out,
+        async_out,
         enum_cases,
         resource_info,
     );
@@ -81,15 +84,34 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         &self,
         proto_out: &mut Output,
         x11rb_out: &mut Output,
+        async_out: &mut Output,
         enum_cases: &mut EnumCases,
         resource_info: &[super::ResourceInfo<'_>],
     ) {
         super::write_code_header(proto_out);
         super::write_code_header(x11rb_out);
-        header::write_header(proto_out, self.ns, header::Mode::Protocol);
-        header::write_header(x11rb_out, self.ns, header::Mode::X11rb);
+        super::write_code_header(async_out);
+        header::write_header(
+            proto_out,
+            self.ns,
+            header::Mode::Protocol,
+            async_switch::ImplMode::Sync,
+        );
+        header::write_header(
+            x11rb_out,
+            self.ns,
+            header::Mode::X11rb,
+            async_switch::ImplMode::Sync,
+        );
+        header::write_header(
+            async_out,
+            self.ns,
+            header::Mode::X11rb,
+            async_switch::ImplMode::Async,
+        );
 
         let mut trait_out = Output::new();
+        let mut async_trait_out = Output::new();
 
         for def in self.ns.src_order_defs.borrow().iter() {
             match def {
@@ -100,7 +122,9 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                         request_def,
                         proto_out,
                         x11rb_out,
+                        async_out,
                         &mut trait_out,
+                        &mut async_trait_out,
                         cases_entry,
                     )
                 }
@@ -156,6 +180,19 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         outln!(x11rb_out, "");
         outln!(
             x11rb_out,
+            "impl<C: RequestConnection + ?Sized> ConnectionExt for C {{}}",
+        );
+
+        outln!(
+            async_out,
+            "/// Extension trait defining the requests of this extension.",
+        );
+        outln!(async_out, "pub trait ConnectionExt: RequestConnection {{");
+        out!(async_out.indent(), "{}", async_trait_out.into_data());
+        outln!(async_out, "}}");
+        outln!(async_out, "");
+        outln!(
+            async_out,
             "impl<C: RequestConnection + ?Sized> ConnectionExt for C {{}}",
         );
 

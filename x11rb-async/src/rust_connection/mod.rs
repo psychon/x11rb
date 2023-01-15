@@ -433,7 +433,7 @@ impl<S: Stream + Send + Sync + 'static> RequestConnection for RustConnection<S> 
 }
 
 impl<S: Stream + Send + Sync + 'static> Connection for RustConnection<S> {
-    fn poll_for_raw_event(
+    fn poll_for_raw_event_with_sequence(
         &self,
     ) -> Result<Option<RawEventAndSeqNumber<Self::Buf>>, ConnectionError> {
         // Try to gain access to the read end of the stream.
@@ -446,7 +446,7 @@ impl<S: Stream + Send + Sync + 'static> Connection for RustConnection<S> {
         self.inner.poll_for_raw_event_with_sequence()
     }
 
-    fn wait_for_raw_event(
+    fn wait_for_raw_event_with_sequence(
         &self,
     ) -> Fut<'_, x11rb_protocol::RawEventAndSeqNumber<Self::Buf>, ConnectionError> {
         Box::pin(async move {

@@ -17,6 +17,7 @@ async-io = "1.12.0"
 async-lock = "2.6.0"
 blocking = "1.3.0"
 futures-lite = "1.12.0"
+pin-project-lite = "0.2.9"
 scoped-tls = "1.0.1"
 x11rb = { version = "0.11.1", path = "../x11rb", default-features = false }
 x11rb-protocol = { version = "0.11.1", path = "../x11rb-protocol" }

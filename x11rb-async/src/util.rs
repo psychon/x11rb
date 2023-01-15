@@ -3,7 +3,6 @@
 //! Utilities.
 
 use crate::errors::{ConnectionError, ReplyError, ReplyOrIdError};
-
 use std::io;
 
 pub(crate) trait AsIoError {

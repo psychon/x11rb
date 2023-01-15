@@ -1,3 +1,4 @@
+use super::async_switch::ImplMode;
 use crate::generator::output::Output;
 
 use xcbgen::defs as xcbdefs;
@@ -8,7 +9,12 @@ pub(super) enum Mode {
     X11rb,
 }
 
-pub(super) fn write_header(out: &mut Output, ns: &xcbdefs::Namespace, mode: Mode) {
+pub(super) fn write_header(
+    out: &mut Output,
+    ns: &xcbdefs::Namespace,
+    mode: Mode,
+    poll_mode: ImplMode,
+) {
     if let Some(info) = &ns.ext_info {
         outln!(out, "//! Bindings to the `{}` X11 extension.", info.name);
     } else {
@@ -89,6 +95,11 @@ pub(super) fn write_header(out: &mut Output, ns: &xcbdefs::Namespace, mode: Mode
         outln!(out, "use crate::errors::ConnectionError;");
         outln!(out, "#[allow(unused_imports)]");
         outln!(out, "use crate::errors::ReplyOrIdError;");
+
+        if poll_mode == ImplMode::Async {
+            outln!(out, "use std::future::Future;");
+            outln!(out, "use std::pin::Pin;");
+        }
     }
 
     let mut imports = ns
@@ -151,11 +162,12 @@ pub(super) fn write_header(out: &mut Output, ns: &xcbdefs::Namespace, mode: Mode
         if mode == Mode::X11rb {
             outln!(out, "");
             outln!(out, "/// Get the major opcode of this extension");
-            outln!(out, "fn major_opcode<Conn: RequestConnection + ?Sized>(conn: &Conn) -> Result<u8, ConnectionError> {{");
+            outln!(out, "{}fn major_opcode<Conn: RequestConnection + ?Sized>(conn: &Conn) -> Result<u8, ConnectionError> {{", poll_mode.fn_async());
             out.indented(|out| {
                 outln!(
                     out,
-                    "let info = conn.extension_information(X11_EXTENSION_NAME)?;",
+                    "let info = conn.extension_information(X11_EXTENSION_NAME){}?;",
+                    poll_mode.dot_await()
                 );
                 outln!(
                     out,

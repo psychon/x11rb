@@ -2,9 +2,10 @@ use std::borrow::Cow;
 use std::collections::HashMap;
 
 use super::{
-    expr_to_str, gather_deducible_fields, get_ns_name_prefix, parse, serialize, special_cases,
-    struct_type, switch, to_rust_type_name, to_rust_variable_name, CaseInfo, DeducibleField,
-    Derives, FieldContainer, NamespaceGenerator, Output, PerModuleEnumCases, StructSizeConstraint,
+    async_switch::ImplMode, expr_to_str, gather_deducible_fields, get_ns_name_prefix, parse,
+    serialize, special_cases, struct_type, switch, to_rust_type_name, to_rust_variable_name,
+    CaseInfo, DeducibleField, Derives, FieldContainer, NamespaceGenerator, Output,
+    PerModuleEnumCases, StructSizeConstraint,
 };
 
 use xcbgen::defs as xcbdefs;
@@ -118,7 +119,9 @@ pub(super) fn generate_request(
     request_def: &xcbdefs::RequestDef,
     proto_out: &mut Output,
     x11rb_out: &mut Output,
+    async_out: &mut Output,
     trait_out: &mut Output,
+    async_trait_out: &mut Output,
     enum_cases: &mut PerModuleEnumCases,
 ) {
     let name = to_rust_type_name(&request_def.name);
@@ -218,6 +221,16 @@ pub(super) fn generate_request(
         &function_name,
         &gathered,
         x11rb_out,
+        ImplMode::Sync,
+    );
+    emit_request_function(
+        generator,
+        request_def,
+        &name,
+        &function_name,
+        &gathered,
+        async_out,
+        ImplMode::Async,
     );
     emit_request_trait_function(
         generator,
@@ -226,6 +239,16 @@ pub(super) fn generate_request(
         &function_name,
         &gathered,
         trait_out,
+        ImplMode::Sync,
+    );
+    emit_request_trait_function(
+        generator,
+        request_def,
+        &name,
+        &function_name,
+        &gathered,
+        async_trait_out,
+        ImplMode::Async,
     );
 
     super::special_cases::handle_request(request_def, proto_out);
@@ -1112,6 +1135,7 @@ fn emit_request_function(
     function_name: &str,
     gathered: &GatheredRequestFields,
     out: &mut Output,
+    mode: ImplMode,
 ) {
     let ns = request_def.namespace.upgrade().unwrap();
     let is_xproto = ns.header == "xproto";
@@ -1169,7 +1193,8 @@ fn emit_request_function(
     }
     outln!(
         out,
-        "pub fn {}<{}>({}) -> Result<{}, ConnectionError>",
+        "pub {}fn {}<{}>({}) -> Result<{}, ConnectionError>",
+        mode.fn_async(),
         function_name,
         generic_params,
         args,
@@ -1178,7 +1203,13 @@ fn emit_request_function(
     outln!(out, "where");
     outln!(out.indent(), "Conn: RequestConnection + ?Sized,");
     for (param_name, where_) in gathered.generics.iter() {
-        outln!(out.indent(), "{}: {},", param_name, where_);
+        out!(out.indent(), "{}: {}", param_name, where_);
+
+        if mode == ImplMode::Async {
+            out!(out, " + Send");
+        }
+
+        outln!(out.indent(), ",")
     }
     outln!(out, "{{");
     #[allow(clippy::cognitive_complexity)]
@@ -1208,7 +1239,11 @@ fn emit_request_function(
         outln!(
             out,
             "let (bytes, fds) = request0.serialize({});",
-            if is_xproto { "" } else { "major_opcode(conn)?" }
+            if is_xproto {
+                String::new()
+            } else {
+                format!("major_opcode(conn){}?", mode.dot_await())
+            }
         );
         outln!(
             out,
@@ -1218,17 +1253,30 @@ fn emit_request_function(
         if let Some(cookie) = special_cookie {
             outln!(
                 out,
-                "Ok({}::new(conn.send_request_with_reply(&slices, fds)?))",
+                "Ok({}::new(conn.send_request_with_reply(&slices, fds){}?))",
                 cookie,
+                mode.dot_await(),
             )
         } else if request_def.reply.is_some() {
             if gathered.reply_has_fds {
-                outln!(out, "conn.send_request_with_reply_with_fds(&slices, fds)");
+                outln!(
+                    out,
+                    "conn.send_request_with_reply_with_fds(&slices, fds){}",
+                    mode.dot_await()
+                );
             } else {
-                outln!(out, "conn.send_request_with_reply(&slices, fds)",);
+                outln!(
+                    out,
+                    "conn.send_request_with_reply(&slices, fds){}",
+                    mode.dot_await()
+                );
             }
         } else {
-            outln!(out, "conn.send_request_without_reply(&slices, fds)",);
+            outln!(
+                out,
+                "conn.send_request_without_reply(&slices, fds){}",
+                mode.dot_await()
+            );
         }
     });
     outln!(out, "}}");
@@ -1241,6 +1289,7 @@ fn emit_request_trait_function(
     function_name: &str,
     gathered: &GatheredRequestFields,
     out: &mut Output,
+    mode: ImplMode,
 ) {
     let ns = request_def.namespace.upgrade().unwrap();
     let is_list_fonts_with_info = request_def.name == "ListFontsWithInfo" && ns.header == "xproto";
@@ -1253,6 +1302,9 @@ fn emit_request_trait_function(
         generic_params.push('<');
         if needs_lifetime {
             generic_params.push_str("'c, 'input");
+            if mode == ImplMode::Async {
+                generic_params.push_str(", 'future");
+            }
         }
         for (i, (param_name, _)) in gathered.generics.iter().enumerate() {
             if i != 0 || needs_lifetime {
@@ -1302,20 +1354,36 @@ fn emit_request_trait_function(
     if let Some(ref doc) = request_def.doc {
         generator.emit_doc(doc, out, Default::default());
     }
+    let real_ret_ty = mode.ret_ty(
+        format!("Result<{}, ConnectionError>", ret_type),
+        needs_lifetime,
+    );
     outln!(
         out,
-        "fn {}{}{}({}) -> Result<{}, ConnectionError>",
+        "fn {}{}{}({}) -> {}",
         func_name_prefix,
         function_name,
         generic_params,
         args,
-        ret_type,
+        real_ret_ty,
     );
-    if !gathered.generics.is_empty() {
+    if !gathered.generics.is_empty() || (needs_lifetime && mode == ImplMode::Async) {
         outln!(out, "where");
+    }
+    if !gathered.generics.is_empty() {
         for (param_name, where_) in gathered.generics.iter() {
-            outln!(out.indent(), "{}: {},", param_name, where_);
-        }
+            out!(out.indent(), "{}: {}", param_name, where_);
+
+            if mode == ImplMode::Async {
+                out!(out, " + Send + 'static");
+            }
+
+            outln!(out.indent(), ",");
+        } 
+    }
+    if needs_lifetime && mode == ImplMode::Async {
+        outln!(out.indent(), "'c: 'future,");
+        outln!(out.indent(), "'input: 'future,");
     }
     outln!(out, "{{");
 
@@ -1325,15 +1393,25 @@ fn emit_request_trait_function(
         call_args.push_str(arg_name);
     }
 
+    if matches!(mode, ImplMode::Async) {
+        out!(out.indent(), "Box::pin(");
+    }
+
     let func_name_same_as_field_name = request_def
         .fields
         .borrow()
         .iter()
         .any(|field| field.name() == Some(function_name));
     if func_name_same_as_field_name {
-        outln!(out.indent(), "self::{}({})", function_name, call_args);
+        out!(out.indent(), "self::{}({})", function_name, call_args);
     } else {
-        outln!(out.indent(), "{}({})", function_name, call_args);
+        out!(out.indent(), "{}({})", function_name, call_args);
+    }
+
+    if matches!(mode, ImplMode::Async) {
+        outln!(out.indent(), ")");
+    } else {
+        outln!(out.indent(), "");
     }
 
     outln!(out, "}}");

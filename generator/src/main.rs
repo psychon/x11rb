@@ -114,10 +114,10 @@ fn replace_file_if_different(file_path: &Path, data: &[u8]) -> Result<(), Error>
 
 fn main2() -> Result<u8, Error> {
     let args: Vec<_> = std::env::args_os().collect();
-    if args.len() != 4 {
+    if args.len() != 5 {
         eprintln!("USAGE:");
         eprintln!(
-            "    {} <INPUT_DIR> <PROTO_OUTPUT_DIR> <X11RB_OUTPUT_DIR>",
+            "    {} <INPUT_DIR> <PROTO_OUTPUT_DIR> <X11RB_OUTPUT_DIR> <ASYNC_OUTPUT_DIR>",
             args[0].to_string_lossy()
         );
         return Ok(1);
@@ -125,6 +125,7 @@ fn main2() -> Result<u8, Error> {
     let input_dir_path = Path::new(&args[1]);
     let proto_output_dir_path = Path::new(&args[2]);
     let x11rb_output_dir_path = Path::new(&args[3]);
+    let async_output_dir_path = Path::new(&args[4]);
 
     let xml_files = list_xmls(input_dir_path)?;
     let module = xcbgen::defs::Module::new();
@@ -146,8 +147,10 @@ fn main2() -> Result<u8, Error> {
         let mut x11rb_file_path = PathBuf::from(x11rb_output_dir_path);
         proto_file_path.push(&generated.file_name);
         x11rb_file_path.push(&generated.file_name);
+        let async_file_path = async_output_dir_path.join(&generated.file_name);
         replace_file_if_different(&proto_file_path, generated.proto.as_bytes())?;
         replace_file_if_different(&x11rb_file_path, generated.x11rb.as_bytes())?;
+        replace_file_if_different(&async_file_path, generated.async_.as_bytes())?;
     }
     println!("Code generated successfully");
 

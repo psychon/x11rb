@@ -234,14 +234,14 @@ impl<C: BlConnection + Send + Sync + 'static> RequestConnection for BlockingConn
 }
 
 impl<C: BlConnection + Send + Sync + 'static> Connection for BlockingConnection<C> {
-    fn poll_for_raw_event(
+    fn poll_for_raw_event_with_sequence(
         &self,
     ) -> Result<Option<x11rb_protocol::RawEventAndSeqNumber<Self::Buf>>, ConnectionError> {
         // Doesn't block.
         self.inner.poll_for_raw_event_with_sequence()
     }
 
-    fn wait_for_raw_event(
+    fn wait_for_raw_event_with_sequence(
         &self,
     ) -> Fut<'_, x11rb_protocol::RawEventAndSeqNumber<Self::Buf>, ConnectionError> {
         Box::pin(self.with_conn(|conn| conn.wait_for_raw_event_with_sequence()))
