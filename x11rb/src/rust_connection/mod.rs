@@ -262,6 +262,20 @@ impl<S: Stream> RustConnection<S> {
         })
     }
 
+    /// Send a request that is managed by an external writer.
+    pub fn external_send_request(&self, kind: ReplyFdKind) -> Option<SequenceNumber> {
+        self.inner.lock().unwrap().inner.send_request(kind)
+    }
+
+    /// Prepare to read a reply to a request that was sent via `external_send_request`.
+    pub fn external_prepare_for_reply(&self, seq: SequenceNumber) -> bool {
+        self.inner
+            .lock()
+            .unwrap()
+            .inner
+            .prepare_check_for_reply_or_error(seq)
+    }
+
     /// Internal function for actually sending a request.
     ///
     /// This function "does the actual work" for `send_request_with_reply()` and

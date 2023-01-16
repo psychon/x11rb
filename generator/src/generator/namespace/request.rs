@@ -1379,7 +1379,7 @@ fn emit_request_trait_function(
             }
 
             outln!(out.indent(), ",");
-        } 
+        }
     }
     if needs_lifetime && mode == ImplMode::Async {
         outln!(out.indent(), "'c: 'future,");

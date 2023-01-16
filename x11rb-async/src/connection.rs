@@ -38,7 +38,7 @@ pub trait RequestConnection: Sync {
     ///     fds: Vec<RawFdContainer>
     /// ) -> Result<Cookie<'_, Self, R>, ConnectionError>
     /// ```
-    fn send_request_with_reply<'this, 'bufs, 'sl, 'future, R>(
+    fn send_request_with_reply<'this, 'bufs, 'sl, 're, 'future, R>(
         &'this self,
         bufs: &'bufs [IoSlice<'sl>],
         fds: Vec<RawFdContainer>,
@@ -47,7 +47,8 @@ pub trait RequestConnection: Sync {
         'this: 'future,
         'bufs: 'future,
         'sl: 'future,
-        R: TryParse + Send;
+        're: 'future,
+        R: TryParse + Send + 're;
 
     /// Send a request with a reply to the server.
     ///
@@ -101,7 +102,7 @@ pub trait RequestConnection: Sync {
     ///     fds: Vec<RawFdContainer>,
     /// ) -> Result<CookieWithFds<'_, Self, R>, ConnectionError>
     /// ```
-    fn send_request_with_reply_with_fds<'this, 'bufs, 'sl, 'future, R>(
+    fn send_request_with_reply_with_fds<'this, 'bufs, 'sl, 're, 'future, R>(
         &'this self,
         bufs: &'bufs [IoSlice<'sl>],
         fds: Vec<RawFdContainer>,
@@ -110,7 +111,8 @@ pub trait RequestConnection: Sync {
         'this: 'future,
         'bufs: 'future,
         'sl: 'future,
-        R: TryParseFd + Send;
+        're: 'future,
+        R: TryParseFd + Send + 're;
 
     /// Send a request with a reply containing file descriptors to the server.
     ///

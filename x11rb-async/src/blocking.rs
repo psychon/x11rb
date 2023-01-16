@@ -4,7 +4,8 @@
 
 use crate::connection::{Connection, Fut, RequestConnection};
 use crate::errors::{ConnectionError, ParseError, ReplyOrIdError};
-use crate::{x11_utils::X11Error, SequenceNumber};
+use crate::x11_utils::X11Error;
+use crate::SequenceNumber;
 
 use std::future::Future;
 use std::io::IoSlice;
@@ -103,7 +104,7 @@ impl<C: BlConnection + Send + Sync + 'static> RequestConnection for BlockingConn
         self.inner.parse_event(event)
     }
 
-    fn send_request_with_reply<'this, 'bufs, 'sl, 'future, R>(
+    fn send_request_with_reply<'this, 'bufs, 'sl, 're, 'future, R>(
         &'this self,
         bufs: &'bufs [IoSlice<'sl>],
         fds: Vec<x11rb_protocol::RawFdContainer>,
@@ -112,7 +113,8 @@ impl<C: BlConnection + Send + Sync + 'static> RequestConnection for BlockingConn
         'this: 'future,
         'bufs: 'future,
         'sl: 'future,
-        R: x11rb::x11_utils::TryParse + Send,
+        're: 'future,
+        R: x11rb::x11_utils::TryParse + Send + 're,
     {
         let mut buf = Vec::with_capacity(bufs.iter().map(|b| b.len()).sum());
         for b in bufs {
@@ -139,7 +141,7 @@ impl<C: BlConnection + Send + Sync + 'static> RequestConnection for BlockingConn
         })
     }
 
-    fn send_request_with_reply_with_fds<'this, 'bufs, 'sl, 'future, R>(
+    fn send_request_with_reply_with_fds<'this, 'bufs, 'sl, 're, 'future, R>(
         &'this self,
         bufs: &'bufs [IoSlice<'sl>],
         fds: Vec<x11rb_protocol::RawFdContainer>,
@@ -148,7 +150,8 @@ impl<C: BlConnection + Send + Sync + 'static> RequestConnection for BlockingConn
         'this: 'future,
         'bufs: 'future,
         'sl: 'future,
-        R: x11rb::x11_utils::TryParseFd + Send,
+        're: 'future,
+        R: x11rb::x11_utils::TryParseFd + Send + 're,
     {
         let mut buf = Vec::with_capacity(bufs.iter().map(|b| b.len()).sum());
         for b in bufs {
