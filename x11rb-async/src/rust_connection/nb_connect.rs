@@ -12,11 +12,10 @@ use std::os::unix::net::UnixStream;
 
 use async_io::Async;
 use x11rb::rust_connection::DefaultStream;
-use x11rb_protocol::parse_display::{parse_display, ConnectAddress};
+use x11rb_protocol::parse_display::{ConnectAddress, ParsedDisplay};
 
 /// Connect to a `DefaultStream` from a display string.
-pub(super) async fn connect(display: Option<&str>) -> Result<(DefaultStream, usize), ConnectError> {
-    let addrs = parse_display(display).ok_or(ConnectError::DisplayParsingError)?;
+pub(super) async fn connect(addrs: &ParsedDisplay) -> Result<(DefaultStream, usize), ConnectError> {
     let screen = addrs.screen.into();
 
     let mut err = None;

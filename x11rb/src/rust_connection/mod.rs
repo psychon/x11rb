@@ -263,17 +263,39 @@ impl<S: Stream> RustConnection<S> {
     }
 
     /// Send a request that is managed by an external writer.
+    ///
+    /// This function is used to send requests that are managed by an external writer. For
+    /// instance, you may want to send a `PutImage` request without loading the entire image
+    /// into memory. In this case, you can use this function to setup the request and then
+    /// write the image data to the stream yourself.
+    ///
+    /// If `None` is returned, the connection first needs to be synchronized.
     pub fn external_send_request(&self, kind: ReplyFdKind) -> Option<SequenceNumber> {
         self.inner.lock().unwrap().inner.send_request(kind)
     }
 
     /// Prepare to read a reply to a request that was sent via `external_send_request`.
+    ///
+    /// This is intended to be paired with [`external_send_request`]. If `true` is returned,
+    /// synchronization is necessary before reading the reply.
     pub fn external_prepare_for_reply(&self, seq: SequenceNumber) -> bool {
         self.inner
             .lock()
             .unwrap()
             .inner
             .prepare_check_for_reply_or_error(seq)
+    }
+
+    /// Insert an extension managed by an external writer.
+    pub fn external_insert_extension(
+        &self,
+        name: &'static str,
+        info: Option<ExtensionInformation>,
+    ) {
+        self.extension_manager
+            .lock()
+            .unwrap()
+            .insert_extension_information(name, info)
     }
 
     /// Internal function for actually sending a request.

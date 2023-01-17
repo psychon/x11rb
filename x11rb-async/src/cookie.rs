@@ -158,6 +158,10 @@ impl<'conn, C: Connection + ?Sized, R: TryParse> Cookie<'conn, C, R> {
         let reply = buf.map(|buf| R::try_parse(buf.as_ref()).unwrap().0);
         Ok(reply)
     }
+
+    pub(crate) fn into_sequence_number(self) -> SequenceNumber {
+        self.raw.consume().1
+    }
 }
 
 /// A cookie for a request that has a reply containing file descriptors.

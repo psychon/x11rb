@@ -5,20 +5,20 @@
 mod nb_connect;
 
 use crate::connection::{Connection, Fut, RequestConnection};
-use crate::errors::{ConnectError, ConnectionError, ParseError, ReplyOrIdError};
+use crate::errors::{ConnectError, ConnectionError, ParseError, ReplyError, ReplyOrIdError};
 use crate::{
     Cookie, CookieWithFds, RawEventAndSeqNumber, RawFdContainer, ReplyOrError, SequenceNumber,
     Setup, VoidCookie,
 };
 
 use async_io::Async;
-use async_lock::{Mutex, MutexGuard};
+use async_lock::{Mutex, MutexGuard, RwLock, RwLockReadGuard, RwLockWriteGuard};
 use concurrent_queue::ConcurrentQueue;
 use event_listener::Event;
 use futures_lite::future;
 use futures_lite::prelude::*;
-use x11rb_protocol::DiscardMode;
 
+use std::collections::hash_map::{Entry, HashMap};
 use std::convert::Infallible;
 use std::io;
 use std::pin::Pin;
@@ -33,10 +33,15 @@ use std::os::windows::io::AsRawSocket as AsRaw;
 pub use x11rb::rust_connection::{DefaultStream as X11rbDefaultStream, Stream as X11rbStream};
 
 use x11rb::connection::{BufWithFds, Connection as _, RequestConnection as _, RequestKind};
+use x11rb::protocol::bigreq::EnableReply;
+use x11rb::protocol::xproto::QueryExtensionReply;
 use x11rb::rust_connection::{PollMode, RustConnection as InnerConnection};
 
+use x11rb::x11_utils::ExtensionInformation;
 use x11rb_protocol::connection::ReplyFdKind;
 use x11rb_protocol::id_allocator::IdAllocator;
+use x11rb_protocol::xauth::get_auth;
+use x11rb_protocol::DiscardMode;
 
 /// Streams that support non-blocking functionality.
 pub trait Stream<'a>: X11rbStream {
@@ -96,12 +101,8 @@ impl X11rbStream for DefaultStream {
         self.stream.get_ref().write(buf, fds)
     }
 
-    fn read_exact(
-        &self,
-        mut buf: &mut [u8],
-        fd_storage: &mut Vec<RawFdContainer>,
-    ) -> io::Result<()> {
-        self.stream.get_ref().read_exact(&mut buf, fd_storage)
+    fn read_exact(&self, buf: &mut [u8], fd_storage: &mut Vec<RawFdContainer>) -> io::Result<()> {
+        self.stream.get_ref().read_exact(buf, fd_storage)
     }
 
     fn write_vectored(
@@ -169,14 +170,20 @@ pub struct RustConnection<S: Unistream = DefaultStream> {
     /// The underlying connection.
     inner: Box<InnerConnection<WrapperStream<S>>>,
 
-    /// Only one task should be calling `drain()` at a time.
-    drain_lock: Mutex<()>,
+    /// Only one task should be calling `drive()` at a time.
+    drive_lock: Mutex<()>,
 
     /// Our buffer for writing.
     write_buffer: Mutex<WriteBuffer>,
 
     /// ID allocation mechanism.
     id_allocator: Mutex<IdAllocator>,
+
+    /// State of any extensions.
+    extensions: RwLock<HashMap<&'static str, ExtensionState>>,
+
+    /// The maximum length of a request.
+    max_request_len: RwLock<MaxRequestLen>,
 
     /// Queue of pending events.
     event_queue: ConcurrentQueue<(Vec<u8>, u64)>,
@@ -194,18 +201,14 @@ impl<S: Unistream> X11rbStream for WrapperStream<S> {
         Err(io::Error::from(io::ErrorKind::WouldBlock))
     }
 
-    // Other calls are non-blocking, just bubble up from there.
+    // Other calls are non-blocking, just forward the impl.
 
     fn read(&self, buf: &mut [u8], fd_storage: &mut Vec<RawFdContainer>) -> io::Result<usize> {
         self.0.read(buf, fd_storage)
     }
 
-    fn read_exact(
-        &self,
-        mut buf: &mut [u8],
-        fd_storage: &mut Vec<RawFdContainer>,
-    ) -> io::Result<()> {
-        self.0.read_exact(&mut buf, fd_storage)
+    fn read_exact(&self, buf: &mut [u8], fd_storage: &mut Vec<RawFdContainer>) -> io::Result<()> {
+        self.0.read_exact(buf, fd_storage)
     }
 
     fn write(&self, buf: &[u8], fds: &mut Vec<RawFdContainer>) -> io::Result<usize> {
@@ -227,17 +230,67 @@ struct WriteBuffer {
 
     /// The file descriptors that are associated with this buffer.
     fds: Vec<RawFdContainer>,
+
+    /// Are we currently in a write operation?
+    ///
+    /// If a write task is dropped (e.g. in `select!`), it puts the connection into an
+    /// invalid state.
+    writing: bool,
+}
+
+impl WriteBuffer {
+    fn assert_not_writing(&mut self) {
+        if self.writing {
+            panic!("Connection was previously in a writing state, did you drop a `send_request` future?");
+        }
+
+        self.writing = true;
+    }
+}
+
+enum ExtensionState {
+    /// Currently loading the extension.
+    Loading(SequenceNumber),
+
+    /// The extension is loaded.
+    Loaded,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum MaxRequestLen {
+    Unknown,
+    Requested(SequenceNumber),
+    Known(usize),
 }
 
 impl RustConnection {
     /// Connect to the X11 server.
     pub async fn connect(dpy_name: Option<&str>) -> Result<(Self, usize), ConnectError> {
-        let (stream, screen) = nb_connect::connect(dpy_name).await?;
+        // Parse the display.
+        let addrs = x11rb_protocol::parse_display::parse_display(dpy_name)
+            .ok_or(ConnectError::DisplayParsingError)?;
+
+        // Connect to the display.
+        let (stream, screen) = nb_connect::connect(&addrs).await?;
         let stream = DefaultStream {
             stream: Async::new(stream)?,
         };
 
-        Ok((Self::connect_to_stream(stream, screen).await?, screen))
+        // Get the peer address of the socket.
+        let (family, address) = stream.stream.get_ref().peer_addr()?;
+
+        // Use this to get authority information.
+        let (auth_name, auth_data) = blocking::unblock(move || {
+            get_auth(family, &address, addrs.display)
+                .unwrap_or(None)
+                .unwrap_or_else(|| (Vec::new(), Vec::new()))
+        })
+        .await;
+
+        Ok((
+            Self::connect_to_stream_with_auth_info(stream, screen, auth_name, auth_data).await?,
+            screen,
+        ))
     }
 }
 
@@ -313,25 +366,28 @@ impl<S: Unistream + AsRaw> RustConnection<S> {
                 WrapperStream(stream),
                 setup,
             )?),
-            drain_lock: Mutex::new(()),
+            drive_lock: Mutex::new(()),
             write_buffer: Mutex::new(WriteBuffer {
                 buffer: Vec::with_capacity(BUFFER_SIZE),
                 fds: Vec::new(),
+                writing: false,
             }),
+            max_request_len: RwLock::new(MaxRequestLen::Unknown),
+            extensions: RwLock::new(HashMap::new()),
             event_queue: ConcurrentQueue::unbounded(),
             new_input: Event::new(),
         })
     }
 }
 
-impl<S: Unistream> RustConnection<S> {
+impl<S: Unistream + Send + Sync> RustConnection<S> {
     /// Run the connection logic.
     ///
     /// This future will read data from the stream and distribute the results to other calls.
     /// It is meant to be run as a background task, and will never return.
     pub async fn connection(&self) -> Result<Infallible, ConnectionError> {
         // Make sure we can only run one connection task at a time.
-        let drain_lock = self.drain_lock.lock().await;
+        let drain_lock = self.drive_lock.lock().await;
 
         // Run the connection logic.
         self.drive(drain_lock).await
@@ -384,7 +440,7 @@ impl<S: Unistream> RustConnection<S> {
         &self,
         fut: impl Future<Output = Result<R, E>>,
     ) -> Result<R, E> {
-        if let Some(lock) = self.drain_lock.try_lock() {
+        if let Some(lock) = self.drive_lock.try_lock() {
             // If we aren't driven right now, drive while we run the future.
             future::or(fut, async move {
                 match self.drive(lock).await {
@@ -472,6 +528,9 @@ impl<S: Unistream> RustConnection<S> {
             return Ok(buffer);
         }
 
+        // Make sure we're not stepping on anyone else's toes.
+        buffer.assert_not_writing();
+
         // Write the entire buffer.
         let mut position = 0;
         write_with(&self.inner.stream().0, {
@@ -500,6 +559,7 @@ impl<S: Unistream> RustConnection<S> {
         }
 
         buffer.buffer.clear();
+        buffer.writing = false;
 
         Ok(buffer)
     }
@@ -510,6 +570,8 @@ impl<S: Unistream> RustConnection<S> {
         fds: &mut Vec<RawFdContainer>,
         mut buffer: MutexGuard<'a, WriteBuffer>,
     ) -> Result<MutexGuard<'a, WriteBuffer>, ConnectionError> {
+        buffer.assert_not_writing();
+
         // Get the total length of the buffers.
         let mut total_length = iov.iter().map(|x| x.len()).sum::<usize>();
 
@@ -525,6 +587,7 @@ impl<S: Unistream> RustConnection<S> {
             }
 
             buffer.fds.append(fds);
+            buffer.writing = false;
 
             return Ok(buffer);
         }
@@ -566,6 +629,8 @@ impl<S: Unistream> RustConnection<S> {
             Ok(())
         })
         .await?;
+
+        buffer.writing = false;
 
         Ok(buffer)
     }
@@ -633,9 +698,62 @@ impl<S: Unistream> RustConnection<S> {
             listener.await;
         }
     }
+
+    async fn prefetech_extension_impl(
+        &self,
+        ext: &'static str,
+    ) -> Result<RwLockReadGuard<'_, HashMap<&'static str, ExtensionState>>, ConnectionError> {
+        // See if there is an entry in the cache.
+        let cache = self.extensions.read().await;
+
+        if !cache.contains_key(&ext) {
+            // We need a write guard to write to it.
+            // This is inefficient, but this is the cold path so it shouldn't matter.
+            drop(cache);
+            let mut cache = self.extensions.write().await;
+
+            // Check again if there is an entry in the cache.
+            if let Entry::Vacant(entry) = cache.entry(ext) {
+                // We need to send a QueryExtension request.
+                let cookie = crate::protocol::xproto::query_extension(self, ext.as_bytes()).await?;
+
+                // Add the extension to the cache.
+                entry.insert(ExtensionState::Loading(cookie.into_sequence_number()));
+            }
+
+            return Ok(RwLockWriteGuard::downgrade(cache));
+        }
+
+        Ok(cache)
+    }
+
+    async fn prefetch_len_impl(
+        &self,
+    ) -> Result<RwLockReadGuard<'_, MaxRequestLen>, ConnectionError> {
+        let mrl = self.max_request_len.read().await;
+
+        // Prefetch if we haven't already.
+        if *mrl == MaxRequestLen::Unknown {
+            // Acquire a write lock and try again.
+            drop(mrl);
+            let mut mrl = self.max_request_len.write().await;
+
+            if *mrl == MaxRequestLen::Unknown {
+                // We need to wait for the reply.
+                let cookie = crate::protocol::bigreq::enable(self).await?;
+
+                // Mark the extension as loaded.
+                *mrl = MaxRequestLen::Requested(cookie.into_sequence_number());
+            }
+
+            return Ok(RwLockWriteGuard::downgrade(mrl));
+        }
+
+        Ok(mrl)
+    }
 }
 
-impl<S: Unistream + Send + Sync + 'static> RequestConnection for RustConnection<S> {
+impl<S: Unistream + Send + Sync> RequestConnection for RustConnection<S> {
     type Buf = Vec<u8>;
 
     fn send_request_with_reply<'this, 'bufs, 'sl, 're, 'future, R>(
@@ -718,7 +836,7 @@ impl<S: Unistream + Send + Sync + 'static> RequestConnection for RustConnection<
                 match self.inner.check_for_raw_error(seq) {
                     Ok(result) => return Ok(result),
                     Err(ConnectionError::IoError(e)) if e.kind() == io::ErrorKind::WouldBlock => {}
-                    Err(e) => return Err(e.into()),
+                    Err(e) => return Err(e),
                 }
 
                 // Wait for the stream to become readable.
@@ -728,7 +846,7 @@ impl<S: Unistream + Send + Sync + 'static> RequestConnection for RustConnection<
                 match self.inner.check_for_raw_error(seq) {
                     Ok(result) => return Ok(result),
                     Err(ConnectionError::IoError(e)) if e.kind() == io::ErrorKind::WouldBlock => {}
-                    Err(e) => return Err(e.into()),
+                    Err(e) => return Err(e),
                 }
 
                 listener.await;
@@ -756,22 +874,112 @@ impl<S: Unistream + Send + Sync + 'static> RequestConnection for RustConnection<
     }
 
     fn prefetch_extension_information(&self, name: &'static str) -> Fut<'_, (), ConnectionError> {
-        Box::pin(self.driven(async move { todo!() }))
+        Box::pin(async move {
+            self.prefetech_extension_impl(name).await?;
+            Ok(())
+        })
     }
 
     fn extension_information(
         &self,
         name: &'static str,
-    ) -> Fut<'_, Option<x11rb::x11_utils::ExtensionInformation>, ConnectionError> {
-        Box::pin(async move { todo!() })
+    ) -> Fut<'_, Option<ExtensionInformation>, ConnectionError> {
+        Box::pin(async move {
+            // Make sure we've prefetched the information.
+            let ext = self.prefetech_extension_impl(name).await?;
+
+            // Complete the request if necessary.
+            if let Some(ExtensionState::Loading(_)) = ext.get(name) {
+                // Acquire a write lock and try again.
+                drop(ext);
+                let mut ext = self.extensions.write().await;
+
+                if let Some(ExtensionState::Loading(seq)) = ext.get(name) {
+                    // We need to wait for the reply.
+                    let cookie = Cookie::<'_, _, QueryExtensionReply>::new(self, *seq);
+                    let reply = cookie.reply().await.map_err(|e| match e {
+                        ReplyError::ConnectionError(e) => e,
+                        ReplyError::X11Error(_) => ConnectionError::UnknownError,
+                    })?;
+
+                    // Mark the extension as loaded.
+                    let _ = ext.insert(name, ExtensionState::Loaded);
+
+                    // Take the "present" field of the reply and use it to determine whether the
+                    // extension is present.
+                    if reply.present {
+                        self.inner.external_insert_extension(
+                            name,
+                            Some(ExtensionInformation {
+                                major_opcode: reply.major_opcode,
+                                first_event: reply.first_event,
+                                first_error: reply.first_error,
+                            }),
+                        )
+                    } else {
+                        self.inner.external_insert_extension(name, None)
+                    }
+                }
+            }
+
+            // Should never block now.
+            self.inner.extension_information(name)
+        })
     }
 
     fn maximum_request_bytes(&self) -> Pin<Box<dyn Future<Output = usize> + Send + '_>> {
-        Box::pin(async move { todo!() })
+        Box::pin(async move {
+            // Make sure we've prefetched the information.
+            let mrl = self
+                .prefetch_len_impl()
+                .await
+                .expect("prefetch_len_impl failed");
+
+            // Complete the request if necessary.
+            match *mrl {
+                MaxRequestLen::Unknown => panic!("prefetch_len_impl failed"),
+                MaxRequestLen::Known(len) => len,
+                MaxRequestLen::Requested(_) => {
+                    // Acquire a write lock and try again.
+                    drop(mrl);
+                    let mut mrl = self.max_request_len.write().await;
+
+                    match *mrl {
+                        MaxRequestLen::Unknown => panic!("prefetch_len_impl failed"),
+                        MaxRequestLen::Known(len) => len,
+                        MaxRequestLen::Requested(seq) => {
+                            // We need to wait for the reply.
+                            let cookie = Cookie::<'_, _, EnableReply>::new(self, seq);
+                            let reply = cookie
+                                .reply()
+                                .await
+                                .map_err(|e| match e {
+                                    ReplyError::ConnectionError(e) => e,
+                                    ReplyError::X11Error(_) => ConnectionError::UnknownError,
+                                })
+                                .expect("EnableReply failed");
+
+                            // Mark the extension as loaded.
+                            let total = reply
+                                .maximum_request_length
+                                .try_into()
+                                .unwrap_or(usize::MAX)
+                                * 4;
+                            *mrl = MaxRequestLen::Known(total);
+                            total
+                        }
+                    }
+                }
+            }
+        })
     }
 
     fn prefetch_maximum_request_bytes(&self) -> Pin<Box<dyn Future<Output = ()> + Send + '_>> {
-        Box::pin(async move { todo!() })
+        Box::pin(async move {
+            self.prefetch_len_impl()
+                .await
+                .expect("prefetch_len_impl failed");
+        })
     }
 
     fn wait_for_reply(
@@ -801,7 +1009,7 @@ impl<S: Unistream + Send + Sync + 'static> RequestConnection for RustConnection<
     }
 }
 
-impl<S: Unistream + Send + Sync + 'static> Connection for RustConnection<S> {
+impl<S: Unistream + Send + Sync> Connection for RustConnection<S> {
     fn poll_for_raw_event_with_sequence(
         &self,
     ) -> Result<Option<RawEventAndSeqNumber<Self::Buf>>, ConnectionError> {
@@ -863,6 +1071,8 @@ impl<S: Unistream + Send + Sync + 'static> Connection for RustConnection<S> {
 
     fn generate_id(&self) -> Fut<'_, u32, ReplyOrIdError> {
         Box::pin(async move {
+            use crate::protocol::xc_misc;
+
             // Try to generate an ID.
             let mut id_allocator = self.id_allocator.lock().await;
 
@@ -871,7 +1081,17 @@ impl<S: Unistream + Send + Sync + 'static> Connection for RustConnection<S> {
             }
 
             // Reset the ID range.
-            // TODO
+            if self
+                .extension_information(xc_misc::X11_EXTENSION_NAME)
+                .await?
+                .is_some()
+            {
+                let range = xc_misc::get_xid_range(self).await?.reply().await?;
+                id_allocator.update_xid_range(&range)?;
+                return id_allocator
+                    .generate_id()
+                    .ok_or(ReplyOrIdError::IdsExhausted);
+            }
 
             Err(ReplyOrIdError::IdsExhausted)
         })
@@ -891,46 +1111,5 @@ where
             }
             res => return res,
         }
-    }
-}
-
-trait AsIoError {
-    fn as_io_error(&self) -> Option<&io::Error>;
-    fn from_io_error(e: io::Error) -> Self;
-}
-
-impl AsIoError for io::Error {
-    fn as_io_error(&self) -> Option<&io::Error> {
-        Some(self)
-    }
-
-    fn from_io_error(e: io::Error) -> Self {
-        e
-    }
-}
-
-impl AsIoError for ConnectionError {
-    fn as_io_error(&self) -> Option<&io::Error> {
-        match self {
-            Self::IoError(ref e) => Some(e),
-            _ => None,
-        }
-    }
-
-    fn from_io_error(e: io::Error) -> Self {
-        Self::IoError(e)
-    }
-}
-
-impl AsIoError for ReplyOrIdError {
-    fn as_io_error(&self) -> Option<&io::Error> {
-        match self {
-            Self::ConnectionError(ConnectionError::IoError(ref e)) => Some(e),
-            _ => None,
-        }
-    }
-
-    fn from_io_error(e: io::Error) -> Self {
-        Self::ConnectionError(ConnectionError::IoError(e))
     }
 }

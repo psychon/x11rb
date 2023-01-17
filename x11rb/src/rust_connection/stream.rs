@@ -255,7 +255,7 @@ impl DefaultStream {
     ///
     /// The returned values can be directly given to `super::xauth::get_auth` as `family` and
     /// `address`.
-    pub(crate) fn peer_addr(&self) -> Result<(Family, Vec<u8>)> {
+    pub fn peer_addr(&self) -> Result<(Family, Vec<u8>)> {
         match self.inner {
             DefaultStreamInner::TcpStream(ref stream) => {
                 // Get the v4 address of the other end (if there is one)
