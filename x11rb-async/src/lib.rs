@@ -14,7 +14,6 @@ pub mod rust_connection;
 // -- Private Modules --
 
 mod cookie;
-mod util;
 
 pub use cookie::{Cookie, CookieWithFds, VoidCookie};
 

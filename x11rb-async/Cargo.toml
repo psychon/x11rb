@@ -23,6 +23,69 @@ tinyvec = { version = "1.6.0", features = ["alloc"] }
 x11rb = { version = "0.11.1", path = "../x11rb", default-features = false }
 x11rb-protocol = { version = "0.11.1", path = "../x11rb-protocol" }
 
+[features]
+# Enable this feature to enable all the X11 extensions
+all-extensions = [
+    "x11rb-protocol/all-extensions", 
+    "composite", 
+    "damage", 
+    "dbe", 
+    "dpms", 
+    "dri2", 
+    "dri3", 
+    "glx", 
+    "present", 
+    "randr", 
+    "record", 
+    "render", 
+    "res", 
+    "screensaver", 
+    "shape", 
+    "shm", 
+    "sync", 
+    "xevie", 
+    "xf86dri", 
+    "xf86vidmode", 
+    "xfixes", 
+    "xinerama", 
+    "xinput", 
+    "xkb", 
+    "xprint", 
+    "xselinux", 
+    "xtest", 
+    "xv", 
+    "xvmc"
+]
+
+composite = ["x11rb-protocol/composite", "xfixes"]
+damage = ["x11rb-protocol/damage", "xfixes"]
+dbe = ["x11rb-protocol/dbe"]
+dpms = ["x11rb-protocol/dpms"]
+dri2 = ["x11rb-protocol/dri2"]
+dri3 = ["x11rb-protocol/dri3"]
+glx = ["x11rb-protocol/glx"]
+present = ["x11rb-protocol/present", "randr", "xfixes", "sync"]
+randr = ["x11rb-protocol/randr", "render"]
+record = ["x11rb-protocol/record"]
+render = ["x11rb-protocol/render"]
+res = ["x11rb-protocol/res"]
+screensaver = ["x11rb-protocol/screensaver"]
+shape = ["x11rb-protocol/shape"]
+shm = ["x11rb-protocol/shm"]
+sync = ["x11rb-protocol/sync"]
+xevie = ["x11rb-protocol/xevie"]
+xf86dri = ["x11rb-protocol/xf86dri"]
+xf86vidmode = ["x11rb-protocol/xf86vidmode"]
+xfixes = ["x11rb-protocol/xfixes", "render", "shape"]
+xinerama = ["x11rb-protocol/xinerama"]
+xinput = ["x11rb-protocol/xinput", "xfixes"]
+xkb = ["x11rb-protocol/xkb"]
+xprint = ["x11rb-protocol/xprint"]
+xselinux = ["x11rb-protocol/xselinux"]
+xtest = ["x11rb-protocol/xtest"]
+xv = ["x11rb-protocol/xv", "shm"]
+xvmc = ["x11rb-protocol/xvmc", "xv"]
+
 [dev-dependencies]
 async-executor = "1.5.0"
 bytemuck = "1.12.3"
