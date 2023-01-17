@@ -11,6 +11,7 @@ use std::net::{IpAddr, Ipv4Addr, Ipv6Addr, TcpStream};
 use std::os::unix::net::UnixStream;
 
 use async_io::Async;
+use tinyvec::TinyVec;
 use x11rb::rust_connection::DefaultStream;
 use x11rb_protocol::parse_display::{ConnectAddress, ParsedDisplay};
 
@@ -76,73 +77,30 @@ async fn connect_addr(addr: ConnectAddress<'_>) -> io::Result<DefaultStream> {
 }
 
 /// Resolve the address asynchronously.
-async fn resolve_addr(host: &str) -> io::Result<impl ExactSizeIterator<Item = IpAddr>> {
+async fn resolve_addr(host: &str) -> io::Result<impl Iterator<Item = IpAddr>> {
+    type Ips = TinyVec<[Option<IpAddr>; 1]>;
+
+    let one = |i| TinyVec::from([Some(i)]).into_iter().flatten();
+
     // Avoid using the threadpool by trying to parse the address as IPv4 or IPv6.
     if let Ok(ipv4) = host.parse::<Ipv4Addr>() {
-        return Ok(IpAddrIter::from(ipv4));
+        return Ok(one(ipv4.into()));
     }
 
     if let Ok(ipv6) = host.parse::<Ipv6Addr>() {
-        return Ok(IpAddrIter::from(ipv6));
+        return Ok(one(ipv6.into()));
     }
 
     // Resolve the hostname using the blocking threadpool.
-    let host = host.to_string();
+    let host = format!("{}:0", host);
     blocking::unblock(move || {
         use std::net::ToSocketAddrs;
 
         let hosts = host
             .to_socket_addrs()?
-            .map(|addr| addr.ip())
-            .collect::<Vec<_>>();
-        Ok(IpAddrIter::Multiple(hosts.into_iter()))
+            .map(|addr| Some(addr.ip()))
+            .collect::<Ips>();
+        Ok(hosts.into_iter().flatten())
     })
     .await
-}
-
-/// Iterator that returns one or returns several IPs.
-enum IpAddrIter {
-    /// A single IP.
-    Single(Option<IpAddr>),
-
-    /// Multiple IPs.
-    Multiple(std::vec::IntoIter<IpAddr>),
-}
-
-impl Iterator for IpAddrIter {
-    type Item = IpAddr;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        match self {
-            IpAddrIter::Single(ip) => ip.take(),
-            IpAddrIter::Multiple(iter) => iter.next(),
-        }
-    }
-
-    fn size_hint(&self) -> (usize, Option<usize>) {
-        match self {
-            IpAddrIter::Single(ip) => {
-                if ip.is_some() {
-                    (1, Some(1))
-                } else {
-                    (0, Some(0))
-                }
-            }
-            IpAddrIter::Multiple(iter) => iter.size_hint(),
-        }
-    }
-}
-
-impl ExactSizeIterator for IpAddrIter {}
-
-impl From<Ipv4Addr> for IpAddrIter {
-    fn from(ip: Ipv4Addr) -> Self {
-        IpAddrIter::Single(Some(IpAddr::V4(ip)))
-    }
-}
-
-impl From<Ipv6Addr> for IpAddrIter {
-    fn from(ip: Ipv6Addr) -> Self {
-        IpAddrIter::Single(Some(IpAddr::V6(ip)))
-    }
 }
