@@ -2,6 +2,7 @@
 
 //! A connection implemented entirely in Rust.
 
+mod max_request_bytes;
 mod nb_connect;
 
 use crate::connection::{Connection, Fut, RequestConnection};
@@ -464,7 +465,11 @@ impl<S: Unistream + Send + Sync> RustConnection<S> {
     ) -> Result<SequenceNumber, ConnectionError> {
         // Compute the request.
         let mut storage = Default::default();
-        let bufs = x11rb::connection::compute_length_field(&*self.inner, bufs, &mut storage)?;
+        let mrl = {
+            let max = self.maximum_request_bytes().await;
+            max_request_bytes::MaxBytesConnWrapper::new(max)
+        };
+        let bufs = x11rb::connection::compute_length_field(&mrl, bufs, &mut storage)?;
 
         // Lock the buffer.
         let mut buffer = self.write_buffer.lock().await;
@@ -729,8 +734,11 @@ impl<S: Unistream + Send + Sync> RustConnection<S> {
 
     async fn prefetch_len_impl(
         &self,
-    ) -> Result<RwLockReadGuard<'_, MaxRequestLen>, ConnectionError> {
-        let mrl = self.max_request_len.read().await;
+    ) -> Result<Option<RwLockReadGuard<'_, MaxRequestLen>>, ConnectionError> {
+        let mrl = match self.max_request_len.try_read() {
+            Some(mrl) => mrl,
+            None => return Ok(None),
+        };
 
         // Prefetch if we haven't already.
         if *mrl == MaxRequestLen::Unknown {
@@ -746,10 +754,10 @@ impl<S: Unistream + Send + Sync> RustConnection<S> {
                 *mrl = MaxRequestLen::Requested(cookie.into_sequence_number());
             }
 
-            return Ok(RwLockWriteGuard::downgrade(mrl));
+            return Ok(Some(RwLockWriteGuard::downgrade(mrl)));
         }
 
-        Ok(mrl)
+        Ok(Some(mrl))
     }
 }
 
@@ -930,10 +938,22 @@ impl<S: Unistream + Send + Sync> RequestConnection for RustConnection<S> {
     fn maximum_request_bytes(&self) -> Pin<Box<dyn Future<Output = usize> + Send + '_>> {
         Box::pin(async move {
             // Make sure we've prefetched the information.
-            let mrl = self
+            let mrl = match self
                 .prefetch_len_impl()
                 .await
-                .expect("prefetch_len_impl failed");
+                .expect("prefetch_len_impl failed")
+            {
+                Some(mrl) => mrl,
+                None => {
+                    // We must be writing to it at the moment.
+                    return self
+                        .setup()
+                        .maximum_request_length
+                        .try_into()
+                        .unwrap_or(std::usize::MAX)
+                        * 4;
+                }
+            };
 
             // Complete the request if necessary.
             match *mrl {
