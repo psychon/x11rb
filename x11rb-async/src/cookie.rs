@@ -39,8 +39,12 @@ impl<'conn, C: Connection + ?Sized> VoidCookie<'conn, C> {
 
     /// Check if this request caused an X11 error.
     pub async fn check(self) -> Result<(), ReplyError> {
-        let (conn, seq) = self.consume();
-        match conn.check_for_raw_error(seq).await? {
+        let res = self.conn.check_for_raw_error(self.sequence).await;
+
+        // Wait until after the `await` to consume the cookie.
+        let (conn, _) = self.consume();
+
+        match res? {
             Some(e) => Err(conn.parse_error(e.as_ref())?.into()),
             None => Ok(()),
         }
@@ -120,13 +124,18 @@ impl<'conn, C: Connection + ?Sized, R: TryParse> Cookie<'conn, C, R> {
 
     /// Get the raw reply that the server sent.
     pub async fn raw_reply(self) -> Result<C::Buf, ReplyError> {
-        let (conn, seq) = self.raw.consume();
-
         // Wait for the reply
-        let reply_or_error = conn.wait_for_reply_or_raw_error(seq).await?;
+        let reply_or_error = self
+            .raw
+            .conn
+            .wait_for_reply_or_raw_error(self.raw.sequence)
+            .await;
+
+        // Wait until after the `await` to consume the cookie.
+        let (conn, _) = self.raw.consume();
 
         // Check for errors
-        match reply_or_error {
+        match reply_or_error? {
             ReplyOrError::Reply(reply) => Ok(reply),
             ReplyOrError::Error(error) => Err(conn.parse_error(error.as_ref())?.into()),
         }
@@ -134,10 +143,14 @@ impl<'conn, C: Connection + ?Sized, R: TryParse> Cookie<'conn, C, R> {
 
     /// Get the reply, but have errors handled as events.
     pub async fn raw_reply_unchecked(self) -> Result<Option<C::Buf>, ConnectionError> {
-        let (conn, seq) = self.raw.consume();
-
         // Wait for the reply
-        conn.wait_for_reply(seq).await
+        let res = self.raw.conn.wait_for_reply(self.raw.sequence).await;
+
+        // Wait until after the `await` to consume the cookie.
+        let _ = self.raw.consume();
+
+        // Check for errors
+        res
     }
 
     /// Get the reply that the server sent.
@@ -181,13 +194,18 @@ impl<'conn, C: Connection + ?Sized, R: TryParseFd> CookieWithFds<'conn, C, R> {
 
     /// Get the raw reply that the server sent.
     pub async fn raw_reply(self) -> Result<BufWithFds<C::Buf>, ReplyError> {
-        let (conn, seq) = self.raw.consume();
-
         // Wait for the reply
-        let reply_or_error = conn.wait_for_reply_with_fds_raw(seq).await?;
+        let reply_or_error = self
+            .raw
+            .conn
+            .wait_for_reply_with_fds_raw(self.raw.sequence)
+            .await;
+
+        // Wait until after the `await` to consume the cookie.
+        let (conn, _) = self.raw.consume();
 
         // Check for errors
-        match reply_or_error {
+        match reply_or_error? {
             ReplyOrError::Reply(reply) => Ok(reply),
             ReplyOrError::Error(error) => Err(conn.parse_error(error.as_ref())?.into()),
         }
