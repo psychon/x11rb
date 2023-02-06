@@ -10,10 +10,12 @@ use std::cell::RefCell;
 use std::env;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
+use x11rb::rust_connection::RustConnection;
+
+use x11rb_async::blocking::BlockingConnection;
 use x11rb_async::connection::Connection;
 use x11rb_async::errors::{ConnectionError, ReplyOrIdError};
 use x11rb_async::protocol::{xproto::*, Event};
-use x11rb_async::rust_connection::RustConnection;
 
 struct Atoms {
     utf8_string: Atom,
@@ -222,7 +224,7 @@ async fn redraw(
 
 async fn main2() -> Result<(), Box<dyn std::error::Error>> {
     // Open a new connection.
-    let (conn, screen_index) = RustConnection::connect(None).await?;
+    let (conn, screen_index) = BlockingConnection::<RustConnection>::connect(None).await?;
 
     // Setup atoms for this connection.
     let atoms = Atoms::load(&conn).await?;

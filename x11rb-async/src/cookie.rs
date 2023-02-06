@@ -2,14 +2,13 @@
 
 //! Cookies!
 
-use x11rb::connection::RequestKind;
+use x11rb::connection::{BufWithFds, ReplyOrError, RequestKind};
 use x11rb_protocol::protocol::xproto::ListFontsWithInfoReply;
-use x11rb_protocol::DiscardMode;
+use x11rb_protocol::{DiscardMode, SequenceNumber};
 
 use crate::connection::{Connection, RequestConnection};
 use crate::errors::{ConnectionError, ReplyError};
 use crate::x11_utils::{TryParse, TryParseFd};
-use crate::{BufWithFds, ReplyOrError, SequenceNumber};
 
 use futures_lite::{ready, stream::Stream};
 use std::future::Future;
@@ -157,10 +156,6 @@ impl<'conn, C: Connection + ?Sized, R: TryParse> Cookie<'conn, C, R> {
         // Parse the reply
         let reply = buf.map(|buf| R::try_parse(buf.as_ref()).unwrap().0);
         Ok(reply)
-    }
-
-    pub(crate) fn into_sequence_number(self) -> SequenceNumber {
-        self.raw.consume().1
     }
 }
 

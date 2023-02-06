@@ -2,16 +2,18 @@
 
 //! Generic connection-related traits.
 
-use x11rb::connection::{EventAndSeqNumber, RequestKind};
-use x11rb_protocol::x11_utils::{ReplyFDsRequest, ReplyRequest, VoidRequest};
-use x11rb_protocol::DiscardMode;
+use x11rb::connection::{BufWithFds, EventAndSeqNumber, ReplyOrError, RequestKind};
+use x11rb::utils::RawFdContainer as OwnedFd;
+use x11rb_protocol::protocol::xproto::Setup;
+use x11rb_protocol::protocol::Event;
+use x11rb_protocol::x11_utils::{
+    ExtensionInformation, ReplyFDsRequest, ReplyRequest, TryParse, TryParseFd, VoidRequest,
+    X11Error,
+};
+use x11rb_protocol::{DiscardMode, RawEventAndSeqNumber, SequenceNumber};
 
 use crate::errors::{ConnectionError, ParseError, ReplyError, ReplyOrIdError};
-use crate::x11_utils::{ExtensionInformation, TryParse, TryParseFd, X11Error};
-use crate::{
-    BufWithFds, Cookie, CookieWithFds, Event, RawEventAndSeqNumber, RawFdContainer, ReplyOrError,
-    SequenceNumber, Setup, VoidCookie,
-};
+use crate::{Cookie, CookieWithFds, VoidCookie};
 
 use std::boxed::Box;
 use std::future::Future;
@@ -41,7 +43,7 @@ pub trait RequestConnection: Sync {
     fn send_request_with_reply<'this, 'bufs, 'sl, 're, 'future, R>(
         &'this self,
         bufs: &'bufs [IoSlice<'sl>],
-        fds: Vec<RawFdContainer>,
+        fds: Vec<OwnedFd>,
     ) -> Fut<'future, Cookie<'this, Self, R>, ConnectionError>
     where
         'this: 'future,
@@ -105,7 +107,7 @@ pub trait RequestConnection: Sync {
     fn send_request_with_reply_with_fds<'this, 'bufs, 'sl, 're, 'future, R>(
         &'this self,
         bufs: &'bufs [IoSlice<'sl>],
-        fds: Vec<RawFdContainer>,
+        fds: Vec<OwnedFd>,
     ) -> Fut<'future, CookieWithFds<'this, Self, R>, ConnectionError>
     where
         'this: 'future,
@@ -169,7 +171,7 @@ pub trait RequestConnection: Sync {
     fn send_request_without_reply<'this, 'bufs, 'sl, 'future>(
         &'this self,
         bufs: &'bufs [IoSlice<'sl>],
-        fds: Vec<RawFdContainer>,
+        fds: Vec<OwnedFd>,
     ) -> Fut<'future, VoidCookie<'this, Self>, ConnectionError>
     where
         'this: 'future,

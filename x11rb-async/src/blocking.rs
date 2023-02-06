@@ -3,7 +3,7 @@
 //! A `Connection` implementation that uses a threadpool to handle requests.
 
 use crate::connection::{Connection, Fut, RequestConnection};
-use crate::errors::{ConnectionError, ParseError, ReplyOrIdError};
+use crate::errors::{ConnectError, ConnectionError, ParseError, ReplyOrIdError};
 use crate::x11_utils::X11Error;
 use crate::SequenceNumber;
 
@@ -12,7 +12,15 @@ use std::io::IoSlice;
 use std::mem;
 use std::pin::Pin;
 use std::sync::Arc;
+
 use x11rb::connection::{Connection as BlConnection, ReplyOrError, RequestKind};
+use x11rb::rust_connection::{RustConnection, Stream};
+
+#[cfg(feature = "allow-unsafe-code")]
+use std::ffi::CStr;
+#[cfg(feature = "allow-unsafe-code")]
+use x11rb::xcb_ffi::XCBConnection;
+
 use x11rb_protocol::DiscardMode;
 
 /// A `Connection` implementation that uses a threadpool to handle requests.
@@ -35,10 +43,8 @@ pub struct BlockingConnection<C> {
 
 impl<C: BlConnection + Send + Sync + 'static> BlockingConnection<C> {
     /// Create a new `BlockingConnection` from an existing `Connection`.
-    pub fn new(conn: C) -> Self {
-        Self {
-            inner: Arc::new(conn),
-        }
+    pub fn new(conn: Arc<C>) -> Self {
+        Self { inner: conn }
     }
 
     /// Run the closure with a reference to the underlying connection.
@@ -54,6 +60,56 @@ impl<C: BlConnection + Send + Sync + 'static> BlockingConnection<C> {
     /// Get a reference to the underlying connection.
     pub fn get_ref(&self) -> &C {
         &self.inner
+    }
+}
+
+impl BlockingConnection<RustConnection> {
+    /// Connect to the X11 server using this connection.
+    pub async fn connect(display: Option<&str>) -> Result<(Self, usize), ConnectError> {
+        let display = display.map(|s| s.to_string());
+
+        let (inner, screen) =
+            blocking::unblock(move || RustConnection::connect(display.as_deref())).await?;
+
+        Ok((Self::new(Arc::new(inner)), screen))
+    }
+}
+
+impl<S: Stream + Send + Sync + 'static> BlockingConnection<RustConnection<S>> {
+    /// Establish a connection over the given stream.
+    pub async fn connect_to_stream(stream: S, screen: usize) -> Result<Self, ConnectError> {
+        let inner =
+            blocking::unblock(move || RustConnection::connect_to_stream(stream, screen)).await?;
+
+        Ok(Self::new(Arc::new(inner)))
+    }
+
+    /// Establish a connection over the given stream using the given auth info
+    pub async fn connect_to_stream_with_auth_info(
+        stream: S,
+        screen: usize,
+        auth_name: Vec<u8>,
+        auth_data: Vec<u8>,
+    ) -> Result<Self, ConnectError> {
+        let inner = blocking::unblock(move || {
+            RustConnection::connect_to_stream_with_auth_info(stream, screen, auth_name, auth_data)
+        })
+        .await?;
+
+        Ok(Self::new(Arc::new(inner)))
+    }
+}
+
+#[cfg(feature = "allow-unsafe-code")]
+impl BlockingConnection<XCBConnection> {
+    /// Connect to the X11 server using this connection.
+    pub async fn connect(display: Option<&CStr>) -> Result<(Self, usize), ConnectError> {
+        let display = display.map(|s| s.to_owned());
+
+        let (inner, screen) =
+            blocking::unblock(move || XCBConnection::connect(display.as_deref())).await?;
+
+        Ok((Self::new(Arc::new(inner)), screen))
     }
 }
 
