@@ -55,6 +55,20 @@ impl ExtensionManager {
         Ok(())
     }
 
+    /// Insert an extension if you already have the information.
+    pub fn insert_extension_information(
+        &mut self,
+        extension_name: &'static str,
+        info: Option<ExtensionInformation>,
+    ) {
+        let state = match info {
+            Some(info) => CheckState::Present(info),
+            None => CheckState::Missing,
+        };
+
+        let _ = self.0.insert(extension_name, state);
+    }
+
     /// An implementation of `RequestConnection::extension_information()`.
     ///
     /// The given connection is used for sending a `QueryExtension` request if needed.

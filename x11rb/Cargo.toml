@@ -88,7 +88,7 @@ all-extensions = [
     "xselinux",
     "xtest",
     "xv",
-    "xvmc",
+    "xvmc"
 ]
 
 # Features to enable individual X11 extensions
