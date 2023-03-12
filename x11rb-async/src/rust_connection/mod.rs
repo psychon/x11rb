@@ -501,7 +501,7 @@ impl<S: Stream> RustConnection<S> {
             for _ in 0..50 {
                 // Try to read packets from the stream.
                 packet_reader.try_read_packets(&self.stream, &mut packets, &mut fds)?;
-                let packet_count = packets.len(); 
+                let packet_count = packets.len();
 
                 // Now, actually enqueue the packets.
                 {
