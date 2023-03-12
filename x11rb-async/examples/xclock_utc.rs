@@ -10,12 +10,10 @@ use std::cell::RefCell;
 use std::env;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
-use x11rb::rust_connection::RustConnection;
-
-use x11rb_async::blocking::BlockingConnection;
 use x11rb_async::connection::Connection;
 use x11rb_async::errors::{ConnectionError, ReplyOrIdError};
 use x11rb_async::protocol::{xproto::*, Event};
+use x11rb_async::rust_connection::RustConnection;
 
 struct Atoms {
     utf8_string: Atom,
@@ -224,25 +222,28 @@ async fn redraw(
 
 async fn main2() -> Result<(), Box<dyn std::error::Error>> {
     // Open a new connection.
-    let (conn, screen_index) = BlockingConnection::<RustConnection>::connect(None).await?;
+    let (conn, screen_index) = RustConnection::connect(None).await?;
+
+    // This is shared between tasks.
+    let (width, height) = (100, 100);
+    let size = RefCell::new((width, height));
+
+    // Create an executor for spawning tasks.
+    let ex = LocalExecutor::new();
+
+    // Spawn a task to poll for events.
+    ex.spawn(conn.read_packets()).detach();
 
     // Setup atoms for this connection.
     let atoms = Atoms::load(&conn).await?;
     let screen = conn.setup().roots.get(screen_index).unwrap();
 
     // Create a window.
-    let (width, height) = (100, 100);
     let window = create_window(&conn, screen, &atoms, (width, height)).await?;
 
     // Create a graphics context.
     let gc_id = conn.generate_id().await?;
     conn.create_gc(gc_id, window, &CreateGCAux::new()).await?;
-
-    // This is shared between tasks.
-    let size = RefCell::new((width, height));
-
-    // Create an executor for spawning tasks.
-    let ex = LocalExecutor::new();
 
     // On X11RB_EXAMPLE_TIMEOUT, exit after a set timeout.
     if let Some(timeout) = env::var("X11RB_EXAMPLE_TIMEOUT")

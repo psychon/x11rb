@@ -83,7 +83,6 @@ impl PacketReader {
                     let dest = self.inner.buffer();
                     let amt_to_read = cmp::min(src.len(), dest.len());
 
-                    // copy slices over
                     dest[..amt_to_read].copy_from_slice(&src[..amt_to_read]);
 
                     // reborrow src
