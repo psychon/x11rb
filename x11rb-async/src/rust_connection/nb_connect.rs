@@ -8,6 +8,7 @@ use std::os::unix::net::UnixStream;
 
 use async_io::Async;
 
+use futures_lite::pin;
 use futures_lite::prelude::*;
 use futures_lite::stream;
 
@@ -20,8 +21,12 @@ pub(super) async fn connect(addrs: &ParsedDisplay) -> Result<(DefaultStream, usi
     let screen = addrs.screen as usize;
     let mut err = None;
 
-    stream::iter(addrs.connect_instruction())
-        .then(|addr| Box::pin(connect_to_addr(addr)))
+    let connections = stream::iter(addrs.connect_instruction()).then(connect_to_addr);
+
+    // Pinning the stream lets us use `find_map` below without boxing.
+    pin!(connections);
+
+    connections
         .find_map(|result| match result {
             Ok(stream) => Some(stream),
             Err(e) => {
@@ -46,12 +51,16 @@ async fn connect_to_addr(addr: ConnectAddress<'_>) -> io::Result<DefaultStream> 
             let mut err = None;
 
             // Resolve the hostname.
-            resolve_host(host)
+            let streams = resolve_host(host)
                 .await?
-                .then(|ip_addr| Box::pin(Async::<TcpStream>::connect((ip_addr, port))))
+                .then(|ip_addr| Async::<TcpStream>::connect((ip_addr, port)))
                 .map(|result| {
                     result.and_then(|stream| DefaultStream::from_tcp_stream(stream.into_inner()?))
-                })
+                });
+
+            pin!(streams);
+
+            streams
                 .find_map(|result| match result {
                     Ok(stream) => Some(stream),
                     Err(e) => {
