@@ -2842,7 +2842,7 @@ fn example_input_masks<C: Connection>(conn: &C, screen_num: usize) {
 // shown above:
 
 #[allow(unused)]
-fn example_visual_colormap_entries<C: Connection>(visual: &Visualtype) -> u16 {
+fn example_visual_colormap_entries(visual: &Visualtype) -> u16 {
     visual.colormap_entries
 }
 
