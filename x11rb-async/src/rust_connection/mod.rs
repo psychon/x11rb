@@ -10,7 +10,7 @@ use std::future::Future;
 use std::io;
 use std::mem;
 use std::pin::Pin;
-use std::sync::Mutex as StdMutex;
+use std::sync::{Arc, Mutex as StdMutex};
 
 use crate::connection::{Connection, Fut, RequestConnection};
 use crate::{Cookie, CookieWithFds, VoidCookie};
@@ -37,22 +37,8 @@ pub use stream::{DefaultStream, Stream, StreamAdaptor, StreamBase};
 /// A pure-Rust async connection to an X11 server.
 #[derive(Debug)]
 pub struct RustConnection<S = DefaultStream> {
-    /// The underlying connection manager.
-    ///
-    /// This is never held across an `.await` point, so it's fine to
-    /// use a standard library mutex.
-    inner: StdMutex<InnerConnection>,
-
-    /// The stream for communicating with the X11 server.
-    stream: S,
-
-    /// Listener for when new data is available on the stream.
-    new_input: Event,
-
-    /// The packet reader.
-    ///
-    /// Holding this lock implies the exclusive right to read from the stream.
-    packet_reader: Mutex<PacketReader>,
+    /// Shared state between the conenction and the packet reader.
+    shared: Arc<SharedState<S>>,
 
     /// The write buffer.
     ///
@@ -70,6 +56,23 @@ pub struct RustConnection<S = DefaultStream> {
 
     /// The extension information.
     extensions: RwLock<Extensions>,
+}
+
+/// State shared between th `RustConnection` and the future polling
+/// for new packets.
+#[derive(Debug)]
+struct SharedState<S> {
+    /// The underlying connection manager.
+    ///
+    /// This is never held across an `.await` point, so it's fine to
+    /// use a standard library mutex.
+    inner: StdMutex<ProtoConnection>,
+
+    /// The stream for communicating with the X11 server.
+    stream: S,
+
+    /// Listener for when new data is available on the stream.
+    new_input: Event,
 }
 
 #[derive(Debug)]
@@ -100,18 +103,16 @@ impl ExtInfoProvider for Extensions {
     }
 
     fn get_from_event_code(&self, event_code: u8) -> Option<(&str, ExtensionInformation)> {
-        self.iter().find(|(_, info)| info.first_event == event_code)
+        self.iter()
+            .filter(|(_, info)| info.first_event <= event_code)
+            .max_by_key(|(_, info)| info.first_event)
     }
 
     fn get_from_error_code(&self, error_code: u8) -> Option<(&str, ExtensionInformation)> {
-        self.iter().find(|(_, info)| info.first_error == error_code)
+        self.iter()
+            .filter(|(_, info)| info.first_error <= error_code)
+            .max_by_key(|(_, info)| info.first_error)
     }
-}
-
-#[derive(Debug)]
-struct InnerConnection {
-    /// The underlying connection.
-    conn: ProtoConnection,
 }
 
 #[derive(Debug)]
@@ -134,10 +135,14 @@ struct WriteBufferInner {
     /// The buffer that is used for writing.
     buffer: Vec<u8>,
 
-    /// The file descriptors that are used for writing.
+    /// The file descriptors that we are sending over.
     fds: Vec<RawFdContainer>,
 
     /// Whether the buffer has been corrupted.
+    ///
+    /// A lock has to be explicitly unlock()d, otherwise the buffer is marked as corrupted.
+    /// This exists to detect futures that were not polled to completion and might have
+    /// written only a part of their data.
     corrupted: bool,
 }
 
@@ -156,7 +161,20 @@ enum MaxRequestBytes {
 
 impl RustConnection {
     /// Connect to the X11 server.
-    pub async fn connect(display_name: Option<&str>) -> Result<(Self, usize), ConnectError> {
+    ///
+    /// This function returns a future that drives the packet reader for the connection.
+    /// It should be spawned on a task executor to be polled while the connection is in
+    /// use.
+    pub async fn connect(
+        display_name: Option<&str>,
+    ) -> Result<
+        (
+            Self,
+            usize,
+            impl Future<Output = Result<Infallible, ConnectionError>> + Send,
+        ),
+        ConnectError,
+    > {
         // Parse the display name.
         let addrs = x11rb_protocol::parse_display::parse_display(display_name)
             .ok_or(ConnectError::DisplayParsingError)?;
@@ -178,27 +196,49 @@ impl RustConnection {
         })
         .await;
 
-        Ok((
+        let (conn, drive) =
             RustConnection::connect_to_stream_with_auth_info(stream, screen, auth_name, auth_data)
-                .await?,
-            screen,
-        ))
+                .await?;
+        Ok((conn, screen, drive))
     }
 }
 
-impl<S: Stream> RustConnection<S> {
+impl<S: Stream + Send + Sync> RustConnection<S> {
     /// Connect to the X11 server using the given stream.
-    pub async fn connect_to_stream(stream: S, screen: usize) -> Result<Self, ConnectError> {
+    ///
+    /// This function returns a future that drives the packet reader for the connection.
+    /// It should be spawned on a task executor to be polled while the connection is in
+    /// use.
+    pub async fn connect_to_stream(
+        stream: S,
+        screen: usize,
+    ) -> Result<
+        (
+            Self,
+            impl Future<Output = Result<Infallible, ConnectionError>> + Send,
+        ),
+        ConnectError,
+    > {
         Self::connect_to_stream_with_auth_info(stream, screen, Vec::new(), Vec::new()).await
     }
 
     /// Connect to the server using the given stream and authentication information.
+    ///
+    /// This function returns a future that drives the packet reader for the connection.
+    /// It should be spawned on a task executor to be polled while the connection is in
+    /// use.
     pub async fn connect_to_stream_with_auth_info(
         stream: S,
         screen: usize,
         auth_name: Vec<u8>,
         auth_data: Vec<u8>,
-    ) -> Result<Self, ConnectError> {
+    ) -> Result<
+        (
+            Self,
+            impl Future<Output = Result<Infallible, ConnectionError>> + Send,
+        ),
+        ConnectError,
+    > {
         // Set up the connection.
         let (mut connect, setup_request) =
             x11rb_protocol::connect::Connect::with_authorization(auth_name, auth_data);
@@ -247,29 +287,48 @@ impl<S: Stream> RustConnection<S> {
     }
 
     /// Establish a connection on an already connected stream.
-    pub fn for_connected_stream(stream: S, setup: Setup) -> Result<Self, ConnectError> {
+    ///
+    /// This function returns a future that drives the packet reader for the connection.
+    /// It should be spawned on a task executor to be polled while the connection is in
+    /// use.
+    pub fn for_connected_stream(
+        stream: S,
+        setup: Setup,
+    ) -> Result<
+        (
+            Self,
+            impl Future<Output = Result<Infallible, ConnectionError>> + Send,
+        ),
+        ConnectError,
+    > {
         let id_allocator = IdAllocator::new(setup.resource_id_base, setup.resource_id_mask)?;
-
-        Ok(RustConnection {
-            inner: StdMutex::new(InnerConnection {
-                conn: ProtoConnection::new(),
-            }),
+        let shared = Arc::new(SharedState {
+            inner: StdMutex::new(ProtoConnection::new()),
             stream,
             new_input: Event::new(),
-            packet_reader: Mutex::new(PacketReader {
-                read_buffer: vec![0; 4096].into_boxed_slice(),
-                inner: ProtoPacketReader::new(),
-            }),
-            write_buffer: WriteBuffer(Mutex::new(WriteBufferInner {
-                buffer: Vec::with_capacity(16384),
-                fds: vec![],
-                corrupted: false,
-            })),
-            setup,
-            max_request_bytes: Mutex::new(MaxRequestBytes::Unknown),
-            id_allocator: Mutex::new(id_allocator),
-            extensions: RwLock::new(Extensions(HashMap::new())),
-        })
+        });
+
+        // Spawn a future that reads from the stream and caches the result.
+        let drive = {
+            let shared = shared.clone();
+            async move { shared.drive().await }
+        };
+
+        Ok((
+            RustConnection {
+                shared,
+                write_buffer: WriteBuffer(Mutex::new(WriteBufferInner {
+                    buffer: Vec::with_capacity(16384),
+                    fds: vec![],
+                    corrupted: false,
+                })),
+                setup,
+                max_request_bytes: Mutex::new(MaxRequestBytes::Unknown),
+                id_allocator: Mutex::new(id_allocator),
+                extensions: RwLock::new(Extensions(HashMap::new())),
+            },
+            drive,
+        ))
     }
 
     /// Send a request.
@@ -291,8 +350,8 @@ impl<S: Stream> RustConnection<S> {
 
         loop {
             let seq = {
-                let mut inner = self.inner.lock().unwrap();
-                inner.conn.send_request(kind)
+                let mut inner = self.shared.inner.lock().unwrap();
+                inner.send_request(kind)
             };
 
             // Logically send the request.
@@ -326,25 +385,15 @@ impl<S: Stream> RustConnection<S> {
         ];
 
         // Send this request.
-        let seq = {
-            let mut inner = self.inner.lock().unwrap();
+        {
+            let mut inner = self.shared.inner.lock().unwrap();
             let seq = inner
-                .conn
                 .send_request(ReplyFdKind::ReplyWithoutFDs)
                 .expect("This request should not be blocked by syncs");
-            inner
-                .conn
-                .discard_reply(seq, DiscardMode::DiscardReplyAndError);
+            inner.discard_reply(seq, DiscardMode::DiscardReplyAndError);
 
             seq
         };
-
-        // Discard the reply.
-        self.inner
-            .lock()
-            .unwrap()
-            .conn
-            .discard_reply(seq, DiscardMode::DiscardReplyAndError);
 
         // Write the entire packet.
         let iov = &[io::IoSlice::new(&request)];
@@ -380,10 +429,11 @@ impl<S: Stream> RustConnection<S> {
             return Ok(write_buffer);
         }
 
-        // Otherwise, now write directly to the stream.
+        debug_assert!(write_buffer.0.buffer.is_empty());
+
         // Otherwise, write directly to the stream.
         let mut partial: &[u8] = &[];
-        write_with(&self.stream, |stream| {
+        write_with(&self.shared.stream, |stream| {
             while total_len > 0 && !partial.is_empty() {
                 // If the partial buffer is non-empty, write it.
                 if !partial.is_empty() {
@@ -419,7 +469,7 @@ impl<S: Stream> RustConnection<S> {
         })
         .await?;
 
-        todo!()
+        Ok(write_buffer)
     }
 
     /// Flush the write buffer.
@@ -434,7 +484,7 @@ impl<S: Stream> RustConnection<S> {
 
         // Write the entire buffer.
         let mut position = 0;
-        write_with(&self.stream, {
+        write_with(&self.shared.stream, {
             let buffer = &mut *buffer.0;
             move |stream| {
                 while position < buffer.buffer.len() {
@@ -467,65 +517,6 @@ impl<S: Stream> RustConnection<S> {
         Ok(buffer)
     }
 
-    /// A future that reads incoming packets from the server.
-    pub async fn read_packets(&self) -> Result<Infallible, ConnectionError> {
-        // Try to acquire the reader lock to become the exclusive reader.
-        self.drive(self.packet_reader.lock().await).await
-    }
-
-    async fn driven<T, F>(&self, future: F) -> Result<T, ConnectionError>
-    where
-        F: Future<Output = Result<T, ConnectionError>>,
-    {
-        // If we need to drive the connection, we need to acquire the reader lock.
-        if let Some(packet_reader) = self.packet_reader.try_lock() {
-            // Run the future and drive at the same time.
-            future::or(future, async move {
-                self.drive(packet_reader).await.map(|x| match x {})
-            })
-            .await
-        } else {
-            // Someone else is driving, so just run the future.
-            future.await
-        }
-    }
-
-    async fn drive(
-        &self,
-        mut packet_reader: MutexGuard<'_, PacketReader>,
-    ) -> Result<Infallible, ConnectionError> {
-        let mut fds = vec![];
-        let mut packets = vec![];
-
-        loop {
-            for _ in 0..50 {
-                // Try to read packets from the stream.
-                packet_reader.try_read_packets(&self.stream, &mut packets, &mut fds)?;
-                let packet_count = packets.len();
-
-                // Now, actually enqueue the packets.
-                {
-                    let mut inner = self.inner.lock().unwrap();
-                    inner.conn.enqueue_fds(mem::take(&mut fds));
-                    packets
-                        .drain(..)
-                        .for_each(|packet| inner.conn.enqueue_packet(packet));
-                }
-
-                if packet_count > 0 {
-                    // Notify any listeners that there is new data.
-                    self.new_input.notify(1);
-                } else {
-                    // Wait for more data.
-                    self.stream.readable().await?;
-                }
-            }
-
-            // In the case of a large influx of packets, don't starve other tasks.
-            future::yield_now().await;
-        }
-    }
-
     async fn prefetch_extension_impl(
         &self,
         ext: &'static str,
@@ -536,19 +527,15 @@ impl<S: Stream> RustConnection<S> {
         // See if there is an entry in the cache.
         let mut cache = self.extensions.write().await;
 
-        if !cache.0.contains_key(&ext) {
-            // Check again if there is a cache entry.
-            if let Entry::Vacant(entry) = cache.0.entry(ext) {
-                // Send a QueryExtension request.
-                let cookie = crate::protocol::xproto::query_extension(self, ext.as_bytes()).await?;
+        // Check if there is a cache entry.
+        if let Entry::Vacant(entry) = cache.0.entry(ext) {
+            // Send a QueryExtension request.
+            let cookie = crate::protocol::xproto::query_extension(self, ext.as_bytes()).await?;
 
-                // Add the extension to the cache.
-                entry.insert(ExtensionState::Loading(cookie.sequence_number()));
+            // Add the extension to the cache.
+            entry.insert(ExtensionState::Loading(cookie.sequence_number()));
 
-                std::mem::forget(cookie);
-            }
-
-            return Ok(cache);
+            std::mem::forget(cookie);
         }
 
         Ok(cache)
@@ -563,7 +550,11 @@ impl<S: Stream> RustConnection<S> {
     {
         let mut mrl = match self.max_request_bytes.try_lock() {
             Some(mrl) => mrl,
-            None => return Ok(None),
+            None => {
+                // Someone else may already be prefetching the max request length, and using
+                // this request to check it.
+                return Ok(None);
+            }
         };
 
         // Start prefetching if necessary.
@@ -596,9 +587,9 @@ impl<S: Stream> RustConnection<S> {
             .unlock();
 
         let get_reply = || {
-            let mut inner = self.inner.lock().unwrap();
+            let mut inner = self.shared.inner.lock().unwrap();
 
-            if let Some(reply) = inner.conn.poll_for_reply_or_error(sequence) {
+            if let Some(reply) = inner.poll_for_reply_or_error(sequence) {
                 if reply.0[0] == 0 {
                     // This is a reply
                     Some(Ok(ReplyOrError::Error(reply.0)))
@@ -619,7 +610,7 @@ impl<S: Stream> RustConnection<S> {
             }
 
             // Register a listener for the reply.
-            let listener = self.new_input.listen();
+            let listener = self.shared.new_input.listen();
 
             // Maybe a packet was delivered while we were registering the listener.
             if let Some(reply) = get_reply() {
@@ -628,6 +619,45 @@ impl<S: Stream> RustConnection<S> {
 
             // Wait for the next packet.
             listener.await;
+        }
+    }
+}
+
+impl<S: Stream> SharedState<S> {
+    async fn drive(&self) -> Result<Infallible, ConnectionError> {
+        let mut packet_reader = PacketReader {
+            read_buffer: vec![0; 4096].into_boxed_slice(),
+            inner: ProtoPacketReader::new(),
+        };
+        let mut fds = vec![];
+        let mut packets = vec![];
+
+        loop {
+            for _ in 0..50 {
+                // Try to read packets from the stream.
+                packet_reader.try_read_packets(&self.stream, &mut packets, &mut fds)?;
+                let packet_count = packets.len();
+
+                // Now, actually enqueue the packets.
+                {
+                    let mut inner = self.inner.lock().unwrap();
+                    inner.enqueue_fds(mem::take(&mut fds));
+                    packets
+                        .drain(..)
+                        .for_each(|packet| inner.enqueue_packet(packet));
+                }
+
+                if packet_count > 0 {
+                    // Notify any listeners that there is new data.
+                    self.new_input.notify_additional(std::usize::MAX);
+                } else {
+                    // Wait for more data.
+                    self.stream.readable().await?;
+                }
+            }
+
+            // In the case of a large influx of packets, don't starve other tasks.
+            future::yield_now().await;
         }
     }
 }
@@ -731,13 +761,13 @@ impl<S: Stream + Send + Sync> RequestConnection for RustConnection<S> {
         're: 'future,
         R: TryParse + Send + 're,
     {
-        Box::pin(self.driven(async move {
+        Box::pin(async move {
             let seq = self
                 .send_request(bufs, fds, ReplyFdKind::ReplyWithoutFDs)
                 .await?;
 
             Ok(Cookie::new(self, seq))
-        }))
+        })
     }
 
     fn send_request_with_reply_with_fds<'this, 'bufs, 'sl, 're, 'future, R>(
@@ -752,13 +782,13 @@ impl<S: Stream + Send + Sync> RequestConnection for RustConnection<S> {
         're: 'future,
         R: TryParseFd + Send + 're,
     {
-        Box::pin(self.driven(async move {
+        Box::pin(async move {
             let seq = self
                 .send_request(bufs, fds, ReplyFdKind::ReplyWithFDs)
                 .await?;
 
             Ok(CookieWithFds::new(self, seq))
-        }))
+        })
     }
 
     fn send_request_without_reply<'this, 'bufs, 'sl, 'future>(
@@ -771,11 +801,11 @@ impl<S: Stream + Send + Sync> RequestConnection for RustConnection<S> {
         'bufs: 'future,
         'sl: 'future,
     {
-        Box::pin(self.driven(async move {
+        Box::pin(async move {
             let seq = self.send_request(bufs, fds, ReplyFdKind::NoReply).await?;
 
             Ok(VoidCookie::new(self, seq))
-        }))
+        })
     }
 
     fn discard_reply(
@@ -784,25 +814,25 @@ impl<S: Stream + Send + Sync> RequestConnection for RustConnection<S> {
         _kind: x11rb::connection::RequestKind,
         mode: x11rb_protocol::DiscardMode,
     ) {
-        self.inner
+        self.shared
+            .inner
             .lock()
             .unwrap()
-            .conn
             .discard_reply(sequence, mode)
     }
 
     fn prefetch_extension_information(&self, name: &'static str) -> Fut<'_, (), ConnectionError> {
-        Box::pin(self.driven(async move {
+        Box::pin(async move {
             self.prefetch_extension_impl(name).await?;
             Ok(())
-        }))
+        })
     }
 
     fn extension_information(
         &self,
         name: &'static str,
     ) -> Fut<'_, Option<ExtensionInformation>, ConnectionError> {
-        Box::pin(self.driven(async move {
+        Box::pin(async move {
             // Prefetch te information.
             let mut cache = self.prefetch_extension_impl(name).await?;
 
@@ -841,35 +871,35 @@ impl<S: Stream + Send + Sync> RequestConnection for RustConnection<S> {
                     Ok(ext_info)
                 }
             }
-        }))
+        })
     }
 
     fn wait_for_reply_or_raw_error(
         &self,
         sequence: SequenceNumber,
     ) -> Fut<'_, ReplyOrError<Self::Buf>, ConnectionError> {
-        Box::pin(self.driven(async move {
+        Box::pin(async move {
             match self.wait_for_reply_with_fds_impl(sequence).await? {
                 ReplyOrError::Reply((buf, _)) => Ok(ReplyOrError::Reply(buf)),
                 ReplyOrError::Error(buf) => Ok(ReplyOrError::Error(buf)),
             }
-        }))
+        })
     }
 
     fn wait_for_reply(
         &self,
         sequence: SequenceNumber,
     ) -> Fut<'_, Option<Self::Buf>, ConnectionError> {
-        Box::pin(self.driven(async move {
+        Box::pin(async move {
             // Flush the request.
             self.flush_impl(self.write_buffer.lock().await?)
                 .await?
                 .unlock();
 
             let get_reply = || {
-                let mut inner = self.inner.lock().unwrap();
+                let mut inner = self.shared.inner.lock().unwrap();
 
-                match inner.conn.poll_for_reply(sequence) {
+                match inner.poll_for_reply(sequence) {
                     PollReply::TryAgain => None,
                     PollReply::Reply(reply) => Some(Ok(Some(reply))),
                     PollReply::NoReply => Some(Ok(None)),
@@ -884,7 +914,7 @@ impl<S: Stream + Send + Sync> RequestConnection for RustConnection<S> {
                 }
 
                 // Wait for the next event.
-                let listener = self.new_input.listen();
+                let listener = self.shared.new_input.listen();
 
                 // Check for a reply again.
                 if let Some(reply) = get_reply() {
@@ -894,7 +924,7 @@ impl<S: Stream + Send + Sync> RequestConnection for RustConnection<S> {
                 // Wait for the next event.
                 listener.await;
             }
-        }))
+        })
     }
 
     fn wait_for_reply_with_fds_raw(
@@ -902,7 +932,7 @@ impl<S: Stream + Send + Sync> RequestConnection for RustConnection<S> {
         sequence: SequenceNumber,
     ) -> Fut<'_, ReplyOrError<x11rb::connection::BufWithFds<Self::Buf>, Self::Buf>, ConnectionError>
     {
-        Box::pin(self.driven(self.wait_for_reply_with_fds_impl(sequence)))
+        Box::pin(self.wait_for_reply_with_fds_impl(sequence))
     }
 
     fn check_for_raw_error(
@@ -912,19 +942,19 @@ impl<S: Stream + Send + Sync> RequestConnection for RustConnection<S> {
         Box::pin(async move {
             let mut write_buffer = None;
             if self
+                .shared
                 .inner
                 .lock()
                 .unwrap()
-                .conn
                 .prepare_check_for_reply_or_error(sequence)
             {
                 write_buffer = Some(self.send_sync(self.write_buffer.lock().await?).await?);
 
                 assert!(!self
+                    .shared
                     .inner
                     .lock()
                     .unwrap()
-                    .conn
                     .prepare_check_for_reply_or_error(sequence),);
             }
 
@@ -937,10 +967,10 @@ impl<S: Stream + Send + Sync> RequestConnection for RustConnection<S> {
 
             let get_result = || {
                 let poll_result = self
+                    .shared
                     .inner
                     .lock()
                     .unwrap()
-                    .conn
                     .poll_check_for_reply_or_error(sequence);
 
                 match poll_result {
@@ -956,7 +986,7 @@ impl<S: Stream + Send + Sync> RequestConnection for RustConnection<S> {
                 }
 
                 // Register a listener for the reply.
-                let listener = self.new_input.listen();
+                let listener = self.shared.new_input.listen();
 
                 // Maybe a packet was delivered while we were registering the listener.
                 if let Some(result) = get_result() {
@@ -1052,12 +1082,12 @@ impl<S: Stream + Send + Sync> Connection for RustConnection<S> {
     fn wait_for_raw_event_with_sequence(
         &self,
     ) -> Fut<'_, x11rb_protocol::RawEventAndSeqNumber<Self::Buf>, ConnectionError> {
-        Box::pin(self.driven(async move {
+        Box::pin(async move {
             let get_event = || {
-                self.inner
+                self.shared
+                    .inner
                     .lock()
                     .unwrap()
-                    .conn
                     .poll_for_event_with_sequence()
             };
 
@@ -1068,7 +1098,7 @@ impl<S: Stream + Send + Sync> Connection for RustConnection<S> {
                 }
 
                 // Register a listener for the reply.
-                let listener = self.new_input.listen();
+                let listener = self.shared.new_input.listen();
 
                 // Maybe a packet was delivered while we were registering the listener.
                 if let Some(event) = get_event() {
@@ -1078,42 +1108,28 @@ impl<S: Stream + Send + Sync> Connection for RustConnection<S> {
                 // Wait for the next packet.
                 listener.await;
             }
-        }))
+        })
     }
 
     fn poll_for_raw_event_with_sequence(
         &self,
     ) -> Result<Option<x11rb_protocol::RawEventAndSeqNumber<Self::Buf>>, ConnectionError> {
-        let get_event = || {
-            self.inner
-                .lock()
-                .unwrap()
-                .conn
-                .poll_for_event_with_sequence()
-        };
-
-        // Try to get the event.
-        if let Some(event) = get_event() {
-            return Ok(Some(event));
-        }
-
-        // Maybe we need to be driven. In this case, poll the future once.
-        if let Some(res) = future::block_on(future::poll_once(self.driven(future::pending()))) {
-            res?;
-        }
-
-        // Try again.
-        Ok(get_event())
+        Ok(self
+            .shared
+            .inner
+            .lock()
+            .unwrap()
+            .poll_for_event_with_sequence())
     }
 
     fn flush(&self) -> Fut<'_, (), ConnectionError> {
-        Box::pin(self.driven(async move {
+        Box::pin(async move {
             self.flush_impl(self.write_buffer.lock().await?)
                 .await?
                 .unlock();
 
             Ok(())
-        }))
+        })
     }
 
     fn setup(&self) -> &Setup {

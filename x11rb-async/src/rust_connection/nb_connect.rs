@@ -18,7 +18,7 @@ use x11rb_protocol::parse_display::{ConnectAddress, ParsedDisplay};
 
 /// Connect to a `DefaultStream` asynchronously from a display string.
 pub(super) async fn connect(addrs: &ParsedDisplay) -> Result<(DefaultStream, usize), ConnectError> {
-    let screen = addrs.screen as usize;
+    let screen: usize = addrs.screen.into();
     let mut err = None;
 
     let connections = stream::iter(addrs.connect_instruction()).then(connect_to_addr);
