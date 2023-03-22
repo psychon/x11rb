@@ -10,12 +10,10 @@ use std::cell::RefCell;
 use std::env;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
-use x11rb::rust_connection::RustConnection;
-
-use x11rb_async::blocking::BlockingConnection;
 use x11rb_async::connection::Connection;
 use x11rb_async::errors::{ConnectionError, ReplyOrIdError};
 use x11rb_async::protocol::{xproto::*, Event};
+use x11rb_async::rust_connection::RustConnection;
 
 struct Atoms {
     utf8_string: Atom,
@@ -223,77 +221,80 @@ async fn redraw(
 }
 
 async fn main2() -> Result<(), Box<dyn std::error::Error>> {
-    // Open a new connection.
-    let (conn, screen_index) = BlockingConnection::<RustConnection>::connect(None).await?;
-
-    // Setup atoms for this connection.
-    let atoms = Atoms::load(&conn).await?;
-    let screen = conn.setup().roots.get(screen_index).unwrap();
-
-    // Create a window.
-    let (width, height) = (100, 100);
-    let window = create_window(&conn, screen, &atoms, (width, height)).await?;
-
-    // Create a graphics context.
-    let gc_id = conn.generate_id().await?;
-    conn.create_gc(gc_id, window, &CreateGCAux::new()).await?;
-
     // This is shared between tasks.
+    let (width, height) = (100, 100);
     let size = RefCell::new((width, height));
+
+    // Open a new connection.
+    let (conn, screen_index, drive) = RustConnection::connect(None).await?;
+    let screen = conn.setup().roots.get(screen_index).unwrap();
 
     // Create an executor for spawning tasks.
     let ex = LocalExecutor::new();
 
-    // On X11RB_EXAMPLE_TIMEOUT, exit after a set timeout.
-    if let Some(timeout) = env::var("X11RB_EXAMPLE_TIMEOUT")
-        .ok()
-        .and_then(|s| s.parse().ok())
-    {
-        ex.spawn(async move {
-            Timer::after(Duration::from_secs(timeout)).await;
-            std::process::exit(0);
-        })
-        .detach();
-    }
-
-    // Span a task that redraws the window every second.
-    ex.spawn({
-        let conn = &conn;
-        let size = &size;
-
-        async move {
-            // Create a timer that fires every second.
-            let timer = Timer::interval(Duration::from_millis(1_000));
-
-            // Iterate over this timer endlessly.
-            timer
-                .then(move |_| async move {
-                    // Redraw after one second has passed.
-                    let (width, height) = *size.borrow();
-                    redraw(conn, screen, window, gc_id, (width, height)).await?;
-                    conn.flush().await?;
-
-                    Ok::<_, ConnectionError>(())
-                })
-                .for_each(|res| {
-                    if let Err(e) = res {
-                        eprintln!("Timer task failed: {}", e);
-                    }
-                })
-                .await;
-        }
-    })
-    .detach();
-
-    // Flush the connection so far.
-    conn.flush().await?;
-
-    // Run the executor to drive the loop.
     ex.run({
-        let conn = &conn;
+        let ex = &ex;
         let size = &size;
+        let conn = &conn;
 
         async move {
+            // Spawn a task to poll for events.
+            ex.spawn(async move {
+                if let Err(e) = drive.await {
+                    eprintln!("Error while driving the connection: {}", e);
+                }
+            })
+            .detach();
+
+            // Setup atoms for this connection.
+            let atoms = Atoms::load(conn).await?;
+
+            // Create a window.
+            let window = create_window(conn, screen, &atoms, (width, height)).await?;
+
+            // Create a graphics context.
+            let gc_id = conn.generate_id().await?;
+            conn.create_gc(gc_id, window, &CreateGCAux::new()).await?;
+
+            // On X11RB_EXAMPLE_TIMEOUT, exit after a set timeout.
+            if let Some(timeout) = env::var("X11RB_EXAMPLE_TIMEOUT")
+                .ok()
+                .and_then(|s| s.parse().ok())
+            {
+                ex.spawn(async move {
+                    Timer::after(Duration::from_secs(timeout)).await;
+                    std::process::exit(0);
+                })
+                .detach();
+            }
+
+            // Span a task that redraws the window every second.
+            ex.spawn(async move {
+                // Create a timer that fires every second.
+                let timer = Timer::interval(Duration::from_millis(1_000));
+
+                // Iterate over this timer endlessly.
+                timer
+                    .then(move |_| async move {
+                        // Redraw after one second has passed.
+                        let (width, height) = *size.borrow();
+                        redraw(conn, screen, window, gc_id, (width, height)).await?;
+                        conn.flush().await?;
+
+                        Ok::<_, ConnectionError>(())
+                    })
+                    .for_each(|res| {
+                        if let Err(e) = res {
+                            eprintln!("Timer task failed: {}", e);
+                        }
+                    })
+                    .await;
+            })
+            .detach();
+
+            // Flush the connection so far.
+            conn.flush().await?;
+
             loop {
                 // Get the next event.
                 let event = conn.wait_for_event().await?;
@@ -314,7 +315,7 @@ async fn main2() -> Result<(), Box<dyn std::error::Error>> {
                             && data[0] == atoms.wm_delete_window
                         {
                             println!("Window was asked to close");
-                            return Ok::<_, ConnectionError>(());
+                            return Ok::<_, Box<dyn std::error::Error>>(());
                         }
                     }
 

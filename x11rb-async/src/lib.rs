@@ -9,6 +9,7 @@ pub mod connection;
 #[allow(clippy::type_complexity)]
 #[rustfmt::skip]
 pub mod protocol;
+pub mod rust_connection;
 
 #[doc(inline)]
 pub use x11rb::{errors, x11_utils};

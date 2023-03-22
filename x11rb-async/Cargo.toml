@@ -13,7 +13,10 @@ license = "MIT OR Apache-2.0"
 keywords = ["xcb", "x11", "async"]
 
 [dependencies]
+async-io = "1.12.0"
+async-lock = "2.7.0"
 blocking = "1.3.0"
+event-listener = "2.5.3"
 futures-lite = "1"
 x11rb = { version = "0.11.1", path = "../x11rb", default-features = false }
 x11rb-protocol = { version = "0.11.1", path = "../x11rb-protocol" }
