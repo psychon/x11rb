@@ -542,20 +542,11 @@ impl<S: Stream + Send + Sync> RustConnection<S> {
     }
 
     /// Prefetch the maximum request length.
-    async fn prefetch_len_impl(
-        &self,
-    ) -> Result<Option<MutexGuard<'_, MaxRequestBytes>>, ConnectionError>
+    async fn prefetch_len_impl(&self) -> Result<MutexGuard<'_, MaxRequestBytes>, ConnectionError>
     where
         S: Send + Sync,
     {
-        let mut mrl = match self.max_request_bytes.try_lock() {
-            Some(mrl) => mrl,
-            None => {
-                // Someone else may already be prefetching the max request length, and using
-                // this request to check it.
-                return Ok(None);
-            }
-        };
+        let mut mrl = self.max_request_bytes.lock().await;
 
         // Start prefetching if necessary.
         if *mrl == MaxRequestBytes::Unknown {
@@ -573,7 +564,7 @@ impl<S: Stream + Send + Sync> RustConnection<S> {
             *mrl = MaxRequestBytes::Requested(cookie);
         }
 
-        Ok(Some(mrl))
+        Ok(mrl)
     }
 
     /// Wait for a reply with file descriptors.
@@ -1013,26 +1004,10 @@ impl<S: Stream + Send + Sync> RequestConnection for RustConnection<S> {
         &self,
     ) -> Pin<Box<dyn futures_lite::Future<Output = usize> + Send + '_>> {
         Box::pin(async move {
-            let setup_len = || {
-                self.setup()
-                    .maximum_request_length
-                    .try_into()
-                    .ok()
-                    .and_then(|x: usize| x.checked_mul(4))
-                    .unwrap_or(std::usize::MAX)
-            };
-
-            let mut mrl = match self
+            let mut mrl = self
                 .prefetch_len_impl()
                 .await
-                .expect("Failed to prefetch maximum request bytes")
-            {
-                Some(mrl) => mrl,
-                None => {
-                    // We must be writing to it at the moment.
-                    return setup_len();
-                }
-            };
+                .expect("Failed to prefetch maximum request bytes");
 
             // Complete the prefetching.
             match *mrl {
@@ -1043,7 +1018,13 @@ impl<S: Stream + Send + Sync> RequestConnection for RustConnection<S> {
                         Some(cookie) => cookie,
                         None => {
                             // Not available.
-                            return setup_len();
+                            return self
+                                .setup()
+                                .maximum_request_length
+                                .try_into()
+                                .ok()
+                                .and_then(|x: usize| x.checked_mul(4))
+                                .unwrap_or(std::usize::MAX);
                         }
                     };
 
