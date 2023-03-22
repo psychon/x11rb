@@ -303,7 +303,7 @@ impl<S: Stream + Send + Sync> RustConnection<S> {
     > {
         let id_allocator = IdAllocator::new(setup.resource_id_base, setup.resource_id_mask)?;
         let shared = Arc::new(SharedState {
-            inner: StdMutex::new(ProtoConnection::new()),
+            inner: Default::default(),
             stream,
             new_input: Event::new(),
         });

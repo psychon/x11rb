@@ -66,12 +66,17 @@ pub struct Connection {
     pending_fds: VecDeque<RawFdContainer>,
 }
 
+impl Default for Connection {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Connection {
     /// Create a new `Connection`.
     ///
     /// It is assumed that the connection was just established. This means that the next request
     /// that is sent will have sequence number one.
-    #[allow(clippy::new_without_default)]
     pub fn new() -> Self {
         Connection {
             last_sequence_written: 0,
