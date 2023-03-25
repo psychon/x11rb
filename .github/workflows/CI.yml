@@ -142,7 +142,8 @@ jobs:
     - name: Prepare run examples
       run: |
           echo '#!/bin/bash
-              cd x11rb || exit 1
+              cd $1 || exit 1
+              shift
               for example in examples/*.rs; do
                   example=${example/examples\//}
                   example=${example/.rs/}
@@ -151,12 +152,14 @@ jobs:
                   fi
               done
           ' > run_examples && chmod a+x run_examples
-    - name: run examples with RustConnection
-      run: ./run_examples --features "$MOST_FEATURES libc"
-    - name: run examples with XCBConnection
-      run: ./run_examples --features "$MOST_FEATURES libc allow-unsafe-code"
-    - name: run examples with XCBConnection and dl-libxcb
-      run: ./run_examples --features "$MOST_FEATURES libc allow-unsafe-code dl-libxcb"
+    - name: run x11rb examples with RustConnection
+      run: ./run_examples x11rb --features "$MOST_FEATURES libc"
+    - name: run x11rb examples with XCBConnection
+      run: ./run_examples x11rb --features "$MOST_FEATURES libc allow-unsafe-code"
+    - name: run x11rb examples with XCBConnection and dl-libxcb
+      run: ./run_examples x11rb --features "$MOST_FEATURES libc allow-unsafe-code dl-libxcb"
+    - name: run x11rb-async examples
+      run: ./run_examples x11rb-async
 
     # run code generator in nightly builds for coverage
     - name: Run code generator
