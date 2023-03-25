@@ -32,13 +32,13 @@ struct WindowState {
     angle_velocity: f64,
 }
 
-fn main() {
-    let (conn, screen_num) = connect(None).unwrap();
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let (conn, screen_num) = connect(None)?;
     let conn = Arc::new(conn);
     let screen = &conn.setup().roots[screen_num];
 
-    let white = conn.generate_id().unwrap();
-    let black = conn.generate_id().unwrap();
+    let white = conn.generate_id()?;
+    let black = conn.generate_id()?;
 
     conn.create_gc(
         white,
@@ -46,16 +46,14 @@ fn main() {
         &CreateGCAux::new()
             .graphics_exposures(0)
             .foreground(screen.white_pixel),
-    )
-    .unwrap();
+    )?;
     conn.create_gc(
         black,
         screen.root,
         &CreateGCAux::new()
             .graphics_exposures(0)
             .foreground(screen.black_pixel),
-    )
-    .unwrap();
+    )?;
 
     let windows: Vec<_> = (0..WINS)
         .map(|_| Arc::new(Mutex::new(WindowState::default())))
@@ -67,7 +65,8 @@ fn main() {
         thread::spawn(move || run(conn2, win, screen_num, white, black));
     }
 
-    event_thread(conn, windows, white).unwrap();
+    event_thread(conn, windows, white)?;
+    Ok(())
 }
 
 fn run<C: Connection>(
@@ -79,8 +78,8 @@ fn run<C: Connection>(
 ) -> Result<(), ReplyOrIdError> {
     let wm_protocols = conn.intern_atom(false, b"WM_PROTOCOLS")?;
     let wm_delete_window = conn.intern_atom(false, b"WM_DELETE_WINDOW")?;
-    let wm_protocols = wm_protocols.reply().unwrap().atom;
-    let wm_delete_window = wm_delete_window.reply().unwrap().atom;
+    let wm_protocols = wm_protocols.reply()?.atom;
+    let wm_delete_window = wm_delete_window.reply()?.atom;
 
     let screen = &conn.setup().roots[screen_num];
     let default_size = 300;

@@ -221,18 +221,16 @@ fn setup_window<C: Connection>(
         AtomEnum::WM_NAME,
         AtomEnum::STRING,
         title.as_bytes(),
-    )
-    .unwrap();
+    )?;
     conn.change_property32(
         PropMode::REPLACE,
         win_id,
         wm_protocols,
         AtomEnum::ATOM,
         &[wm_delete_window],
-    )
-    .unwrap();
+    )?;
 
-    conn.map_window(win_id).unwrap();
+    conn.map_window(win_id)?;
 
     Ok(win_id)
 }
@@ -251,7 +249,7 @@ fn create_gc_with_foreground<C: Connection>(
     )
 }
 
-fn main() {
+fn main() -> Result<(), Box<dyn std::error::Error>> {
     let (conn, screen_num) = connect(None).expect("Failed to connect to the X11 server");
 
     // The following is only needed for start_timeout_thread(), which is used for 'tests'
@@ -260,32 +258,29 @@ fn main() {
 
     let screen = &conn.setup().roots[screen_num];
 
-    let wm_protocols = conn.intern_atom(false, b"WM_PROTOCOLS").unwrap();
-    let wm_delete_window = conn.intern_atom(false, b"WM_DELETE_WINDOW").unwrap();
+    let wm_protocols = conn.intern_atom(false, b"WM_PROTOCOLS")?;
+    let wm_delete_window = conn.intern_atom(false, b"WM_DELETE_WINDOW")?;
 
     let mut window_size = (700, 500);
     let has_shape = conn
         .extension_information(shape::X11_EXTENSION_NAME)
         .expect("failed to get extension information")
         .is_some();
-    let (wm_protocols, wm_delete_window) = (
-        wm_protocols.reply().unwrap().atom,
-        wm_delete_window.reply().unwrap().atom,
-    );
-    let win_id = setup_window(conn, screen, window_size, wm_protocols, wm_delete_window).unwrap();
+    let (wm_protocols, wm_delete_window) =
+        (wm_protocols.reply()?.atom, wm_delete_window.reply()?.atom);
+    let win_id = setup_window(conn, screen, window_size, wm_protocols, wm_delete_window)?;
     let mut pixmap = PixmapWrapper::create_pixmap(
         conn,
         screen.root_depth,
         win_id,
         window_size.0,
         window_size.1,
-    )
-    .unwrap();
+    )?;
 
-    let black_gc = create_gc_with_foreground(conn, win_id, screen.black_pixel).unwrap();
-    let white_gc = create_gc_with_foreground(conn, win_id, screen.white_pixel).unwrap();
+    let black_gc = create_gc_with_foreground(conn, win_id, screen.black_pixel)?;
+    let white_gc = create_gc_with_foreground(conn, win_id, screen.white_pixel)?;
 
-    conn.flush().unwrap();
+    conn.flush()?;
 
     let mut need_repaint = false;
     let mut need_reshape = false;
@@ -294,7 +289,7 @@ fn main() {
     util::start_timeout_thread(conn1.clone(), win_id);
 
     loop {
-        let event = conn.wait_for_event().unwrap();
+        let event = conn.wait_for_event()?;
         let mut event_option = Some(event);
         while let Some(event) = event_option {
             match event {
@@ -311,8 +306,7 @@ fn main() {
                         win_id,
                         window_size.0,
                         window_size.1,
-                    )
-                    .unwrap();
+                    )?;
                     need_reshape = true;
                 }
                 Event::MotionNotify(event) => {
@@ -326,7 +320,7 @@ fn main() {
                     let data = event.data.as_data32();
                     if event.format == 32 && event.window == win_id && data[0] == wm_delete_window {
                         println!("Window was asked to close");
-                        return;
+                        return Ok(());
                     }
                 }
                 Event::Error(error) => {
@@ -337,11 +331,11 @@ fn main() {
                 }
             }
 
-            event_option = conn.poll_for_event().unwrap();
+            event_option = conn.poll_for_event()?;
         }
 
         if need_reshape && has_shape {
-            shape_window(conn, win_id, window_size).unwrap();
+            shape_window(conn, win_id, window_size)?;
             need_reshape = false;
         }
         if need_repaint {
@@ -353,9 +347,8 @@ fn main() {
                 black_gc.gcontext(),
                 white_gc.gcontext(),
                 window_size,
-            )
-            .unwrap();
-            draw_pupils(conn, pixmap.pixmap(), black_gc.gcontext(), pos).unwrap();
+            )?;
+            draw_pupils(conn, pixmap.pixmap(), black_gc.gcontext(), pos)?;
 
             // Copy drawing from pixmap to window
             conn.copy_area(
@@ -368,10 +361,9 @@ fn main() {
                 0,
                 window_size.0,
                 window_size.1,
-            )
-            .unwrap();
+            )?;
 
-            conn.flush().unwrap();
+            conn.flush()?;
             need_repaint = false;
         }
     }

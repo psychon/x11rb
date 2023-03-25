@@ -4,12 +4,12 @@ extern crate x11rb;
 
 use x11rb::protocol::xproto::{ConnectionExt, FontDraw};
 
-fn main() {
-    let (conn, _) = connect(None).unwrap();
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let (conn, _) = connect(None)?;
 
     println!("DIR  MIN  MAX EXIST DFLT PROP ASC DESC NAME");
-    for reply in conn.list_fonts_with_info(u16::max_value(), b"*").unwrap() {
-        let reply = reply.unwrap();
+    for reply in conn.list_fonts_with_info(u16::max_value(), b"*")? {
+        let reply = reply?;
 
         let dir = if reply.draw_direction == FontDraw::LEFT_TO_RIGHT {
             "-->"
@@ -44,6 +44,7 @@ fn main() {
             name
         );
     }
+    Ok(())
 }
 
 include!("integration_test_util/connect.rs");
