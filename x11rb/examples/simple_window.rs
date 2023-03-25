@@ -7,6 +7,15 @@ use x11rb::protocol::Event;
 use x11rb::resource_manager::new_from_default;
 use x11rb::wrapper::ConnectionExt as _;
 
+x11rb::atom_manager! {
+    pub Atoms: AtomsCookie {
+        WM_PROTOCOLS,
+        WM_DELETE_WINDOW,
+        _NET_WM_NAME,
+        UTF8_STRING,
+    }
+}
+
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let (conn, screen_num) = x11rb::connect(None)?;
 
@@ -20,14 +29,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let resource_db = new_from_default(conn)?;
     let cursor_handle = CursorHandle::new(conn, screen_num, &resource_db)?;
 
-    let wm_protocols = conn.intern_atom(false, b"WM_PROTOCOLS")?;
-    let wm_delete_window = conn.intern_atom(false, b"WM_DELETE_WINDOW")?;
-    let net_wm_name = conn.intern_atom(false, b"_NET_WM_NAME")?;
-    let utf8_string = conn.intern_atom(false, b"UTF8_STRING")?;
-    let wm_protocols = wm_protocols.reply()?.atom;
-    let wm_delete_window = wm_delete_window.reply()?.atom;
-    let net_wm_name = net_wm_name.reply()?.atom;
-    let utf8_string = utf8_string.reply()?.atom;
+    let atoms = Atoms::new(conn)?.reply()?;
     let cursor_handle = cursor_handle.reply()?;
 
     let win_aux = CreateWindowAux::new()
@@ -68,16 +70,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     conn.change_property8(
         PropMode::REPLACE,
         win_id,
-        net_wm_name,
-        utf8_string,
+        atoms._NET_WM_NAME,
+        atoms.UTF8_STRING,
         title.as_bytes(),
     )?;
     conn.change_property32(
         PropMode::REPLACE,
         win_id,
-        wm_protocols,
+        atoms.WM_PROTOCOLS,
         AtomEnum::ATOM,
-        &[wm_delete_window],
+        &[atoms.WM_DELETE_WINDOW],
     )?;
     conn.change_property8(
         PropMode::REPLACE,
@@ -143,7 +145,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             }
             Event::ClientMessage(event) => {
                 let data = event.data.as_data32();
-                if event.format == 32 && event.window == win_id && data[0] == wm_delete_window {
+                if event.format == 32 && event.window == win_id && data[0] == atoms.WM_DELETE_WINDOW
+                {
                     println!("Window was asked to close");
                     return Ok(());
                 }
