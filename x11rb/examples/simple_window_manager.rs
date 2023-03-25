@@ -104,14 +104,12 @@ impl<'a, C: Connection> WmState<'a, C> {
         }
         // Get the replies and manage windows
         for (win, attr, geom) in cookies {
-            let (attr, geom) = (attr.reply(), geom.reply());
-            if attr.is_err() || geom.is_err() {
+            if let (Ok(attr), Ok(geom)) = (attr.reply(), geom.reply()) {
+                if !attr.override_redirect && attr.map_state != MapState::UNMAPPED {
+                    self.manage_window(win, &geom)?;
+                }
+            } else {
                 // Just skip this window
-                continue;
-            }
-            let (attr, geom) = (attr.unwrap(), geom.unwrap());
-            if !attr.override_redirect && attr.map_state != MapState::UNMAPPED {
-                self.manage_window(win, &geom)?;
             }
         }
 
@@ -398,8 +396,8 @@ fn become_wm<C: Connection>(conn: &C, screen: &Screen) -> Result<(), ReplyError>
     }
 }
 
-fn main() {
-    let (conn, screen_num) = connect(None).unwrap();
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let (conn, screen_num) = connect(None)?;
 
     // The following is only needed for start_timeout_thread(), which is used for 'tests'
     let conn1 = std::sync::Arc::new(conn);
@@ -407,27 +405,27 @@ fn main() {
 
     let screen = &conn.setup().roots[screen_num];
 
-    become_wm(conn, screen).unwrap();
+    become_wm(conn, screen)?;
 
-    let mut wm_state = WmState::new(conn, screen_num).unwrap();
-    wm_state.scan_windows().unwrap();
+    let mut wm_state = WmState::new(conn, screen_num)?;
+    wm_state.scan_windows()?;
 
     util::start_timeout_thread(conn1.clone(), screen.root);
 
     loop {
         wm_state.refresh();
-        conn.flush().unwrap();
+        conn.flush()?;
 
-        let event = conn.wait_for_event().unwrap();
+        let event = conn.wait_for_event()?;
         let mut event_option = Some(event);
         while let Some(event) = event_option {
             if let Event::ClientMessage(_) = event {
                 // This is start_timeout_thread() signaling us to close (most likely).
-                return;
+                return Ok(());
             }
 
-            wm_state.handle_event(event).unwrap();
-            event_option = conn.poll_for_event().unwrap();
+            wm_state.handle_event(event)?;
+            event_option = conn.poll_for_event()?;
         }
     }
 }
