@@ -1,10 +1,9 @@
 //! An implementation of a pure-Rust async connection to an X11 server.
 
-use async_lock::{Mutex, MutexGuard, RwLock, RwLockWriteGuard};
+use async_lock::{Mutex, MutexGuard, RwLock};
 use event_listener::Event;
 use futures_lite::future;
 
-use std::collections::hash_map::{Entry, HashMap};
 use std::convert::Infallible;
 use std::future::Future;
 use std::io;
@@ -19,16 +18,15 @@ use x11rb_protocol::connection::{Connection as ProtoConnection, PollReply, Reply
 use x11rb_protocol::id_allocator::IdAllocator;
 use x11rb_protocol::packet_reader::PacketReader as ProtoPacketReader;
 use x11rb_protocol::protocol::bigreq::EnableReply;
-use x11rb_protocol::protocol::xproto::{QueryExtensionReply, Setup};
-use x11rb_protocol::x11_utils::{
-    ExtInfoProvider, ExtensionInformation, TryParse, TryParseFd, X11Error,
-};
+use x11rb_protocol::protocol::xproto::Setup;
+use x11rb_protocol::x11_utils::{ExtensionInformation, TryParse, TryParseFd, X11Error};
 use x11rb_protocol::xauth::get_auth;
 use x11rb_protocol::{DiscardMode, RawFdContainer, SequenceNumber};
 
 use x11rb::connection::{BufWithFds, ReplyOrError};
-use x11rb::errors::{ConnectError, ConnectionError, ParseError, ReplyError, ReplyOrIdError};
+use x11rb::errors::{ConnectError, ConnectionError, ParseError, ReplyOrIdError};
 
+mod extensions;
 mod nb_connect;
 mod stream;
 
@@ -55,7 +53,7 @@ pub struct RustConnection<S = DefaultStream> {
     id_allocator: Mutex<IdAllocator>,
 
     /// The extension information.
-    extensions: RwLock<Extensions>,
+    extensions: RwLock<extensions::Extensions>,
 }
 
 /// State shared between th `RustConnection` and the future polling
@@ -73,46 +71,6 @@ struct SharedState<S> {
 
     /// Listener for when new data is available on the stream.
     new_input: Event,
-}
-
-#[derive(Debug)]
-struct Extensions(HashMap<&'static str, ExtensionState>);
-
-#[derive(Debug)]
-enum ExtensionState {
-    /// Currently loading the extension.
-    Loading(SequenceNumber),
-
-    /// The extension is loaded.
-    Loaded(Option<ExtensionInformation>),
-}
-
-impl Extensions {
-    fn iter(&self) -> impl Iterator<Item = (&str, ExtensionInformation)> {
-        self.0.iter().filter_map(|(name, state)| match state {
-            ExtensionState::Loaded(ref ext) => ext.map(|ext| (*name, ext)),
-            _ => None,
-        })
-    }
-}
-
-impl ExtInfoProvider for Extensions {
-    fn get_from_major_opcode(&self, major_opcode: u8) -> Option<(&str, ExtensionInformation)> {
-        self.iter()
-            .find(|(_, info)| info.major_opcode == major_opcode)
-    }
-
-    fn get_from_event_code(&self, event_code: u8) -> Option<(&str, ExtensionInformation)> {
-        self.iter()
-            .filter(|(_, info)| info.first_event <= event_code)
-            .max_by_key(|(_, info)| info.first_event)
-    }
-
-    fn get_from_error_code(&self, error_code: u8) -> Option<(&str, ExtensionInformation)> {
-        self.iter()
-            .filter(|(_, info)| info.first_error <= error_code)
-            .max_by_key(|(_, info)| info.first_error)
-    }
 }
 
 #[derive(Debug)]
@@ -325,7 +283,7 @@ impl<S: Stream + Send + Sync> RustConnection<S> {
                 setup,
                 max_request_bytes: Mutex::new(MaxRequestBytes::Unknown),
                 id_allocator: Mutex::new(id_allocator),
-                extensions: RwLock::new(Extensions(HashMap::new())),
+                extensions: Default::default(),
             },
             drive,
         ))
@@ -515,30 +473,6 @@ impl<S: Stream + Send + Sync> RustConnection<S> {
         buffer.0.buffer.clear();
 
         Ok(buffer)
-    }
-
-    async fn prefetch_extension_impl(
-        &self,
-        ext: &'static str,
-    ) -> Result<RwLockWriteGuard<'_, Extensions>, ConnectionError>
-    where
-        S: Send + Sync,
-    {
-        // See if there is an entry in the cache.
-        let mut cache = self.extensions.write().await;
-
-        // Check if there is a cache entry.
-        if let Entry::Vacant(entry) = cache.0.entry(ext) {
-            // Send a QueryExtension request.
-            let cookie = crate::protocol::xproto::query_extension(self, ext.as_bytes()).await?;
-
-            // Add the extension to the cache.
-            entry.insert(ExtensionState::Loading(cookie.sequence_number()));
-
-            std::mem::forget(cookie);
-        }
-
-        Ok(cache)
     }
 
     /// Prefetch the maximum request length.
@@ -814,8 +748,8 @@ impl<S: Stream + Send + Sync> RequestConnection for RustConnection<S> {
 
     fn prefetch_extension_information(&self, name: &'static str) -> Fut<'_, (), ConnectionError> {
         Box::pin(async move {
-            self.prefetch_extension_impl(name).await?;
-            Ok(())
+            let mut cache = self.extensions.write().await;
+            cache.prefetch(self, name).await
         })
     }
 
@@ -824,44 +758,8 @@ impl<S: Stream + Send + Sync> RequestConnection for RustConnection<S> {
         name: &'static str,
     ) -> Fut<'_, Option<ExtensionInformation>, ConnectionError> {
         Box::pin(async move {
-            // Prefetch te information.
-            let mut cache = self.prefetch_extension_impl(name).await?;
-
-            let mut entry = match cache.0.entry(name) {
-                Entry::Occupied(o) => o,
-                _ => unreachable!("We just prefetched this."),
-            };
-
-            // Complete the request if we need to.
-            match entry.get() {
-                ExtensionState::Loaded(info) => Ok(*info),
-
-                ExtensionState::Loading(cookie) => {
-                    // Load the extension information.
-                    let cookie = Cookie::<'_, _, QueryExtensionReply>::new(self, *cookie);
-
-                    // Get the reply.
-                    let reply = cookie.reply().await.map_err(|e| match e {
-                        ReplyError::ConnectionError(e) => e,
-                        ReplyError::X11Error(_) => ConnectionError::UnknownError,
-                    })?;
-
-                    let ext_info = if reply.present {
-                        Some(ExtensionInformation {
-                            major_opcode: reply.major_opcode,
-                            first_event: reply.first_event,
-                            first_error: reply.first_error,
-                        })
-                    } else {
-                        None
-                    };
-
-                    // Update the cache.
-                    *entry.get_mut() = ExtensionState::Loaded(ext_info);
-
-                    Ok(ext_info)
-                }
-            }
+            let mut cache = self.extensions.write().await;
+            cache.information(self, name).await
         })
     }
 
