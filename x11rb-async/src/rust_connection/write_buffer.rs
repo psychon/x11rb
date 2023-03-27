@@ -67,13 +67,13 @@ impl std::ops::Deref for WriteBufferGuard<'_> {
     type Target = WriteBufferInner;
 
     fn deref(&self) -> &Self::Target {
-        &*self.0
+        &self.0
     }
 }
 
 impl std::ops::DerefMut for WriteBufferGuard<'_> {
     fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut *self.0
+        &mut self.0
     }
 }
 
