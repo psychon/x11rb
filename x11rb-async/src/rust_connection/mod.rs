@@ -513,25 +513,21 @@ impl<S: Stream + Send + Sync> RequestConnection for RustConnection<S> {
         sequence: SequenceNumber,
     ) -> Fut<'_, Option<Self::Buf>, ConnectionError> {
         Box::pin(async move {
-            let mut write_buffer = None;
+            let mut write_buffer = self.write_buffer.lock().await?;
             if self
                 .shared
                 .lock_connection()
                 .prepare_check_for_reply_or_error(sequence)
             {
-                write_buffer = Some(self.send_sync(self.write_buffer.lock().await?).await?);
+                write_buffer = self.send_sync(write_buffer).await?;
 
                 assert!(!self
                     .shared
                     .lock_connection()
-                    .prepare_check_for_reply_or_error(sequence),);
+                    .prepare_check_for_reply_or_error(sequence));
             }
 
             // Ensure that the request is sent.
-            let write_buffer = match write_buffer {
-                Some(write_buffer) => write_buffer,
-                None => self.write_buffer.lock().await?,
-            };
             self.flush_impl(write_buffer).await?.unlock();
 
             let get_result =
