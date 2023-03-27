@@ -27,8 +27,10 @@ mod extensions;
 mod nb_connect;
 mod shared_state;
 mod stream;
+mod write_buffer;
 
 pub use stream::{DefaultStream, Stream, StreamAdaptor, StreamBase};
+use write_buffer::{WriteBuffer, WriteBufferGuard};
 
 /// A pure-Rust async connection to an X11 server.
 #[derive(Debug)]
@@ -52,28 +54,6 @@ pub struct RustConnection<S = DefaultStream> {
 
     /// The extension information.
     extensions: RwLock<extensions::Extensions>,
-}
-
-#[derive(Debug)]
-struct WriteBuffer(Mutex<WriteBufferInner>);
-
-#[derive(Debug)]
-struct WriteBufferGuard<'a>(MutexGuard<'a, WriteBufferInner>);
-
-#[derive(Debug)]
-struct WriteBufferInner {
-    /// The buffer that is used for writing.
-    buffer: Vec<u8>,
-
-    /// The file descriptors that we are sending over.
-    fds: Vec<RawFdContainer>,
-
-    /// Whether the buffer has been corrupted.
-    ///
-    /// A lock has to be explicitly unlock()d, otherwise the buffer is marked as corrupted.
-    /// This exists to detect futures that were not polled to completion and might have
-    /// written only a part of their data.
-    corrupted: bool,
 }
 
 /// The maximum bytes we can send in a single request.
@@ -243,11 +223,7 @@ impl<S: Stream + Send + Sync> RustConnection<S> {
         Ok((
             RustConnection {
                 shared,
-                write_buffer: WriteBuffer(Mutex::new(WriteBufferInner {
-                    buffer: Vec::with_capacity(16384),
-                    fds: vec![],
-                    corrupted: false,
-                })),
+                write_buffer: Default::default(),
                 setup,
                 max_request_bytes: Mutex::new(MaxRequestBytes::Unknown),
                 id_allocator: Mutex::new(id_allocator),
@@ -331,70 +307,12 @@ impl<S: Stream + Send + Sync> RustConnection<S> {
     async fn write_all_vectored<'a>(
         &'a self,
         mut write_buffer: WriteBufferGuard<'a>,
-        mut bufs: &[io::IoSlice<'_>],
+        bufs: &[io::IoSlice<'_>],
         fds: &mut Vec<RawFdContainer>,
     ) -> Result<WriteBufferGuard<'a>, ConnectionError> {
-        // Get the total length of the buffers.
-        let mut total_len = bufs
-            .iter()
-            .fold(0usize, |sum, buf| sum.saturating_add(buf.len()));
-
-        // If our data doesn't fit, flush the buffer first.
-        if write_buffer.0.buffer.len() + total_len > write_buffer.0.buffer.capacity() {
-            write_buffer = self.flush_impl(write_buffer).await?;
-        }
-
-        // If our data fits now, write all of it.
-        if total_len < write_buffer.0.buffer.capacity() {
-            for buf in bufs {
-                write_buffer.0.buffer.extend_from_slice(buf);
-            }
-
-            write_buffer.0.fds.append(fds);
-
-            return Ok(write_buffer);
-        }
-
-        debug_assert!(write_buffer.0.buffer.is_empty());
-
-        // Otherwise, write directly to the stream.
-        let mut partial: &[u8] = &[];
-        write_with(&self.shared.stream, |stream| {
-            while total_len > 0 && !partial.is_empty() {
-                // If the partial buffer is non-empty, write it.
-                if !partial.is_empty() {
-                    let n = stream.write(partial, fds)?;
-                    if n == 0 {
-                        return Err(io::Error::from(io::ErrorKind::WriteZero));
-                    }
-
-                    partial = &partial[n..];
-                    total_len -= n;
-                } else {
-                    // Write the iov.
-                    let mut n = stream.write_vectored(bufs, fds)?;
-                    if n == 0 {
-                        return Err(io::Error::from(io::ErrorKind::WriteZero));
-                    }
-
-                    // Calculate how much we have left to go.
-                    total_len -= n;
-                    while n > 0 {
-                        if n >= bufs[0].len() {
-                            n -= bufs[0].len();
-                            bufs = &bufs[1..];
-                        } else {
-                            partial = &bufs[0][n..];
-                            n = 0;
-                        }
-                    }
-                }
-            }
-
-            Ok(())
-        })
-        .await?;
-
+        write_buffer
+            .write_all_vectored(&self.shared.stream, bufs, fds)
+            .await?;
         Ok(write_buffer)
     }
 
@@ -403,43 +321,7 @@ impl<S: Stream + Send + Sync> RustConnection<S> {
         &'a self,
         mut buffer: WriteBufferGuard<'a>,
     ) -> Result<WriteBufferGuard<'a>, ConnectionError> {
-        // If we don't have any data to write, we are done.
-        if buffer.0.buffer.is_empty() && buffer.0.fds.is_empty() {
-            return Ok(buffer);
-        }
-
-        // Write the entire buffer.
-        let mut position = 0;
-        write_with(&self.shared.stream, {
-            let buffer = &mut *buffer.0;
-            move |stream| {
-                while position < buffer.buffer.len() {
-                    let n = stream.write(&buffer.buffer[position..], &mut buffer.fds)?;
-                    if n == 0 {
-                        return Err(io::Error::new(
-                            io::ErrorKind::WriteZero,
-                            "failed to write whole buffer",
-                        ));
-                    }
-
-                    position += n;
-                }
-
-                Ok(())
-            }
-        })
-        .await?;
-
-        if !buffer.0.fds.is_empty() {
-            return Err(ConnectionError::IoError(io::Error::new(
-                io::ErrorKind::Other,
-                "failed to write all fds",
-            )));
-        }
-
-        // Reset the buffer.
-        buffer.0.buffer.clear();
-
+        buffer.flush(&self.shared.stream).await?;
         Ok(buffer)
     }
 
@@ -494,26 +376,6 @@ impl<S: Stream + Send + Sync> RustConnection<S> {
         };
 
         self.shared.wait_for_incoming(get_reply).await
-    }
-}
-
-impl WriteBuffer {
-    async fn lock(&self) -> Result<WriteBufferGuard<'_>, ConnectionError> {
-        let mut lock = self.0.lock().await;
-        if std::mem::replace(&mut lock.corrupted, true) {
-            return Err(ConnectionError::IoError(io::Error::new(
-                io::ErrorKind::Other,
-                "The write buffer was corrupted",
-            )));
-        }
-
-        Ok(WriteBufferGuard(lock))
-    }
-}
-
-impl<'a> WriteBufferGuard<'a> {
-    fn unlock(mut self) {
-        self.0.corrupted = false;
     }
 }
 
