@@ -37,10 +37,9 @@ impl StreamBase<'_> for FakeStream {
 
 #[test]
 fn connection_breaks_on_immediate_drop() {
-    let setup = {
-        let mut setup = Setup::default();
-        setup.resource_id_mask = (1 << 8) - 1;
-        setup
+    let setup = Setup {
+        resource_id_mask: (1 << 8) - 1,
+        ..Default::default()
     };
     let (conn, driver) = RustConnection::for_connected_stream(FakeStream, setup).unwrap();
 
