@@ -217,7 +217,11 @@ impl<S: Stream + Send + Sync> RustConnection<S> {
         // Spawn a future that reads from the stream and caches the result.
         let drive = {
             let shared = shared.clone();
-            async move { shared.drive().await }
+            // When the following object is dropped, it marks the connection as broken. This
+            // mechanism fires when the future from drive() is dropped. We need to create it
+            // outside of the async block in case that future is never polled.
+            let break_on_drop = shared_state::BreakOnDrop(shared.clone());
+            async move { shared.drive(break_on_drop).await }
         };
 
         Ok((
@@ -375,7 +379,7 @@ impl<S: Stream + Send + Sync> RustConnection<S> {
             }
         };
 
-        self.shared.wait_for_incoming(get_reply).await
+        self.shared.wait_for_incoming(get_reply).await?
     }
 }
 
@@ -496,7 +500,7 @@ impl<S: Stream + Send + Sync> RequestConnection for RustConnection<S> {
             };
 
             // Wait for the reply.
-            self.shared.wait_for_incoming(get_reply).await
+            self.shared.wait_for_incoming(get_reply).await?
         })
     }
 
@@ -537,7 +541,7 @@ impl<S: Stream + Send + Sync> RequestConnection for RustConnection<S> {
                     PollReply::Reply(buffer) => Some(Ok(Some(buffer))),
                 };
 
-            self.shared.wait_for_incoming(get_result).await
+            self.shared.wait_for_incoming(get_result).await?
         })
     }
 
@@ -617,7 +621,7 @@ impl<S: Stream + Send + Sync> Connection for RustConnection<S> {
         Box::pin(async move {
             let get_event = |inner: &mut ProtoConnection| inner.poll_for_event_with_sequence();
 
-            Ok(self.shared.wait_for_incoming(get_event).await)
+            Ok(self.shared.wait_for_incoming(get_event).await?)
         })
     }
 

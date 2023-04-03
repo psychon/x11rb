@@ -5,7 +5,10 @@ use futures_lite::future;
 use std::convert::Infallible;
 use std::io;
 use std::mem;
-use std::sync::{Mutex as StdMutex, MutexGuard as StdMutexGuard};
+use std::sync::{
+    atomic::{AtomicBool, Ordering},
+    Arc, Mutex as StdMutex, MutexGuard as StdMutexGuard,
+};
 use x11rb::errors::ConnectionError;
 use x11rb_protocol::connection::Connection as ProtoConnection;
 use x11rb_protocol::packet_reader::PacketReader as ProtoPacketReader;
@@ -26,6 +29,9 @@ pub(super) struct SharedState<S> {
 
     /// Listener for when new data is available on the stream.
     new_input: Event,
+
+    /// Flag that indicates that the future for drive() was dropped and we no longer read input.
+    driver_dropped: AtomicBool,
 }
 
 impl<S: Stream> SharedState<S> {
@@ -34,6 +40,7 @@ impl<S: Stream> SharedState<S> {
             inner: Default::default(),
             stream,
             new_input: Event::new(),
+            driver_dropped: AtomicBool::new(false),
         }
     }
 
@@ -47,14 +54,14 @@ impl<S: Stream> SharedState<S> {
     /// The given function get_reply should check whether the needed package was already received
     /// and put into the inner connection. It should return `None` if nothing is present yet and
     /// new incoming X11 packets should be awaited.
-    pub(super) async fn wait_for_incoming<R, F>(&self, mut get_reply: F) -> R
+    pub(super) async fn wait_for_incoming<R, F>(&self, mut get_reply: F) -> Result<R, io::Error>
     where
         F: FnMut(&mut ProtoConnection) -> Option<R>,
     {
         loop {
             // See if we can find the reply in the connection.
             if let Some(reply) = get_reply(&mut self.lock_connection()) {
-                return reply;
+                return Ok(reply);
             }
 
             // Register a listener for the reply.
@@ -62,7 +69,16 @@ impl<S: Stream> SharedState<S> {
 
             // Maybe a packet was delivered while we were registering the listener.
             if let Some(reply) = get_reply(&mut self.lock_connection()) {
-                return reply;
+                return Ok(reply);
+            }
+
+            // Maybe the future from drive() was dropped?
+            // We only check this down here and not before the listener since this is unlikely
+            if self.driver_dropped.load(Ordering::SeqCst) {
+                return Err(io::Error::new(
+                    io::ErrorKind::Other,
+                    "Driving future was dropped",
+                ));
             }
 
             // Wait for the next packet.
@@ -71,7 +87,10 @@ impl<S: Stream> SharedState<S> {
     }
 
     /// Read incoming packets from the stream and put them into the inner connection.
-    pub(super) async fn drive(&self) -> Result<Infallible, ConnectionError> {
+    pub(super) async fn drive(
+        &self,
+        _break_on_drop: BreakOnDrop<S>,
+    ) -> Result<Infallible, ConnectionError> {
         let mut packet_reader = PacketReader {
             read_buffer: vec![0; 4096].into_boxed_slice(),
             inner: ProtoPacketReader::new(),
@@ -179,5 +198,18 @@ impl PacketReader {
         }
 
         Ok(())
+    }
+}
+
+#[derive(Debug)]
+pub(super) struct BreakOnDrop<S>(pub(super) Arc<SharedState<S>>);
+
+impl<S> Drop for BreakOnDrop<S> {
+    fn drop(&mut self) {
+        // Mark the connection as broken
+        self.0.driver_dropped.store(true, Ordering::SeqCst);
+
+        // Wake up everyone that might be waiting
+        self.0.new_input.notify_additional(std::usize::MAX);
     }
 }

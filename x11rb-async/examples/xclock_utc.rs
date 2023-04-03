@@ -239,12 +239,26 @@ async fn main2() -> Result<(), Box<dyn std::error::Error>> {
 
         async move {
             // Spawn a task to poll for events.
-            ex.spawn(async move {
+            let driver = ex.spawn(async move {
                 if let Err(e) = drive.await {
                     eprintln!("Error while driving the connection: {}", e);
                 }
-            })
-            .detach();
+            });
+
+            // On X11RB_EXAMPLE_TIMEOUT, exit after a set timeout.
+            if let Some(timeout) = env::var("X11RB_EXAMPLE_TIMEOUT")
+                .ok()
+                .and_then(|s| s.parse().ok())
+            {
+                ex.spawn(async move {
+                    Timer::after(Duration::from_secs(timeout)).await;
+                    eprintln!("Cancelling drive task due to $X11RB_EXAMPLE_TIMEOUT");
+                    driver.cancel().await;
+                })
+                .detach();
+            } else {
+                driver.detach();
+            }
 
             // Setup atoms for this connection.
             let atoms = Atoms::load(conn).await?;
@@ -255,18 +269,6 @@ async fn main2() -> Result<(), Box<dyn std::error::Error>> {
             // Create a graphics context.
             let gc_id = conn.generate_id().await?;
             conn.create_gc(gc_id, window, &CreateGCAux::new()).await?;
-
-            // On X11RB_EXAMPLE_TIMEOUT, exit after a set timeout.
-            if let Some(timeout) = env::var("X11RB_EXAMPLE_TIMEOUT")
-                .ok()
-                .and_then(|s| s.parse().ok())
-            {
-                ex.spawn(async move {
-                    Timer::after(Duration::from_secs(timeout)).await;
-                    std::process::exit(0);
-                })
-                .detach();
-            }
 
             // Span a task that redraws the window every second.
             ex.spawn(async move {
