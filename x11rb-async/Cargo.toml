@@ -21,6 +21,10 @@ futures-lite = "1"
 x11rb = { version = "0.11.1", path = "../x11rb", default-features = false }
 x11rb-protocol = { version = "0.11.1", path = "../x11rb-protocol" }
 
+[target.'cfg(unix)'.dev-dependencies.nix]
+version = "0.26"
+default-features = false
+
 [features]
 # Enable this feature to enable all the X11 extensions
 all-extensions = [

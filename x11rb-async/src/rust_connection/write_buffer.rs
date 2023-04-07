@@ -156,7 +156,7 @@ impl WriteBufferInner {
         // Otherwise, write directly to the stream.
         let mut partial: &[u8] = &[];
         super::write_with(stream, |stream| {
-            while total_len > 0 && !partial.is_empty() {
+            while total_len > 0 || !partial.is_empty() {
                 // If the partial buffer is non-empty, write it.
                 if !partial.is_empty() {
                     let n = stream.write(partial, fds)?;
@@ -185,6 +185,13 @@ impl WriteBufferInner {
                         }
                     }
                 }
+            }
+
+            if !fds.is_empty() {
+                return Err(io::Error::new(
+                    io::ErrorKind::Other,
+                    "Left over FDs after sending the request",
+                ));
             }
 
             Ok(())

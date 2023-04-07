@@ -334,7 +334,7 @@ impl<S: Stream> RustConnection<S> {
         mut fds: Vec<RawFdContainer>,
     ) -> std::io::Result<MutexGuardInner<'a>> {
         let mut partial_buf: &[u8] = &[];
-        while !partial_buf.is_empty() || !bufs.is_empty() || !fds.is_empty() {
+        while !partial_buf.is_empty() || !bufs.is_empty() {
             self.stream.poll(PollMode::ReadAndWritable)?;
             let write_result = if !partial_buf.is_empty() {
                 // "inner" is held, passed into this function, so this should never be held
@@ -385,6 +385,12 @@ impl<S: Stream> RustConnection<S> {
                 }
                 Err(e) => return Err(e),
             }
+        }
+        if !fds.is_empty() {
+            return Err(std::io::Error::new(
+                std::io::ErrorKind::Other,
+                "Left over FDs after sending the request",
+            ));
         }
         Ok(inner)
     }
