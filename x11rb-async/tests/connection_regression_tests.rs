@@ -110,8 +110,9 @@ fn retry_for_left_over_fds() {
     let length = 16384 * 2;
     match send_request_via_connection(FakeStream(Default::default()), length, fds) {
         Some(ConnectionError::IoError(e)) => {
-            assert_eq!(e.kind(), std::io::ErrorKind::WriteZero);
-        },
+            assert_eq!(e.kind(), std::io::ErrorKind::Other);
+            assert_eq!(e.to_string(), "Left over FDs after sending the request");
+        }
         e => panic!("Unexpected error: {:?}", e),
     }
 }
