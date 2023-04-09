@@ -1,5 +1,6 @@
-use std::convert::TryFrom;
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
+
+use polling::{Event as PollingEvent, Poller};
 
 use x11rb::atom_manager;
 use x11rb::connection::Connection;
@@ -166,87 +167,39 @@ fn redraw(
     Ok(())
 }
 
-#[cfg(unix)]
 fn poll_with_timeout(
+    poller: &Poller,
     conn: &RustConnection,
     timeout: Duration,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    use std::os::raw::c_int;
-    use std::os::unix::io::AsRawFd;
+    // Add interest in the connection's stream.
+    poller.add(conn.stream(), PollingEvent::readable(1))?;
 
-    use nix::poll::{poll, PollFd, PollFlags};
+    // Remove it if we time out.
+    let _guard = CallOnDrop(|| {
+        poller.delete(conn.stream()).ok();
+    });
 
-    let start_instant = Instant::now();
-    let fd = conn.stream().as_raw_fd();
-    let mut poll_fds = [PollFd::new(fd, PollFlags::POLLIN)];
+    // Wait for events.
+    let mut event = Vec::with_capacity(1);
+    let target = Instant::now() + timeout;
     loop {
-        let timeout_millis = timeout
-            .checked_sub(start_instant.elapsed())
-            .map(|remaining| c_int::try_from(remaining.as_millis()).unwrap_or(c_int::max_value()))
-            .unwrap_or(0);
-        match poll(&mut poll_fds, timeout_millis) {
-            Ok(_) => {
-                if poll_fds[0]
-                    .revents()
-                    .unwrap_or_else(PollFlags::empty)
-                    .contains(PollFlags::POLLIN)
-                {
-                    break;
-                }
-            }
-            // try again
-            Err(nix::Error::EINTR) => {}
-            Err(e) => return Err(e.into()),
+        let remaining = target.saturating_duration_since(Instant::now());
+        poller.wait(&mut event, Some(remaining))?;
+
+        // If we received an event, we're done.
+        if event.contains(&PollingEvent::readable(1)) {
+            return Ok(());
         }
-        if start_instant.elapsed() >= timeout {
-            break;
+
+        // If our timeout expired, we're done.
+        if Instant::now() >= target {
+            // We do not really care about the result of poll. Either there was a timeout, in which case we
+            // try to handle events (there are none) and then redraw. Or there was an event, in which case
+            // we handle it and then still redraw.
+            return Ok(());
         }
     }
-    // We do not really care about the result of poll. Either there was a timeout, in which case we
-    // try to handle events (there are none) and then redraw. Or there was an event, in which case
-    // we handle it and then still redraw.
-    Ok(())
-}
-
-#[cfg(windows)]
-fn poll_with_timeout(
-    conn: &RustConnection,
-    timeout: Duration,
-) -> Result<(), Box<dyn std::error::Error>> {
-    use std::os::windows::io::AsRawSocket;
-
-    use winapi::shared::minwindef::INT;
-    use winapi::um::winsock2::{POLLRDNORM, SOCKET, WSAPOLLFD};
-    use winapi_wsapoll::wsa_poll;
-
-    let start_instant = Instant::now();
-    let raw_socket = conn.stream().as_raw_socket();
-    let mut poll_fds = [WSAPOLLFD {
-        fd: raw_socket as SOCKET,
-        events: POLLRDNORM,
-        revents: 0,
-    }];
-    loop {
-        let timeout_millis = timeout
-            .checked_sub(start_instant.elapsed())
-            .map(|remaining| INT::try_from(remaining.as_millis()).unwrap_or(INT::max_value()))
-            .unwrap_or(0);
-        match wsa_poll(&mut poll_fds, timeout_millis) {
-            Ok(_) => {
-                if (poll_fds[0].revents & POLLRDNORM) != 0 {
-                    break;
-                }
-            }
-            Err(e) => return Err(e.into()),
-        }
-        if start_instant.elapsed() >= timeout {
-            break;
-        }
-    }
-    // We do not really care about the result of poll. Either there was a timeout, in which case we
-    // try to handle events (there are none) and then redraw. Or there was an event, in which case
-    // we handle it and then still redraw.
-    Ok(())
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -255,6 +208,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // The following is only needed for start_timeout_thread(), which is used for 'tests'
     let conn1 = std::sync::Arc::new(conn);
     let conn = &*conn1;
+    let poller = Poller::new()?;
 
     let screen = &conn.setup().roots[screen_num];
     let atoms = Atoms::new(conn)?.reply()?;
@@ -270,7 +224,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     conn.flush()?;
 
     loop {
-        poll_with_timeout(conn, Duration::from_millis(1_000))?;
+        poll_with_timeout(&poller, conn, Duration::from_millis(1_000))?;
         while let Some(event) = conn.poll_for_event()? {
             println!("{:?})", event);
             match event {
@@ -313,3 +267,11 @@ fn get_time() -> (u8, u8, u8) {
 }
 
 include!("integration_test_util/util.rs");
+
+struct CallOnDrop<F: FnMut()>(F);
+
+impl<F: FnMut()> Drop for CallOnDrop<F> {
+    fn drop(&mut self) {
+        (self.0)();
+    }
+}
