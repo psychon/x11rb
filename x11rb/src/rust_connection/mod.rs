@@ -286,7 +286,7 @@ impl<S: Stream> RustConnection<S> {
         fds: Vec<RawFdContainer>,
         kind: ReplyFdKind,
     ) -> Result<SequenceNumber, ConnectionError> {
-        let span = crate::debug_span!("Sending request");
+        let span = crate::debug_span!("send_request");
         let _guard = span.enter();
 
         {
@@ -646,7 +646,7 @@ impl<S: Stream> RequestConnection for RustConnection<S> {
     }
 
     fn wait_for_reply(&self, sequence: SequenceNumber) -> Result<Option<Vec<u8>>, ConnectionError> {
-        let span = crate::debug_span!("Waiting for reply", sequence);
+        let span = crate::debug_span!("wait_for_reply", sequence);
         let _enter = span.enter();
 
         let mut inner = self.inner.lock().unwrap();
@@ -667,7 +667,7 @@ impl<S: Stream> RequestConnection for RustConnection<S> {
         &self,
         sequence: SequenceNumber,
     ) -> Result<Option<Buffer>, ConnectionError> {
-        let span = crate::debug_span!("Checking for error", sequence);
+        let span = crate::debug_span!("check_for_raw_error", sequence);
         let _enter = span.enter();
 
         let mut inner = self.inner.lock().unwrap();
@@ -694,7 +694,7 @@ impl<S: Stream> RequestConnection for RustConnection<S> {
         &self,
         sequence: SequenceNumber,
     ) -> Result<ReplyOrError<BufWithFds, Buffer>, ConnectionError> {
-        let span = crate::debug_span!("Waiting for reply", sequence);
+        let span = crate::debug_span!("wait_for_reply_with_fds_raw", sequence);
         let _enter = span.enter();
 
         let mut inner = self.inner.lock().unwrap();
@@ -723,7 +723,7 @@ impl<S: Stream> RequestConnection for RustConnection<S> {
         match max_bytes {
             Unknown => unreachable!("We just prefetched this"),
             Requested(seqno) => {
-                let span = crate::info_span!("Waiting for maximum request length reply");
+                let span = crate::info_span!("maximum_request_bytes");
                 let _guard = span.enter();
 
                 let length = seqno
@@ -769,7 +769,7 @@ impl<S: Stream> Connection for RustConnection<S> {
     fn wait_for_raw_event_with_sequence(
         &self,
     ) -> Result<RawEventAndSeqNumber<Vec<u8>>, ConnectionError> {
-        let span = crate::trace_span!("Wait for event");
+        let span = crate::trace_span!("wait_for_raw_event_with_sequence");
         let _guard = span.enter();
 
         let mut inner = self.inner.lock().unwrap();
@@ -784,7 +784,7 @@ impl<S: Stream> Connection for RustConnection<S> {
     fn poll_for_raw_event_with_sequence(
         &self,
     ) -> Result<Option<RawEventAndSeqNumber<Vec<u8>>>, ConnectionError> {
-        let span = crate::trace_span!("Poll for event");
+        let span = crate::trace_span!("poll_for_raw_event_with_sequence");
         let _guard = span.enter();
 
         let mut inner = self.inner.lock().unwrap();

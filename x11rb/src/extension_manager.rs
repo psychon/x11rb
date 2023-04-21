@@ -86,7 +86,7 @@ impl ExtensionManager {
         conn: &C,
         extension_name: &'static str,
     ) -> Result<Option<ExtensionInformation>, ConnectionError> {
-        let span = crate::debug_span!("Querying extension information");
+        let span = crate::debug_span!("extension_information", extension_name);
         let _guard = span.enter();
         let entry = self.prefetch_extension_information_aux(conn, extension_name)?;
         match entry {
