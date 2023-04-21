@@ -603,7 +603,11 @@ impl<S: Stream> RequestConnection for RustConnection<S> {
     }
 
     fn discard_reply(&self, sequence: SequenceNumber, _kind: RequestKind, mode: DiscardMode) {
-        crate::debug!("Discarding reply to request {} in mode {:?}", sequence, mode);
+        crate::debug!(
+            "Discarding reply to request {} in mode {:?}",
+            sequence,
+            mode
+        );
         self.inner
             .lock()
             .unwrap()

@@ -37,7 +37,10 @@ impl ExtensionManager {
             // Extension already checked, return the cached value
             HashMapEntry::Occupied(entry) => Ok(entry.into_mut()),
             HashMapEntry::Vacant(entry) => {
-                crate::debug!("Prefetching information about '{}' extension", extension_name);
+                crate::debug!(
+                    "Prefetching information about '{}' extension",
+                    extension_name
+                );
                 let cookie = conn.query_extension(extension_name.as_bytes())?;
                 Ok(entry.insert(CheckState::Prefetched(cookie.into_sequence_number())))
             }
@@ -62,7 +65,11 @@ impl ExtensionManager {
         extension_name: &'static str,
         info: Option<ExtensionInformation>,
     ) {
-        crate::debug!("Inserting '{}' extension information directly: {:?}", extension_name, info);
+        crate::debug!(
+            "Inserting '{}' extension information directly: {:?}",
+            extension_name,
+            info
+        );
         let state = match info {
             Some(info) => CheckState::Present(info),
             None => CheckState::Missing,
@@ -84,10 +91,17 @@ impl ExtensionManager {
         let entry = self.prefetch_extension_information_aux(conn, extension_name)?;
         match entry {
             CheckState::Prefetched(sequence_number) => {
-                crate::debug!("Waiting for QueryInfo reply for '{}' extension", extension_name);
+                crate::debug!(
+                    "Waiting for QueryInfo reply for '{}' extension",
+                    extension_name
+                );
                 match Cookie::<C, QueryExtensionReply>::new(conn, *sequence_number).reply() {
                     Err(err) => {
-                        crate::warning!("Got error {:?} for QueryInfo reply for '{}' extension", err, extension_name);
+                        crate::warning!(
+                            "Got error {:?} for QueryInfo reply for '{}' extension",
+                            err,
+                            extension_name
+                        );
                         *entry = CheckState::Error;
                         match err {
                             ReplyError::ConnectionError(e) => Err(e),
