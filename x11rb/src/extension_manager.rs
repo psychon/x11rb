@@ -37,6 +37,7 @@ impl ExtensionManager {
             // Extension already checked, return the cached value
             HashMapEntry::Occupied(entry) => Ok(entry.into_mut()),
             HashMapEntry::Vacant(entry) => {
+                crate::debug!("Prefetching information about '{extension_name}' extension");
                 let cookie = conn.query_extension(extension_name.as_bytes())?;
                 Ok(entry.insert(CheckState::Prefetched(cookie.into_sequence_number())))
             }
@@ -61,6 +62,7 @@ impl ExtensionManager {
         extension_name: &'static str,
         info: Option<ExtensionInformation>,
     ) {
+        crate::debug!("Inserting '{extension_name}' extension information directly: {info:?}");
         let state = match info {
             Some(info) => CheckState::Present(info),
             None => CheckState::Missing,
@@ -77,11 +79,15 @@ impl ExtensionManager {
         conn: &C,
         extension_name: &'static str,
     ) -> Result<Option<ExtensionInformation>, ConnectionError> {
+        let span = crate::debug_span!("Querying extension information");
+        let _guard = span.enter();
         let entry = self.prefetch_extension_information_aux(conn, extension_name)?;
         match entry {
             CheckState::Prefetched(sequence_number) => {
+                crate::debug!("Waiting for QueryInfo reply for '{extension_name}' extension");
                 match Cookie::<C, QueryExtensionReply>::new(conn, *sequence_number).reply() {
                     Err(err) => {
+                        crate::warning!("For error {err:?} for QueryInfo reply for '{extension_name}' extension");
                         *entry = CheckState::Error;
                         match err {
                             ReplyError::ConnectionError(e) => Err(e),
@@ -97,9 +103,11 @@ impl ExtensionManager {
                                 first_event: info.first_event,
                                 first_error: info.first_error,
                             };
+                            crate::debug!("Extension '{extension_name}' is present: {info:?}");
                             *entry = CheckState::Present(info);
                             Ok(Some(info))
                         } else {
+                            crate::debug!("Extension '{extension_name}' is not present");
                             *entry = CheckState::Missing;
                             Ok(None)
                         }
