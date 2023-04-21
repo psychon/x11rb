@@ -119,14 +119,18 @@ impl RustConnection<DefaultStream> {
         // works.
         let mut error = None;
         for addr in parsed_display.connect_instruction() {
-            match DefaultStream::connect(addr) {
+            crate::trace!("Connecting to X11 server via {addr:?}");
+            match DefaultStream::connect(&addr) {
                 Ok(stream) => {
+                    crate::trace!("Connected to X11 server via {addr:?}");
+
                     // we found a stream, get auth information
                     let (family, address) = stream.peer_addr()?;
                     let (auth_name, auth_data) = get_auth(family, &address, parsed_display.display)
                         // Ignore all errors while determining auth; instead we just try without auth info.
                         .unwrap_or(None)
                         .unwrap_or_else(|| (Vec::new(), Vec::new()));
+                    crate::trace!("Picked authentication via auth mechanism {auth_name:?}");
 
                     // finish connecting to server
                     return Ok((
@@ -137,6 +141,7 @@ impl RustConnection<DefaultStream> {
                     ));
                 }
                 Err(e) => {
+                    crate::debug!("Failed to connect to X11 server via {addr:?}: {e:?}");
                     error = Some(e);
                     continue;
                 }
@@ -182,6 +187,10 @@ impl<S: Stream> RustConnection<S> {
         let mut nwritten = 0;
         let mut fds = vec![];
 
+        crate::trace!(
+            "Writing connection setup with {} bytes",
+            setup_request.len()
+        );
         while nwritten != setup_request.len() {
             stream.poll(PollMode::Writable)?;
             // poll returned successfully, so the stream is writable.
@@ -203,6 +212,10 @@ impl<S: Stream> RustConnection<S> {
         // read in the setup
         loop {
             stream.poll(PollMode::Readable)?;
+            crate::trace!(
+                "Reading connection setup with at least {} bytes remaining",
+                connect.buffer().len()
+            );
             let adv = match stream.read(connect.buffer(), &mut fds) {
                 Ok(0) => {
                     return Err(std::io::Error::new(
@@ -216,6 +229,7 @@ impl<S: Stream> RustConnection<S> {
                 Err(ref e) if e.kind() == std::io::ErrorKind::WouldBlock => continue,
                 Err(e) => return Err(e.into()),
             };
+            crate::trace!("Read {adv} bytes");
 
             // advance the internal buffer
             if connect.advance(adv) {
@@ -272,13 +286,32 @@ impl<S: Stream> RustConnection<S> {
         fds: Vec<RawFdContainer>,
         kind: ReplyFdKind,
     ) -> Result<SequenceNumber, ConnectionError> {
+        let span = crate::debug_span!("Sending request");
+        let _guard = span.enter();
+
+        {
+            let major_opcode = bufs[0][0];
+            let minor_opcode = bufs[0][1];
+            if major_opcode < 128 {
+                crate::debug!("Sending xproto request {major_opcode}");
+            } else {
+                use x11rb_protocol::x11_utils::ExtInfoProvider;
+                let ext_mgr = self.extension_manager.lock().unwrap();
+                let ext = ext_mgr
+                    .get_from_major_opcode(major_opcode)
+                    .map(|(name, _)| name)
+                    .unwrap_or("Unknown extension");
+                crate::debug!("Sending {} request {}", ext, minor_opcode);
+            };
+        };
+
         let mut storage = Default::default();
         let bufs = compute_length_field(self, bufs, &mut storage)?;
 
         // Note: `inner` must be kept blocked until the request has been completely written
         // or buffered to avoid sending the data of different requests interleaved. For this
         // reason, `read_packet_and_enqueue` must always be called with `BlockingMode::NonBlocking`
-        // during a write, otherise `inner` would be temporarily released.
+        // during a write, otherwise `inner` would be temporarily released.
         let mut inner = self.inner.lock().unwrap();
 
         loop {
@@ -290,6 +323,7 @@ impl<S: Stream> RustConnection<S> {
                     return Ok(seqno);
                 }
                 None => {
+                    crate::trace!("Syncing with the X11 server since there are too many outstanding void requests");
                     inner = self.send_sync(inner)?;
                 }
             }
@@ -378,6 +412,7 @@ impl<S: Stream> RustConnection<S> {
                     }
                 }
                 Err(ref e) if e.kind() == std::io::ErrorKind::WouldBlock => {
+                    crate::trace!("Writing more data would block for now");
                     // Writing would block, try to read instead because the
                     // server might not accept new requests after its
                     // buffered replies have been read.
@@ -407,6 +442,7 @@ impl<S: Stream> RustConnection<S> {
                 // Flush completed
                 Ok(()) => break,
                 Err(ref e) if e.kind() == std::io::ErrorKind::WouldBlock => {
+                    crate::trace!("Flushing more data would block for now");
                     // Writing would block, try to read instead because the
                     // server might not accept new requests after its
                     // buffered replies have been read.
@@ -439,8 +475,13 @@ impl<S: Stream> RustConnection<S> {
             Err(TryLockError::WouldBlock) => {
                 // In non-blocking mode, we just return immediately
                 match mode {
-                    BlockingMode::NonBlocking => return Ok(inner),
-                    BlockingMode::Blocking => {}
+                    BlockingMode::NonBlocking => {
+                        crate::trace!("read_packet_and_enqueue in NonBlocking mode doing nothing since reader is already locked");
+                        return Ok(inner);
+                    }
+                    BlockingMode::Blocking => {
+                        crate::trace!("read_packet_and_enqueue in Blocking mode waiting for pre-existing reader");
+                    }
                 }
 
                 // 1.1. Someone else is reading (other thread is at 2.2);
@@ -504,6 +545,7 @@ impl<S: Stream> RustConnection<S> {
 
     fn prefetch_maximum_request_bytes_impl(&self, max_bytes: &mut MutexGuard<'_, MaxRequestBytes>) {
         if let MaxRequestBytes::Unknown = **max_bytes {
+            crate::info!("Prefetching maximum request length");
             let request = self
                 .bigreq_enable()
                 .map(|cookie| cookie.into_sequence_number())
@@ -561,6 +603,7 @@ impl<S: Stream> RequestConnection for RustConnection<S> {
     }
 
     fn discard_reply(&self, sequence: SequenceNumber, _kind: RequestKind, mode: DiscardMode) {
+        crate::debug!("Discarding reply to request {sequence} in mode {mode:?}");
         self.inner
             .lock()
             .unwrap()
@@ -599,9 +642,13 @@ impl<S: Stream> RequestConnection for RustConnection<S> {
     }
 
     fn wait_for_reply(&self, sequence: SequenceNumber) -> Result<Option<Vec<u8>>, ConnectionError> {
+        let span = crate::debug_span!("Waiting for reply", sequence);
+        let _enter = span.enter();
+
         let mut inner = self.inner.lock().unwrap();
         inner = self.flush_impl(inner)?;
         loop {
+            crate::trace!({ sequence }, "Polling for reply");
             let poll_result = inner.inner.poll_for_reply(sequence);
             match poll_result {
                 PollReply::TryAgain => {}
@@ -616,14 +663,19 @@ impl<S: Stream> RequestConnection for RustConnection<S> {
         &self,
         sequence: SequenceNumber,
     ) -> Result<Option<Buffer>, ConnectionError> {
+        let span = crate::debug_span!("Checking for error", sequence);
+        let _enter = span.enter();
+
         let mut inner = self.inner.lock().unwrap();
         if inner.inner.prepare_check_for_reply_or_error(sequence) {
+            crate::trace!("Inserting sync with the X11 server");
             inner = self.send_sync(inner)?;
             assert!(!inner.inner.prepare_check_for_reply_or_error(sequence));
         }
         // Ensure the request is sent
         inner = self.flush_impl(inner)?;
         loop {
+            crate::trace!({ sequence }, "Polling for reply or error");
             let poll_result = inner.inner.poll_check_for_reply_or_error(sequence);
             match poll_result {
                 PollReply::TryAgain => {}
@@ -638,14 +690,20 @@ impl<S: Stream> RequestConnection for RustConnection<S> {
         &self,
         sequence: SequenceNumber,
     ) -> Result<ReplyOrError<BufWithFds, Buffer>, ConnectionError> {
+        let span = crate::debug_span!("Waiting for reply", sequence);
+        let _enter = span.enter();
+
         let mut inner = self.inner.lock().unwrap();
         // Ensure the request is sent
         inner = self.flush_impl(inner)?;
         loop {
+            crate::trace!({ sequence }, "Polling for reply or error");
             if let Some(reply) = inner.inner.poll_for_reply_or_error(sequence) {
                 if reply.0[0] == 0 {
+                    crate::trace!("Got error");
                     return Ok(ReplyOrError::Error(reply.0));
                 } else {
+                    crate::trace!("Got reply");
                     return Ok(ReplyOrError::Reply(reply));
                 }
             }
@@ -661,6 +719,9 @@ impl<S: Stream> RequestConnection for RustConnection<S> {
         match max_bytes {
             Unknown => unreachable!("We just prefetched this"),
             Requested(seqno) => {
+                let span = crate::info_span!("Waiting for maximum request length reply");
+                let _guard = span.enter();
+
                 let length = seqno
                     // If prefetching the request succeeded, get a cookie
                     .and_then(|seqno| {
@@ -677,6 +738,7 @@ impl<S: Stream> RequestConnection for RustConnection<S> {
                     .unwrap_or(usize::max_value());
                 let length = length * 4;
                 *max_bytes = Known(length);
+                crate::info!("Maximum request length is {length} bytes");
                 length
             }
             Known(length) => *length,
@@ -703,6 +765,9 @@ impl<S: Stream> Connection for RustConnection<S> {
     fn wait_for_raw_event_with_sequence(
         &self,
     ) -> Result<RawEventAndSeqNumber<Vec<u8>>, ConnectionError> {
+        let span = crate::trace_span!("Wait for event");
+        let _guard = span.enter();
+
         let mut inner = self.inner.lock().unwrap();
         loop {
             if let Some(event) = inner.inner.poll_for_event_with_sequence() {
@@ -715,6 +780,9 @@ impl<S: Stream> Connection for RustConnection<S> {
     fn poll_for_raw_event_with_sequence(
         &self,
     ) -> Result<Option<RawEventAndSeqNumber<Vec<u8>>>, ConnectionError> {
+        let span = crate::trace_span!("Poll for event");
+        let _guard = span.enter();
+
         let mut inner = self.inner.lock().unwrap();
         if let Some(event) = inner.inner.poll_for_event_with_sequence() {
             Ok(Some(event))
@@ -745,9 +813,10 @@ impl<S: Stream> Connection for RustConnection<S> {
                 .extension_information(xc_misc::X11_EXTENSION_NAME)?
                 .is_none()
             {
-                // IDs are exhausted and XC-MISC is not available
+                crate::error!("XIDs are exhausted and XC-MISC extension is not available");
                 Err(ReplyOrIdError::IdsExhausted)
             } else {
+                crate::info!("XIDs are exhausted; fetching free range via XC-MISC");
                 id_allocator.update_xid_range(&self.xc_misc_get_xid_range()?.reply()?)?;
                 id_allocator
                     .generate_id()

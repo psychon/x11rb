@@ -191,11 +191,11 @@ enum DefaultStreamInner {
 
 impl DefaultStream {
     /// Try to connect to the X11 server described by the given arguments.
-    pub fn connect(addr: ConnectAddress<'_>) -> Result<Self> {
+    pub fn connect(addr: &ConnectAddress<'_>) -> Result<Self> {
         match addr {
             ConnectAddress::Hostname(host, port) => {
                 // connect over TCP
-                let stream = TcpStream::connect((host, port))?;
+                let stream = TcpStream::connect((*host, *port))?;
                 Self::from_tcp_stream(stream)
             }
             #[cfg(unix)]
