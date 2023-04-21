@@ -119,10 +119,10 @@ impl RustConnection<DefaultStream> {
         // works.
         let mut error = None;
         for addr in parsed_display.connect_instruction() {
-            crate::trace!("Connecting to X11 server via {addr:?}");
+            crate::trace!("Connecting to X11 server via {:?}", addr);
             match DefaultStream::connect(&addr) {
                 Ok(stream) => {
-                    crate::trace!("Connected to X11 server via {addr:?}");
+                    crate::trace!("Connected to X11 server via {:?}", addr);
 
                     // we found a stream, get auth information
                     let (family, address) = stream.peer_addr()?;
@@ -130,7 +130,7 @@ impl RustConnection<DefaultStream> {
                         // Ignore all errors while determining auth; instead we just try without auth info.
                         .unwrap_or(None)
                         .unwrap_or_else(|| (Vec::new(), Vec::new()));
-                    crate::trace!("Picked authentication via auth mechanism {auth_name:?}");
+                    crate::trace!("Picked authentication via auth mechanism {:?}", auth_name);
 
                     // finish connecting to server
                     return Ok((
@@ -141,7 +141,7 @@ impl RustConnection<DefaultStream> {
                     ));
                 }
                 Err(e) => {
-                    crate::debug!("Failed to connect to X11 server via {addr:?}: {e:?}");
+                    crate::debug!("Failed to connect to X11 server via {:?}: {:?}", addr, e);
                     error = Some(e);
                     continue;
                 }
@@ -229,7 +229,7 @@ impl<S: Stream> RustConnection<S> {
                 Err(ref e) if e.kind() == std::io::ErrorKind::WouldBlock => continue,
                 Err(e) => return Err(e.into()),
             };
-            crate::trace!("Read {adv} bytes");
+            crate::trace!("Read {} bytes", adv);
 
             // advance the internal buffer
             if connect.advance(adv) {
@@ -293,7 +293,7 @@ impl<S: Stream> RustConnection<S> {
             let major_opcode = bufs[0][0];
             let minor_opcode = bufs[0][1];
             if major_opcode < 128 {
-                crate::debug!("Sending xproto request {major_opcode}");
+                crate::debug!("Sending xproto request {}", major_opcode);
             } else {
                 use x11rb_protocol::x11_utils::ExtInfoProvider;
                 let ext_mgr = self.extension_manager.lock().unwrap();
@@ -603,7 +603,7 @@ impl<S: Stream> RequestConnection for RustConnection<S> {
     }
 
     fn discard_reply(&self, sequence: SequenceNumber, _kind: RequestKind, mode: DiscardMode) {
-        crate::debug!("Discarding reply to request {sequence} in mode {mode:?}");
+        crate::debug!("Discarding reply to request {} in mode {:?}", sequence, mode);
         self.inner
             .lock()
             .unwrap()
@@ -738,7 +738,7 @@ impl<S: Stream> RequestConnection for RustConnection<S> {
                     .unwrap_or(usize::max_value());
                 let length = length * 4;
                 *max_bytes = Known(length);
-                crate::info!("Maximum request length is {length} bytes");
+                crate::info!("Maximum request length is {} bytes", length);
                 length
             }
             Known(length) => *length,

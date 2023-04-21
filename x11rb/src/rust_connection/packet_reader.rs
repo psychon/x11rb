@@ -62,7 +62,7 @@ impl PacketReader {
                         ));
                     }
                     Ok(n) => {
-                        crate::trace!("Read {n} bytes directly into large packet");
+                        crate::trace!("Read {} bytes directly into large packet", n);
                         if let Some(packet) = self.inner.advance(n) {
                             out_packets.push(packet);
                         }
@@ -84,7 +84,7 @@ impl PacketReader {
                     Err(ref e) if e.kind() == io::ErrorKind::WouldBlock => break,
                     Err(e) => return Err(e),
                 };
-                crate::trace!("Read {nread} bytes into read buffer");
+                crate::trace!("Read {} bytes into read buffer", nread);
 
                 // begin reading that data into packets
                 let mut src = &self.read_buffer[..nread];

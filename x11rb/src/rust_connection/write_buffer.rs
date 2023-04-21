@@ -48,7 +48,7 @@ impl WriteBuffer {
                     }
                 }
                 Ok(n) => {
-                    crate::trace!("Flushing wrote {n} bytes of data");
+                    crate::trace!("Flushing wrote {} bytes of data", n);
                     let _ = self.data_buf.drain(..n);
                 }
                 Err(e) => return Err(e),
@@ -88,14 +88,14 @@ impl WriteBuffer {
                         if available_buf == 0 {
                             // Buffer filled and cannot flush anything without
                             // blocking, so return `WouldBlock`.
-                            crate::trace!("Writing failed due to full buffer: {e:?}");
+                            crate::trace!("Writing failed due to full buffer: {:?}", e);
                             return Err(e);
                         } else {
                             let n_to_write = first_buffer.len().min(available_buf);
                             self.data_buf.extend(&first_buffer[..n_to_write]);
                             // Return `Ok` because some or all data has been buffered,
                             // so from the outside it is seen as a successful write.
-                            crate::trace!("Writing appended {n_to_write} bytes to the buffer");
+                            crate::trace!("Writing appended {} bytes to the buffer", n_to_write);
                             return Ok(n_to_write);
                         }
                     } else {
