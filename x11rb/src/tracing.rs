@@ -43,9 +43,12 @@ pub(crate) mod implementation {
 #[cfg(not(feature = "tracing"))]
 pub(crate) mod implementation {
     macro_rules! event {
+        ( $lvl:expr, { $($fields:tt)+ }, $($arg:tt)+ ) => {
+            let _ = format_args!($($arg)+);
+        };
         ( $lvl:expr, $($arg:tt)+ ) => {
-            let _ = ($($arg)+);
-        }
+            let _ = format_args!($($arg)+);
+        };
     }
 
     pub(crate) struct Span;
