@@ -124,7 +124,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     loop {
         let event = conn.wait_for_event()?;
-        tracing::event!(tracing::Level::DEBUG, "Got event {event:?}");
+        tracing::debug!("Got event {event:?}");
         match event {
             Event::Expose(event) => {
                 if event.count == 0 {
@@ -158,14 +158,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 let data = event.data.as_data32();
                 if event.format == 32 && event.window == win_id && data[0] == atoms.WM_DELETE_WINDOW
                 {
-                    tracing::event!(tracing::Level::INFO, "Window was asked to close");
+                    tracing::info!("Window was asked to close");
                     return Ok(());
                 }
             }
             Event::Error(err) => {
-                tracing::event!(tracing::Level::ERROR, "Got an unexpected error: {err:?}")
+                tracing::error!("Got an unexpected error: {err:?}")
             }
-            event => tracing::event!(tracing::Level::INFO, "Got an unhandled event: {event:?}"),
+            event => tracing::info!("Got an unhandled event: {event:?}"),
         }
     }
 }
