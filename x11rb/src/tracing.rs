@@ -52,11 +52,11 @@ pub(crate) mod implementation {
     }
 
     pub(crate) struct Span;
-    pub(crate) struct Entered<'a>(&'a Span);
+    pub(crate) struct EnteredSpan;
 
     impl Span {
-        pub(crate) fn enter(&self) -> Entered<'_> {
-            Entered(self)
+        pub(crate) fn entered(&self) -> EnteredSpan {
+            EnteredSpan
         }
     }
 
