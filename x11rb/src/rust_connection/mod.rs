@@ -293,21 +293,12 @@ impl<S: Stream> RustConnection<S> {
     ) -> Result<SequenceNumber, ConnectionError> {
         let _guard = crate::debug_span!("send_request").entered();
 
-        {
-            let major_opcode = bufs[0][0];
-            let minor_opcode = bufs[0][1];
-            if major_opcode < 128 {
-                crate::debug!("Sending xproto request {}", major_opcode);
-            } else {
-                use x11rb_protocol::x11_utils::ExtInfoProvider;
-                let ext_mgr = self.extension_manager.lock().unwrap();
-                let ext = ext_mgr
-                    .get_from_major_opcode(major_opcode)
-                    .map(|(name, _)| name)
-                    .unwrap_or("Unknown extension");
-                crate::debug!("Sending {} request {}", ext, minor_opcode);
-            };
+        let request_info = RequestInfo {
+            extension_manager: &self.extension_manager,
+            major_opcode: bufs[0][0],
+            minor_opcode: bufs[0][1],
         };
+        crate::debug!("Sending {}", request_info);
 
         let mut storage = Default::default();
         let bufs = compute_length_field(self, bufs, &mut storage)?;
@@ -835,5 +826,28 @@ struct NotifyOnDrop<'a>(&'a Condvar);
 impl Drop for NotifyOnDrop<'_> {
     fn drop(&mut self) {
         self.0.notify_all();
+    }
+}
+
+/// Format information about a request in a Display impl
+struct RequestInfo<'a> {
+    extension_manager: &'a Mutex<ExtensionManager>,
+    major_opcode: u8,
+    minor_opcode: u8,
+}
+
+impl std::fmt::Display for RequestInfo<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        if self.major_opcode < 128 {
+            write!(f, "xproto request {}", self.major_opcode)
+        } else {
+            use x11rb_protocol::x11_utils::ExtInfoProvider;
+            let ext_mgr = self.extension_manager.lock().unwrap();
+            let ext_name = ext_mgr
+                .get_from_major_opcode(self.major_opcode)
+                .map(|(name, _)| name)
+                .unwrap_or("unknown extension");
+            write!(f, "{} request {}", ext_name, self.minor_opcode)
+        }
     }
 }
