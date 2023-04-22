@@ -4,6 +4,7 @@ use std::convert::TryInto;
 use std::io::IoSlice;
 use std::mem::drop;
 use std::sync::{Condvar, Mutex, MutexGuard, TryLockError};
+use std::time::Instant;
 
 use crate::connection::{
     compute_length_field, Connection, ReplyOrError, RequestConnection, RequestKind,
@@ -119,10 +120,14 @@ impl RustConnection<DefaultStream> {
         // works.
         let mut error = None;
         for addr in parsed_display.connect_instruction() {
-            crate::trace!("Connecting to X11 server via {:?}", addr);
+            let start = Instant::now();
             match DefaultStream::connect(&addr) {
                 Ok(stream) => {
-                    crate::trace!("Connected to X11 server via {:?}", addr);
+                    crate::trace!(
+                        "Connected to X11 server via {:?} in {:?}",
+                        addr,
+                        start.elapsed()
+                    );
 
                     // we found a stream, get auth information
                     let (family, address) = stream.peer_addr()?;
