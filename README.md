@@ -24,13 +24,6 @@ xcb-proto that comes with the source code is used.
 The interaction with libxcb via `XCBConnection` requires at least libxcb 1.12.
 
 
-## Does this support async/await
-
-No. If you have so many X11 connections that this would matter, you are doing
-something wrong. Also, it encourages people to write high-latency code instead
-of sending multiple requests and only afterwards wait for the replies.
-
-
 ## Crate features
 
 Most X11 extensions are feature-gated. For example, to use the shared memory
