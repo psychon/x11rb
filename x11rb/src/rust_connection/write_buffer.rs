@@ -25,6 +25,11 @@ impl WriteBuffer {
 
     fn flush_buffer(&mut self, stream: &impl Stream) -> std::io::Result<()> {
         while self.needs_flush() {
+            crate::trace!(
+                "Trying to flush {} bytes of data and {} FDs",
+                self.data_buf.len(),
+                self.fd_buf.len()
+            );
             let (data_buf_1, data_buf_2) = self.data_buf.as_slices();
             let data_bufs = [IoSlice::new(data_buf_1), IoSlice::new(data_buf_2)];
             match stream.write_vectored(&data_bufs, &mut self.fd_buf) {
@@ -43,6 +48,7 @@ impl WriteBuffer {
                     }
                 }
                 Ok(n) => {
+                    crate::trace!("Flushing wrote {} bytes of data", n);
                     let _ = self.data_buf.drain(..n);
                 }
                 Err(e) => return Err(e),
@@ -64,6 +70,11 @@ impl WriteBuffer {
         F: FnOnce(&mut VecDeque<u8>),
         G: FnOnce(&W, &mut Vec<RawFdContainer>) -> std::io::Result<usize>,
     {
+        crate::trace!(
+            "Writing {} FDs and {} bytes of data",
+            fds.len(),
+            to_write_length
+        );
         self.fd_buf.append(fds);
 
         // Is there enough buffer space left for this write?
@@ -77,12 +88,14 @@ impl WriteBuffer {
                         if available_buf == 0 {
                             // Buffer filled and cannot flush anything without
                             // blocking, so return `WouldBlock`.
+                            crate::trace!("Writing failed due to full buffer: {:?}", e);
                             return Err(e);
                         } else {
                             let n_to_write = first_buffer.len().min(available_buf);
                             self.data_buf.extend(&first_buffer[..n_to_write]);
                             // Return `Ok` because some or all data has been buffered,
                             // so from the outside it is seen as a successful write.
+                            crate::trace!("Writing appended {} bytes to the buffer", n_to_write);
                             return Ok(n_to_write);
                         }
                     } else {
@@ -98,9 +111,11 @@ impl WriteBuffer {
             // is copied into the buffer, since that would just mean that the large write gets
             // split into multiple smaller ones.
             assert!(self.data_buf.is_empty());
+            crate::trace!("Large write is written directly to the stream");
             write_inner(stream, &mut self.fd_buf)
         } else {
             // At this point there is enough space available in the buffer.
+            crate::trace!("Data to write is appended to the buffer");
             write_buffer(&mut self.data_buf);
             Ok(to_write_length)
         }

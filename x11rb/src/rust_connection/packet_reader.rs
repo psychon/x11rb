@@ -44,18 +44,25 @@ impl PacketReader {
         out_packets: &mut Vec<Vec<u8>>,
         fd_storage: &mut Vec<RawFdContainer>,
     ) -> Result<()> {
+        let original_length = out_packets.len();
         loop {
             // if the necessary packet size is larger than our buffer, just fill straight
             // into the buffer
             if self.inner.remaining_capacity() >= self.read_buffer.len() {
+                crate::trace!(
+                    "Trying to read large packet with {} bytes remaining",
+                    self.inner.remaining_capacity()
+                );
                 match stream.read(self.inner.buffer(), fd_storage) {
                     Ok(0) => {
+                        crate::error!("Large read returned zero");
                         return Err(Error::new(
                             ErrorKind::UnexpectedEof,
                             "The X11 server closed the connection",
                         ));
                     }
                     Ok(n) => {
+                        crate::trace!("Read {} bytes directly into large packet", n);
                         if let Some(packet) = self.inner.advance(n) {
                             out_packets.push(packet);
                         }
@@ -67,6 +74,7 @@ impl PacketReader {
                 // read into our buffer
                 let nread = match stream.read(&mut self.read_buffer, fd_storage) {
                     Ok(0) => {
+                        crate::error!("Buffered read returned zero");
                         return Err(Error::new(
                             ErrorKind::UnexpectedEof,
                             "The X11 server closed the connection",
@@ -76,6 +84,7 @@ impl PacketReader {
                     Err(ref e) if e.kind() == io::ErrorKind::WouldBlock => break,
                     Err(e) => return Err(e),
                 };
+                crate::trace!("Read {} bytes into read buffer", nread);
 
                 // begin reading that data into packets
                 let mut src = &self.read_buffer[..nread];
@@ -96,6 +105,10 @@ impl PacketReader {
                 }
             }
         }
+        crate::trace!(
+            "Read {} complete packet(s)",
+            out_packets.len() - original_length
+        );
 
         Ok(())
     }

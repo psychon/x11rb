@@ -146,6 +146,9 @@ pub mod reexports {
     pub use x11rb_protocol;
 }
 
+mod tracing;
+pub(crate) use crate::tracing::*;
+
 pub mod utils;
 #[cfg(feature = "allow-unsafe-code")]
 pub mod xcb_ffi;

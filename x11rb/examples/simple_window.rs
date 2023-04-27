@@ -16,7 +16,18 @@ x11rb::atom_manager! {
     }
 }
 
+fn init_tracing() {
+    use tracing_subscriber::prelude::*;
+
+    tracing_subscriber::registry()
+        .with(tracing_subscriber::fmt::layer())
+        .with(tracing_subscriber::EnvFilter::from_default_env())
+        .init();
+}
+
 fn main() -> Result<(), Box<dyn std::error::Error>> {
+    init_tracing();
+
     let (conn, screen_num) = x11rb::connect(None)?;
 
     // The following is only needed for start_timeout_thread(), which is used for 'tests'
@@ -113,7 +124,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     loop {
         let event = conn.wait_for_event()?;
-        println!("{:?})", event);
+        tracing::debug!("Got event {event:?}");
         match event {
             Event::Expose(event) => {
                 if event.count == 0 {
@@ -147,12 +158,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 let data = event.data.as_data32();
                 if event.format == 32 && event.window == win_id && data[0] == atoms.WM_DELETE_WINDOW
                 {
-                    println!("Window was asked to close");
+                    tracing::info!("Window was asked to close");
                     return Ok(());
                 }
             }
-            Event::Error(_) => println!("Got an unexpected error"),
-            _ => println!("Got an unknown event"),
+            Event::Error(err) => {
+                tracing::error!("Got an unexpected error: {err:?}")
+            }
+            event => tracing::info!("Got an unhandled event: {event:?}"),
         }
     }
 }
