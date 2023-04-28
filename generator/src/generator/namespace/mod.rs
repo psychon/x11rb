@@ -1518,6 +1518,8 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                     derives.ord = false;
                     derives.hash = false;
                     derives.default_ = false;
+                    derives.eq = false;
+                    derives.partial_eq = false;
                 }
                 xcbdefs::FieldDef::Expr(_) => {}
                 xcbdefs::FieldDef::VirtualLen(_) => {}

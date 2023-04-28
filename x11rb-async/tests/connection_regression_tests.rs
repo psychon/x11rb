@@ -102,7 +102,7 @@ fn retry_for_left_over_fds() {
     // Right now that error is WriteZero. That is still better than no error at all.
 
     let fds = {
-        let (fd0, fd1) = nix::unistd::pipe().unwrap();
+        let (fd0, fd1) = rustix::io::pipe().unwrap();
         vec![RawFdContainer::new(fd0), RawFdContainer::new(fd1)]
     };
 

@@ -24,8 +24,8 @@ tracing = { version = "0.1", default-features = false }
 x11rb = { version = "0.12.0", path = "../x11rb", default-features = false }
 x11rb-protocol = { version = "0.12.0", path = "../x11rb-protocol" }
 
-[target.'cfg(unix)'.dev-dependencies.nix]
-version = "0.26"
+[target.'cfg(unix)'.dev-dependencies.rustix]
+version = "0.37.16"
 default-features = false
 
 [features]

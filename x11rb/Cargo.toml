@@ -22,18 +22,7 @@ once_cell = { version = "1.17", optional = true }
 gethostname = "0.3.0"
 as-raw-xcb-connection = { version = "1.0", optional = true }
 tracing = { version = "0.1", optional = true, default-features = false }
-
-[target.'cfg(unix)'.dependencies.nix]
-version = "0.26"
-default-features = false
-features = ["socket", "uio", "poll"]
-
-[target.'cfg(windows)'.dependencies]
-winapi-wsapoll = "0.1.1"
-
-[target.'cfg(windows)'.dependencies.winapi]
-version = "0.3"
-features = ["winsock2"]
+rustix = { version = "0.37.16", default-features = false, features = ["std", "fs", "net"] }
 
 [dev-dependencies]
 polling = "2.8.0"
@@ -57,37 +46,7 @@ resource_manager = ["x11rb-protocol/resource_manager"]
 dl-libxcb = ["allow-unsafe-code", "libloading", "once_cell"]
 
 # Enable this feature to enable all the X11 extensions
-all-extensions = [
-    "x11rb-protocol/all-extensions",
-    "composite",
-    "damage",
-    "dbe",
-    "dpms",
-    "dri2",
-    "dri3",
-    "glx",
-    "present",
-    "randr",
-    "record",
-    "render",
-    "res",
-    "screensaver",
-    "shape",
-    "shm",
-    "sync",
-    "xevie",
-    "xf86dri",
-    "xf86vidmode",
-    "xfixes",
-    "xinerama",
-    "xinput",
-    "xkb",
-    "xprint",
-    "xselinux",
-    "xtest",
-    "xv",
-    "xvmc"
-]
+all-extensions = ["x11rb-protocol/all-extensions", "composite", "damage", "dbe", "dpms", "dri2", "dri3", "glx", "present", "randr", "record", "render", "res", "screensaver", "shape", "shm", "sync", "xevie", "xf86dri", "xf86vidmode", "xfixes", "xinerama", "xinput", "xkb", "xprint", "xselinux", "xtest", "xv", "xvmc"]
 
 # Features to enable individual X11 extensions
 composite = ["x11rb-protocol/composite", "xfixes"]

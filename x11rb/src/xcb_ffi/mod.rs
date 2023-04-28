@@ -12,6 +12,7 @@ use std::ptr::{null, null_mut};
 use std::sync::{atomic::Ordering, Mutex};
 
 use libc::c_void;
+use rustix::fd::{FromRawFd, OwnedFd};
 
 use crate::connection::{
     compute_length_field, Connection, ReplyOrError, RequestConnection, RequestKind,
@@ -474,7 +475,10 @@ impl RequestConnection for XCBConnection {
 
         // The number of FDs is in the second byte (= buffer[1]) in all replies.
         let fd_slice = unsafe { std::slice::from_raw_parts(fd_ptr, usize::from(buffer[1])) };
-        let fd_vec = fd_slice.iter().map(|&fd| RawFdContainer::new(fd)).collect();
+        let fd_vec = fd_slice
+            .iter()
+            .map(|&fd| RawFdContainer::new(unsafe { OwnedFd::from_raw_fd(fd) }))
+            .collect();
 
         Ok(ReplyOrError::Reply((buffer, fd_vec)))
     }

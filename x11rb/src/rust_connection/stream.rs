@@ -265,6 +265,18 @@ impl DefaultStream {
             .unwrap_or_else(Vec::new);
         Ok((Family::LOCAL, hostname))
     }
+
+    fn as_fd(&self) -> rustix::fd::BorrowedFd<'_> {
+        use rustix::fd::AsFd;
+
+        match self.inner {
+            DefaultStreamInner::TcpStream(ref stream) => stream.as_fd(),
+            #[cfg(unix)]
+            DefaultStreamInner::UnixStream(ref stream) => stream.as_fd(),
+            #[cfg(any(target_os = "linux", target_os = "android"))]
+            DefaultStreamInner::AbstractUnix(ref stream) => stream.as_fd(),
+        }
+    }
 }
 
 #[cfg(unix)]
@@ -315,33 +327,39 @@ fn do_write(
     bufs: &[IoSlice<'_>],
     fds: &mut Vec<RawFdContainer>,
 ) -> Result<usize> {
-    use nix::sys::socket::{sendmsg, ControlMessage, MsgFlags, SockaddrLike};
+    use rustix::fd::{AsFd, BorrowedFd};
+    use rustix::io::Errno;
+    use rustix::net::{sendmsg_noaddr, SendAncillaryBuffer, SendAncillaryMessage, SendFlags};
 
-    fn sendmsg_wrapper<S: SockaddrLike>(
-        fd: RawFd,
+    fn sendmsg_wrapper(
+        fd: BorrowedFd<'_>,
         iov: &[IoSlice<'_>],
-        cmsgs: &[ControlMessage<'_>],
-        flags: MsgFlags,
-        addr: Option<&S>,
+        cmsgs: &mut SendAncillaryBuffer<'_, '_, '_>,
+        flags: SendFlags,
     ) -> Result<usize> {
         loop {
-            match sendmsg(fd, iov, cmsgs, flags, addr) {
+            match sendmsg_noaddr(fd, iov, cmsgs, flags) {
                 Ok(n) => return Ok(n),
                 // try again
-                Err(nix::Error::EINTR) => {}
+                Err(Errno::INTR) => {}
                 Err(e) => return Err(e.into()),
             }
         }
     }
 
-    let fd = stream.as_raw_fd();
+    let fd = stream.as_fd();
 
     let res = if !fds.is_empty() {
-        let fds = fds.iter().map(|fd| fd.as_raw_fd()).collect::<Vec<_>>();
-        let cmsgs = [ControlMessage::ScmRights(&fds[..])];
-        sendmsg_wrapper::<()>(fd, bufs, &cmsgs, MsgFlags::empty(), None)?
+        let fds = fds.iter().map(|fd| fd.as_fd()).collect::<Vec<_>>();
+        let rights = SendAncillaryMessage::ScmRights(&fds);
+
+        let mut cmsg_space = vec![0u8; rights.size()];
+        let mut cmsg_buffer = SendAncillaryBuffer::new(&mut cmsg_space);
+        assert!(cmsg_buffer.push(rights));
+
+        sendmsg_wrapper(fd, bufs, &mut cmsg_buffer, SendFlags::empty())?
     } else {
-        sendmsg_wrapper::<()>(fd, bufs, &[], MsgFlags::empty(), None)?
+        sendmsg_wrapper(fd, bufs, &mut Default::default(), SendFlags::empty())?
     };
 
     // We successfully sent all FDs
@@ -352,80 +370,59 @@ fn do_write(
 
 impl Stream for DefaultStream {
     fn poll(&self, mode: PollMode) -> Result<()> {
-        #[cfg(unix)]
-        {
-            use nix::poll::{poll, PollFd, PollFlags};
+        use rustix::io::{poll, Errno, PollFd, PollFlags};
 
-            let mut poll_flags = PollFlags::empty();
-            if mode.readable() {
-                poll_flags |= PollFlags::POLLIN;
-            }
-            if mode.writable() {
-                poll_flags |= PollFlags::POLLOUT;
-            }
-            let fd = self.as_raw_fd();
-            let mut poll_fds = [PollFd::new(fd, poll_flags)];
-            loop {
-                match poll(&mut poll_fds, -1) {
-                    Ok(_) => break,
-                    Err(nix::Error::EINTR) => {}
-                    Err(e) => return Err(e.into()),
-                }
-            }
-            // Let the errors (POLLERR) be handled when trying to read or write.
-            Ok(())
+        let mut poll_flags = PollFlags::empty();
+        if mode.readable() {
+            poll_flags |= PollFlags::IN;
         }
-        #[cfg(windows)]
-        {
-            use winapi::um::winsock2::{POLLRDNORM, POLLWRNORM, SOCKET, WSAPOLLFD};
-            use winapi_wsapoll::wsa_poll;
-
-            let raw_socket = self.as_raw_socket();
-            let mut events = 0;
-            if mode.readable() {
-                events |= POLLRDNORM;
-            }
-            if mode.writable() {
-                events |= POLLWRNORM;
-            }
-            let mut poll_fds = [WSAPOLLFD {
-                fd: raw_socket as SOCKET,
-                events,
-                revents: 0,
-            }];
-            let _ = wsa_poll(&mut poll_fds, -1)?;
-            // Let the errors (POLLERR) be handled when trying to read or write.
-            Ok(())
+        if mode.writable() {
+            poll_flags |= PollFlags::OUT;
         }
+        let fd = self.as_fd();
+        let mut poll_fds = [PollFd::from_borrowed_fd(fd, poll_flags)];
+        loop {
+            match poll(&mut poll_fds, -1) {
+                Ok(_) => break,
+                Err(Errno::INTR) => {}
+                Err(e) => return Err(e.into()),
+            }
+        }
+        // Let the errors (POLLERR) be handled when trying to read or write.
+        Ok(())
     }
 
     fn read(&self, buf: &mut [u8], fd_storage: &mut Vec<RawFdContainer>) -> Result<usize> {
         #[cfg(unix)]
         {
-            use nix::sys::socket::{recvmsg, ControlMessageOwned};
+            use rustix::cmsg_space;
+            use rustix::io::Errno;
+            use rustix::net::{recvmsg, RecvAncillaryBuffer, RecvAncillaryMessage};
             use std::io::IoSliceMut;
 
             // Chosen by checking what libxcb does
             const MAX_FDS_RECEIVED: usize = 16;
-            let mut cmsg = nix::cmsg_space!([RawFd; MAX_FDS_RECEIVED]);
+            let mut cmsg = vec![0u8; cmsg_space!(ScmRights(MAX_FDS_RECEIVED))];
             let mut iov = [IoSliceMut::new(buf)];
+            let mut cmsg_buffer = RecvAncillaryBuffer::new(&mut cmsg);
 
-            let fd = self.as_raw_fd();
+            let fd = self.as_fd();
             let msg = loop {
-                match recvmsg::<()>(fd, &mut iov, Some(&mut cmsg), recvmsg::flags()) {
+                match recvmsg(fd, &mut iov, &mut cmsg_buffer, recvmsg::flags()) {
                     Ok(msg) => break msg,
                     // try again
-                    Err(nix::Error::EINTR) => {}
+                    Err(Errno::INTR) => {}
                     Err(e) => return Err(e.into()),
                 }
             };
 
-            let fds_received = msg
-                .cmsgs()
-                .flat_map(|cmsg| match cmsg {
-                    ControlMessageOwned::ScmRights(r) => r,
-                    _ => Vec::new(),
+            let fds_received = cmsg_buffer
+                .drain()
+                .filter_map(|cmsg| match cmsg {
+                    RecvAncillaryMessage::ScmRights(r) => Some(r),
+                    _ => None,
                 })
+                .flatten()
                 .map(RawFdContainer::new);
 
             let mut cloexec_error = Ok(());
@@ -514,29 +511,29 @@ impl Stream for DefaultStream {
 }
 
 #[cfg(any(target_os = "linux", target_os = "android"))]
-fn connect_abstract_unix_stream(path: &[u8]) -> nix::Result<RawFdContainer> {
-    use nix::fcntl::{fcntl, FcntlArg, OFlag};
-    use nix::sys::socket::{connect, socket, AddressFamily, SockFlag, SockType, UnixAddr};
+fn connect_abstract_unix_stream(
+    path: &[u8],
+) -> std::result::Result<RawFdContainer, rustix::io::Errno> {
+    use rustix::fs::{fcntl_getfl, fcntl_setfl, OFlags};
+    use rustix::net::{
+        connect_unix, socket_with, AddressFamily, Protocol, SocketAddrUnix, SocketFlags, SocketType,
+    };
 
-    let socket = socket(
-        AddressFamily::Unix,
-        SockType::Stream,
-        SockFlag::SOCK_CLOEXEC,
-        None,
+    let socket = socket_with(
+        AddressFamily::UNIX,
+        SocketType::STREAM,
+        SocketFlags::CLOEXEC,
+        Protocol::default(),
     )?;
 
     // Wrap it in a RawFdContainer. Its Drop impl makes sure to close the socket if something
     // errors out below.
     let socket = RawFdContainer::new(socket);
 
-    connect(socket.as_raw_fd(), &UnixAddr::new_abstract(path)?)?;
+    connect_unix(&socket, &SocketAddrUnix::new_abstract_name(path)?)?;
 
     // Make the FD non-blocking
-    let flags = fcntl(socket.as_raw_fd(), FcntlArg::F_GETFL)?;
-    let _ = fcntl(
-        socket.as_raw_fd(),
-        FcntlArg::F_SETFL(OFlag::from_bits_truncate(flags) | OFlag::O_NONBLOCK),
-    )?;
+    fcntl_setfl(&socket, fcntl_getfl(&socket)? | OFlags::NONBLOCK)?;
 
     Ok(socket)
 }
@@ -552,14 +549,15 @@ fn connect_abstract_unix_stream(path: &[u8]) -> nix::Result<RawFdContainer> {
 ))]
 mod recvmsg {
     use super::RawFdContainer;
+    use rustix::net::RecvFlags;
 
-    pub(crate) fn flags() -> nix::sys::socket::MsgFlags {
-        nix::sys::socket::MsgFlags::MSG_CMSG_CLOEXEC
+    pub(crate) fn flags() -> RecvFlags {
+        RecvFlags::CMSG_CLOEXEC
     }
 
     pub(crate) fn after_recvmsg<'a>(
         fds: impl Iterator<Item = RawFdContainer> + 'a,
-        _cloexec_error: &'a mut nix::Result<()>,
+        _cloexec_error: &'a mut Result<(), rustix::io::Errno>,
     ) -> impl Iterator<Item = RawFdContainer> + 'a {
         fds
     }
@@ -579,20 +577,21 @@ mod recvmsg {
 ))]
 mod recvmsg {
     use super::RawFdContainer;
-    use nix::fcntl::{fcntl, FcntlArg, FdFlag};
-    use nix::sys::socket::MsgFlags;
-    use std::os::unix::io::AsRawFd;
+    use rustix::io::{fcntl_getfd, fcntl_setfd, FdFlags};
+    use rustix::net::RecvFlags;
 
-    pub(crate) fn flags() -> MsgFlags {
-        MsgFlags::empty()
+    pub(crate) fn flags() -> RecvFlags {
+        RecvFlags::empty()
     }
 
     pub(crate) fn after_recvmsg<'a>(
         fds: impl Iterator<Item = RawFdContainer> + 'a,
-        cloexec_error: &'a mut nix::Result<()>,
+        cloexec_error: &'a mut rustix::io::Result<()>,
     ) -> impl Iterator<Item = RawFdContainer> + 'a {
         fds.map(move |fd| {
-            if let Err(e) = fcntl(fd.as_raw_fd(), FcntlArg::F_SETFD(FdFlag::FD_CLOEXEC)) {
+            if let Err(e) =
+                fcntl_getfd(&fd).and_then(|flags| fcntl_setfd(&fd, flags | FdFlags::CLOEXEC))
+            {
                 *cloexec_error = Err(e);
             }
             fd

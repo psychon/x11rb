@@ -997,7 +997,7 @@ pub const ATTACH_FD_REQUEST: u8 = 6;
 /// * `shmseg` - A shared memory segment ID created with xcb_generate_id().
 /// * `shm_fd` - The file descriptor the server should mmap().
 /// * `read_only` - True if the segment shall be mapped read only by the X11 server, otherwise false.
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug)]
 pub struct AttachFdRequest {
     pub shmseg: Seg,
     pub shm_fd: RawFdContainer,
@@ -1149,7 +1149,7 @@ impl crate::x11_utils::ReplyFDsRequest for CreateSegmentRequest {
 /// # Fields
 ///
 /// * `nfd` - The number of file descriptors sent by the server.  Will always be 1.
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug)]
 pub struct CreateSegmentReply {
     pub nfd: u8,
     pub sequence: u16,

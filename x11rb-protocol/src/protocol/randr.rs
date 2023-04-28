@@ -6896,7 +6896,7 @@ impl<'input> crate::x11_utils::ReplyFDsRequest for CreateLeaseRequest<'input> {
     type Reply = CreateLeaseReply;
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug)]
 pub struct CreateLeaseReply {
     pub nfd: u8,
     pub sequence: u16,

@@ -11,27 +11,21 @@
 
 #[cfg(all(feature = "std", unix))]
 mod raw_fd_container {
-    use std::mem::forget;
-    use std::os::unix::io::{AsRawFd, IntoRawFd, RawFd};
+    use rustix::fd::OwnedFd;
+    use std::os::unix::io::{AsRawFd, RawFd};
 
     /// A simple wrapper around RawFd that closes the fd on drop.
     ///
     /// On non-unix systems, this type is empty and does not provide
     /// any method.
-    #[derive(Debug, Hash, PartialEq, Eq)]
-    pub struct RawFdContainer(RawFd);
-
-    impl Drop for RawFdContainer {
-        fn drop(&mut self) {
-            let _ = nix::unistd::close(self.0);
-        }
-    }
+    #[derive(Debug)]
+    pub struct RawFdContainer(OwnedFd);
 
     impl RawFdContainer {
         /// Create a new `RawFdContainer` for the given `RawFd`.
         ///
         /// The `RawFdContainer` takes ownership of the `RawFd` and closes it on drop.
-        pub fn new(fd: RawFd) -> Self {
+        pub fn new(fd: OwnedFd) -> Self {
             RawFdContainer(fd)
         }
 
@@ -40,7 +34,7 @@ mod raw_fd_container {
         /// of the `dup`ed version, whereas the original `RawFdContainer`
         /// will keep the ownership of its FD.
         pub fn try_clone(&self) -> Result<Self, std::io::Error> {
-            Ok(Self::new(nix::unistd::dup(self.0)?))
+            Ok(Self::new(rustix::io::dup(&self.0)?))
         }
 
         /// Get the `RawFd` out of this `RawFdContainer`.
@@ -48,9 +42,7 @@ mod raw_fd_container {
         /// This function would be an implementation of `IntoRawFd` if that were possible. However, it
         /// causes a conflict with an `impl` from libcore...
         pub fn into_raw_fd(self) -> RawFd {
-            let fd = self.0;
-            forget(self);
-            fd
+            self.0.as_raw_fd()
         }
 
         /// Consumes the `RawFdContainer` and closes the wrapped FD with
@@ -59,20 +51,19 @@ mod raw_fd_container {
         /// This is similar to dropping the `RawFdContainer`, but it allows
         /// the caller to handle errors.
         pub fn close(self) -> Result<(), std::io::Error> {
-            let fd = self.into_raw_fd();
-            nix::unistd::close(fd).map_err(|e| e.into())
-        }
-    }
-
-    impl<T: IntoRawFd> From<T> for RawFdContainer {
-        fn from(fd: T) -> Self {
-            Self::new(fd.into_raw_fd())
+            todo!()
         }
     }
 
     impl AsRawFd for RawFdContainer {
         fn as_raw_fd(&self) -> RawFd {
-            self.0
+            self.0.as_raw_fd()
+        }
+    }
+
+    impl rustix::fd::AsFd for RawFdContainer {
+        fn as_fd(&self) -> rustix::fd::BorrowedFd<'_> {
+            rustix::fd::AsFd::as_fd(&self.0)
         }
     }
 }
