@@ -36,10 +36,11 @@ jobs:
          uses: dtolnay/rust-toolchain@beta
          with:
            components: clippy
-       - uses: actions-rs/clippy-check@v1
+       - uses: giraffate/clippy-action@v1
          with:
-           token: ${{ secrets.GITHUB_TOKEN }}
-           args: --workspace --all-targets --all-features
+           reporter: 'github-pr-review'
+           github_token: ${{ secrets.GITHUB_TOKEN }}
+           clippy_flags: --workspace --all-targets --all-features
 
   clippy-rustfmt:
      runs-on: ubuntu-latest
