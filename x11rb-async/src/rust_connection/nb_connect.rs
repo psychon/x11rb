@@ -2,6 +2,7 @@
 
 use std::io;
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr, TcpStream};
+use std::time::Instant;
 
 #[cfg(unix)]
 use std::os::unix::net::UnixStream;
@@ -46,6 +47,24 @@ pub(super) async fn connect(addrs: &ParsedDisplay) -> Result<(DefaultStream, usi
 
 /// Connect to a `DefaultStream` asynchronously.
 async fn connect_to_addr(addr: ConnectAddress<'_>) -> io::Result<DefaultStream> {
+    let start = Instant::now();
+    match connect_to_addr_impl(&addr).await {
+        Ok(stream) => {
+            tracing::trace!(
+                "Connected to X11 server via {:?} in {:?}",
+                addr,
+                start.elapsed()
+            );
+            Ok(stream)
+        }
+        Err(e) => {
+            tracing::debug!("Failed to connect to X11 server via {:?}: {:?}", addr, e);
+            Err(e)
+        }
+    }
+}
+
+async fn connect_to_addr_impl(addr: &ConnectAddress<'_>) -> io::Result<DefaultStream> {
     match addr {
         ConnectAddress::Hostname(host, port) => {
             let mut err = None;
@@ -53,7 +72,7 @@ async fn connect_to_addr(addr: ConnectAddress<'_>) -> io::Result<DefaultStream> 
             // Resolve the hostname.
             let streams = resolve_host(host)
                 .await?
-                .then(|ip_addr| Async::<TcpStream>::connect((ip_addr, port)))
+                .then(|ip_addr| Async::<TcpStream>::connect((ip_addr, *port)))
                 .map(|result| {
                     result.and_then(|stream| DefaultStream::from_tcp_stream(stream.into_inner()?))
                 });

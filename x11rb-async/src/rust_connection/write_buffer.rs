@@ -89,6 +89,11 @@ impl WriteBufferInner {
         }
 
         // Write the entire buffer.
+        tracing::trace!(
+            "Flushing {} bytes of data and {} FDs",
+            self.buffer.len(),
+            self.fds.len()
+        );
         let mut position = 0;
         super::write_with(stream, {
             let (buffer, fds) = (&mut self.buffer, &mut self.fds);
@@ -102,6 +107,7 @@ impl WriteBufferInner {
                         ));
                     }
 
+                    tracing::trace!("Flushing wrote {} bytes of data", n);
                     position += n;
                 }
 
@@ -134,6 +140,7 @@ impl WriteBufferInner {
         let mut total_len = bufs
             .iter()
             .fold(0usize, |sum, buf| sum.saturating_add(buf.len()));
+        tracing::trace!("Writing {} bytes of data and {} fds", total_len, fds.len());
 
         // If our data doesn't fit, flush the buffer first.
         if self.buffer.len() + total_len > self.buffer.capacity() {
@@ -142,6 +149,7 @@ impl WriteBufferInner {
 
         // If our data fits now, write all of it.
         if total_len < self.buffer.capacity() {
+            tracing::trace!("Data to write is appended to the buffer");
             for buf in bufs {
                 self.buffer.extend_from_slice(buf);
             }
@@ -154,6 +162,7 @@ impl WriteBufferInner {
         debug_assert!(self.buffer.is_empty());
 
         // Otherwise, write directly to the stream.
+        tracing::trace!("Data to write is written directly to the stream");
         let mut partial: &[u8] = &[];
         super::write_with(stream, |stream| {
             while total_len > 0 || !partial.is_empty() {

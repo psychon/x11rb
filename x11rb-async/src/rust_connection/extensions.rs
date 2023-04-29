@@ -37,6 +37,8 @@ impl Extensions {
     ) -> Result<(), ConnectionError> {
         // Check if there is already a cache entry.
         if let Entry::Vacant(entry) = self.0.entry(name) {
+            tracing::debug!("Prefetching information about '{}' extension", name);
+
             // Send a QueryExtension request.
             let cookie = crate::protocol::xproto::query_extension(conn, name.as_bytes()).await?;
 
@@ -69,22 +71,34 @@ impl Extensions {
             ExtensionState::Loaded(info) => Ok(*info),
 
             ExtensionState::Loading(cookie) => {
+                tracing::debug!("Waiting for QueryInfo reply for '{}' extension", name);
+
                 // Load the extension information.
                 let cookie = Cookie::<'_, _, QueryExtensionReply>::new(conn, *cookie);
 
                 // Get the reply.
-                let reply = cookie.reply().await.map_err(|e| match e {
-                    ReplyError::ConnectionError(e) => e,
-                    ReplyError::X11Error(_) => ConnectionError::UnknownError,
+                let reply = cookie.reply().await.map_err(|e| {
+                    tracing::warn!(
+                        "Got error {:?} for QueryInfo reply for '{}' extension",
+                        e,
+                        name
+                    );
+                    match e {
+                        ReplyError::ConnectionError(e) => e,
+                        ReplyError::X11Error(_) => ConnectionError::UnknownError,
+                    }
                 })?;
 
                 let ext_info = if reply.present {
-                    Some(ExtensionInformation {
+                    let info = ExtensionInformation {
                         major_opcode: reply.major_opcode,
                         first_event: reply.first_event,
                         first_error: reply.first_error,
-                    })
+                    };
+                    tracing::debug!("Extension '{}' is present: {:?}", name, info);
+                    Some(info)
                 } else {
+                    tracing::debug!("Extension '{}' is not present", name);
                     None
                 };
 
