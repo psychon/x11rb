@@ -61,35 +61,20 @@ jobs:
 
        # rustfmt
        - name: rustfmt
-         uses: actions-rs/cargo@v1
-         with:
-           command: fmt
-           args: --all -- --check
+         run: cargo fmt --all -- --check
 
        # clippy
        - name: clippy x11rb without features
-         uses: actions-rs/cargo@v1
-         with:
-           command: clippy
-           args: -p x11rb --all-targets -- -D warnings ${{ matrix.clippy_args }}
+         run: cargo clippy -p x11rb --all-targets -- -D warnings ${{ matrix.clippy_args }}
 
        - name: clippy x11rb with allow-unsafe-code but without dl-libxcb
-         uses: actions-rs/cargo@v1
-         with:
-           command: clippy
-           args: -p x11rb --all-targets --features "allow-unsafe-code" -- -D warnings ${{ matrix.clippy_args }}
+         run: cargo clippy -p x11rb --all-targets --features "allow-unsafe-code" -- -D warnings ${{ matrix.clippy_args }}
 
        - name: clippy x11rb with allow-unsafe-code and dl-libxcb
-         uses: actions-rs/cargo@v1
-         with:
-           command: clippy
-           args: -p x11rb --all-targets --features "allow-unsafe-code dl-libxcb" -- -D warnings ${{ matrix.clippy_args }}
+         run: cargo clippy -p x11rb --all-targets --features "allow-unsafe-code dl-libxcb" -- -D warnings ${{ matrix.clippy_args }}
 
        - name: clippy workspace with all features
-         uses: actions-rs/cargo@v1
-         with:
-           command: clippy
-           args: --workspace --all-targets --all-features -- -D warnings ${{ matrix.clippy_args }}
+         run: cargo clippy --workspace --all-targets --all-features -- -D warnings ${{ matrix.clippy_args }}
 
   build:
     runs-on: ubuntu-latest
