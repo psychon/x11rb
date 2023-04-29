@@ -19,7 +19,7 @@ jobs:
   code_gen:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - uses: actions-rs/toolchain@v1
       with:
         profile: minimal
@@ -34,7 +34,7 @@ jobs:
   clippy:
      runs-on: ubuntu-latest
      steps:
-       - uses: actions/checkout@v2
+       - uses: actions/checkout@v3
        - name: Install clippy
          uses: actions-rs/toolchain@v1
          with:
@@ -50,7 +50,7 @@ jobs:
   clippy-rustfmt:
      runs-on: ubuntu-latest
      steps:
-       - uses: actions/checkout@v2
+       - uses: actions/checkout@v3
        - name: Install rustfmt and clippy
          uses: actions-rs/toolchain@v1
          with:
@@ -101,7 +101,7 @@ jobs:
           - rust: nightly
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - uses: actions-rs/toolchain@v1
       with:
         profile: minimal
@@ -173,7 +173,7 @@ jobs:
       run: grcov $(find ./ -type f -name "coverage-*.profraw") -s . --binary-path ./target/debug --branch --ignore-not-existing --ignore 'tests/*' -t coveralls+ --token ? -o ./coveralls.json
     - name: Upload to codecov.io
       if: matrix.rust == 'nightly'
-      uses: codecov/codecov-action@v2
+      uses: codecov/codecov-action@v3
       with:
         files: ./coveralls.json
         flags: tests
@@ -183,7 +183,7 @@ jobs:
   msrv-check:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - uses: actions-rs/toolchain@v1
       with:
         profile: minimal
@@ -205,7 +205,7 @@ jobs:
     env:
       CROSS_TARGET: mips64-unknown-linux-gnuabi64
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - uses: actions-rs/toolchain@v1
       with:
         profile: minimal
@@ -222,7 +222,7 @@ jobs:
   non-linux-unix-test:
     runs-on: macos-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - uses: actions-rs/toolchain@v1
       with:
         profile: minimal
