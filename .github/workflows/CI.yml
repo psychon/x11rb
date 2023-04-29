@@ -173,7 +173,7 @@ jobs:
       run: grcov $(find ./ -type f -name "coverage-*.profraw") -s . --binary-path ./target/debug --branch --ignore-not-existing --ignore 'tests/*' -t coveralls+ --token ? -o ./coveralls.json
     - name: Upload to codecov.io
       if: matrix.rust == 'nightly'
-      uses: codecov/codecov-action@v2
+      uses: codecov/codecov-action@v3
       with:
         files: ./coveralls.json
         flags: tests
