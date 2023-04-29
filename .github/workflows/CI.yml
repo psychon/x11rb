@@ -20,10 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    - uses: actions-rs/toolchain@v1
-      with:
-        profile: minimal
-        toolchain: stable
+    - uses: dtolnay/rust-toolchain@stable
     - name: Clear src/protocol directories in x11rb and x11rb-protocol
       run: rm -rf x11rb/src/protocol/ x11rb-protocol/src/protocol/
     - name: Run code generator
@@ -36,60 +33,41 @@ jobs:
      steps:
        - uses: actions/checkout@v3
        - name: Install clippy
-         uses: actions-rs/toolchain@v1
+         uses: dtolnay/rust-toolchain@beta
          with:
-           profile: minimal
-           toolchain: beta
-           override: true
            components: clippy
-       - uses: actions-rs/clippy-check@v1
+       - uses: giraffate/clippy-action@v1
          with:
-           token: ${{ secrets.GITHUB_TOKEN }}
-           args: --workspace --all-targets --all-features
+           reporter: 'github-pr-review'
+           filter_mode: 'nofilter'
+           github_token: ${{ secrets.GITHUB_TOKEN }}
+           clippy_flags: --workspace --all-targets --all-features
 
   clippy-rustfmt:
      runs-on: ubuntu-latest
      steps:
        - uses: actions/checkout@v3
        - name: Install rustfmt and clippy
-         uses: actions-rs/toolchain@v1
+         uses: dtolnay/rust-toolchain@stable
          with:
-           profile: minimal
-           toolchain: stable
-           override: true
            components: rustfmt, clippy
 
        # rustfmt
        - name: rustfmt
-         uses: actions-rs/cargo@v1
-         with:
-           command: fmt
-           args: --all -- --check
+         run: cargo fmt --all -- --check
 
        # clippy
        - name: clippy x11rb without features
-         uses: actions-rs/cargo@v1
-         with:
-           command: clippy
-           args: -p x11rb --all-targets -- -D warnings ${{ matrix.clippy_args }}
+         run: cargo clippy -p x11rb --all-targets -- -D warnings ${{ matrix.clippy_args }}
 
        - name: clippy x11rb with allow-unsafe-code but without dl-libxcb
-         uses: actions-rs/cargo@v1
-         with:
-           command: clippy
-           args: -p x11rb --all-targets --features "allow-unsafe-code" -- -D warnings ${{ matrix.clippy_args }}
+         run: cargo clippy -p x11rb --all-targets --features "allow-unsafe-code" -- -D warnings ${{ matrix.clippy_args }}
 
        - name: clippy x11rb with allow-unsafe-code and dl-libxcb
-         uses: actions-rs/cargo@v1
-         with:
-           command: clippy
-           args: -p x11rb --all-targets --features "allow-unsafe-code dl-libxcb" -- -D warnings ${{ matrix.clippy_args }}
+         run: cargo clippy -p x11rb --all-targets --features "allow-unsafe-code dl-libxcb" -- -D warnings ${{ matrix.clippy_args }}
 
        - name: clippy workspace with all features
-         uses: actions-rs/cargo@v1
-         with:
-           command: clippy
-           args: --workspace --all-targets --all-features -- -D warnings ${{ matrix.clippy_args }}
+         run: cargo clippy --workspace --all-targets --all-features -- -D warnings ${{ matrix.clippy_args }}
 
   build:
     runs-on: ubuntu-latest
@@ -102,11 +80,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - uses: actions-rs/toolchain@v1
+    - uses: dtolnay/rust-toolchain@master
       with:
-        profile: minimal
         toolchain: ${{ matrix.rust }}
-        override: true
 
     - name: Install profiling tools
       if: matrix.rust == 'nightly'
@@ -184,12 +160,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    - uses: actions-rs/toolchain@v1
-      with:
-        profile: minimal
-        toolchain: 1.56.0
-        override: true
-          #
+    - uses: dtolnay/rust-toolchain@1.56.0
+
     # build
     - name: cargo check x11rb-protocol with all features
       run: cargo build --package x11rb-protocol --verbose --lib --all-features
@@ -206,11 +178,7 @@ jobs:
       CROSS_TARGET: mips64-unknown-linux-gnuabi64
     steps:
     - uses: actions/checkout@v3
-    - uses: actions-rs/toolchain@v1
-      with:
-        profile: minimal
-        toolchain: stable
-        override: true
+    - uses: dtolnay/rust-toolchain@stable
     - name: Install cross rust
       run: rustup target add "$CROSS_TARGET"
     - name: Install cross
@@ -223,10 +191,6 @@ jobs:
     runs-on: macos-latest
     steps:
     - uses: actions/checkout@v3
-    - uses: actions-rs/toolchain@v1
-      with:
-        profile: minimal
-        toolchain: stable
-        override: true
+    - uses: dtolnay/rust-toolchain@stable
     - name: Run tests
       run: cargo test --verbose --package x11rb --features "$MOST_FEATURES"
