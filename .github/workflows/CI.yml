@@ -20,10 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    - uses: actions-rs/toolchain@v1
-      with:
-        profile: minimal
-        toolchain: stable
+    - uses: dtolnay/rust-toolchain@stable
     - name: Clear src/protocol directories in x11rb and x11rb-protocol
       run: rm -rf x11rb/src/protocol/ x11rb-protocol/src/protocol/
     - name: Run code generator
@@ -36,11 +33,8 @@ jobs:
      steps:
        - uses: actions/checkout@v3
        - name: Install clippy
-         uses: actions-rs/toolchain@v1
+         uses: dtolnay/rust-toolchain@beta
          with:
-           profile: minimal
-           toolchain: beta
-           override: true
            components: clippy
        - uses: actions-rs/clippy-check@v1
          with:
@@ -52,11 +46,8 @@ jobs:
      steps:
        - uses: actions/checkout@v3
        - name: Install rustfmt and clippy
-         uses: actions-rs/toolchain@v1
+         uses: dtolnay/rust-toolchain@stable
          with:
-           profile: minimal
-           toolchain: stable
-           override: true
            components: rustfmt, clippy
 
        # rustfmt
@@ -87,11 +78,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - uses: actions-rs/toolchain@v1
+    - uses: dtolnay/rust-toolchain@master
       with:
-        profile: minimal
         toolchain: ${{ matrix.rust }}
-        override: true
 
     - name: Install profiling tools
       if: matrix.rust == 'nightly'
@@ -169,12 +158,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    - uses: actions-rs/toolchain@v1
-      with:
-        profile: minimal
-        toolchain: 1.56.0
-        override: true
-          #
+    - uses: dtolnay/rust-toolchain@1.56.0
+
     # build
     - name: cargo check x11rb-protocol with all features
       run: cargo build --package x11rb-protocol --verbose --lib --all-features
@@ -191,11 +176,7 @@ jobs:
       CROSS_TARGET: mips64-unknown-linux-gnuabi64
     steps:
     - uses: actions/checkout@v3
-    - uses: actions-rs/toolchain@v1
-      with:
-        profile: minimal
-        toolchain: stable
-        override: true
+    - uses: dtolnay/rust-toolchain@stable
     - name: Install cross rust
       run: rustup target add "$CROSS_TARGET"
     - name: Install cross
@@ -208,10 +189,6 @@ jobs:
     runs-on: macos-latest
     steps:
     - uses: actions/checkout@v3
-    - uses: actions-rs/toolchain@v1
-      with:
-        profile: minimal
-        toolchain: stable
-        override: true
+    - uses: dtolnay/rust-toolchain@stable
     - name: Run tests
       run: cargo test --verbose --package x11rb --features "$MOST_FEATURES"
