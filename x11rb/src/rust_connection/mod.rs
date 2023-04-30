@@ -838,16 +838,28 @@ struct RequestInfo<'a> {
 
 impl std::fmt::Display for RequestInfo<'_> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        if self.major_opcode < 128 {
-            write!(f, "xproto request {}", self.major_opcode)
-        } else {
-            use x11rb_protocol::x11_utils::ExtInfoProvider;
-            let ext_mgr = self.extension_manager.lock().unwrap();
-            let ext_name = ext_mgr
-                .get_from_major_opcode(self.major_opcode)
-                .map(|(name, _)| name)
-                .unwrap_or("unknown extension");
-            write!(f, "{} request {}", ext_name, self.minor_opcode)
+        let lock = self.extension_manager.try_lock();
+        match lock {
+            Ok(guard) => {
+                write!(
+                    f,
+                    "{} request",
+                    x11rb_protocol::protocol::get_request_name(
+                        &*guard,
+                        self.major_opcode,
+                        self.minor_opcode
+                    )
+                )
+            }
+            Err(TryLockError::WouldBlock) => {
+                // This (most likely) happens because the extension manager is sending a QueryExtension request
+                write!(
+                    f,
+                    "request with major opcode {} and minor {}",
+                    self.major_opcode, self.minor_opcode
+                )
+            }
+            Err(TryLockError::Poisoned(e)) => panic!("{}", e),
         }
     }
 }

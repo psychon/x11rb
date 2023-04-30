@@ -90,6 +90,879 @@ pub mod xv;
 #[cfg(feature = "xvmc")]
 pub mod xvmc;
 
+/// Get the name of a request based on its major and minor code.
+///
+/// The major and minor opcode are the first and second byte of a request.
+/// Core requests do not have a minor opcode. For these, the minor opcode is ignored by this function.
+pub fn get_request_name(
+    ext_info_provider: &dyn ExtInfoProvider,
+    major_opcode: u8,
+    minor_opcode: u8,
+) -> Cow<'static, str> {
+    // From the X11 protocol reference manual:
+    // Major opcodes 128 through 255 are reserved for extensions.
+    if major_opcode < 128 {
+        match major_opcode {
+            xproto::CREATE_WINDOW_REQUEST => "CreateWindow".into(),
+            xproto::CHANGE_WINDOW_ATTRIBUTES_REQUEST => "ChangeWindowAttributes".into(),
+            xproto::GET_WINDOW_ATTRIBUTES_REQUEST => "GetWindowAttributes".into(),
+            xproto::DESTROY_WINDOW_REQUEST => "DestroyWindow".into(),
+            xproto::DESTROY_SUBWINDOWS_REQUEST => "DestroySubwindows".into(),
+            xproto::CHANGE_SAVE_SET_REQUEST => "ChangeSaveSet".into(),
+            xproto::REPARENT_WINDOW_REQUEST => "ReparentWindow".into(),
+            xproto::MAP_WINDOW_REQUEST => "MapWindow".into(),
+            xproto::MAP_SUBWINDOWS_REQUEST => "MapSubwindows".into(),
+            xproto::UNMAP_WINDOW_REQUEST => "UnmapWindow".into(),
+            xproto::UNMAP_SUBWINDOWS_REQUEST => "UnmapSubwindows".into(),
+            xproto::CONFIGURE_WINDOW_REQUEST => "ConfigureWindow".into(),
+            xproto::CIRCULATE_WINDOW_REQUEST => "CirculateWindow".into(),
+            xproto::GET_GEOMETRY_REQUEST => "GetGeometry".into(),
+            xproto::QUERY_TREE_REQUEST => "QueryTree".into(),
+            xproto::INTERN_ATOM_REQUEST => "InternAtom".into(),
+            xproto::GET_ATOM_NAME_REQUEST => "GetAtomName".into(),
+            xproto::CHANGE_PROPERTY_REQUEST => "ChangeProperty".into(),
+            xproto::DELETE_PROPERTY_REQUEST => "DeleteProperty".into(),
+            xproto::GET_PROPERTY_REQUEST => "GetProperty".into(),
+            xproto::LIST_PROPERTIES_REQUEST => "ListProperties".into(),
+            xproto::SET_SELECTION_OWNER_REQUEST => "SetSelectionOwner".into(),
+            xproto::GET_SELECTION_OWNER_REQUEST => "GetSelectionOwner".into(),
+            xproto::CONVERT_SELECTION_REQUEST => "ConvertSelection".into(),
+            xproto::SEND_EVENT_REQUEST => "SendEvent".into(),
+            xproto::GRAB_POINTER_REQUEST => "GrabPointer".into(),
+            xproto::UNGRAB_POINTER_REQUEST => "UngrabPointer".into(),
+            xproto::GRAB_BUTTON_REQUEST => "GrabButton".into(),
+            xproto::UNGRAB_BUTTON_REQUEST => "UngrabButton".into(),
+            xproto::CHANGE_ACTIVE_POINTER_GRAB_REQUEST => "ChangeActivePointerGrab".into(),
+            xproto::GRAB_KEYBOARD_REQUEST => "GrabKeyboard".into(),
+            xproto::UNGRAB_KEYBOARD_REQUEST => "UngrabKeyboard".into(),
+            xproto::GRAB_KEY_REQUEST => "GrabKey".into(),
+            xproto::UNGRAB_KEY_REQUEST => "UngrabKey".into(),
+            xproto::ALLOW_EVENTS_REQUEST => "AllowEvents".into(),
+            xproto::GRAB_SERVER_REQUEST => "GrabServer".into(),
+            xproto::UNGRAB_SERVER_REQUEST => "UngrabServer".into(),
+            xproto::QUERY_POINTER_REQUEST => "QueryPointer".into(),
+            xproto::GET_MOTION_EVENTS_REQUEST => "GetMotionEvents".into(),
+            xproto::TRANSLATE_COORDINATES_REQUEST => "TranslateCoordinates".into(),
+            xproto::WARP_POINTER_REQUEST => "WarpPointer".into(),
+            xproto::SET_INPUT_FOCUS_REQUEST => "SetInputFocus".into(),
+            xproto::GET_INPUT_FOCUS_REQUEST => "GetInputFocus".into(),
+            xproto::QUERY_KEYMAP_REQUEST => "QueryKeymap".into(),
+            xproto::OPEN_FONT_REQUEST => "OpenFont".into(),
+            xproto::CLOSE_FONT_REQUEST => "CloseFont".into(),
+            xproto::QUERY_FONT_REQUEST => "QueryFont".into(),
+            xproto::QUERY_TEXT_EXTENTS_REQUEST => "QueryTextExtents".into(),
+            xproto::LIST_FONTS_REQUEST => "ListFonts".into(),
+            xproto::LIST_FONTS_WITH_INFO_REQUEST => "ListFontsWithInfo".into(),
+            xproto::SET_FONT_PATH_REQUEST => "SetFontPath".into(),
+            xproto::GET_FONT_PATH_REQUEST => "GetFontPath".into(),
+            xproto::CREATE_PIXMAP_REQUEST => "CreatePixmap".into(),
+            xproto::FREE_PIXMAP_REQUEST => "FreePixmap".into(),
+            xproto::CREATE_GC_REQUEST => "CreateGC".into(),
+            xproto::CHANGE_GC_REQUEST => "ChangeGC".into(),
+            xproto::COPY_GC_REQUEST => "CopyGC".into(),
+            xproto::SET_DASHES_REQUEST => "SetDashes".into(),
+            xproto::SET_CLIP_RECTANGLES_REQUEST => "SetClipRectangles".into(),
+            xproto::FREE_GC_REQUEST => "FreeGC".into(),
+            xproto::CLEAR_AREA_REQUEST => "ClearArea".into(),
+            xproto::COPY_AREA_REQUEST => "CopyArea".into(),
+            xproto::COPY_PLANE_REQUEST => "CopyPlane".into(),
+            xproto::POLY_POINT_REQUEST => "PolyPoint".into(),
+            xproto::POLY_LINE_REQUEST => "PolyLine".into(),
+            xproto::POLY_SEGMENT_REQUEST => "PolySegment".into(),
+            xproto::POLY_RECTANGLE_REQUEST => "PolyRectangle".into(),
+            xproto::POLY_ARC_REQUEST => "PolyArc".into(),
+            xproto::FILL_POLY_REQUEST => "FillPoly".into(),
+            xproto::POLY_FILL_RECTANGLE_REQUEST => "PolyFillRectangle".into(),
+            xproto::POLY_FILL_ARC_REQUEST => "PolyFillArc".into(),
+            xproto::PUT_IMAGE_REQUEST => "PutImage".into(),
+            xproto::GET_IMAGE_REQUEST => "GetImage".into(),
+            xproto::POLY_TEXT8_REQUEST => "PolyText8".into(),
+            xproto::POLY_TEXT16_REQUEST => "PolyText16".into(),
+            xproto::IMAGE_TEXT8_REQUEST => "ImageText8".into(),
+            xproto::IMAGE_TEXT16_REQUEST => "ImageText16".into(),
+            xproto::CREATE_COLORMAP_REQUEST => "CreateColormap".into(),
+            xproto::FREE_COLORMAP_REQUEST => "FreeColormap".into(),
+            xproto::COPY_COLORMAP_AND_FREE_REQUEST => "CopyColormapAndFree".into(),
+            xproto::INSTALL_COLORMAP_REQUEST => "InstallColormap".into(),
+            xproto::UNINSTALL_COLORMAP_REQUEST => "UninstallColormap".into(),
+            xproto::LIST_INSTALLED_COLORMAPS_REQUEST => "ListInstalledColormaps".into(),
+            xproto::ALLOC_COLOR_REQUEST => "AllocColor".into(),
+            xproto::ALLOC_NAMED_COLOR_REQUEST => "AllocNamedColor".into(),
+            xproto::ALLOC_COLOR_CELLS_REQUEST => "AllocColorCells".into(),
+            xproto::ALLOC_COLOR_PLANES_REQUEST => "AllocColorPlanes".into(),
+            xproto::FREE_COLORS_REQUEST => "FreeColors".into(),
+            xproto::STORE_COLORS_REQUEST => "StoreColors".into(),
+            xproto::STORE_NAMED_COLOR_REQUEST => "StoreNamedColor".into(),
+            xproto::QUERY_COLORS_REQUEST => "QueryColors".into(),
+            xproto::LOOKUP_COLOR_REQUEST => "LookupColor".into(),
+            xproto::CREATE_CURSOR_REQUEST => "CreateCursor".into(),
+            xproto::CREATE_GLYPH_CURSOR_REQUEST => "CreateGlyphCursor".into(),
+            xproto::FREE_CURSOR_REQUEST => "FreeCursor".into(),
+            xproto::RECOLOR_CURSOR_REQUEST => "RecolorCursor".into(),
+            xproto::QUERY_BEST_SIZE_REQUEST => "QueryBestSize".into(),
+            xproto::QUERY_EXTENSION_REQUEST => "QueryExtension".into(),
+            xproto::LIST_EXTENSIONS_REQUEST => "ListExtensions".into(),
+            xproto::CHANGE_KEYBOARD_MAPPING_REQUEST => "ChangeKeyboardMapping".into(),
+            xproto::GET_KEYBOARD_MAPPING_REQUEST => "GetKeyboardMapping".into(),
+            xproto::CHANGE_KEYBOARD_CONTROL_REQUEST => "ChangeKeyboardControl".into(),
+            xproto::GET_KEYBOARD_CONTROL_REQUEST => "GetKeyboardControl".into(),
+            xproto::BELL_REQUEST => "Bell".into(),
+            xproto::CHANGE_POINTER_CONTROL_REQUEST => "ChangePointerControl".into(),
+            xproto::GET_POINTER_CONTROL_REQUEST => "GetPointerControl".into(),
+            xproto::SET_SCREEN_SAVER_REQUEST => "SetScreenSaver".into(),
+            xproto::GET_SCREEN_SAVER_REQUEST => "GetScreenSaver".into(),
+            xproto::CHANGE_HOSTS_REQUEST => "ChangeHosts".into(),
+            xproto::LIST_HOSTS_REQUEST => "ListHosts".into(),
+            xproto::SET_ACCESS_CONTROL_REQUEST => "SetAccessControl".into(),
+            xproto::SET_CLOSE_DOWN_MODE_REQUEST => "SetCloseDownMode".into(),
+            xproto::KILL_CLIENT_REQUEST => "KillClient".into(),
+            xproto::ROTATE_PROPERTIES_REQUEST => "RotateProperties".into(),
+            xproto::FORCE_SCREEN_SAVER_REQUEST => "ForceScreenSaver".into(),
+            xproto::SET_POINTER_MAPPING_REQUEST => "SetPointerMapping".into(),
+            xproto::GET_POINTER_MAPPING_REQUEST => "GetPointerMapping".into(),
+            xproto::SET_MODIFIER_MAPPING_REQUEST => "SetModifierMapping".into(),
+            xproto::GET_MODIFIER_MAPPING_REQUEST => "GetModifierMapping".into(),
+            xproto::NO_OPERATION_REQUEST => "NoOperation".into(),
+            _ => alloc::format!("xproto::opcode {}", major_opcode).into(),
+        }
+    } else {
+        // Figure out the extension name
+        let ext_name = match ext_info_provider.get_from_major_opcode(major_opcode) {
+            Some((name, _)) => name,
+            None => return alloc::format!("ext {}::opcode {}", major_opcode, minor_opcode).into(),
+        };
+        match ext_name {
+            bigreq::X11_EXTENSION_NAME => {
+                match minor_opcode {
+                    bigreq::ENABLE_REQUEST => "BigRequests::Enable".into(),
+                    _ => alloc::format!("BigRequests::opcode {}", minor_opcode).into(),
+                }
+            }
+            #[cfg(feature = "composite")]
+            composite::X11_EXTENSION_NAME => {
+                match minor_opcode {
+                    composite::QUERY_VERSION_REQUEST => "Composite::QueryVersion".into(),
+                    composite::REDIRECT_WINDOW_REQUEST => "Composite::RedirectWindow".into(),
+                    composite::REDIRECT_SUBWINDOWS_REQUEST => "Composite::RedirectSubwindows".into(),
+                    composite::UNREDIRECT_WINDOW_REQUEST => "Composite::UnredirectWindow".into(),
+                    composite::UNREDIRECT_SUBWINDOWS_REQUEST => "Composite::UnredirectSubwindows".into(),
+                    composite::CREATE_REGION_FROM_BORDER_CLIP_REQUEST => "Composite::CreateRegionFromBorderClip".into(),
+                    composite::NAME_WINDOW_PIXMAP_REQUEST => "Composite::NameWindowPixmap".into(),
+                    composite::GET_OVERLAY_WINDOW_REQUEST => "Composite::GetOverlayWindow".into(),
+                    composite::RELEASE_OVERLAY_WINDOW_REQUEST => "Composite::ReleaseOverlayWindow".into(),
+                    _ => alloc::format!("Composite::opcode {}", minor_opcode).into(),
+                }
+            }
+            #[cfg(feature = "damage")]
+            damage::X11_EXTENSION_NAME => {
+                match minor_opcode {
+                    damage::QUERY_VERSION_REQUEST => "Damage::QueryVersion".into(),
+                    damage::CREATE_REQUEST => "Damage::Create".into(),
+                    damage::DESTROY_REQUEST => "Damage::Destroy".into(),
+                    damage::SUBTRACT_REQUEST => "Damage::Subtract".into(),
+                    damage::ADD_REQUEST => "Damage::Add".into(),
+                    _ => alloc::format!("Damage::opcode {}", minor_opcode).into(),
+                }
+            }
+            #[cfg(feature = "dbe")]
+            dbe::X11_EXTENSION_NAME => {
+                match minor_opcode {
+                    dbe::QUERY_VERSION_REQUEST => "Dbe::QueryVersion".into(),
+                    dbe::ALLOCATE_BACK_BUFFER_REQUEST => "Dbe::AllocateBackBuffer".into(),
+                    dbe::DEALLOCATE_BACK_BUFFER_REQUEST => "Dbe::DeallocateBackBuffer".into(),
+                    dbe::SWAP_BUFFERS_REQUEST => "Dbe::SwapBuffers".into(),
+                    dbe::BEGIN_IDIOM_REQUEST => "Dbe::BeginIdiom".into(),
+                    dbe::END_IDIOM_REQUEST => "Dbe::EndIdiom".into(),
+                    dbe::GET_VISUAL_INFO_REQUEST => "Dbe::GetVisualInfo".into(),
+                    dbe::GET_BACK_BUFFER_ATTRIBUTES_REQUEST => "Dbe::GetBackBufferAttributes".into(),
+                    _ => alloc::format!("Dbe::opcode {}", minor_opcode).into(),
+                }
+            }
+            #[cfg(feature = "dpms")]
+            dpms::X11_EXTENSION_NAME => {
+                match minor_opcode {
+                    dpms::GET_VERSION_REQUEST => "DPMS::GetVersion".into(),
+                    dpms::CAPABLE_REQUEST => "DPMS::Capable".into(),
+                    dpms::GET_TIMEOUTS_REQUEST => "DPMS::GetTimeouts".into(),
+                    dpms::SET_TIMEOUTS_REQUEST => "DPMS::SetTimeouts".into(),
+                    dpms::ENABLE_REQUEST => "DPMS::Enable".into(),
+                    dpms::DISABLE_REQUEST => "DPMS::Disable".into(),
+                    dpms::FORCE_LEVEL_REQUEST => "DPMS::ForceLevel".into(),
+                    dpms::INFO_REQUEST => "DPMS::Info".into(),
+                    _ => alloc::format!("DPMS::opcode {}", minor_opcode).into(),
+                }
+            }
+            #[cfg(feature = "dri2")]
+            dri2::X11_EXTENSION_NAME => {
+                match minor_opcode {
+                    dri2::QUERY_VERSION_REQUEST => "DRI2::QueryVersion".into(),
+                    dri2::CONNECT_REQUEST => "DRI2::Connect".into(),
+                    dri2::AUTHENTICATE_REQUEST => "DRI2::Authenticate".into(),
+                    dri2::CREATE_DRAWABLE_REQUEST => "DRI2::CreateDrawable".into(),
+                    dri2::DESTROY_DRAWABLE_REQUEST => "DRI2::DestroyDrawable".into(),
+                    dri2::GET_BUFFERS_REQUEST => "DRI2::GetBuffers".into(),
+                    dri2::COPY_REGION_REQUEST => "DRI2::CopyRegion".into(),
+                    dri2::GET_BUFFERS_WITH_FORMAT_REQUEST => "DRI2::GetBuffersWithFormat".into(),
+                    dri2::SWAP_BUFFERS_REQUEST => "DRI2::SwapBuffers".into(),
+                    dri2::GET_MSC_REQUEST => "DRI2::GetMSC".into(),
+                    dri2::WAIT_MSC_REQUEST => "DRI2::WaitMSC".into(),
+                    dri2::WAIT_SBC_REQUEST => "DRI2::WaitSBC".into(),
+                    dri2::SWAP_INTERVAL_REQUEST => "DRI2::SwapInterval".into(),
+                    dri2::GET_PARAM_REQUEST => "DRI2::GetParam".into(),
+                    _ => alloc::format!("DRI2::opcode {}", minor_opcode).into(),
+                }
+            }
+            #[cfg(feature = "dri3")]
+            dri3::X11_EXTENSION_NAME => {
+                match minor_opcode {
+                    dri3::QUERY_VERSION_REQUEST => "DRI3::QueryVersion".into(),
+                    dri3::OPEN_REQUEST => "DRI3::Open".into(),
+                    dri3::PIXMAP_FROM_BUFFER_REQUEST => "DRI3::PixmapFromBuffer".into(),
+                    dri3::BUFFER_FROM_PIXMAP_REQUEST => "DRI3::BufferFromPixmap".into(),
+                    dri3::FENCE_FROM_FD_REQUEST => "DRI3::FenceFromFD".into(),
+                    dri3::FD_FROM_FENCE_REQUEST => "DRI3::FDFromFence".into(),
+                    dri3::GET_SUPPORTED_MODIFIERS_REQUEST => "DRI3::GetSupportedModifiers".into(),
+                    dri3::PIXMAP_FROM_BUFFERS_REQUEST => "DRI3::PixmapFromBuffers".into(),
+                    dri3::BUFFERS_FROM_PIXMAP_REQUEST => "DRI3::BuffersFromPixmap".into(),
+                    dri3::SET_DRM_DEVICE_IN_USE_REQUEST => "DRI3::SetDRMDeviceInUse".into(),
+                    _ => alloc::format!("DRI3::opcode {}", minor_opcode).into(),
+                }
+            }
+            ge::X11_EXTENSION_NAME => {
+                match minor_opcode {
+                    ge::QUERY_VERSION_REQUEST => "GenericEvent::QueryVersion".into(),
+                    _ => alloc::format!("GenericEvent::opcode {}", minor_opcode).into(),
+                }
+            }
+            #[cfg(feature = "glx")]
+            glx::X11_EXTENSION_NAME => {
+                match minor_opcode {
+                    glx::RENDER_REQUEST => "Glx::Render".into(),
+                    glx::RENDER_LARGE_REQUEST => "Glx::RenderLarge".into(),
+                    glx::CREATE_CONTEXT_REQUEST => "Glx::CreateContext".into(),
+                    glx::DESTROY_CONTEXT_REQUEST => "Glx::DestroyContext".into(),
+                    glx::MAKE_CURRENT_REQUEST => "Glx::MakeCurrent".into(),
+                    glx::IS_DIRECT_REQUEST => "Glx::IsDirect".into(),
+                    glx::QUERY_VERSION_REQUEST => "Glx::QueryVersion".into(),
+                    glx::WAIT_GL_REQUEST => "Glx::WaitGL".into(),
+                    glx::WAIT_X_REQUEST => "Glx::WaitX".into(),
+                    glx::COPY_CONTEXT_REQUEST => "Glx::CopyContext".into(),
+                    glx::SWAP_BUFFERS_REQUEST => "Glx::SwapBuffers".into(),
+                    glx::USE_X_FONT_REQUEST => "Glx::UseXFont".into(),
+                    glx::CREATE_GLX_PIXMAP_REQUEST => "Glx::CreateGLXPixmap".into(),
+                    glx::GET_VISUAL_CONFIGS_REQUEST => "Glx::GetVisualConfigs".into(),
+                    glx::DESTROY_GLX_PIXMAP_REQUEST => "Glx::DestroyGLXPixmap".into(),
+                    glx::VENDOR_PRIVATE_REQUEST => "Glx::VendorPrivate".into(),
+                    glx::VENDOR_PRIVATE_WITH_REPLY_REQUEST => "Glx::VendorPrivateWithReply".into(),
+                    glx::QUERY_EXTENSIONS_STRING_REQUEST => "Glx::QueryExtensionsString".into(),
+                    glx::QUERY_SERVER_STRING_REQUEST => "Glx::QueryServerString".into(),
+                    glx::CLIENT_INFO_REQUEST => "Glx::ClientInfo".into(),
+                    glx::GET_FB_CONFIGS_REQUEST => "Glx::GetFBConfigs".into(),
+                    glx::CREATE_PIXMAP_REQUEST => "Glx::CreatePixmap".into(),
+                    glx::DESTROY_PIXMAP_REQUEST => "Glx::DestroyPixmap".into(),
+                    glx::CREATE_NEW_CONTEXT_REQUEST => "Glx::CreateNewContext".into(),
+                    glx::QUERY_CONTEXT_REQUEST => "Glx::QueryContext".into(),
+                    glx::MAKE_CONTEXT_CURRENT_REQUEST => "Glx::MakeContextCurrent".into(),
+                    glx::CREATE_PBUFFER_REQUEST => "Glx::CreatePbuffer".into(),
+                    glx::DESTROY_PBUFFER_REQUEST => "Glx::DestroyPbuffer".into(),
+                    glx::GET_DRAWABLE_ATTRIBUTES_REQUEST => "Glx::GetDrawableAttributes".into(),
+                    glx::CHANGE_DRAWABLE_ATTRIBUTES_REQUEST => "Glx::ChangeDrawableAttributes".into(),
+                    glx::CREATE_WINDOW_REQUEST => "Glx::CreateWindow".into(),
+                    glx::DELETE_WINDOW_REQUEST => "Glx::DeleteWindow".into(),
+                    glx::SET_CLIENT_INFO_ARB_REQUEST => "Glx::SetClientInfoARB".into(),
+                    glx::CREATE_CONTEXT_ATTRIBS_ARB_REQUEST => "Glx::CreateContextAttribsARB".into(),
+                    glx::SET_CLIENT_INFO2_ARB_REQUEST => "Glx::SetClientInfo2ARB".into(),
+                    glx::NEW_LIST_REQUEST => "Glx::NewList".into(),
+                    glx::END_LIST_REQUEST => "Glx::EndList".into(),
+                    glx::DELETE_LISTS_REQUEST => "Glx::DeleteLists".into(),
+                    glx::GEN_LISTS_REQUEST => "Glx::GenLists".into(),
+                    glx::FEEDBACK_BUFFER_REQUEST => "Glx::FeedbackBuffer".into(),
+                    glx::SELECT_BUFFER_REQUEST => "Glx::SelectBuffer".into(),
+                    glx::RENDER_MODE_REQUEST => "Glx::RenderMode".into(),
+                    glx::FINISH_REQUEST => "Glx::Finish".into(),
+                    glx::PIXEL_STOREF_REQUEST => "Glx::PixelStoref".into(),
+                    glx::PIXEL_STOREI_REQUEST => "Glx::PixelStorei".into(),
+                    glx::READ_PIXELS_REQUEST => "Glx::ReadPixels".into(),
+                    glx::GET_BOOLEANV_REQUEST => "Glx::GetBooleanv".into(),
+                    glx::GET_CLIP_PLANE_REQUEST => "Glx::GetClipPlane".into(),
+                    glx::GET_DOUBLEV_REQUEST => "Glx::GetDoublev".into(),
+                    glx::GET_ERROR_REQUEST => "Glx::GetError".into(),
+                    glx::GET_FLOATV_REQUEST => "Glx::GetFloatv".into(),
+                    glx::GET_INTEGERV_REQUEST => "Glx::GetIntegerv".into(),
+                    glx::GET_LIGHTFV_REQUEST => "Glx::GetLightfv".into(),
+                    glx::GET_LIGHTIV_REQUEST => "Glx::GetLightiv".into(),
+                    glx::GET_MAPDV_REQUEST => "Glx::GetMapdv".into(),
+                    glx::GET_MAPFV_REQUEST => "Glx::GetMapfv".into(),
+                    glx::GET_MAPIV_REQUEST => "Glx::GetMapiv".into(),
+                    glx::GET_MATERIALFV_REQUEST => "Glx::GetMaterialfv".into(),
+                    glx::GET_MATERIALIV_REQUEST => "Glx::GetMaterialiv".into(),
+                    glx::GET_PIXEL_MAPFV_REQUEST => "Glx::GetPixelMapfv".into(),
+                    glx::GET_PIXEL_MAPUIV_REQUEST => "Glx::GetPixelMapuiv".into(),
+                    glx::GET_PIXEL_MAPUSV_REQUEST => "Glx::GetPixelMapusv".into(),
+                    glx::GET_POLYGON_STIPPLE_REQUEST => "Glx::GetPolygonStipple".into(),
+                    glx::GET_STRING_REQUEST => "Glx::GetString".into(),
+                    glx::GET_TEX_ENVFV_REQUEST => "Glx::GetTexEnvfv".into(),
+                    glx::GET_TEX_ENVIV_REQUEST => "Glx::GetTexEnviv".into(),
+                    glx::GET_TEX_GENDV_REQUEST => "Glx::GetTexGendv".into(),
+                    glx::GET_TEX_GENFV_REQUEST => "Glx::GetTexGenfv".into(),
+                    glx::GET_TEX_GENIV_REQUEST => "Glx::GetTexGeniv".into(),
+                    glx::GET_TEX_IMAGE_REQUEST => "Glx::GetTexImage".into(),
+                    glx::GET_TEX_PARAMETERFV_REQUEST => "Glx::GetTexParameterfv".into(),
+                    glx::GET_TEX_PARAMETERIV_REQUEST => "Glx::GetTexParameteriv".into(),
+                    glx::GET_TEX_LEVEL_PARAMETERFV_REQUEST => "Glx::GetTexLevelParameterfv".into(),
+                    glx::GET_TEX_LEVEL_PARAMETERIV_REQUEST => "Glx::GetTexLevelParameteriv".into(),
+                    glx::IS_ENABLED_REQUEST => "Glx::IsEnabled".into(),
+                    glx::IS_LIST_REQUEST => "Glx::IsList".into(),
+                    glx::FLUSH_REQUEST => "Glx::Flush".into(),
+                    glx::ARE_TEXTURES_RESIDENT_REQUEST => "Glx::AreTexturesResident".into(),
+                    glx::DELETE_TEXTURES_REQUEST => "Glx::DeleteTextures".into(),
+                    glx::GEN_TEXTURES_REQUEST => "Glx::GenTextures".into(),
+                    glx::IS_TEXTURE_REQUEST => "Glx::IsTexture".into(),
+                    glx::GET_COLOR_TABLE_REQUEST => "Glx::GetColorTable".into(),
+                    glx::GET_COLOR_TABLE_PARAMETERFV_REQUEST => "Glx::GetColorTableParameterfv".into(),
+                    glx::GET_COLOR_TABLE_PARAMETERIV_REQUEST => "Glx::GetColorTableParameteriv".into(),
+                    glx::GET_CONVOLUTION_FILTER_REQUEST => "Glx::GetConvolutionFilter".into(),
+                    glx::GET_CONVOLUTION_PARAMETERFV_REQUEST => "Glx::GetConvolutionParameterfv".into(),
+                    glx::GET_CONVOLUTION_PARAMETERIV_REQUEST => "Glx::GetConvolutionParameteriv".into(),
+                    glx::GET_SEPARABLE_FILTER_REQUEST => "Glx::GetSeparableFilter".into(),
+                    glx::GET_HISTOGRAM_REQUEST => "Glx::GetHistogram".into(),
+                    glx::GET_HISTOGRAM_PARAMETERFV_REQUEST => "Glx::GetHistogramParameterfv".into(),
+                    glx::GET_HISTOGRAM_PARAMETERIV_REQUEST => "Glx::GetHistogramParameteriv".into(),
+                    glx::GET_MINMAX_REQUEST => "Glx::GetMinmax".into(),
+                    glx::GET_MINMAX_PARAMETERFV_REQUEST => "Glx::GetMinmaxParameterfv".into(),
+                    glx::GET_MINMAX_PARAMETERIV_REQUEST => "Glx::GetMinmaxParameteriv".into(),
+                    glx::GET_COMPRESSED_TEX_IMAGE_ARB_REQUEST => "Glx::GetCompressedTexImageARB".into(),
+                    glx::DELETE_QUERIES_ARB_REQUEST => "Glx::DeleteQueriesARB".into(),
+                    glx::GEN_QUERIES_ARB_REQUEST => "Glx::GenQueriesARB".into(),
+                    glx::IS_QUERY_ARB_REQUEST => "Glx::IsQueryARB".into(),
+                    glx::GET_QUERYIV_ARB_REQUEST => "Glx::GetQueryivARB".into(),
+                    glx::GET_QUERY_OBJECTIV_ARB_REQUEST => "Glx::GetQueryObjectivARB".into(),
+                    glx::GET_QUERY_OBJECTUIV_ARB_REQUEST => "Glx::GetQueryObjectuivARB".into(),
+                    _ => alloc::format!("Glx::opcode {}", minor_opcode).into(),
+                }
+            }
+            #[cfg(feature = "present")]
+            present::X11_EXTENSION_NAME => {
+                match minor_opcode {
+                    present::QUERY_VERSION_REQUEST => "Present::QueryVersion".into(),
+                    present::PIXMAP_REQUEST => "Present::Pixmap".into(),
+                    present::NOTIFY_MSC_REQUEST => "Present::NotifyMSC".into(),
+                    present::SELECT_INPUT_REQUEST => "Present::SelectInput".into(),
+                    present::QUERY_CAPABILITIES_REQUEST => "Present::QueryCapabilities".into(),
+                    _ => alloc::format!("Present::opcode {}", minor_opcode).into(),
+                }
+            }
+            #[cfg(feature = "randr")]
+            randr::X11_EXTENSION_NAME => {
+                match minor_opcode {
+                    randr::QUERY_VERSION_REQUEST => "RandR::QueryVersion".into(),
+                    randr::SET_SCREEN_CONFIG_REQUEST => "RandR::SetScreenConfig".into(),
+                    randr::SELECT_INPUT_REQUEST => "RandR::SelectInput".into(),
+                    randr::GET_SCREEN_INFO_REQUEST => "RandR::GetScreenInfo".into(),
+                    randr::GET_SCREEN_SIZE_RANGE_REQUEST => "RandR::GetScreenSizeRange".into(),
+                    randr::SET_SCREEN_SIZE_REQUEST => "RandR::SetScreenSize".into(),
+                    randr::GET_SCREEN_RESOURCES_REQUEST => "RandR::GetScreenResources".into(),
+                    randr::GET_OUTPUT_INFO_REQUEST => "RandR::GetOutputInfo".into(),
+                    randr::LIST_OUTPUT_PROPERTIES_REQUEST => "RandR::ListOutputProperties".into(),
+                    randr::QUERY_OUTPUT_PROPERTY_REQUEST => "RandR::QueryOutputProperty".into(),
+                    randr::CONFIGURE_OUTPUT_PROPERTY_REQUEST => "RandR::ConfigureOutputProperty".into(),
+                    randr::CHANGE_OUTPUT_PROPERTY_REQUEST => "RandR::ChangeOutputProperty".into(),
+                    randr::DELETE_OUTPUT_PROPERTY_REQUEST => "RandR::DeleteOutputProperty".into(),
+                    randr::GET_OUTPUT_PROPERTY_REQUEST => "RandR::GetOutputProperty".into(),
+                    randr::CREATE_MODE_REQUEST => "RandR::CreateMode".into(),
+                    randr::DESTROY_MODE_REQUEST => "RandR::DestroyMode".into(),
+                    randr::ADD_OUTPUT_MODE_REQUEST => "RandR::AddOutputMode".into(),
+                    randr::DELETE_OUTPUT_MODE_REQUEST => "RandR::DeleteOutputMode".into(),
+                    randr::GET_CRTC_INFO_REQUEST => "RandR::GetCrtcInfo".into(),
+                    randr::SET_CRTC_CONFIG_REQUEST => "RandR::SetCrtcConfig".into(),
+                    randr::GET_CRTC_GAMMA_SIZE_REQUEST => "RandR::GetCrtcGammaSize".into(),
+                    randr::GET_CRTC_GAMMA_REQUEST => "RandR::GetCrtcGamma".into(),
+                    randr::SET_CRTC_GAMMA_REQUEST => "RandR::SetCrtcGamma".into(),
+                    randr::GET_SCREEN_RESOURCES_CURRENT_REQUEST => "RandR::GetScreenResourcesCurrent".into(),
+                    randr::SET_CRTC_TRANSFORM_REQUEST => "RandR::SetCrtcTransform".into(),
+                    randr::GET_CRTC_TRANSFORM_REQUEST => "RandR::GetCrtcTransform".into(),
+                    randr::GET_PANNING_REQUEST => "RandR::GetPanning".into(),
+                    randr::SET_PANNING_REQUEST => "RandR::SetPanning".into(),
+                    randr::SET_OUTPUT_PRIMARY_REQUEST => "RandR::SetOutputPrimary".into(),
+                    randr::GET_OUTPUT_PRIMARY_REQUEST => "RandR::GetOutputPrimary".into(),
+                    randr::GET_PROVIDERS_REQUEST => "RandR::GetProviders".into(),
+                    randr::GET_PROVIDER_INFO_REQUEST => "RandR::GetProviderInfo".into(),
+                    randr::SET_PROVIDER_OFFLOAD_SINK_REQUEST => "RandR::SetProviderOffloadSink".into(),
+                    randr::SET_PROVIDER_OUTPUT_SOURCE_REQUEST => "RandR::SetProviderOutputSource".into(),
+                    randr::LIST_PROVIDER_PROPERTIES_REQUEST => "RandR::ListProviderProperties".into(),
+                    randr::QUERY_PROVIDER_PROPERTY_REQUEST => "RandR::QueryProviderProperty".into(),
+                    randr::CONFIGURE_PROVIDER_PROPERTY_REQUEST => "RandR::ConfigureProviderProperty".into(),
+                    randr::CHANGE_PROVIDER_PROPERTY_REQUEST => "RandR::ChangeProviderProperty".into(),
+                    randr::DELETE_PROVIDER_PROPERTY_REQUEST => "RandR::DeleteProviderProperty".into(),
+                    randr::GET_PROVIDER_PROPERTY_REQUEST => "RandR::GetProviderProperty".into(),
+                    randr::GET_MONITORS_REQUEST => "RandR::GetMonitors".into(),
+                    randr::SET_MONITOR_REQUEST => "RandR::SetMonitor".into(),
+                    randr::DELETE_MONITOR_REQUEST => "RandR::DeleteMonitor".into(),
+                    randr::CREATE_LEASE_REQUEST => "RandR::CreateLease".into(),
+                    randr::FREE_LEASE_REQUEST => "RandR::FreeLease".into(),
+                    _ => alloc::format!("RandR::opcode {}", minor_opcode).into(),
+                }
+            }
+            #[cfg(feature = "record")]
+            record::X11_EXTENSION_NAME => {
+                match minor_opcode {
+                    record::QUERY_VERSION_REQUEST => "Record::QueryVersion".into(),
+                    record::CREATE_CONTEXT_REQUEST => "Record::CreateContext".into(),
+                    record::REGISTER_CLIENTS_REQUEST => "Record::RegisterClients".into(),
+                    record::UNREGISTER_CLIENTS_REQUEST => "Record::UnregisterClients".into(),
+                    record::GET_CONTEXT_REQUEST => "Record::GetContext".into(),
+                    record::ENABLE_CONTEXT_REQUEST => "Record::EnableContext".into(),
+                    record::DISABLE_CONTEXT_REQUEST => "Record::DisableContext".into(),
+                    record::FREE_CONTEXT_REQUEST => "Record::FreeContext".into(),
+                    _ => alloc::format!("Record::opcode {}", minor_opcode).into(),
+                }
+            }
+            #[cfg(feature = "render")]
+            render::X11_EXTENSION_NAME => {
+                match minor_opcode {
+                    render::QUERY_VERSION_REQUEST => "Render::QueryVersion".into(),
+                    render::QUERY_PICT_FORMATS_REQUEST => "Render::QueryPictFormats".into(),
+                    render::QUERY_PICT_INDEX_VALUES_REQUEST => "Render::QueryPictIndexValues".into(),
+                    render::CREATE_PICTURE_REQUEST => "Render::CreatePicture".into(),
+                    render::CHANGE_PICTURE_REQUEST => "Render::ChangePicture".into(),
+                    render::SET_PICTURE_CLIP_RECTANGLES_REQUEST => "Render::SetPictureClipRectangles".into(),
+                    render::FREE_PICTURE_REQUEST => "Render::FreePicture".into(),
+                    render::COMPOSITE_REQUEST => "Render::Composite".into(),
+                    render::TRAPEZOIDS_REQUEST => "Render::Trapezoids".into(),
+                    render::TRIANGLES_REQUEST => "Render::Triangles".into(),
+                    render::TRI_STRIP_REQUEST => "Render::TriStrip".into(),
+                    render::TRI_FAN_REQUEST => "Render::TriFan".into(),
+                    render::CREATE_GLYPH_SET_REQUEST => "Render::CreateGlyphSet".into(),
+                    render::REFERENCE_GLYPH_SET_REQUEST => "Render::ReferenceGlyphSet".into(),
+                    render::FREE_GLYPH_SET_REQUEST => "Render::FreeGlyphSet".into(),
+                    render::ADD_GLYPHS_REQUEST => "Render::AddGlyphs".into(),
+                    render::FREE_GLYPHS_REQUEST => "Render::FreeGlyphs".into(),
+                    render::COMPOSITE_GLYPHS8_REQUEST => "Render::CompositeGlyphs8".into(),
+                    render::COMPOSITE_GLYPHS16_REQUEST => "Render::CompositeGlyphs16".into(),
+                    render::COMPOSITE_GLYPHS32_REQUEST => "Render::CompositeGlyphs32".into(),
+                    render::FILL_RECTANGLES_REQUEST => "Render::FillRectangles".into(),
+                    render::CREATE_CURSOR_REQUEST => "Render::CreateCursor".into(),
+                    render::SET_PICTURE_TRANSFORM_REQUEST => "Render::SetPictureTransform".into(),
+                    render::QUERY_FILTERS_REQUEST => "Render::QueryFilters".into(),
+                    render::SET_PICTURE_FILTER_REQUEST => "Render::SetPictureFilter".into(),
+                    render::CREATE_ANIM_CURSOR_REQUEST => "Render::CreateAnimCursor".into(),
+                    render::ADD_TRAPS_REQUEST => "Render::AddTraps".into(),
+                    render::CREATE_SOLID_FILL_REQUEST => "Render::CreateSolidFill".into(),
+                    render::CREATE_LINEAR_GRADIENT_REQUEST => "Render::CreateLinearGradient".into(),
+                    render::CREATE_RADIAL_GRADIENT_REQUEST => "Render::CreateRadialGradient".into(),
+                    render::CREATE_CONICAL_GRADIENT_REQUEST => "Render::CreateConicalGradient".into(),
+                    _ => alloc::format!("Render::opcode {}", minor_opcode).into(),
+                }
+            }
+            #[cfg(feature = "res")]
+            res::X11_EXTENSION_NAME => {
+                match minor_opcode {
+                    res::QUERY_VERSION_REQUEST => "Res::QueryVersion".into(),
+                    res::QUERY_CLIENTS_REQUEST => "Res::QueryClients".into(),
+                    res::QUERY_CLIENT_RESOURCES_REQUEST => "Res::QueryClientResources".into(),
+                    res::QUERY_CLIENT_PIXMAP_BYTES_REQUEST => "Res::QueryClientPixmapBytes".into(),
+                    res::QUERY_CLIENT_IDS_REQUEST => "Res::QueryClientIds".into(),
+                    res::QUERY_RESOURCE_BYTES_REQUEST => "Res::QueryResourceBytes".into(),
+                    _ => alloc::format!("Res::opcode {}", minor_opcode).into(),
+                }
+            }
+            #[cfg(feature = "screensaver")]
+            screensaver::X11_EXTENSION_NAME => {
+                match minor_opcode {
+                    screensaver::QUERY_VERSION_REQUEST => "ScreenSaver::QueryVersion".into(),
+                    screensaver::QUERY_INFO_REQUEST => "ScreenSaver::QueryInfo".into(),
+                    screensaver::SELECT_INPUT_REQUEST => "ScreenSaver::SelectInput".into(),
+                    screensaver::SET_ATTRIBUTES_REQUEST => "ScreenSaver::SetAttributes".into(),
+                    screensaver::UNSET_ATTRIBUTES_REQUEST => "ScreenSaver::UnsetAttributes".into(),
+                    screensaver::SUSPEND_REQUEST => "ScreenSaver::Suspend".into(),
+                    _ => alloc::format!("ScreenSaver::opcode {}", minor_opcode).into(),
+                }
+            }
+            #[cfg(feature = "shape")]
+            shape::X11_EXTENSION_NAME => {
+                match minor_opcode {
+                    shape::QUERY_VERSION_REQUEST => "Shape::QueryVersion".into(),
+                    shape::RECTANGLES_REQUEST => "Shape::Rectangles".into(),
+                    shape::MASK_REQUEST => "Shape::Mask".into(),
+                    shape::COMBINE_REQUEST => "Shape::Combine".into(),
+                    shape::OFFSET_REQUEST => "Shape::Offset".into(),
+                    shape::QUERY_EXTENTS_REQUEST => "Shape::QueryExtents".into(),
+                    shape::SELECT_INPUT_REQUEST => "Shape::SelectInput".into(),
+                    shape::INPUT_SELECTED_REQUEST => "Shape::InputSelected".into(),
+                    shape::GET_RECTANGLES_REQUEST => "Shape::GetRectangles".into(),
+                    _ => alloc::format!("Shape::opcode {}", minor_opcode).into(),
+                }
+            }
+            #[cfg(feature = "shm")]
+            shm::X11_EXTENSION_NAME => {
+                match minor_opcode {
+                    shm::QUERY_VERSION_REQUEST => "Shm::QueryVersion".into(),
+                    shm::ATTACH_REQUEST => "Shm::Attach".into(),
+                    shm::DETACH_REQUEST => "Shm::Detach".into(),
+                    shm::PUT_IMAGE_REQUEST => "Shm::PutImage".into(),
+                    shm::GET_IMAGE_REQUEST => "Shm::GetImage".into(),
+                    shm::CREATE_PIXMAP_REQUEST => "Shm::CreatePixmap".into(),
+                    shm::ATTACH_FD_REQUEST => "Shm::AttachFd".into(),
+                    shm::CREATE_SEGMENT_REQUEST => "Shm::CreateSegment".into(),
+                    _ => alloc::format!("Shm::opcode {}", minor_opcode).into(),
+                }
+            }
+            #[cfg(feature = "sync")]
+            sync::X11_EXTENSION_NAME => {
+                match minor_opcode {
+                    sync::INITIALIZE_REQUEST => "Sync::Initialize".into(),
+                    sync::LIST_SYSTEM_COUNTERS_REQUEST => "Sync::ListSystemCounters".into(),
+                    sync::CREATE_COUNTER_REQUEST => "Sync::CreateCounter".into(),
+                    sync::DESTROY_COUNTER_REQUEST => "Sync::DestroyCounter".into(),
+                    sync::QUERY_COUNTER_REQUEST => "Sync::QueryCounter".into(),
+                    sync::AWAIT_REQUEST => "Sync::Await".into(),
+                    sync::CHANGE_COUNTER_REQUEST => "Sync::ChangeCounter".into(),
+                    sync::SET_COUNTER_REQUEST => "Sync::SetCounter".into(),
+                    sync::CREATE_ALARM_REQUEST => "Sync::CreateAlarm".into(),
+                    sync::CHANGE_ALARM_REQUEST => "Sync::ChangeAlarm".into(),
+                    sync::DESTROY_ALARM_REQUEST => "Sync::DestroyAlarm".into(),
+                    sync::QUERY_ALARM_REQUEST => "Sync::QueryAlarm".into(),
+                    sync::SET_PRIORITY_REQUEST => "Sync::SetPriority".into(),
+                    sync::GET_PRIORITY_REQUEST => "Sync::GetPriority".into(),
+                    sync::CREATE_FENCE_REQUEST => "Sync::CreateFence".into(),
+                    sync::TRIGGER_FENCE_REQUEST => "Sync::TriggerFence".into(),
+                    sync::RESET_FENCE_REQUEST => "Sync::ResetFence".into(),
+                    sync::DESTROY_FENCE_REQUEST => "Sync::DestroyFence".into(),
+                    sync::QUERY_FENCE_REQUEST => "Sync::QueryFence".into(),
+                    sync::AWAIT_FENCE_REQUEST => "Sync::AwaitFence".into(),
+                    _ => alloc::format!("Sync::opcode {}", minor_opcode).into(),
+                }
+            }
+            xc_misc::X11_EXTENSION_NAME => {
+                match minor_opcode {
+                    xc_misc::GET_VERSION_REQUEST => "XCMisc::GetVersion".into(),
+                    xc_misc::GET_XID_RANGE_REQUEST => "XCMisc::GetXIDRange".into(),
+                    xc_misc::GET_XID_LIST_REQUEST => "XCMisc::GetXIDList".into(),
+                    _ => alloc::format!("XCMisc::opcode {}", minor_opcode).into(),
+                }
+            }
+            #[cfg(feature = "xevie")]
+            xevie::X11_EXTENSION_NAME => {
+                match minor_opcode {
+                    xevie::QUERY_VERSION_REQUEST => "Xevie::QueryVersion".into(),
+                    xevie::START_REQUEST => "Xevie::Start".into(),
+                    xevie::END_REQUEST => "Xevie::End".into(),
+                    xevie::SEND_REQUEST => "Xevie::Send".into(),
+                    xevie::SELECT_INPUT_REQUEST => "Xevie::SelectInput".into(),
+                    _ => alloc::format!("Xevie::opcode {}", minor_opcode).into(),
+                }
+            }
+            #[cfg(feature = "xf86dri")]
+            xf86dri::X11_EXTENSION_NAME => {
+                match minor_opcode {
+                    xf86dri::QUERY_VERSION_REQUEST => "XF86Dri::QueryVersion".into(),
+                    xf86dri::QUERY_DIRECT_RENDERING_CAPABLE_REQUEST => "XF86Dri::QueryDirectRenderingCapable".into(),
+                    xf86dri::OPEN_CONNECTION_REQUEST => "XF86Dri::OpenConnection".into(),
+                    xf86dri::CLOSE_CONNECTION_REQUEST => "XF86Dri::CloseConnection".into(),
+                    xf86dri::GET_CLIENT_DRIVER_NAME_REQUEST => "XF86Dri::GetClientDriverName".into(),
+                    xf86dri::CREATE_CONTEXT_REQUEST => "XF86Dri::CreateContext".into(),
+                    xf86dri::DESTROY_CONTEXT_REQUEST => "XF86Dri::DestroyContext".into(),
+                    xf86dri::CREATE_DRAWABLE_REQUEST => "XF86Dri::CreateDrawable".into(),
+                    xf86dri::DESTROY_DRAWABLE_REQUEST => "XF86Dri::DestroyDrawable".into(),
+                    xf86dri::GET_DRAWABLE_INFO_REQUEST => "XF86Dri::GetDrawableInfo".into(),
+                    xf86dri::GET_DEVICE_INFO_REQUEST => "XF86Dri::GetDeviceInfo".into(),
+                    xf86dri::AUTH_CONNECTION_REQUEST => "XF86Dri::AuthConnection".into(),
+                    _ => alloc::format!("XF86Dri::opcode {}", minor_opcode).into(),
+                }
+            }
+            #[cfg(feature = "xf86vidmode")]
+            xf86vidmode::X11_EXTENSION_NAME => {
+                match minor_opcode {
+                    xf86vidmode::QUERY_VERSION_REQUEST => "XF86VidMode::QueryVersion".into(),
+                    xf86vidmode::GET_MODE_LINE_REQUEST => "XF86VidMode::GetModeLine".into(),
+                    xf86vidmode::MOD_MODE_LINE_REQUEST => "XF86VidMode::ModModeLine".into(),
+                    xf86vidmode::SWITCH_MODE_REQUEST => "XF86VidMode::SwitchMode".into(),
+                    xf86vidmode::GET_MONITOR_REQUEST => "XF86VidMode::GetMonitor".into(),
+                    xf86vidmode::LOCK_MODE_SWITCH_REQUEST => "XF86VidMode::LockModeSwitch".into(),
+                    xf86vidmode::GET_ALL_MODE_LINES_REQUEST => "XF86VidMode::GetAllModeLines".into(),
+                    xf86vidmode::ADD_MODE_LINE_REQUEST => "XF86VidMode::AddModeLine".into(),
+                    xf86vidmode::DELETE_MODE_LINE_REQUEST => "XF86VidMode::DeleteModeLine".into(),
+                    xf86vidmode::VALIDATE_MODE_LINE_REQUEST => "XF86VidMode::ValidateModeLine".into(),
+                    xf86vidmode::SWITCH_TO_MODE_REQUEST => "XF86VidMode::SwitchToMode".into(),
+                    xf86vidmode::GET_VIEW_PORT_REQUEST => "XF86VidMode::GetViewPort".into(),
+                    xf86vidmode::SET_VIEW_PORT_REQUEST => "XF86VidMode::SetViewPort".into(),
+                    xf86vidmode::GET_DOT_CLOCKS_REQUEST => "XF86VidMode::GetDotClocks".into(),
+                    xf86vidmode::SET_CLIENT_VERSION_REQUEST => "XF86VidMode::SetClientVersion".into(),
+                    xf86vidmode::SET_GAMMA_REQUEST => "XF86VidMode::SetGamma".into(),
+                    xf86vidmode::GET_GAMMA_REQUEST => "XF86VidMode::GetGamma".into(),
+                    xf86vidmode::GET_GAMMA_RAMP_REQUEST => "XF86VidMode::GetGammaRamp".into(),
+                    xf86vidmode::SET_GAMMA_RAMP_REQUEST => "XF86VidMode::SetGammaRamp".into(),
+                    xf86vidmode::GET_GAMMA_RAMP_SIZE_REQUEST => "XF86VidMode::GetGammaRampSize".into(),
+                    xf86vidmode::GET_PERMISSIONS_REQUEST => "XF86VidMode::GetPermissions".into(),
+                    _ => alloc::format!("XF86VidMode::opcode {}", minor_opcode).into(),
+                }
+            }
+            #[cfg(feature = "xfixes")]
+            xfixes::X11_EXTENSION_NAME => {
+                match minor_opcode {
+                    xfixes::QUERY_VERSION_REQUEST => "XFixes::QueryVersion".into(),
+                    xfixes::CHANGE_SAVE_SET_REQUEST => "XFixes::ChangeSaveSet".into(),
+                    xfixes::SELECT_SELECTION_INPUT_REQUEST => "XFixes::SelectSelectionInput".into(),
+                    xfixes::SELECT_CURSOR_INPUT_REQUEST => "XFixes::SelectCursorInput".into(),
+                    xfixes::GET_CURSOR_IMAGE_REQUEST => "XFixes::GetCursorImage".into(),
+                    xfixes::CREATE_REGION_REQUEST => "XFixes::CreateRegion".into(),
+                    xfixes::CREATE_REGION_FROM_BITMAP_REQUEST => "XFixes::CreateRegionFromBitmap".into(),
+                    xfixes::CREATE_REGION_FROM_WINDOW_REQUEST => "XFixes::CreateRegionFromWindow".into(),
+                    xfixes::CREATE_REGION_FROM_GC_REQUEST => "XFixes::CreateRegionFromGC".into(),
+                    xfixes::CREATE_REGION_FROM_PICTURE_REQUEST => "XFixes::CreateRegionFromPicture".into(),
+                    xfixes::DESTROY_REGION_REQUEST => "XFixes::DestroyRegion".into(),
+                    xfixes::SET_REGION_REQUEST => "XFixes::SetRegion".into(),
+                    xfixes::COPY_REGION_REQUEST => "XFixes::CopyRegion".into(),
+                    xfixes::UNION_REGION_REQUEST => "XFixes::UnionRegion".into(),
+                    xfixes::INTERSECT_REGION_REQUEST => "XFixes::IntersectRegion".into(),
+                    xfixes::SUBTRACT_REGION_REQUEST => "XFixes::SubtractRegion".into(),
+                    xfixes::INVERT_REGION_REQUEST => "XFixes::InvertRegion".into(),
+                    xfixes::TRANSLATE_REGION_REQUEST => "XFixes::TranslateRegion".into(),
+                    xfixes::REGION_EXTENTS_REQUEST => "XFixes::RegionExtents".into(),
+                    xfixes::FETCH_REGION_REQUEST => "XFixes::FetchRegion".into(),
+                    xfixes::SET_GC_CLIP_REGION_REQUEST => "XFixes::SetGCClipRegion".into(),
+                    xfixes::SET_WINDOW_SHAPE_REGION_REQUEST => "XFixes::SetWindowShapeRegion".into(),
+                    xfixes::SET_PICTURE_CLIP_REGION_REQUEST => "XFixes::SetPictureClipRegion".into(),
+                    xfixes::SET_CURSOR_NAME_REQUEST => "XFixes::SetCursorName".into(),
+                    xfixes::GET_CURSOR_NAME_REQUEST => "XFixes::GetCursorName".into(),
+                    xfixes::GET_CURSOR_IMAGE_AND_NAME_REQUEST => "XFixes::GetCursorImageAndName".into(),
+                    xfixes::CHANGE_CURSOR_REQUEST => "XFixes::ChangeCursor".into(),
+                    xfixes::CHANGE_CURSOR_BY_NAME_REQUEST => "XFixes::ChangeCursorByName".into(),
+                    xfixes::EXPAND_REGION_REQUEST => "XFixes::ExpandRegion".into(),
+                    xfixes::HIDE_CURSOR_REQUEST => "XFixes::HideCursor".into(),
+                    xfixes::SHOW_CURSOR_REQUEST => "XFixes::ShowCursor".into(),
+                    xfixes::CREATE_POINTER_BARRIER_REQUEST => "XFixes::CreatePointerBarrier".into(),
+                    xfixes::DELETE_POINTER_BARRIER_REQUEST => "XFixes::DeletePointerBarrier".into(),
+                    xfixes::SET_CLIENT_DISCONNECT_MODE_REQUEST => "XFixes::SetClientDisconnectMode".into(),
+                    xfixes::GET_CLIENT_DISCONNECT_MODE_REQUEST => "XFixes::GetClientDisconnectMode".into(),
+                    _ => alloc::format!("XFixes::opcode {}", minor_opcode).into(),
+                }
+            }
+            #[cfg(feature = "xinerama")]
+            xinerama::X11_EXTENSION_NAME => {
+                match minor_opcode {
+                    xinerama::QUERY_VERSION_REQUEST => "Xinerama::QueryVersion".into(),
+                    xinerama::GET_STATE_REQUEST => "Xinerama::GetState".into(),
+                    xinerama::GET_SCREEN_COUNT_REQUEST => "Xinerama::GetScreenCount".into(),
+                    xinerama::GET_SCREEN_SIZE_REQUEST => "Xinerama::GetScreenSize".into(),
+                    xinerama::IS_ACTIVE_REQUEST => "Xinerama::IsActive".into(),
+                    xinerama::QUERY_SCREENS_REQUEST => "Xinerama::QueryScreens".into(),
+                    _ => alloc::format!("Xinerama::opcode {}", minor_opcode).into(),
+                }
+            }
+            #[cfg(feature = "xinput")]
+            xinput::X11_EXTENSION_NAME => {
+                match minor_opcode {
+                    xinput::GET_EXTENSION_VERSION_REQUEST => "Input::GetExtensionVersion".into(),
+                    xinput::LIST_INPUT_DEVICES_REQUEST => "Input::ListInputDevices".into(),
+                    xinput::OPEN_DEVICE_REQUEST => "Input::OpenDevice".into(),
+                    xinput::CLOSE_DEVICE_REQUEST => "Input::CloseDevice".into(),
+                    xinput::SET_DEVICE_MODE_REQUEST => "Input::SetDeviceMode".into(),
+                    xinput::SELECT_EXTENSION_EVENT_REQUEST => "Input::SelectExtensionEvent".into(),
+                    xinput::GET_SELECTED_EXTENSION_EVENTS_REQUEST => "Input::GetSelectedExtensionEvents".into(),
+                    xinput::CHANGE_DEVICE_DONT_PROPAGATE_LIST_REQUEST => "Input::ChangeDeviceDontPropagateList".into(),
+                    xinput::GET_DEVICE_DONT_PROPAGATE_LIST_REQUEST => "Input::GetDeviceDontPropagateList".into(),
+                    xinput::GET_DEVICE_MOTION_EVENTS_REQUEST => "Input::GetDeviceMotionEvents".into(),
+                    xinput::CHANGE_KEYBOARD_DEVICE_REQUEST => "Input::ChangeKeyboardDevice".into(),
+                    xinput::CHANGE_POINTER_DEVICE_REQUEST => "Input::ChangePointerDevice".into(),
+                    xinput::GRAB_DEVICE_REQUEST => "Input::GrabDevice".into(),
+                    xinput::UNGRAB_DEVICE_REQUEST => "Input::UngrabDevice".into(),
+                    xinput::GRAB_DEVICE_KEY_REQUEST => "Input::GrabDeviceKey".into(),
+                    xinput::UNGRAB_DEVICE_KEY_REQUEST => "Input::UngrabDeviceKey".into(),
+                    xinput::GRAB_DEVICE_BUTTON_REQUEST => "Input::GrabDeviceButton".into(),
+                    xinput::UNGRAB_DEVICE_BUTTON_REQUEST => "Input::UngrabDeviceButton".into(),
+                    xinput::ALLOW_DEVICE_EVENTS_REQUEST => "Input::AllowDeviceEvents".into(),
+                    xinput::GET_DEVICE_FOCUS_REQUEST => "Input::GetDeviceFocus".into(),
+                    xinput::SET_DEVICE_FOCUS_REQUEST => "Input::SetDeviceFocus".into(),
+                    xinput::GET_FEEDBACK_CONTROL_REQUEST => "Input::GetFeedbackControl".into(),
+                    xinput::CHANGE_FEEDBACK_CONTROL_REQUEST => "Input::ChangeFeedbackControl".into(),
+                    xinput::GET_DEVICE_KEY_MAPPING_REQUEST => "Input::GetDeviceKeyMapping".into(),
+                    xinput::CHANGE_DEVICE_KEY_MAPPING_REQUEST => "Input::ChangeDeviceKeyMapping".into(),
+                    xinput::GET_DEVICE_MODIFIER_MAPPING_REQUEST => "Input::GetDeviceModifierMapping".into(),
+                    xinput::SET_DEVICE_MODIFIER_MAPPING_REQUEST => "Input::SetDeviceModifierMapping".into(),
+                    xinput::GET_DEVICE_BUTTON_MAPPING_REQUEST => "Input::GetDeviceButtonMapping".into(),
+                    xinput::SET_DEVICE_BUTTON_MAPPING_REQUEST => "Input::SetDeviceButtonMapping".into(),
+                    xinput::QUERY_DEVICE_STATE_REQUEST => "Input::QueryDeviceState".into(),
+                    xinput::DEVICE_BELL_REQUEST => "Input::DeviceBell".into(),
+                    xinput::SET_DEVICE_VALUATORS_REQUEST => "Input::SetDeviceValuators".into(),
+                    xinput::GET_DEVICE_CONTROL_REQUEST => "Input::GetDeviceControl".into(),
+                    xinput::CHANGE_DEVICE_CONTROL_REQUEST => "Input::ChangeDeviceControl".into(),
+                    xinput::LIST_DEVICE_PROPERTIES_REQUEST => "Input::ListDeviceProperties".into(),
+                    xinput::CHANGE_DEVICE_PROPERTY_REQUEST => "Input::ChangeDeviceProperty".into(),
+                    xinput::DELETE_DEVICE_PROPERTY_REQUEST => "Input::DeleteDeviceProperty".into(),
+                    xinput::GET_DEVICE_PROPERTY_REQUEST => "Input::GetDeviceProperty".into(),
+                    xinput::XI_QUERY_POINTER_REQUEST => "Input::XIQueryPointer".into(),
+                    xinput::XI_WARP_POINTER_REQUEST => "Input::XIWarpPointer".into(),
+                    xinput::XI_CHANGE_CURSOR_REQUEST => "Input::XIChangeCursor".into(),
+                    xinput::XI_CHANGE_HIERARCHY_REQUEST => "Input::XIChangeHierarchy".into(),
+                    xinput::XI_SET_CLIENT_POINTER_REQUEST => "Input::XISetClientPointer".into(),
+                    xinput::XI_GET_CLIENT_POINTER_REQUEST => "Input::XIGetClientPointer".into(),
+                    xinput::XI_SELECT_EVENTS_REQUEST => "Input::XISelectEvents".into(),
+                    xinput::XI_QUERY_VERSION_REQUEST => "Input::XIQueryVersion".into(),
+                    xinput::XI_QUERY_DEVICE_REQUEST => "Input::XIQueryDevice".into(),
+                    xinput::XI_SET_FOCUS_REQUEST => "Input::XISetFocus".into(),
+                    xinput::XI_GET_FOCUS_REQUEST => "Input::XIGetFocus".into(),
+                    xinput::XI_GRAB_DEVICE_REQUEST => "Input::XIGrabDevice".into(),
+                    xinput::XI_UNGRAB_DEVICE_REQUEST => "Input::XIUngrabDevice".into(),
+                    xinput::XI_ALLOW_EVENTS_REQUEST => "Input::XIAllowEvents".into(),
+                    xinput::XI_PASSIVE_GRAB_DEVICE_REQUEST => "Input::XIPassiveGrabDevice".into(),
+                    xinput::XI_PASSIVE_UNGRAB_DEVICE_REQUEST => "Input::XIPassiveUngrabDevice".into(),
+                    xinput::XI_LIST_PROPERTIES_REQUEST => "Input::XIListProperties".into(),
+                    xinput::XI_CHANGE_PROPERTY_REQUEST => "Input::XIChangeProperty".into(),
+                    xinput::XI_DELETE_PROPERTY_REQUEST => "Input::XIDeleteProperty".into(),
+                    xinput::XI_GET_PROPERTY_REQUEST => "Input::XIGetProperty".into(),
+                    xinput::XI_GET_SELECTED_EVENTS_REQUEST => "Input::XIGetSelectedEvents".into(),
+                    xinput::XI_BARRIER_RELEASE_POINTER_REQUEST => "Input::XIBarrierReleasePointer".into(),
+                    xinput::SEND_EXTENSION_EVENT_REQUEST => "Input::SendExtensionEvent".into(),
+                    _ => alloc::format!("Input::opcode {}", minor_opcode).into(),
+                }
+            }
+            #[cfg(feature = "xkb")]
+            xkb::X11_EXTENSION_NAME => {
+                match minor_opcode {
+                    xkb::USE_EXTENSION_REQUEST => "xkb::UseExtension".into(),
+                    xkb::SELECT_EVENTS_REQUEST => "xkb::SelectEvents".into(),
+                    xkb::BELL_REQUEST => "xkb::Bell".into(),
+                    xkb::GET_STATE_REQUEST => "xkb::GetState".into(),
+                    xkb::LATCH_LOCK_STATE_REQUEST => "xkb::LatchLockState".into(),
+                    xkb::GET_CONTROLS_REQUEST => "xkb::GetControls".into(),
+                    xkb::SET_CONTROLS_REQUEST => "xkb::SetControls".into(),
+                    xkb::GET_MAP_REQUEST => "xkb::GetMap".into(),
+                    xkb::SET_MAP_REQUEST => "xkb::SetMap".into(),
+                    xkb::GET_COMPAT_MAP_REQUEST => "xkb::GetCompatMap".into(),
+                    xkb::SET_COMPAT_MAP_REQUEST => "xkb::SetCompatMap".into(),
+                    xkb::GET_INDICATOR_STATE_REQUEST => "xkb::GetIndicatorState".into(),
+                    xkb::GET_INDICATOR_MAP_REQUEST => "xkb::GetIndicatorMap".into(),
+                    xkb::SET_INDICATOR_MAP_REQUEST => "xkb::SetIndicatorMap".into(),
+                    xkb::GET_NAMED_INDICATOR_REQUEST => "xkb::GetNamedIndicator".into(),
+                    xkb::SET_NAMED_INDICATOR_REQUEST => "xkb::SetNamedIndicator".into(),
+                    xkb::GET_NAMES_REQUEST => "xkb::GetNames".into(),
+                    xkb::SET_NAMES_REQUEST => "xkb::SetNames".into(),
+                    xkb::PER_CLIENT_FLAGS_REQUEST => "xkb::PerClientFlags".into(),
+                    xkb::LIST_COMPONENTS_REQUEST => "xkb::ListComponents".into(),
+                    xkb::GET_KBD_BY_NAME_REQUEST => "xkb::GetKbdByName".into(),
+                    xkb::GET_DEVICE_INFO_REQUEST => "xkb::GetDeviceInfo".into(),
+                    xkb::SET_DEVICE_INFO_REQUEST => "xkb::SetDeviceInfo".into(),
+                    xkb::SET_DEBUGGING_FLAGS_REQUEST => "xkb::SetDebuggingFlags".into(),
+                    _ => alloc::format!("xkb::opcode {}", minor_opcode).into(),
+                }
+            }
+            #[cfg(feature = "xprint")]
+            xprint::X11_EXTENSION_NAME => {
+                match minor_opcode {
+                    xprint::PRINT_QUERY_VERSION_REQUEST => "XPrint::PrintQueryVersion".into(),
+                    xprint::PRINT_GET_PRINTER_LIST_REQUEST => "XPrint::PrintGetPrinterList".into(),
+                    xprint::PRINT_REHASH_PRINTER_LIST_REQUEST => "XPrint::PrintRehashPrinterList".into(),
+                    xprint::CREATE_CONTEXT_REQUEST => "XPrint::CreateContext".into(),
+                    xprint::PRINT_SET_CONTEXT_REQUEST => "XPrint::PrintSetContext".into(),
+                    xprint::PRINT_GET_CONTEXT_REQUEST => "XPrint::PrintGetContext".into(),
+                    xprint::PRINT_DESTROY_CONTEXT_REQUEST => "XPrint::PrintDestroyContext".into(),
+                    xprint::PRINT_GET_SCREEN_OF_CONTEXT_REQUEST => "XPrint::PrintGetScreenOfContext".into(),
+                    xprint::PRINT_START_JOB_REQUEST => "XPrint::PrintStartJob".into(),
+                    xprint::PRINT_END_JOB_REQUEST => "XPrint::PrintEndJob".into(),
+                    xprint::PRINT_START_DOC_REQUEST => "XPrint::PrintStartDoc".into(),
+                    xprint::PRINT_END_DOC_REQUEST => "XPrint::PrintEndDoc".into(),
+                    xprint::PRINT_PUT_DOCUMENT_DATA_REQUEST => "XPrint::PrintPutDocumentData".into(),
+                    xprint::PRINT_GET_DOCUMENT_DATA_REQUEST => "XPrint::PrintGetDocumentData".into(),
+                    xprint::PRINT_START_PAGE_REQUEST => "XPrint::PrintStartPage".into(),
+                    xprint::PRINT_END_PAGE_REQUEST => "XPrint::PrintEndPage".into(),
+                    xprint::PRINT_SELECT_INPUT_REQUEST => "XPrint::PrintSelectInput".into(),
+                    xprint::PRINT_INPUT_SELECTED_REQUEST => "XPrint::PrintInputSelected".into(),
+                    xprint::PRINT_GET_ATTRIBUTES_REQUEST => "XPrint::PrintGetAttributes".into(),
+                    xprint::PRINT_GET_ONE_ATTRIBUTES_REQUEST => "XPrint::PrintGetOneAttributes".into(),
+                    xprint::PRINT_SET_ATTRIBUTES_REQUEST => "XPrint::PrintSetAttributes".into(),
+                    xprint::PRINT_GET_PAGE_DIMENSIONS_REQUEST => "XPrint::PrintGetPageDimensions".into(),
+                    xprint::PRINT_QUERY_SCREENS_REQUEST => "XPrint::PrintQueryScreens".into(),
+                    xprint::PRINT_SET_IMAGE_RESOLUTION_REQUEST => "XPrint::PrintSetImageResolution".into(),
+                    xprint::PRINT_GET_IMAGE_RESOLUTION_REQUEST => "XPrint::PrintGetImageResolution".into(),
+                    _ => alloc::format!("XPrint::opcode {}", minor_opcode).into(),
+                }
+            }
+            #[cfg(feature = "xselinux")]
+            xselinux::X11_EXTENSION_NAME => {
+                match minor_opcode {
+                    xselinux::QUERY_VERSION_REQUEST => "SELinux::QueryVersion".into(),
+                    xselinux::SET_DEVICE_CREATE_CONTEXT_REQUEST => "SELinux::SetDeviceCreateContext".into(),
+                    xselinux::GET_DEVICE_CREATE_CONTEXT_REQUEST => "SELinux::GetDeviceCreateContext".into(),
+                    xselinux::SET_DEVICE_CONTEXT_REQUEST => "SELinux::SetDeviceContext".into(),
+                    xselinux::GET_DEVICE_CONTEXT_REQUEST => "SELinux::GetDeviceContext".into(),
+                    xselinux::SET_WINDOW_CREATE_CONTEXT_REQUEST => "SELinux::SetWindowCreateContext".into(),
+                    xselinux::GET_WINDOW_CREATE_CONTEXT_REQUEST => "SELinux::GetWindowCreateContext".into(),
+                    xselinux::GET_WINDOW_CONTEXT_REQUEST => "SELinux::GetWindowContext".into(),
+                    xselinux::SET_PROPERTY_CREATE_CONTEXT_REQUEST => "SELinux::SetPropertyCreateContext".into(),
+                    xselinux::GET_PROPERTY_CREATE_CONTEXT_REQUEST => "SELinux::GetPropertyCreateContext".into(),
+                    xselinux::SET_PROPERTY_USE_CONTEXT_REQUEST => "SELinux::SetPropertyUseContext".into(),
+                    xselinux::GET_PROPERTY_USE_CONTEXT_REQUEST => "SELinux::GetPropertyUseContext".into(),
+                    xselinux::GET_PROPERTY_CONTEXT_REQUEST => "SELinux::GetPropertyContext".into(),
+                    xselinux::GET_PROPERTY_DATA_CONTEXT_REQUEST => "SELinux::GetPropertyDataContext".into(),
+                    xselinux::LIST_PROPERTIES_REQUEST => "SELinux::ListProperties".into(),
+                    xselinux::SET_SELECTION_CREATE_CONTEXT_REQUEST => "SELinux::SetSelectionCreateContext".into(),
+                    xselinux::GET_SELECTION_CREATE_CONTEXT_REQUEST => "SELinux::GetSelectionCreateContext".into(),
+                    xselinux::SET_SELECTION_USE_CONTEXT_REQUEST => "SELinux::SetSelectionUseContext".into(),
+                    xselinux::GET_SELECTION_USE_CONTEXT_REQUEST => "SELinux::GetSelectionUseContext".into(),
+                    xselinux::GET_SELECTION_CONTEXT_REQUEST => "SELinux::GetSelectionContext".into(),
+                    xselinux::GET_SELECTION_DATA_CONTEXT_REQUEST => "SELinux::GetSelectionDataContext".into(),
+                    xselinux::LIST_SELECTIONS_REQUEST => "SELinux::ListSelections".into(),
+                    xselinux::GET_CLIENT_CONTEXT_REQUEST => "SELinux::GetClientContext".into(),
+                    _ => alloc::format!("SELinux::opcode {}", minor_opcode).into(),
+                }
+            }
+            #[cfg(feature = "xtest")]
+            xtest::X11_EXTENSION_NAME => {
+                match minor_opcode {
+                    xtest::GET_VERSION_REQUEST => "Test::GetVersion".into(),
+                    xtest::COMPARE_CURSOR_REQUEST => "Test::CompareCursor".into(),
+                    xtest::FAKE_INPUT_REQUEST => "Test::FakeInput".into(),
+                    xtest::GRAB_CONTROL_REQUEST => "Test::GrabControl".into(),
+                    _ => alloc::format!("Test::opcode {}", minor_opcode).into(),
+                }
+            }
+            #[cfg(feature = "xv")]
+            xv::X11_EXTENSION_NAME => {
+                match minor_opcode {
+                    xv::QUERY_EXTENSION_REQUEST => "Xv::QueryExtension".into(),
+                    xv::QUERY_ADAPTORS_REQUEST => "Xv::QueryAdaptors".into(),
+                    xv::QUERY_ENCODINGS_REQUEST => "Xv::QueryEncodings".into(),
+                    xv::GRAB_PORT_REQUEST => "Xv::GrabPort".into(),
+                    xv::UNGRAB_PORT_REQUEST => "Xv::UngrabPort".into(),
+                    xv::PUT_VIDEO_REQUEST => "Xv::PutVideo".into(),
+                    xv::PUT_STILL_REQUEST => "Xv::PutStill".into(),
+                    xv::GET_VIDEO_REQUEST => "Xv::GetVideo".into(),
+                    xv::GET_STILL_REQUEST => "Xv::GetStill".into(),
+                    xv::STOP_VIDEO_REQUEST => "Xv::StopVideo".into(),
+                    xv::SELECT_VIDEO_NOTIFY_REQUEST => "Xv::SelectVideoNotify".into(),
+                    xv::SELECT_PORT_NOTIFY_REQUEST => "Xv::SelectPortNotify".into(),
+                    xv::QUERY_BEST_SIZE_REQUEST => "Xv::QueryBestSize".into(),
+                    xv::SET_PORT_ATTRIBUTE_REQUEST => "Xv::SetPortAttribute".into(),
+                    xv::GET_PORT_ATTRIBUTE_REQUEST => "Xv::GetPortAttribute".into(),
+                    xv::QUERY_PORT_ATTRIBUTES_REQUEST => "Xv::QueryPortAttributes".into(),
+                    xv::LIST_IMAGE_FORMATS_REQUEST => "Xv::ListImageFormats".into(),
+                    xv::QUERY_IMAGE_ATTRIBUTES_REQUEST => "Xv::QueryImageAttributes".into(),
+                    xv::PUT_IMAGE_REQUEST => "Xv::PutImage".into(),
+                    xv::SHM_PUT_IMAGE_REQUEST => "Xv::ShmPutImage".into(),
+                    _ => alloc::format!("Xv::opcode {}", minor_opcode).into(),
+                }
+            }
+            #[cfg(feature = "xvmc")]
+            xvmc::X11_EXTENSION_NAME => {
+                match minor_opcode {
+                    xvmc::QUERY_VERSION_REQUEST => "XvMC::QueryVersion".into(),
+                    xvmc::LIST_SURFACE_TYPES_REQUEST => "XvMC::ListSurfaceTypes".into(),
+                    xvmc::CREATE_CONTEXT_REQUEST => "XvMC::CreateContext".into(),
+                    xvmc::DESTROY_CONTEXT_REQUEST => "XvMC::DestroyContext".into(),
+                    xvmc::CREATE_SURFACE_REQUEST => "XvMC::CreateSurface".into(),
+                    xvmc::DESTROY_SURFACE_REQUEST => "XvMC::DestroySurface".into(),
+                    xvmc::CREATE_SUBPICTURE_REQUEST => "XvMC::CreateSubpicture".into(),
+                    xvmc::DESTROY_SUBPICTURE_REQUEST => "XvMC::DestroySubpicture".into(),
+                    xvmc::LIST_SUBPICTURE_TYPES_REQUEST => "XvMC::ListSubpictureTypes".into(),
+                    _ => alloc::format!("XvMC::opcode {}", minor_opcode).into(),
+                }
+            }
+            _ => alloc::format!("ext {}::opcode {}", ext_name, minor_opcode).into(),
+        }
+    }
+}
+
 /// Enumeration of all possible X11 requests.
 #[derive(Debug)]
 #[allow(clippy::large_enum_variant)]
