@@ -23,9 +23,91 @@ pub(super) struct PerModuleEnumCases {
 
 pub(super) type EnumCases = HashMap<String, PerModuleEnumCases>;
 
+/// Generate a function that figures out the name of a request
+fn generate_request_naming(out: &mut Output, module: &xcbdefs::Module) {
+    outln!(
+        out,
+        "/// Get the name of a request based on its major and minor code."
+    );
+    outln!(out, "///");
+    outln!(
+        out,
+        "/// The major and minor opcode are the first and second byte of a request."
+    );
+    outln!(out, "/// Core requests do not have a minor opcode. For these, the minor opcode is ignored by this function.");
+    outln!(out, "pub fn get_request_name(");
+    out.indented(|out| {
+        outln!(out, "ext_info_provider: &dyn ExtInfoProvider,");
+        outln!(out, "major_opcode: u8,");
+        outln!(out, "minor_opcode: u8,");
+    });
+    outln!(out, ") -> Cow<'static, str> {{");
+    out.indented(|out| {
+        outln!(out, "// From the X11 protocol reference manual:");
+        outln!(out, "// Major opcodes 128 through 255 are reserved for extensions.");
+        outln!(out, "if major_opcode < 128 {{");
+        out.indented(|out| {
+            outln!(out, "match major_opcode {{");
+            out.indented(|out| {
+                let xproto_ns = module.namespace("xproto").unwrap();
+                for def in xproto_ns.src_order_defs.borrow().iter() {
+                    if let xcbdefs::Def::Request(request) = def {
+                        outln!(out, "xproto::{}_REQUEST => \"{}\".into(),", super::camel_case_to_upper_snake(&request.name), request.name);
+                    }
+                }
+                outln!(out, "_ => alloc::format!(\"xproto::opcode {{}}\", major_opcode).into(),");
+            });
+            outln!(out, "}}");
+        });
+        outln!(out, "}} else {{");
+        out.indented(|out| {
+            outln!(out, "// Figure out the extension name");
+            outln!(out, "let ext_name = match ext_info_provider.get_from_major_opcode(major_opcode) {{");
+            out.indented(|out| {
+                outln!(out, "Some((name, _)) => name,");
+                outln!(out, "None => return alloc::format!(\"ext {{}}::opcode {{}}\", major_opcode, minor_opcode).into(),");
+            });
+            outln!(out, "}};");
+            outln!(out, "match ext_name {{");
+            out.indented(|out| {
+                for ns in module.sorted_namespaces() {
+                    // xproto was already handled above
+                    if let Some(ext_info) = &ns.ext_info {
+                        let has_feature = super::ext_has_feature(&ns.header);
+                        if has_feature {
+                            outln!(out, "#[cfg(feature = \"{}\")]", ns.header);
+                        }
+                        outln!(out, "{}::X11_EXTENSION_NAME => {{", ns.header);
+                        out.indented(|out| {
+                            outln!(out, "match minor_opcode {{");
+                            out.indented(|out| {
+                                for def in ns.src_order_defs.borrow().iter() {
+                                    if let xcbdefs::Def::Request(request) = def {
+                                        outln!(out, "{}::{}_REQUEST => \"{}::{}\".into(),", ns.header, super::camel_case_to_upper_snake(&request.name), ext_info.name, request.name);
+                                    }
+                                }
+                                outln!(out, "_ => alloc::format!(\"{}::opcode {{}}\", minor_opcode).into(),", ext_info.name);
+                            });
+                            outln!(out, "}}");
+                        });
+                        outln!(out, "}}");
+                    }
+                }
+                outln!(out, "_ => alloc::format!(\"ext {{}}::opcode {{}}\", ext_name, minor_opcode).into(),");
+            });
+            outln!(out, "}}");
+        });
+        outln!(out, "}}");
+    });
+    outln!(out, "}}");
+    outln!(out, "");
+}
+
 /// Generate the Request and Reply enums containing all possible requests and replies, respectively.
 pub(super) fn generate(out: &mut Output, module: &xcbdefs::Module, mut enum_cases: EnumCases) {
     let namespaces = module.sorted_namespaces();
+
+    generate_request_naming(out, module);
 
     outln!(out, "/// Enumeration of all possible X11 requests.");
     outln!(out, "#[derive(Debug)]");

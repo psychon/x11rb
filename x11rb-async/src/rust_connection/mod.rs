@@ -262,17 +262,14 @@ impl<S: Stream + Send + Sync> RustConnection<S> {
             {
                 const LEVEL: tracing::Level = tracing::Level::DEBUG;
                 if tracing::event_enabled!(LEVEL) {
+                    // QueryExtension is used by the extension manager. We would deadlock if we
+                    // tried to lock it again. Hence, this case is hardcoded here.
                     let major_opcode = bufs[0][0];
-                    let minor_opcode = bufs[0][1];
-                    if major_opcode < 128 {
-                        tracing::event!(LEVEL, "Sending xproto request {}", major_opcode);
+                    if major_opcode == 98 {
+                        tracing::event!(LEVEL, "Sending QueryExtension request");
                     } else {
-                        use x11rb_protocol::x11_utils::ExtInfoProvider;
                         let extensions = self.extensions.read().await;
-                        let ext_name = extensions.get_from_major_opcode(major_opcode)
-                            .map(|(name, _)| name)
-                            .unwrap_or("unknown extension");
-                        tracing::event!(LEVEL, "Sending {} request {}", ext_name, minor_opcode);
+                        tracing::event!(LEVEL, "Sending {} request", x11rb_protocol::protocol::get_request_name(&*extensions, major_opcode, bufs[0][1]));
                     }
                 }
             }
