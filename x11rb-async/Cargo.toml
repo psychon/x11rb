@@ -93,6 +93,4 @@ allow-unsafe-code = ["x11rb/allow-unsafe-code"]
 
 [dev-dependencies]
 async-executor = "1.5.0"
-async-io = "1.12.0"
-bytemuck = "1.12.3"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
