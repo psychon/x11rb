@@ -135,7 +135,7 @@ jobs:
     - name: run x11rb examples with XCBConnection and dl-libxcb
       run: ./run_examples x11rb --features "$MOST_FEATURES libc allow-unsafe-code dl-libxcb"
     - name: run x11rb-async examples
-      run: ./run_examples x11rb-async
+      run: ./run_examples x11rb-async --features "shm"
 
     # run code generator in nightly builds for coverage
     - name: Run code generator
