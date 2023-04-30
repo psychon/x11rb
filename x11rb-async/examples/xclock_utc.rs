@@ -241,7 +241,7 @@ async fn main2() -> Result<(), Box<dyn std::error::Error>> {
             // Spawn a task to poll for events.
             let driver = ex.spawn(async move {
                 if let Err(e) = drive.await {
-                    eprintln!("Error while driving the connection: {}", e);
+                    tracing::error!("Error while driving the connection: {}", e);
                 }
             });
 
@@ -252,7 +252,7 @@ async fn main2() -> Result<(), Box<dyn std::error::Error>> {
             {
                 ex.spawn(async move {
                     Timer::after(Duration::from_secs(timeout)).await;
-                    eprintln!("Cancelling drive task due to $X11RB_EXAMPLE_TIMEOUT");
+                    tracing::warn!("Cancelling drive task due to $X11RB_EXAMPLE_TIMEOUT");
                     driver.cancel().await;
                 })
                 .detach();
@@ -287,7 +287,7 @@ async fn main2() -> Result<(), Box<dyn std::error::Error>> {
                     })
                     .for_each(|res| {
                         if let Err(e) = res {
-                            eprintln!("Timer task failed: {}", e);
+                            tracing::error!("Timer task failed: {}", e);
                         }
                     })
                     .await;
@@ -301,7 +301,7 @@ async fn main2() -> Result<(), Box<dyn std::error::Error>> {
                 // Get the next event.
                 let event = conn.wait_for_event().await?;
 
-                println!("{:?}", event);
+                tracing::info!("{:?}", event);
 
                 match event {
                     Event::ConfigureNotify(cme) => {
@@ -316,14 +316,14 @@ async fn main2() -> Result<(), Box<dyn std::error::Error>> {
                             && cme.window == window
                             && data[0] == atoms.wm_delete_window
                         {
-                            println!("Window was asked to close");
+                            tracing::warn!("Window was asked to close");
                             return Ok::<_, Box<dyn std::error::Error>>(());
                         }
                     }
 
-                    Event::Error(_) => println!("Unexpected error"),
+                    Event::Error(e) => tracing::warn!("Unexpected error: {e:?}"),
 
-                    _ => println!("Unhandled event"),
+                    _ => tracing::info!("Unhandled event"),
                 }
 
                 // Redraw and flush.
@@ -339,7 +339,13 @@ async fn main2() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 fn main() {
+    use tracing_subscriber::prelude::*;
+    tracing_subscriber::registry()
+        .with(tracing_subscriber::fmt::layer())
+        .with(tracing_subscriber::EnvFilter::from_default_env())
+        .init();
+
     if let Err(e) = async_io::block_on(main2()) {
-        eprintln!("Fatal Error: {}", e);
+        tracing::error!("Fatal Error: {}", e);
     }
 }
