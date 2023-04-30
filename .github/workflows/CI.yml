@@ -21,8 +21,8 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - uses: dtolnay/rust-toolchain@stable
-    - name: Clear src/protocol directories in x11rb and x11rb-protocol
-      run: rm -rf x11rb/src/protocol/ x11rb-protocol/src/protocol/
+    - name: Clear src/protocol directories in x11rb, x11rb-async and x11rb-protocol
+      run: rm -rf x11rb/src/protocol/ x11rb-async/src/protocol/ x11rb-protocol/src/protocol/
     - name: Run code generator
       run: make
     - name: Check for changes
@@ -183,8 +183,10 @@ jobs:
       run: rustup target add "$CROSS_TARGET"
     - name: Install cross
       uses: taiki-e/install-action@cross
-    - name: cargo test
+    - name: cargo test on x11rb
       run: cross test --target "$CROSS_TARGET" --verbose --package x11rb --features "$MOST_FEATURES"
+    - name: cargo test on x11rb-async
+      run: cross test --target "$CROSS_TARGET" --verbose --package x11rb-async --features "all-extensions"
 
   # future-proof against issue #721
   non-linux-unix-test:
