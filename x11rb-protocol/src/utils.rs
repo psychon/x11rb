@@ -12,7 +12,7 @@
 #[cfg(all(feature = "std", unix))]
 mod raw_fd_container {
     use rustix::fd::OwnedFd;
-    use std::os::unix::io::{AsRawFd, RawFd};
+    use std::os::unix::io::{AsRawFd, IntoRawFd, RawFd};
 
     /// A simple wrapper around RawFd that closes the fd on drop.
     ///
@@ -42,22 +42,25 @@ mod raw_fd_container {
         /// This function would be an implementation of `IntoRawFd` if that were possible. However, it
         /// causes a conflict with an `impl` from libcore...
         pub fn into_raw_fd(self) -> RawFd {
-            self.0.as_raw_fd()
+            self.0.into_raw_fd()
         }
+    }
 
-        /// Consumes the `RawFdContainer` and closes the wrapped FD with
-        /// the `close` system call.
-        ///
-        /// This is similar to dropping the `RawFdContainer`, but it allows
-        /// the caller to handle errors.
-        pub fn close(self) -> Result<(), std::io::Error> {
-            todo!()
+    impl From<OwnedFd> for RawFdContainer {
+        fn from(fd: OwnedFd) -> Self {
+            Self::new(fd)
         }
     }
 
     impl AsRawFd for RawFdContainer {
         fn as_raw_fd(&self) -> RawFd {
             self.0.as_raw_fd()
+        }
+    }
+
+    impl IntoRawFd for RawFdContainer {
+        fn into_raw_fd(self) -> RawFd {
+            self.0.into_raw_fd()
         }
     }
 

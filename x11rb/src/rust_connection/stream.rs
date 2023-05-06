@@ -519,16 +519,12 @@ fn connect_abstract_unix_stream(
         connect_unix, socket_with, AddressFamily, Protocol, SocketAddrUnix, SocketFlags, SocketType,
     };
 
-    let socket = socket_with(
+    let socket = RawFdContainer::new(socket_with(
         AddressFamily::UNIX,
         SocketType::STREAM,
         SocketFlags::CLOEXEC,
         Protocol::default(),
-    )?;
-
-    // Wrap it in a RawFdContainer. Its Drop impl makes sure to close the socket if something
-    // errors out below.
-    let socket = RawFdContainer::new(socket);
+    )?);
 
     connect_unix(&socket, &SocketAddrUnix::new_abstract_name(path)?)?;
 

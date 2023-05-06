@@ -46,7 +46,37 @@ resource_manager = ["x11rb-protocol/resource_manager"]
 dl-libxcb = ["allow-unsafe-code", "libloading", "once_cell"]
 
 # Enable this feature to enable all the X11 extensions
-all-extensions = ["x11rb-protocol/all-extensions", "composite", "damage", "dbe", "dpms", "dri2", "dri3", "glx", "present", "randr", "record", "render", "res", "screensaver", "shape", "shm", "sync", "xevie", "xf86dri", "xf86vidmode", "xfixes", "xinerama", "xinput", "xkb", "xprint", "xselinux", "xtest", "xv", "xvmc"]
+all-extensions = [
+    "x11rb-protocol/all-extensions",
+    "composite",
+    "damage",
+    "dbe",
+    "dpms",
+    "dri2",
+    "dri3",
+    "glx",
+    "present",
+    "randr",
+    "record",
+    "render",
+    "res",
+    "screensaver",
+    "shape",
+    "shm",
+    "sync",
+    "xevie",
+    "xf86dri",
+    "xf86vidmode",
+    "xfixes",
+    "xinerama",
+    "xinput",
+    "xkb",
+    "xprint",
+    "xselinux",
+    "xtest",
+    "xv",
+    "xvmc"
+]
 
 # Features to enable individual X11 extensions
 composite = ["x11rb-protocol/composite", "xfixes"]
