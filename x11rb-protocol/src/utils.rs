@@ -52,6 +52,12 @@ mod raw_fd_container {
         }
     }
 
+    impl From<RawFdContainer> for OwnedFd {
+        fn from(fd: RawFdContainer) -> Self {
+            fd.0
+        }
+    }
+
     impl AsRawFd for RawFdContainer {
         fn as_raw_fd(&self) -> RawFd {
             self.0.as_raw_fd()

@@ -2,11 +2,11 @@ extern crate x11rb;
 
 use std::fs::{remove_file, File, OpenOptions};
 use std::io::{Result as IOResult, Write};
-#[cfg(unix)]
 use std::os::unix::io::AsRawFd;
 use std::ptr::null_mut;
 
 use libc::{mmap, MAP_FAILED, MAP_SHARED, PROT_READ, PROT_WRITE};
+use rustix::fd::OwnedFd;
 
 use x11rb::connection::Connection;
 use x11rb::errors::{ConnectionError, ReplyError, ReplyOrIdError};
@@ -100,7 +100,7 @@ fn make_file() -> IOResult<File> {
 
 fn send_fd<C: Connection>(conn: &C, screen_num: usize, file: File) -> Result<(), ReplyOrIdError> {
     let shmseg = conn.generate_id()?;
-    conn.shm_attach_fd(shmseg, file, false)?;
+    conn.shm_attach_fd(shmseg, OwnedFd::from(file), false)?;
 
     use_shared_mem(conn, screen_num, shmseg)?;
 
