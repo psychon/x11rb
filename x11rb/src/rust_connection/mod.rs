@@ -260,15 +260,11 @@ impl<S: Stream> RustConnection<S> {
     /// It is assumed that `setup` was just received from the server. Thus, the first reply to a
     /// request that is sent will have sequence number one.
     pub fn for_connected_stream(stream: S, setup: Setup) -> Result<Self, ConnectError> {
-        Self::for_inner(stream, ProtoConnection::new(), setup)
-    }
-
-    fn for_inner(stream: S, inner: ProtoConnection, setup: Setup) -> Result<Self, ConnectError> {
         let id_allocator = IdAllocator::new(setup.resource_id_base, setup.resource_id_mask)?;
 
         Ok(RustConnection {
             inner: Mutex::new(ConnectionInner {
-                inner,
+                inner: ProtoConnection::new(),
                 write_buffer: WriteBuffer::new(),
             }),
             stream,
