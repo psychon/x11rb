@@ -1,3 +1,35 @@
+# Version 0.12.0 (2023-XX-XX)
+
+New features:
+* There is a new crate x11rb-async that brings x11rb to the async ecosystem.
+* Bitmask enumerations now also implement BitAnd, BitAndAssign and BitOrAssign
+  and offers contains() and intersects() methods.
+* Add (optional) support for the `as-raw-xcb-connection` crate.
+* Implement Default for `x11rb_protocol::connection::Connection`.
+* Optional support for the `tracing` crate.
+* New API to convert major + minor opcode of a request to human readable names.
+
+Fixes:
+* Improve error message when not all FDs could be sent.
+* Use correct byte order on `Image::get()` for big-endian servers.
+* Fix build for `XCBConnection` on architectures without `AtomicU64`.
+
+Breaking changes:
+* Various methods on `x11rb_protocol::protocol::xinput::EventForSend` now return
+  `ParseError` instead of unwrapping errors internally.
+* The generated names for some structs in `x11rb_protocol::protocol::xkb` are
+  now better. For example, `SelectEventsAuxBitcase1` is now called
+  `SelectEventsAuxNewKeyboardNotify`, which at least hints towards its meaning.
+* `Image::get()` now also returns the visual ID from the `GetImageReply`.
+
+Minor changes:
+* Update dependencies.
+* Get rid of some (infallible) `unwrap()`s in generated code by moving this to a
+  hand-written helper function.
+* The usual round of fixing new clippy warnings.
+* Remove some unnecessary `unwrap()`s in examples.
+* Use the polling crate in the xclock_utc example.
+
 # Version 0.11.1 (2023-01-06)
 
 Fixes:
