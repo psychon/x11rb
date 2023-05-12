@@ -10,12 +10,15 @@ There are two crates involved:
   are for this crate, unless explicitly mentioned
 - x11rb contains some helper functions to simplify request sending
 
+The code in x11rb-async is similar to what is generated for x11rb. Hence, it is
+not shown here.
+
 As you may know, the code generator uses an XML description of the X11 protocol
 from `xcb-proto`. This document will show some examples of the XML description
 followed by the Rust code that is generated for it.
 
 The following code is generated at the beginning of a module (example for
-`xproto`; other modules have some slight differences):
+`xproto` in x11rb-protocol; other modules and x11rb have some slight differences):
 ```rust
 // This file contains generated code. Do not edit directly.
 // To regenerate this, run 'make'.
@@ -363,8 +366,7 @@ pub struct ClientMessageData([u8; 20]);
 impl ClientMessageData {
     pub fn as_data8(&self) -> [u8; 20] {
         fn do_the_parse(remaining: &[u8]) -> Result<[u8; 20], ParseError> {
-            let (data8, remaining) = crate::x11_utils::parse_u8_list(remaining, 20)?;
-            let data8 = <[u8; 20]>::try_from(data8).unwrap();
+            let (data8, remaining) = crate::x11_utils::parse_u8_array::<20>(remaining)?;
             let _ = remaining;
             Ok(data8)
         }
