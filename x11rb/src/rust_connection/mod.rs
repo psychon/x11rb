@@ -13,7 +13,7 @@ use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
 pub use crate::errors::{ConnectError, ConnectionError, ParseError, ReplyError, ReplyOrIdError};
 use crate::extension_manager::ExtensionManager;
 use crate::protocol::bigreq::{ConnectionExt as _, EnableReply};
-use crate::protocol::xproto::{Setup, GET_INPUT_FOCUS_REQUEST};
+use crate::protocol::xproto::{Setup, GET_INPUT_FOCUS_REQUEST, QUERY_EXTENSION_REQUEST};
 use crate::utils::RawFdContainer;
 use crate::x11_utils::{ExtensionInformation, TryParse, TryParseFd};
 use x11rb_protocol::connect::Connect;
@@ -834,28 +834,21 @@ struct RequestInfo<'a> {
 
 impl std::fmt::Display for RequestInfo<'_> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let lock = self.extension_manager.try_lock();
-        match lock {
-            Ok(guard) => {
-                write!(
-                    f,
-                    "{} request",
-                    x11rb_protocol::protocol::get_request_name(
-                        &*guard,
-                        self.major_opcode,
-                        self.minor_opcode
-                    )
+        // QueryExtension is used by the extension manager. We would deadlock if we
+        // tried to lock it again. Hence, this case is hardcoded here.
+        if self.major_opcode == QUERY_EXTENSION_REQUEST {
+            write!(f, "QueryExtension request")
+        } else {
+            let guard = self.extension_manager.lock().unwrap();
+            write!(
+                f,
+                "{} request",
+                x11rb_protocol::protocol::get_request_name(
+                    &*guard,
+                    self.major_opcode,
+                    self.minor_opcode
                 )
-            }
-            Err(TryLockError::WouldBlock) => {
-                // This (most likely) happens because the extension manager is sending a QueryExtension request
-                write!(
-                    f,
-                    "request with major opcode {} and minor {}",
-                    self.major_opcode, self.minor_opcode
-                )
-            }
-            Err(TryLockError::Poisoned(e)) => panic!("{}", e),
+            )
         }
     }
 }

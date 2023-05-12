@@ -16,7 +16,7 @@ use crate::{Cookie, CookieWithFds, VoidCookie};
 use x11rb_protocol::connection::{Connection as ProtoConnection, PollReply, ReplyFdKind};
 use x11rb_protocol::id_allocator::IdAllocator;
 use x11rb_protocol::protocol::bigreq::EnableReply;
-use x11rb_protocol::protocol::xproto::Setup;
+use x11rb_protocol::protocol::xproto::{Setup, QUERY_EXTENSION_REQUEST};
 use x11rb_protocol::x11_utils::{ExtensionInformation, TryParse, TryParseFd, X11Error};
 use x11rb_protocol::xauth::get_auth;
 use x11rb_protocol::{DiscardMode, RawFdContainer, SequenceNumber};
@@ -265,7 +265,7 @@ impl<S: Stream + Send + Sync> RustConnection<S> {
                     // QueryExtension is used by the extension manager. We would deadlock if we
                     // tried to lock it again. Hence, this case is hardcoded here.
                     let major_opcode = bufs[0][0];
-                    if major_opcode == 98 {
+                    if major_opcode == QUERY_EXTENSION_REQUEST {
                         tracing::event!(LEVEL, "Sending QueryExtension request");
                     } else {
                         let extensions = self.extensions.read().await;
