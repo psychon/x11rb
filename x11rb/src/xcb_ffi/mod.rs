@@ -9,10 +9,7 @@ use std::os::raw::c_int;
 #[cfg(unix)]
 use std::os::unix::io::{AsRawFd, RawFd};
 use std::ptr::{null, null_mut};
-use std::sync::{
-    atomic::{AtomicU64, Ordering},
-    Mutex,
-};
+use std::sync::{atomic::Ordering, Mutex};
 
 use libc::c_void;
 
@@ -28,9 +25,11 @@ use crate::x11_utils::{ExtensionInformation, TryParse, TryParseFd};
 
 use x11rb_protocol::{DiscardMode, SequenceNumber};
 
+mod atomic_u64;
 mod pending_errors;
 mod raw_ffi;
 
+use atomic_u64::AtomicU64;
 #[cfg(all(not(test), feature = "dl-libxcb"))]
 pub use raw_ffi::libxcb_library::load_libxcb;
 

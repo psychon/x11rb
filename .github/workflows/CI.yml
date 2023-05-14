@@ -174,10 +174,15 @@ jobs:
     - name: cargo check protocol without default features
       run: cargo build --manifest-path x11rb-protocol/Cargo.toml --no-default-features --features=all-extensions
 
-  big-endian-test:
+  non-amd64-test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - cross_target: mips64-unknown-linux-gnuabi64
+          - cross_target: powerpc-unknown-linux-gnu
     env:
-      CROSS_TARGET: mips64-unknown-linux-gnuabi64
+      CROSS_TARGET: ${{ matrix.cross_target }}
     steps:
     - uses: actions/checkout@v3
     - uses: dtolnay/rust-toolchain@stable
@@ -187,6 +192,8 @@ jobs:
       uses: taiki-e/install-action@cross
     - name: cargo test on x11rb
       run: cross test --target "$CROSS_TARGET" --verbose --package x11rb --features "$MOST_FEATURES"
+    - name: cargo test on x11rb with extra features
+      run: cross test --target "$CROSS_TARGET" --verbose --package x11rb --features "$MOST_FEATURES dl-libxcb"
     - name: cargo test on x11rb-async
       run: cross test --target "$CROSS_TARGET" --verbose --package x11rb-async --features "all-extensions"
 
