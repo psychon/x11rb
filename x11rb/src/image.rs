@@ -706,7 +706,7 @@ impl<'a> Image<'a> {
             format.scanline_pad.try_into()?,
             reply.depth,
             format.bits_per_pixel.try_into()?,
-            ImageOrder::MsbFirst,
+            setup.image_byte_order.try_into()?,
             Cow::Owned(reply.data),
         )
     }
