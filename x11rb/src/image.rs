@@ -32,7 +32,7 @@ use crate::cookie::VoidCookie;
 use crate::errors::{ConnectionError, ParseError, ReplyError};
 use crate::protocol::xproto::{
     get_image, put_image, Drawable, Format, Gcontext, GetImageReply, ImageFormat,
-    ImageOrder as XprotoImageOrder, Setup, VisualClass, Visualtype,
+    ImageOrder as XprotoImageOrder, Setup, VisualClass, Visualid, Visualtype,
 };
 
 /// The description of a single color component.
@@ -662,7 +662,8 @@ impl<'a> Image<'a> {
     /// Get an image from the X11 server.
     ///
     /// This function sends a [`GetImage`](crate::protocol::xproto::GetImageRequest) request, waits
-    /// for its response and wraps it in a new `Image`.
+    /// for its response and wraps it in a new `Image`. The image and the corresponding visual id
+    /// are returned.
     ///
     /// The returned image contains the rectangle with top left corner `(x, y)` and size `(width,
     /// height)` of the given `drawable`.
@@ -673,7 +674,7 @@ impl<'a> Image<'a> {
         y: i16,
         width: u16,
         height: u16,
-    ) -> Result<Self, ReplyError> {
+    ) -> Result<(Self, Visualid), ReplyError> {
         let reply = get_image(
             conn,
             ImageFormat::Z_PIXMAP,
@@ -685,7 +686,9 @@ impl<'a> Image<'a> {
             !0,
         )?
         .reply()?;
-        Ok(Self::get_from_reply(conn.setup(), width, height, reply)?)
+        let visual = reply.visual;
+        let image = Self::get_from_reply(conn.setup(), width, height, reply)?;
+        Ok((image, visual))
     }
 
     /// Construct an `Image` from a `GetImageReply`.
