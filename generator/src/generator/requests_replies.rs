@@ -1,5 +1,4 @@
 use std::collections::HashMap;
-use std::rc::Rc;
 
 use xcbgen::defs as xcbdefs;
 
@@ -23,8 +22,109 @@ pub(super) struct PerModuleEnumCases {
 
 pub(super) type EnumCases = HashMap<String, PerModuleEnumCases>;
 
+fn generate_request_naming_internal(out: &mut Output, module: &xcbdefs::Module) {
+    outln!(
+        out,
+        "/// Helper container for translating numeric request information to a string"
+    );
+    outln!(out, "#[derive(Debug)]");
+    outln!(out, "enum RequestInfo {{");
+    out.indented(|out| {
+        outln!(out, "/// A core protocol request");
+        outln!(out, "Xproto(&'static str),");
+        outln!(out, "/// A known request from a known extension. String is of the form \"ExtName::RequestName\".");
+        outln!(out, "KnownExt(&'static str),");
+        outln!(out, "/// A request which could not be identified. The first entry is the extension name (or none for xproto). Second is opcode.");
+        outln!(out, "UnknownRequest(Option<&'static str>, u8),");
+        outln!(out, "/// A request from an extension that could not be identified");
+        outln!(out, "UnknownExtension(u8, u8),");
+    });
+    outln!(out, "}}");
+    outln!(out, "");
+
+    outln!(
+        out,
+        "/// Get information about a request based on its major and minor code."
+    );
+    outln!(out, "///");
+    outln!(
+        out,
+        "/// The major and minor opcode are the first and second byte of a request."
+    );
+    outln!(out, "/// Core requests do not have a minor opcode. For these, the minor opcode is ignored by this function.");
+    outln!(out, "///");
+    outln!(out, "/// This function returns the name of the extension to which the request belongs, if available, and information about the specific request.");
+    outln!(out, "fn get_request_name_internal(");
+    out.indented(|out| {
+        outln!(out, "ext_info_provider: &dyn ExtInfoProvider,");
+        outln!(out, "major_opcode: u8,");
+        outln!(out, "minor_opcode: u8,");
+    });
+    outln!(out, ") -> (Option<&str>, RequestInfo) {{");
+    out.indented(|out| {
+        outln!(out, "// From the X11 protocol reference manual:");
+        outln!(out, "// Major opcodes 128 through 255 are reserved for extensions.");
+        outln!(out, "if major_opcode < 128 {{");
+        out.indented(|out| {
+            outln!(out, "match major_opcode {{");
+            out.indented(|out| {
+                let xproto_ns = module.namespace("xproto").unwrap();
+                for def in xproto_ns.src_order_defs.borrow().iter() {
+                    if let xcbdefs::Def::Request(request) = def {
+                        outln!(out, "xproto::{}_REQUEST => (None, RequestInfo::Xproto(\"{}\")),", super::camel_case_to_upper_snake(&request.name), request.name);
+                    }
+                }
+                outln!(out, "_ => (None, RequestInfo::UnknownRequest(None, major_opcode)),");
+            });
+            outln!(out, "}}");
+        });
+        outln!(out, "}} else {{");
+        out.indented(|out| {
+            outln!(out, "// Figure out the extension name");
+            outln!(out, "let ext_name = match ext_info_provider.get_from_major_opcode(major_opcode) {{");
+            out.indented(|out| {
+                outln!(out, "Some((name, _)) => name,");
+                outln!(out, "None => return (None, RequestInfo::UnknownExtension(major_opcode, minor_opcode)),");
+            });
+            outln!(out, "}};");
+            outln!(out, "let info = match ext_name {{");
+            out.indented(|out| {
+                for ns in module.sorted_namespaces() {
+                    // xproto was already handled above
+                    if let Some(ext_info) = &ns.ext_info {
+                        let has_feature = super::ext_has_feature(&ns.header);
+                        if has_feature {
+                            outln!(out, "#[cfg(feature = \"{}\")]", ns.header);
+                        }
+                        outln!(out, "{}::X11_EXTENSION_NAME => {{", ns.header);
+                        out.indented(|out| {
+                            outln!(out, "match minor_opcode {{");
+                            out.indented(|out| {
+                                for def in ns.src_order_defs.borrow().iter() {
+                                    if let xcbdefs::Def::Request(request) = def {
+                                        outln!(out, "{}::{}_REQUEST => RequestInfo::KnownExt(\"{}::{}\"),", ns.header, super::camel_case_to_upper_snake(&request.name), ext_info.name, request.name);
+                                    }
+                                }
+                                outln!(out, "_ => RequestInfo::UnknownRequest(Some(\"{}\"), minor_opcode),", ext_info.name);
+                            });
+                            outln!(out, "}}");
+                        });
+                        outln!(out, "}}");
+                    }
+                }
+                outln!(out, "_ => RequestInfo::UnknownExtension(major_opcode, minor_opcode),");
+            });
+            outln!(out, "}};");
+            outln!(out, "(Some(ext_name), info)");
+        });
+        outln!(out, "}}");
+    });
+    outln!(out, "}}");
+    outln!(out, "");
+}
+
 /// Generate a function that figures out the name of a request
-fn generate_request_naming(out: &mut Output, module: &xcbdefs::Module) {
+fn generate_request_naming(out: &mut Output) {
     outln!(
         out,
         "/// Get the name of a request based on its major and minor code."
@@ -43,59 +143,13 @@ fn generate_request_naming(out: &mut Output, module: &xcbdefs::Module) {
     });
     outln!(out, ") -> Cow<'static, str> {{");
     out.indented(|out| {
-        outln!(out, "// From the X11 protocol reference manual:");
-        outln!(out, "// Major opcodes 128 through 255 are reserved for extensions.");
-        outln!(out, "if major_opcode < 128 {{");
+        outln!(out, "match get_request_name_internal(ext_info_provider, major_opcode, minor_opcode).1 {{");
         out.indented(|out| {
-            outln!(out, "match major_opcode {{");
-            out.indented(|out| {
-                let xproto_ns = module.namespace("xproto").unwrap();
-                for def in xproto_ns.src_order_defs.borrow().iter() {
-                    if let xcbdefs::Def::Request(request) = def {
-                        outln!(out, "xproto::{}_REQUEST => \"{}\".into(),", super::camel_case_to_upper_snake(&request.name), request.name);
-                    }
-                }
-                outln!(out, "_ => alloc::format!(\"xproto::opcode {{}}\", major_opcode).into(),");
-            });
-            outln!(out, "}}");
-        });
-        outln!(out, "}} else {{");
-        out.indented(|out| {
-            outln!(out, "// Figure out the extension name");
-            outln!(out, "let ext_name = match ext_info_provider.get_from_major_opcode(major_opcode) {{");
-            out.indented(|out| {
-                outln!(out, "Some((name, _)) => name,");
-                outln!(out, "None => return alloc::format!(\"ext {{}}::opcode {{}}\", major_opcode, minor_opcode).into(),");
-            });
-            outln!(out, "}};");
-            outln!(out, "match ext_name {{");
-            out.indented(|out| {
-                for ns in module.sorted_namespaces() {
-                    // xproto was already handled above
-                    if let Some(ext_info) = &ns.ext_info {
-                        let has_feature = super::ext_has_feature(&ns.header);
-                        if has_feature {
-                            outln!(out, "#[cfg(feature = \"{}\")]", ns.header);
-                        }
-                        outln!(out, "{}::X11_EXTENSION_NAME => {{", ns.header);
-                        out.indented(|out| {
-                            outln!(out, "match minor_opcode {{");
-                            out.indented(|out| {
-                                for def in ns.src_order_defs.borrow().iter() {
-                                    if let xcbdefs::Def::Request(request) = def {
-                                        outln!(out, "{}::{}_REQUEST => \"{}::{}\".into(),", ns.header, super::camel_case_to_upper_snake(&request.name), ext_info.name, request.name);
-                                    }
-                                }
-                                outln!(out, "_ => alloc::format!(\"{}::opcode {{}}\", minor_opcode).into(),", ext_info.name);
-                            });
-                            outln!(out, "}}");
-                        });
-                        outln!(out, "}}");
-                    }
-                }
-                outln!(out, "_ => alloc::format!(\"ext {{}}::opcode {{}}\", ext_name, minor_opcode).into(),");
-            });
-            outln!(out, "}}");
+            outln!(out, "RequestInfo::Xproto(request) => request.into(),");
+            outln!(out, "RequestInfo::KnownExt(ext_and_request) => ext_and_request.into(),");
+            outln!(out, "RequestInfo::UnknownRequest(None, opcode) => alloc::format!(\"xproto::opcode {{}}\", opcode).into(),");
+            outln!(out, "RequestInfo::UnknownRequest(Some(ext), opcode) => alloc::format!(\"{{}}::opcode {{}}\", ext, opcode).into(),");
+            outln!(out, "RequestInfo::UnknownExtension(major_opcode, minor_opcode) => alloc::format!(\"ext {{}}::opcode {{}}\", major_opcode, minor_opcode).into(),");
         });
         outln!(out, "}}");
     });
@@ -107,7 +161,8 @@ fn generate_request_naming(out: &mut Output, module: &xcbdefs::Module) {
 pub(super) fn generate(out: &mut Output, module: &xcbdefs::Module, mut enum_cases: EnumCases) {
     let namespaces = module.sorted_namespaces();
 
-    generate_request_naming(out, module);
+    generate_request_naming_internal(out, module);
+    generate_request_naming(out);
 
     outln!(out, "/// Enumeration of all possible X11 requests.");
     outln!(out, "#[derive(Debug)]");
@@ -335,51 +390,38 @@ pub(super) fn generate(out: &mut Output, module: &xcbdefs::Module, mut enum_case
         out,
         "/// Get the name of a request from its extension name and opcodes.",
     );
-    outln!(out, "pub(crate) fn request_name(extension: Option<&str>, major_opcode: u8, minor_opcode: u16) -> Option<&'static str> {{");
+    outln!(out, "///");
+    outln!(
+        out,
+        "/// First result is the name of the extension, second the name of the request."
+    );
+    outln!(out, "pub(crate) fn request_name(ext_info_provider: &dyn ExtInfoProvider, major_opcode: u8, minor_opcode: u16) -> (Option<String>, Option<&'static str>) {{");
     out.indented(|out| {
-        outln!(out, "// Check if this is a core protocol request.");
-        outln!(out, "match major_opcode {{");
+        outln!(out, "// Don't ask me why X11 errors contain u16 for minor opcode, but requests are sent with u8.");
+        outln!(out, "// We have to work around that incompatibility here.");
+        outln!(out, "// From the X11 protocol reference manual:");
+        outln!(out, "// Major opcodes 128 through 255 are reserved for extensions.");
+        outln!(out, "let (ext, info) = if major_opcode < 128 || minor_opcode <= u16::from(u8::MAX) {{");
         out.indented(|out| {
-            let xproto_ns = module.namespace("xproto").unwrap();
-            for def in sorted_requests(&xproto_ns) {
-                outln!(out, "{} => return Some(\"{}\"),", def.opcode, def.name);
-            }
-            outln!(out, "_ => (),");
+            outln!(out, "get_request_name_internal(ext_info_provider, major_opcode, minor_opcode as u8)");
         });
-        outln!(out, "}}");
-
-        outln!(out, "// Check the extension");
-        outln!(out, "match (extension, minor_opcode) {{");
+        outln!(out, "}} else {{");
         out.indented(|out| {
-            for ns in namespaces.iter() {
-                if ns.header == "xproto" {
-                    continue;
-                }
-                let has_feature = super::ext_has_feature(&ns.header);
-                for def in sorted_requests(ns) {
-                    if has_feature {
-                        outln!(out, "#[cfg(feature = \"{}\")]", ns.header);
-                    }
-                    outln!(
-                        out,
-                        "(Some({}::X11_EXTENSION_NAME), {}) => Some(\"{}\"),",
-                        ns.header,
-                        def.opcode,
-                        def.name,
-                    );
-                }
-            }
-            outln!(out, "_ => None,");
+            outln!(out, "let ext = ext_info_provider.get_from_major_opcode(major_opcode);");
+            outln!(out, "return (ext.map(|(ext, _)| String::from(ext)), None);");
         });
-        outln!(out, "}}");
+        outln!(out, "}};");
+        outln!(out, "let ext = ext.map(String::from);");
+        outln!(out, "let info = match info {{");
+        out.indented(|out| {
+            outln!(out, "RequestInfo::Xproto(request) => request.into(),");
+            outln!(out, "RequestInfo::KnownExt(ext_and_request) => ext_and_request.split_once(\"::\").map(|r| r.1),");
+            outln!(out, "RequestInfo::UnknownRequest(_, _) => None,");
+            outln!(out, "RequestInfo::UnknownExtension(_, _) => None,");
+        });
+        outln!(out, "}};");
+        outln!(out, "(ext, info)");
     });
     outln!(out, "}}");
     outln!(out, "");
-}
-
-/// Get all requests in the namespace in a sorted order
-fn sorted_requests(ns: &xcbgen::defs::Namespace) -> Vec<Rc<xcbgen::defs::RequestDef>> {
-    let mut events: Vec<_> = ns.request_defs.borrow().values().cloned().collect();
-    events.sort_by(|a, b| a.opcode.cmp(&b.opcode));
-    events
 }

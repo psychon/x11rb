@@ -6,7 +6,7 @@
 
 use core::convert::TryInto;
 
-use alloc::string::{String, ToString};
+use alloc::string::String;
 use alloc::vec::Vec;
 
 use crate::errors::ParseError;
@@ -51,10 +51,8 @@ impl X11Error {
             Err(ParseError::InvalidValue)
         } else {
             let error_kind = ErrorKind::from_wire_error_code(error_code, ext_info_provider);
-            let extension_name = ext_info_provider
-                .get_from_major_opcode(major_opcode)
-                .map(|(name, _)| name.to_string());
-            let request_name = request_name(extension_name.as_deref(), major_opcode, minor_opcode);
+            let (extension_name, request_name) =
+                request_name(ext_info_provider, major_opcode, minor_opcode);
             Ok(X11Error {
                 error_kind,
                 error_code,
