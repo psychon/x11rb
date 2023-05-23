@@ -53,6 +53,8 @@ pub mod parse_display;
 pub mod protocol;
 #[cfg(feature = "resource_manager")]
 pub mod resource_manager;
+#[cfg(test)]
+mod test;
 mod utils;
 pub mod wrapper;
 #[cfg(feature = "std")]
