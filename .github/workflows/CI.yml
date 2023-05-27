@@ -205,3 +205,60 @@ jobs:
     - uses: dtolnay/rust-toolchain@stable
     - name: Run tests
       run: cargo test --verbose --package x11rb --features "$MOST_FEATURES"
+
+  windows-stable:
+    runs-on: windows-latest
+    env:
+      DISPLAY: 127.0.0.1:0
+      X11RB_EXAMPLE_TIMEOUT: 1
+    steps:
+    - run: git config --global core.autocrlf input
+    - uses: actions/checkout@v3
+    - uses: dtolnay/rust-toolchain@stable
+
+    - uses: cygwin/cygwin-install-action@v4
+      with:
+        packages: xorg-server-extra
+
+    # This uses libc::mmap and thus is Unix-only
+    - name: disable unix-only shared_memory example
+      run: del x11rb\examples\shared_memory.rs ; del x11rb-async\examples\shared_memory_async.rs
+
+    - name: Crate a fake "shared_memory" because it is referenced in Cargo.toml
+      run: Copy-Item "x11rb\examples\simple_window.rs" -Destination "x11rb\examples\shared_memory.rs" ; Copy-Item "x11rb-async\examples\xclock_utc_async.rs" -Destination "x11rb-async\examples\shared_memory_async.rs"
+
+    # We do not have libxcb and thus cannot build XCBConnection
+    - name: cargo build x11rb with all features
+      run: cargo check -p x11rb --verbose --all-targets --features all-extensions,cursor,image,tracing,tracing-subscriber/env-filter
+    - name: cargo build x11rb-async with all features
+      run: cargo check -p x11rb-async --verbose --all-targets --features all-extensions
+
+    - name: Start an X11 server in the background
+      shell: pwsh
+      run: $Server = Start-Process -PassThru -FilePath C:\cygwin\bin\Xvfb.exe -ArgumentList "-listen tcp :0"
+
+    # Run the examples as integration tests.
+    # If you know some PowerShell programming, feel free to simplify this. This is
+    # the first time I touched PowerShell and I hope not to touch it again any
+    # time soon. Requirements include "must fail if the command fails".
+    - name: run x11rb examples
+      shell: pwsh
+      run: |
+        Get-ChildItem x11rb\examples | Where {$_.extension -eq ".rs"} | Where {$_.BaseName -ne "tutorial"} | Where {$_.BaseName -ne "shared_memory"} | Foreach-Object {
+          $cmd = "cargo run --verbose --package x11rb --features all-extensions,cursor,image,tracing,tracing-subscriber/env-filter --example $($_.BaseName) 2>&1"
+          Write-Host -ForegroundColor Yellow $cmd
+          $backupErrorActionPreference = $script:ErrorActionPreference
+          $script:ErrorActionPreference = "Continue"
+          try
+          {
+            cmd /c "$cmd" | ForEach-Object { "$_" }
+            if ($LASTEXITCODE -ne 0)
+            {
+              throw "Execution failed with exit code $LASTEXITCODE for $cmd"
+            }
+          }
+          finally
+          {
+            $script:ErrorActionPreference = $backupErrorActionPreference
+          }
+        }
