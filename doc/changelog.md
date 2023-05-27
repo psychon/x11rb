@@ -1,4 +1,4 @@
-# Version 0.12.0 (2023-XX-XX)
+# Version 0.12.0 (2023-05-27)
 
 New features:
 * There is a new crate x11rb-async that brings x11rb to the async ecosystem.
