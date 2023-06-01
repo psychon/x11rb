@@ -23,7 +23,7 @@ macro_rules! property_cookie {
             Conn: RequestConnection + ?Sized,
         {
             /// Get the reply that the server sent.
-            pub fn reply(self) -> Result<$struct_name, ReplyError> {
+            pub fn reply(self) -> Result<Option<$struct_name>, ReplyError> {
                 Ok($from_reply(self.0.reply()?)?)
             }
 
@@ -33,6 +33,7 @@ macro_rules! property_cookie {
                     .reply_unchecked()?
                     .map($from_reply)
                     .transpose()
+                    .map(|e| e.flatten())
                     .map_err(Into::into)
             }
         }
@@ -111,7 +112,10 @@ impl WmClass {
     ///
     /// The original `GetProperty` request must have been for a `WM_CLASS` property for this
     /// function to return sensible results.
-    pub fn from_reply(reply: GetPropertyReply) -> Result<Self, ParseError> {
+    pub fn from_reply(reply: GetPropertyReply) -> Result<Option<Self>, ParseError> {
+        if reply.type_ == AtomEnum::NONE.into() {
+            return Ok(None);
+        }
         if reply.type_ != AtomEnum::STRING.into() || reply.format != 8 {
             return Err(ParseError::InvalidValue);
         }
@@ -121,7 +125,7 @@ impl WmClass {
             .iter()
             .position(|&v| v == 0)
             .unwrap_or(reply.value.len());
-        Ok(WmClass(reply, offset))
+        Ok(Some(WmClass(reply, offset)))
     }
 
     /// Get the instance contained in this `WM_CLASS` property
@@ -293,11 +297,14 @@ impl WmSizeHints {
     ///
     /// The original `WmSizeHints` request must have been for a `WM_SIZE_HINTS` property for this
     /// function to return sensible results.
-    pub fn from_reply(reply: &GetPropertyReply) -> Result<Self, ParseError> {
+    pub fn from_reply(reply: &GetPropertyReply) -> Result<Option<Self>, ParseError> {
+        if reply.type_ == AtomEnum::NONE.into() {
+            return Ok(None);
+        }
         if reply.type_ != AtomEnum::WM_SIZE_HINTS.into() || reply.format != 32 {
             return Err(ParseError::InvalidValue);
         }
-        Ok(Self::try_parse(&reply.value)?.0)
+        Ok(Some(Self::try_parse(&reply.value)?.0))
     }
 
     /// Set these `WM_SIZE_HINTS` on some window as the `WM_NORMAL_HINTS` property.
@@ -544,12 +551,14 @@ impl WmHints {
     ///
     /// The original `WmHints` request must have been for a `WM_HINTS` property for this
     /// function to return sensible results.
-    pub fn from_reply(reply: &GetPropertyReply) -> Result<Self, ParseError> {
+    pub fn from_reply(reply: &GetPropertyReply) -> Result<Option<Self>, ParseError> {
+        if reply.type_ == AtomEnum::NONE.into() {
+            return Ok(None);
+        }
         if reply.type_ != AtomEnum::WM_HINTS.into() || reply.format != 32 {
             return Err(ParseError::InvalidValue);
         }
-
-        Ok(Self::try_parse(&reply.value)?.0)
+        Ok(Some(Self::try_parse(&reply.value)?.0))
     }
 
     /// Set these `WM_HINTS` on some window.
@@ -703,10 +712,17 @@ mod test {
             (b"Hello\0World", b"Hello", b"World"),
             (b"Hello\0World\0Good\0Day", b"Hello", b"World\0Good\0Day"),
         ] {
-            let wm_class =
-                WmClass::from_reply(get_property_reply(input, 8, AtomEnum::STRING)).unwrap();
+            let wm_class = WmClass::from_reply(get_property_reply(input, 8, AtomEnum::STRING))
+                .unwrap()
+                .unwrap();
             assert_eq!((wm_class.instance(), wm_class.class()), (*instance, *class));
         }
+    }
+
+    #[test]
+    fn test_wm_class_missing() {
+        let wm_class = WmClass::from_reply(get_property_reply(&[], 0, AtomEnum::NONE)).unwrap();
+        assert!(wm_class.is_none());
     }
 
     #[test]
@@ -739,6 +755,7 @@ mod test {
             .collect::<Vec<u8>>();
         let wm_size_hints =
             WmSizeHints::from_reply(&get_property_reply(&input, 32, AtomEnum::WM_SIZE_HINTS))
+                .unwrap()
                 .unwrap();
 
         assert!(
@@ -755,6 +772,13 @@ mod test {
         assert_eq!(wm_size_hints.win_gravity, Some(Gravity::NORTH_WEST));
 
         assert_eq!(input, wm_size_hints.serialize());
+    }
+
+    #[test]
+    fn test_wm_normal_hints_missing() {
+        let wm_size_hints =
+            WmSizeHints::from_reply(&get_property_reply(&[], 0, AtomEnum::NONE)).unwrap();
+        assert!(wm_size_hints.is_none());
     }
 
     #[test]
@@ -776,8 +800,9 @@ mod test {
             .iter()
             .flat_map(|v| u32::serialize(v).to_vec())
             .collect::<Vec<u8>>();
-        let wm_hints =
-            WmHints::from_reply(&get_property_reply(&input, 32, AtomEnum::WM_HINTS)).unwrap();
+        let wm_hints = WmHints::from_reply(&get_property_reply(&input, 32, AtomEnum::WM_HINTS))
+            .unwrap()
+            .unwrap();
 
         assert_eq!(wm_hints.input, Some(true));
         match wm_hints.initial_state {
@@ -792,5 +817,11 @@ mod test {
         assert!(!wm_hints.urgent);
 
         assert_eq!(input, wm_hints.serialize());
+    }
+
+    #[test]
+    fn test_wm_hints_missing() {
+        let wm_hints = WmHints::from_reply(&get_property_reply(&[], 0, AtomEnum::NONE)).unwrap();
+        assert!(wm_hints.is_none());
     }
 }
