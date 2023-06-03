@@ -473,17 +473,9 @@ fn emit_request_struct(
         name = name
     );
     out.indented(|out| {
-        outln!(
-            out,
-            "/// Serialize this request into bytes for the provided connection",
-        );
-        outln!(
-            out,
-            "pub fn serialize(self{opcode}) -> BufWithFds<PiecewiseBuf<{lifetime}>> {{",
-            opcode = if is_xproto { "" } else { ", major_opcode: u8" },
-            lifetime = serialize_lifetime_return,
-        );
-        out.indented(|out| {
+        let mut code = Output::new();
+        {
+            let out = &mut code;
             let fields = request_def.fields.borrow();
 
             let has_expr_fields = fields
@@ -898,6 +890,19 @@ fn emit_request_struct(
                 fds = fds_arg,
             );
             outln!(out, "{}", result);
+        };
+        outln!(
+            out,
+            "/// Serialize this request into bytes for the provided connection",
+        );
+        outln!(
+            out,
+            "pub fn serialize(self{opcode}) -> BufWithFds<PiecewiseBuf<{lifetime}>> {{",
+            opcode = if is_xproto { "" } else { ", major_opcode: u8" },
+            lifetime = serialize_lifetime_return,
+        );
+        out.indented(|out| {
+            out!(out, "{}", code.into_data());
         });
         outln!(out, "}}");
 
