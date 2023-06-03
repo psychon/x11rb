@@ -42,7 +42,8 @@ where
 {
     let request0 = PrintQueryVersionRequest;
     let (bytes, fds) = request0.serialize(major_opcode(conn).await?);
-    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
+    let slices = [IoSlice::new(&bytes[0])];
+    assert_eq!(slices.len(), bytes.len());
     conn.send_request_with_reply(&slices, fds).await
 }
 pub async fn print_get_printer_list<'c, 'input, Conn>(conn: &'c Conn, printer_name: &'input [String8], locale: &'input [String8]) -> Result<Cookie<'c, Conn, PrintGetPrinterListReply>, ConnectionError>
@@ -54,7 +55,8 @@ where
         locale: Cow::Borrowed(locale),
     };
     let (bytes, fds) = request0.serialize(major_opcode(conn).await?);
-    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
+    let slices = [IoSlice::new(&bytes[0]), IoSlice::new(&bytes[1]), IoSlice::new(&bytes[2]), IoSlice::new(&bytes[3]), IoSlice::new(&bytes[4])];
+    assert_eq!(slices.len(), bytes.len());
     conn.send_request_with_reply(&slices, fds).await
 }
 pub async fn print_rehash_printer_list<Conn>(conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -63,7 +65,8 @@ where
 {
     let request0 = PrintRehashPrinterListRequest;
     let (bytes, fds) = request0.serialize(major_opcode(conn).await?);
-    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
+    let slices = [IoSlice::new(&bytes[0])];
+    assert_eq!(slices.len(), bytes.len());
     conn.send_request_without_reply(&slices, fds).await
 }
 pub async fn create_context<'c, 'input, Conn>(conn: &'c Conn, context_id: u32, printer_name: &'input [String8], locale: &'input [String8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -76,7 +79,8 @@ where
         locale: Cow::Borrowed(locale),
     };
     let (bytes, fds) = request0.serialize(major_opcode(conn).await?);
-    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
+    let slices = [IoSlice::new(&bytes[0]), IoSlice::new(&bytes[1]), IoSlice::new(&bytes[2]), IoSlice::new(&bytes[3]), IoSlice::new(&bytes[4])];
+    assert_eq!(slices.len(), bytes.len());
     conn.send_request_without_reply(&slices, fds).await
 }
 pub async fn print_set_context<Conn>(conn: &Conn, context: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -87,7 +91,8 @@ where
         context,
     };
     let (bytes, fds) = request0.serialize(major_opcode(conn).await?);
-    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
+    let slices = [IoSlice::new(&bytes[0])];
+    assert_eq!(slices.len(), bytes.len());
     conn.send_request_without_reply(&slices, fds).await
 }
 pub async fn print_get_context<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, PrintGetContextReply>, ConnectionError>
@@ -96,7 +101,8 @@ where
 {
     let request0 = PrintGetContextRequest;
     let (bytes, fds) = request0.serialize(major_opcode(conn).await?);
-    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
+    let slices = [IoSlice::new(&bytes[0])];
+    assert_eq!(slices.len(), bytes.len());
     conn.send_request_with_reply(&slices, fds).await
 }
 pub async fn print_destroy_context<Conn>(conn: &Conn, context: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -107,7 +113,8 @@ where
         context,
     };
     let (bytes, fds) = request0.serialize(major_opcode(conn).await?);
-    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
+    let slices = [IoSlice::new(&bytes[0])];
+    assert_eq!(slices.len(), bytes.len());
     conn.send_request_without_reply(&slices, fds).await
 }
 pub async fn print_get_screen_of_context<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, PrintGetScreenOfContextReply>, ConnectionError>
@@ -116,7 +123,8 @@ where
 {
     let request0 = PrintGetScreenOfContextRequest;
     let (bytes, fds) = request0.serialize(major_opcode(conn).await?);
-    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
+    let slices = [IoSlice::new(&bytes[0])];
+    assert_eq!(slices.len(), bytes.len());
     conn.send_request_with_reply(&slices, fds).await
 }
 pub async fn print_start_job<Conn>(conn: &Conn, output_mode: u8) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -127,7 +135,8 @@ where
         output_mode,
     };
     let (bytes, fds) = request0.serialize(major_opcode(conn).await?);
-    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
+    let slices = [IoSlice::new(&bytes[0])];
+    assert_eq!(slices.len(), bytes.len());
     conn.send_request_without_reply(&slices, fds).await
 }
 pub async fn print_end_job<Conn>(conn: &Conn, cancel: bool) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -138,7 +147,8 @@ where
         cancel,
     };
     let (bytes, fds) = request0.serialize(major_opcode(conn).await?);
-    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
+    let slices = [IoSlice::new(&bytes[0])];
+    assert_eq!(slices.len(), bytes.len());
     conn.send_request_without_reply(&slices, fds).await
 }
 pub async fn print_start_doc<Conn>(conn: &Conn, driver_mode: u8) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -149,7 +159,8 @@ where
         driver_mode,
     };
     let (bytes, fds) = request0.serialize(major_opcode(conn).await?);
-    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
+    let slices = [IoSlice::new(&bytes[0])];
+    assert_eq!(slices.len(), bytes.len());
     conn.send_request_without_reply(&slices, fds).await
 }
 pub async fn print_end_doc<Conn>(conn: &Conn, cancel: bool) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -160,7 +171,8 @@ where
         cancel,
     };
     let (bytes, fds) = request0.serialize(major_opcode(conn).await?);
-    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
+    let slices = [IoSlice::new(&bytes[0])];
+    assert_eq!(slices.len(), bytes.len());
     conn.send_request_without_reply(&slices, fds).await
 }
 pub async fn print_put_document_data<'c, 'input, Conn>(conn: &'c Conn, drawable: xproto::Drawable, data: &'input [u8], doc_format: &'input [String8], options: &'input [String8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -174,7 +186,8 @@ where
         options: Cow::Borrowed(options),
     };
     let (bytes, fds) = request0.serialize(major_opcode(conn).await?);
-    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
+    let slices = [IoSlice::new(&bytes[0]), IoSlice::new(&bytes[1]), IoSlice::new(&bytes[2]), IoSlice::new(&bytes[3]), IoSlice::new(&bytes[4]), IoSlice::new(&bytes[5]), IoSlice::new(&bytes[6])];
+    assert_eq!(slices.len(), bytes.len());
     conn.send_request_without_reply(&slices, fds).await
 }
 pub async fn print_get_document_data<Conn>(conn: &Conn, context: Pcontext, max_bytes: u32) -> Result<Cookie<'_, Conn, PrintGetDocumentDataReply>, ConnectionError>
@@ -186,7 +199,8 @@ where
         max_bytes,
     };
     let (bytes, fds) = request0.serialize(major_opcode(conn).await?);
-    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
+    let slices = [IoSlice::new(&bytes[0])];
+    assert_eq!(slices.len(), bytes.len());
     conn.send_request_with_reply(&slices, fds).await
 }
 pub async fn print_start_page<Conn>(conn: &Conn, window: xproto::Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -197,7 +211,8 @@ where
         window,
     };
     let (bytes, fds) = request0.serialize(major_opcode(conn).await?);
-    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
+    let slices = [IoSlice::new(&bytes[0])];
+    assert_eq!(slices.len(), bytes.len());
     conn.send_request_without_reply(&slices, fds).await
 }
 pub async fn print_end_page<Conn>(conn: &Conn, cancel: bool) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -208,7 +223,8 @@ where
         cancel,
     };
     let (bytes, fds) = request0.serialize(major_opcode(conn).await?);
-    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
+    let slices = [IoSlice::new(&bytes[0])];
+    assert_eq!(slices.len(), bytes.len());
     conn.send_request_without_reply(&slices, fds).await
 }
 pub async fn print_select_input<Conn>(conn: &Conn, context: Pcontext, event_mask: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -220,7 +236,8 @@ where
         event_mask,
     };
     let (bytes, fds) = request0.serialize(major_opcode(conn).await?);
-    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
+    let slices = [IoSlice::new(&bytes[0])];
+    assert_eq!(slices.len(), bytes.len());
     conn.send_request_without_reply(&slices, fds).await
 }
 pub async fn print_input_selected<Conn>(conn: &Conn, context: Pcontext) -> Result<Cookie<'_, Conn, PrintInputSelectedReply>, ConnectionError>
@@ -231,7 +248,8 @@ where
         context,
     };
     let (bytes, fds) = request0.serialize(major_opcode(conn).await?);
-    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
+    let slices = [IoSlice::new(&bytes[0])];
+    assert_eq!(slices.len(), bytes.len());
     conn.send_request_with_reply(&slices, fds).await
 }
 pub async fn print_get_attributes<Conn>(conn: &Conn, context: Pcontext, pool: u8) -> Result<Cookie<'_, Conn, PrintGetAttributesReply>, ConnectionError>
@@ -243,7 +261,8 @@ where
         pool,
     };
     let (bytes, fds) = request0.serialize(major_opcode(conn).await?);
-    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
+    let slices = [IoSlice::new(&bytes[0])];
+    assert_eq!(slices.len(), bytes.len());
     conn.send_request_with_reply(&slices, fds).await
 }
 pub async fn print_get_one_attributes<'c, 'input, Conn>(conn: &'c Conn, context: Pcontext, pool: u8, name: &'input [String8]) -> Result<Cookie<'c, Conn, PrintGetOneAttributesReply>, ConnectionError>
@@ -256,7 +275,8 @@ where
         name: Cow::Borrowed(name),
     };
     let (bytes, fds) = request0.serialize(major_opcode(conn).await?);
-    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
+    let slices = [IoSlice::new(&bytes[0]), IoSlice::new(&bytes[1]), IoSlice::new(&bytes[2])];
+    assert_eq!(slices.len(), bytes.len());
     conn.send_request_with_reply(&slices, fds).await
 }
 pub async fn print_set_attributes<'c, 'input, Conn>(conn: &'c Conn, context: Pcontext, string_len: u32, pool: u8, rule: u8, attributes: &'input [String8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -271,7 +291,8 @@ where
         attributes: Cow::Borrowed(attributes),
     };
     let (bytes, fds) = request0.serialize(major_opcode(conn).await?);
-    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
+    let slices = [IoSlice::new(&bytes[0]), IoSlice::new(&bytes[1]), IoSlice::new(&bytes[2])];
+    assert_eq!(slices.len(), bytes.len());
     conn.send_request_without_reply(&slices, fds).await
 }
 pub async fn print_get_page_dimensions<Conn>(conn: &Conn, context: Pcontext) -> Result<Cookie<'_, Conn, PrintGetPageDimensionsReply>, ConnectionError>
@@ -282,7 +303,8 @@ where
         context,
     };
     let (bytes, fds) = request0.serialize(major_opcode(conn).await?);
-    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
+    let slices = [IoSlice::new(&bytes[0])];
+    assert_eq!(slices.len(), bytes.len());
     conn.send_request_with_reply(&slices, fds).await
 }
 pub async fn print_query_screens<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, PrintQueryScreensReply>, ConnectionError>
@@ -291,7 +313,8 @@ where
 {
     let request0 = PrintQueryScreensRequest;
     let (bytes, fds) = request0.serialize(major_opcode(conn).await?);
-    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
+    let slices = [IoSlice::new(&bytes[0])];
+    assert_eq!(slices.len(), bytes.len());
     conn.send_request_with_reply(&slices, fds).await
 }
 pub async fn print_set_image_resolution<Conn>(conn: &Conn, context: Pcontext, image_resolution: u16) -> Result<Cookie<'_, Conn, PrintSetImageResolutionReply>, ConnectionError>
@@ -303,7 +326,8 @@ where
         image_resolution,
     };
     let (bytes, fds) = request0.serialize(major_opcode(conn).await?);
-    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
+    let slices = [IoSlice::new(&bytes[0])];
+    assert_eq!(slices.len(), bytes.len());
     conn.send_request_with_reply(&slices, fds).await
 }
 pub async fn print_get_image_resolution<Conn>(conn: &Conn, context: Pcontext) -> Result<Cookie<'_, Conn, PrintGetImageResolutionReply>, ConnectionError>
@@ -314,7 +338,8 @@ where
         context,
     };
     let (bytes, fds) = request0.serialize(major_opcode(conn).await?);
-    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
+    let slices = [IoSlice::new(&bytes[0])];
+    assert_eq!(slices.len(), bytes.len());
     conn.send_request_with_reply(&slices, fds).await
 }
 /// Extension trait defining the requests of this extension.

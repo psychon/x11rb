@@ -42,7 +42,8 @@ where
 {
     let request0 = QueryVersionRequest;
     let (bytes, fds) = request0.serialize(major_opcode(conn).await?);
-    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
+    let slices = [IoSlice::new(&bytes[0])];
+    assert_eq!(slices.len(), bytes.len());
     conn.send_request_with_reply(&slices, fds).await
 }
 pub async fn rectangles<'c, 'input, Conn>(conn: &'c Conn, operation: SO, destination_kind: SK, ordering: xproto::ClipOrdering, destination_window: xproto::Window, x_offset: i16, y_offset: i16, rectangles: &'input [xproto::Rectangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -59,7 +60,8 @@ where
         rectangles: Cow::Borrowed(rectangles),
     };
     let (bytes, fds) = request0.serialize(major_opcode(conn).await?);
-    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
+    let slices = [IoSlice::new(&bytes[0]), IoSlice::new(&bytes[1]), IoSlice::new(&bytes[2])];
+    assert_eq!(slices.len(), bytes.len());
     conn.send_request_without_reply(&slices, fds).await
 }
 pub async fn mask<Conn, A>(conn: &Conn, operation: SO, destination_kind: SK, destination_window: xproto::Window, x_offset: i16, y_offset: i16, source_bitmap: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -77,7 +79,8 @@ where
         source_bitmap,
     };
     let (bytes, fds) = request0.serialize(major_opcode(conn).await?);
-    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
+    let slices = [IoSlice::new(&bytes[0])];
+    assert_eq!(slices.len(), bytes.len());
     conn.send_request_without_reply(&slices, fds).await
 }
 pub async fn combine<Conn>(conn: &Conn, operation: SO, destination_kind: SK, source_kind: SK, destination_window: xproto::Window, x_offset: i16, y_offset: i16, source_window: xproto::Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -94,7 +97,8 @@ where
         source_window,
     };
     let (bytes, fds) = request0.serialize(major_opcode(conn).await?);
-    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
+    let slices = [IoSlice::new(&bytes[0])];
+    assert_eq!(slices.len(), bytes.len());
     conn.send_request_without_reply(&slices, fds).await
 }
 pub async fn offset<Conn>(conn: &Conn, destination_kind: SK, destination_window: xproto::Window, x_offset: i16, y_offset: i16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -108,7 +112,8 @@ where
         y_offset,
     };
     let (bytes, fds) = request0.serialize(major_opcode(conn).await?);
-    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
+    let slices = [IoSlice::new(&bytes[0])];
+    assert_eq!(slices.len(), bytes.len());
     conn.send_request_without_reply(&slices, fds).await
 }
 pub async fn query_extents<Conn>(conn: &Conn, destination_window: xproto::Window) -> Result<Cookie<'_, Conn, QueryExtentsReply>, ConnectionError>
@@ -119,7 +124,8 @@ where
         destination_window,
     };
     let (bytes, fds) = request0.serialize(major_opcode(conn).await?);
-    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
+    let slices = [IoSlice::new(&bytes[0])];
+    assert_eq!(slices.len(), bytes.len());
     conn.send_request_with_reply(&slices, fds).await
 }
 pub async fn select_input<Conn>(conn: &Conn, destination_window: xproto::Window, enable: bool) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -131,7 +137,8 @@ where
         enable,
     };
     let (bytes, fds) = request0.serialize(major_opcode(conn).await?);
-    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
+    let slices = [IoSlice::new(&bytes[0])];
+    assert_eq!(slices.len(), bytes.len());
     conn.send_request_without_reply(&slices, fds).await
 }
 pub async fn input_selected<Conn>(conn: &Conn, destination_window: xproto::Window) -> Result<Cookie<'_, Conn, InputSelectedReply>, ConnectionError>
@@ -142,7 +149,8 @@ where
         destination_window,
     };
     let (bytes, fds) = request0.serialize(major_opcode(conn).await?);
-    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
+    let slices = [IoSlice::new(&bytes[0])];
+    assert_eq!(slices.len(), bytes.len());
     conn.send_request_with_reply(&slices, fds).await
 }
 pub async fn get_rectangles<Conn>(conn: &Conn, window: xproto::Window, source_kind: SK) -> Result<Cookie<'_, Conn, GetRectanglesReply>, ConnectionError>
@@ -154,7 +162,8 @@ where
         source_kind,
     };
     let (bytes, fds) = request0.serialize(major_opcode(conn).await?);
-    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
+    let slices = [IoSlice::new(&bytes[0])];
+    assert_eq!(slices.len(), bytes.len());
     conn.send_request_with_reply(&slices, fds).await
 }
 /// Extension trait defining the requests of this extension.

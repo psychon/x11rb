@@ -45,7 +45,8 @@ where
         client_minor_version,
     };
     let (bytes, fds) = request0.serialize(major_opcode(conn).await?);
-    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
+    let slices = [IoSlice::new(&bytes[0])];
+    assert_eq!(slices.len(), bytes.len());
     conn.send_request_with_reply(&slices, fds).await
 }
 pub async fn query_info<Conn>(conn: &Conn, drawable: xproto::Drawable) -> Result<Cookie<'_, Conn, QueryInfoReply>, ConnectionError>
@@ -56,7 +57,8 @@ where
         drawable,
     };
     let (bytes, fds) = request0.serialize(major_opcode(conn).await?);
-    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
+    let slices = [IoSlice::new(&bytes[0])];
+    assert_eq!(slices.len(), bytes.len());
     conn.send_request_with_reply(&slices, fds).await
 }
 pub async fn select_input<Conn>(conn: &Conn, drawable: xproto::Drawable, event_mask: Event) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -68,7 +70,8 @@ where
         event_mask,
     };
     let (bytes, fds) = request0.serialize(major_opcode(conn).await?);
-    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
+    let slices = [IoSlice::new(&bytes[0])];
+    assert_eq!(slices.len(), bytes.len());
     conn.send_request_without_reply(&slices, fds).await
 }
 pub async fn set_attributes<'c, 'input, Conn>(conn: &'c Conn, drawable: xproto::Drawable, x: i16, y: i16, width: u16, height: u16, border_width: u16, class: xproto::WindowClass, depth: u8, visual: xproto::Visualid, value_list: &'input SetAttributesAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -88,7 +91,8 @@ where
         value_list: Cow::Borrowed(value_list),
     };
     let (bytes, fds) = request0.serialize(major_opcode(conn).await?);
-    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
+    let slices = [IoSlice::new(&bytes[0]), IoSlice::new(&bytes[1]), IoSlice::new(&bytes[2])];
+    assert_eq!(slices.len(), bytes.len());
     conn.send_request_without_reply(&slices, fds).await
 }
 pub async fn unset_attributes<Conn>(conn: &Conn, drawable: xproto::Drawable) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -99,7 +103,8 @@ where
         drawable,
     };
     let (bytes, fds) = request0.serialize(major_opcode(conn).await?);
-    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
+    let slices = [IoSlice::new(&bytes[0])];
+    assert_eq!(slices.len(), bytes.len());
     conn.send_request_without_reply(&slices, fds).await
 }
 pub async fn suspend<Conn>(conn: &Conn, suspend: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -110,7 +115,8 @@ where
         suspend,
     };
     let (bytes, fds) = request0.serialize(major_opcode(conn).await?);
-    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
+    let slices = [IoSlice::new(&bytes[0])];
+    assert_eq!(slices.len(), bytes.len());
     conn.send_request_without_reply(&slices, fds).await
 }
 /// Extension trait defining the requests of this extension.

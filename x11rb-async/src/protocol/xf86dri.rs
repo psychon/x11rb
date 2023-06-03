@@ -40,7 +40,8 @@ where
 {
     let request0 = QueryVersionRequest;
     let (bytes, fds) = request0.serialize(major_opcode(conn).await?);
-    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
+    let slices = [IoSlice::new(&bytes[0])];
+    assert_eq!(slices.len(), bytes.len());
     conn.send_request_with_reply(&slices, fds).await
 }
 pub async fn query_direct_rendering_capable<Conn>(conn: &Conn, screen: u32) -> Result<Cookie<'_, Conn, QueryDirectRenderingCapableReply>, ConnectionError>
@@ -51,7 +52,8 @@ where
         screen,
     };
     let (bytes, fds) = request0.serialize(major_opcode(conn).await?);
-    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
+    let slices = [IoSlice::new(&bytes[0])];
+    assert_eq!(slices.len(), bytes.len());
     conn.send_request_with_reply(&slices, fds).await
 }
 pub async fn open_connection<Conn>(conn: &Conn, screen: u32) -> Result<Cookie<'_, Conn, OpenConnectionReply>, ConnectionError>
@@ -62,7 +64,8 @@ where
         screen,
     };
     let (bytes, fds) = request0.serialize(major_opcode(conn).await?);
-    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
+    let slices = [IoSlice::new(&bytes[0])];
+    assert_eq!(slices.len(), bytes.len());
     conn.send_request_with_reply(&slices, fds).await
 }
 pub async fn close_connection<Conn>(conn: &Conn, screen: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -73,7 +76,8 @@ where
         screen,
     };
     let (bytes, fds) = request0.serialize(major_opcode(conn).await?);
-    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
+    let slices = [IoSlice::new(&bytes[0])];
+    assert_eq!(slices.len(), bytes.len());
     conn.send_request_without_reply(&slices, fds).await
 }
 pub async fn get_client_driver_name<Conn>(conn: &Conn, screen: u32) -> Result<Cookie<'_, Conn, GetClientDriverNameReply>, ConnectionError>
@@ -84,7 +88,8 @@ where
         screen,
     };
     let (bytes, fds) = request0.serialize(major_opcode(conn).await?);
-    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
+    let slices = [IoSlice::new(&bytes[0])];
+    assert_eq!(slices.len(), bytes.len());
     conn.send_request_with_reply(&slices, fds).await
 }
 pub async fn create_context<Conn>(conn: &Conn, screen: u32, visual: u32, context: u32) -> Result<Cookie<'_, Conn, CreateContextReply>, ConnectionError>
@@ -97,7 +102,8 @@ where
         context,
     };
     let (bytes, fds) = request0.serialize(major_opcode(conn).await?);
-    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
+    let slices = [IoSlice::new(&bytes[0])];
+    assert_eq!(slices.len(), bytes.len());
     conn.send_request_with_reply(&slices, fds).await
 }
 pub async fn destroy_context<Conn>(conn: &Conn, screen: u32, context: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -109,7 +115,8 @@ where
         context,
     };
     let (bytes, fds) = request0.serialize(major_opcode(conn).await?);
-    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
+    let slices = [IoSlice::new(&bytes[0])];
+    assert_eq!(slices.len(), bytes.len());
     conn.send_request_without_reply(&slices, fds).await
 }
 pub async fn create_drawable<Conn>(conn: &Conn, screen: u32, drawable: u32) -> Result<Cookie<'_, Conn, CreateDrawableReply>, ConnectionError>
@@ -121,7 +128,8 @@ where
         drawable,
     };
     let (bytes, fds) = request0.serialize(major_opcode(conn).await?);
-    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
+    let slices = [IoSlice::new(&bytes[0])];
+    assert_eq!(slices.len(), bytes.len());
     conn.send_request_with_reply(&slices, fds).await
 }
 pub async fn destroy_drawable<Conn>(conn: &Conn, screen: u32, drawable: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -133,7 +141,8 @@ where
         drawable,
     };
     let (bytes, fds) = request0.serialize(major_opcode(conn).await?);
-    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
+    let slices = [IoSlice::new(&bytes[0])];
+    assert_eq!(slices.len(), bytes.len());
     conn.send_request_without_reply(&slices, fds).await
 }
 pub async fn get_drawable_info<Conn>(conn: &Conn, screen: u32, drawable: u32) -> Result<Cookie<'_, Conn, GetDrawableInfoReply>, ConnectionError>
@@ -145,7 +154,8 @@ where
         drawable,
     };
     let (bytes, fds) = request0.serialize(major_opcode(conn).await?);
-    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
+    let slices = [IoSlice::new(&bytes[0])];
+    assert_eq!(slices.len(), bytes.len());
     conn.send_request_with_reply(&slices, fds).await
 }
 pub async fn get_device_info<Conn>(conn: &Conn, screen: u32) -> Result<Cookie<'_, Conn, GetDeviceInfoReply>, ConnectionError>
@@ -156,7 +166,8 @@ where
         screen,
     };
     let (bytes, fds) = request0.serialize(major_opcode(conn).await?);
-    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
+    let slices = [IoSlice::new(&bytes[0])];
+    assert_eq!(slices.len(), bytes.len());
     conn.send_request_with_reply(&slices, fds).await
 }
 pub async fn auth_connection<Conn>(conn: &Conn, screen: u32, magic: u32) -> Result<Cookie<'_, Conn, AuthConnectionReply>, ConnectionError>
@@ -168,7 +179,8 @@ where
         magic,
     };
     let (bytes, fds) = request0.serialize(major_opcode(conn).await?);
-    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
+    let slices = [IoSlice::new(&bytes[0])];
+    assert_eq!(slices.len(), bytes.len());
     conn.send_request_with_reply(&slices, fds).await
 }
 /// Extension trait defining the requests of this extension.

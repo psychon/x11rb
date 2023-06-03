@@ -43,7 +43,8 @@ where
         client_minor_version,
     };
     let (bytes, fds) = request0.serialize(major_opcode(conn).await?);
-    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
+    let slices = [IoSlice::new(&bytes[0])];
+    assert_eq!(slices.len(), bytes.len());
     conn.send_request_with_reply(&slices, fds).await
 }
 pub async fn start<Conn>(conn: &Conn, screen: u32) -> Result<Cookie<'_, Conn, StartReply>, ConnectionError>
@@ -54,7 +55,8 @@ where
         screen,
     };
     let (bytes, fds) = request0.serialize(major_opcode(conn).await?);
-    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
+    let slices = [IoSlice::new(&bytes[0])];
+    assert_eq!(slices.len(), bytes.len());
     conn.send_request_with_reply(&slices, fds).await
 }
 pub async fn end<Conn>(conn: &Conn, cmap: u32) -> Result<Cookie<'_, Conn, EndReply>, ConnectionError>
@@ -65,7 +67,8 @@ where
         cmap,
     };
     let (bytes, fds) = request0.serialize(major_opcode(conn).await?);
-    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
+    let slices = [IoSlice::new(&bytes[0])];
+    assert_eq!(slices.len(), bytes.len());
     conn.send_request_with_reply(&slices, fds).await
 }
 pub async fn send<Conn>(conn: &Conn, event: Event, data_type: u32) -> Result<Cookie<'_, Conn, SendReply>, ConnectionError>
@@ -77,7 +80,8 @@ where
         data_type,
     };
     let (bytes, fds) = request0.serialize(major_opcode(conn).await?);
-    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
+    let slices = [IoSlice::new(&bytes[0])];
+    assert_eq!(slices.len(), bytes.len());
     conn.send_request_with_reply(&slices, fds).await
 }
 pub async fn select_input<Conn>(conn: &Conn, event_mask: u32) -> Result<Cookie<'_, Conn, SelectInputReply>, ConnectionError>
@@ -88,7 +92,8 @@ where
         event_mask,
     };
     let (bytes, fds) = request0.serialize(major_opcode(conn).await?);
-    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
+    let slices = [IoSlice::new(&bytes[0])];
+    assert_eq!(slices.len(), bytes.len());
     conn.send_request_with_reply(&slices, fds).await
 }
 /// Extension trait defining the requests of this extension.

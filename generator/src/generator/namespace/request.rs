@@ -172,7 +172,7 @@ pub(super) fn generate_request(
 
     let gathered = gather_request_fields(generator, request_def, &deducible_fields);
 
-    emit_request_struct(
+    let num_slices = emit_request_struct(
         generator,
         request_def,
         &name,
@@ -220,6 +220,7 @@ pub(super) fn generate_request(
         &name,
         &function_name,
         &gathered,
+        num_slices,
         x11rb_out,
         ImplMode::Sync,
     );
@@ -229,6 +230,7 @@ pub(super) fn generate_request(
         &name,
         &function_name,
         &gathered,
+        num_slices,
         async_out,
         ImplMode::Async,
     );
@@ -412,7 +414,7 @@ fn emit_request_struct(
     deducible_fields: &HashMap<String, DeducibleField>,
     gathered: &GatheredRequestFields,
     out: &mut Output,
-) {
+) -> usize {
     let ns = request_def.namespace.upgrade().unwrap();
     let is_xproto = ns.header == "xproto";
     let is_send_event = is_xproto && request_def.name == "SendEvent";
@@ -472,6 +474,7 @@ fn emit_request_struct(
         lifetime = struct_lifetime_block,
         name = name
     );
+    let mut num_slices_opt = None;
     out.indented(|out| {
         let mut code = Output::new();
         let num_slices;
@@ -878,6 +881,7 @@ fn emit_request_struct(
             };
 
             num_slices = request_slices.len();
+            num_slices_opt = Some(num_slices);
             let mut slices_arg = String::new();
             for (i, request_slices) in request_slices.iter().enumerate() {
                 if i != 0 {
@@ -1133,6 +1137,7 @@ fn emit_request_struct(
         outln!(out.indent(), "type Reply = {}Reply;", name);
     };
     outln!(out, "}}");
+    num_slices_opt.unwrap()
 }
 
 fn emit_request_function(
@@ -1141,6 +1146,7 @@ fn emit_request_function(
     name: &str,
     function_name: &str,
     gathered: &GatheredRequestFields,
+    num_slices: usize,
     out: &mut Output,
     mode: ImplMode,
 ) {
@@ -1252,10 +1258,15 @@ fn emit_request_function(
                 format!("major_opcode(conn){}?", mode.dot_await())
             }
         );
-        outln!(
-            out,
-            "let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();"
-        );
+
+        out!(out, "let slices = [");
+        let mut separator = "";
+        for index in 0..num_slices {
+            out!(out, "{separator}IoSlice::new(&bytes[{index}])");
+            separator = ", ";
+        }
+        outln!(out, "];");
+        outln!(out, "assert_eq!(slices.len(), bytes.len());");
 
         if let Some(cookie) = special_cookie {
             outln!(
