@@ -94,10 +94,7 @@ xvmc = ["x11rb-protocol/xvmc", "xv"]
 allow-unsafe-code = ["x11rb/allow-unsafe-code"]
 
 [package.metadata.docs.rs]
-features = [
-    "all-extensions",
-    "allow-unsafe-code",
-]
+all-features = true
 
 [dev-dependencies]
 async-executor = "1.5.0"

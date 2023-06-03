@@ -126,14 +126,7 @@ xv = ["x11rb-protocol/xv", "shm"]
 xvmc = ["x11rb-protocol/xvmc", "xv"]
 
 [package.metadata.docs.rs]
-features = [
-    "all-extensions",
-    "allow-unsafe-code",
-    "cursor",
-    "dl-libxcb",
-    "image",
-    "resource_manager",
-]
+all-features = true
 
 [[example]]
 name = "generic_events"
