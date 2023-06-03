@@ -474,6 +474,7 @@ fn emit_request_struct(
     );
     out.indented(|out| {
         let mut code = Output::new();
+        let num_slices;
         {
             let out = &mut code;
             let fields = request_def.fields.borrow();
@@ -876,6 +877,7 @@ fn emit_request_struct(
                 String::from("fds")
             };
 
+            num_slices = request_slices.len();
             let mut slices_arg = String::new();
             for (i, request_slices) in request_slices.iter().enumerate() {
                 if i != 0 {
@@ -885,7 +887,7 @@ fn emit_request_struct(
             }
 
             let result = format!(
-                "(vec![{slices}], {fds})",
+                "([{slices}], {fds})",
                 slices = slices_arg,
                 fds = fds_arg,
             );
@@ -897,7 +899,7 @@ fn emit_request_struct(
         );
         outln!(
             out,
-            "pub fn serialize(self{opcode}) -> BufWithFds<PiecewiseBuf<{lifetime}>> {{",
+            "pub fn serialize(self{opcode}) -> BufWithFds<[Cow<{lifetime}, [u8]>; {num_slices}]> {{",
             opcode = if is_xproto { "" } else { ", major_opcode: u8" },
             lifetime = serialize_lifetime_return,
         );

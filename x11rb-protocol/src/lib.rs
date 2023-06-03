@@ -37,7 +37,6 @@ extern crate alloc;
 #[cfg(feature = "std")]
 extern crate std;
 
-use alloc::borrow::Cow;
 use alloc::vec::Vec;
 
 pub mod connect;
@@ -65,8 +64,6 @@ pub use utils::RawFdContainer;
 // Used to avoid too-complex types.
 /// A combination of a buffer and a list of file descriptors.
 pub type BufWithFds<B> = (B, Vec<RawFdContainer>);
-/// A buffer that is logically continuous, but presented in a number of pieces.
-pub type PiecewiseBuf<'a> = Vec<Cow<'a, [u8]>>;
 
 /// Number type used for referring to things that were sent to the server in responses from the
 /// server.

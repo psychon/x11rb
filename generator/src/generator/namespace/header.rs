@@ -61,7 +61,7 @@ pub(super) fn write_header(
         outln!(out, "use crate::errors::ParseError;");
         outln!(out, "#[allow(unused_imports)]");
         outln!(out, "use crate::x11_utils::TryIntoUSize;");
-        outln!(out, "use crate::{{BufWithFds, PiecewiseBuf}};");
+        outln!(out, "use crate::BufWithFds;");
     }
     outln!(out, "#[allow(unused_imports)]");
     match mode {

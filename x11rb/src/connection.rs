@@ -3,7 +3,6 @@
 //! This module contains the `Connection` trait and related definitions. The code in this module is
 //! used by each concrete implementation of the X11 protocol.
 
-use std::borrow::Cow;
 use std::convert::{TryFrom, TryInto};
 use std::io::IoSlice;
 
@@ -23,8 +22,6 @@ pub use x11rb_protocol::{DiscardMode, RawEventAndSeqNumber, SequenceNumber};
 pub type BufWithFds<B> = (B, Vec<RawFdContainer>);
 /// An event and its sequence number.
 pub type EventAndSeqNumber = (Event, SequenceNumber);
-/// A buffer that is logically continuous, but presented in a number of pieces.
-pub type PiecewiseBuf<'a> = Vec<Cow<'a, [u8]>>;
 
 /// Either a raw reply or a raw error response to an X11 request.
 #[derive(Debug)]
