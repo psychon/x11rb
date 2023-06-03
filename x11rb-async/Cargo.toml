@@ -2,15 +2,17 @@
 name = "x11rb-async"
 version = "0.12.0"
 description = "Async Rust bindings to X11"
-edition = "2021"
 authors = [
     "Uli Schlachter <psychon@znc.in>",
     "Eduardo Sánchez Muñoz <eduardosm-dev@e64.io>",
     "notgull <jtnunley01@gmail.com>",
 ]
 repository = "https://github.com/psychon/x11rb"
+readme = "../README.md"
+edition = "2021"
+rust-version = "1.56"
 license = "MIT OR Apache-2.0"
-keywords = ["xcb", "x11", "async"]
+keywords = ["xcb", "X11", "async"]
 
 [dependencies]
 async-io = "1.13.0"
