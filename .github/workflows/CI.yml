@@ -224,7 +224,7 @@ jobs:
     - name: disable unix-only shared_memory example
       run: del x11rb\examples\shared_memory.rs ; del x11rb-async\examples\shared_memory_async.rs
 
-    - name: Crate a fake "shared_memory" because it is referenced in Cargo.toml
+    - name: Create a fake "shared_memory" because it is referenced in Cargo.toml
       run: Copy-Item "x11rb\examples\simple_window.rs" -Destination "x11rb\examples\shared_memory.rs" ; Copy-Item "x11rb-async\examples\xclock_utc_async.rs" -Destination "x11rb-async\examples\shared_memory_async.rs"
 
     # We do not have libxcb and thus cannot build XCBConnection
