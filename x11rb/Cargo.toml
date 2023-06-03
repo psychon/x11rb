@@ -13,12 +13,6 @@ edition = "2021"
 rust-version = "1.56"
 license = "MIT OR Apache-2.0"
 keywords = ["xcb", "X11"]
-exclude = [
-    "/xcb-proto-1.15.2",
-    "/Makefile",
-    "/.mergify.yml",
-    "/appveyor.yml",
-]
 
 [dependencies]
 x11rb-protocol = { version = "0.12.0", path = "../x11rb-protocol" }
