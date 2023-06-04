@@ -17,7 +17,7 @@ use core::convert::TryFrom;
 use crate::errors::ParseError;
 #[allow(unused_imports)]
 use crate::x11_utils::TryIntoUSize;
-use crate::{BufWithFds, PiecewiseBuf};
+use crate::BufWithFds;
 #[allow(unused_imports)]
 use crate::utils::{RawFdContainer, pretty_print_bitmask, pretty_print_enum};
 #[allow(unused_imports)]
@@ -46,7 +46,7 @@ pub struct QueryVersionRequest {
 }
 impl QueryVersionRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let client_major_bytes = self.client_major.serialize();
         let client_minor_bytes = self.client_minor.serialize();
@@ -64,7 +64,7 @@ impl QueryVersionRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -165,7 +165,7 @@ pub struct SetDeviceCreateContextRequest<'input> {
 }
 impl<'input> SetDeviceCreateContextRequest<'input> {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'input>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
         let length_so_far = 0;
         let context_len = u32::try_from(self.context.len()).expect("`context` has too many elements");
         let context_len_bytes = context_len.serialize();
@@ -186,7 +186,7 @@ impl<'input> SetDeviceCreateContextRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into(), self.context, padding0.into()], vec![])
+        ([request0.into(), self.context, padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -227,7 +227,7 @@ pub const GET_DEVICE_CREATE_CONTEXT_REQUEST: u8 = 2;
 pub struct GetDeviceCreateContextRequest;
 impl GetDeviceCreateContextRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let mut request0 = vec![
             major_opcode,
@@ -239,7 +239,7 @@ impl GetDeviceCreateContextRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -339,7 +339,7 @@ pub struct SetDeviceContextRequest<'input> {
 }
 impl<'input> SetDeviceContextRequest<'input> {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'input>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
         let length_so_far = 0;
         let device_bytes = self.device.serialize();
         let context_len = u32::try_from(self.context.len()).expect("`context` has too many elements");
@@ -365,7 +365,7 @@ impl<'input> SetDeviceContextRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into(), self.context, padding0.into()], vec![])
+        ([request0.into(), self.context, padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -411,7 +411,7 @@ pub struct GetDeviceContextRequest {
 }
 impl GetDeviceContextRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let device_bytes = self.device.serialize();
         let mut request0 = vec![
@@ -428,7 +428,7 @@ impl GetDeviceContextRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -529,7 +529,7 @@ pub struct SetWindowCreateContextRequest<'input> {
 }
 impl<'input> SetWindowCreateContextRequest<'input> {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'input>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
         let length_so_far = 0;
         let context_len = u32::try_from(self.context.len()).expect("`context` has too many elements");
         let context_len_bytes = context_len.serialize();
@@ -550,7 +550,7 @@ impl<'input> SetWindowCreateContextRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into(), self.context, padding0.into()], vec![])
+        ([request0.into(), self.context, padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -591,7 +591,7 @@ pub const GET_WINDOW_CREATE_CONTEXT_REQUEST: u8 = 6;
 pub struct GetWindowCreateContextRequest;
 impl GetWindowCreateContextRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let mut request0 = vec![
             major_opcode,
@@ -603,7 +603,7 @@ impl GetWindowCreateContextRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -702,7 +702,7 @@ pub struct GetWindowContextRequest {
 }
 impl GetWindowContextRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
@@ -719,7 +719,7 @@ impl GetWindowContextRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -898,7 +898,7 @@ pub struct SetPropertyCreateContextRequest<'input> {
 }
 impl<'input> SetPropertyCreateContextRequest<'input> {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'input>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
         let length_so_far = 0;
         let context_len = u32::try_from(self.context.len()).expect("`context` has too many elements");
         let context_len_bytes = context_len.serialize();
@@ -919,7 +919,7 @@ impl<'input> SetPropertyCreateContextRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into(), self.context, padding0.into()], vec![])
+        ([request0.into(), self.context, padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -960,7 +960,7 @@ pub const GET_PROPERTY_CREATE_CONTEXT_REQUEST: u8 = 9;
 pub struct GetPropertyCreateContextRequest;
 impl GetPropertyCreateContextRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let mut request0 = vec![
             major_opcode,
@@ -972,7 +972,7 @@ impl GetPropertyCreateContextRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -1071,7 +1071,7 @@ pub struct SetPropertyUseContextRequest<'input> {
 }
 impl<'input> SetPropertyUseContextRequest<'input> {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'input>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
         let length_so_far = 0;
         let context_len = u32::try_from(self.context.len()).expect("`context` has too many elements");
         let context_len_bytes = context_len.serialize();
@@ -1092,7 +1092,7 @@ impl<'input> SetPropertyUseContextRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into(), self.context, padding0.into()], vec![])
+        ([request0.into(), self.context, padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -1133,7 +1133,7 @@ pub const GET_PROPERTY_USE_CONTEXT_REQUEST: u8 = 11;
 pub struct GetPropertyUseContextRequest;
 impl GetPropertyUseContextRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let mut request0 = vec![
             major_opcode,
@@ -1145,7 +1145,7 @@ impl GetPropertyUseContextRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -1245,7 +1245,7 @@ pub struct GetPropertyContextRequest {
 }
 impl GetPropertyContextRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let window_bytes = self.window.serialize();
         let property_bytes = self.property.serialize();
@@ -1267,7 +1267,7 @@ impl GetPropertyContextRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -1371,7 +1371,7 @@ pub struct GetPropertyDataContextRequest {
 }
 impl GetPropertyDataContextRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let window_bytes = self.window.serialize();
         let property_bytes = self.property.serialize();
@@ -1393,7 +1393,7 @@ impl GetPropertyDataContextRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -1496,7 +1496,7 @@ pub struct ListPropertiesRequest {
 }
 impl ListPropertiesRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
@@ -1513,7 +1513,7 @@ impl ListPropertiesRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -1613,7 +1613,7 @@ pub struct SetSelectionCreateContextRequest<'input> {
 }
 impl<'input> SetSelectionCreateContextRequest<'input> {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'input>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
         let length_so_far = 0;
         let context_len = u32::try_from(self.context.len()).expect("`context` has too many elements");
         let context_len_bytes = context_len.serialize();
@@ -1634,7 +1634,7 @@ impl<'input> SetSelectionCreateContextRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into(), self.context, padding0.into()], vec![])
+        ([request0.into(), self.context, padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -1675,7 +1675,7 @@ pub const GET_SELECTION_CREATE_CONTEXT_REQUEST: u8 = 16;
 pub struct GetSelectionCreateContextRequest;
 impl GetSelectionCreateContextRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let mut request0 = vec![
             major_opcode,
@@ -1687,7 +1687,7 @@ impl GetSelectionCreateContextRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -1786,7 +1786,7 @@ pub struct SetSelectionUseContextRequest<'input> {
 }
 impl<'input> SetSelectionUseContextRequest<'input> {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'input>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
         let length_so_far = 0;
         let context_len = u32::try_from(self.context.len()).expect("`context` has too many elements");
         let context_len_bytes = context_len.serialize();
@@ -1807,7 +1807,7 @@ impl<'input> SetSelectionUseContextRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into(), self.context, padding0.into()], vec![])
+        ([request0.into(), self.context, padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -1848,7 +1848,7 @@ pub const GET_SELECTION_USE_CONTEXT_REQUEST: u8 = 18;
 pub struct GetSelectionUseContextRequest;
 impl GetSelectionUseContextRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let mut request0 = vec![
             major_opcode,
@@ -1860,7 +1860,7 @@ impl GetSelectionUseContextRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -1959,7 +1959,7 @@ pub struct GetSelectionContextRequest {
 }
 impl GetSelectionContextRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let selection_bytes = self.selection.serialize();
         let mut request0 = vec![
@@ -1976,7 +1976,7 @@ impl GetSelectionContextRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -2077,7 +2077,7 @@ pub struct GetSelectionDataContextRequest {
 }
 impl GetSelectionDataContextRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let selection_bytes = self.selection.serialize();
         let mut request0 = vec![
@@ -2094,7 +2094,7 @@ impl GetSelectionDataContextRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -2193,7 +2193,7 @@ pub const LIST_SELECTIONS_REQUEST: u8 = 21;
 pub struct ListSelectionsRequest;
 impl ListSelectionsRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let mut request0 = vec![
             major_opcode,
@@ -2205,7 +2205,7 @@ impl ListSelectionsRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -2303,7 +2303,7 @@ pub struct GetClientContextRequest {
 }
 impl GetClientContextRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let resource_bytes = self.resource.serialize();
         let mut request0 = vec![
@@ -2320,7 +2320,7 @@ impl GetClientContextRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {

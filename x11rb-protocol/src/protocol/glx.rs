@@ -17,7 +17,7 @@ use core::convert::TryFrom;
 use crate::errors::ParseError;
 #[allow(unused_imports)]
 use crate::x11_utils::TryIntoUSize;
-use crate::{BufWithFds, PiecewiseBuf};
+use crate::BufWithFds;
 #[allow(unused_imports)]
 use crate::utils::{RawFdContainer, pretty_print_bitmask, pretty_print_enum};
 #[allow(unused_imports)]
@@ -532,7 +532,7 @@ pub struct RenderRequest<'input> {
 }
 impl<'input> RenderRequest<'input> {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'input>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
         let length_so_far = 0;
         let context_tag_bytes = self.context_tag.serialize();
         let mut request0 = vec![
@@ -552,7 +552,7 @@ impl<'input> RenderRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into(), self.data, padding0.into()], vec![])
+        ([request0.into(), self.data, padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -600,7 +600,7 @@ pub struct RenderLargeRequest<'input> {
 }
 impl<'input> RenderLargeRequest<'input> {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'input>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
         let length_so_far = 0;
         let context_tag_bytes = self.context_tag.serialize();
         let request_num_bytes = self.request_num.serialize();
@@ -632,7 +632,7 @@ impl<'input> RenderLargeRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into(), self.data, padding0.into()], vec![])
+        ([request0.into(), self.data, padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -688,7 +688,7 @@ pub struct CreateContextRequest {
 }
 impl CreateContextRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let context_bytes = self.context.serialize();
         let visual_bytes = self.visual.serialize();
@@ -725,7 +725,7 @@ impl CreateContextRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -770,7 +770,7 @@ pub struct DestroyContextRequest {
 }
 impl DestroyContextRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let context_bytes = self.context.serialize();
         let mut request0 = vec![
@@ -787,7 +787,7 @@ impl DestroyContextRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -825,7 +825,7 @@ pub struct MakeCurrentRequest {
 }
 impl MakeCurrentRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let drawable_bytes = self.drawable.serialize();
         let context_bytes = self.context.serialize();
@@ -852,7 +852,7 @@ impl MakeCurrentRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -973,7 +973,7 @@ pub struct IsDirectRequest {
 }
 impl IsDirectRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let context_bytes = self.context.serialize();
         let mut request0 = vec![
@@ -990,7 +990,7 @@ impl IsDirectRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -1108,7 +1108,7 @@ pub struct QueryVersionRequest {
 }
 impl QueryVersionRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let major_version_bytes = self.major_version.serialize();
         let minor_version_bytes = self.minor_version.serialize();
@@ -1130,7 +1130,7 @@ impl QueryVersionRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -1253,7 +1253,7 @@ pub struct WaitGLRequest {
 }
 impl WaitGLRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let context_tag_bytes = self.context_tag.serialize();
         let mut request0 = vec![
@@ -1270,7 +1270,7 @@ impl WaitGLRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -1306,7 +1306,7 @@ pub struct WaitXRequest {
 }
 impl WaitXRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let context_tag_bytes = self.context_tag.serialize();
         let mut request0 = vec![
@@ -1323,7 +1323,7 @@ impl WaitXRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -1362,7 +1362,7 @@ pub struct CopyContextRequest {
 }
 impl CopyContextRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let src_bytes = self.src.serialize();
         let dest_bytes = self.dest.serialize();
@@ -1394,7 +1394,7 @@ impl CopyContextRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -1522,7 +1522,7 @@ pub struct SwapBuffersRequest {
 }
 impl SwapBuffersRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let context_tag_bytes = self.context_tag.serialize();
         let drawable_bytes = self.drawable.serialize();
@@ -1544,7 +1544,7 @@ impl SwapBuffersRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -1586,7 +1586,7 @@ pub struct UseXFontRequest {
 }
 impl UseXFontRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let context_tag_bytes = self.context_tag.serialize();
         let font_bytes = self.font.serialize();
@@ -1623,7 +1623,7 @@ impl UseXFontRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -1670,7 +1670,7 @@ pub struct CreateGLXPixmapRequest {
 }
 impl CreateGLXPixmapRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let screen_bytes = self.screen.serialize();
         let visual_bytes = self.visual.serialize();
@@ -1702,7 +1702,7 @@ impl CreateGLXPixmapRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -1744,7 +1744,7 @@ pub struct GetVisualConfigsRequest {
 }
 impl GetVisualConfigsRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let screen_bytes = self.screen.serialize();
         let mut request0 = vec![
@@ -1761,7 +1761,7 @@ impl GetVisualConfigsRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -1864,7 +1864,7 @@ pub struct DestroyGLXPixmapRequest {
 }
 impl DestroyGLXPixmapRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let glx_pixmap_bytes = self.glx_pixmap.serialize();
         let mut request0 = vec![
@@ -1881,7 +1881,7 @@ impl DestroyGLXPixmapRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -1919,7 +1919,7 @@ pub struct VendorPrivateRequest<'input> {
 }
 impl<'input> VendorPrivateRequest<'input> {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'input>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
         let length_so_far = 0;
         let vendor_code_bytes = self.vendor_code.serialize();
         let context_tag_bytes = self.context_tag.serialize();
@@ -1944,7 +1944,7 @@ impl<'input> VendorPrivateRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into(), self.data, padding0.into()], vec![])
+        ([request0.into(), self.data, padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -1994,7 +1994,7 @@ pub struct VendorPrivateWithReplyRequest<'input> {
 }
 impl<'input> VendorPrivateWithReplyRequest<'input> {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'input>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
         let length_so_far = 0;
         let vendor_code_bytes = self.vendor_code.serialize();
         let context_tag_bytes = self.context_tag.serialize();
@@ -2019,7 +2019,7 @@ impl<'input> VendorPrivateWithReplyRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into(), self.data, padding0.into()], vec![])
+        ([request0.into(), self.data, padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -2135,7 +2135,7 @@ pub struct QueryExtensionsStringRequest {
 }
 impl QueryExtensionsStringRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let screen_bytes = self.screen.serialize();
         let mut request0 = vec![
@@ -2152,7 +2152,7 @@ impl QueryExtensionsStringRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -2272,7 +2272,7 @@ pub struct QueryServerStringRequest {
 }
 impl QueryServerStringRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let screen_bytes = self.screen.serialize();
         let name_bytes = self.name.serialize();
@@ -2294,7 +2294,7 @@ impl QueryServerStringRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -2401,7 +2401,7 @@ pub struct ClientInfoRequest<'input> {
 }
 impl<'input> ClientInfoRequest<'input> {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'input>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
         let length_so_far = 0;
         let major_version_bytes = self.major_version.serialize();
         let minor_version_bytes = self.minor_version.serialize();
@@ -2432,7 +2432,7 @@ impl<'input> ClientInfoRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into(), self.string, padding0.into()], vec![])
+        ([request0.into(), self.string, padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -2481,7 +2481,7 @@ pub struct GetFBConfigsRequest {
 }
 impl GetFBConfigsRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let screen_bytes = self.screen.serialize();
         let mut request0 = vec![
@@ -2498,7 +2498,7 @@ impl GetFBConfigsRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -2605,7 +2605,7 @@ pub struct CreatePixmapRequest<'input> {
 }
 impl<'input> CreatePixmapRequest<'input> {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'input>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
         let length_so_far = 0;
         let screen_bytes = self.screen.serialize();
         let fbconfig_bytes = self.fbconfig.serialize();
@@ -2648,7 +2648,7 @@ impl<'input> CreatePixmapRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into(), attribs_bytes.into(), padding0.into()], vec![])
+        ([request0.into(), attribs_bytes.into(), padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -2703,7 +2703,7 @@ pub struct DestroyPixmapRequest {
 }
 impl DestroyPixmapRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let glx_pixmap_bytes = self.glx_pixmap.serialize();
         let mut request0 = vec![
@@ -2720,7 +2720,7 @@ impl DestroyPixmapRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -2761,7 +2761,7 @@ pub struct CreateNewContextRequest {
 }
 impl CreateNewContextRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let context_bytes = self.context.serialize();
         let fbconfig_bytes = self.fbconfig.serialize();
@@ -2803,7 +2803,7 @@ impl CreateNewContextRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -2850,7 +2850,7 @@ pub struct QueryContextRequest {
 }
 impl QueryContextRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let context_bytes = self.context.serialize();
         let mut request0 = vec![
@@ -2867,7 +2867,7 @@ impl QueryContextRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -2972,7 +2972,7 @@ pub struct MakeContextCurrentRequest {
 }
 impl MakeContextCurrentRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let old_context_tag_bytes = self.old_context_tag.serialize();
         let drawable_bytes = self.drawable.serialize();
@@ -3004,7 +3004,7 @@ impl MakeContextCurrentRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -3130,7 +3130,7 @@ pub struct CreatePbufferRequest<'input> {
 }
 impl<'input> CreatePbufferRequest<'input> {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'input>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
         let length_so_far = 0;
         let screen_bytes = self.screen.serialize();
         let fbconfig_bytes = self.fbconfig.serialize();
@@ -3168,7 +3168,7 @@ impl<'input> CreatePbufferRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into(), attribs_bytes.into(), padding0.into()], vec![])
+        ([request0.into(), attribs_bytes.into(), padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -3220,7 +3220,7 @@ pub struct DestroyPbufferRequest {
 }
 impl DestroyPbufferRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let pbuffer_bytes = self.pbuffer.serialize();
         let mut request0 = vec![
@@ -3237,7 +3237,7 @@ impl DestroyPbufferRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -3273,7 +3273,7 @@ pub struct GetDrawableAttributesRequest {
 }
 impl GetDrawableAttributesRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let drawable_bytes = self.drawable.serialize();
         let mut request0 = vec![
@@ -3290,7 +3290,7 @@ impl GetDrawableAttributesRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -3393,7 +3393,7 @@ pub struct ChangeDrawableAttributesRequest<'input> {
 }
 impl<'input> ChangeDrawableAttributesRequest<'input> {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'input>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
         let length_so_far = 0;
         let drawable_bytes = self.drawable.serialize();
         assert_eq!(self.attribs.len() % 2, 0, "`attribs` has an incorrect length, must be a multiple of 2");
@@ -3421,7 +3421,7 @@ impl<'input> ChangeDrawableAttributesRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into(), attribs_bytes.into(), padding0.into()], vec![])
+        ([request0.into(), attribs_bytes.into(), padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -3471,7 +3471,7 @@ pub struct CreateWindowRequest<'input> {
 }
 impl<'input> CreateWindowRequest<'input> {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'input>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
         let length_so_far = 0;
         let screen_bytes = self.screen.serialize();
         let fbconfig_bytes = self.fbconfig.serialize();
@@ -3514,7 +3514,7 @@ impl<'input> CreateWindowRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into(), attribs_bytes.into(), padding0.into()], vec![])
+        ([request0.into(), attribs_bytes.into(), padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -3569,7 +3569,7 @@ pub struct DeleteWindowRequest {
 }
 impl DeleteWindowRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let glxwindow_bytes = self.glxwindow.serialize();
         let mut request0 = vec![
@@ -3586,7 +3586,7 @@ impl DeleteWindowRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -3626,7 +3626,7 @@ pub struct SetClientInfoARBRequest<'input> {
 }
 impl<'input> SetClientInfoARBRequest<'input> {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'input>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 6]> {
         let length_so_far = 0;
         let major_version_bytes = self.major_version.serialize();
         let minor_version_bytes = self.minor_version.serialize();
@@ -3675,7 +3675,7 @@ impl<'input> SetClientInfoARBRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into(), gl_versions_bytes.into(), self.gl_extension_string, padding0.into(), self.glx_extension_string, padding1.into()], vec![])
+        ([request0.into(), gl_versions_bytes.into(), self.gl_extension_string, padding0.into(), self.glx_extension_string, padding1.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -3741,7 +3741,7 @@ pub struct CreateContextAttribsARBRequest<'input> {
 }
 impl<'input> CreateContextAttribsARBRequest<'input> {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'input>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
         let length_so_far = 0;
         let context_bytes = self.context.serialize();
         let fbconfig_bytes = self.fbconfig.serialize();
@@ -3789,7 +3789,7 @@ impl<'input> CreateContextAttribsARBRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into(), attribs_bytes.into(), padding0.into()], vec![])
+        ([request0.into(), attribs_bytes.into(), padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -3852,7 +3852,7 @@ pub struct SetClientInfo2ARBRequest<'input> {
 }
 impl<'input> SetClientInfo2ARBRequest<'input> {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'input>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 6]> {
         let length_so_far = 0;
         let major_version_bytes = self.major_version.serialize();
         let minor_version_bytes = self.minor_version.serialize();
@@ -3901,7 +3901,7 @@ impl<'input> SetClientInfo2ARBRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into(), gl_versions_bytes.into(), self.gl_extension_string, padding0.into(), self.glx_extension_string, padding1.into()], vec![])
+        ([request0.into(), gl_versions_bytes.into(), self.gl_extension_string, padding0.into(), self.glx_extension_string, padding1.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -3964,7 +3964,7 @@ pub struct NewListRequest {
 }
 impl NewListRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let context_tag_bytes = self.context_tag.serialize();
         let list_bytes = self.list.serialize();
@@ -3991,7 +3991,7 @@ impl NewListRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -4031,7 +4031,7 @@ pub struct EndListRequest {
 }
 impl EndListRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let context_tag_bytes = self.context_tag.serialize();
         let mut request0 = vec![
@@ -4048,7 +4048,7 @@ impl EndListRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -4086,7 +4086,7 @@ pub struct DeleteListsRequest {
 }
 impl DeleteListsRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let context_tag_bytes = self.context_tag.serialize();
         let list_bytes = self.list.serialize();
@@ -4113,7 +4113,7 @@ impl DeleteListsRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -4154,7 +4154,7 @@ pub struct GenListsRequest {
 }
 impl GenListsRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let context_tag_bytes = self.context_tag.serialize();
         let range_bytes = self.range.serialize();
@@ -4176,7 +4176,7 @@ impl GenListsRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -4275,7 +4275,7 @@ pub struct FeedbackBufferRequest {
 }
 impl FeedbackBufferRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let context_tag_bytes = self.context_tag.serialize();
         let size_bytes = self.size.serialize();
@@ -4302,7 +4302,7 @@ impl FeedbackBufferRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -4343,7 +4343,7 @@ pub struct SelectBufferRequest {
 }
 impl SelectBufferRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let context_tag_bytes = self.context_tag.serialize();
         let size_bytes = self.size.serialize();
@@ -4365,7 +4365,7 @@ impl SelectBufferRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -4404,7 +4404,7 @@ pub struct RenderModeRequest {
 }
 impl RenderModeRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let context_tag_bytes = self.context_tag.serialize();
         let mode_bytes = self.mode.serialize();
@@ -4426,7 +4426,7 @@ impl RenderModeRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -4589,7 +4589,7 @@ pub struct FinishRequest {
 }
 impl FinishRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let context_tag_bytes = self.context_tag.serialize();
         let mut request0 = vec![
@@ -4606,7 +4606,7 @@ impl FinishRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -4695,7 +4695,7 @@ pub struct PixelStorefRequest {
 }
 impl PixelStorefRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let context_tag_bytes = self.context_tag.serialize();
         let pname_bytes = self.pname.serialize();
@@ -4722,7 +4722,7 @@ impl PixelStorefRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -4764,7 +4764,7 @@ pub struct PixelStoreiRequest {
 }
 impl PixelStoreiRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let context_tag_bytes = self.context_tag.serialize();
         let pname_bytes = self.pname.serialize();
@@ -4791,7 +4791,7 @@ impl PixelStoreiRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -4839,7 +4839,7 @@ pub struct ReadPixelsRequest {
 }
 impl ReadPixelsRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let context_tag_bytes = self.context_tag.serialize();
         let x_bytes = self.x.serialize();
@@ -4892,7 +4892,7 @@ impl ReadPixelsRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -5009,7 +5009,7 @@ pub struct GetBooleanvRequest {
 }
 impl GetBooleanvRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let context_tag_bytes = self.context_tag.serialize();
         let pname_bytes = self.pname.serialize();
@@ -5031,7 +5031,7 @@ impl GetBooleanvRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -5139,7 +5139,7 @@ pub struct GetClipPlaneRequest {
 }
 impl GetClipPlaneRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let context_tag_bytes = self.context_tag.serialize();
         let plane_bytes = self.plane.serialize();
@@ -5161,7 +5161,7 @@ impl GetClipPlaneRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -5262,7 +5262,7 @@ pub struct GetDoublevRequest {
 }
 impl GetDoublevRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let context_tag_bytes = self.context_tag.serialize();
         let pname_bytes = self.pname.serialize();
@@ -5284,7 +5284,7 @@ impl GetDoublevRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -5391,7 +5391,7 @@ pub struct GetErrorRequest {
 }
 impl GetErrorRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let context_tag_bytes = self.context_tag.serialize();
         let mut request0 = vec![
@@ -5408,7 +5408,7 @@ impl GetErrorRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -5504,7 +5504,7 @@ pub struct GetFloatvRequest {
 }
 impl GetFloatvRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let context_tag_bytes = self.context_tag.serialize();
         let pname_bytes = self.pname.serialize();
@@ -5526,7 +5526,7 @@ impl GetFloatvRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -5634,7 +5634,7 @@ pub struct GetIntegervRequest {
 }
 impl GetIntegervRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let context_tag_bytes = self.context_tag.serialize();
         let pname_bytes = self.pname.serialize();
@@ -5656,7 +5656,7 @@ impl GetIntegervRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -5765,7 +5765,7 @@ pub struct GetLightfvRequest {
 }
 impl GetLightfvRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let context_tag_bytes = self.context_tag.serialize();
         let light_bytes = self.light.serialize();
@@ -5792,7 +5792,7 @@ impl GetLightfvRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -5903,7 +5903,7 @@ pub struct GetLightivRequest {
 }
 impl GetLightivRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let context_tag_bytes = self.context_tag.serialize();
         let light_bytes = self.light.serialize();
@@ -5930,7 +5930,7 @@ impl GetLightivRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -6041,7 +6041,7 @@ pub struct GetMapdvRequest {
 }
 impl GetMapdvRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let context_tag_bytes = self.context_tag.serialize();
         let target_bytes = self.target.serialize();
@@ -6068,7 +6068,7 @@ impl GetMapdvRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -6179,7 +6179,7 @@ pub struct GetMapfvRequest {
 }
 impl GetMapfvRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let context_tag_bytes = self.context_tag.serialize();
         let target_bytes = self.target.serialize();
@@ -6206,7 +6206,7 @@ impl GetMapfvRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -6317,7 +6317,7 @@ pub struct GetMapivRequest {
 }
 impl GetMapivRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let context_tag_bytes = self.context_tag.serialize();
         let target_bytes = self.target.serialize();
@@ -6344,7 +6344,7 @@ impl GetMapivRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -6455,7 +6455,7 @@ pub struct GetMaterialfvRequest {
 }
 impl GetMaterialfvRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let context_tag_bytes = self.context_tag.serialize();
         let face_bytes = self.face.serialize();
@@ -6482,7 +6482,7 @@ impl GetMaterialfvRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -6593,7 +6593,7 @@ pub struct GetMaterialivRequest {
 }
 impl GetMaterialivRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let context_tag_bytes = self.context_tag.serialize();
         let face_bytes = self.face.serialize();
@@ -6620,7 +6620,7 @@ impl GetMaterialivRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -6730,7 +6730,7 @@ pub struct GetPixelMapfvRequest {
 }
 impl GetPixelMapfvRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let context_tag_bytes = self.context_tag.serialize();
         let map_bytes = self.map.serialize();
@@ -6752,7 +6752,7 @@ impl GetPixelMapfvRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -6860,7 +6860,7 @@ pub struct GetPixelMapuivRequest {
 }
 impl GetPixelMapuivRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let context_tag_bytes = self.context_tag.serialize();
         let map_bytes = self.map.serialize();
@@ -6882,7 +6882,7 @@ impl GetPixelMapuivRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -6990,7 +6990,7 @@ pub struct GetPixelMapusvRequest {
 }
 impl GetPixelMapusvRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let context_tag_bytes = self.context_tag.serialize();
         let map_bytes = self.map.serialize();
@@ -7012,7 +7012,7 @@ impl GetPixelMapusvRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -7120,7 +7120,7 @@ pub struct GetPolygonStippleRequest {
 }
 impl GetPolygonStippleRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let context_tag_bytes = self.context_tag.serialize();
         let lsb_first_bytes = self.lsb_first.serialize();
@@ -7142,7 +7142,7 @@ impl GetPolygonStippleRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -7245,7 +7245,7 @@ pub struct GetStringRequest {
 }
 impl GetStringRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let context_tag_bytes = self.context_tag.serialize();
         let name_bytes = self.name.serialize();
@@ -7267,7 +7267,7 @@ impl GetStringRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -7374,7 +7374,7 @@ pub struct GetTexEnvfvRequest {
 }
 impl GetTexEnvfvRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let context_tag_bytes = self.context_tag.serialize();
         let target_bytes = self.target.serialize();
@@ -7401,7 +7401,7 @@ impl GetTexEnvfvRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -7512,7 +7512,7 @@ pub struct GetTexEnvivRequest {
 }
 impl GetTexEnvivRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let context_tag_bytes = self.context_tag.serialize();
         let target_bytes = self.target.serialize();
@@ -7539,7 +7539,7 @@ impl GetTexEnvivRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -7650,7 +7650,7 @@ pub struct GetTexGendvRequest {
 }
 impl GetTexGendvRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let context_tag_bytes = self.context_tag.serialize();
         let coord_bytes = self.coord.serialize();
@@ -7677,7 +7677,7 @@ impl GetTexGendvRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -7788,7 +7788,7 @@ pub struct GetTexGenfvRequest {
 }
 impl GetTexGenfvRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let context_tag_bytes = self.context_tag.serialize();
         let coord_bytes = self.coord.serialize();
@@ -7815,7 +7815,7 @@ impl GetTexGenfvRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -7926,7 +7926,7 @@ pub struct GetTexGenivRequest {
 }
 impl GetTexGenivRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let context_tag_bytes = self.context_tag.serialize();
         let coord_bytes = self.coord.serialize();
@@ -7953,7 +7953,7 @@ impl GetTexGenivRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -8067,7 +8067,7 @@ pub struct GetTexImageRequest {
 }
 impl GetTexImageRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let context_tag_bytes = self.context_tag.serialize();
         let target_bytes = self.target.serialize();
@@ -8109,7 +8109,7 @@ impl GetTexImageRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -8232,7 +8232,7 @@ pub struct GetTexParameterfvRequest {
 }
 impl GetTexParameterfvRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let context_tag_bytes = self.context_tag.serialize();
         let target_bytes = self.target.serialize();
@@ -8259,7 +8259,7 @@ impl GetTexParameterfvRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -8370,7 +8370,7 @@ pub struct GetTexParameterivRequest {
 }
 impl GetTexParameterivRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let context_tag_bytes = self.context_tag.serialize();
         let target_bytes = self.target.serialize();
@@ -8397,7 +8397,7 @@ impl GetTexParameterivRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -8509,7 +8509,7 @@ pub struct GetTexLevelParameterfvRequest {
 }
 impl GetTexLevelParameterfvRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let context_tag_bytes = self.context_tag.serialize();
         let target_bytes = self.target.serialize();
@@ -8541,7 +8541,7 @@ impl GetTexLevelParameterfvRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -8655,7 +8655,7 @@ pub struct GetTexLevelParameterivRequest {
 }
 impl GetTexLevelParameterivRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let context_tag_bytes = self.context_tag.serialize();
         let target_bytes = self.target.serialize();
@@ -8687,7 +8687,7 @@ impl GetTexLevelParameterivRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -8799,7 +8799,7 @@ pub struct IsEnabledRequest {
 }
 impl IsEnabledRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let context_tag_bytes = self.context_tag.serialize();
         let capability_bytes = self.capability.serialize();
@@ -8821,7 +8821,7 @@ impl IsEnabledRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -8919,7 +8919,7 @@ pub struct IsListRequest {
 }
 impl IsListRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let context_tag_bytes = self.context_tag.serialize();
         let list_bytes = self.list.serialize();
@@ -8941,7 +8941,7 @@ impl IsListRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -9038,7 +9038,7 @@ pub struct FlushRequest {
 }
 impl FlushRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let context_tag_bytes = self.context_tag.serialize();
         let mut request0 = vec![
@@ -9055,7 +9055,7 @@ impl FlushRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -9092,7 +9092,7 @@ pub struct AreTexturesResidentRequest<'input> {
 }
 impl<'input> AreTexturesResidentRequest<'input> {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'input>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
         let length_so_far = 0;
         let context_tag_bytes = self.context_tag.serialize();
         let n = i32::try_from(self.textures.len()).expect("`textures` has too many elements");
@@ -9119,7 +9119,7 @@ impl<'input> AreTexturesResidentRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into(), textures_bytes.into(), padding0.into()], vec![])
+        ([request0.into(), textures_bytes.into(), padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -9232,7 +9232,7 @@ pub struct DeleteTexturesRequest<'input> {
 }
 impl<'input> DeleteTexturesRequest<'input> {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'input>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
         let length_so_far = 0;
         let context_tag_bytes = self.context_tag.serialize();
         let n = i32::try_from(self.textures.len()).expect("`textures` has too many elements");
@@ -9259,7 +9259,7 @@ impl<'input> DeleteTexturesRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into(), textures_bytes.into(), padding0.into()], vec![])
+        ([request0.into(), textures_bytes.into(), padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -9306,7 +9306,7 @@ pub struct GenTexturesRequest {
 }
 impl GenTexturesRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let context_tag_bytes = self.context_tag.serialize();
         let n_bytes = self.n.serialize();
@@ -9328,7 +9328,7 @@ impl GenTexturesRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -9428,7 +9428,7 @@ pub struct IsTextureRequest {
 }
 impl IsTextureRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let context_tag_bytes = self.context_tag.serialize();
         let texture_bytes = self.texture.serialize();
@@ -9450,7 +9450,7 @@ impl IsTextureRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -9551,7 +9551,7 @@ pub struct GetColorTableRequest {
 }
 impl GetColorTableRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let context_tag_bytes = self.context_tag.serialize();
         let target_bytes = self.target.serialize();
@@ -9588,7 +9588,7 @@ impl GetColorTableRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -9703,7 +9703,7 @@ pub struct GetColorTableParameterfvRequest {
 }
 impl GetColorTableParameterfvRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let context_tag_bytes = self.context_tag.serialize();
         let target_bytes = self.target.serialize();
@@ -9730,7 +9730,7 @@ impl GetColorTableParameterfvRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -9841,7 +9841,7 @@ pub struct GetColorTableParameterivRequest {
 }
 impl GetColorTableParameterivRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let context_tag_bytes = self.context_tag.serialize();
         let target_bytes = self.target.serialize();
@@ -9868,7 +9868,7 @@ impl GetColorTableParameterivRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -9981,7 +9981,7 @@ pub struct GetConvolutionFilterRequest {
 }
 impl GetConvolutionFilterRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let context_tag_bytes = self.context_tag.serialize();
         let target_bytes = self.target.serialize();
@@ -10018,7 +10018,7 @@ impl GetConvolutionFilterRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -10136,7 +10136,7 @@ pub struct GetConvolutionParameterfvRequest {
 }
 impl GetConvolutionParameterfvRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let context_tag_bytes = self.context_tag.serialize();
         let target_bytes = self.target.serialize();
@@ -10163,7 +10163,7 @@ impl GetConvolutionParameterfvRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -10274,7 +10274,7 @@ pub struct GetConvolutionParameterivRequest {
 }
 impl GetConvolutionParameterivRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let context_tag_bytes = self.context_tag.serialize();
         let target_bytes = self.target.serialize();
@@ -10301,7 +10301,7 @@ impl GetConvolutionParameterivRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -10414,7 +10414,7 @@ pub struct GetSeparableFilterRequest {
 }
 impl GetSeparableFilterRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let context_tag_bytes = self.context_tag.serialize();
         let target_bytes = self.target.serialize();
@@ -10451,7 +10451,7 @@ impl GetSeparableFilterRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -10572,7 +10572,7 @@ pub struct GetHistogramRequest {
 }
 impl GetHistogramRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let context_tag_bytes = self.context_tag.serialize();
         let target_bytes = self.target.serialize();
@@ -10610,7 +10610,7 @@ impl GetHistogramRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -10727,7 +10727,7 @@ pub struct GetHistogramParameterfvRequest {
 }
 impl GetHistogramParameterfvRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let context_tag_bytes = self.context_tag.serialize();
         let target_bytes = self.target.serialize();
@@ -10754,7 +10754,7 @@ impl GetHistogramParameterfvRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -10865,7 +10865,7 @@ pub struct GetHistogramParameterivRequest {
 }
 impl GetHistogramParameterivRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let context_tag_bytes = self.context_tag.serialize();
         let target_bytes = self.target.serialize();
@@ -10892,7 +10892,7 @@ impl GetHistogramParameterivRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -11006,7 +11006,7 @@ pub struct GetMinmaxRequest {
 }
 impl GetMinmaxRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let context_tag_bytes = self.context_tag.serialize();
         let target_bytes = self.target.serialize();
@@ -11044,7 +11044,7 @@ impl GetMinmaxRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -11156,7 +11156,7 @@ pub struct GetMinmaxParameterfvRequest {
 }
 impl GetMinmaxParameterfvRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let context_tag_bytes = self.context_tag.serialize();
         let target_bytes = self.target.serialize();
@@ -11183,7 +11183,7 @@ impl GetMinmaxParameterfvRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -11294,7 +11294,7 @@ pub struct GetMinmaxParameterivRequest {
 }
 impl GetMinmaxParameterivRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let context_tag_bytes = self.context_tag.serialize();
         let target_bytes = self.target.serialize();
@@ -11321,7 +11321,7 @@ impl GetMinmaxParameterivRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -11432,7 +11432,7 @@ pub struct GetCompressedTexImageARBRequest {
 }
 impl GetCompressedTexImageARBRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let context_tag_bytes = self.context_tag.serialize();
         let target_bytes = self.target.serialize();
@@ -11459,7 +11459,7 @@ impl GetCompressedTexImageARBRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -11569,7 +11569,7 @@ pub struct DeleteQueriesARBRequest<'input> {
 }
 impl<'input> DeleteQueriesARBRequest<'input> {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'input>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
         let length_so_far = 0;
         let context_tag_bytes = self.context_tag.serialize();
         let n = i32::try_from(self.ids.len()).expect("`ids` has too many elements");
@@ -11596,7 +11596,7 @@ impl<'input> DeleteQueriesARBRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into(), ids_bytes.into(), padding0.into()], vec![])
+        ([request0.into(), ids_bytes.into(), padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -11643,7 +11643,7 @@ pub struct GenQueriesARBRequest {
 }
 impl GenQueriesARBRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let context_tag_bytes = self.context_tag.serialize();
         let n_bytes = self.n.serialize();
@@ -11665,7 +11665,7 @@ impl GenQueriesARBRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -11765,7 +11765,7 @@ pub struct IsQueryARBRequest {
 }
 impl IsQueryARBRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let context_tag_bytes = self.context_tag.serialize();
         let id_bytes = self.id.serialize();
@@ -11787,7 +11787,7 @@ impl IsQueryARBRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -11886,7 +11886,7 @@ pub struct GetQueryivARBRequest {
 }
 impl GetQueryivARBRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let context_tag_bytes = self.context_tag.serialize();
         let target_bytes = self.target.serialize();
@@ -11913,7 +11913,7 @@ impl GetQueryivARBRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -12024,7 +12024,7 @@ pub struct GetQueryObjectivARBRequest {
 }
 impl GetQueryObjectivARBRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let context_tag_bytes = self.context_tag.serialize();
         let id_bytes = self.id.serialize();
@@ -12051,7 +12051,7 @@ impl GetQueryObjectivARBRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -12162,7 +12162,7 @@ pub struct GetQueryObjectuivARBRequest {
 }
 impl GetQueryObjectuivARBRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let context_tag_bytes = self.context_tag.serialize();
         let id_bytes = self.id.serialize();
@@ -12189,7 +12189,7 @@ impl GetQueryObjectuivARBRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {

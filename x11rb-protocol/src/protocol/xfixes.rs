@@ -17,7 +17,7 @@ use core::convert::TryFrom;
 use crate::errors::ParseError;
 #[allow(unused_imports)]
 use crate::x11_utils::TryIntoUSize;
-use crate::{BufWithFds, PiecewiseBuf};
+use crate::BufWithFds;
 #[allow(unused_imports)]
 use crate::utils::{RawFdContainer, pretty_print_bitmask, pretty_print_enum};
 #[allow(unused_imports)]
@@ -50,7 +50,7 @@ pub struct QueryVersionRequest {
 }
 impl QueryVersionRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let client_major_version_bytes = self.client_major_version.serialize();
         let client_minor_version_bytes = self.client_minor_version.serialize();
@@ -72,7 +72,7 @@ impl QueryVersionRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -375,7 +375,7 @@ pub struct ChangeSaveSetRequest {
 }
 impl ChangeSaveSetRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let mode_bytes = u8::from(self.mode).serialize();
         let target_bytes = u8::from(self.target).serialize();
@@ -399,7 +399,7 @@ impl ChangeSaveSetRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -703,7 +703,7 @@ pub struct SelectSelectionInputRequest {
 }
 impl SelectSelectionInputRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let window_bytes = self.window.serialize();
         let selection_bytes = self.selection.serialize();
@@ -730,7 +730,7 @@ impl SelectSelectionInputRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -1015,7 +1015,7 @@ pub struct SelectCursorInputRequest {
 }
 impl SelectCursorInputRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let window_bytes = self.window.serialize();
         let event_mask_bytes = u32::from(self.event_mask).serialize();
@@ -1037,7 +1037,7 @@ impl SelectCursorInputRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -1074,7 +1074,7 @@ pub const GET_CURSOR_IMAGE_REQUEST: u8 = 4;
 pub struct GetCursorImageRequest;
 impl GetCursorImageRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let mut request0 = vec![
             major_opcode,
@@ -1086,7 +1086,7 @@ impl GetCursorImageRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -1251,7 +1251,7 @@ pub struct CreateRegionRequest<'input> {
 }
 impl<'input> CreateRegionRequest<'input> {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'input>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
         let length_so_far = 0;
         let region_bytes = self.region.serialize();
         let mut request0 = vec![
@@ -1272,7 +1272,7 @@ impl<'input> CreateRegionRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into(), rectangles_bytes.into(), padding0.into()], vec![])
+        ([request0.into(), rectangles_bytes.into(), padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -1325,7 +1325,7 @@ pub struct CreateRegionFromBitmapRequest {
 }
 impl CreateRegionFromBitmapRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let region_bytes = self.region.serialize();
         let bitmap_bytes = self.bitmap.serialize();
@@ -1347,7 +1347,7 @@ impl CreateRegionFromBitmapRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -1387,7 +1387,7 @@ pub struct CreateRegionFromWindowRequest {
 }
 impl CreateRegionFromWindowRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let region_bytes = self.region.serialize();
         let window_bytes = self.window.serialize();
@@ -1414,7 +1414,7 @@ impl CreateRegionFromWindowRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -1457,7 +1457,7 @@ pub struct CreateRegionFromGCRequest {
 }
 impl CreateRegionFromGCRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let region_bytes = self.region.serialize();
         let gc_bytes = self.gc.serialize();
@@ -1479,7 +1479,7 @@ impl CreateRegionFromGCRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -1518,7 +1518,7 @@ pub struct CreateRegionFromPictureRequest {
 }
 impl CreateRegionFromPictureRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let region_bytes = self.region.serialize();
         let picture_bytes = self.picture.serialize();
@@ -1540,7 +1540,7 @@ impl CreateRegionFromPictureRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -1578,7 +1578,7 @@ pub struct DestroyRegionRequest {
 }
 impl DestroyRegionRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let region_bytes = self.region.serialize();
         let mut request0 = vec![
@@ -1595,7 +1595,7 @@ impl DestroyRegionRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -1632,7 +1632,7 @@ pub struct SetRegionRequest<'input> {
 }
 impl<'input> SetRegionRequest<'input> {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'input>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
         let length_so_far = 0;
         let region_bytes = self.region.serialize();
         let mut request0 = vec![
@@ -1653,7 +1653,7 @@ impl<'input> SetRegionRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into(), rectangles_bytes.into(), padding0.into()], vec![])
+        ([request0.into(), rectangles_bytes.into(), padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -1706,7 +1706,7 @@ pub struct CopyRegionRequest {
 }
 impl CopyRegionRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let source_bytes = self.source.serialize();
         let destination_bytes = self.destination.serialize();
@@ -1728,7 +1728,7 @@ impl CopyRegionRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -1768,7 +1768,7 @@ pub struct UnionRegionRequest {
 }
 impl UnionRegionRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let source1_bytes = self.source1.serialize();
         let source2_bytes = self.source2.serialize();
@@ -1795,7 +1795,7 @@ impl UnionRegionRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -1837,7 +1837,7 @@ pub struct IntersectRegionRequest {
 }
 impl IntersectRegionRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let source1_bytes = self.source1.serialize();
         let source2_bytes = self.source2.serialize();
@@ -1864,7 +1864,7 @@ impl IntersectRegionRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -1906,7 +1906,7 @@ pub struct SubtractRegionRequest {
 }
 impl SubtractRegionRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let source1_bytes = self.source1.serialize();
         let source2_bytes = self.source2.serialize();
@@ -1933,7 +1933,7 @@ impl SubtractRegionRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -1975,7 +1975,7 @@ pub struct InvertRegionRequest {
 }
 impl InvertRegionRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let source_bytes = self.source.serialize();
         let bounds_bytes = self.bounds.serialize();
@@ -2006,7 +2006,7 @@ impl InvertRegionRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -2048,7 +2048,7 @@ pub struct TranslateRegionRequest {
 }
 impl TranslateRegionRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let region_bytes = self.region.serialize();
         let dx_bytes = self.dx.serialize();
@@ -2071,7 +2071,7 @@ impl TranslateRegionRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -2112,7 +2112,7 @@ pub struct RegionExtentsRequest {
 }
 impl RegionExtentsRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let source_bytes = self.source.serialize();
         let destination_bytes = self.destination.serialize();
@@ -2134,7 +2134,7 @@ impl RegionExtentsRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -2172,7 +2172,7 @@ pub struct FetchRegionRequest {
 }
 impl FetchRegionRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let region_bytes = self.region.serialize();
         let mut request0 = vec![
@@ -2189,7 +2189,7 @@ impl FetchRegionRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -2293,7 +2293,7 @@ pub struct SetGCClipRegionRequest {
 }
 impl SetGCClipRegionRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let gc_bytes = self.gc.serialize();
         let region_bytes = self.region.serialize();
@@ -2321,7 +2321,7 @@ impl SetGCClipRegionRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -2367,7 +2367,7 @@ pub struct SetWindowShapeRegionRequest {
 }
 impl SetWindowShapeRegionRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let dest_bytes = self.dest.serialize();
         let dest_kind_bytes = shape::Kind::from(self.dest_kind).serialize();
@@ -2400,7 +2400,7 @@ impl SetWindowShapeRegionRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -2449,7 +2449,7 @@ pub struct SetPictureClipRegionRequest {
 }
 impl SetPictureClipRegionRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let picture_bytes = self.picture.serialize();
         let region_bytes = self.region.serialize();
@@ -2477,7 +2477,7 @@ impl SetPictureClipRegionRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -2520,7 +2520,7 @@ pub struct SetCursorNameRequest<'input> {
 }
 impl<'input> SetCursorNameRequest<'input> {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'input>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
         let length_so_far = 0;
         let cursor_bytes = self.cursor.serialize();
         let nbytes = u16::try_from(self.name.len()).expect("`name` has too many elements");
@@ -2546,7 +2546,7 @@ impl<'input> SetCursorNameRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into(), self.name, padding0.into()], vec![])
+        ([request0.into(), self.name, padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -2593,7 +2593,7 @@ pub struct GetCursorNameRequest {
 }
 impl GetCursorNameRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let cursor_bytes = self.cursor.serialize();
         let mut request0 = vec![
@@ -2610,7 +2610,7 @@ impl GetCursorNameRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -2712,7 +2712,7 @@ pub const GET_CURSOR_IMAGE_AND_NAME_REQUEST: u8 = 25;
 pub struct GetCursorImageAndNameRequest;
 impl GetCursorImageAndNameRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let mut request0 = vec![
             major_opcode,
@@ -2724,7 +2724,7 @@ impl GetCursorImageAndNameRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -2852,7 +2852,7 @@ pub struct ChangeCursorRequest {
 }
 impl ChangeCursorRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let source_bytes = self.source.serialize();
         let destination_bytes = self.destination.serialize();
@@ -2874,7 +2874,7 @@ impl ChangeCursorRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -2913,7 +2913,7 @@ pub struct ChangeCursorByNameRequest<'input> {
 }
 impl<'input> ChangeCursorByNameRequest<'input> {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'input>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
         let length_so_far = 0;
         let src_bytes = self.src.serialize();
         let nbytes = u16::try_from(self.name.len()).expect("`name` has too many elements");
@@ -2939,7 +2939,7 @@ impl<'input> ChangeCursorByNameRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into(), self.name, padding0.into()], vec![])
+        ([request0.into(), self.name, padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -2991,7 +2991,7 @@ pub struct ExpandRegionRequest {
 }
 impl ExpandRegionRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let source_bytes = self.source.serialize();
         let destination_bytes = self.destination.serialize();
@@ -3025,7 +3025,7 @@ impl ExpandRegionRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -3071,7 +3071,7 @@ pub struct HideCursorRequest {
 }
 impl HideCursorRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
@@ -3088,7 +3088,7 @@ impl HideCursorRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -3124,7 +3124,7 @@ pub struct ShowCursorRequest {
 }
 impl ShowCursorRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let window_bytes = self.window.serialize();
         let mut request0 = vec![
@@ -3141,7 +3141,7 @@ impl ShowCursorRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -3238,7 +3238,7 @@ pub struct CreatePointerBarrierRequest<'input> {
 }
 impl<'input> CreatePointerBarrierRequest<'input> {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'input>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
         let length_so_far = 0;
         let barrier_bytes = self.barrier.serialize();
         let window_bytes = self.window.serialize();
@@ -3287,7 +3287,7 @@ impl<'input> CreatePointerBarrierRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into(), devices_bytes.into(), padding0.into()], vec![])
+        ([request0.into(), devices_bytes.into(), padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
@@ -3353,7 +3353,7 @@ pub struct DeletePointerBarrierRequest {
 }
 impl DeletePointerBarrierRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let barrier_bytes = self.barrier.serialize();
         let mut request0 = vec![
@@ -3370,7 +3370,7 @@ impl DeletePointerBarrierRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -3454,7 +3454,7 @@ pub struct SetClientDisconnectModeRequest {
 }
 impl SetClientDisconnectModeRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let disconnect_mode_bytes = u32::from(self.disconnect_mode).serialize();
         let mut request0 = vec![
@@ -3471,7 +3471,7 @@ impl SetClientDisconnectModeRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
@@ -3506,7 +3506,7 @@ pub const GET_CLIENT_DISCONNECT_MODE_REQUEST: u8 = 34;
 pub struct GetClientDisconnectModeRequest;
 impl GetClientDisconnectModeRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self, major_opcode: u8) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let mut request0 = vec![
             major_opcode,
@@ -3518,7 +3518,7 @@ impl GetClientDisconnectModeRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
