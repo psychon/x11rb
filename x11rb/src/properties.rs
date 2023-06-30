@@ -477,6 +477,8 @@ where
 /// The possible values for a `WM_STATE`'s state field.
 #[derive(Debug, Copy, Clone)]
 pub enum WmHintsState {
+    /// The window should be in Withdrawn state.
+    Withdrawn,
     /// The window should be in Normal state.
     Normal,
     /// The window should be in Iconic state.
@@ -604,6 +606,7 @@ impl TryParse for WmHints {
 
         let initial_state = match initial_state {
             None => None,
+            Some(0) => Some(WmHintsState::Withdrawn),
             Some(1) => Some(WmHintsState::Normal),
             Some(3) => Some(WmHintsState::Iconic),
             _ => return Err(ParseError::InvalidValue),
@@ -651,6 +654,7 @@ impl Serialize for WmHints {
         flags.serialize_into(bytes);
         u32::from(self.input.unwrap_or(false)).serialize_into(bytes);
         match self.initial_state {
+            Some(WmHintsState::Withdrawn) => 0,
             Some(WmHintsState::Normal) => 1,
             Some(WmHintsState::Iconic) => 3,
             None => 0,
