@@ -89,42 +89,6 @@ pub trait Stream {
     /// * The returned value shall always be the actual number of bytes read into `buf`.
     fn read(&self, buf: &mut [u8], fd_storage: &mut Vec<RawFdContainer>) -> Result<usize>;
 
-    /// Read the exact number of bytes required to fill `buf` and also some amount of FDs.
-    ///
-    /// Unlike `read`, this method always blocks until `buf` has been filled or there is an
-    /// error.
-    ///
-    /// This function works like [`std::io::Read::read`], but also supports the reception of file
-    /// descriptors. Any received file descriptors are appended to the given `fd_storage`.
-    ///
-    /// This function does not guarantee that all file descriptors were sent together with the data
-    /// with which they are received. However, file descriptors may not be received later than the
-    /// data that was sent at the same time. Instead, file descriptors may only be received
-    /// earlier.
-    ///
-    /// # Multithreading
-    ///
-    /// Same as `read`. In any case, if this function returns without error, `buf.len()` bytes
-    /// should have been read into `buf`.
-    fn read_exact(&self, mut buf: &mut [u8], fd_storage: &mut Vec<RawFdContainer>) -> Result<()> {
-        while !buf.is_empty() {
-            self.poll(PollMode::Readable)?;
-            match self.read(buf, fd_storage) {
-                Ok(0) => {
-                    return Err(std::io::Error::new(
-                        std::io::ErrorKind::UnexpectedEof,
-                        "failed to fill the whole buffer",
-                    ))
-                }
-                Ok(n) => buf = &mut buf[n..],
-                // Spurious wakeup from poll
-                Err(ref e) if e.kind() == std::io::ErrorKind::WouldBlock => {}
-                Err(e) => return Err(e),
-            }
-        }
-        Ok(())
-    }
-
     /// Write a buffer and some FDs into this writer without blocking, returning how many
     /// bytes were written.
     ///

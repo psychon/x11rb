@@ -145,10 +145,6 @@ impl<S: X11rbStream> X11rbStream for StreamAdaptor<S> {
         self.get_ref().write(buf, fds)
     }
 
-    fn read_exact(&self, buf: &mut [u8], fd_storage: &mut Vec<RawFdContainer>) -> io::Result<()> {
-        self.get_ref().read_exact(buf, fd_storage)
-    }
-
     fn write_vectored(
         &self,
         bufs: &[io::IoSlice<'_>],

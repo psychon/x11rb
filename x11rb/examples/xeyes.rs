@@ -35,7 +35,7 @@ fn draw_eyes<C: Connection>(
     conn.poly_fill_arc(win_id, black, &[arc1, arc2])?;
 
     // Draw the white inner part
-    for mut arc in [&mut arc1, &mut arc2].iter_mut() {
+    for arc in [&mut arc1, &mut arc2].iter_mut() {
         arc.x += EYE_SIZE;
         arc.y += EYE_SIZE;
         arc.width -= 2 * EYE_SIZE as u16;
