@@ -3,13 +3,6 @@ pull_request_rules:
     conditions:
       - label!=no-mergify
       - "#approved-reviews-by>=1"
-      - status-success=continuous-integration/appveyor/pr
-      - status-success=non-amd64-test (powerpc-unknown-linux-gnu)
-      - status-success=non-amd64-test (mips64-unknown-linux-gnuabi64)
-      - status-success=msrv-check
-      - status-success=build (stable)
-      - status-success=clippy-rustfmt
-      - status-success=code_gen
     actions:
       merge:
         method: merge
