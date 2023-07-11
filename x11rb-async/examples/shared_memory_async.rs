@@ -4,7 +4,7 @@ use std::os::unix::io::AsRawFd;
 use std::ptr::null_mut;
 
 use async_executor::LocalExecutor;
-use nix::libc::{mmap, MAP_FAILED, MAP_SHARED, PROT_READ, PROT_WRITE};
+use libc::{mmap, MAP_FAILED, MAP_SHARED, PROT_READ, PROT_WRITE};
 
 use x11rb_async::connection::Connection;
 use x11rb_async::errors::{ConnectionError, ReplyError, ReplyOrIdError};

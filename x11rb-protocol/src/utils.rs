@@ -46,15 +46,9 @@ mod raw_fd_container {
         }
     }
 
-    impl From<OwnedFd> for RawFdContainer {
-        fn from(fd: OwnedFd) -> Self {
-            Self::new(fd)
-        }
-    }
-
-    impl From<RawFdContainer> for OwnedFd {
-        fn from(fd: RawFdContainer) -> Self {
-            fd.0
+    impl<T: Into<OwnedFd>> From<T> for RawFdContainer {
+        fn from(fd: T) -> Self {
+            Self::new(fd.into())
         }
     }
 
