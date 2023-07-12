@@ -679,6 +679,11 @@ macro_rules! bitmask_binop {
                 let flag = flag.into();
                 (<$u>::from(self) & flag) != 0
             }
+
+            /// Returns the internal value of the object.
+            pub fn bits(self) -> $u {
+                self.0
+            }
         }
     };
 }
