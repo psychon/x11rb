@@ -367,7 +367,7 @@ impl<S: Stream + Send + Sync> RustConnection<S> {
 
         // Start prefetching if necessary.
         if *mrl == MaxRequestBytes::Unknown {
-            tracing::info!("Prefetching maximum request length");
+            tracing::debug!("Prefetching maximum request length");
             let cookie = crate::protocol::bigreq::enable(self)
                 .await
                 .map(|cookie| {
@@ -645,7 +645,7 @@ impl<S: Stream + Send + Sync> RequestConnection for RustConnection<S> {
                             .unwrap_or(std::usize::MAX);
 
                         *mrl = MaxRequestBytes::Known(total);
-                        tracing::info!("Maximum request length is {} bytes", total);
+                        tracing::debug!("Maximum request length is {} bytes", total);
                         total
                     }
                 }
@@ -717,7 +717,7 @@ impl<S: Stream + Send + Sync> Connection for RustConnection<S> {
                     .await?
                     .is_some()
                 {
-                    tracing::info!("XIDs are exhausted; fetching free range via XC-MISC");
+                    tracing::debug!("XIDs are exhausted; fetching free range via XC-MISC");
 
                     // Update the ID range.
                     id_allocator
