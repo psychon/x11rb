@@ -717,7 +717,7 @@ impl<S: Stream + Send + Sync> Connection for RustConnection<S> {
                     .await?
                     .is_some()
                 {
-                    tracing::debug!("XIDs are exhausted; fetching free range via XC-MISC");
+                    tracing::info!("XIDs are exhausted; fetching free range via XC-MISC");
 
                     // Update the ID range.
                     id_allocator
