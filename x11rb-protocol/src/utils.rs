@@ -11,64 +11,13 @@
 
 #[cfg(all(feature = "std", unix))]
 mod raw_fd_container {
-    use rustix::fd::OwnedFd;
-    use std::os::unix::io::{AsRawFd, IntoRawFd, RawFd};
+    use std::os::unix::io::OwnedFd;
 
     /// A simple wrapper around RawFd that closes the fd on drop.
     ///
     /// On non-unix systems, this type is empty and does not provide
     /// any method.
-    #[derive(Debug)]
-    pub struct RawFdContainer(OwnedFd);
-
-    impl RawFdContainer {
-        /// Create a new `RawFdContainer` for the given `RawFd`.
-        ///
-        /// The `RawFdContainer` takes ownership of the `RawFd` and closes it on drop.
-        pub fn new(fd: OwnedFd) -> Self {
-            RawFdContainer(fd)
-        }
-
-        /// Tries to clone the `RawFdContainer` creating a new FD
-        /// with `dup`. The new `RawFdContainer` will take ownership
-        /// of the `dup`ed version, whereas the original `RawFdContainer`
-        /// will keep the ownership of its FD.
-        pub fn try_clone(&self) -> Result<Self, std::io::Error> {
-            Ok(Self::new(rustix::io::dup(&self.0)?))
-        }
-
-        /// Get the `RawFd` out of this `RawFdContainer`.
-        ///
-        /// This function would be an implementation of `IntoRawFd` if that were possible. However, it
-        /// causes a conflict with an `impl` from libcore...
-        pub fn into_raw_fd(self) -> RawFd {
-            self.0.into_raw_fd()
-        }
-    }
-
-    impl<T: Into<OwnedFd>> From<T> for RawFdContainer {
-        fn from(fd: T) -> Self {
-            Self::new(fd.into())
-        }
-    }
-
-    impl AsRawFd for RawFdContainer {
-        fn as_raw_fd(&self) -> RawFd {
-            self.0.as_raw_fd()
-        }
-    }
-
-    impl IntoRawFd for RawFdContainer {
-        fn into_raw_fd(self) -> RawFd {
-            self.0.into_raw_fd()
-        }
-    }
-
-    impl rustix::fd::AsFd for RawFdContainer {
-        fn as_fd(&self) -> rustix::fd::BorrowedFd<'_> {
-            rustix::fd::AsFd::as_fd(&self.0)
-        }
-    }
+    pub type RawFdContainer = OwnedFd;
 }
 
 #[cfg(not(all(feature = "std", unix)))]

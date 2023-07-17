@@ -160,15 +160,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    - uses: dtolnay/rust-toolchain@1.56.0
+    - uses: dtolnay/rust-toolchain@1.63.0
 
     # build
     - name: cargo check x11rb-protocol with all features
       run: cargo build --package x11rb-protocol --verbose --lib --all-features
     - name: cargo check x11rb with all features
       run: cargo build --package x11rb --verbose --lib --all-features
-    - name: Pin last log release supporting our msrv of Rust 1.56
-      run: cargo update --package log --precise 0.4.18
     - name: cargo check x11rb-async with all features
       run: cargo build --package x11rb-async --verbose --lib --all-features
 

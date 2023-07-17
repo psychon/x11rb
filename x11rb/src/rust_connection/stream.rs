@@ -329,7 +329,7 @@ fn do_write(
 ) -> Result<usize> {
     use rustix::fd::{AsFd, BorrowedFd};
     use rustix::io::Errno;
-    use rustix::net::{sendmsg_noaddr, SendAncillaryBuffer, SendAncillaryMessage, SendFlags};
+    use rustix::net::{sendmsg, SendAncillaryBuffer, SendAncillaryMessage, SendFlags};
 
     fn sendmsg_wrapper(
         fd: BorrowedFd<'_>,
@@ -338,7 +338,7 @@ fn do_write(
         flags: SendFlags,
     ) -> Result<usize> {
         loop {
-            match sendmsg_noaddr(fd, iov, cmsgs, flags) {
+            match sendmsg(fd, iov, cmsgs, flags) {
                 Ok(n) => return Ok(n),
                 // try again
                 Err(Errno::INTR) => {}
@@ -370,7 +370,8 @@ fn do_write(
 
 impl Stream for DefaultStream {
     fn poll(&self, mode: PollMode) -> Result<()> {
-        use rustix::io::{poll, Errno, PollFd, PollFlags};
+        use rustix::event::{poll, PollFd, PollFlags};
+        use rustix::io::Errno;
 
         let mut poll_flags = PollFlags::empty();
         if mode.readable() {
@@ -422,8 +423,7 @@ impl Stream for DefaultStream {
                     RecvAncillaryMessage::ScmRights(r) => Some(r),
                     _ => None,
                 })
-                .flatten()
-                .map(RawFdContainer::new);
+                .flatten();
 
             let mut cloexec_error = Ok(());
             fd_storage.extend(recvmsg::after_recvmsg(fds_received, &mut cloexec_error));
@@ -516,15 +516,15 @@ fn connect_abstract_unix_stream(
 ) -> std::result::Result<RawFdContainer, rustix::io::Errno> {
     use rustix::fs::{fcntl_getfl, fcntl_setfl, OFlags};
     use rustix::net::{
-        connect_unix, socket_with, AddressFamily, Protocol, SocketAddrUnix, SocketFlags, SocketType,
+        connect_unix, socket_with, AddressFamily, SocketAddrUnix, SocketFlags, SocketType,
     };
 
-    let socket = RawFdContainer::new(socket_with(
+    let socket = socket_with(
         AddressFamily::UNIX,
         SocketType::STREAM,
         SocketFlags::CLOEXEC,
-        Protocol::default(),
-    )?);
+        None,
+    )?;
 
     connect_unix(&socket, &SocketAddrUnix::new_abstract_name(path)?)?;
 

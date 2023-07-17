@@ -10,7 +10,7 @@ authors = [
 repository = "https://github.com/psychon/x11rb"
 readme = "../README.md"
 edition = "2021"
-rust-version = "1.56"
+rust-version = "1.63"
 license = "MIT OR Apache-2.0"
 keywords = ["xcb", "X11"]
 
@@ -21,7 +21,7 @@ serde = { version = "1", features = ["derive"], optional = true }
 criterion = "0.4"
 
 [target.'cfg(unix)'.dependencies.rustix]
-version = "0.37.16"
+version = "0.38"
 default-features = false
 features = ["std"]
 optional = true

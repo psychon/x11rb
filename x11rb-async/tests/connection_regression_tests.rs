@@ -102,8 +102,8 @@ fn retry_for_left_over_fds() {
     // Right now that error is WriteZero. That is still better than no error at all.
 
     let fds = {
-        let (fd0, fd1) = rustix::io::pipe().unwrap();
-        vec![RawFdContainer::new(fd0), RawFdContainer::new(fd1)]
+        let (fd0, fd1) = rustix::pipe::pipe().unwrap();
+        vec![fd0, fd1]
     };
 
     // Send a large request. This should be larger than the write buffer size, which is 16384 bytes.
