@@ -266,11 +266,11 @@ pub const REDIRECT_WINDOW_REQUEST: u8 = 1;
 /// Redirect the heirarchy starting at “window” to off-screen storage..
 ///
 /// The hierarchy starting at 'window' is directed to off-screen
-/// 	storage.  When all clients enabling redirection terminate,
-/// 	the redirection will automatically be disabled.
+/// storage.  When all clients enabling redirection terminate,
+/// the redirection will automatically be disabled.
 ///
-/// 	The root window may not be redirected. Doing so results in a Match
-/// 	error.
+/// The root window may not be redirected. Doing so results in a Match
+/// error.
 ///
 /// # Fields
 ///
@@ -344,9 +344,9 @@ pub const REDIRECT_SUBWINDOWS_REQUEST: u8 = 2;
 /// Redirect all current and future children of ‘window’.
 ///
 /// Hierarchies starting at all current and future children of window
-/// 	will be redirected as in RedirectWindow. If update is Manual,
-/// 	then painting of the window background during window manipulation
-/// 	and ClearArea requests is inhibited.
+/// will be redirected as in RedirectWindow. If update is Manual,
+/// then painting of the window background during window manipulation
+/// and ClearArea requests is inhibited.
 ///
 /// # Fields
 ///
@@ -420,7 +420,7 @@ pub const UNREDIRECT_WINDOW_REQUEST: u8 = 3;
 /// Terminate redirection of the specified window..
 ///
 /// Redirection of the specified window will be terminated.  This cannot be
-/// 	used if the window was redirected with RedirectSubwindows.
+/// used if the window was redirected with RedirectSubwindows.
 ///
 /// # Fields
 ///

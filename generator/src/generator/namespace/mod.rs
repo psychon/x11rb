@@ -1092,7 +1092,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 if line.trim().is_empty() {
                     outln!(out, "///");
                 } else {
-                    outln!(out, "/// {}", line.trim_end());
+                    outln!(out, "/// {}", line.trim());
                 }
             }
         }
