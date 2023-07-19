@@ -40,7 +40,7 @@ pub const X11_EXTENSION_NAME: &str = "Present";
 /// by this build of x11rb. For most things, it does not make sense to use this
 /// information. If you need to send a `QueryVersion`, it is recommended to instead
 /// send the maximum version of the extension that you need.
-pub const X11_XML_VERSION: (u32, u32) = (1, 2);
+pub const X11_XML_VERSION: (u32, u32) = (1, 3);
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -168,6 +168,7 @@ impl Option {
     pub const COPY: Self = Self(1 << 1);
     pub const UST: Self = Self(1 << 2);
     pub const SUBOPTIMAL: Self = Self(1 << 3);
+    pub const ASYNC_MAY_TEAR: Self = Self(1 << 4);
 }
 impl From<Option> for u8 {
     #[inline]
@@ -219,6 +220,7 @@ impl core::fmt::Debug for Option  {
             (Self::COPY.0.into(), "COPY", "Copy"),
             (Self::UST.0.into(), "UST", "UST"),
             (Self::SUBOPTIMAL.0.into(), "SUBOPTIMAL", "Suboptimal"),
+            (Self::ASYNC_MAY_TEAR.0.into(), "ASYNC_MAY_TEAR", "AsyncMayTear"),
         ];
         pretty_print_bitmask(fmt, self.0.into(), &variants)
     }
@@ -233,6 +235,7 @@ impl Capability {
     pub const ASYNC: Self = Self(1 << 0);
     pub const FENCE: Self = Self(1 << 1);
     pub const UST: Self = Self(1 << 2);
+    pub const ASYNC_MAY_TEAR: Self = Self(1 << 3);
 }
 impl From<Capability> for u8 {
     #[inline]
@@ -283,6 +286,7 @@ impl core::fmt::Debug for Capability  {
             (Self::ASYNC.0.into(), "ASYNC", "Async"),
             (Self::FENCE.0.into(), "FENCE", "Fence"),
             (Self::UST.0.into(), "UST", "UST"),
+            (Self::ASYNC_MAY_TEAR.0.into(), "ASYNC_MAY_TEAR", "AsyncMayTear"),
         ];
         pretty_print_bitmask(fmt, self.0.into(), &variants)
     }

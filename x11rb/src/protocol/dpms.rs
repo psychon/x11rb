@@ -22,6 +22,8 @@ use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
 use crate::errors::ConnectionError;
 #[allow(unused_imports)]
 use crate::errors::ReplyOrIdError;
+#[allow(unused_imports)]
+use super::xproto;
 
 pub use x11rb_protocol::protocol::dpms::*;
 
@@ -129,6 +131,19 @@ where
     conn.send_request_with_reply(&slices, fds)
 }
 
+pub fn select_input<Conn>(conn: &Conn, event_mask: EventMask) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+where
+    Conn: RequestConnection + ?Sized,
+{
+    let request0 = SelectInputRequest {
+        event_mask,
+    };
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
+    let slices = [IoSlice::new(&bytes[0])];
+    assert_eq!(slices.len(), bytes.len());
+    conn.send_request_without_reply(&slices, fds)
+}
+
 /// Extension trait defining the requests of this extension.
 pub trait ConnectionExt: RequestConnection {
     fn dpms_get_version(&self, client_major_version: u16, client_minor_version: u16) -> Result<Cookie<'_, Self, GetVersionReply>, ConnectionError>
@@ -162,6 +177,10 @@ pub trait ConnectionExt: RequestConnection {
     fn dpms_info(&self) -> Result<Cookie<'_, Self, InfoReply>, ConnectionError>
     {
         info(self)
+    }
+    fn dpms_select_input(&self, event_mask: EventMask) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    {
+        select_input(self, event_mask)
     }
 }
 

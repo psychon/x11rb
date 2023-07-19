@@ -22,6 +22,8 @@ use crate::BufWithFds;
 use crate::utils::{RawFdContainer, pretty_print_bitmask, pretty_print_enum};
 #[allow(unused_imports)]
 use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse, TryParseFd};
+#[allow(unused_imports)]
+use super::xproto;
 
 /// The X11 name of the extension for QueryExtension
 pub const X11_EXTENSION_NAME: &str = "DPMS";
@@ -32,7 +34,7 @@ pub const X11_EXTENSION_NAME: &str = "DPMS";
 /// by this build of x11rb. For most things, it does not make sense to use this
 /// information. If you need to send a `QueryVersion`, it is recommended to instead
 /// send the maximum version of the extension that you need.
-pub const X11_XML_VERSION: (u32, u32) = (0, 0);
+pub const X11_XML_VERSION: (u32, u32) = (1, 2);
 
 /// Opcode for the GetVersion request
 pub const GET_VERSION_REQUEST: u8 = 0;
@@ -800,6 +802,210 @@ impl Serialize for InfoReply {
         bytes.extend_from_slice(&[0; 1]);
         self.sequence.serialize_into(bytes);
         self.length.serialize_into(bytes);
+        u16::from(self.power_level).serialize_into(bytes);
+        self.state.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 21]);
+    }
+}
+
+#[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct EventMask(u32);
+impl EventMask {
+    pub const INFO_NOTIFY: Self = Self(1 << 0);
+}
+impl From<EventMask> for u32 {
+    #[inline]
+    fn from(input: EventMask) -> Self {
+        input.0
+    }
+}
+impl From<EventMask> for Option<u32> {
+    #[inline]
+    fn from(input: EventMask) -> Self {
+        Some(input.0)
+    }
+}
+impl From<u8> for EventMask {
+    #[inline]
+    fn from(value: u8) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u16> for EventMask {
+    #[inline]
+    fn from(value: u16) -> Self {
+        Self(value.into())
+    }
+}
+impl From<u32> for EventMask {
+    #[inline]
+    fn from(value: u32) -> Self {
+        Self(value)
+    }
+}
+impl core::fmt::Debug for EventMask  {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        let variants = [
+            (Self::INFO_NOTIFY.0, "INFO_NOTIFY", "InfoNotify"),
+        ];
+        pretty_print_bitmask(fmt, self.0, &variants)
+    }
+}
+bitmask_binop!(EventMask, u32);
+
+/// Opcode for the SelectInput request
+pub const SELECT_INPUT_REQUEST: u8 = 8;
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct SelectInputRequest {
+    pub event_mask: EventMask,
+}
+impl SelectInputRequest {
+    /// Serialize this request into bytes for the provided connection
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
+        let length_so_far = 0;
+        let event_mask_bytes = u32::from(self.event_mask).serialize();
+        let mut request0 = vec![
+            major_opcode,
+            SELECT_INPUT_REQUEST,
+            0,
+            0,
+            event_mask_bytes[0],
+            event_mask_bytes[1],
+            event_mask_bytes[2],
+            event_mask_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        ([request0.into()], vec![])
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != SELECT_INPUT_REQUEST {
+            return Err(ParseError::InvalidValue);
+        }
+        let (event_mask, remaining) = u32::try_parse(value)?;
+        let event_mask = event_mask.into();
+        let _ = remaining;
+        Ok(SelectInputRequest {
+            event_mask,
+        })
+    }
+}
+impl Request for SelectInputRequest {
+    const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
+
+    fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
+        let (bufs, fds) = self.serialize(major_opcode);
+        // Flatten the buffers into a single vector
+        let buf = bufs.iter().flat_map(|buf| buf.iter().copied()).collect();
+        (buf, fds)
+    }
+}
+impl crate::x11_utils::VoidRequest for SelectInputRequest {
+}
+
+/// Opcode for the InfoNotify event
+pub const INFO_NOTIFY_EVENT: u16 = 0;
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct InfoNotifyEvent {
+    pub response_type: u8,
+    pub extension: u8,
+    pub sequence: u16,
+    pub length: u32,
+    pub event_type: u16,
+    pub timestamp: xproto::Timestamp,
+    pub power_level: DPMSMode,
+    pub state: bool,
+}
+impl TryParse for InfoNotifyEvent {
+    fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = initial_value;
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (extension, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (event_type, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
+        let (timestamp, remaining) = xproto::Timestamp::try_parse(remaining)?;
+        let (power_level, remaining) = u16::try_parse(remaining)?;
+        let (state, remaining) = bool::try_parse(remaining)?;
+        let remaining = remaining.get(21..).ok_or(ParseError::InsufficientData)?;
+        let power_level = power_level.into();
+        let result = InfoNotifyEvent { response_type, extension, sequence, length, event_type, timestamp, power_level, state };
+        let _ = remaining;
+        let remaining = initial_value.get(32 + length as usize * 4..)
+            .ok_or(ParseError::InsufficientData)?;
+        Ok((result, remaining))
+    }
+}
+impl Serialize for InfoNotifyEvent {
+    type Bytes = [u8; 40];
+    fn serialize(&self) -> [u8; 40] {
+        let response_type_bytes = self.response_type.serialize();
+        let extension_bytes = self.extension.serialize();
+        let sequence_bytes = self.sequence.serialize();
+        let length_bytes = self.length.serialize();
+        let event_type_bytes = self.event_type.serialize();
+        let timestamp_bytes = self.timestamp.serialize();
+        let power_level_bytes = u16::from(self.power_level).serialize();
+        let state_bytes = self.state.serialize();
+        [
+            response_type_bytes[0],
+            extension_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            length_bytes[0],
+            length_bytes[1],
+            length_bytes[2],
+            length_bytes[3],
+            event_type_bytes[0],
+            event_type_bytes[1],
+            0,
+            0,
+            timestamp_bytes[0],
+            timestamp_bytes[1],
+            timestamp_bytes[2],
+            timestamp_bytes[3],
+            power_level_bytes[0],
+            power_level_bytes[1],
+            state_bytes[0],
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(40);
+        self.response_type.serialize_into(bytes);
+        self.extension.serialize_into(bytes);
+        self.sequence.serialize_into(bytes);
+        self.length.serialize_into(bytes);
+        self.event_type.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 2]);
+        self.timestamp.serialize_into(bytes);
         u16::from(self.power_level).serialize_into(bytes);
         self.state.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 21]);

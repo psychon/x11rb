@@ -34,6 +34,12 @@ async fn major_opcode<Conn: RequestConnection + ?Sized>(conn: &Conn) -> Result<u
     Ok(info.major_opcode)
 }
 
+/// Enable the BIG-REQUESTS extension.
+///
+/// This enables the BIG-REQUESTS extension, which allows for requests larger than
+/// 262140 bytes in length.  When enabled, if the 16-bit length field is zero, it
+/// is immediately followed by a 32-bit length field specifying the length of the
+/// request in 4-byte units.
 pub async fn enable<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, EnableReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -46,6 +52,12 @@ where
 }
 /// Extension trait defining the requests of this extension.
 pub trait ConnectionExt: RequestConnection {
+    /// Enable the BIG-REQUESTS extension.
+    ///
+    /// This enables the BIG-REQUESTS extension, which allows for requests larger than
+    /// 262140 bytes in length.  When enabled, if the 16-bit length field is zero, it
+    /// is immediately followed by a 32-bit length field specifying the length of the
+    /// request in 4-byte units.
     fn bigreq_enable(&self) -> Pin<Box<dyn Future<Output = Result<Cookie<'_, Self, EnableReply>, ConnectionError>> + Send + '_>>
     {
         Box::pin(enable(self))

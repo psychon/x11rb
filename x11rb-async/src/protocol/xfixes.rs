@@ -489,6 +489,11 @@ where
     assert_eq!(slices.len(), bytes.len());
     conn.send_request_without_reply(&slices, fds).await
 }
+/// Sets the disconnect mode for the client..
+///
+/// # Fields
+///
+/// * `disconnect_mode` - The new disconnect mode.
 pub async fn set_client_disconnect_mode<Conn>(conn: &Conn, disconnect_mode: ClientDisconnectFlags) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -666,6 +671,11 @@ pub trait ConnectionExt: RequestConnection {
     {
         Box::pin(delete_pointer_barrier(self, barrier))
     }
+    /// Sets the disconnect mode for the client..
+    ///
+    /// # Fields
+    ///
+    /// * `disconnect_mode` - The new disconnect mode.
     fn xfixes_set_client_disconnect_mode(&self, disconnect_mode: ClientDisconnectFlags) -> Pin<Box<dyn Future<Output = Result<VoidCookie<'_, Self>, ConnectionError>> + Send + '_>>
     {
         Box::pin(set_client_disconnect_mode(self, disconnect_mode))
