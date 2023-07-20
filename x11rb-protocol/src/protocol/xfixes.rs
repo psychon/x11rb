@@ -3397,6 +3397,14 @@ impl Request for DeletePointerBarrierRequest {
 impl crate::x11_utils::VoidRequest for DeletePointerBarrierRequest {
 }
 
+/// # Fields
+///
+/// * `Default` - The default behavior for regular clients: the X11 server won't terminate as long
+/// as such clients are still connected, and should this client disconnect, the
+/// server will continue running so long as other clients (that have not set
+/// XFixesClientDisconnectFlagTerminate) are connected.
+/// * `Terminate` - Indicates to the X11 server that it can ignore the client and terminate itself
+/// even though the client is still connected to the X11 server.
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ClientDisconnectFlags(u32);
@@ -3447,6 +3455,11 @@ bitmask_binop!(ClientDisconnectFlags, u32);
 
 /// Opcode for the SetClientDisconnectMode request
 pub const SET_CLIENT_DISCONNECT_MODE_REQUEST: u8 = 33;
+/// Sets the disconnect mode for the client..
+///
+/// # Fields
+///
+/// * `disconnect_mode` - The new disconnect mode.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetClientDisconnectModeRequest {
@@ -3544,6 +3557,11 @@ impl crate::x11_utils::ReplyRequest for GetClientDisconnectModeRequest {
     type Reply = GetClientDisconnectModeReply;
 }
 
+/// Gets the disconnect mode for the client..
+///
+/// # Fields
+///
+/// * `disconnect_mode` - The current disconnect mode.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetClientDisconnectModeReply {

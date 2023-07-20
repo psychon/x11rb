@@ -99,6 +99,15 @@ impl core::fmt::Debug for Redirect  {
 
 /// Opcode for the QueryVersion request
 pub const QUERY_VERSION_REQUEST: u8 = 0;
+/// Negotiate the version of Composite.
+///
+/// This negotiates the version of the Composite extension.  It must be precede all
+/// other requests using Composite.  Failure to do so will cause a BadRequest error.
+///
+/// # Fields
+///
+/// * `client_major_version` - The major version supported by the client.
+/// * `client_minor_version` - The minor version supported by the client.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryVersionRequest {
@@ -159,6 +168,15 @@ impl crate::x11_utils::ReplyRequest for QueryVersionRequest {
     type Reply = QueryVersionReply;
 }
 
+/// The negotiated version of Composite.
+///
+/// This indicates the version of Composite chosen by the server.  It will always be
+/// less than or equal to the version offered by the client.
+///
+/// # Fields
+///
+/// * `major_version` - The major version chosen by the server.
+/// * `minor_version` - The minor version chosen by the server.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryVersionReply {
@@ -245,6 +263,21 @@ impl Serialize for QueryVersionReply {
 
 /// Opcode for the RedirectWindow request
 pub const REDIRECT_WINDOW_REQUEST: u8 = 1;
+/// Redirect the heirarchy starting at “window” to off-screen storage..
+///
+/// The hierarchy starting at 'window' is directed to off-screen
+/// storage.  When all clients enabling redirection terminate,
+/// the redirection will automatically be disabled.
+///
+/// The root window may not be redirected. Doing so results in a Match
+/// error.
+///
+/// # Fields
+///
+/// * `window` - The root of the heirarchy to redirect to off-screen storage.
+/// * `update` - Whether contents are automatically mirrored to the parent window.  If one client
+/// already specifies an update type of Manual, any attempt by another to specify a
+/// mode of Manual so will result in an Access error.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct RedirectWindowRequest {
@@ -308,6 +341,19 @@ impl crate::x11_utils::VoidRequest for RedirectWindowRequest {
 
 /// Opcode for the RedirectSubwindows request
 pub const REDIRECT_SUBWINDOWS_REQUEST: u8 = 2;
+/// Redirect all current and future children of ‘window’.
+///
+/// Hierarchies starting at all current and future children of window
+/// will be redirected as in RedirectWindow. If update is Manual,
+/// then painting of the window background during window manipulation
+/// and ClearArea requests is inhibited.
+///
+/// # Fields
+///
+/// * `window` - The root of the heirarchy to redirect to off-screen storage.
+/// * `update` - Whether contents are automatically mirrored to the parent window.  If one client
+/// already specifies an update type of Manual, any attempt by another to specify a
+/// mode of Manual so will result in an Access error.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct RedirectSubwindowsRequest {
@@ -371,6 +417,17 @@ impl crate::x11_utils::VoidRequest for RedirectSubwindowsRequest {
 
 /// Opcode for the UnredirectWindow request
 pub const UNREDIRECT_WINDOW_REQUEST: u8 = 3;
+/// Terminate redirection of the specified window..
+///
+/// Redirection of the specified window will be terminated.  This cannot be
+/// used if the window was redirected with RedirectSubwindows.
+///
+/// # Fields
+///
+/// * `window` - The window to terminate redirection of.  Must be redirected by the
+/// current client, or a Value error results.
+/// * `update` - The update type passed to RedirectWindows.  If this does not match the
+/// previously requested update type, a Value error results.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct UnredirectWindowRequest {
@@ -434,6 +491,17 @@ impl crate::x11_utils::VoidRequest for UnredirectWindowRequest {
 
 /// Opcode for the UnredirectSubwindows request
 pub const UNREDIRECT_SUBWINDOWS_REQUEST: u8 = 4;
+/// Terminate redirection of the specified window’s children.
+///
+/// Redirection of all children of window will be terminated.
+///
+/// # Fields
+///
+/// * `window` - The window to terminate redirection of.  Must have previously been
+/// selected for sub-redirection by the current client, or a Value error
+/// results.
+/// * `update` - The update type passed to RedirectSubWindows.  If this does not match
+/// the previously requested update type, a Value error results.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct UnredirectSubwindowsRequest {

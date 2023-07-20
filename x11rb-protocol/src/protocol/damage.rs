@@ -108,6 +108,16 @@ pub const BAD_DAMAGE_ERROR: u8 = 0;
 
 /// Opcode for the QueryVersion request
 pub const QUERY_VERSION_REQUEST: u8 = 0;
+/// Negotiate the version of the DAMAGE extension.
+///
+/// This negotiates the version of the DAMAGE extension.  It must precede any other
+/// request using the DAMAGE extension.  Failure to do so will cause a BadRequest
+/// error for those requests.
+///
+/// # Fields
+///
+/// * `client_major_version` - The major version supported by the client.
+/// * `client_minor_version` - The minor version supported by the client.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryVersionRequest {
@@ -168,6 +178,15 @@ impl crate::x11_utils::ReplyRequest for QueryVersionRequest {
     type Reply = QueryVersionReply;
 }
 
+/// The negotiated version of the DAMAGE extension.
+///
+/// This indicates the version of the DAMAGE extension chosen by the server.
+/// It will always be less than or equal to the version offered by the client.
+///
+/// # Fields
+///
+/// * `major_version` - The major version chosen by the server.
+/// * `minor_version` - The minor version chosen by the server.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryVersionReply {
@@ -254,6 +273,39 @@ impl Serialize for QueryVersionReply {
 
 /// Opcode for the Create request
 pub const CREATE_REQUEST: u8 = 1;
+/// Creates a Damage object to monitor changes to a drawable..
+///
+/// This creates a Damage object to monitor changes to a drawable, and specifies
+/// the level of detail to be reported for changes.
+///
+/// We call changes made to pixel contents of windows and pixmaps 'damage'
+/// throughout this extension.
+///
+/// Damage accumulates as drawing occurs in the drawable.  Each drawing operation
+/// 'damages' one or more rectangular areas within the drawable.  The rectangles
+/// are guaranteed to include the set of pixels modified by each operation, but
+/// may include significantly more than just those pixels.  The desire is for
+/// the damage to strike a balance between the number of rectangles reported and
+/// the extraneous area included.  A reasonable goal is for each primitive
+/// object drawn (line, string, rectangle) to be represented as a single
+/// rectangle and for the damage area of the operation to be the union of these
+/// rectangles.
+///
+/// The DAMAGE extension allows applications to either receive the raw
+/// rectangles as a stream of events, or to have them partially processed within
+/// the X server to reduce the amount of data transmitted as well as reduce the
+/// processing latency once the repaint operation has started.
+///
+/// The Damage object holds any accumulated damage region and reflects the
+/// relationship between the drawable selected for damage notification and the
+/// drawable for which damage is tracked.
+///
+/// # Fields
+///
+/// * `damage` - The ID with which you will refer to the new Damage object, created by
+/// `xcb_generate_id`.
+/// * `drawable` - The ID of the drawable to be monitored.
+/// * `level` - The level of detail to be provided in Damage events.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CreateRequest {
@@ -325,6 +377,14 @@ impl crate::x11_utils::VoidRequest for CreateRequest {
 
 /// Opcode for the Destroy request
 pub const DESTROY_REQUEST: u8 = 2;
+/// Destroys a previously created Damage object..
+///
+/// This destroys a Damage object and requests the X server stop reporting
+/// the changes it was tracking.
+///
+/// # Fields
+///
+/// * `damage` - The ID you provided to `xcb_create_damage`.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DestroyRequest {
@@ -378,6 +438,15 @@ impl crate::x11_utils::VoidRequest for DestroyRequest {
 
 /// Opcode for the Subtract request
 pub const SUBTRACT_REQUEST: u8 = 3;
+/// Remove regions from a previously created Damage object..
+///
+/// This updates the regions of damage recorded in a a Damage object.
+/// See https://www.x.org/releases/current/doc/damageproto/damageproto.txt
+/// for details.
+///
+/// # Fields
+///
+/// * `damage` - The ID you provided to `xcb_create_damage`.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SubtractRequest {
@@ -447,6 +516,15 @@ impl crate::x11_utils::VoidRequest for SubtractRequest {
 
 /// Opcode for the Add request
 pub const ADD_REQUEST: u8 = 4;
+/// Add a region to a previously created Damage object..
+///
+/// This updates the regions of damage recorded in a a Damage object.
+/// See https://www.x.org/releases/current/doc/damageproto/damageproto.txt
+/// for details.
+///
+/// # Fields
+///
+/// * `damage` - The ID you provided to `xcb_create_damage`.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct AddRequest {
@@ -508,6 +586,22 @@ impl crate::x11_utils::VoidRequest for AddRequest {
 
 /// Opcode for the Notify event
 pub const NOTIFY_EVENT: u8 = 0;
+/// the contents of the monitored drawable have changed.
+///
+/// # Fields
+///
+/// * `level` - The level of the damage being reported.
+/// If the 0x80 bit is set, indicates there are subsequent Damage events
+/// being delivered immediately as part of a larger Damage region.
+/// * `drawable` - The drawable for which damage is being reported.
+/// * `damage` - The Damage object being used to track the damage.
+/// * `timestamp` - Time when the event was generated (in milliseconds).
+/// * `area` - Damaged area of the drawable.
+/// * `geometry` - Total area of the drawable.
+///
+/// # See
+///
+/// * `Create`: request
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct NotifyEvent {

@@ -36,6 +36,15 @@ fn major_opcode<Conn: RequestConnection + ?Sized>(conn: &Conn) -> Result<u8, Con
     Ok(info.major_opcode)
 }
 
+/// Negotiate the version of Composite.
+///
+/// This negotiates the version of the Composite extension.  It must be precede all
+/// other requests using Composite.  Failure to do so will cause a BadRequest error.
+///
+/// # Fields
+///
+/// * `client_major_version` - The major version supported by the client.
+/// * `client_minor_version` - The minor version supported by the client.
 pub fn query_version<Conn>(conn: &Conn, client_major_version: u32, client_minor_version: u32) -> Result<Cookie<'_, Conn, QueryVersionReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -50,6 +59,21 @@ where
     conn.send_request_with_reply(&slices, fds)
 }
 
+/// Redirect the heirarchy starting at “window” to off-screen storage..
+///
+/// The hierarchy starting at 'window' is directed to off-screen
+/// storage.  When all clients enabling redirection terminate,
+/// the redirection will automatically be disabled.
+///
+/// The root window may not be redirected. Doing so results in a Match
+/// error.
+///
+/// # Fields
+///
+/// * `window` - The root of the heirarchy to redirect to off-screen storage.
+/// * `update` - Whether contents are automatically mirrored to the parent window.  If one client
+/// already specifies an update type of Manual, any attempt by another to specify a
+/// mode of Manual so will result in an Access error.
 pub fn redirect_window<Conn>(conn: &Conn, window: xproto::Window, update: Redirect) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -64,6 +88,19 @@ where
     conn.send_request_without_reply(&slices, fds)
 }
 
+/// Redirect all current and future children of ‘window’.
+///
+/// Hierarchies starting at all current and future children of window
+/// will be redirected as in RedirectWindow. If update is Manual,
+/// then painting of the window background during window manipulation
+/// and ClearArea requests is inhibited.
+///
+/// # Fields
+///
+/// * `window` - The root of the heirarchy to redirect to off-screen storage.
+/// * `update` - Whether contents are automatically mirrored to the parent window.  If one client
+/// already specifies an update type of Manual, any attempt by another to specify a
+/// mode of Manual so will result in an Access error.
 pub fn redirect_subwindows<Conn>(conn: &Conn, window: xproto::Window, update: Redirect) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -78,6 +115,17 @@ where
     conn.send_request_without_reply(&slices, fds)
 }
 
+/// Terminate redirection of the specified window..
+///
+/// Redirection of the specified window will be terminated.  This cannot be
+/// used if the window was redirected with RedirectSubwindows.
+///
+/// # Fields
+///
+/// * `window` - The window to terminate redirection of.  Must be redirected by the
+/// current client, or a Value error results.
+/// * `update` - The update type passed to RedirectWindows.  If this does not match the
+/// previously requested update type, a Value error results.
 pub fn unredirect_window<Conn>(conn: &Conn, window: xproto::Window, update: Redirect) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -92,6 +140,17 @@ where
     conn.send_request_without_reply(&slices, fds)
 }
 
+/// Terminate redirection of the specified window’s children.
+///
+/// Redirection of all children of window will be terminated.
+///
+/// # Fields
+///
+/// * `window` - The window to terminate redirection of.  Must have previously been
+/// selected for sub-redirection by the current client, or a Value error
+/// results.
+/// * `update` - The update type passed to RedirectSubWindows.  If this does not match
+/// the previously requested update type, a Value error results.
 pub fn unredirect_subwindows<Conn>(conn: &Conn, window: xproto::Window, update: Redirect) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -162,22 +221,81 @@ where
 
 /// Extension trait defining the requests of this extension.
 pub trait ConnectionExt: RequestConnection {
+    /// Negotiate the version of Composite.
+    ///
+    /// This negotiates the version of the Composite extension.  It must be precede all
+    /// other requests using Composite.  Failure to do so will cause a BadRequest error.
+    ///
+    /// # Fields
+    ///
+    /// * `client_major_version` - The major version supported by the client.
+    /// * `client_minor_version` - The minor version supported by the client.
     fn composite_query_version(&self, client_major_version: u32, client_minor_version: u32) -> Result<Cookie<'_, Self, QueryVersionReply>, ConnectionError>
     {
         query_version(self, client_major_version, client_minor_version)
     }
+    /// Redirect the heirarchy starting at “window” to off-screen storage..
+    ///
+    /// The hierarchy starting at 'window' is directed to off-screen
+    /// storage.  When all clients enabling redirection terminate,
+    /// the redirection will automatically be disabled.
+    ///
+    /// The root window may not be redirected. Doing so results in a Match
+    /// error.
+    ///
+    /// # Fields
+    ///
+    /// * `window` - The root of the heirarchy to redirect to off-screen storage.
+    /// * `update` - Whether contents are automatically mirrored to the parent window.  If one client
+    /// already specifies an update type of Manual, any attempt by another to specify a
+    /// mode of Manual so will result in an Access error.
     fn composite_redirect_window(&self, window: xproto::Window, update: Redirect) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         redirect_window(self, window, update)
     }
+    /// Redirect all current and future children of ‘window’.
+    ///
+    /// Hierarchies starting at all current and future children of window
+    /// will be redirected as in RedirectWindow. If update is Manual,
+    /// then painting of the window background during window manipulation
+    /// and ClearArea requests is inhibited.
+    ///
+    /// # Fields
+    ///
+    /// * `window` - The root of the heirarchy to redirect to off-screen storage.
+    /// * `update` - Whether contents are automatically mirrored to the parent window.  If one client
+    /// already specifies an update type of Manual, any attempt by another to specify a
+    /// mode of Manual so will result in an Access error.
     fn composite_redirect_subwindows(&self, window: xproto::Window, update: Redirect) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         redirect_subwindows(self, window, update)
     }
+    /// Terminate redirection of the specified window..
+    ///
+    /// Redirection of the specified window will be terminated.  This cannot be
+    /// used if the window was redirected with RedirectSubwindows.
+    ///
+    /// # Fields
+    ///
+    /// * `window` - The window to terminate redirection of.  Must be redirected by the
+    /// current client, or a Value error results.
+    /// * `update` - The update type passed to RedirectWindows.  If this does not match the
+    /// previously requested update type, a Value error results.
     fn composite_unredirect_window(&self, window: xproto::Window, update: Redirect) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         unredirect_window(self, window, update)
     }
+    /// Terminate redirection of the specified window’s children.
+    ///
+    /// Redirection of all children of window will be terminated.
+    ///
+    /// # Fields
+    ///
+    /// * `window` - The window to terminate redirection of.  Must have previously been
+    /// selected for sub-redirection by the current client, or a Value error
+    /// results.
+    /// * `update` - The update type passed to RedirectSubWindows.  If this does not match
+    /// the previously requested update type, a Value error results.
     fn composite_unredirect_subwindows(&self, window: xproto::Window, update: Redirect) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         unredirect_subwindows(self, window, update)

@@ -36,6 +36,12 @@ pub const X11_XML_VERSION: (u32, u32) = (0, 0);
 
 /// Opcode for the Enable request
 pub const ENABLE_REQUEST: u8 = 0;
+/// Enable the BIG-REQUESTS extension.
+///
+/// This enables the BIG-REQUESTS extension, which allows for requests larger than
+/// 262140 bytes in length.  When enabled, if the 16-bit length field is zero, it
+/// is immediately followed by a 32-bit length field specifying the length of the
+/// request in 4-byte units.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct EnableRequest;
@@ -79,6 +85,9 @@ impl crate::x11_utils::ReplyRequest for EnableRequest {
     type Reply = EnableReply;
 }
 
+/// # Fields
+///
+/// * `maximum_request_length` - The maximum length of requests supported by the server, in 4-byte units.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct EnableReply {

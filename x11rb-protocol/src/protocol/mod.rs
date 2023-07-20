@@ -305,6 +305,7 @@ fn get_request_name_internal(
                     dpms::DISABLE_REQUEST => RequestInfo::KnownExt("DPMS::Disable"),
                     dpms::FORCE_LEVEL_REQUEST => RequestInfo::KnownExt("DPMS::ForceLevel"),
                     dpms::INFO_REQUEST => RequestInfo::KnownExt("DPMS::Info"),
+                    dpms::SELECT_INPUT_REQUEST => RequestInfo::KnownExt("DPMS::SelectInput"),
                     _ => RequestInfo::UnknownRequest(Some("DPMS"), minor_opcode),
                 }
             }
@@ -1189,6 +1190,8 @@ pub enum Request<'input> {
     DpmsForceLevel(dpms::ForceLevelRequest),
     #[cfg(feature = "dpms")]
     DpmsInfo(dpms::InfoRequest),
+    #[cfg(feature = "dpms")]
+    DpmsSelectInput(dpms::SelectInputRequest),
     #[cfg(feature = "dri2")]
     Dri2QueryVersion(dri2::QueryVersionRequest),
     #[cfg(feature = "dri2")]
@@ -2407,6 +2410,7 @@ impl<'input> Request<'input> {
                     dpms::DISABLE_REQUEST => return Ok(Request::DpmsDisable(dpms::DisableRequest::try_parse_request(header, remaining)?)),
                     dpms::FORCE_LEVEL_REQUEST => return Ok(Request::DpmsForceLevel(dpms::ForceLevelRequest::try_parse_request(header, remaining)?)),
                     dpms::INFO_REQUEST => return Ok(Request::DpmsInfo(dpms::InfoRequest::try_parse_request(header, remaining)?)),
+                    dpms::SELECT_INPUT_REQUEST => return Ok(Request::DpmsSelectInput(dpms::SelectInputRequest::try_parse_request(header, remaining)?)),
                     _ => (),
                 }
             }
@@ -3266,6 +3270,8 @@ impl<'input> Request<'input> {
             Request::DpmsForceLevel(_) => None,
             #[cfg(feature = "dpms")]
             Request::DpmsInfo(_) => Some(parse_reply::<dpms::InfoRequest>),
+            #[cfg(feature = "dpms")]
+            Request::DpmsSelectInput(_) => None,
             #[cfg(feature = "dri2")]
             Request::Dri2QueryVersion(_) => Some(parse_reply::<dri2::QueryVersionRequest>),
             #[cfg(feature = "dri2")]
@@ -4473,6 +4479,8 @@ impl<'input> Request<'input> {
             Request::DpmsForceLevel(req) => Request::DpmsForceLevel(req),
             #[cfg(feature = "dpms")]
             Request::DpmsInfo(req) => Request::DpmsInfo(req),
+            #[cfg(feature = "dpms")]
+            Request::DpmsSelectInput(req) => Request::DpmsSelectInput(req),
             #[cfg(feature = "dri2")]
             Request::Dri2QueryVersion(req) => Request::Dri2QueryVersion(req),
             #[cfg(feature = "dri2")]
@@ -8367,6 +8375,8 @@ pub enum Event {
     VisibilityNotify(xproto::VisibilityNotifyEvent),
     #[cfg(feature = "damage")]
     DamageNotify(damage::NotifyEvent),
+    #[cfg(feature = "dpms")]
+    DpmsInfoNotify(dpms::InfoNotifyEvent),
     #[cfg(feature = "dri2")]
     Dri2BufferSwapComplete(dri2::BufferSwapCompleteEvent),
     #[cfg(feature = "dri2")]
@@ -8735,6 +8745,13 @@ impl Event {
             .get_from_major_opcode(ge_event.extension)
             .map(|(name, _)| name);
         match ext_name {
+            #[cfg(feature = "dpms")]
+            Some(dpms::X11_EXTENSION_NAME) => {
+                match ge_event.event_type {
+                    dpms::INFO_NOTIFY_EVENT => Ok(Self::DpmsInfoNotify(TryParse::try_parse(event)?.0)),
+                    _ => Ok(Self::Unknown(event.to_vec())),
+                }
+            }
             #[cfg(feature = "present")]
             Some(present::X11_EXTENSION_NAME) => {
                 match ge_event.event_type {
@@ -8828,6 +8845,8 @@ impl Event {
             Event::VisibilityNotify(value) => Some(value.sequence),
             #[cfg(feature = "damage")]
             Event::DamageNotify(value) => Some(value.sequence),
+            #[cfg(feature = "dpms")]
+            Event::DpmsInfoNotify(value) => Some(value.sequence),
             #[cfg(feature = "dri2")]
             Event::Dri2BufferSwapComplete(value) => Some(value.sequence),
             #[cfg(feature = "dri2")]
@@ -9044,6 +9063,8 @@ impl Event {
             Event::VisibilityNotify(value) => value.response_type,
             #[cfg(feature = "damage")]
             Event::DamageNotify(value) => value.response_type,
+            #[cfg(feature = "dpms")]
+            Event::DpmsInfoNotify(value) => value.response_type,
             #[cfg(feature = "dri2")]
             Event::Dri2BufferSwapComplete(value) => value.response_type,
             #[cfg(feature = "dri2")]

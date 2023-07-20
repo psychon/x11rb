@@ -520,6 +520,11 @@ where
     conn.send_request_without_reply(&slices, fds)
 }
 
+/// Sets the disconnect mode for the client..
+///
+/// # Fields
+///
+/// * `disconnect_mode` - The new disconnect mode.
 pub fn set_client_disconnect_mode<Conn>(conn: &Conn, disconnect_mode: ClientDisconnectFlags) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -684,6 +689,11 @@ pub trait ConnectionExt: RequestConnection {
     {
         delete_pointer_barrier(self, barrier)
     }
+    /// Sets the disconnect mode for the client..
+    ///
+    /// # Fields
+    ///
+    /// * `disconnect_mode` - The new disconnect mode.
     fn xfixes_set_client_disconnect_mode(&self, disconnect_mode: ClientDisconnectFlags) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         set_client_disconnect_mode(self, disconnect_mode)
