@@ -30,7 +30,7 @@ pub trait RequestConnection: Sync {
 
     /// Send a request with a reply to the server.
     ///
-    /// This is the `async` analog of [`x11rb::RequestConnection::send_request_with_reply`], and is
+    /// This is the `async` analog of [`x11rb::connection::RequestConnection::send_request_with_reply`], and is
     /// semantically equivalent to:
     ///
     /// ```no_compile
@@ -56,7 +56,7 @@ pub trait RequestConnection: Sync {
     ///
     /// Rather than sending raw bytes, this method sends the trait object.
     ///
-    /// This is the `async` analog of [`x11rb::RequestConnection::send_trait_request_with_reply`], and
+    /// This is the `async` analog of [`x11rb::connection::RequestConnection::send_trait_request_with_reply`], and
     /// is semantically equivalent to:
     ///
     /// ```no_compile
@@ -94,7 +94,7 @@ pub trait RequestConnection: Sync {
 
     /// Send a request with a reply containing file descriptors to the server.
     ///
-    /// This is the `async` analog of [`x11rb::RequestConnection::send_request_with_reply_with_fds`], and
+    /// This is the `async` analog of [`x11rb::connection::RequestConnection::send_request_with_reply_with_fds`], and
     /// is semantically equivalent to:
     ///
     /// ```no_compile
@@ -120,7 +120,7 @@ pub trait RequestConnection: Sync {
     ///
     /// Rather than sending raw bytes, this method sends the trait object.
     ///
-    /// This is the `async` analog of [`x11rb::RequestConnection::send_trait_request_with_reply_with_fds`],
+    /// This is the `async` analog of [`x11rb::connection::RequestConnection::send_trait_request_with_reply_with_fds`],
     /// and is semantically equivalent to:
     ///
     /// ```no_compile
@@ -158,7 +158,7 @@ pub trait RequestConnection: Sync {
 
     /// Send a request without a reply to the server.
     ///
-    /// This is the `async` analog of [`x11rb::RequestConnection::send_request_without_reply`], and is
+    /// This is the `async` analog of [`x11rb::connection::RequestConnection::send_request_without_reply`], and is
     /// semantically equivalent to:
     ///
     /// ```no_compile
@@ -182,7 +182,7 @@ pub trait RequestConnection: Sync {
     ///
     /// Rather than sending raw bytes, this method sends the trait object.
     ///
-    /// This is the `async` analog of [`x11rb::RequestConnection::send_trait_request_without_reply`],
+    /// This is the `async` analog of [`x11rb::connection::RequestConnection::send_trait_request_without_reply`],
     /// and is semantically equivalent to:
     ///
     /// ```no_compile
@@ -222,7 +222,7 @@ pub trait RequestConnection: Sync {
 
     /// Prefetch information about an extension.
     ///
-    /// This is the `async` analog of [`x11rb::RequestConnection::prefetch_extension_information`], and
+    /// This is the `async` analog of [`x11rb::connection::RequestConnection::prefetch_extension_information`], and
     /// is semantically equivalent to:
     ///
     /// ```no_compile
@@ -232,7 +232,7 @@ pub trait RequestConnection: Sync {
 
     /// Get information about an extension.
     ///
-    /// This is the `async` analog of [`x11rb::RequestConnection::extension_information`], and is
+    /// This is the `async` analog of [`x11rb::connection::RequestConnection::extension_information`], and is
     /// semantically equivalent to:
     ///
     /// ```no_compile
@@ -246,7 +246,7 @@ pub trait RequestConnection: Sync {
 
     /// Wait for the reply to a request.
     ///
-    /// This is the `async` analog of [`x11rb::RequestConnection::wait_for_reply_or_error`], and is
+    /// This is the `async` analog of [`x11rb::connection::RequestConnection::wait_for_reply_or_error`], and is
     /// semantically equivalent to:
     ///
     /// ```no_compile
@@ -267,7 +267,7 @@ pub trait RequestConnection: Sync {
 
     /// Wait for the reply to a request.
     ///
-    /// This is the `async` analog of [`x11rb::RequestConnection::wait_for_reply_or_raw_error`], and is
+    /// This is the `async` analog of [`x11rb::connection::RequestConnection::wait_for_reply_or_raw_error`], and is
     /// semantically equivalent to:
     ///
     /// ```no_compile
@@ -283,7 +283,7 @@ pub trait RequestConnection: Sync {
 
     /// Wait for the reply to a request.
     ///
-    /// This is the `async` analog of [`x11rb::RequestConnection::wait_for_reply`], and is semantically
+    /// This is the `async` analog of [`x11rb::connection::RequestConnection::wait_for_reply`], and is semantically
     /// equivalent to:
     ///
     /// ```no_compile
@@ -299,7 +299,7 @@ pub trait RequestConnection: Sync {
 
     /// Wait for the reply to a request with file descriptors.
     ///
-    /// This is the `async` analog of [`x11rb::RequestConnection::wait_for_reply_with_fds`], and is
+    /// This is the `async` analog of [`x11rb::connection::RequestConnection::wait_for_reply_with_fds`], and is
     /// semantically equivalent to:
     ///
     /// ```no_compile
@@ -323,7 +323,7 @@ pub trait RequestConnection: Sync {
 
     /// Wait for the reply to a request with file descriptors.
     ///
-    /// This is the `async` analog of [`x11rb::RequestConnection::wait_for_reply_with_fds_raw`], and is
+    /// This is the `async` analog of [`x11rb::connection::RequestConnection::wait_for_reply_with_fds_raw`], and is
     /// semantically equivalent to:
     ///
     /// ```no_compile
@@ -339,7 +339,7 @@ pub trait RequestConnection: Sync {
 
     /// Check whether a request has errored.
     ///
-    /// This is the `async` analog of [`x11rb::RequestConnection::check_for_error`], and is semantically
+    /// This is the `async` analog of [`x11rb::connection::RequestConnection::check_for_error`], and is semantically
     /// equivalent to:
     ///
     /// ```no_compile
@@ -361,7 +361,7 @@ pub trait RequestConnection: Sync {
 
     /// Check whether a request has errored.
     ///
-    /// This is the `async` analog of [`x11rb::RequestConnection::check_for_raw_error`], and is
+    /// This is the `async` analog of [`x11rb::connection::RequestConnection::check_for_raw_error`], and is
     /// semantically equivalent to:
     ///
     /// ```no_compile
@@ -377,7 +377,7 @@ pub trait RequestConnection: Sync {
 
     /// Prefetches the maximum request length.
     ///
-    /// This is the `async` analog of [`x11rb::RequestConnection::prefetch_maximum_request_bytes`], and
+    /// This is the `async` analog of [`x11rb::connection::RequestConnection::prefetch_maximum_request_bytes`], and
     /// is semantically equivalent to:
     ///
     /// ```no_compile
@@ -387,7 +387,7 @@ pub trait RequestConnection: Sync {
 
     /// Get the maximum request length.
     ///
-    /// This is the `async` analog of [`x11rb::RequestConnection::maximum_request_bytes`], and is
+    /// This is the `async` analog of [`x11rb::connection::RequestConnection::maximum_request_bytes`], and is
     /// semantically equivalent to:
     ///
     /// ```no_compile
@@ -406,7 +406,7 @@ pub trait RequestConnection: Sync {
 pub trait Connection: RequestConnection {
     /// Wait for a new event from the X11 server.
     ///
-    /// This is the `async` analog of [`x11rb::Connection::wait_for_event`], and is semantically equivalent
+    /// This is the `async` analog of [`x11rb::connection::Connection::wait_for_event`], and is semantically equivalent
     /// to:
     ///
     /// ```no_compile
@@ -418,7 +418,7 @@ pub trait Connection: RequestConnection {
 
     /// Wait for a new event from the X11 server.
     ///
-    /// This is the `async` analog of [`x11rb::Connection::wait_for_raw_event`], and is semantically
+    /// This is the `async` analog of [`x11rb::connection::Connection::wait_for_raw_event`], and is semantically
     /// equivalent to:
     ///
     /// ```no_compile
@@ -430,7 +430,7 @@ pub trait Connection: RequestConnection {
 
     /// Wait for a new event from the X11 server.
     ///
-    /// This is the `async` analog of [`x11rb::Connection::wait_for_event_with_sequence`], and is semantically
+    /// This is the `async` analog of [`x11rb::connection::Connection::wait_for_event_with_sequence`], and is semantically
     /// equivalent to:
     ///
     /// ```no_compile
@@ -449,7 +449,7 @@ pub trait Connection: RequestConnection {
 
     /// Wait for a raw/unparsed event from the X11 server.
     ///
-    /// This is the `async` analog of [`x11rb::Connection::wait_for_raw_event`], and is semantically
+    /// This is the `async` analog of [`x11rb::connection::Connection::wait_for_raw_event`], and is semantically
     /// equivalent to:
     ///
     /// ```no_compile
@@ -497,7 +497,7 @@ pub trait Connection: RequestConnection {
 
     /// Generate a new X11 identifier.
     ///
-    /// This is the `async` analog of [`x11rb::Connection::generate_id`], and is the semantic equivalent
+    /// This is the `async` analog of [`x11rb::connection::Connection::generate_id`], and is the semantic equivalent
     /// to:
     ///
     /// ```no_compile
