@@ -47,6 +47,13 @@ pub fn parse_display(dpy_name: Option<&str>) -> Option<ParsedDisplay> {
 }
 
 fn parse_display_impl(dpy_name: &str) -> Option<ParsedDisplay> {
+    if dpy_name.starts_with('/') {
+        return parse_display_direct_path(dpy_name);
+    }
+    if let Some(remaining) = dpy_name.strip_prefix("unix:") {
+        return parse_display_direct_path(remaining);
+    }
+
     // Everything up to the last '/' is the protocol. This part is optional.
     let (protocol, remaining) = if let Some(pos) = dpy_name.rfind('/') {
         (Some(&dpy_name[..pos]), &dpy_name[pos + 1..])
@@ -77,6 +84,41 @@ fn parse_display_impl(dpy_name: &str) -> Option<ParsedDisplay> {
     })
 }
 
+// Check for "launchd mode" where we get the full path to a unix socket
+fn parse_display_direct_path(dpy_name: &str) -> Option<ParsedDisplay> {
+    #[cfg(feature = "std")]
+    fn file_exists(path: impl AsRef<std::path::Path>) -> bool {
+        path.as_ref().exists()
+    }
+    #[cfg(not(feature = "std"))]
+    fn file_exists(_path: &str) -> bool {
+        // Just hope for the best
+        true
+    }
+
+    if file_exists(dpy_name) {
+        return Some(ParsedDisplay {
+            host: dpy_name.to_string(),
+            protocol: Some("unix".to_string()),
+            display: 0,
+            screen: 0,
+        });
+    }
+
+    // Optionally, a screen number may be appended as ".n".
+    if let Some((path, screen)) = dpy_name.rsplit_once('.') {
+        if file_exists(path) {
+            return Some(ParsedDisplay {
+                host: path.to_string(),
+                protocol: Some("unix".to_string()),
+                display: 0,
+                screen: screen.parse().ok()?,
+            });
+        }
+    }
+    None
+}
+
 #[cfg(test)]
 mod test {
     use super::{parse_display, ParsedDisplay};
@@ -102,6 +144,7 @@ mod test {
         xcb_good_cases();
         xcb_bad_cases();
         own_good_cases();
+        own_bad_cases();
     }
 
     fn test_missing_input() {
@@ -149,9 +192,59 @@ mod test {
         }
     }
 
+    fn own_bad_cases() {
+        let non_existing_file = concat!(env!("CARGO_MANIFEST_DIR"), "/this_file_does_not_exist");
+        assert_eq!(
+            do_parse_display(non_existing_file),
+            None,
+            "Unexpectedly parsed: {}",
+            non_existing_file
+        );
+    }
+
     // Based on libxcb's test suite; (C) 2001-2006 Bart Massey, Jamey Sharp, and Josh Triplett
     fn xcb_good_cases() {
+        // The libxcb code creates a temporary file. We can just use a known-to-exist file.
+        let existing_file = concat!(env!("CARGO_MANIFEST_DIR"), "/Cargo.toml");
+
         for (input, output) in &[
+            // unix in "launchd mode"
+            (
+                existing_file,
+                ParsedDisplay {
+                    host: existing_file.to_string(),
+                    protocol: Some("unix".to_string()),
+                    display: 0,
+                    screen: 0,
+                },
+            ),
+            (
+                &alloc::format!("unix:{existing_file}"),
+                ParsedDisplay {
+                    host: existing_file.to_string(),
+                    protocol: Some("unix".to_string()),
+                    display: 0,
+                    screen: 0,
+                },
+            ),
+            (
+                &alloc::format!("unix:{existing_file}.1"),
+                ParsedDisplay {
+                    host: existing_file.to_string(),
+                    protocol: Some("unix".to_string()),
+                    display: 0,
+                    screen: 1,
+                },
+            ),
+            (
+                &alloc::format!("{existing_file}.1"),
+                ParsedDisplay {
+                    host: existing_file.to_string(),
+                    protocol: Some("unix".to_string()),
+                    display: 0,
+                    screen: 1,
+                },
+            ),
             // unix
             (
                 ":0",
