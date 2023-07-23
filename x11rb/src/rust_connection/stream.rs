@@ -351,6 +351,18 @@ fn do_write(
 
     let res = if !fds.is_empty() {
         let fds = fds.iter().map(|fd| fd.as_fd()).collect::<Vec<_>>();
+
+        // Most sendmsg implementations put a limit of at least 0xFF file descriptors.
+        if fds.len() > 0xFF {
+            return Err(std::io::Error::new(
+                std::io::ErrorKind::Other,
+                format!(
+                    "Cannot send more than 0xFF FDs at once, tried to send {}",
+                    fds.len()
+                ),
+            ));
+        }
+
         let rights = SendAncillaryMessage::ScmRights(&fds);
 
         let mut cmsg_space = vec![0u8; rights.size()];
@@ -396,14 +408,14 @@ impl Stream for DefaultStream {
     fn read(&self, buf: &mut [u8], fd_storage: &mut Vec<RawFdContainer>) -> Result<usize> {
         #[cfg(unix)]
         {
-            use rustix::cmsg_space;
             use rustix::io::Errno;
             use rustix::net::{recvmsg, RecvAncillaryBuffer, RecvAncillaryMessage};
             use std::io::IoSliceMut;
 
-            // Chosen by checking what libxcb does
-            const MAX_FDS_RECEIVED: usize = 16;
-            let mut cmsg = vec![0u8; cmsg_space!(ScmRights(MAX_FDS_RECEIVED))];
+            // 1024 bytes on the stack should be enough for more file descriptors than the X server will ever
+            // send, as well as the header for the ancillary data. If you can find a case where this can
+            // overflow with an actual production X11 server, I'll buy you a steak dinner.
+            let mut cmsg = [0u8; 1024];
             let mut iov = [IoSliceMut::new(buf)];
             let mut cmsg_buffer = RecvAncillaryBuffer::new(&mut cmsg);
 
