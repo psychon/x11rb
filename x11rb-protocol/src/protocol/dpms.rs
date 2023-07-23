@@ -164,6 +164,11 @@ impl crate::x11_utils::GenerateRandom for GetVersionReply {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_get_version_reply() {
+    crate::x11_utils::test_randomised_type::<GetVersionReply>();
+}
 
 /// Opcode for the Capable request
 pub const CAPABLE_REQUEST: u8 = 1;
@@ -298,6 +303,11 @@ impl crate::x11_utils::GenerateRandom for CapableReply {
             capable: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_capable_reply() {
+    crate::x11_utils::test_randomised_type::<CapableReply>();
 }
 
 /// Opcode for the GetTimeouts request
@@ -443,6 +453,11 @@ impl crate::x11_utils::GenerateRandom for GetTimeoutsReply {
             off_timeout: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_get_timeouts_reply() {
+    crate::x11_utils::test_randomised_type::<GetTimeoutsReply>();
 }
 
 /// Opcode for the SetTimeouts request
@@ -861,5 +876,10 @@ impl crate::x11_utils::GenerateRandom for InfoReply {
             state: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_info_reply() {
+    crate::x11_utils::test_randomised_type::<InfoReply>();
 }
 

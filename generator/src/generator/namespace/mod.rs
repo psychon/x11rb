@@ -1624,3 +1624,17 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         }
     }
 }
+
+fn generate_random_test(
+    out: &mut Output,
+    rust_name: &str,
+) {
+    let func_name = format!("test_{}", super::camel_case_to_lower_snake(rust_name));
+    outln!(out, "#[cfg(test)]");
+    outln!(out, "#[test]");
+    outln!(out, "fn {func_name}() {{");
+    out.indented(|out| {
+        outln!(out, "crate::x11_utils::test_randomised_type::<{rust_name}>();");
+    });
+    outln!(out, "}}");
+}

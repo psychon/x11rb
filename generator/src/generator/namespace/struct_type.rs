@@ -48,9 +48,11 @@ pub(super) fn emit_struct_type(
     if let Some(doc) = doc {
         generator.emit_doc(doc, out, Some(&deducible_fields));
     }
-    let derives = derives.to_list();
-    if !derives.is_empty() {
-        outln!(out, "#[derive({})]", derives.join(", "));
+    {
+        let derives = derives.to_list();
+        if !derives.is_empty() {
+            outln!(out, "#[derive({})]", derives.join(", "));
+        }
     }
     if !has_fds {
         outln!(
@@ -333,6 +335,14 @@ pub(super) fn emit_struct_type(
             outln!(out, "}}");
         });
         outln!(out, "}}");
+
+        let has_try_parse = external_params.is_empty();
+        // FIXME: The has_length_expr thing really needs to be recursive: A could contain B which
+        // has such a length field. Thus, stuff still fails.
+        let has_length_expr = fields.iter().any(|field| matches!(field, xcbdefs::FieldDef::List(xcbdefs::ListField { length_expr: Some(_), ..})));
+        if generate_try_parse && has_try_parse && derives.partial_eq && !has_length_expr{
+            super::generate_random_test(out, name);
+        }
     }
 }
 

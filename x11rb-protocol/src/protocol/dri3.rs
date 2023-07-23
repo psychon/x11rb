@@ -174,6 +174,11 @@ impl crate::x11_utils::GenerateRandom for QueryVersionReply {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_query_version_reply() {
+    crate::x11_utils::test_randomised_type::<QueryVersionReply>();
+}
 
 /// Opcode for the Open request
 pub const OPEN_REQUEST: u8 = 1;

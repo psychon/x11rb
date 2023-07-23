@@ -130,6 +130,11 @@ impl crate::x11_utils::GenerateRandom for CompletionEvent {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_completion_event() {
+    crate::x11_utils::test_randomised_type::<CompletionEvent>();
+}
 impl From<&CompletionEvent> for [u8; 32] {
     fn from(input: &CompletionEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -341,6 +346,11 @@ impl crate::x11_utils::GenerateRandom for QueryVersionReply {
             pixmap_format: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_query_version_reply() {
+    crate::x11_utils::test_randomised_type::<QueryVersionReply>();
 }
 
 /// Opcode for the Attach request
@@ -797,6 +807,11 @@ impl crate::x11_utils::GenerateRandom for GetImageReply {
             size: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_get_image_reply() {
+    crate::x11_utils::test_randomised_type::<GetImageReply>();
 }
 
 /// Opcode for the CreatePixmap request

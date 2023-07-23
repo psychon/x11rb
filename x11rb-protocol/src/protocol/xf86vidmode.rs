@@ -385,6 +385,11 @@ impl crate::x11_utils::GenerateRandom for ModeInfo {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_mode_info() {
+    crate::x11_utils::test_randomised_type::<ModeInfo>();
+}
 
 /// Opcode for the QueryVersion request
 pub const QUERY_VERSION_REQUEST: u8 = 0;
@@ -502,6 +507,11 @@ impl crate::x11_utils::GenerateRandom for QueryVersionReply {
             minor_version: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_query_version_reply() {
+    crate::x11_utils::test_randomised_type::<QueryVersionReply>();
 }
 
 /// Opcode for the GetModeLine request
@@ -1981,6 +1991,11 @@ impl crate::x11_utils::GenerateRandom for ValidateModeLineReply {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_validate_mode_line_reply() {
+    crate::x11_utils::test_randomised_type::<ValidateModeLineReply>();
+}
 
 /// Opcode for the SwitchToMode request
 pub const SWITCH_TO_MODE_REQUEST: u8 = 10;
@@ -2301,6 +2316,11 @@ impl crate::x11_utils::GenerateRandom for GetViewPortReply {
             y: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_get_view_port_reply() {
+    crate::x11_utils::test_randomised_type::<GetViewPortReply>();
 }
 
 /// Opcode for the SetViewPort request
@@ -2823,6 +2843,11 @@ impl crate::x11_utils::GenerateRandom for GetGammaReply {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_get_gamma_reply() {
+    crate::x11_utils::test_randomised_type::<GetGammaReply>();
+}
 
 /// Opcode for the GetGammaRamp request
 pub const GET_GAMMA_RAMP_REQUEST: u8 = 17;
@@ -3183,6 +3208,11 @@ impl crate::x11_utils::GenerateRandom for GetGammaRampSizeReply {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_get_gamma_ramp_size_reply() {
+    crate::x11_utils::test_randomised_type::<GetGammaRampSizeReply>();
+}
 
 /// Opcode for the GetPermissions request
 pub const GET_PERMISSIONS_REQUEST: u8 = 20;
@@ -3328,6 +3358,11 @@ impl crate::x11_utils::GenerateRandom for GetPermissionsReply {
             permissions: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_get_permissions_reply() {
+    crate::x11_utils::test_randomised_type::<GetPermissionsReply>();
 }
 
 /// Opcode for the BadClock error

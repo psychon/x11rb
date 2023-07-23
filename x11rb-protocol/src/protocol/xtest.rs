@@ -163,6 +163,11 @@ impl crate::x11_utils::GenerateRandom for GetVersionReply {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_get_version_reply() {
+    crate::x11_utils::test_randomised_type::<GetVersionReply>();
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -368,6 +373,11 @@ impl crate::x11_utils::GenerateRandom for CompareCursorReply {
             length: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_compare_cursor_reply() {
+    crate::x11_utils::test_randomised_type::<CompareCursorReply>();
 }
 
 /// Opcode for the FakeInput request

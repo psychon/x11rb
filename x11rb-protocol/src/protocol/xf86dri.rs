@@ -89,6 +89,11 @@ impl crate::x11_utils::GenerateRandom for DrmClipRect {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_drm_clip_rect() {
+    crate::x11_utils::test_randomised_type::<DrmClipRect>();
+}
 
 /// Opcode for the QueryVersion request
 pub const QUERY_VERSION_REQUEST: u8 = 0;
@@ -216,6 +221,11 @@ impl crate::x11_utils::GenerateRandom for QueryVersionReply {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_query_version_reply() {
+    crate::x11_utils::test_randomised_type::<QueryVersionReply>();
+}
 
 /// Opcode for the QueryDirectRenderingCapable request
 pub const QUERY_DIRECT_RENDERING_CAPABLE_REQUEST: u8 = 1;
@@ -334,6 +344,11 @@ impl crate::x11_utils::GenerateRandom for QueryDirectRenderingCapableReply {
             is_capable: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_query_direct_rendering_capable_reply() {
+    crate::x11_utils::test_randomised_type::<QueryDirectRenderingCapableReply>();
 }
 
 /// Opcode for the OpenConnection request
@@ -802,6 +817,11 @@ impl crate::x11_utils::GenerateRandom for CreateContextReply {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_create_context_reply() {
+    crate::x11_utils::test_randomised_type::<CreateContextReply>();
+}
 
 /// Opcode for the DestroyContext request
 pub const DESTROY_CONTEXT_REQUEST: u8 = 6;
@@ -992,6 +1012,11 @@ impl crate::x11_utils::GenerateRandom for CreateDrawableReply {
             hw_drawable_handle: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_create_drawable_reply() {
+    crate::x11_utils::test_randomised_type::<CreateDrawableReply>();
 }
 
 /// Opcode for the DestroyDrawable request
@@ -1513,5 +1538,10 @@ impl crate::x11_utils::GenerateRandom for AuthConnectionReply {
             authenticated: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_auth_connection_reply() {
+    crate::x11_utils::test_randomised_type::<AuthConnectionReply>();
 }
 

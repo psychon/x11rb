@@ -319,6 +319,11 @@ impl crate::x11_utils::GenerateRandom for DRI2Buffer {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_dr_i2_buffer() {
+    crate::x11_utils::test_randomised_type::<DRI2Buffer>();
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -365,6 +370,11 @@ impl crate::x11_utils::GenerateRandom for AttachFormat {
             format: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_attach_format() {
+    crate::x11_utils::test_randomised_type::<AttachFormat>();
 }
 
 /// Opcode for the QueryVersion request
@@ -504,6 +514,11 @@ impl crate::x11_utils::GenerateRandom for QueryVersionReply {
             minor_version: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_query_version_reply() {
+    crate::x11_utils::test_randomised_type::<QueryVersionReply>();
 }
 
 /// Opcode for the Connect request
@@ -798,6 +813,11 @@ impl crate::x11_utils::GenerateRandom for AuthenticateReply {
             authenticated: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_authenticate_reply() {
+    crate::x11_utils::test_randomised_type::<AuthenticateReply>();
 }
 
 /// Opcode for the CreateDrawable request
@@ -1207,6 +1227,11 @@ impl crate::x11_utils::GenerateRandom for CopyRegionReply {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_copy_region_reply() {
+    crate::x11_utils::test_randomised_type::<CopyRegionReply>();
+}
 
 /// Opcode for the GetBuffersWithFormat request
 pub const GET_BUFFERS_WITH_FORMAT_REQUEST: u8 = 7;
@@ -1551,6 +1576,11 @@ impl crate::x11_utils::GenerateRandom for SwapBuffersReply {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_swap_buffers_reply() {
+    crate::x11_utils::test_randomised_type::<SwapBuffersReply>();
+}
 
 /// Opcode for the GetMSC request
 pub const GET_MSC_REQUEST: u8 = 9;
@@ -1717,6 +1747,11 @@ impl crate::x11_utils::GenerateRandom for GetMSCReply {
             sbc_lo: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_get_msc_reply() {
+    crate::x11_utils::test_randomised_type::<GetMSCReply>();
 }
 
 /// Opcode for the WaitMSC request
@@ -1933,6 +1968,11 @@ impl crate::x11_utils::GenerateRandom for WaitMSCReply {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_wait_msc_reply() {
+    crate::x11_utils::test_randomised_type::<WaitMSCReply>();
+}
 
 /// Opcode for the WaitSBC request
 pub const WAIT_SBC_REQUEST: u8 = 11;
@@ -2115,6 +2155,11 @@ impl crate::x11_utils::GenerateRandom for WaitSBCReply {
             sbc_lo: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_wait_sbc_reply() {
+    crate::x11_utils::test_randomised_type::<WaitSBCReply>();
 }
 
 /// Opcode for the SwapInterval request
@@ -2319,6 +2364,11 @@ impl crate::x11_utils::GenerateRandom for GetParamReply {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_get_param_reply() {
+    crate::x11_utils::test_randomised_type::<GetParamReply>();
+}
 
 /// Opcode for the BufferSwapComplete event
 pub const BUFFER_SWAP_COMPLETE_EVENT: u8 = 0;
@@ -2435,6 +2485,11 @@ impl crate::x11_utils::GenerateRandom for BufferSwapCompleteEvent {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_buffer_swap_complete_event() {
+    crate::x11_utils::test_randomised_type::<BufferSwapCompleteEvent>();
+}
 impl From<&BufferSwapCompleteEvent> for [u8; 32] {
     fn from(input: &BufferSwapCompleteEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -2545,6 +2600,11 @@ impl crate::x11_utils::GenerateRandom for InvalidateBuffersEvent {
             drawable: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_invalidate_buffers_event() {
+    crate::x11_utils::test_randomised_type::<InvalidateBuffersEvent>();
 }
 impl From<&InvalidateBuffersEvent> for [u8; 32] {
     fn from(input: &InvalidateBuffersEvent) -> Self {

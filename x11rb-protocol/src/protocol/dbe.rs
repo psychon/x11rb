@@ -170,6 +170,11 @@ impl crate::x11_utils::GenerateRandom for SwapInfo {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_swap_info() {
+    crate::x11_utils::test_randomised_type::<SwapInfo>();
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -206,6 +211,11 @@ impl crate::x11_utils::GenerateRandom for BufferAttributes {
             window: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_buffer_attributes() {
+    crate::x11_utils::test_randomised_type::<BufferAttributes>();
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -259,6 +269,11 @@ impl crate::x11_utils::GenerateRandom for VisualInfo {
             perf_level: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_visual_info() {
+    crate::x11_utils::test_randomised_type::<VisualInfo>();
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -474,6 +489,11 @@ impl crate::x11_utils::GenerateRandom for QueryVersionReply {
             minor_version: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_query_version_reply() {
+    crate::x11_utils::test_randomised_type::<QueryVersionReply>();
 }
 
 /// Opcode for the AllocateBackBuffer request
@@ -1069,5 +1089,10 @@ impl crate::x11_utils::GenerateRandom for GetBackBufferAttributesReply {
             attributes: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_get_back_buffer_attributes_reply() {
+    crate::x11_utils::test_randomised_type::<GetBackBufferAttributesReply>();
 }
 

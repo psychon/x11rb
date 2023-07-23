@@ -91,6 +91,11 @@ impl crate::x11_utils::GenerateRandom for Fp3232 {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_fp3232() {
+    crate::x11_utils::test_randomised_type::<Fp3232>();
+}
 
 /// Opcode for the GetExtensionVersion request
 pub const GET_EXTENSION_VERSION_REQUEST: u8 = 1;
@@ -259,6 +264,11 @@ impl crate::x11_utils::GenerateRandom for GetExtensionVersionReply {
             present: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_get_extension_version_reply() {
+    crate::x11_utils::test_randomised_type::<GetExtensionVersionReply>();
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -553,6 +563,11 @@ impl crate::x11_utils::GenerateRandom for DeviceInfo {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_device_info() {
+    crate::x11_utils::test_randomised_type::<DeviceInfo>();
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -617,6 +632,11 @@ impl crate::x11_utils::GenerateRandom for KeyInfo {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_key_info() {
+    crate::x11_utils::test_randomised_type::<KeyInfo>();
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -664,6 +684,11 @@ impl crate::x11_utils::GenerateRandom for ButtonInfo {
             num_buttons: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_button_info() {
+    crate::x11_utils::test_randomised_type::<ButtonInfo>();
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -719,6 +744,11 @@ impl crate::x11_utils::GenerateRandom for AxisInfo {
             maximum: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_axis_info() {
+    crate::x11_utils::test_randomised_type::<AxisInfo>();
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -840,6 +870,11 @@ impl crate::x11_utils::GenerateRandom for InputInfoInfoKey {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_input_info_info_key() {
+    crate::x11_utils::test_randomised_type::<InputInfoInfoKey>();
+}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct InputInfoInfoButton {
@@ -873,6 +908,11 @@ impl crate::x11_utils::GenerateRandom for InputInfoInfoButton {
             num_buttons: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_input_info_info_button() {
+    crate::x11_utils::test_randomised_type::<InputInfoInfoButton>();
 }
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -1075,6 +1115,11 @@ impl crate::x11_utils::GenerateRandom for InputInfo {
             info: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_input_info() {
+    crate::x11_utils::test_randomised_type::<InputInfo>();
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -1306,6 +1351,11 @@ impl crate::x11_utils::GenerateRandom for InputClassInfo {
             event_type_base: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_input_class_info() {
+    crate::x11_utils::test_randomised_type::<InputClassInfo>();
 }
 
 /// Opcode for the OpenDevice request
@@ -1650,6 +1700,11 @@ impl crate::x11_utils::GenerateRandom for SetDeviceModeReply {
             status: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_set_device_mode_reply() {
+    crate::x11_utils::test_randomised_type::<SetDeviceModeReply>();
 }
 
 /// Opcode for the SelectExtensionEvent request
@@ -2505,6 +2560,11 @@ impl crate::x11_utils::GenerateRandom for ChangeKeyboardDeviceReply {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_change_keyboard_device_reply() {
+    crate::x11_utils::test_randomised_type::<ChangeKeyboardDeviceReply>();
+}
 
 /// Opcode for the ChangePointerDevice request
 pub const CHANGE_POINTER_DEVICE_REQUEST: u8 = 12;
@@ -2661,6 +2721,11 @@ impl crate::x11_utils::GenerateRandom for ChangePointerDeviceReply {
             status: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_change_pointer_device_reply() {
+    crate::x11_utils::test_randomised_type::<ChangePointerDeviceReply>();
 }
 
 /// Opcode for the GrabDevice request
@@ -2866,6 +2931,11 @@ impl crate::x11_utils::GenerateRandom for GrabDeviceReply {
             status: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_grab_device_reply() {
+    crate::x11_utils::test_randomised_type::<GrabDeviceReply>();
 }
 
 /// Opcode for the UngrabDevice request
@@ -3703,6 +3773,11 @@ impl crate::x11_utils::GenerateRandom for GetDeviceFocusReply {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_get_device_focus_reply() {
+    crate::x11_utils::test_randomised_type::<GetDeviceFocusReply>();
+}
 
 /// Opcode for the SetDeviceFocus request
 pub const SET_DEVICE_FOCUS_REQUEST: u8 = 21;
@@ -4070,6 +4145,11 @@ impl crate::x11_utils::GenerateRandom for PtrFeedbackState {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_ptr_feedback_state() {
+    crate::x11_utils::test_randomised_type::<PtrFeedbackState>();
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -4144,6 +4224,11 @@ impl crate::x11_utils::GenerateRandom for IntegerFeedbackState {
             max_value: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_integer_feedback_state() {
+    crate::x11_utils::test_randomised_type::<IntegerFeedbackState>();
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -4286,6 +4371,11 @@ impl crate::x11_utils::GenerateRandom for BellFeedbackState {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_bell_feedback_state() {
+    crate::x11_utils::test_randomised_type::<BellFeedbackState>();
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -4351,6 +4441,11 @@ impl crate::x11_utils::GenerateRandom for LedFeedbackState {
             led_values: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_led_feedback_state() {
+    crate::x11_utils::test_randomised_type::<LedFeedbackState>();
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -4521,6 +4616,11 @@ impl crate::x11_utils::GenerateRandom for FeedbackStateDataPointer {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_feedback_state_data_pointer() {
+    crate::x11_utils::test_randomised_type::<FeedbackStateDataPointer>();
+}
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct FeedbackStateDataString {
@@ -4629,6 +4729,11 @@ impl crate::x11_utils::GenerateRandom for FeedbackStateDataInteger {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_feedback_state_data_integer() {
+    crate::x11_utils::test_randomised_type::<FeedbackStateDataInteger>();
+}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct FeedbackStateDataLed {
@@ -4673,6 +4778,11 @@ impl crate::x11_utils::GenerateRandom for FeedbackStateDataLed {
             led_values: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_feedback_state_data_led() {
+    crate::x11_utils::test_randomised_type::<FeedbackStateDataLed>();
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -4725,6 +4835,11 @@ impl crate::x11_utils::GenerateRandom for FeedbackStateDataBell {
             duration: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_feedback_state_data_bell() {
+    crate::x11_utils::test_randomised_type::<FeedbackStateDataBell>();
 }
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -4920,6 +5035,11 @@ impl crate::x11_utils::GenerateRandom for FeedbackState {
             data: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_feedback_state() {
+    crate::x11_utils::test_randomised_type::<FeedbackState>();
 }
 
 /// Opcode for the GetFeedbackControl request
@@ -5155,6 +5275,11 @@ impl crate::x11_utils::GenerateRandom for KbdFeedbackCtl {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_kbd_feedback_ctl() {
+    crate::x11_utils::test_randomised_type::<KbdFeedbackCtl>();
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -5228,6 +5353,11 @@ impl crate::x11_utils::GenerateRandom for PtrFeedbackCtl {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_ptr_feedback_ctl() {
+    crate::x11_utils::test_randomised_type::<PtrFeedbackCtl>();
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -5284,6 +5414,11 @@ impl crate::x11_utils::GenerateRandom for IntegerFeedbackCtl {
             int_to_display: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_integer_feedback_ctl() {
+    crate::x11_utils::test_randomised_type::<IntegerFeedbackCtl>();
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -5424,6 +5559,11 @@ impl crate::x11_utils::GenerateRandom for BellFeedbackCtl {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_bell_feedback_ctl() {
+    crate::x11_utils::test_randomised_type::<BellFeedbackCtl>();
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -5489,6 +5629,11 @@ impl crate::x11_utils::GenerateRandom for LedFeedbackCtl {
             led_values: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_led_feedback_ctl() {
+    crate::x11_utils::test_randomised_type::<LedFeedbackCtl>();
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -5574,6 +5719,11 @@ impl crate::x11_utils::GenerateRandom for FeedbackCtlDataKeyboard {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_feedback_ctl_data_keyboard() {
+    crate::x11_utils::test_randomised_type::<FeedbackCtlDataKeyboard>();
+}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct FeedbackCtlDataPointer {
@@ -5625,6 +5775,11 @@ impl crate::x11_utils::GenerateRandom for FeedbackCtlDataPointer {
             threshold: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_feedback_ctl_data_pointer() {
+    crate::x11_utils::test_randomised_type::<FeedbackCtlDataPointer>();
 }
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -5714,6 +5869,11 @@ impl crate::x11_utils::GenerateRandom for FeedbackCtlDataInteger {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_feedback_ctl_data_integer() {
+    crate::x11_utils::test_randomised_type::<FeedbackCtlDataInteger>();
+}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct FeedbackCtlDataLed {
@@ -5758,6 +5918,11 @@ impl crate::x11_utils::GenerateRandom for FeedbackCtlDataLed {
             led_values: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_feedback_ctl_data_led() {
+    crate::x11_utils::test_randomised_type::<FeedbackCtlDataLed>();
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -5810,6 +5975,11 @@ impl crate::x11_utils::GenerateRandom for FeedbackCtlDataBell {
             duration: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_feedback_ctl_data_bell() {
+    crate::x11_utils::test_randomised_type::<FeedbackCtlDataBell>();
 }
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -6005,6 +6175,11 @@ impl crate::x11_utils::GenerateRandom for FeedbackCtl {
             data: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_feedback_ctl() {
+    crate::x11_utils::test_randomised_type::<FeedbackCtl>();
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -6692,6 +6867,11 @@ impl crate::x11_utils::GenerateRandom for SetDeviceModifierMappingReply {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_set_device_modifier_mapping_reply() {
+    crate::x11_utils::test_randomised_type::<SetDeviceModifierMappingReply>();
+}
 
 /// Opcode for the GetDeviceButtonMapping request
 pub const GET_DEVICE_BUTTON_MAPPING_REQUEST: u8 = 28;
@@ -6993,6 +7173,11 @@ impl crate::x11_utils::GenerateRandom for SetDeviceButtonMappingReply {
             status: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_set_device_button_mapping_reply() {
+    crate::x11_utils::test_randomised_type::<SetDeviceButtonMappingReply>();
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -7645,6 +7830,11 @@ impl crate::x11_utils::GenerateRandom for InputState {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_input_state() {
+    crate::x11_utils::test_randomised_type::<InputState>();
+}
 
 /// Opcode for the QueryDeviceState request
 pub const QUERY_DEVICE_STATE_REQUEST: u8 = 30;
@@ -8011,6 +8201,11 @@ impl crate::x11_utils::GenerateRandom for SetDeviceValuatorsReply {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_set_device_valuators_reply() {
+    crate::x11_utils::test_randomised_type::<SetDeviceValuatorsReply>();
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -8269,6 +8464,11 @@ impl crate::x11_utils::GenerateRandom for DeviceAbsCalibState {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_device_abs_calib_state() {
+    crate::x11_utils::test_randomised_type::<DeviceAbsCalibState>();
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -8366,6 +8566,11 @@ impl crate::x11_utils::GenerateRandom for DeviceAbsAreaState {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_device_abs_area_state() {
+    crate::x11_utils::test_randomised_type::<DeviceAbsAreaState>();
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -8425,6 +8630,11 @@ impl crate::x11_utils::GenerateRandom for DeviceCoreState {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_device_core_state() {
+    crate::x11_utils::test_randomised_type::<DeviceCoreState>();
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -8478,6 +8688,11 @@ impl crate::x11_utils::GenerateRandom for DeviceEnableState {
             enable: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_device_enable_state() {
+    crate::x11_utils::test_randomised_type::<DeviceEnableState>();
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -8638,6 +8853,11 @@ impl crate::x11_utils::GenerateRandom for DeviceStateDataAbsCalib {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_device_state_data_abs_calib() {
+    crate::x11_utils::test_randomised_type::<DeviceStateDataAbsCalib>();
+}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DeviceStateDataCore {
@@ -8680,6 +8900,11 @@ impl crate::x11_utils::GenerateRandom for DeviceStateDataCore {
             iscore: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_device_state_data_core() {
+    crate::x11_utils::test_randomised_type::<DeviceStateDataCore>();
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -8761,6 +8986,11 @@ impl crate::x11_utils::GenerateRandom for DeviceStateDataAbsArea {
             following: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_device_state_data_abs_area() {
+    crate::x11_utils::test_randomised_type::<DeviceStateDataAbsArea>();
 }
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -8943,6 +9173,11 @@ impl crate::x11_utils::GenerateRandom for DeviceState {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_device_state() {
+    crate::x11_utils::test_randomised_type::<DeviceState>();
+}
 
 /// Opcode for the GetDeviceControl request
 pub const GET_DEVICE_CONTROL_REQUEST: u8 = 34;
@@ -9063,6 +9298,11 @@ impl crate::x11_utils::GenerateRandom for GetDeviceControlReply {
             control: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_get_device_control_reply() {
+    crate::x11_utils::test_randomised_type::<GetDeviceControlReply>();
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -9245,6 +9485,11 @@ impl crate::x11_utils::GenerateRandom for DeviceAbsCalibCtl {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_device_abs_calib_ctl() {
+    crate::x11_utils::test_randomised_type::<DeviceAbsCalibCtl>();
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -9342,6 +9587,11 @@ impl crate::x11_utils::GenerateRandom for DeviceAbsAreaCtrl {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_device_abs_area_ctrl() {
+    crate::x11_utils::test_randomised_type::<DeviceAbsAreaCtrl>();
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -9396,6 +9646,11 @@ impl crate::x11_utils::GenerateRandom for DeviceCoreCtrl {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_device_core_ctrl() {
+    crate::x11_utils::test_randomised_type::<DeviceCoreCtrl>();
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -9449,6 +9704,11 @@ impl crate::x11_utils::GenerateRandom for DeviceEnableCtrl {
             enable: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_device_enable_ctrl() {
+    crate::x11_utils::test_randomised_type::<DeviceEnableCtrl>();
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -9606,6 +9866,11 @@ impl crate::x11_utils::GenerateRandom for DeviceCtlDataAbsCalib {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_device_ctl_data_abs_calib() {
+    crate::x11_utils::test_randomised_type::<DeviceCtlDataAbsCalib>();
+}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DeviceCtlDataCore {
@@ -9643,6 +9908,11 @@ impl crate::x11_utils::GenerateRandom for DeviceCtlDataCore {
             status: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_device_ctl_data_core() {
+    crate::x11_utils::test_randomised_type::<DeviceCtlDataCore>();
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -9724,6 +9994,11 @@ impl crate::x11_utils::GenerateRandom for DeviceCtlDataAbsArea {
             following: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_device_ctl_data_abs_area() {
+    crate::x11_utils::test_randomised_type::<DeviceCtlDataAbsArea>();
 }
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -9906,6 +10181,11 @@ impl crate::x11_utils::GenerateRandom for DeviceCtl {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_device_ctl() {
+    crate::x11_utils::test_randomised_type::<DeviceCtl>();
+}
 
 /// Opcode for the ChangeDeviceControl request
 pub const CHANGE_DEVICE_CONTROL_REQUEST: u8 = 35;
@@ -10065,6 +10345,11 @@ impl crate::x11_utils::GenerateRandom for ChangeDeviceControlReply {
             status: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_change_device_control_reply() {
+    crate::x11_utils::test_randomised_type::<ChangeDeviceControlReply>();
 }
 
 /// Opcode for the ListDeviceProperties request
@@ -10860,6 +11145,11 @@ impl crate::x11_utils::GenerateRandom for GetDevicePropertyReply {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_get_device_property_reply() {
+    crate::x11_utils::test_randomised_type::<GetDevicePropertyReply>();
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -10994,6 +11284,11 @@ impl crate::x11_utils::GenerateRandom for GroupInfo {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_group_info() {
+    crate::x11_utils::test_randomised_type::<GroupInfo>();
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -11057,6 +11352,11 @@ impl crate::x11_utils::GenerateRandom for ModifierInfo {
             effective: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_modifier_info() {
+    crate::x11_utils::test_randomised_type::<ModifierInfo>();
 }
 
 /// Opcode for the XIQueryPointer request
@@ -11703,6 +12003,11 @@ impl crate::x11_utils::GenerateRandom for RemoveMaster {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_remove_master() {
+    crate::x11_utils::test_randomised_type::<RemoveMaster>();
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -11760,6 +12065,11 @@ impl crate::x11_utils::GenerateRandom for AttachSlave {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_attach_slave() {
+    crate::x11_utils::test_randomised_type::<AttachSlave>();
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -11813,6 +12123,11 @@ impl crate::x11_utils::GenerateRandom for DetachSlave {
             deviceid: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_detach_slave() {
+    crate::x11_utils::test_randomised_type::<DetachSlave>();
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -11938,6 +12253,11 @@ impl crate::x11_utils::GenerateRandom for HierarchyChangeDataRemoveMaster {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_hierarchy_change_data_remove_master() {
+    crate::x11_utils::test_randomised_type::<HierarchyChangeDataRemoveMaster>();
+}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct HierarchyChangeDataAttachSlave {
@@ -11979,6 +12299,11 @@ impl crate::x11_utils::GenerateRandom for HierarchyChangeDataAttachSlave {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_hierarchy_change_data_attach_slave() {
+    crate::x11_utils::test_randomised_type::<HierarchyChangeDataAttachSlave>();
+}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct HierarchyChangeDataDetachSlave {
@@ -12016,6 +12341,11 @@ impl crate::x11_utils::GenerateRandom for HierarchyChangeDataDetachSlave {
             deviceid: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_hierarchy_change_data_detach_slave() {
+    crate::x11_utils::test_randomised_type::<HierarchyChangeDataDetachSlave>();
 }
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -12175,6 +12505,11 @@ impl crate::x11_utils::GenerateRandom for HierarchyChange {
             data: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_hierarchy_change() {
+    crate::x11_utils::test_randomised_type::<HierarchyChange>();
 }
 
 /// Opcode for the XIChangeHierarchy request
@@ -12454,6 +12789,11 @@ impl crate::x11_utils::GenerateRandom for XIGetClientPointerReply {
             deviceid: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_xi_get_client_pointer_reply() {
+    crate::x11_utils::test_randomised_type::<XIGetClientPointerReply>();
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -12878,6 +13218,11 @@ impl crate::x11_utils::GenerateRandom for XIQueryVersionReply {
             minor_version: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_xi_query_version_reply() {
+    crate::x11_utils::test_randomised_type::<XIQueryVersionReply>();
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -13446,6 +13791,11 @@ impl crate::x11_utils::GenerateRandom for ScrollClass {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_scroll_class() {
+    crate::x11_utils::test_randomised_type::<ScrollClass>();
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -13509,6 +13859,11 @@ impl crate::x11_utils::GenerateRandom for TouchClass {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_touch_class() {
+    crate::x11_utils::test_randomised_type::<TouchClass>();
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -13567,6 +13922,11 @@ impl crate::x11_utils::GenerateRandom for GestureClass {
             num_touches: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_gesture_class() {
+    crate::x11_utils::test_randomised_type::<GestureClass>();
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -13693,6 +14053,11 @@ impl crate::x11_utils::GenerateRandom for ValuatorClass {
             mode: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_valuator_class() {
+    crate::x11_utils::test_randomised_type::<ValuatorClass>();
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -13901,6 +14266,11 @@ impl crate::x11_utils::GenerateRandom for DeviceClassDataValuator {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_device_class_data_valuator() {
+    crate::x11_utils::test_randomised_type::<DeviceClassDataValuator>();
+}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DeviceClassDataScroll {
@@ -13970,6 +14340,11 @@ impl crate::x11_utils::GenerateRandom for DeviceClassDataScroll {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_device_class_data_scroll() {
+    crate::x11_utils::test_randomised_type::<DeviceClassDataScroll>();
+}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DeviceClassDataTouch {
@@ -14010,6 +14385,11 @@ impl crate::x11_utils::GenerateRandom for DeviceClassDataTouch {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_device_class_data_touch() {
+    crate::x11_utils::test_randomised_type::<DeviceClassDataTouch>();
+}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DeviceClassDataGesture {
@@ -14045,6 +14425,11 @@ impl crate::x11_utils::GenerateRandom for DeviceClassDataGesture {
             num_touches: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_device_class_data_gesture() {
+    crate::x11_utils::test_randomised_type::<DeviceClassDataGesture>();
 }
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -14245,6 +14630,11 @@ impl crate::x11_utils::GenerateRandom for DeviceClass {
             data: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_device_class() {
+    crate::x11_utils::test_randomised_type::<DeviceClass>();
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -14686,6 +15076,11 @@ impl crate::x11_utils::GenerateRandom for XIGetFocusReply {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_xi_get_focus_reply() {
+    crate::x11_utils::test_randomised_type::<XIGetFocusReply>();
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -14979,6 +15374,11 @@ impl crate::x11_utils::GenerateRandom for XIGrabDeviceReply {
             status: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_xi_grab_device_reply() {
+    crate::x11_utils::test_randomised_type::<XIGrabDeviceReply>();
 }
 
 /// Opcode for the XIUngrabDevice request
@@ -15475,6 +15875,11 @@ impl crate::x11_utils::GenerateRandom for GrabModifierInfo {
             status: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_grab_modifier_info() {
+    crate::x11_utils::test_randomised_type::<GrabModifierInfo>();
 }
 
 /// Opcode for the XIPassiveGrabDevice request
@@ -16509,6 +16914,11 @@ impl crate::x11_utils::GenerateRandom for XIGetPropertyReply {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_xi_get_property_reply() {
+    crate::x11_utils::test_randomised_type::<XIGetPropertyReply>();
+}
 
 /// Opcode for the XIGetSelectedEvents request
 pub const XI_GET_SELECTED_EVENTS_REQUEST: u8 = 60;
@@ -16692,6 +17102,11 @@ impl crate::x11_utils::GenerateRandom for BarrierReleasePointerInfo {
             eventid: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_barrier_release_pointer_info() {
+    crate::x11_utils::test_randomised_type::<BarrierReleasePointerInfo>();
 }
 
 /// Opcode for the XIBarrierReleasePointer request
@@ -17137,6 +17552,11 @@ impl crate::x11_utils::GenerateRandom for DeviceKeyPressEvent {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_device_key_press_event() {
+    crate::x11_utils::test_randomised_type::<DeviceKeyPressEvent>();
+}
 impl From<&DeviceKeyPressEvent> for [u8; 32] {
     fn from(input: &DeviceKeyPressEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -17314,6 +17734,11 @@ impl crate::x11_utils::GenerateRandom for DeviceFocusInEvent {
             device_id: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_device_focus_in_event() {
+    crate::x11_utils::test_randomised_type::<DeviceFocusInEvent>();
 }
 impl From<&DeviceFocusInEvent> for [u8; 32] {
     fn from(input: &DeviceFocusInEvent) -> Self {
@@ -17746,6 +18171,11 @@ impl crate::x11_utils::GenerateRandom for DeviceMappingNotifyEvent {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_device_mapping_notify_event() {
+    crate::x11_utils::test_randomised_type::<DeviceMappingNotifyEvent>();
+}
 impl From<&DeviceMappingNotifyEvent> for [u8; 32] {
     fn from(input: &DeviceMappingNotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -17959,6 +18389,11 @@ impl crate::x11_utils::GenerateRandom for ChangeDeviceNotifyEvent {
             request: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_change_device_notify_event() {
+    crate::x11_utils::test_randomised_type::<ChangeDeviceNotifyEvent>();
 }
 impl From<&ChangeDeviceNotifyEvent> for [u8; 32] {
     fn from(input: &ChangeDeviceNotifyEvent) -> Self {
@@ -18453,6 +18888,11 @@ impl crate::x11_utils::GenerateRandom for DevicePresenceNotifyEvent {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_device_presence_notify_event() {
+    crate::x11_utils::test_randomised_type::<DevicePresenceNotifyEvent>();
+}
 impl From<&DevicePresenceNotifyEvent> for [u8; 32] {
     fn from(input: &DevicePresenceNotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -18600,6 +19040,11 @@ impl crate::x11_utils::GenerateRandom for DevicePropertyNotifyEvent {
             device_id: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_device_property_notify_event() {
+    crate::x11_utils::test_randomised_type::<DevicePropertyNotifyEvent>();
 }
 impl From<&DevicePropertyNotifyEvent> for [u8; 32] {
     fn from(input: &DevicePropertyNotifyEvent) -> Self {
@@ -19733,6 +20178,11 @@ impl crate::x11_utils::GenerateRandom for HierarchyInfo {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_hierarchy_info() {
+    crate::x11_utils::test_randomised_type::<HierarchyInfo>();
+}
 
 /// Opcode for the Hierarchy event
 pub const HIERARCHY_EVENT: u16 = 11;
@@ -20011,6 +20461,11 @@ impl crate::x11_utils::GenerateRandom for PropertyEvent {
             what: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_property_event() {
+    crate::x11_utils::test_randomised_type::<PropertyEvent>();
 }
 
 /// Opcode for the RawKeyPress event
@@ -20679,6 +21134,11 @@ impl crate::x11_utils::GenerateRandom for TouchOwnershipEvent {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_touch_ownership_event() {
+    crate::x11_utils::test_randomised_type::<TouchOwnershipEvent>();
+}
 
 /// Opcode for the RawTouchBegin event
 pub const RAW_TOUCH_BEGIN_EVENT: u16 = 22;
@@ -21051,6 +21511,11 @@ impl crate::x11_utils::GenerateRandom for BarrierHitEvent {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_barrier_hit_event() {
+    crate::x11_utils::test_randomised_type::<BarrierHitEvent>();
+}
 
 /// Opcode for the BarrierLeave event
 pub const BARRIER_LEAVE_EVENT: u16 = 26;
@@ -21373,6 +21838,11 @@ impl crate::x11_utils::GenerateRandom for GesturePinchBeginEvent {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_gesture_pinch_begin_event() {
+    crate::x11_utils::test_randomised_type::<GesturePinchBeginEvent>();
+}
 
 /// Opcode for the GesturePinchUpdate event
 pub const GESTURE_PINCH_UPDATE_EVENT: u16 = 28;
@@ -21680,6 +22150,11 @@ impl crate::x11_utils::GenerateRandom for GestureSwipeBeginEvent {
             flags: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_gesture_swipe_begin_event() {
+    crate::x11_utils::test_randomised_type::<GestureSwipeBeginEvent>();
 }
 
 /// Opcode for the GestureSwipeUpdate event

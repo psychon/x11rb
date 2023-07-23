@@ -75,6 +75,11 @@ impl crate::x11_utils::GenerateRandom for Range8 {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_range8() {
+    crate::x11_utils::test_randomised_type::<Range8>();
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -116,6 +121,11 @@ impl crate::x11_utils::GenerateRandom for Range16 {
             last: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_range16() {
+    crate::x11_utils::test_randomised_type::<Range16>();
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -160,6 +170,11 @@ impl crate::x11_utils::GenerateRandom for ExtRange {
             minor: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_ext_range() {
+    crate::x11_utils::test_randomised_type::<ExtRange>();
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -257,6 +272,11 @@ impl crate::x11_utils::GenerateRandom for Range {
             client_died: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_range() {
+    crate::x11_utils::test_randomised_type::<Range>();
 }
 
 pub type ElementHeader = u8;
@@ -597,6 +617,11 @@ impl crate::x11_utils::GenerateRandom for QueryVersionReply {
             minor_version: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_query_version_reply() {
+    crate::x11_utils::test_randomised_type::<QueryVersionReply>();
 }
 
 /// Opcode for the CreateContext request

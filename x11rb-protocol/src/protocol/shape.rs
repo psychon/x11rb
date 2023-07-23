@@ -310,6 +310,11 @@ impl crate::x11_utils::GenerateRandom for NotifyEvent {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_notify_event() {
+    crate::x11_utils::test_randomised_type::<NotifyEvent>();
+}
 impl From<&NotifyEvent> for [u8; 32] {
     fn from(input: &NotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -480,6 +485,11 @@ impl crate::x11_utils::GenerateRandom for QueryVersionReply {
             minor_version: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_query_version_reply() {
+    crate::x11_utils::test_randomised_type::<QueryVersionReply>();
 }
 
 /// Opcode for the Rectangles request
@@ -1033,6 +1043,11 @@ impl crate::x11_utils::GenerateRandom for QueryExtentsReply {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_query_extents_reply() {
+    crate::x11_utils::test_randomised_type::<QueryExtentsReply>();
+}
 
 /// Opcode for the SelectInput request
 pub const SELECT_INPUT_REQUEST: u8 = 6;
@@ -1210,6 +1225,11 @@ impl crate::x11_utils::GenerateRandom for InputSelectedReply {
             length: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_input_selected_reply() {
+    crate::x11_utils::test_randomised_type::<InputSelectedReply>();
 }
 
 /// Opcode for the GetRectangles request

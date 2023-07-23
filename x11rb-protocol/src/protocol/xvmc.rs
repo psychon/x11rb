@@ -138,6 +138,11 @@ impl crate::x11_utils::GenerateRandom for SurfaceInfo {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_surface_info() {
+    crate::x11_utils::test_randomised_type::<SurfaceInfo>();
+}
 
 /// Opcode for the QueryVersion request
 pub const QUERY_VERSION_REQUEST: u8 = 0;
@@ -259,6 +264,11 @@ impl crate::x11_utils::GenerateRandom for QueryVersionReply {
             minor: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_query_version_reply() {
+    crate::x11_utils::test_randomised_type::<QueryVersionReply>();
 }
 
 /// Opcode for the ListSurfaceTypes request

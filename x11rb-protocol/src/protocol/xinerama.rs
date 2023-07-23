@@ -91,6 +91,11 @@ impl crate::x11_utils::GenerateRandom for ScreenInfo {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_screen_info() {
+    crate::x11_utils::test_randomised_type::<ScreenInfo>();
+}
 
 /// Opcode for the QueryVersion request
 pub const QUERY_VERSION_REQUEST: u8 = 0;
@@ -222,6 +227,11 @@ impl crate::x11_utils::GenerateRandom for QueryVersionReply {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_query_version_reply() {
+    crate::x11_utils::test_randomised_type::<QueryVersionReply>();
+}
 
 /// Opcode for the GetState request
 pub const GET_STATE_REQUEST: u8 = 1;
@@ -347,6 +357,11 @@ impl crate::x11_utils::GenerateRandom for GetStateReply {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_get_state_reply() {
+    crate::x11_utils::test_randomised_type::<GetStateReply>();
+}
 
 /// Opcode for the GetScreenCount request
 pub const GET_SCREEN_COUNT_REQUEST: u8 = 2;
@@ -471,6 +486,11 @@ impl crate::x11_utils::GenerateRandom for GetScreenCountReply {
             window: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_get_screen_count_reply() {
+    crate::x11_utils::test_randomised_type::<GetScreenCountReply>();
 }
 
 /// Opcode for the GetScreenSize request
@@ -629,6 +649,11 @@ impl crate::x11_utils::GenerateRandom for GetScreenSizeReply {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_get_screen_size_reply() {
+    crate::x11_utils::test_randomised_type::<GetScreenSizeReply>();
+}
 
 /// Opcode for the IsActive request
 pub const IS_ACTIVE_REQUEST: u8 = 4;
@@ -741,6 +766,11 @@ impl crate::x11_utils::GenerateRandom for IsActiveReply {
             state: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_is_active_reply() {
+    crate::x11_utils::test_randomised_type::<IsActiveReply>();
 }
 
 /// Opcode for the QueryScreens request

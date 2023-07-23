@@ -751,7 +751,10 @@ pub fn parse_request_header(
 
 #[cfg(test)]
 mod generate_random {
+    use alloc::vec::Vec;
+    use core::{fmt::Debug, borrow::Borrow};
     use fastrand::Rng;
+    use super::{Serialize, TryParse};
 
     /// Generate a random instance of this type.
     pub(crate) trait GenerateRandom: Sized {
@@ -785,11 +788,11 @@ mod generate_random {
     impl_primitive!(f32, ());
     impl_primitive!(f64, ());
 
-    fn generate_random_vec<T: GenerateRandom>(rng: &mut Rng, len: usize) -> alloc::vec::Vec<T> {
+    fn generate_random_vec<T: GenerateRandom>(rng: &mut Rng, len: usize) -> Vec<T> {
         core::iter::repeat_with(|| T::generate(rng)).take(len).collect()
     }
 
-    impl<T: GenerateRandom> GenerateRandom for alloc::vec::Vec<T> {
+    impl<T: GenerateRandom> GenerateRandom for Vec<T> {
         fn generate(rng: &mut Rng) -> Self {
             let len = rng.usize(..4);
             generate_random_vec(rng, len)
@@ -805,7 +808,7 @@ mod generate_random {
     macro_rules! impl_array {
         ($($num: expr)*) => {
             $(
-                impl<T: GenerateRandom + core::fmt::Debug> GenerateRandom for [T; $num] {
+                impl<T: GenerateRandom + Debug> GenerateRandom for [T; $num] {
                     fn generate(rng: &mut Rng) -> Self {
                         generate_random_vec(rng, $num).try_into().unwrap()
                     }
@@ -825,7 +828,49 @@ mod generate_random {
             }
         }
     }
+
+    fn test_serialize_vs_serialize_into<T>()
+        where T: GenerateRandom + Serialize,
+              <T as Serialize>::Bytes: Borrow<[u8]>
+    {
+        let value = T::generate(&mut Rng::with_seed(123));
+
+        let result1 = value.serialize();
+        let mut result2 = Vec::new();
+        value.serialize_into(&mut result2);
+
+        assert_eq!(result1.borrow(), result2.as_slice());
+    }
+
+    fn test_round_trip<T>()
+        where T: GenerateRandom + Serialize + TryParse + Debug + PartialEq<T>,
+              <T as Serialize>::Bytes: Borrow<[u8]>
+    {
+        let value1 = T::generate(&mut Rng::with_seed(123));
+        std::println!("Generated random value: {value1:?}");
+
+        let mut serialized = Vec::new();
+        value1.serialize_into(&mut serialized);
+        std::println!("Serialisation produced: {serialized:?}");
+
+        // Random length fields do not necessarily make sense. Parsing doesn't care as long as
+        // enough data according to the length field is present. Thus, add some padding.
+        serialized.extend_from_slice(&[0x12; 32 + 4 * 4]);
+
+        let (value2, _remaining) = T::try_parse(serialized.borrow()).unwrap();
+        std::println!("Parsed again as: {value2:?}");
+
+        assert_eq!(value1, value2);
+    }
+
+    pub(crate) fn test_randomised_type<T>()
+        where T: GenerateRandom + Serialize + TryParse + Debug + PartialEq<T>,
+              <T as Serialize>::Bytes: Borrow<[u8]>
+    {
+        test_serialize_vs_serialize_into::<T>();
+        test_round_trip::<T>();
+    }
 }
 
 #[cfg(test)]
-pub(crate) use generate_random::GenerateRandom;
+pub(crate) use generate_random::{GenerateRandom, test_randomised_type};

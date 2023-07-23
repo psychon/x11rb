@@ -397,6 +397,11 @@ impl crate::x11_utils::GenerateRandom for QueryVersionReply {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_query_version_reply() {
+    crate::x11_utils::test_randomised_type::<QueryVersionReply>();
+}
 
 /// Opcode for the QueryInfo request
 pub const QUERY_INFO_REQUEST: u8 = 1;
@@ -564,6 +569,11 @@ impl crate::x11_utils::GenerateRandom for QueryInfoReply {
             kind: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_query_info_reply() {
+    crate::x11_utils::test_randomised_type::<QueryInfoReply>();
 }
 
 /// Opcode for the SelectInput request
@@ -1352,6 +1362,11 @@ impl crate::x11_utils::GenerateRandom for NotifyEvent {
             forced: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_notify_event() {
+    crate::x11_utils::test_randomised_type::<NotifyEvent>();
 }
 impl From<&NotifyEvent> for [u8; 32] {
     fn from(input: &NotifyEvent) -> Self {

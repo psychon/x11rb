@@ -846,6 +846,11 @@ impl crate::x11_utils::GenerateRandom for Directformat {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_directformat() {
+    crate::x11_utils::test_randomised_type::<Directformat>();
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -930,6 +935,11 @@ impl crate::x11_utils::GenerateRandom for Pictforminfo {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_pictforminfo() {
+    crate::x11_utils::test_randomised_type::<Pictforminfo>();
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -975,6 +985,11 @@ impl crate::x11_utils::GenerateRandom for Pictvisual {
             format: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_pictvisual() {
+    crate::x11_utils::test_randomised_type::<Pictvisual>();
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -1155,6 +1170,11 @@ impl crate::x11_utils::GenerateRandom for Indexvalue {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_indexvalue() {
+    crate::x11_utils::test_randomised_type::<Indexvalue>();
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -1211,6 +1231,11 @@ impl crate::x11_utils::GenerateRandom for Color {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_color() {
+    crate::x11_utils::test_randomised_type::<Color>();
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -1256,6 +1281,11 @@ impl crate::x11_utils::GenerateRandom for Pointfix {
             y: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_pointfix() {
+    crate::x11_utils::test_randomised_type::<Pointfix>();
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -1310,6 +1340,11 @@ impl crate::x11_utils::GenerateRandom for Linefix {
             p2: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_linefix() {
+    crate::x11_utils::test_randomised_type::<Linefix>();
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -1377,6 +1412,11 @@ impl crate::x11_utils::GenerateRandom for Triangle {
             p3: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_triangle() {
+    crate::x11_utils::test_randomised_type::<Triangle>();
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -1466,6 +1506,11 @@ impl crate::x11_utils::GenerateRandom for Trapezoid {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_trapezoid() {
+    crate::x11_utils::test_randomised_type::<Trapezoid>();
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -1535,6 +1580,11 @@ impl crate::x11_utils::GenerateRandom for Glyphinfo {
             y_off: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_glyphinfo() {
+    crate::x11_utils::test_randomised_type::<Glyphinfo>();
 }
 
 /// Opcode for the QueryVersion request
@@ -1692,6 +1742,11 @@ impl crate::x11_utils::GenerateRandom for QueryVersionReply {
             minor_version: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_query_version_reply() {
+    crate::x11_utils::test_randomised_type::<QueryVersionReply>();
 }
 
 /// Opcode for the QueryPictFormats request
@@ -4535,6 +4590,11 @@ impl crate::x11_utils::GenerateRandom for Transform {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_transform() {
+    crate::x11_utils::test_randomised_type::<Transform>();
+}
 
 /// Opcode for the SetPictureTransform request
 pub const SET_PICTURE_TRANSFORM_REQUEST: u8 = 28;
@@ -4914,6 +4974,11 @@ impl crate::x11_utils::GenerateRandom for Animcursorelt {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_animcursorelt() {
+    crate::x11_utils::test_randomised_type::<Animcursorelt>();
+}
 
 /// Opcode for the CreateAnimCursor request
 pub const CREATE_ANIM_CURSOR_REQUEST: u8 = 31;
@@ -5043,6 +5108,11 @@ impl crate::x11_utils::GenerateRandom for Spanfix {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_spanfix() {
+    crate::x11_utils::test_randomised_type::<Spanfix>();
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -5104,6 +5174,11 @@ impl crate::x11_utils::GenerateRandom for Trap {
             bot: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_trap() {
+    crate::x11_utils::test_randomised_type::<Trap>();
 }
 
 /// Opcode for the AddTraps request

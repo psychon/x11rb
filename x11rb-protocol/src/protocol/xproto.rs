@@ -67,6 +67,11 @@ impl crate::x11_utils::GenerateRandom for Char2b {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_char2b() {
+    crate::x11_utils::test_randomised_type::<Char2b>();
+}
 
 pub type Window = u32;
 
@@ -141,6 +146,11 @@ impl crate::x11_utils::GenerateRandom for Point {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_point() {
+    crate::x11_utils::test_randomised_type::<Point>();
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -196,6 +206,11 @@ impl crate::x11_utils::GenerateRandom for Rectangle {
             height: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_rectangle() {
+    crate::x11_utils::test_randomised_type::<Rectangle>();
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -267,6 +282,11 @@ impl crate::x11_utils::GenerateRandom for Arc {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_arc() {
+    crate::x11_utils::test_randomised_type::<Arc>();
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -319,6 +339,11 @@ impl crate::x11_utils::GenerateRandom for Format {
             scanline_pad: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_format() {
+    crate::x11_utils::test_randomised_type::<Format>();
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -491,6 +516,11 @@ impl crate::x11_utils::GenerateRandom for Visualtype {
             blue_mask: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_visualtype() {
+    crate::x11_utils::test_randomised_type::<Visualtype>();
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -1727,6 +1757,11 @@ impl crate::x11_utils::GenerateRandom for KeyPressEvent {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_key_press_event() {
+    crate::x11_utils::test_randomised_type::<KeyPressEvent>();
+}
 impl From<&KeyPressEvent> for [u8; 32] {
     fn from(input: &KeyPressEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -2022,6 +2057,11 @@ impl crate::x11_utils::GenerateRandom for ButtonPressEvent {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_button_press_event() {
+    crate::x11_utils::test_randomised_type::<ButtonPressEvent>();
+}
 impl From<&ButtonPressEvent> for [u8; 32] {
     fn from(input: &ButtonPressEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -2310,6 +2350,11 @@ impl crate::x11_utils::GenerateRandom for MotionNotifyEvent {
             same_screen: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_motion_notify_event() {
+    crate::x11_utils::test_randomised_type::<MotionNotifyEvent>();
 }
 impl From<&MotionNotifyEvent> for [u8; 32] {
     fn from(input: &MotionNotifyEvent) -> Self {
@@ -2685,6 +2730,11 @@ impl crate::x11_utils::GenerateRandom for EnterNotifyEvent {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_enter_notify_event() {
+    crate::x11_utils::test_randomised_type::<EnterNotifyEvent>();
+}
 impl From<&EnterNotifyEvent> for [u8; 32] {
     fn from(input: &EnterNotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -2828,6 +2878,11 @@ impl crate::x11_utils::GenerateRandom for FocusInEvent {
             mode: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_focus_in_event() {
+    crate::x11_utils::test_randomised_type::<FocusInEvent>();
 }
 impl From<&FocusInEvent> for [u8; 32] {
     fn from(input: &FocusInEvent) -> Self {
@@ -3114,6 +3169,11 @@ impl crate::x11_utils::GenerateRandom for ExposeEvent {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_expose_event() {
+    crate::x11_utils::test_randomised_type::<ExposeEvent>();
+}
 impl From<&ExposeEvent> for [u8; 32] {
     fn from(input: &ExposeEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -3278,6 +3338,11 @@ impl crate::x11_utils::GenerateRandom for GraphicsExposureEvent {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_graphics_exposure_event() {
+    crate::x11_utils::test_randomised_type::<GraphicsExposureEvent>();
+}
 impl From<&GraphicsExposureEvent> for [u8; 32] {
     fn from(input: &GraphicsExposureEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -3406,6 +3471,11 @@ impl crate::x11_utils::GenerateRandom for NoExposureEvent {
             major_opcode: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_no_exposure_event() {
+    crate::x11_utils::test_randomised_type::<NoExposureEvent>();
 }
 impl From<&NoExposureEvent> for [u8; 32] {
     fn from(input: &NoExposureEvent) -> Self {
@@ -3600,6 +3670,11 @@ impl crate::x11_utils::GenerateRandom for VisibilityNotifyEvent {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_visibility_notify_event() {
+    crate::x11_utils::test_randomised_type::<VisibilityNotifyEvent>();
+}
 impl From<&VisibilityNotifyEvent> for [u8; 32] {
     fn from(input: &VisibilityNotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -3760,6 +3835,11 @@ impl crate::x11_utils::GenerateRandom for CreateNotifyEvent {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_create_notify_event() {
+    crate::x11_utils::test_randomised_type::<CreateNotifyEvent>();
+}
 impl From<&CreateNotifyEvent> for [u8; 32] {
     fn from(input: &CreateNotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -3892,6 +3972,11 @@ impl crate::x11_utils::GenerateRandom for DestroyNotifyEvent {
             window: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_destroy_notify_event() {
+    crate::x11_utils::test_randomised_type::<DestroyNotifyEvent>();
 }
 impl From<&DestroyNotifyEvent> for [u8; 32] {
     fn from(input: &DestroyNotifyEvent) -> Self {
@@ -4033,6 +4118,11 @@ impl crate::x11_utils::GenerateRandom for UnmapNotifyEvent {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_unmap_notify_event() {
+    crate::x11_utils::test_randomised_type::<UnmapNotifyEvent>();
+}
 impl From<&UnmapNotifyEvent> for [u8; 32] {
     fn from(input: &UnmapNotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -4173,6 +4263,11 @@ impl crate::x11_utils::GenerateRandom for MapNotifyEvent {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_map_notify_event() {
+    crate::x11_utils::test_randomised_type::<MapNotifyEvent>();
+}
 impl From<&MapNotifyEvent> for [u8; 32] {
     fn from(input: &MapNotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -4299,6 +4394,11 @@ impl crate::x11_utils::GenerateRandom for MapRequestEvent {
             window: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_map_request_event() {
+    crate::x11_utils::test_randomised_type::<MapRequestEvent>();
 }
 impl From<&MapRequestEvent> for [u8; 32] {
     fn from(input: &MapRequestEvent) -> Self {
@@ -4449,6 +4549,11 @@ impl crate::x11_utils::GenerateRandom for ReparentNotifyEvent {
             override_redirect: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_reparent_notify_event() {
+    crate::x11_utils::test_randomised_type::<ReparentNotifyEvent>();
 }
 impl From<&ReparentNotifyEvent> for [u8; 32] {
     fn from(input: &ReparentNotifyEvent) -> Self {
@@ -4645,6 +4750,11 @@ impl crate::x11_utils::GenerateRandom for ConfigureNotifyEvent {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_configure_notify_event() {
+    crate::x11_utils::test_randomised_type::<ConfigureNotifyEvent>();
+}
 impl From<&ConfigureNotifyEvent> for [u8; 32] {
     fn from(input: &ConfigureNotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -4824,6 +4934,11 @@ impl crate::x11_utils::GenerateRandom for ConfigureRequestEvent {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_configure_request_event() {
+    crate::x11_utils::test_randomised_type::<ConfigureRequestEvent>();
+}
 impl From<&ConfigureRequestEvent> for [u8; 32] {
     fn from(input: &ConfigureRequestEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -4962,6 +5077,11 @@ impl crate::x11_utils::GenerateRandom for GravityNotifyEvent {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_gravity_notify_event() {
+    crate::x11_utils::test_randomised_type::<GravityNotifyEvent>();
+}
 impl From<&GravityNotifyEvent> for [u8; 32] {
     fn from(input: &GravityNotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -5084,6 +5204,11 @@ impl crate::x11_utils::GenerateRandom for ResizeRequestEvent {
             height: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_resize_request_event() {
+    crate::x11_utils::test_randomised_type::<ResizeRequestEvent>();
 }
 impl From<&ResizeRequestEvent> for [u8; 32] {
     fn from(input: &ResizeRequestEvent) -> Self {
@@ -5305,6 +5430,11 @@ impl crate::x11_utils::GenerateRandom for CirculateNotifyEvent {
             place: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_circulate_notify_event() {
+    crate::x11_utils::test_randomised_type::<CirculateNotifyEvent>();
 }
 impl From<&CirculateNotifyEvent> for [u8; 32] {
     fn from(input: &CirculateNotifyEvent) -> Self {
@@ -5530,6 +5660,11 @@ impl crate::x11_utils::GenerateRandom for PropertyNotifyEvent {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_property_notify_event() {
+    crate::x11_utils::test_randomised_type::<PropertyNotifyEvent>();
+}
 impl From<&PropertyNotifyEvent> for [u8; 32] {
     fn from(input: &PropertyNotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -5656,6 +5791,11 @@ impl crate::x11_utils::GenerateRandom for SelectionClearEvent {
             selection: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_selection_clear_event() {
+    crate::x11_utils::test_randomised_type::<SelectionClearEvent>();
 }
 impl From<&SelectionClearEvent> for [u8; 32] {
     fn from(input: &SelectionClearEvent) -> Self {
@@ -6151,6 +6291,11 @@ impl crate::x11_utils::GenerateRandom for SelectionRequestEvent {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_selection_request_event() {
+    crate::x11_utils::test_randomised_type::<SelectionRequestEvent>();
+}
 impl From<&SelectionRequestEvent> for [u8; 32] {
     fn from(input: &SelectionRequestEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -6297,6 +6442,11 @@ impl crate::x11_utils::GenerateRandom for SelectionNotifyEvent {
             property: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_selection_notify_event() {
+    crate::x11_utils::test_randomised_type::<SelectionNotifyEvent>();
 }
 impl From<&SelectionNotifyEvent> for [u8; 32] {
     fn from(input: &SelectionNotifyEvent) -> Self {
@@ -6587,6 +6737,11 @@ impl crate::x11_utils::GenerateRandom for ColormapNotifyEvent {
             state: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_colormap_notify_event() {
+    crate::x11_utils::test_randomised_type::<ColormapNotifyEvent>();
 }
 impl From<&ColormapNotifyEvent> for [u8; 32] {
     fn from(input: &ColormapNotifyEvent) -> Self {
@@ -7133,6 +7288,11 @@ impl crate::x11_utils::GenerateRandom for MappingNotifyEvent {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_mapping_notify_event() {
+    crate::x11_utils::test_randomised_type::<MappingNotifyEvent>();
+}
 impl From<&MappingNotifyEvent> for [u8; 32] {
     fn from(input: &MappingNotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -7281,6 +7441,11 @@ impl crate::x11_utils::GenerateRandom for GeGenericEvent {
             event_type: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_ge_generic_event() {
+    crate::x11_utils::test_randomised_type::<GeGenericEvent>();
 }
 
 /// Opcode for the Request error
@@ -9125,6 +9290,11 @@ impl crate::x11_utils::GenerateRandom for GetWindowAttributesReply {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_get_window_attributes_reply() {
+    crate::x11_utils::test_randomised_type::<GetWindowAttributesReply>();
+}
 
 /// Opcode for the DestroyWindow request
 pub const DESTROY_WINDOW_REQUEST: u8 = 4;
@@ -10668,6 +10838,11 @@ impl crate::x11_utils::GenerateRandom for GetGeometryReply {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_get_geometry_reply() {
+    crate::x11_utils::test_randomised_type::<GetGeometryReply>();
+}
 
 /// Opcode for the QueryTree request
 pub const QUERY_TREE_REQUEST: u8 = 15;
@@ -11031,6 +11206,11 @@ impl crate::x11_utils::GenerateRandom for InternAtomReply {
             atom: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_intern_atom_reply() {
+    crate::x11_utils::test_randomised_type::<InternAtomReply>();
 }
 
 /// Opcode for the GetAtomName request
@@ -12313,6 +12493,11 @@ impl crate::x11_utils::GenerateRandom for GetSelectionOwnerReply {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_get_selection_owner_reply() {
+    crate::x11_utils::test_randomised_type::<GetSelectionOwnerReply>();
+}
 
 /// Opcode for the ConvertSelection request
 pub const CONVERT_SELECTION_REQUEST: u8 = 24;
@@ -13096,6 +13281,11 @@ impl crate::x11_utils::GenerateRandom for GrabPointerReply {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_grab_pointer_reply() {
+    crate::x11_utils::test_randomised_type::<GrabPointerReply>();
+}
 
 /// Opcode for the UngrabPointer request
 pub const UNGRAB_POINTER_REQUEST: u8 = 27;
@@ -13792,6 +13982,11 @@ impl crate::x11_utils::GenerateRandom for GrabKeyboardReply {
             length: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_grab_keyboard_reply() {
+    crate::x11_utils::test_randomised_type::<GrabKeyboardReply>();
 }
 
 /// Opcode for the UngrabKeyboard request
@@ -14684,6 +14879,11 @@ impl crate::x11_utils::GenerateRandom for QueryPointerReply {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_query_pointer_reply() {
+    crate::x11_utils::test_randomised_type::<QueryPointerReply>();
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -14734,6 +14934,11 @@ impl crate::x11_utils::GenerateRandom for Timecoord {
             y: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_timecoord() {
+    crate::x11_utils::test_randomised_type::<Timecoord>();
 }
 
 /// Opcode for the GetMotionEvents request
@@ -15042,6 +15247,11 @@ impl crate::x11_utils::GenerateRandom for TranslateCoordinatesReply {
             dst_y: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_translate_coordinates_reply() {
+    crate::x11_utils::test_randomised_type::<TranslateCoordinatesReply>();
 }
 
 /// Opcode for the WarpPointer request
@@ -15483,6 +15693,11 @@ impl crate::x11_utils::GenerateRandom for GetInputFocusReply {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_get_input_focus_reply() {
+    crate::x11_utils::test_randomised_type::<GetInputFocusReply>();
+}
 
 /// Opcode for the QueryKeymap request
 pub const QUERY_KEYMAP_REQUEST: u8 = 44;
@@ -15894,6 +16109,11 @@ impl crate::x11_utils::GenerateRandom for Fontprop {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_fontprop() {
+    crate::x11_utils::test_randomised_type::<Fontprop>();
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -15963,6 +16183,11 @@ impl crate::x11_utils::GenerateRandom for Charinfo {
             attributes: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_charinfo() {
+    crate::x11_utils::test_randomised_type::<Charinfo>();
 }
 
 /// Opcode for the QueryFont request
@@ -16417,6 +16642,11 @@ impl crate::x11_utils::GenerateRandom for QueryTextExtentsReply {
             overall_right: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_query_text_extents_reply() {
+    crate::x11_utils::test_randomised_type::<QueryTextExtentsReply>();
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -20397,6 +20627,11 @@ impl crate::x11_utils::GenerateRandom for Segment {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_segment() {
+    crate::x11_utils::test_randomised_type::<Segment>();
+}
 
 /// Opcode for the PolySegment request
 pub const POLY_SEGMENT_REQUEST: u8 = 66;
@@ -22559,6 +22794,11 @@ impl crate::x11_utils::GenerateRandom for AllocColorReply {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_alloc_color_reply() {
+    crate::x11_utils::test_randomised_type::<AllocColorReply>();
+}
 
 /// Opcode for the AllocNamedColor request
 pub const ALLOC_NAMED_COLOR_REQUEST: u8 = 85;
@@ -22746,6 +22986,11 @@ impl crate::x11_utils::GenerateRandom for AllocNamedColorReply {
             visual_blue: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_alloc_named_color_reply() {
+    crate::x11_utils::test_randomised_type::<AllocNamedColorReply>();
 }
 
 /// Opcode for the AllocColorCells request
@@ -23311,6 +23556,11 @@ impl crate::x11_utils::GenerateRandom for Coloritem {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_coloritem() {
+    crate::x11_utils::test_randomised_type::<Coloritem>();
+}
 
 /// Opcode for the StoreColors request
 pub const STORE_COLORS_REQUEST: u8 = 89;
@@ -23531,6 +23781,11 @@ impl crate::x11_utils::GenerateRandom for Rgb {
             blue: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_rgb() {
+    crate::x11_utils::test_randomised_type::<Rgb>();
 }
 
 /// Opcode for the QueryColors request
@@ -23861,6 +24116,11 @@ impl crate::x11_utils::GenerateRandom for LookupColorReply {
             visual_blue: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_lookup_color_reply() {
+    crate::x11_utils::test_randomised_type::<LookupColorReply>();
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -24648,6 +24908,11 @@ impl crate::x11_utils::GenerateRandom for QueryBestSizeReply {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_query_best_size_reply() {
+    crate::x11_utils::test_randomised_type::<QueryBestSizeReply>();
+}
 
 /// Opcode for the QueryExtension request
 pub const QUERY_EXTENSION_REQUEST: u8 = 98;
@@ -24826,6 +25091,11 @@ impl crate::x11_utils::GenerateRandom for QueryExtensionReply {
             first_error: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_query_extension_reply() {
+    crate::x11_utils::test_randomised_type::<QueryExtensionReply>();
 }
 
 /// Opcode for the ListExtensions request
@@ -26106,6 +26376,11 @@ impl crate::x11_utils::GenerateRandom for GetPointerControlReply {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_get_pointer_control_reply() {
+    crate::x11_utils::test_randomised_type::<GetPointerControlReply>();
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -26480,6 +26755,11 @@ impl crate::x11_utils::GenerateRandom for GetScreenSaverReply {
             allow_exposures: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_get_screen_saver_reply() {
+    crate::x11_utils::test_randomised_type::<GetScreenSaverReply>();
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -27690,6 +27970,11 @@ impl crate::x11_utils::GenerateRandom for SetPointerMappingReply {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_set_pointer_mapping_reply() {
+    crate::x11_utils::test_randomised_type::<SetPointerMappingReply>();
+}
 
 /// Opcode for the GetPointerMapping request
 pub const GET_POINTER_MAPPING_REQUEST: u8 = 117;
@@ -28024,6 +28309,11 @@ impl crate::x11_utils::GenerateRandom for SetModifierMappingReply {
             length: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_set_modifier_mapping_reply() {
+    crate::x11_utils::test_randomised_type::<SetModifierMappingReply>();
 }
 
 /// Opcode for the GetModifierMapping request

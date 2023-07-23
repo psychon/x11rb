@@ -192,6 +192,11 @@ impl crate::x11_utils::GenerateRandom for ScreenSize {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_screen_size() {
+    crate::x11_utils::test_randomised_type::<ScreenSize>();
+}
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -398,6 +403,11 @@ impl crate::x11_utils::GenerateRandom for QueryVersionReply {
             minor_version: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_query_version_reply() {
+    crate::x11_utils::test_randomised_type::<QueryVersionReply>();
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -676,6 +686,11 @@ impl crate::x11_utils::GenerateRandom for SetScreenConfigReply {
             subpixel_order: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_set_screen_config_reply() {
+    crate::x11_utils::test_randomised_type::<SetScreenConfigReply>();
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -1146,6 +1161,11 @@ impl crate::x11_utils::GenerateRandom for GetScreenSizeRangeReply {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_get_screen_size_range_reply() {
+    crate::x11_utils::test_randomised_type::<GetScreenSizeRangeReply>();
+}
 
 /// Opcode for the SetScreenSize request
 pub const SET_SCREEN_SIZE_REQUEST: u8 = 7;
@@ -1447,6 +1467,11 @@ impl crate::x11_utils::GenerateRandom for ModeInfo {
             mode_flags: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_mode_info() {
+    crate::x11_utils::test_randomised_type::<ModeInfo>();
 }
 
 /// Opcode for the GetScreenResources request
@@ -2847,6 +2872,11 @@ impl crate::x11_utils::GenerateRandom for CreateModeReply {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_create_mode_reply() {
+    crate::x11_utils::test_randomised_type::<CreateModeReply>();
+}
 
 /// Opcode for the DestroyMode request
 pub const DESTROY_MODE_REQUEST: u8 = 17;
@@ -3433,6 +3463,11 @@ impl crate::x11_utils::GenerateRandom for SetCrtcConfigReply {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_set_crtc_config_reply() {
+    crate::x11_utils::test_randomised_type::<SetCrtcConfigReply>();
+}
 
 /// Opcode for the GetCrtcGammaSize request
 pub const GET_CRTC_GAMMA_SIZE_REQUEST: u8 = 22;
@@ -3576,6 +3611,11 @@ impl crate::x11_utils::GenerateRandom for GetCrtcGammaSizeReply {
             size: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_get_crtc_gamma_size_reply() {
+    crate::x11_utils::test_randomised_type::<GetCrtcGammaSizeReply>();
 }
 
 /// Opcode for the GetCrtcGamma request
@@ -4634,6 +4674,11 @@ impl crate::x11_utils::GenerateRandom for GetPanningReply {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_get_panning_reply() {
+    crate::x11_utils::test_randomised_type::<GetPanningReply>();
+}
 
 /// Opcode for the SetPanning request
 pub const SET_PANNING_REQUEST: u8 = 29;
@@ -4840,6 +4885,11 @@ impl crate::x11_utils::GenerateRandom for SetPanningReply {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_set_panning_reply() {
+    crate::x11_utils::test_randomised_type::<SetPanningReply>();
+}
 
 /// Opcode for the SetOutputPrimary request
 pub const SET_OUTPUT_PRIMARY_REQUEST: u8 = 30;
@@ -5022,6 +5072,11 @@ impl crate::x11_utils::GenerateRandom for GetOutputPrimaryReply {
             output: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_get_output_primary_reply() {
+    crate::x11_utils::test_randomised_type::<GetOutputPrimaryReply>();
 }
 
 /// Opcode for the GetProviders request
@@ -6410,6 +6465,11 @@ impl crate::x11_utils::GenerateRandom for ScreenChangeNotifyEvent {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_screen_change_notify_event() {
+    crate::x11_utils::test_randomised_type::<ScreenChangeNotifyEvent>();
+}
 impl From<&ScreenChangeNotifyEvent> for [u8; 32] {
     fn from(input: &ScreenChangeNotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -6655,6 +6715,11 @@ impl crate::x11_utils::GenerateRandom for CrtcChange {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_crtc_change() {
+    crate::x11_utils::test_randomised_type::<CrtcChange>();
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -6759,6 +6824,11 @@ impl crate::x11_utils::GenerateRandom for OutputChange {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_output_change() {
+    crate::x11_utils::test_randomised_type::<OutputChange>();
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -6843,6 +6913,11 @@ impl crate::x11_utils::GenerateRandom for OutputProperty {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_output_property() {
+    crate::x11_utils::test_randomised_type::<OutputProperty>();
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -6915,6 +6990,11 @@ impl crate::x11_utils::GenerateRandom for ProviderChange {
             provider: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_provider_change() {
+    crate::x11_utils::test_randomised_type::<ProviderChange>();
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -6999,6 +7079,11 @@ impl crate::x11_utils::GenerateRandom for ProviderProperty {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_provider_property() {
+    crate::x11_utils::test_randomised_type::<ProviderProperty>();
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -7066,6 +7151,11 @@ impl crate::x11_utils::GenerateRandom for ResourceChange {
             window: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_resource_change() {
+    crate::x11_utils::test_randomised_type::<ResourceChange>();
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -7729,6 +7819,11 @@ impl crate::x11_utils::GenerateRandom for LeaseNotify {
             created: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_lease_notify() {
+    crate::x11_utils::test_randomised_type::<LeaseNotify>();
 }
 
 #[derive(Debug, Copy, Clone)]

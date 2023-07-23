@@ -404,6 +404,11 @@ pub(super) fn emit_switch_type(
     });
     outln!(out, "}}");
 
+    let has_try_parse = switch.external_params.borrow().is_empty();
+    if generate_try_parse && generate_serialize && has_try_parse {
+        super::generate_random_test(out, name);
+    }
+
     case_infos
 }
 

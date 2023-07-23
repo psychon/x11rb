@@ -264,6 +264,11 @@ impl crate::x11_utils::GenerateRandom for QueryVersionReply {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_query_version_reply() {
+    crate::x11_utils::test_randomised_type::<QueryVersionReply>();
+}
 
 /// Opcode for the RedirectWindow request
 pub const REDIRECT_WINDOW_REQUEST: u8 = 1;
@@ -781,6 +786,11 @@ impl crate::x11_utils::GenerateRandom for GetOverlayWindowReply {
             overlay_win: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_get_overlay_window_reply() {
+    crate::x11_utils::test_randomised_type::<GetOverlayWindowReply>();
 }
 
 /// Opcode for the ReleaseOverlayWindow request

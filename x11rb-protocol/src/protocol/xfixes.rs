@@ -196,6 +196,11 @@ impl crate::x11_utils::GenerateRandom for QueryVersionReply {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_query_version_reply() {
+    crate::x11_utils::test_randomised_type::<QueryVersionReply>();
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -723,6 +728,11 @@ impl crate::x11_utils::GenerateRandom for SelectionNotifyEvent {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_selection_notify_event() {
+    crate::x11_utils::test_randomised_type::<SelectionNotifyEvent>();
+}
 impl From<&SelectionNotifyEvent> for [u8; 32] {
     fn from(input: &SelectionNotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -1070,6 +1080,11 @@ impl crate::x11_utils::GenerateRandom for CursorNotifyEvent {
             name: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_cursor_notify_event() {
+    crate::x11_utils::test_randomised_type::<CursorNotifyEvent>();
 }
 impl From<&CursorNotifyEvent> for [u8; 32] {
     fn from(input: &CursorNotifyEvent) -> Self {
@@ -3841,5 +3856,10 @@ impl crate::x11_utils::GenerateRandom for GetClientDisconnectModeReply {
             disconnect_mode: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_get_client_disconnect_mode_reply() {
+    crate::x11_utils::test_randomised_type::<GetClientDisconnectModeReply>();
 }
 

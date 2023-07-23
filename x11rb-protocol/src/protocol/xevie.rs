@@ -186,6 +186,11 @@ impl crate::x11_utils::GenerateRandom for QueryVersionReply {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_query_version_reply() {
+    crate::x11_utils::test_randomised_type::<QueryVersionReply>();
+}
 
 /// Opcode for the Start request
 pub const START_REQUEST: u8 = 1;
@@ -325,6 +330,11 @@ impl crate::x11_utils::GenerateRandom for StartReply {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_start_reply() {
+    crate::x11_utils::test_randomised_type::<StartReply>();
+}
 
 /// Opcode for the End request
 pub const END_REQUEST: u8 = 2;
@@ -463,6 +473,11 @@ impl crate::x11_utils::GenerateRandom for EndReply {
             length: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_end_reply() {
+    crate::x11_utils::test_randomised_type::<EndReply>();
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -607,6 +622,11 @@ impl crate::x11_utils::GenerateRandom for Event {
         Self {
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_event() {
+    crate::x11_utils::test_randomised_type::<Event>();
 }
 
 /// Opcode for the Send request
@@ -848,6 +868,11 @@ impl crate::x11_utils::GenerateRandom for SendReply {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_send_reply() {
+    crate::x11_utils::test_randomised_type::<SendReply>();
+}
 
 /// Opcode for the SelectInput request
 pub const SELECT_INPUT_REQUEST: u8 = 4;
@@ -986,5 +1011,10 @@ impl crate::x11_utils::GenerateRandom for SelectInputReply {
             length: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_select_input_reply() {
+    crate::x11_utils::test_randomised_type::<SelectInputReply>();
 }
 

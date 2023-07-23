@@ -534,6 +534,11 @@ impl crate::x11_utils::GenerateRandom for Notify {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_notify() {
+    crate::x11_utils::test_randomised_type::<Notify>();
+}
 
 /// Opcode for the QueryVersion request
 pub const QUERY_VERSION_REQUEST: u8 = 0;
@@ -672,6 +677,11 @@ impl crate::x11_utils::GenerateRandom for QueryVersionReply {
             minor_version: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_query_version_reply() {
+    crate::x11_utils::test_randomised_type::<QueryVersionReply>();
 }
 
 /// Opcode for the Pixmap request
@@ -1173,6 +1183,11 @@ impl crate::x11_utils::GenerateRandom for QueryCapabilitiesReply {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_query_capabilities_reply() {
+    crate::x11_utils::test_randomised_type::<QueryCapabilitiesReply>();
+}
 
 /// Opcode for the Generic event
 pub const GENERIC_EVENT: u8 = 0;
@@ -1254,6 +1269,11 @@ impl crate::x11_utils::GenerateRandom for GenericEvent {
             event: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_generic_event() {
+    crate::x11_utils::test_randomised_type::<GenericEvent>();
 }
 impl From<&GenericEvent> for [u8; 32] {
     fn from(input: &GenericEvent) -> Self {
@@ -1461,6 +1481,11 @@ impl crate::x11_utils::GenerateRandom for ConfigureNotifyEvent {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_configure_notify_event() {
+    crate::x11_utils::test_randomised_type::<ConfigureNotifyEvent>();
+}
 
 /// Opcode for the CompleteNotify event
 pub const COMPLETE_NOTIFY_EVENT: u16 = 1;
@@ -1597,6 +1622,11 @@ impl crate::x11_utils::GenerateRandom for CompleteNotifyEvent {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_complete_notify_event() {
+    crate::x11_utils::test_randomised_type::<CompleteNotifyEvent>();
+}
 
 /// Opcode for the IdleNotify event
 pub const IDLE_NOTIFY_EVENT: u16 = 2;
@@ -1714,6 +1744,11 @@ impl crate::x11_utils::GenerateRandom for IdleNotifyEvent {
             idle_fence: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_idle_notify_event() {
+    crate::x11_utils::test_randomised_type::<IdleNotifyEvent>();
 }
 
 /// Opcode for the RedirectNotify event
@@ -1863,5 +1898,10 @@ impl crate::x11_utils::GenerateRandom for RedirectNotifyEvent {
             notifies: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_redirect_notify_event() {
+    crate::x11_utils::test_randomised_type::<RedirectNotifyEvent>();
 }
 

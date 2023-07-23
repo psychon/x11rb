@@ -81,6 +81,11 @@ impl crate::x11_utils::GenerateRandom for Client {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_client() {
+    crate::x11_utils::test_randomised_type::<Client>();
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -126,6 +131,11 @@ impl crate::x11_utils::GenerateRandom for Type {
             count: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_type() {
+    crate::x11_utils::test_randomised_type::<Type>();
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -233,6 +243,11 @@ impl crate::x11_utils::GenerateRandom for ClientIdSpec {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_client_id_spec() {
+    crate::x11_utils::test_randomised_type::<ClientIdSpec>();
+}
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -335,6 +350,11 @@ impl crate::x11_utils::GenerateRandom for ResourceIdSpec {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_resource_id_spec() {
+    crate::x11_utils::test_randomised_type::<ResourceIdSpec>();
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -402,6 +422,11 @@ impl crate::x11_utils::GenerateRandom for ResourceSizeSpec {
             use_count: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_resource_size_spec() {
+    crate::x11_utils::test_randomised_type::<ResourceSizeSpec>();
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -588,6 +613,11 @@ impl crate::x11_utils::GenerateRandom for QueryVersionReply {
             server_minor: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_query_version_reply() {
+    crate::x11_utils::test_randomised_type::<QueryVersionReply>();
 }
 
 /// Opcode for the QueryClients request
@@ -964,6 +994,11 @@ impl crate::x11_utils::GenerateRandom for QueryClientPixmapBytesReply {
             bytes_overflow: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_query_client_pixmap_bytes_reply() {
+    crate::x11_utils::test_randomised_type::<QueryClientPixmapBytesReply>();
 }
 
 /// Opcode for the QueryClientIds request

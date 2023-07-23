@@ -597,6 +597,11 @@ impl crate::x11_utils::GenerateRandom for Rational {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_rational() {
+    crate::x11_utils::test_randomised_type::<Rational>();
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -644,6 +649,11 @@ impl crate::x11_utils::GenerateRandom for Format {
             depth: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_format() {
+    crate::x11_utils::test_randomised_type::<Format>();
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -1342,6 +1352,11 @@ impl crate::x11_utils::GenerateRandom for VideoNotifyEvent {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_video_notify_event() {
+    crate::x11_utils::test_randomised_type::<VideoNotifyEvent>();
+}
 impl From<&VideoNotifyEvent> for [u8; 32] {
     fn from(input: &VideoNotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -1477,6 +1492,11 @@ impl crate::x11_utils::GenerateRandom for PortNotifyEvent {
             value: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_port_notify_event() {
+    crate::x11_utils::test_randomised_type::<PortNotifyEvent>();
 }
 impl From<&PortNotifyEvent> for [u8; 32] {
     fn from(input: &PortNotifyEvent) -> Self {
@@ -1645,6 +1665,11 @@ impl crate::x11_utils::GenerateRandom for QueryExtensionReply {
             minor: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_query_extension_reply() {
+    crate::x11_utils::test_randomised_type::<QueryExtensionReply>();
 }
 
 /// Opcode for the QueryAdaptors request
@@ -2024,6 +2049,11 @@ impl crate::x11_utils::GenerateRandom for GrabPortReply {
             length: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_grab_port_reply() {
+    crate::x11_utils::test_randomised_type::<GrabPortReply>();
 }
 
 /// Opcode for the UngrabPort request
@@ -2899,6 +2929,11 @@ impl crate::x11_utils::GenerateRandom for QueryBestSizeReply {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_query_best_size_reply() {
+    crate::x11_utils::test_randomised_type::<QueryBestSizeReply>();
+}
 
 /// Opcode for the SetPortAttribute request
 pub const SET_PORT_ATTRIBUTE_REQUEST: u8 = 13;
@@ -3097,6 +3132,11 @@ impl crate::x11_utils::GenerateRandom for GetPortAttributeReply {
             value: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_get_port_attribute_reply() {
+    crate::x11_utils::test_randomised_type::<GetPortAttributeReply>();
 }
 
 /// Opcode for the QueryPortAttributes request

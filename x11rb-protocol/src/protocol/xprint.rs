@@ -563,6 +563,11 @@ impl crate::x11_utils::GenerateRandom for PrintQueryVersionReply {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_print_query_version_reply() {
+    crate::x11_utils::test_randomised_type::<PrintQueryVersionReply>();
+}
 
 /// Opcode for the PrintGetPrinterList request
 pub const PRINT_GET_PRINTER_LIST_REQUEST: u8 = 1;
@@ -1020,6 +1025,11 @@ impl crate::x11_utils::GenerateRandom for PrintGetContextReply {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_print_get_context_reply() {
+    crate::x11_utils::test_randomised_type::<PrintGetContextReply>();
+}
 
 /// Opcode for the PrintDestroyContext request
 pub const PRINT_DESTROY_CONTEXT_REQUEST: u8 = 5;
@@ -1185,6 +1195,11 @@ impl crate::x11_utils::GenerateRandom for PrintGetScreenOfContextReply {
             root: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_print_get_screen_of_context_reply() {
+    crate::x11_utils::test_randomised_type::<PrintGetScreenOfContextReply>();
 }
 
 /// Opcode for the PrintStartJob request
@@ -1946,6 +1961,11 @@ impl crate::x11_utils::GenerateRandom for PrintInputSelectedReply {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_print_input_selected_reply() {
+    crate::x11_utils::test_randomised_type::<PrintInputSelectedReply>();
+}
 
 /// Opcode for the PrintGetAttributes request
 pub const PRINT_GET_ATTRIBUTES_REQUEST: u8 = 17;
@@ -2486,6 +2506,11 @@ impl crate::x11_utils::GenerateRandom for PrintGetPageDimensionsReply {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_print_get_page_dimensions_reply() {
+    crate::x11_utils::test_randomised_type::<PrintGetPageDimensionsReply>();
+}
 
 /// Opcode for the PrintQueryScreens request
 pub const PRINT_QUERY_SCREENS_REQUEST: u8 = 22;
@@ -2735,6 +2760,11 @@ impl crate::x11_utils::GenerateRandom for PrintSetImageResolutionReply {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_print_set_image_resolution_reply() {
+    crate::x11_utils::test_randomised_type::<PrintSetImageResolutionReply>();
+}
 
 /// Opcode for the PrintGetImageResolution request
 pub const PRINT_GET_IMAGE_RESOLUTION_REQUEST: u8 = 24;
@@ -2855,6 +2885,11 @@ impl crate::x11_utils::GenerateRandom for PrintGetImageResolutionReply {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_print_get_image_resolution_reply() {
+    crate::x11_utils::test_randomised_type::<PrintGetImageResolutionReply>();
+}
 
 /// Opcode for the Notify event
 pub const NOTIFY_EVENT: u8 = 0;
@@ -2922,6 +2957,11 @@ impl crate::x11_utils::GenerateRandom for NotifyEvent {
             cancel: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_notify_event() {
+    crate::x11_utils::test_randomised_type::<NotifyEvent>();
 }
 impl From<&NotifyEvent> for [u8; 32] {
     fn from(input: &NotifyEvent) -> Self {
@@ -3033,6 +3073,11 @@ impl crate::x11_utils::GenerateRandom for AttributNotifyEvent {
             context: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_attribut_notify_event() {
+    crate::x11_utils::test_randomised_type::<AttributNotifyEvent>();
 }
 impl From<&AttributNotifyEvent> for [u8; 32] {
     fn from(input: &AttributNotifyEvent) -> Self {

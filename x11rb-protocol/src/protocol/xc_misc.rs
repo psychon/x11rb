@@ -164,6 +164,11 @@ impl crate::x11_utils::GenerateRandom for GetVersionReply {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_get_version_reply() {
+    crate::x11_utils::test_randomised_type::<GetVersionReply>();
+}
 
 /// Opcode for the GetXIDRange request
 pub const GET_XID_RANGE_REQUEST: u8 = 1;
@@ -285,6 +290,11 @@ impl crate::x11_utils::GenerateRandom for GetXIDRangeReply {
             count: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_get_xid_range_reply() {
+    crate::x11_utils::test_randomised_type::<GetXIDRangeReply>();
 }
 
 /// Opcode for the GetXIDList request

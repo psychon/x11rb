@@ -146,4 +146,9 @@ impl crate::x11_utils::GenerateRandom for EnableReply {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_enable_reply() {
+    crate::x11_utils::test_randomised_type::<EnableReply>();
+}
 

@@ -353,6 +353,11 @@ impl crate::x11_utils::GenerateRandom for Int64 {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_int64() {
+    crate::x11_utils::test_randomised_type::<Int64>();
+}
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -489,6 +494,11 @@ impl crate::x11_utils::GenerateRandom for Trigger {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_trigger() {
+    crate::x11_utils::test_randomised_type::<Trigger>();
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -554,6 +564,11 @@ impl crate::x11_utils::GenerateRandom for Waitcondition {
             event_threshold: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_waitcondition() {
+    crate::x11_utils::test_randomised_type::<Waitcondition>();
 }
 
 /// Opcode for the Counter error
@@ -713,6 +728,11 @@ impl crate::x11_utils::GenerateRandom for InitializeReply {
             minor_version: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_initialize_reply() {
+    crate::x11_utils::test_randomised_type::<InitializeReply>();
 }
 
 /// Opcode for the ListSystemCounters request
@@ -1075,6 +1095,11 @@ impl crate::x11_utils::GenerateRandom for QueryCounterReply {
             counter_value: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_query_counter_reply() {
+    crate::x11_utils::test_randomised_type::<QueryCounterReply>();
 }
 
 /// Opcode for the Await request
@@ -1996,6 +2021,11 @@ impl crate::x11_utils::GenerateRandom for QueryAlarmReply {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_query_alarm_reply() {
+    crate::x11_utils::test_randomised_type::<QueryAlarmReply>();
+}
 
 /// Opcode for the SetPriority request
 pub const SET_PRIORITY_REQUEST: u8 = 12;
@@ -2178,6 +2208,11 @@ impl crate::x11_utils::GenerateRandom for GetPriorityReply {
             priority: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_get_priority_reply() {
+    crate::x11_utils::test_randomised_type::<GetPriorityReply>();
 }
 
 /// Opcode for the CreateFence request
@@ -2551,6 +2586,11 @@ impl crate::x11_utils::GenerateRandom for QueryFenceReply {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_query_fence_reply() {
+    crate::x11_utils::test_randomised_type::<QueryFenceReply>();
+}
 
 /// Opcode for the AwaitFence request
 pub const AWAIT_FENCE_REQUEST: u8 = 19;
@@ -2729,6 +2769,11 @@ impl crate::x11_utils::GenerateRandom for CounterNotifyEvent {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_counter_notify_event() {
+    crate::x11_utils::test_randomised_type::<CounterNotifyEvent>();
+}
 impl From<&CounterNotifyEvent> for [u8; 32] {
     fn from(input: &CounterNotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -2889,6 +2934,11 @@ impl crate::x11_utils::GenerateRandom for AlarmNotifyEvent {
             state: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_alarm_notify_event() {
+    crate::x11_utils::test_randomised_type::<AlarmNotifyEvent>();
 }
 impl From<&AlarmNotifyEvent> for [u8; 32] {
     fn from(input: &AlarmNotifyEvent) -> Self {

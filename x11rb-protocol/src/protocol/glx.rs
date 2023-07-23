@@ -228,6 +228,11 @@ impl crate::x11_utils::GenerateRandom for PbufferClobberEvent {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_pbuffer_clobber_event() {
+    crate::x11_utils::test_randomised_type::<PbufferClobberEvent>();
+}
 impl From<&PbufferClobberEvent> for [u8; 32] {
     fn from(input: &PbufferClobberEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -397,6 +402,11 @@ impl crate::x11_utils::GenerateRandom for BufferSwapCompleteEvent {
             sbc: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_buffer_swap_complete_event() {
+    crate::x11_utils::test_randomised_type::<BufferSwapCompleteEvent>();
 }
 impl From<&BufferSwapCompleteEvent> for [u8; 32] {
     fn from(input: &BufferSwapCompleteEvent) -> Self {
@@ -1030,6 +1040,11 @@ impl crate::x11_utils::GenerateRandom for MakeCurrentReply {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_make_current_reply() {
+    crate::x11_utils::test_randomised_type::<MakeCurrentReply>();
+}
 
 /// Opcode for the IsDirect request
 pub const IS_DIRECT_REQUEST: u8 = 6;
@@ -1173,6 +1188,11 @@ impl crate::x11_utils::GenerateRandom for IsDirectReply {
             is_direct: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_is_direct_reply() {
+    crate::x11_utils::test_randomised_type::<IsDirectReply>();
 }
 
 /// Opcode for the QueryVersion request
@@ -1330,6 +1350,11 @@ impl crate::x11_utils::GenerateRandom for QueryVersionReply {
             minor_version: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_query_version_reply() {
+    crate::x11_utils::test_randomised_type::<QueryVersionReply>();
 }
 
 /// Opcode for the WaitGL request
@@ -2411,6 +2436,11 @@ impl crate::x11_utils::GenerateRandom for QueryExtensionsStringReply {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_query_extensions_string_reply() {
+    crate::x11_utils::test_randomised_type::<QueryExtensionsStringReply>();
+}
 
 /// Opcode for the QueryServerString request
 pub const QUERY_SERVER_STRING_REQUEST: u8 = 19;
@@ -3307,6 +3337,11 @@ impl crate::x11_utils::GenerateRandom for MakeContextCurrentReply {
             context_tag: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_make_context_current_reply() {
+    crate::x11_utils::test_randomised_type::<MakeContextCurrentReply>();
 }
 
 /// Opcode for the CreatePbuffer request
@@ -4474,6 +4509,11 @@ impl crate::x11_utils::GenerateRandom for GenListsReply {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_gen_lists_reply() {
+    crate::x11_utils::test_randomised_type::<GenListsReply>();
+}
 
 /// Opcode for the FeedbackBuffer request
 pub const FEEDBACK_BUFFER_REQUEST: u8 = 105;
@@ -4926,6 +4966,11 @@ impl crate::x11_utils::GenerateRandom for FinishReply {
             length: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_finish_reply() {
+    crate::x11_utils::test_randomised_type::<FinishReply>();
 }
 
 /// Opcode for the PixelStoref request
@@ -5786,6 +5831,11 @@ impl crate::x11_utils::GenerateRandom for GetErrorReply {
             error: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_get_error_reply() {
+    crate::x11_utils::test_randomised_type::<GetErrorReply>();
 }
 
 /// Opcode for the GetFloatv request
@@ -9474,6 +9524,11 @@ impl crate::x11_utils::GenerateRandom for IsEnabledReply {
         }
     }
 }
+#[cfg(test)]
+#[test]
+fn test_is_enabled_reply() {
+    crate::x11_utils::test_randomised_type::<IsEnabledReply>();
+}
 
 /// Opcode for the IsList request
 pub const IS_LIST_REQUEST: u8 = 141;
@@ -9603,6 +9658,11 @@ impl crate::x11_utils::GenerateRandom for IsListReply {
             ret_val: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_is_list_reply() {
+    crate::x11_utils::test_randomised_type::<IsListReply>();
 }
 
 /// Opcode for the Flush request
@@ -10141,6 +10201,11 @@ impl crate::x11_utils::GenerateRandom for IsTextureReply {
             ret_val: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_is_texture_reply() {
+    crate::x11_utils::test_randomised_type::<IsTextureReply>();
 }
 
 /// Opcode for the GetColorTable request
@@ -12646,6 +12711,11 @@ impl crate::x11_utils::GenerateRandom for IsQueryARBReply {
             ret_val: crate::x11_utils::GenerateRandom::generate(rng),
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_is_query_arb_reply() {
+    crate::x11_utils::test_randomised_type::<IsQueryARBReply>();
 }
 
 /// Opcode for the GetQueryivARB request
