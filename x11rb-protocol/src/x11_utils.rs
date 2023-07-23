@@ -782,6 +782,8 @@ mod generate_random {
     impl_primitive!(i64, (..4));
     impl_primitive!(isize, (..4));
     impl_primitive!(bool, ());
+    impl_primitive!(f32, ());
+    impl_primitive!(f64, ());
 
     fn generate_random_vec<T: GenerateRandom>(rng: &mut Rng, len: usize) -> alloc::vec::Vec<T> {
         core::iter::repeat_with(|| T::generate(rng)).take(len).collect()
