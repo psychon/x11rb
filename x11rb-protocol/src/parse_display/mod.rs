@@ -38,20 +38,41 @@ impl ParsedDisplay {
 /// Parse an X11 display string.
 ///
 /// If `dpy_name` is `None`, the display is parsed from the environment variable `DISPLAY`.
+///
+/// This function is only available when the `std` feature is enabled.
+#[cfg(feature = "std")]
 pub fn parse_display(dpy_name: Option<&str>) -> Option<ParsedDisplay> {
+    fn file_exists(path: &str) -> bool {
+        let path: &std::path::Path = path.as_ref();
+        path.exists()
+    }
+
+    parse_display_with_file_exists_callback(dpy_name, file_exists)
+}
+
+/// Parse an X11 display string.
+///
+/// If `dpy_name` is `None`, the display is parsed from the environment variable `DISPLAY`.
+///
+/// The parameter `file_exists` is called to check whether a given string refers to an existing
+/// file. This function does not need to check the file type.
+pub fn parse_display_with_file_exists_callback(
+    dpy_name: Option<&str>,
+    file_exists: impl Fn(&str) -> bool,
+) -> Option<ParsedDisplay> {
     // If no dpy name was provided, use the env var. If no env var exists, return None.
     match dpy_name {
-        Some(dpy_name) => parse_display_impl(dpy_name),
-        None => parse_display_impl(&std::env::var("DISPLAY").ok()?),
+        Some(dpy_name) => parse_display_impl(dpy_name, file_exists),
+        None => parse_display_impl(&std::env::var("DISPLAY").ok()?, file_exists),
     }
 }
 
-fn parse_display_impl(dpy_name: &str) -> Option<ParsedDisplay> {
+fn parse_display_impl(dpy_name: &str, file_exists: impl Fn(&str) -> bool) -> Option<ParsedDisplay> {
     if dpy_name.starts_with('/') {
-        return parse_display_direct_path(dpy_name);
+        return parse_display_direct_path(dpy_name, file_exists);
     }
     if let Some(remaining) = dpy_name.strip_prefix("unix:") {
-        return parse_display_direct_path(remaining);
+        return parse_display_direct_path(remaining, file_exists);
     }
 
     // Everything up to the last '/' is the protocol. This part is optional.
@@ -85,17 +106,10 @@ fn parse_display_impl(dpy_name: &str) -> Option<ParsedDisplay> {
 }
 
 // Check for "launchd mode" where we get the full path to a unix socket
-fn parse_display_direct_path(dpy_name: &str) -> Option<ParsedDisplay> {
-    #[cfg(feature = "std")]
-    fn file_exists(path: impl AsRef<std::path::Path>) -> bool {
-        path.as_ref().exists()
-    }
-    #[cfg(not(feature = "std"))]
-    fn file_exists(_path: &str) -> bool {
-        // Just hope for the best
-        true
-    }
-
+fn parse_display_direct_path(
+    dpy_name: &str,
+    file_exists: impl Fn(&str) -> bool,
+) -> Option<ParsedDisplay> {
     if file_exists(dpy_name) {
         return Some(ParsedDisplay {
             host: dpy_name.to_string(),
@@ -121,8 +135,9 @@ fn parse_display_direct_path(dpy_name: &str) -> Option<ParsedDisplay> {
 
 #[cfg(test)]
 mod test {
-    use super::{parse_display, ParsedDisplay};
+    use super::{parse_display, parse_display_with_file_exists_callback, ParsedDisplay};
     use alloc::string::ToString;
+    use core::cell::RefCell;
 
     fn do_parse_display(input: &str) -> Option<ParsedDisplay> {
         std::env::set_var("DISPLAY", input);
@@ -538,5 +553,79 @@ mod test {
                 input
             );
         }
+    }
+
+    fn make_unix_path(host: &str, screen: u16) -> Option<ParsedDisplay> {
+        Some(ParsedDisplay {
+            host: host.to_string(),
+            protocol: Some("unix".to_string()),
+            display: 0,
+            screen,
+        })
+    }
+
+    #[test]
+    fn test_file_exists_callback_direct_path() {
+        fn run_test(display: &str, expected_path: &str) {
+            let called = RefCell::new(0);
+            let callback = |path: &_| {
+                assert_eq!(path, expected_path);
+                let mut called = called.borrow_mut();
+                assert_eq!(*called, 0);
+                *called += 1;
+                true
+            };
+            let result = parse_display_with_file_exists_callback(Some(display), callback);
+            assert_eq!(*called.borrow(), 1);
+            assert_eq!(result, make_unix_path(expected_path, 0));
+        }
+
+        run_test("/path/to/file", "/path/to/file");
+        run_test("/path/to/file.123", "/path/to/file.123");
+        run_test("unix:whatever", "whatever");
+        run_test("unix:whatever.123", "whatever.123");
+    }
+
+    #[test]
+    fn test_file_exists_callback_direct_path_with_screen() {
+        fn run_test(display: &str, expected_path: &str) {
+            let called = RefCell::new(0);
+            let callback = |path: &_| {
+                let mut called = called.borrow_mut();
+                *called += 1;
+                match *called {
+                    1 => {
+                        assert_eq!(path, alloc::format!("{expected_path}.42"));
+                        false
+                    }
+                    2 => {
+                        assert_eq!(path, expected_path);
+                        true
+                    }
+                    _ => panic!("Unexpected call count {}", *called),
+                }
+            };
+            let result = parse_display_with_file_exists_callback(Some(display), callback);
+            assert_eq!(*called.borrow(), 2);
+            assert_eq!(result, make_unix_path(expected_path, 42));
+        }
+
+        run_test("/path/to/file.42", "/path/to/file");
+        run_test("unix:whatever.42", "whatever");
+    }
+
+    #[test]
+    fn test_file_exists_callback_not_called_without_path() {
+        let callback = |path: &str| unreachable!("Called with {path}");
+        let result = parse_display_with_file_exists_callback(Some("foo/bar:1.2"), callback);
+        assert_eq!(
+            result,
+            Some(ParsedDisplay {
+                host: "bar".to_string(),
+                protocol: Some("foo".to_string()),
+                display: 1,
+                screen: 2,
+            },)
+        );
     }
 }
