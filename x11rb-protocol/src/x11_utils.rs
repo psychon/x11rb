@@ -782,6 +782,37 @@ mod generate_random {
     impl_primitive!(i64, (..4));
     impl_primitive!(isize, (..4));
     impl_primitive!(bool, ());
+
+    fn generate_random_vec<T: GenerateRandom>(rng: &mut Rng, len: usize) -> alloc::vec::Vec<T> {
+        core::iter::repeat_with(|| T::generate(rng)).take(len).collect()
+    }
+
+    impl<T: GenerateRandom> GenerateRandom for alloc::vec::Vec<T> {
+        fn generate(rng: &mut Rng) -> Self {
+            let len = rng.usize(..4);
+            generate_random_vec(rng, len)
+        }
+    }
+
+    impl<T> GenerateRandom for [T; 0] {
+        fn generate(_rng: &mut Rng) -> Self {
+            []
+        }
+    }
+
+    macro_rules! impl_array {
+        ($($num: expr)*) => {
+            $(
+                impl<T: GenerateRandom + core::fmt::Debug> GenerateRandom for [T; $num] {
+                    fn generate(rng: &mut Rng) -> Self {
+                        generate_random_vec(rng, $num).try_into().unwrap()
+                    }
+                }
+            )*
+        }
+    }
+
+    impl_array!(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32);
 }
 
 #[cfg(test)]
