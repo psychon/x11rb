@@ -76,6 +76,50 @@ impl fmt::Display for ParseError {
     }
 }
 
+/// An error that occurred while parsing the `$DISPLAY` environment variable
+#[derive(Debug, Clone, PartialEq, Eq)]
+#[non_exhaustive]
+pub enum DisplayParsingError {
+    /// No explicit display was provided and the `$DISPLAY` environment variable is not set.
+    DisplayNotSet,
+
+    /// The given value could not be parsed. The input to parsing is provided.
+    MalformedValue(alloc::string::String),
+
+    /// The value of `$DISPLAY` is not valid unicode
+    NotUnicode,
+
+    /// An unknown error occurred during display parsing.
+    ///
+    /// This is `XCB_CONN_CLOSED_PARSE_ERR`.
+    Unknown,
+}
+
+#[cfg(feature = "std")]
+impl Error for DisplayParsingError {}
+
+impl fmt::Display for DisplayParsingError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            DisplayParsingError::DisplayNotSet => {
+                write!(
+                    f,
+                    "$DISPLAY variable not set and no value was provided explicitly"
+                )
+            }
+            DisplayParsingError::MalformedValue(dpy) => {
+                write!(f, "Failed to parse value '{}'", dpy)
+            }
+            DisplayParsingError::NotUnicode => {
+                write!(f, "The value of $DISPLAY is not valid unicode")
+            }
+            DisplayParsingError::Unknown => {
+                write!(f, "Unknown error while parsing a $DISPLAY address")
+            }
+        }
+    }
+}
+
 /// An error that occurred while connecting to an X11 server
 #[derive(Debug)]
 #[non_exhaustive]
@@ -98,7 +142,7 @@ pub enum ConnectError {
     /// Error during parsing of display string.
     ///
     /// This is `XCB_CONN_CLOSED_PARSE_ERR`.
-    DisplayParsingError,
+    DisplayParsingError(DisplayParsingError),
 
     /// Server does not have a screen matching the display.
     ///
@@ -144,7 +188,7 @@ impl fmt::Display for ConnectError {
         match self {
             ConnectError::UnknownError => write!(f, "Unknown connection error"),
             ConnectError::InsufficientMemory => write!(f, "Insufficient memory"),
-            ConnectError::DisplayParsingError => write!(f, "Display parsing error"),
+            ConnectError::DisplayParsingError(err) => err.fmt(f),
             ConnectError::InvalidScreen => write!(f, "Invalid screen"),
             ConnectError::ParseError(err) => err.fmt(f),
             #[cfg(feature = "std")]
@@ -166,6 +210,12 @@ impl fmt::Display for ConnectError {
 impl From<ParseError> for ConnectError {
     fn from(err: ParseError) -> Self {
         ConnectError::ParseError(err)
+    }
+}
+
+impl From<DisplayParsingError> for ConnectError {
+    fn from(err: DisplayParsingError) -> Self {
+        ConnectError::DisplayParsingError(err)
     }
 }
 

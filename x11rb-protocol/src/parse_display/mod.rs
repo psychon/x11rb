@@ -5,6 +5,7 @@
 mod connect_instruction;
 pub use connect_instruction::ConnectAddress;
 
+use crate::errors::DisplayParsingError;
 use alloc::string::{String, ToString};
 
 /// A parsed X11 display string.
@@ -41,7 +42,7 @@ impl ParsedDisplay {
 ///
 /// This function is only available when the `std` feature is enabled.
 #[cfg(feature = "std")]
-pub fn parse_display(dpy_name: Option<&str>) -> Option<ParsedDisplay> {
+pub fn parse_display(dpy_name: Option<&str>) -> Result<ParsedDisplay, DisplayParsingError> {
     fn file_exists(path: &str) -> bool {
         let path: &std::path::Path = path.as_ref();
         path.exists()
@@ -59,15 +60,25 @@ pub fn parse_display(dpy_name: Option<&str>) -> Option<ParsedDisplay> {
 pub fn parse_display_with_file_exists_callback(
     dpy_name: Option<&str>,
     file_exists: impl Fn(&str) -> bool,
-) -> Option<ParsedDisplay> {
+) -> Result<ParsedDisplay, DisplayParsingError> {
     // If no dpy name was provided, use the env var. If no env var exists, return None.
     match dpy_name {
         Some(dpy_name) => parse_display_impl(dpy_name, file_exists),
-        None => parse_display_impl(&std::env::var("DISPLAY").ok()?, file_exists),
+        None => match std::env::var("DISPLAY") {
+            Ok(dpy_name) => parse_display_impl(&dpy_name, file_exists),
+            Err(std::env::VarError::NotPresent) => Err(DisplayParsingError::DisplayNotSet),
+            Err(std::env::VarError::NotUnicode(_)) => Err(DisplayParsingError::NotUnicode),
+        },
     }
 }
 
-fn parse_display_impl(dpy_name: &str, file_exists: impl Fn(&str) -> bool) -> Option<ParsedDisplay> {
+fn parse_display_impl(
+    dpy_name: &str,
+    file_exists: impl Fn(&str) -> bool,
+) -> Result<ParsedDisplay, DisplayParsingError> {
+    let malformed = || DisplayParsingError::MalformedValue(dpy_name.to_string());
+    let map_malformed = |_| malformed();
+
     if dpy_name.starts_with('/') {
         return parse_display_direct_path(dpy_name, file_exists);
     }
@@ -83,7 +94,7 @@ fn parse_display_impl(dpy_name: &str, file_exists: impl Fn(&str) -> bool) -> Opt
     };
 
     // Everything up to the last ':' is the host. This part is required.
-    let pos = remaining.rfind(':')?;
+    let pos = remaining.rfind(':').ok_or_else(malformed)?;
     let (host, remaining) = (&remaining[..pos], &remaining[pos + 1..]);
 
     // The remaining part is display.screen. The display is required and the screen optional.
@@ -93,11 +104,14 @@ fn parse_display_impl(dpy_name: &str, file_exists: impl Fn(&str) -> bool) -> Opt
     };
 
     // Parse the display and screen number
-    let (display, screen) = (display.parse().ok()?, screen.parse().ok()?);
+    let (display, screen) = (
+        display.parse().map_err(map_malformed)?,
+        screen.parse().map_err(map_malformed)?,
+    );
 
     let host = host.to_string();
     let protocol = protocol.map(|p| p.to_string());
-    Some(ParsedDisplay {
+    Ok(ParsedDisplay {
         host,
         protocol,
         display,
@@ -109,9 +123,9 @@ fn parse_display_impl(dpy_name: &str, file_exists: impl Fn(&str) -> bool) -> Opt
 fn parse_display_direct_path(
     dpy_name: &str,
     file_exists: impl Fn(&str) -> bool,
-) -> Option<ParsedDisplay> {
+) -> Result<ParsedDisplay, DisplayParsingError> {
     if file_exists(dpy_name) {
-        return Some(ParsedDisplay {
+        return Ok(ParsedDisplay {
             host: dpy_name.to_string(),
             protocol: Some("unix".to_string()),
             display: 0,
@@ -122,24 +136,28 @@ fn parse_display_direct_path(
     // Optionally, a screen number may be appended as ".n".
     if let Some((path, screen)) = dpy_name.rsplit_once('.') {
         if file_exists(path) {
-            return Some(ParsedDisplay {
+            return Ok(ParsedDisplay {
                 host: path.to_string(),
                 protocol: Some("unix".to_string()),
                 display: 0,
-                screen: screen.parse().ok()?,
+                screen: screen
+                    .parse()
+                    .map_err(|_| DisplayParsingError::MalformedValue(dpy_name.to_string()))?,
             });
         }
     }
-    None
+    Err(DisplayParsingError::MalformedValue(dpy_name.to_string()))
 }
 
 #[cfg(test)]
 mod test {
-    use super::{parse_display, parse_display_with_file_exists_callback, ParsedDisplay};
+    use super::{
+        parse_display, parse_display_with_file_exists_callback, DisplayParsingError, ParsedDisplay,
+    };
     use alloc::string::ToString;
     use core::cell::RefCell;
 
-    fn do_parse_display(input: &str) -> Option<ParsedDisplay> {
+    fn do_parse_display(input: &str) -> Result<ParsedDisplay, DisplayParsingError> {
         std::env::set_var("DISPLAY", input);
         let result1 = parse_display(None);
 
@@ -164,7 +182,7 @@ mod test {
 
     fn test_missing_input() {
         std::env::remove_var("DISPLAY");
-        assert_eq!(parse_display(None), None);
+        assert_eq!(parse_display(None), Err(DisplayParsingError::DisplayNotSet));
     }
 
     fn own_good_cases() {
@@ -200,7 +218,7 @@ mod test {
         ] {
             assert_eq!(
                 do_parse_display(input).as_ref(),
-                Some(output),
+                Ok(output),
                 "Failed parsing correctly: {}",
                 input
             );
@@ -211,7 +229,9 @@ mod test {
         let non_existing_file = concat!(env!("CARGO_MANIFEST_DIR"), "/this_file_does_not_exist");
         assert_eq!(
             do_parse_display(non_existing_file),
-            None,
+            Err(DisplayParsingError::MalformedValue(
+                non_existing_file.to_string()
+            )),
             "Unexpectedly parsed: {}",
             non_existing_file
         );
@@ -511,7 +531,7 @@ mod test {
         ] {
             assert_eq!(
                 do_parse_display(input).as_ref(),
-                Some(output),
+                Ok(output),
                 "Failed parsing correctly: {}",
                 input
             );
@@ -548,15 +568,15 @@ mod test {
         ] {
             assert_eq!(
                 do_parse_display(input),
-                None,
+                Err(DisplayParsingError::MalformedValue(input.to_string())),
                 "Unexpectedly parsed: {}",
                 input
             );
         }
     }
 
-    fn make_unix_path(host: &str, screen: u16) -> Option<ParsedDisplay> {
-        Some(ParsedDisplay {
+    fn make_unix_path(host: &str, screen: u16) -> Result<ParsedDisplay, DisplayParsingError> {
+        Ok(ParsedDisplay {
             host: host.to_string(),
             protocol: Some("unix".to_string()),
             display: 0,
@@ -620,7 +640,7 @@ mod test {
         let result = parse_display_with_file_exists_callback(Some("foo/bar:1.2"), callback);
         assert_eq!(
             result,
-            Some(ParsedDisplay {
+            Ok(ParsedDisplay {
                 host: "bar".to_string(),
                 protocol: Some("foo".to_string()),
                 display: 1,

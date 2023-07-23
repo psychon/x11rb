@@ -87,8 +87,7 @@ impl RustConnection {
         ConnectError,
     > {
         // Parse the display name.
-        let addrs = x11rb_protocol::parse_display::parse_display(display_name)
-            .ok_or(ConnectError::DisplayParsingError)?;
+        let addrs = x11rb_protocol::parse_display::parse_display(display_name)?;
 
         // Connect to the stream.
         let (stream, screen) = nb_connect::connect(&addrs).await?;

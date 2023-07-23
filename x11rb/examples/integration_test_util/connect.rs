@@ -13,7 +13,7 @@ pub fn connect(
         let dpy_name = dpy_name
             .map(std::ffi::CString::new)
             .transpose()
-            .map_err(|_| x11rb::errors::ConnectError::DisplayParsingError)?;
+            .map_err(|_| x11rb::errors::DisplayParsingError::Unknown)?;
         let dpy_name = dpy_name.as_deref();
         x11rb::xcb_ffi::XCBConnection::connect(dpy_name)
     }

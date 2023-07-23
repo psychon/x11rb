@@ -10,6 +10,7 @@ use crate::connection::{
     compute_length_field, Connection, ReplyOrError, RequestConnection, RequestKind,
 };
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
+use crate::errors::DisplayParsingError;
 pub use crate::errors::{ConnectError, ConnectionError, ParseError, ReplyError, ReplyOrIdError};
 use crate::extension_manager::ExtensionManager;
 use crate::protocol::bigreq::{ConnectionExt as _, EnableReply};
@@ -112,8 +113,7 @@ impl RustConnection<DefaultStream> {
     /// If no `dpy_name` is provided, the value from `$DISPLAY` is used.
     pub fn connect(dpy_name: Option<&str>) -> Result<(Self, usize), ConnectError> {
         // Parse display information
-        let parsed_display = x11rb_protocol::parse_display::parse_display(dpy_name)
-            .ok_or(ConnectError::DisplayParsingError)?;
+        let parsed_display = x11rb_protocol::parse_display::parse_display(dpy_name)?;
         let screen = parsed_display.screen.into();
 
         // Establish connection by iterating over ConnectAddresses until we find one that
@@ -156,7 +156,7 @@ impl RustConnection<DefaultStream> {
         // none of the addresses worked
         Err(match error {
             Some(e) => ConnectError::IoError(e),
-            None => ConnectError::DisplayParsingError,
+            None => DisplayParsingError::Unknown.into(),
         })
     }
 }
