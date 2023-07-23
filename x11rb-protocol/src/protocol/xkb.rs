@@ -3400,6 +3400,12 @@ impl From<u8> for Behavior {
         Self(value)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for Behavior {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self(crate::x11_utils::GenerateRandom::generate(rng))
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -6533,6 +6539,12 @@ impl From<SAType> for Action {
             0,
         ];
         Self(value)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for Action {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self(crate::x11_utils::GenerateRandom::generate(rng))
     }
 }
 

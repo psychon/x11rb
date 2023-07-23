@@ -591,6 +591,18 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             outln!(out, "}}");
         }
 
+        // Add a GenerateRandom impl
+        outln!(out, "#[cfg(test)]");
+        outln!(out, "impl crate::x11_utils::GenerateRandom for {rust_name} {{");
+        out.indented(|out| {
+            outln!(out, "fn generate(rng: &mut fastrand::Rng) -> Self {{");
+            out.indented(|out| {
+                outln!(out, "Self(crate::x11_utils::GenerateRandom::generate(rng))");
+            });
+            outln!(out, "}}");
+        });
+        outln!(out, "}}");
+
         outln!(out, "");
     }
 

@@ -7348,6 +7348,12 @@ impl From<LeaseNotify> for NotifyData {
         Self(lc_bytes)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for NotifyData {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self(crate::x11_utils::GenerateRandom::generate(rng))
+    }
+}
 
 /// Opcode for the Notify event
 pub const NOTIFY_EVENT: u8 = 1;

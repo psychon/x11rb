@@ -6261,6 +6261,12 @@ impl From<[u32; 5]> for ClientMessageData {
         Self(value)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for ClientMessageData {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self(crate::x11_utils::GenerateRandom::generate(rng))
+    }
+}
 
 /// Opcode for the ClientMessage event
 pub const CLIENT_MESSAGE_EVENT: u8 = 33;
