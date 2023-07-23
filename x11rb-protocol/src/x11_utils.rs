@@ -748,3 +748,41 @@ pub fn parse_request_header(
         finally_remaining,
     ))
 }
+
+#[cfg(test)]
+mod generate_random {
+    use fastrand::Rng;
+
+    /// Generate a random instance of this type.
+    pub(crate) trait GenerateRandom: Sized {
+        /// Generate a random instance of this type.
+        ///
+        /// - rng: The random number generator to steer the random generation
+        fn generate(rng: &mut Rng) -> Self;
+    }
+
+    macro_rules! impl_primitive {
+        ($ty: ident, ($($args: tt)*)) => {
+            impl GenerateRandom for $ty {
+                fn generate(rng: &mut Rng) -> Self {
+                    rng.$ty ( $($args)* )
+                }
+            }
+        }
+    }
+
+    impl_primitive!(u8, (..4));
+    impl_primitive!(u16, (..4));
+    impl_primitive!(u32, (..4));
+    impl_primitive!(u64, (..4));
+    impl_primitive!(usize, (..4));
+    impl_primitive!(i8, (..4));
+    impl_primitive!(i16, (..4));
+    impl_primitive!(i32, (..4));
+    impl_primitive!(i64, (..4));
+    impl_primitive!(isize, (..4));
+    impl_primitive!(bool, ());
+}
+
+#[cfg(test)]
+pub(crate) use generate_random::GenerateRandom;
