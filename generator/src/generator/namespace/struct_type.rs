@@ -325,7 +325,11 @@ pub(super) fn emit_struct_type(
                         if generator.field_is_visible(field, &deducible_fields) {
                             let field_name = field.name().unwrap();
                             if !skip_length_field || field_name != "length" {
-                                outln!(out, "{}: crate::x11_utils::GenerateRandom::generate(rng),", to_rust_variable_name(field_name));
+                                outln!(
+                                    out,
+                                    "{}: crate::x11_utils::GenerateRandom::generate(rng),",
+                                    to_rust_variable_name(field_name)
+                                );
                             }
                         }
                     }
@@ -339,8 +343,16 @@ pub(super) fn emit_struct_type(
         let has_try_parse = external_params.is_empty();
         // FIXME: The has_length_expr thing really needs to be recursive: A could contain B which
         // has such a length field. Thus, stuff still fails.
-        let has_length_expr = fields.iter().any(|field| matches!(field, xcbdefs::FieldDef::List(xcbdefs::ListField { length_expr: Some(_), ..})));
-        if generate_try_parse && has_try_parse && derives.partial_eq && !has_length_expr{
+        let has_length_expr = fields.iter().any(|field| {
+            matches!(
+                field,
+                xcbdefs::FieldDef::List(xcbdefs::ListField {
+                    length_expr: Some(_),
+                    ..
+                })
+            )
+        });
+        if generate_try_parse && has_try_parse && derives.partial_eq && !has_length_expr {
             super::generate_random_test(out, name);
         }
     }

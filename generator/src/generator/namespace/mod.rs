@@ -593,7 +593,10 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
 
         // Add a GenerateRandom impl
         outln!(out, "#[cfg(test)]");
-        outln!(out, "impl crate::x11_utils::GenerateRandom for {rust_name} {{");
+        outln!(
+            out,
+            "impl crate::x11_utils::GenerateRandom for {rust_name} {{"
+        );
         out.indented(|out| {
             outln!(out, "fn generate(rng: &mut fastrand::Rng) -> Self {{");
             out.indented(|out| {
@@ -923,7 +926,10 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         }
 
         outln!(out, "#[cfg(test)]");
-        outln!(out, "impl crate::x11_utils::GenerateRandom for {rust_name} {{");
+        outln!(
+            out,
+            "impl crate::x11_utils::GenerateRandom for {rust_name} {{"
+        );
         out.indented(|out| {
             outln!(out, "fn generate(rng: &mut fastrand::Rng) -> Self {{");
             out.indented(|out| {
@@ -1625,16 +1631,16 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
     }
 }
 
-fn generate_random_test(
-    out: &mut Output,
-    rust_name: &str,
-) {
+fn generate_random_test(out: &mut Output, rust_name: &str) {
     let func_name = format!("test_{}", super::camel_case_to_lower_snake(rust_name));
     outln!(out, "#[cfg(test)]");
     outln!(out, "#[test]");
     outln!(out, "fn {func_name}() {{");
     out.indented(|out| {
-        outln!(out, "crate::x11_utils::test_randomised_type::<{rust_name}>();");
+        outln!(
+            out,
+            "crate::x11_utils::test_randomised_type::<{rust_name}>();"
+        );
     });
     outln!(out, "}}");
 }
