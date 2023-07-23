@@ -78,6 +78,17 @@ impl Serialize for DrmClipRect {
         self.x3.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for DrmClipRect {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            x1: crate::x11_utils::GenerateRandom::generate(rng),
+            y1: crate::x11_utils::GenerateRandom::generate(rng),
+            x2: crate::x11_utils::GenerateRandom::generate(rng),
+            x3: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the QueryVersion request
 pub const QUERY_VERSION_REQUEST: u8 = 0;
@@ -193,6 +204,18 @@ impl Serialize for QueryVersionReply {
         self.dri_minor_patch.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for QueryVersionReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            dri_major_version: crate::x11_utils::GenerateRandom::generate(rng),
+            dri_minor_version: crate::x11_utils::GenerateRandom::generate(rng),
+            dri_minor_patch: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the QueryDirectRenderingCapable request
 pub const QUERY_DIRECT_RENDERING_CAPABLE_REQUEST: u8 = 1;
@@ -300,6 +323,16 @@ impl Serialize for QueryDirectRenderingCapableReply {
         self.sequence.serialize_into(bytes);
         self.length.serialize_into(bytes);
         self.is_capable.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for QueryDirectRenderingCapableReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            is_capable: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -424,6 +457,18 @@ impl OpenConnectionReply {
     pub fn bus_id_len(&self) -> u32 {
         self.bus_id.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for OpenConnectionReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            sarea_handle_low: crate::x11_utils::GenerateRandom::generate(rng),
+            sarea_handle_high: crate::x11_utils::GenerateRandom::generate(rng),
+            bus_id: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -606,6 +651,19 @@ impl GetClientDriverNameReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetClientDriverNameReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            client_driver_major_version: crate::x11_utils::GenerateRandom::generate(rng),
+            client_driver_minor_version: crate::x11_utils::GenerateRandom::generate(rng),
+            client_driver_patch_version: crate::x11_utils::GenerateRandom::generate(rng),
+            client_driver_name: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the CreateContext request
 pub const CREATE_CONTEXT_REQUEST: u8 = 5;
@@ -732,6 +790,16 @@ impl Serialize for CreateContextReply {
         self.sequence.serialize_into(bytes);
         self.length.serialize_into(bytes);
         self.hw_context.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for CreateContextReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            hw_context: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -913,6 +981,16 @@ impl Serialize for CreateDrawableReply {
         self.sequence.serialize_into(bytes);
         self.length.serialize_into(bytes);
         self.hw_drawable_handle.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for CreateDrawableReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            hw_drawable_handle: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -1142,6 +1220,25 @@ impl GetDrawableInfoReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetDrawableInfoReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            drawable_table_index: crate::x11_utils::GenerateRandom::generate(rng),
+            drawable_table_stamp: crate::x11_utils::GenerateRandom::generate(rng),
+            drawable_origin_x: crate::x11_utils::GenerateRandom::generate(rng),
+            drawable_origin_y: crate::x11_utils::GenerateRandom::generate(rng),
+            drawable_size_w: crate::x11_utils::GenerateRandom::generate(rng),
+            drawable_size_h: crate::x11_utils::GenerateRandom::generate(rng),
+            back_x: crate::x11_utils::GenerateRandom::generate(rng),
+            back_y: crate::x11_utils::GenerateRandom::generate(rng),
+            clip_rects: crate::x11_utils::GenerateRandom::generate(rng),
+            back_clip_rects: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the GetDeviceInfo request
 pub const GET_DEVICE_INFO_REQUEST: u8 = 10;
@@ -1272,6 +1369,21 @@ impl GetDeviceInfoReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetDeviceInfoReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            framebuffer_handle_low: crate::x11_utils::GenerateRandom::generate(rng),
+            framebuffer_handle_high: crate::x11_utils::GenerateRandom::generate(rng),
+            framebuffer_origin_offset: crate::x11_utils::GenerateRandom::generate(rng),
+            framebuffer_size: crate::x11_utils::GenerateRandom::generate(rng),
+            framebuffer_stride: crate::x11_utils::GenerateRandom::generate(rng),
+            device_private: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the AuthConnection request
 pub const AUTH_CONNECTION_REQUEST: u8 = 11;
@@ -1390,6 +1502,16 @@ impl Serialize for AuthConnectionReply {
         self.sequence.serialize_into(bytes);
         self.length.serialize_into(bytes);
         self.authenticated.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for AuthConnectionReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            authenticated: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 

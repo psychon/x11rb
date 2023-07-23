@@ -153,6 +153,17 @@ impl Serialize for GetVersionReply {
         self.server_minor_version.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetVersionReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            server_major_version: crate::x11_utils::GenerateRandom::generate(rng),
+            server_minor_version: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the GetXIDRange request
 pub const GET_XID_RANGE_REQUEST: u8 = 1;
@@ -262,6 +273,17 @@ impl Serialize for GetXIDRangeReply {
         self.length.serialize_into(bytes);
         self.start_id.serialize_into(bytes);
         self.count.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetXIDRangeReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            start_id: crate::x11_utils::GenerateRandom::generate(rng),
+            count: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -379,6 +401,16 @@ impl GetXIDListReply {
     pub fn ids_len(&self) -> u32 {
         self.ids.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetXIDListReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            ids: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 

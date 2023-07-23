@@ -122,6 +122,22 @@ impl Serialize for SurfaceInfo {
         self.flags.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for SurfaceInfo {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            id: crate::x11_utils::GenerateRandom::generate(rng),
+            chroma_format: crate::x11_utils::GenerateRandom::generate(rng),
+            pad0: crate::x11_utils::GenerateRandom::generate(rng),
+            max_width: crate::x11_utils::GenerateRandom::generate(rng),
+            max_height: crate::x11_utils::GenerateRandom::generate(rng),
+            subpicture_max_width: crate::x11_utils::GenerateRandom::generate(rng),
+            subpicture_max_height: crate::x11_utils::GenerateRandom::generate(rng),
+            mc_type: crate::x11_utils::GenerateRandom::generate(rng),
+            flags: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the QueryVersion request
 pub const QUERY_VERSION_REQUEST: u8 = 0;
@@ -231,6 +247,17 @@ impl Serialize for QueryVersionReply {
         self.length.serialize_into(bytes);
         self.major.serialize_into(bytes);
         self.minor.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for QueryVersionReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            major: crate::x11_utils::GenerateRandom::generate(rng),
+            minor: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -348,6 +375,16 @@ impl ListSurfaceTypesReply {
     pub fn num(&self) -> u32 {
         self.surfaces.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for ListSurfaceTypesReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            surfaces: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -507,6 +544,18 @@ impl CreateContextReply {
     pub fn length(&self) -> u32 {
         self.priv_data.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for CreateContextReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            width_actual: crate::x11_utils::GenerateRandom::generate(rng),
+            height_actual: crate::x11_utils::GenerateRandom::generate(rng),
+            flags_return: crate::x11_utils::GenerateRandom::generate(rng),
+            priv_data: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -682,6 +731,15 @@ impl CreateSurfaceReply {
     pub fn length(&self) -> u32 {
         self.priv_data.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for CreateSurfaceReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            priv_data: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -894,6 +952,20 @@ impl CreateSubpictureReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for CreateSubpictureReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            width_actual: crate::x11_utils::GenerateRandom::generate(rng),
+            height_actual: crate::x11_utils::GenerateRandom::generate(rng),
+            num_palette_entries: crate::x11_utils::GenerateRandom::generate(rng),
+            entry_bytes: crate::x11_utils::GenerateRandom::generate(rng),
+            component_order: crate::x11_utils::GenerateRandom::generate(rng),
+            priv_data: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the DestroySubpicture request
 pub const DESTROY_SUBPICTURE_REQUEST: u8 = 7;
@@ -1070,6 +1142,16 @@ impl ListSubpictureTypesReply {
     pub fn num(&self) -> u32 {
         self.types.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for ListSubpictureTypesReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            types: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 

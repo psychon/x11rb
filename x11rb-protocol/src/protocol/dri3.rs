@@ -163,6 +163,17 @@ impl Serialize for QueryVersionReply {
         self.minor_version.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for QueryVersionReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            major_version: crate::x11_utils::GenerateRandom::generate(rng),
+            minor_version: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the Open request
 pub const OPEN_REQUEST: u8 = 1;
@@ -925,6 +936,17 @@ impl GetSupportedModifiersReply {
     pub fn num_screen_modifiers(&self) -> u32 {
         self.screen_modifiers.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetSupportedModifiersReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            window_modifiers: crate::x11_utils::GenerateRandom::generate(rng),
+            screen_modifiers: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 

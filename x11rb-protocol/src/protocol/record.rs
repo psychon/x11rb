@@ -66,6 +66,15 @@ impl Serialize for Range8 {
         self.last.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for Range8 {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            first: crate::x11_utils::GenerateRandom::generate(rng),
+            last: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -97,6 +106,15 @@ impl Serialize for Range16 {
         bytes.reserve(4);
         self.first.serialize_into(bytes);
         self.last.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for Range16 {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            first: crate::x11_utils::GenerateRandom::generate(rng),
+            last: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -132,6 +150,15 @@ impl Serialize for ExtRange {
         bytes.reserve(6);
         self.major.serialize_into(bytes);
         self.minor.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for ExtRange {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            major: crate::x11_utils::GenerateRandom::generate(rng),
+            minor: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -213,6 +240,22 @@ impl Serialize for Range {
         self.errors.serialize_into(bytes);
         self.client_started.serialize_into(bytes);
         self.client_died.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for Range {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            core_requests: crate::x11_utils::GenerateRandom::generate(rng),
+            core_replies: crate::x11_utils::GenerateRandom::generate(rng),
+            ext_requests: crate::x11_utils::GenerateRandom::generate(rng),
+            ext_replies: crate::x11_utils::GenerateRandom::generate(rng),
+            delivered_events: crate::x11_utils::GenerateRandom::generate(rng),
+            device_events: crate::x11_utils::GenerateRandom::generate(rng),
+            errors: crate::x11_utils::GenerateRandom::generate(rng),
+            client_started: crate::x11_utils::GenerateRandom::generate(rng),
+            client_died: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -412,6 +455,15 @@ impl ClientInfo {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for ClientInfo {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            client_resource: crate::x11_utils::GenerateRandom::generate(rng),
+            ranges: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the BadContext error
 pub const BAD_CONTEXT_ERROR: u8 = 0;
@@ -533,6 +585,17 @@ impl Serialize for QueryVersionReply {
         self.length.serialize_into(bytes);
         self.major_version.serialize_into(bytes);
         self.minor_version.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for QueryVersionReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            major_version: crate::x11_utils::GenerateRandom::generate(rng),
+            minor_version: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -926,6 +989,18 @@ impl GetContextReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetContextReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            enabled: crate::x11_utils::GenerateRandom::generate(rng),
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            element_header: crate::x11_utils::GenerateRandom::generate(rng),
+            intercepted_clients: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the EnableContext request
 pub const ENABLE_CONTEXT_REQUEST: u8 = 5;
@@ -1059,6 +1134,21 @@ impl EnableContextReply {
         self.data.len()
             .checked_div(4).unwrap()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for EnableContextReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            category: crate::x11_utils::GenerateRandom::generate(rng),
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            element_header: crate::x11_utils::GenerateRandom::generate(rng),
+            client_swapped: crate::x11_utils::GenerateRandom::generate(rng),
+            xid_base: crate::x11_utils::GenerateRandom::generate(rng),
+            server_time: crate::x11_utils::GenerateRandom::generate(rng),
+            rec_sequence_num: crate::x11_utils::GenerateRandom::generate(rng),
+            data: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 

@@ -155,6 +155,17 @@ impl Serialize for QueryVersionReply {
         self.server_minor.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for QueryVersionReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            server_major: crate::x11_utils::GenerateRandom::generate(rng),
+            server_minor: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the SetDeviceCreateContext request
 pub const SET_DEVICE_CREATE_CONTEXT_REQUEST: u8 = 1;
@@ -326,6 +337,16 @@ impl GetDeviceCreateContextReply {
     pub fn context_len(&self) -> u32 {
         self.context.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetDeviceCreateContextReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            context: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -519,6 +540,16 @@ impl GetDeviceContextReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetDeviceContextReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            context: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the SetWindowCreateContext request
 pub const SET_WINDOW_CREATE_CONTEXT_REQUEST: u8 = 5;
@@ -692,6 +723,16 @@ impl GetWindowCreateContextReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetWindowCreateContextReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            context: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the GetWindowContext request
 pub const GET_WINDOW_CONTEXT_REQUEST: u8 = 7;
@@ -810,6 +851,16 @@ impl GetWindowContextReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetWindowContextReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            context: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -886,6 +937,16 @@ impl ListItem {
     pub fn data_context_len(&self) -> u32 {
         self.data_context.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for ListItem {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            name: crate::x11_utils::GenerateRandom::generate(rng),
+            object_context: crate::x11_utils::GenerateRandom::generate(rng),
+            data_context: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -1061,6 +1122,16 @@ impl GetPropertyCreateContextReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetPropertyCreateContextReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            context: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the SetPropertyUseContext request
 pub const SET_PROPERTY_USE_CONTEXT_REQUEST: u8 = 10;
@@ -1234,6 +1305,16 @@ impl GetPropertyUseContextReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetPropertyUseContextReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            context: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the GetPropertyContext request
 pub const GET_PROPERTY_CONTEXT_REQUEST: u8 = 12;
@@ -1358,6 +1439,16 @@ impl GetPropertyContextReply {
     pub fn context_len(&self) -> u32 {
         self.context.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetPropertyContextReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            context: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -1486,6 +1577,16 @@ impl GetPropertyDataContextReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetPropertyDataContextReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            context: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the ListProperties request
 pub const LIST_PROPERTIES_REQUEST: u8 = 14;
@@ -1601,6 +1702,16 @@ impl ListPropertiesReply {
     pub fn properties_len(&self) -> u32 {
         self.properties.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for ListPropertiesReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            properties: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -1776,6 +1887,16 @@ impl GetSelectionCreateContextReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetSelectionCreateContextReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            context: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the SetSelectionUseContext request
 pub const SET_SELECTION_USE_CONTEXT_REQUEST: u8 = 17;
@@ -1949,6 +2070,16 @@ impl GetSelectionUseContextReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetSelectionUseContextReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            context: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the GetSelectionContext request
 pub const GET_SELECTION_CONTEXT_REQUEST: u8 = 19;
@@ -2065,6 +2196,16 @@ impl GetSelectionContextReply {
     pub fn context_len(&self) -> u32 {
         self.context.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetSelectionContextReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            context: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -2185,6 +2326,16 @@ impl GetSelectionDataContextReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetSelectionDataContextReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            context: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the ListSelections request
 pub const LIST_SELECTIONS_REQUEST: u8 = 21;
@@ -2291,6 +2442,16 @@ impl ListSelectionsReply {
     pub fn selections_len(&self) -> u32 {
         self.selections.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for ListSelectionsReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            selections: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -2409,6 +2570,16 @@ impl GetClientContextReply {
     pub fn context_len(&self) -> u32 {
         self.context.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetClientContextReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            context: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 

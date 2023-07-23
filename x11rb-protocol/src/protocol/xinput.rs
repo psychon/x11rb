@@ -82,6 +82,15 @@ impl Serialize for Fp3232 {
         self.frac.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for Fp3232 {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            integral: crate::x11_utils::GenerateRandom::generate(rng),
+            frac: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the GetExtensionVersion request
 pub const GET_EXTENSION_VERSION_REQUEST: u8 = 1;
@@ -236,6 +245,19 @@ impl Serialize for GetExtensionVersionReply {
         self.server_minor.serialize_into(bytes);
         self.present.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 19]);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetExtensionVersionReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            xi_reply_type: crate::x11_utils::GenerateRandom::generate(rng),
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            server_major: crate::x11_utils::GenerateRandom::generate(rng),
+            server_minor: crate::x11_utils::GenerateRandom::generate(rng),
+            present: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -520,6 +542,17 @@ impl Serialize for DeviceInfo {
         bytes.extend_from_slice(&[0; 1]);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for DeviceInfo {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            device_type: crate::x11_utils::GenerateRandom::generate(rng),
+            device_id: crate::x11_utils::GenerateRandom::generate(rng),
+            num_class_info: crate::x11_utils::GenerateRandom::generate(rng),
+            device_use: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -572,6 +605,18 @@ impl Serialize for KeyInfo {
         bytes.extend_from_slice(&[0; 2]);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for KeyInfo {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            class_id: crate::x11_utils::GenerateRandom::generate(rng),
+            len: crate::x11_utils::GenerateRandom::generate(rng),
+            min_keycode: crate::x11_utils::GenerateRandom::generate(rng),
+            max_keycode: crate::x11_utils::GenerateRandom::generate(rng),
+            num_keys: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -608,6 +653,16 @@ impl Serialize for ButtonInfo {
         u8::from(self.class_id).serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.num_buttons.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for ButtonInfo {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            class_id: crate::x11_utils::GenerateRandom::generate(rng),
+            len: crate::x11_utils::GenerateRandom::generate(rng),
+            num_buttons: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -653,6 +708,16 @@ impl Serialize for AxisInfo {
         self.resolution.serialize_into(bytes);
         self.minimum.serialize_into(bytes);
         self.maximum.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for AxisInfo {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            resolution: crate::x11_utils::GenerateRandom::generate(rng),
+            minimum: crate::x11_utils::GenerateRandom::generate(rng),
+            maximum: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -712,6 +777,18 @@ impl ValuatorInfo {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for ValuatorInfo {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            class_id: crate::x11_utils::GenerateRandom::generate(rng),
+            len: crate::x11_utils::GenerateRandom::generate(rng),
+            mode: crate::x11_utils::GenerateRandom::generate(rng),
+            motion_size: crate::x11_utils::GenerateRandom::generate(rng),
+            axes: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -753,6 +830,16 @@ impl Serialize for InputInfoInfoKey {
         bytes.extend_from_slice(&[0; 2]);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for InputInfoInfoKey {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            min_keycode: crate::x11_utils::GenerateRandom::generate(rng),
+            max_keycode: crate::x11_utils::GenerateRandom::generate(rng),
+            num_keys: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct InputInfoInfoButton {
@@ -777,6 +864,14 @@ impl Serialize for InputInfoInfoButton {
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(2);
         self.num_buttons.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for InputInfoInfoButton {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            num_buttons: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -826,6 +921,16 @@ impl InputInfoInfoValuator {
     pub fn axes_len(&self) -> u8 {
         self.axes.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for InputInfoInfoValuator {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            mode: crate::x11_utils::GenerateRandom::generate(rng),
+            motion_size: crate::x11_utils::GenerateRandom::generate(rng),
+            axes: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -920,6 +1025,17 @@ impl InputInfoInfo {
         }
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for InputInfoInfo {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        match rng.u8(..3) {
+            0 => Self::Key(crate::x11_utils::GenerateRandom::generate(rng)),
+            1 => Self::Button(crate::x11_utils::GenerateRandom::generate(rng)),
+            2 => Self::Valuator(crate::x11_utils::GenerateRandom::generate(rng)),
+            _ => unreachable!()
+        }
+    }
+}
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -949,6 +1065,15 @@ impl Serialize for InputInfo {
         class_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.info.serialize_into(bytes, u8::from(class_id));
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for InputInfo {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            len: crate::x11_utils::GenerateRandom::generate(rng),
+            info: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -993,6 +1118,14 @@ impl DeviceName {
     pub fn len(&self) -> u8 {
         self.string.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for DeviceName {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            string: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -1118,6 +1251,19 @@ impl ListInputDevicesReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for ListInputDevicesReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            xi_reply_type: crate::x11_utils::GenerateRandom::generate(rng),
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            devices: crate::x11_utils::GenerateRandom::generate(rng),
+            infos: crate::x11_utils::GenerateRandom::generate(rng),
+            names: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 pub type EventTypeBase = u8;
 
@@ -1150,6 +1296,15 @@ impl Serialize for InputClassInfo {
         bytes.reserve(2);
         u8::from(self.class_id).serialize_into(bytes);
         self.event_type_base.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for InputClassInfo {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            class_id: crate::x11_utils::GenerateRandom::generate(rng),
+            event_type_base: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -1275,6 +1430,17 @@ impl OpenDeviceReply {
     pub fn num_classes(&self) -> u8 {
         self.class_info.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for OpenDeviceReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            xi_reply_type: crate::x11_utils::GenerateRandom::generate(rng),
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            class_info: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -1472,6 +1638,17 @@ impl Serialize for SetDeviceModeReply {
         self.length.serialize_into(bytes);
         u8::from(self.status).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 23]);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for SetDeviceModeReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            xi_reply_type: crate::x11_utils::GenerateRandom::generate(rng),
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            status: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -1684,6 +1861,18 @@ impl GetSelectedExtensionEventsReply {
     pub fn num_all_classes(&self) -> u16 {
         self.all_classes.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetSelectedExtensionEventsReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            xi_reply_type: crate::x11_utils::GenerateRandom::generate(rng),
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            this_classes: crate::x11_utils::GenerateRandom::generate(rng),
+            all_classes: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -1955,6 +2144,17 @@ impl GetDeviceDontPropagateListReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetDeviceDontPropagateListReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            xi_reply_type: crate::x11_utils::GenerateRandom::generate(rng),
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            classes: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -1981,6 +2181,15 @@ impl DeviceTimeCoord {
         self.time.serialize_into(bytes);
         assert_eq!(self.axisvalues.len(), usize::try_from(num_axes).unwrap(), "`axisvalues` has an incorrect length");
         self.axisvalues.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for DeviceTimeCoord {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            time: crate::x11_utils::GenerateRandom::generate(rng),
+            axisvalues: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -2134,6 +2343,19 @@ impl GetDeviceMotionEventsReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetDeviceMotionEventsReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            xi_reply_type: crate::x11_utils::GenerateRandom::generate(rng),
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            num_axes: crate::x11_utils::GenerateRandom::generate(rng),
+            device_mode: crate::x11_utils::GenerateRandom::generate(rng),
+            events: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the ChangeKeyboardDevice request
 pub const CHANGE_KEYBOARD_DEVICE_REQUEST: u8 = 11;
@@ -2270,6 +2492,17 @@ impl Serialize for ChangeKeyboardDeviceReply {
         self.length.serialize_into(bytes);
         u8::from(self.status).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 23]);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for ChangeKeyboardDeviceReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            xi_reply_type: crate::x11_utils::GenerateRandom::generate(rng),
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            status: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -2416,6 +2649,17 @@ impl Serialize for ChangePointerDeviceReply {
         self.length.serialize_into(bytes);
         u8::from(self.status).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 23]);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for ChangePointerDeviceReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            xi_reply_type: crate::x11_utils::GenerateRandom::generate(rng),
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            status: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -2610,6 +2854,17 @@ impl Serialize for GrabDeviceReply {
         self.length.serialize_into(bytes);
         u8::from(self.status).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 23]);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GrabDeviceReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            xi_reply_type: crate::x11_utils::GenerateRandom::generate(rng),
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            status: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -3435,6 +3690,19 @@ impl Serialize for GetDeviceFocusReply {
         bytes.extend_from_slice(&[0; 15]);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetDeviceFocusReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            xi_reply_type: crate::x11_utils::GenerateRandom::generate(rng),
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            focus: crate::x11_utils::GenerateRandom::generate(rng),
+            time: crate::x11_utils::GenerateRandom::generate(rng),
+            revert_to: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the SetDeviceFocus request
 pub const SET_DEVICE_FOCUS_REQUEST: u8 = 21;
@@ -3711,6 +3979,24 @@ impl Serialize for KbdFeedbackState {
         bytes.extend_from_slice(&self.auto_repeats);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for KbdFeedbackState {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            class_id: crate::x11_utils::GenerateRandom::generate(rng),
+            feedback_id: crate::x11_utils::GenerateRandom::generate(rng),
+            len: crate::x11_utils::GenerateRandom::generate(rng),
+            pitch: crate::x11_utils::GenerateRandom::generate(rng),
+            duration: crate::x11_utils::GenerateRandom::generate(rng),
+            led_mask: crate::x11_utils::GenerateRandom::generate(rng),
+            led_values: crate::x11_utils::GenerateRandom::generate(rng),
+            global_auto_repeat: crate::x11_utils::GenerateRandom::generate(rng),
+            click: crate::x11_utils::GenerateRandom::generate(rng),
+            percent: crate::x11_utils::GenerateRandom::generate(rng),
+            auto_repeats: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -3769,6 +4055,19 @@ impl Serialize for PtrFeedbackState {
         self.accel_num.serialize_into(bytes);
         self.accel_denom.serialize_into(bytes);
         self.threshold.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for PtrFeedbackState {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            class_id: crate::x11_utils::GenerateRandom::generate(rng),
+            feedback_id: crate::x11_utils::GenerateRandom::generate(rng),
+            len: crate::x11_utils::GenerateRandom::generate(rng),
+            accel_num: crate::x11_utils::GenerateRandom::generate(rng),
+            accel_denom: crate::x11_utils::GenerateRandom::generate(rng),
+            threshold: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -3833,6 +4132,19 @@ impl Serialize for IntegerFeedbackState {
         self.max_value.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for IntegerFeedbackState {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            class_id: crate::x11_utils::GenerateRandom::generate(rng),
+            feedback_id: crate::x11_utils::GenerateRandom::generate(rng),
+            len: crate::x11_utils::GenerateRandom::generate(rng),
+            resolution: crate::x11_utils::GenerateRandom::generate(rng),
+            min_value: crate::x11_utils::GenerateRandom::generate(rng),
+            max_value: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -3887,6 +4199,18 @@ impl StringFeedbackState {
     pub fn num_keysyms(&self) -> u16 {
         self.keysyms.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for StringFeedbackState {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            class_id: crate::x11_utils::GenerateRandom::generate(rng),
+            feedback_id: crate::x11_utils::GenerateRandom::generate(rng),
+            len: crate::x11_utils::GenerateRandom::generate(rng),
+            max_symbols: crate::x11_utils::GenerateRandom::generate(rng),
+            keysyms: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -3949,6 +4273,19 @@ impl Serialize for BellFeedbackState {
         self.duration.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for BellFeedbackState {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            class_id: crate::x11_utils::GenerateRandom::generate(rng),
+            feedback_id: crate::x11_utils::GenerateRandom::generate(rng),
+            len: crate::x11_utils::GenerateRandom::generate(rng),
+            percent: crate::x11_utils::GenerateRandom::generate(rng),
+            pitch: crate::x11_utils::GenerateRandom::generate(rng),
+            duration: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -4001,6 +4338,18 @@ impl Serialize for LedFeedbackState {
         self.len.serialize_into(bytes);
         self.led_mask.serialize_into(bytes);
         self.led_values.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for LedFeedbackState {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            class_id: crate::x11_utils::GenerateRandom::generate(rng),
+            feedback_id: crate::x11_utils::GenerateRandom::generate(rng),
+            len: crate::x11_utils::GenerateRandom::generate(rng),
+            led_mask: crate::x11_utils::GenerateRandom::generate(rng),
+            led_values: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -4105,6 +4454,21 @@ impl Serialize for FeedbackStateDataKeyboard {
         bytes.extend_from_slice(&self.auto_repeats);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for FeedbackStateDataKeyboard {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            pitch: crate::x11_utils::GenerateRandom::generate(rng),
+            duration: crate::x11_utils::GenerateRandom::generate(rng),
+            led_mask: crate::x11_utils::GenerateRandom::generate(rng),
+            led_values: crate::x11_utils::GenerateRandom::generate(rng),
+            global_auto_repeat: crate::x11_utils::GenerateRandom::generate(rng),
+            click: crate::x11_utils::GenerateRandom::generate(rng),
+            percent: crate::x11_utils::GenerateRandom::generate(rng),
+            auto_repeats: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct FeedbackStateDataPointer {
@@ -4145,6 +4509,16 @@ impl Serialize for FeedbackStateDataPointer {
         self.accel_num.serialize_into(bytes);
         self.accel_denom.serialize_into(bytes);
         self.threshold.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for FeedbackStateDataPointer {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            accel_num: crate::x11_utils::GenerateRandom::generate(rng),
+            accel_denom: crate::x11_utils::GenerateRandom::generate(rng),
+            threshold: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -4192,6 +4566,15 @@ impl FeedbackStateDataString {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for FeedbackStateDataString {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            max_symbols: crate::x11_utils::GenerateRandom::generate(rng),
+            keysyms: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct FeedbackStateDataInteger {
@@ -4236,6 +4619,16 @@ impl Serialize for FeedbackStateDataInteger {
         self.max_value.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for FeedbackStateDataInteger {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            resolution: crate::x11_utils::GenerateRandom::generate(rng),
+            min_value: crate::x11_utils::GenerateRandom::generate(rng),
+            max_value: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct FeedbackStateDataLed {
@@ -4270,6 +4663,15 @@ impl Serialize for FeedbackStateDataLed {
         bytes.reserve(8);
         self.led_mask.serialize_into(bytes);
         self.led_values.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for FeedbackStateDataLed {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            led_mask: crate::x11_utils::GenerateRandom::generate(rng),
+            led_values: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -4312,6 +4714,16 @@ impl Serialize for FeedbackStateDataBell {
         bytes.extend_from_slice(&[0; 3]);
         self.pitch.serialize_into(bytes);
         self.duration.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for FeedbackStateDataBell {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            percent: crate::x11_utils::GenerateRandom::generate(rng),
+            pitch: crate::x11_utils::GenerateRandom::generate(rng),
+            duration: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -4451,6 +4863,20 @@ impl FeedbackStateData {
         }
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for FeedbackStateData {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        match rng.u8(..6) {
+            0 => Self::Keyboard(crate::x11_utils::GenerateRandom::generate(rng)),
+            1 => Self::Pointer(crate::x11_utils::GenerateRandom::generate(rng)),
+            2 => Self::String(crate::x11_utils::GenerateRandom::generate(rng)),
+            3 => Self::Integer(crate::x11_utils::GenerateRandom::generate(rng)),
+            4 => Self::Led(crate::x11_utils::GenerateRandom::generate(rng)),
+            5 => Self::Bell(crate::x11_utils::GenerateRandom::generate(rng)),
+            _ => unreachable!()
+        }
+    }
+}
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -4483,6 +4909,16 @@ impl Serialize for FeedbackState {
         self.feedback_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.data.serialize_into(bytes, u8::from(class_id));
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for FeedbackState {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            feedback_id: crate::x11_utils::GenerateRandom::generate(rng),
+            len: crate::x11_utils::GenerateRandom::generate(rng),
+            data: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -4604,6 +5040,17 @@ impl GetFeedbackControlReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetFeedbackControlReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            xi_reply_type: crate::x11_utils::GenerateRandom::generate(rng),
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            feedbacks: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -4690,6 +5137,24 @@ impl Serialize for KbdFeedbackCtl {
         self.led_values.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for KbdFeedbackCtl {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            class_id: crate::x11_utils::GenerateRandom::generate(rng),
+            feedback_id: crate::x11_utils::GenerateRandom::generate(rng),
+            len: crate::x11_utils::GenerateRandom::generate(rng),
+            key: crate::x11_utils::GenerateRandom::generate(rng),
+            auto_repeat_mode: crate::x11_utils::GenerateRandom::generate(rng),
+            key_click_percent: crate::x11_utils::GenerateRandom::generate(rng),
+            bell_percent: crate::x11_utils::GenerateRandom::generate(rng),
+            bell_pitch: crate::x11_utils::GenerateRandom::generate(rng),
+            bell_duration: crate::x11_utils::GenerateRandom::generate(rng),
+            led_mask: crate::x11_utils::GenerateRandom::generate(rng),
+            led_values: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -4750,6 +5215,19 @@ impl Serialize for PtrFeedbackCtl {
         self.threshold.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for PtrFeedbackCtl {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            class_id: crate::x11_utils::GenerateRandom::generate(rng),
+            feedback_id: crate::x11_utils::GenerateRandom::generate(rng),
+            len: crate::x11_utils::GenerateRandom::generate(rng),
+            num: crate::x11_utils::GenerateRandom::generate(rng),
+            denom: crate::x11_utils::GenerateRandom::generate(rng),
+            threshold: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -4794,6 +5272,17 @@ impl Serialize for IntegerFeedbackCtl {
         self.feedback_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.int_to_display.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for IntegerFeedbackCtl {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            class_id: crate::x11_utils::GenerateRandom::generate(rng),
+            feedback_id: crate::x11_utils::GenerateRandom::generate(rng),
+            len: crate::x11_utils::GenerateRandom::generate(rng),
+            int_to_display: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -4849,6 +5338,17 @@ impl StringFeedbackCtl {
     pub fn num_keysyms(&self) -> u16 {
         self.keysyms.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for StringFeedbackCtl {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            class_id: crate::x11_utils::GenerateRandom::generate(rng),
+            feedback_id: crate::x11_utils::GenerateRandom::generate(rng),
+            len: crate::x11_utils::GenerateRandom::generate(rng),
+            keysyms: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -4911,6 +5411,19 @@ impl Serialize for BellFeedbackCtl {
         self.duration.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for BellFeedbackCtl {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            class_id: crate::x11_utils::GenerateRandom::generate(rng),
+            feedback_id: crate::x11_utils::GenerateRandom::generate(rng),
+            len: crate::x11_utils::GenerateRandom::generate(rng),
+            percent: crate::x11_utils::GenerateRandom::generate(rng),
+            pitch: crate::x11_utils::GenerateRandom::generate(rng),
+            duration: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -4963,6 +5476,18 @@ impl Serialize for LedFeedbackCtl {
         self.len.serialize_into(bytes);
         self.led_mask.serialize_into(bytes);
         self.led_values.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for LedFeedbackCtl {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            class_id: crate::x11_utils::GenerateRandom::generate(rng),
+            feedback_id: crate::x11_utils::GenerateRandom::generate(rng),
+            len: crate::x11_utils::GenerateRandom::generate(rng),
+            led_mask: crate::x11_utils::GenerateRandom::generate(rng),
+            led_values: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -5034,6 +5559,21 @@ impl Serialize for FeedbackCtlDataKeyboard {
         self.led_values.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for FeedbackCtlDataKeyboard {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            key: crate::x11_utils::GenerateRandom::generate(rng),
+            auto_repeat_mode: crate::x11_utils::GenerateRandom::generate(rng),
+            key_click_percent: crate::x11_utils::GenerateRandom::generate(rng),
+            bell_percent: crate::x11_utils::GenerateRandom::generate(rng),
+            bell_pitch: crate::x11_utils::GenerateRandom::generate(rng),
+            bell_duration: crate::x11_utils::GenerateRandom::generate(rng),
+            led_mask: crate::x11_utils::GenerateRandom::generate(rng),
+            led_values: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct FeedbackCtlDataPointer {
@@ -5074,6 +5614,16 @@ impl Serialize for FeedbackCtlDataPointer {
         self.num.serialize_into(bytes);
         self.denom.serialize_into(bytes);
         self.threshold.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for FeedbackCtlDataPointer {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            num: crate::x11_utils::GenerateRandom::generate(rng),
+            denom: crate::x11_utils::GenerateRandom::generate(rng),
+            threshold: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -5120,6 +5670,14 @@ impl FeedbackCtlDataString {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for FeedbackCtlDataString {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            keysyms: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct FeedbackCtlDataInteger {
@@ -5146,6 +5704,14 @@ impl Serialize for FeedbackCtlDataInteger {
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(4);
         self.int_to_display.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for FeedbackCtlDataInteger {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            int_to_display: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -5182,6 +5748,15 @@ impl Serialize for FeedbackCtlDataLed {
         bytes.reserve(8);
         self.led_mask.serialize_into(bytes);
         self.led_values.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for FeedbackCtlDataLed {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            led_mask: crate::x11_utils::GenerateRandom::generate(rng),
+            led_values: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -5224,6 +5799,16 @@ impl Serialize for FeedbackCtlDataBell {
         bytes.extend_from_slice(&[0; 3]);
         self.pitch.serialize_into(bytes);
         self.duration.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for FeedbackCtlDataBell {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            percent: crate::x11_utils::GenerateRandom::generate(rng),
+            pitch: crate::x11_utils::GenerateRandom::generate(rng),
+            duration: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -5363,6 +5948,20 @@ impl FeedbackCtlData {
         }
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for FeedbackCtlData {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        match rng.u8(..6) {
+            0 => Self::Keyboard(crate::x11_utils::GenerateRandom::generate(rng)),
+            1 => Self::Pointer(crate::x11_utils::GenerateRandom::generate(rng)),
+            2 => Self::String(crate::x11_utils::GenerateRandom::generate(rng)),
+            3 => Self::Integer(crate::x11_utils::GenerateRandom::generate(rng)),
+            4 => Self::Led(crate::x11_utils::GenerateRandom::generate(rng)),
+            5 => Self::Bell(crate::x11_utils::GenerateRandom::generate(rng)),
+            _ => unreachable!()
+        }
+    }
+}
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -5395,6 +5994,16 @@ impl Serialize for FeedbackCtl {
         self.feedback_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.data.serialize_into(bytes, u8::from(class_id));
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for FeedbackCtl {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            feedback_id: crate::x11_utils::GenerateRandom::generate(rng),
+            len: crate::x11_utils::GenerateRandom::generate(rng),
+            data: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -5690,6 +6299,17 @@ impl GetDeviceKeyMappingReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetDeviceKeyMappingReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            xi_reply_type: crate::x11_utils::GenerateRandom::generate(rng),
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            keysyms_per_keycode: crate::x11_utils::GenerateRandom::generate(rng),
+            keysyms: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the ChangeDeviceKeyMapping request
 pub const CHANGE_DEVICE_KEY_MAPPING_REQUEST: u8 = 25;
@@ -5895,6 +6515,17 @@ impl GetDeviceModifierMappingReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetDeviceModifierMappingReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            xi_reply_type: crate::x11_utils::GenerateRandom::generate(rng),
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            keymaps: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the SetDeviceModifierMapping request
 pub const SET_DEVICE_MODIFIER_MAPPING_REQUEST: u8 = 27;
@@ -6050,6 +6681,17 @@ impl Serialize for SetDeviceModifierMappingReply {
         bytes.extend_from_slice(&[0; 23]);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for SetDeviceModifierMappingReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            xi_reply_type: crate::x11_utils::GenerateRandom::generate(rng),
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            status: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the GetDeviceButtonMapping request
 pub const GET_DEVICE_BUTTON_MAPPING_REQUEST: u8 = 28;
@@ -6174,6 +6816,17 @@ impl GetDeviceButtonMappingReply {
     pub fn map_size(&self) -> u8 {
         self.map.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetDeviceButtonMappingReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            xi_reply_type: crate::x11_utils::GenerateRandom::generate(rng),
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            map: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -6330,6 +6983,17 @@ impl Serialize for SetDeviceButtonMappingReply {
         bytes.extend_from_slice(&[0; 23]);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for SetDeviceButtonMappingReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            xi_reply_type: crate::x11_utils::GenerateRandom::generate(rng),
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            status: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -6405,6 +7069,17 @@ impl Serialize for KeyState {
         bytes.extend_from_slice(&self.keys);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for KeyState {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            class_id: crate::x11_utils::GenerateRandom::generate(rng),
+            len: crate::x11_utils::GenerateRandom::generate(rng),
+            num_keys: crate::x11_utils::GenerateRandom::generate(rng),
+            keys: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -6478,6 +7153,17 @@ impl Serialize for ButtonState {
         self.num_buttons.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 1]);
         bytes.extend_from_slice(&self.buttons);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for ButtonState {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            class_id: crate::x11_utils::GenerateRandom::generate(rng),
+            len: crate::x11_utils::GenerateRandom::generate(rng),
+            num_buttons: crate::x11_utils::GenerateRandom::generate(rng),
+            buttons: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -6605,6 +7291,17 @@ impl ValuatorState {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for ValuatorState {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            class_id: crate::x11_utils::GenerateRandom::generate(rng),
+            len: crate::x11_utils::GenerateRandom::generate(rng),
+            mode: crate::x11_utils::GenerateRandom::generate(rng),
+            valuators: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -6667,6 +7364,15 @@ impl Serialize for InputStateDataKey {
         self.num_keys.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 1]);
         bytes.extend_from_slice(&self.keys);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for InputStateDataKey {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            num_keys: crate::x11_utils::GenerateRandom::generate(rng),
+            keys: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -6732,6 +7438,15 @@ impl Serialize for InputStateDataButton {
         bytes.extend_from_slice(&self.buttons);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for InputStateDataButton {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            num_buttons: crate::x11_utils::GenerateRandom::generate(rng),
+            buttons: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct InputStateDataValuator {
@@ -6776,6 +7491,15 @@ impl InputStateDataValuator {
     pub fn num_valuators(&self) -> u8 {
         self.valuators.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for InputStateDataValuator {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            mode: crate::x11_utils::GenerateRandom::generate(rng),
+            valuators: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -6870,6 +7594,17 @@ impl InputStateData {
         }
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for InputStateData {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        match rng.u8(..3) {
+            0 => Self::Key(crate::x11_utils::GenerateRandom::generate(rng)),
+            1 => Self::Button(crate::x11_utils::GenerateRandom::generate(rng)),
+            2 => Self::Valuator(crate::x11_utils::GenerateRandom::generate(rng)),
+            _ => unreachable!()
+        }
+    }
+}
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -6899,6 +7634,15 @@ impl Serialize for InputState {
         class_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.data.serialize_into(bytes, u8::from(class_id));
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for InputState {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            len: crate::x11_utils::GenerateRandom::generate(rng),
+            data: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -7018,6 +7762,17 @@ impl QueryDeviceStateReply {
     pub fn num_classes(&self) -> u8 {
         self.classes.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for QueryDeviceStateReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            xi_reply_type: crate::x11_utils::GenerateRandom::generate(rng),
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            classes: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -7245,6 +8000,17 @@ impl Serialize for SetDeviceValuatorsReply {
         bytes.extend_from_slice(&[0; 23]);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for SetDeviceValuatorsReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            xi_reply_type: crate::x11_utils::GenerateRandom::generate(rng),
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            status: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -7376,6 +8142,18 @@ impl DeviceResolutionState {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for DeviceResolutionState {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            control_id: crate::x11_utils::GenerateRandom::generate(rng),
+            len: crate::x11_utils::GenerateRandom::generate(rng),
+            resolution_values: crate::x11_utils::GenerateRandom::generate(rng),
+            resolution_min: crate::x11_utils::GenerateRandom::generate(rng),
+            resolution_max: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -7474,6 +8252,23 @@ impl Serialize for DeviceAbsCalibState {
         self.button_threshold.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for DeviceAbsCalibState {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            control_id: crate::x11_utils::GenerateRandom::generate(rng),
+            len: crate::x11_utils::GenerateRandom::generate(rng),
+            min_x: crate::x11_utils::GenerateRandom::generate(rng),
+            max_x: crate::x11_utils::GenerateRandom::generate(rng),
+            min_y: crate::x11_utils::GenerateRandom::generate(rng),
+            max_y: crate::x11_utils::GenerateRandom::generate(rng),
+            flip_x: crate::x11_utils::GenerateRandom::generate(rng),
+            flip_y: crate::x11_utils::GenerateRandom::generate(rng),
+            rotation: crate::x11_utils::GenerateRandom::generate(rng),
+            button_threshold: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -7556,6 +8351,21 @@ impl Serialize for DeviceAbsAreaState {
         self.following.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for DeviceAbsAreaState {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            control_id: crate::x11_utils::GenerateRandom::generate(rng),
+            len: crate::x11_utils::GenerateRandom::generate(rng),
+            offset_x: crate::x11_utils::GenerateRandom::generate(rng),
+            offset_y: crate::x11_utils::GenerateRandom::generate(rng),
+            width: crate::x11_utils::GenerateRandom::generate(rng),
+            height: crate::x11_utils::GenerateRandom::generate(rng),
+            screen: crate::x11_utils::GenerateRandom::generate(rng),
+            following: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -7604,6 +8414,17 @@ impl Serialize for DeviceCoreState {
         bytes.extend_from_slice(&[0; 2]);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for DeviceCoreState {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            control_id: crate::x11_utils::GenerateRandom::generate(rng),
+            len: crate::x11_utils::GenerateRandom::generate(rng),
+            status: crate::x11_utils::GenerateRandom::generate(rng),
+            iscore: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -7646,6 +8467,16 @@ impl Serialize for DeviceEnableState {
         self.len.serialize_into(bytes);
         self.enable.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 3]);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for DeviceEnableState {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            control_id: crate::x11_utils::GenerateRandom::generate(rng),
+            len: crate::x11_utils::GenerateRandom::generate(rng),
+            enable: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -7696,6 +8527,16 @@ impl DeviceStateDataResolution {
     pub fn num_valuators(&self) -> u32 {
         self.resolution_values.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for DeviceStateDataResolution {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            resolution_values: crate::x11_utils::GenerateRandom::generate(rng),
+            resolution_min: crate::x11_utils::GenerateRandom::generate(rng),
+            resolution_max: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -7782,6 +8623,21 @@ impl Serialize for DeviceStateDataAbsCalib {
         self.button_threshold.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for DeviceStateDataAbsCalib {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            min_x: crate::x11_utils::GenerateRandom::generate(rng),
+            max_x: crate::x11_utils::GenerateRandom::generate(rng),
+            min_y: crate::x11_utils::GenerateRandom::generate(rng),
+            max_y: crate::x11_utils::GenerateRandom::generate(rng),
+            flip_x: crate::x11_utils::GenerateRandom::generate(rng),
+            flip_y: crate::x11_utils::GenerateRandom::generate(rng),
+            rotation: crate::x11_utils::GenerateRandom::generate(rng),
+            button_threshold: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DeviceStateDataCore {
@@ -7814,6 +8670,15 @@ impl Serialize for DeviceStateDataCore {
         self.status.serialize_into(bytes);
         self.iscore.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 2]);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for DeviceStateDataCore {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            status: crate::x11_utils::GenerateRandom::generate(rng),
+            iscore: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -7882,6 +8747,19 @@ impl Serialize for DeviceStateDataAbsArea {
         self.height.serialize_into(bytes);
         self.screen.serialize_into(bytes);
         self.following.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for DeviceStateDataAbsArea {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            offset_x: crate::x11_utils::GenerateRandom::generate(rng),
+            offset_y: crate::x11_utils::GenerateRandom::generate(rng),
+            width: crate::x11_utils::GenerateRandom::generate(rng),
+            height: crate::x11_utils::GenerateRandom::generate(rng),
+            screen: crate::x11_utils::GenerateRandom::generate(rng),
+            following: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -8012,6 +8890,19 @@ impl DeviceStateData {
         }
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for DeviceStateData {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        match rng.u8(..5) {
+            0 => Self::Resolution(crate::x11_utils::GenerateRandom::generate(rng)),
+            1 => Self::AbsCalib(crate::x11_utils::GenerateRandom::generate(rng)),
+            2 => Self::Core(crate::x11_utils::GenerateRandom::generate(rng)),
+            3 => Self::Enable(crate::x11_utils::GenerateRandom::generate(rng)),
+            4 => Self::AbsArea(crate::x11_utils::GenerateRandom::generate(rng)),
+            _ => unreachable!()
+        }
+    }
+}
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -8041,6 +8932,15 @@ impl Serialize for DeviceState {
         control_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.data.serialize_into(bytes, u16::from(control_id));
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for DeviceState {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            len: crate::x11_utils::GenerateRandom::generate(rng),
+            data: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -8152,6 +9052,18 @@ impl Serialize for GetDeviceControlReply {
         self.control.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetDeviceControlReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            xi_reply_type: crate::x11_utils::GenerateRandom::generate(rng),
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            status: crate::x11_utils::GenerateRandom::generate(rng),
+            control: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -8205,6 +9117,17 @@ impl DeviceResolutionCtl {
     pub fn num_valuators(&self) -> u8 {
         self.resolution_values.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for DeviceResolutionCtl {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            control_id: crate::x11_utils::GenerateRandom::generate(rng),
+            len: crate::x11_utils::GenerateRandom::generate(rng),
+            first_valuator: crate::x11_utils::GenerateRandom::generate(rng),
+            resolution_values: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -8305,6 +9228,23 @@ impl Serialize for DeviceAbsCalibCtl {
         self.button_threshold.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for DeviceAbsCalibCtl {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            control_id: crate::x11_utils::GenerateRandom::generate(rng),
+            len: crate::x11_utils::GenerateRandom::generate(rng),
+            min_x: crate::x11_utils::GenerateRandom::generate(rng),
+            max_x: crate::x11_utils::GenerateRandom::generate(rng),
+            min_y: crate::x11_utils::GenerateRandom::generate(rng),
+            max_y: crate::x11_utils::GenerateRandom::generate(rng),
+            flip_x: crate::x11_utils::GenerateRandom::generate(rng),
+            flip_y: crate::x11_utils::GenerateRandom::generate(rng),
+            rotation: crate::x11_utils::GenerateRandom::generate(rng),
+            button_threshold: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -8387,6 +9327,21 @@ impl Serialize for DeviceAbsAreaCtrl {
         self.following.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for DeviceAbsAreaCtrl {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            control_id: crate::x11_utils::GenerateRandom::generate(rng),
+            len: crate::x11_utils::GenerateRandom::generate(rng),
+            offset_x: crate::x11_utils::GenerateRandom::generate(rng),
+            offset_y: crate::x11_utils::GenerateRandom::generate(rng),
+            width: crate::x11_utils::GenerateRandom::generate(rng),
+            height: crate::x11_utils::GenerateRandom::generate(rng),
+            screen: crate::x11_utils::GenerateRandom::generate(rng),
+            following: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -8431,6 +9386,16 @@ impl Serialize for DeviceCoreCtrl {
         bytes.extend_from_slice(&[0; 3]);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for DeviceCoreCtrl {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            control_id: crate::x11_utils::GenerateRandom::generate(rng),
+            len: crate::x11_utils::GenerateRandom::generate(rng),
+            status: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -8473,6 +9438,16 @@ impl Serialize for DeviceEnableCtrl {
         self.len.serialize_into(bytes);
         self.enable.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 3]);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for DeviceEnableCtrl {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            control_id: crate::x11_utils::GenerateRandom::generate(rng),
+            len: crate::x11_utils::GenerateRandom::generate(rng),
+            enable: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -8521,6 +9496,15 @@ impl DeviceCtlDataResolution {
     pub fn num_valuators(&self) -> u8 {
         self.resolution_values.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for DeviceCtlDataResolution {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            first_valuator: crate::x11_utils::GenerateRandom::generate(rng),
+            resolution_values: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -8607,6 +9591,21 @@ impl Serialize for DeviceCtlDataAbsCalib {
         self.button_threshold.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for DeviceCtlDataAbsCalib {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            min_x: crate::x11_utils::GenerateRandom::generate(rng),
+            max_x: crate::x11_utils::GenerateRandom::generate(rng),
+            min_y: crate::x11_utils::GenerateRandom::generate(rng),
+            max_y: crate::x11_utils::GenerateRandom::generate(rng),
+            flip_x: crate::x11_utils::GenerateRandom::generate(rng),
+            flip_y: crate::x11_utils::GenerateRandom::generate(rng),
+            rotation: crate::x11_utils::GenerateRandom::generate(rng),
+            button_threshold: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DeviceCtlDataCore {
@@ -8635,6 +9634,14 @@ impl Serialize for DeviceCtlDataCore {
         bytes.reserve(4);
         self.status.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 3]);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for DeviceCtlDataCore {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            status: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -8703,6 +9710,19 @@ impl Serialize for DeviceCtlDataAbsArea {
         self.height.serialize_into(bytes);
         self.screen.serialize_into(bytes);
         self.following.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for DeviceCtlDataAbsArea {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            offset_x: crate::x11_utils::GenerateRandom::generate(rng),
+            offset_y: crate::x11_utils::GenerateRandom::generate(rng),
+            width: crate::x11_utils::GenerateRandom::generate(rng),
+            height: crate::x11_utils::GenerateRandom::generate(rng),
+            screen: crate::x11_utils::GenerateRandom::generate(rng),
+            following: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -8833,6 +9853,19 @@ impl DeviceCtlData {
         }
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for DeviceCtlData {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        match rng.u8(..5) {
+            0 => Self::Resolution(crate::x11_utils::GenerateRandom::generate(rng)),
+            1 => Self::AbsCalib(crate::x11_utils::GenerateRandom::generate(rng)),
+            2 => Self::Core(crate::x11_utils::GenerateRandom::generate(rng)),
+            3 => Self::Enable(crate::x11_utils::GenerateRandom::generate(rng)),
+            4 => Self::AbsArea(crate::x11_utils::GenerateRandom::generate(rng)),
+            _ => unreachable!()
+        }
+    }
+}
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -8862,6 +9895,15 @@ impl Serialize for DeviceCtl {
         control_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.data.serialize_into(bytes, u16::from(control_id));
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for DeviceCtl {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            len: crate::x11_utils::GenerateRandom::generate(rng),
+            data: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -9013,6 +10055,17 @@ impl Serialize for ChangeDeviceControlReply {
         bytes.extend_from_slice(&[0; 23]);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for ChangeDeviceControlReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            xi_reply_type: crate::x11_utils::GenerateRandom::generate(rng),
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            status: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the ListDeviceProperties request
 pub const LIST_DEVICE_PROPERTIES_REQUEST: u8 = 36;
@@ -9130,6 +10183,17 @@ impl ListDevicePropertiesReply {
     pub fn num_atoms(&self) -> u16 {
         self.atoms.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for ListDevicePropertiesReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            xi_reply_type: crate::x11_utils::GenerateRandom::generate(rng),
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            atoms: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -9320,6 +10384,17 @@ impl ChangeDevicePropertyAux {
             ChangeDevicePropertyAux::Data16(_) => u8::from(PropertyFormat::M16_BITS),
             ChangeDevicePropertyAux::Data32(_) => u8::from(PropertyFormat::M32_BITS),
             ChangeDevicePropertyAux::InvalidValue(switch_expr) => *switch_expr,
+        }
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for ChangeDevicePropertyAux {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        match rng.u8(..3) {
+            0 => Self::Data8(crate::x11_utils::GenerateRandom::generate(rng)),
+            1 => Self::Data16(crate::x11_utils::GenerateRandom::generate(rng)),
+            2 => Self::Data32(crate::x11_utils::GenerateRandom::generate(rng)),
+            _ => unreachable!()
         }
     }
 }
@@ -9698,6 +10773,17 @@ impl GetDevicePropertyItems {
         }
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetDevicePropertyItems {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        match rng.u8(..3) {
+            0 => Self::Data8(crate::x11_utils::GenerateRandom::generate(rng)),
+            1 => Self::Data16(crate::x11_utils::GenerateRandom::generate(rng)),
+            2 => Self::Data32(crate::x11_utils::GenerateRandom::generate(rng)),
+            _ => unreachable!()
+        }
+    }
+}
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -9757,6 +10843,21 @@ impl Serialize for GetDevicePropertyReply {
         self.device_id.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 10]);
         self.items.serialize_into(bytes, u8::from(format), u32::from(self.num_items));
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetDevicePropertyReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            xi_reply_type: crate::x11_utils::GenerateRandom::generate(rng),
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            type_: crate::x11_utils::GenerateRandom::generate(rng),
+            bytes_after: crate::x11_utils::GenerateRandom::generate(rng),
+            num_items: crate::x11_utils::GenerateRandom::generate(rng),
+            device_id: crate::x11_utils::GenerateRandom::generate(rng),
+            items: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -9882,6 +10983,17 @@ impl Serialize for GroupInfo {
         self.effective.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GroupInfo {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            base: crate::x11_utils::GenerateRandom::generate(rng),
+            latched: crate::x11_utils::GenerateRandom::generate(rng),
+            locked: crate::x11_utils::GenerateRandom::generate(rng),
+            effective: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -9933,6 +11045,17 @@ impl Serialize for ModifierInfo {
         self.latched.serialize_into(bytes);
         self.locked.serialize_into(bytes);
         self.effective.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for ModifierInfo {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            base: crate::x11_utils::GenerateRandom::generate(rng),
+            latched: crate::x11_utils::GenerateRandom::generate(rng),
+            locked: crate::x11_utils::GenerateRandom::generate(rng),
+            effective: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -10086,6 +11209,25 @@ impl XIQueryPointerReply {
     pub fn buttons_len(&self) -> u16 {
         self.buttons.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for XIQueryPointerReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            root: crate::x11_utils::GenerateRandom::generate(rng),
+            child: crate::x11_utils::GenerateRandom::generate(rng),
+            root_x: crate::x11_utils::GenerateRandom::generate(rng),
+            root_y: crate::x11_utils::GenerateRandom::generate(rng),
+            win_x: crate::x11_utils::GenerateRandom::generate(rng),
+            win_y: crate::x11_utils::GenerateRandom::generate(rng),
+            same_screen: crate::x11_utils::GenerateRandom::generate(rng),
+            mods: crate::x11_utils::GenerateRandom::generate(rng),
+            group: crate::x11_utils::GenerateRandom::generate(rng),
+            buttons: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -10475,6 +11617,18 @@ impl AddMaster {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for AddMaster {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            type_: crate::x11_utils::GenerateRandom::generate(rng),
+            len: crate::x11_utils::GenerateRandom::generate(rng),
+            send_core: crate::x11_utils::GenerateRandom::generate(rng),
+            enable: crate::x11_utils::GenerateRandom::generate(rng),
+            name: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -10536,6 +11690,19 @@ impl Serialize for RemoveMaster {
         self.return_keyboard.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for RemoveMaster {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            type_: crate::x11_utils::GenerateRandom::generate(rng),
+            len: crate::x11_utils::GenerateRandom::generate(rng),
+            deviceid: crate::x11_utils::GenerateRandom::generate(rng),
+            return_mode: crate::x11_utils::GenerateRandom::generate(rng),
+            return_pointer: crate::x11_utils::GenerateRandom::generate(rng),
+            return_keyboard: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -10582,6 +11749,17 @@ impl Serialize for AttachSlave {
         self.master.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for AttachSlave {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            type_: crate::x11_utils::GenerateRandom::generate(rng),
+            len: crate::x11_utils::GenerateRandom::generate(rng),
+            deviceid: crate::x11_utils::GenerateRandom::generate(rng),
+            master: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -10624,6 +11802,16 @@ impl Serialize for DetachSlave {
         self.len.serialize_into(bytes);
         self.deviceid.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 2]);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for DetachSlave {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            type_: crate::x11_utils::GenerateRandom::generate(rng),
+            len: crate::x11_utils::GenerateRandom::generate(rng),
+            deviceid: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -10682,6 +11870,16 @@ impl HierarchyChangeDataAddMaster {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for HierarchyChangeDataAddMaster {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            send_core: crate::x11_utils::GenerateRandom::generate(rng),
+            enable: crate::x11_utils::GenerateRandom::generate(rng),
+            name: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct HierarchyChangeDataRemoveMaster {
@@ -10729,6 +11927,17 @@ impl Serialize for HierarchyChangeDataRemoveMaster {
         self.return_keyboard.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for HierarchyChangeDataRemoveMaster {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            deviceid: crate::x11_utils::GenerateRandom::generate(rng),
+            return_mode: crate::x11_utils::GenerateRandom::generate(rng),
+            return_pointer: crate::x11_utils::GenerateRandom::generate(rng),
+            return_keyboard: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct HierarchyChangeDataAttachSlave {
@@ -10761,6 +11970,15 @@ impl Serialize for HierarchyChangeDataAttachSlave {
         self.master.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for HierarchyChangeDataAttachSlave {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            deviceid: crate::x11_utils::GenerateRandom::generate(rng),
+            master: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct HierarchyChangeDataDetachSlave {
@@ -10789,6 +12007,14 @@ impl Serialize for HierarchyChangeDataDetachSlave {
         bytes.reserve(4);
         self.deviceid.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 2]);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for HierarchyChangeDataDetachSlave {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            deviceid: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -10898,6 +12124,18 @@ impl HierarchyChangeData {
         }
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for HierarchyChangeData {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        match rng.u8(..4) {
+            0 => Self::AddMaster(crate::x11_utils::GenerateRandom::generate(rng)),
+            1 => Self::RemoveMaster(crate::x11_utils::GenerateRandom::generate(rng)),
+            2 => Self::AttachSlave(crate::x11_utils::GenerateRandom::generate(rng)),
+            3 => Self::DetachSlave(crate::x11_utils::GenerateRandom::generate(rng)),
+            _ => unreachable!()
+        }
+    }
+}
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -10927,6 +12165,15 @@ impl Serialize for HierarchyChange {
         type_.serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.data.serialize_into(bytes, u16::from(type_));
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for HierarchyChange {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            len: crate::x11_utils::GenerateRandom::generate(rng),
+            data: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -11197,6 +12444,17 @@ impl Serialize for XIGetClientPointerReply {
         bytes.extend_from_slice(&[0; 20]);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for XIGetClientPointerReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            set: crate::x11_utils::GenerateRandom::generate(rng),
+            deviceid: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -11382,6 +12640,15 @@ impl EventMask {
     pub fn mask_len(&self) -> u16 {
         self.mask.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for EventMask {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            deviceid: crate::x11_utils::GenerateRandom::generate(rng),
+            mask: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -11599,6 +12866,17 @@ impl Serialize for XIQueryVersionReply {
         self.major_version.serialize_into(bytes);
         self.minor_version.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 20]);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for XIQueryVersionReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            major_version: crate::x11_utils::GenerateRandom::generate(rng),
+            minor_version: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -12000,6 +13278,18 @@ impl ButtonClass {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for ButtonClass {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            type_: crate::x11_utils::GenerateRandom::generate(rng),
+            len: crate::x11_utils::GenerateRandom::generate(rng),
+            sourceid: crate::x11_utils::GenerateRandom::generate(rng),
+            state: crate::x11_utils::GenerateRandom::generate(rng),
+            labels: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -12051,6 +13341,17 @@ impl KeyClass {
     pub fn num_keys(&self) -> u16 {
         self.keys.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for KeyClass {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            type_: crate::x11_utils::GenerateRandom::generate(rng),
+            len: crate::x11_utils::GenerateRandom::generate(rng),
+            sourceid: crate::x11_utils::GenerateRandom::generate(rng),
+            keys: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -12131,6 +13432,20 @@ impl Serialize for ScrollClass {
         self.increment.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for ScrollClass {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            type_: crate::x11_utils::GenerateRandom::generate(rng),
+            len: crate::x11_utils::GenerateRandom::generate(rng),
+            sourceid: crate::x11_utils::GenerateRandom::generate(rng),
+            number: crate::x11_utils::GenerateRandom::generate(rng),
+            scroll_type: crate::x11_utils::GenerateRandom::generate(rng),
+            flags: crate::x11_utils::GenerateRandom::generate(rng),
+            increment: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -12182,6 +13497,18 @@ impl Serialize for TouchClass {
         self.num_touches.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for TouchClass {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            type_: crate::x11_utils::GenerateRandom::generate(rng),
+            len: crate::x11_utils::GenerateRandom::generate(rng),
+            sourceid: crate::x11_utils::GenerateRandom::generate(rng),
+            mode: crate::x11_utils::GenerateRandom::generate(rng),
+            num_touches: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -12228,6 +13555,17 @@ impl Serialize for GestureClass {
         self.sourceid.serialize_into(bytes);
         self.num_touches.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 1]);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GestureClass {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            type_: crate::x11_utils::GenerateRandom::generate(rng),
+            len: crate::x11_utils::GenerateRandom::generate(rng),
+            sourceid: crate::x11_utils::GenerateRandom::generate(rng),
+            num_touches: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -12339,6 +13677,23 @@ impl Serialize for ValuatorClass {
         bytes.extend_from_slice(&[0; 3]);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for ValuatorClass {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            type_: crate::x11_utils::GenerateRandom::generate(rng),
+            len: crate::x11_utils::GenerateRandom::generate(rng),
+            sourceid: crate::x11_utils::GenerateRandom::generate(rng),
+            number: crate::x11_utils::GenerateRandom::generate(rng),
+            label: crate::x11_utils::GenerateRandom::generate(rng),
+            min: crate::x11_utils::GenerateRandom::generate(rng),
+            max: crate::x11_utils::GenerateRandom::generate(rng),
+            value: crate::x11_utils::GenerateRandom::generate(rng),
+            resolution: crate::x11_utils::GenerateRandom::generate(rng),
+            mode: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -12379,6 +13734,14 @@ impl DeviceClassDataKey {
     pub fn num_keys(&self) -> u16 {
         self.keys.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for DeviceClassDataKey {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            keys: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -12424,6 +13787,15 @@ impl DeviceClassDataButton {
     pub fn num_buttons(&self) -> u16 {
         self.labels.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for DeviceClassDataButton {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            state: crate::x11_utils::GenerateRandom::generate(rng),
+            labels: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -12515,6 +13887,20 @@ impl Serialize for DeviceClassDataValuator {
         bytes.extend_from_slice(&[0; 3]);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for DeviceClassDataValuator {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            number: crate::x11_utils::GenerateRandom::generate(rng),
+            label: crate::x11_utils::GenerateRandom::generate(rng),
+            min: crate::x11_utils::GenerateRandom::generate(rng),
+            max: crate::x11_utils::GenerateRandom::generate(rng),
+            value: crate::x11_utils::GenerateRandom::generate(rng),
+            resolution: crate::x11_utils::GenerateRandom::generate(rng),
+            mode: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DeviceClassDataScroll {
@@ -12573,6 +13959,17 @@ impl Serialize for DeviceClassDataScroll {
         self.increment.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for DeviceClassDataScroll {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            number: crate::x11_utils::GenerateRandom::generate(rng),
+            scroll_type: crate::x11_utils::GenerateRandom::generate(rng),
+            flags: crate::x11_utils::GenerateRandom::generate(rng),
+            increment: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DeviceClassDataTouch {
@@ -12604,6 +14001,15 @@ impl Serialize for DeviceClassDataTouch {
         self.num_touches.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for DeviceClassDataTouch {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            mode: crate::x11_utils::GenerateRandom::generate(rng),
+            num_touches: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DeviceClassDataGesture {
@@ -12630,6 +14036,14 @@ impl Serialize for DeviceClassDataGesture {
         bytes.reserve(2);
         self.num_touches.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 1]);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for DeviceClassDataGesture {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            num_touches: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -12769,6 +14183,20 @@ impl DeviceClassData {
         }
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for DeviceClassData {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        match rng.u8(..6) {
+            0 => Self::Key(crate::x11_utils::GenerateRandom::generate(rng)),
+            1 => Self::Button(crate::x11_utils::GenerateRandom::generate(rng)),
+            2 => Self::Valuator(crate::x11_utils::GenerateRandom::generate(rng)),
+            3 => Self::Scroll(crate::x11_utils::GenerateRandom::generate(rng)),
+            4 => Self::Touch(crate::x11_utils::GenerateRandom::generate(rng)),
+            5 => Self::Gesture(crate::x11_utils::GenerateRandom::generate(rng)),
+            _ => unreachable!()
+        }
+    }
+}
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -12806,6 +14234,16 @@ impl Serialize for DeviceClass {
         self.len.serialize_into(bytes);
         self.sourceid.serialize_into(bytes);
         self.data.serialize_into(bytes, u16::from(type_));
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for DeviceClass {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            len: crate::x11_utils::GenerateRandom::generate(rng),
+            sourceid: crate::x11_utils::GenerateRandom::generate(rng),
+            data: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -12890,6 +14328,19 @@ impl XIDeviceInfo {
     pub fn name_len(&self) -> u16 {
         self.name.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for XIDeviceInfo {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            deviceid: crate::x11_utils::GenerateRandom::generate(rng),
+            type_: crate::x11_utils::GenerateRandom::generate(rng),
+            attachment: crate::x11_utils::GenerateRandom::generate(rng),
+            enabled: crate::x11_utils::GenerateRandom::generate(rng),
+            name: crate::x11_utils::GenerateRandom::generate(rng),
+            classes: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -13008,6 +14459,16 @@ impl XIQueryDeviceReply {
     pub fn num_infos(&self) -> u16 {
         self.infos.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for XIQueryDeviceReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            infos: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -13213,6 +14674,16 @@ impl Serialize for XIGetFocusReply {
         self.length.serialize_into(bytes);
         self.focus.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 20]);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for XIGetFocusReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            focus: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -13497,6 +14968,16 @@ impl Serialize for XIGrabDeviceReply {
         self.length.serialize_into(bytes);
         u8::from(self.status).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 23]);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for XIGrabDeviceReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            status: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -13986,6 +15467,15 @@ impl Serialize for GrabModifierInfo {
         bytes.extend_from_slice(&[0; 3]);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GrabModifierInfo {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            modifiers: crate::x11_utils::GenerateRandom::generate(rng),
+            status: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the XIPassiveGrabDevice request
 pub const XI_PASSIVE_GRAB_DEVICE_REQUEST: u8 = 54;
@@ -14196,6 +15686,16 @@ impl XIPassiveGrabDeviceReply {
     pub fn num_modifiers(&self) -> u16 {
         self.modifiers.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for XIPassiveGrabDeviceReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            modifiers: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -14415,6 +15915,16 @@ impl XIListPropertiesReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for XIListPropertiesReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            properties: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -14530,6 +16040,17 @@ impl XIChangePropertyAux {
             XIChangePropertyAux::Data16(_) => u8::from(PropertyFormat::M16_BITS),
             XIChangePropertyAux::Data32(_) => u8::from(PropertyFormat::M32_BITS),
             XIChangePropertyAux::InvalidValue(switch_expr) => *switch_expr,
+        }
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for XIChangePropertyAux {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        match rng.u8(..3) {
+            0 => Self::Data8(crate::x11_utils::GenerateRandom::generate(rng)),
+            1 => Self::Data16(crate::x11_utils::GenerateRandom::generate(rng)),
+            2 => Self::Data32(crate::x11_utils::GenerateRandom::generate(rng)),
+            _ => unreachable!()
         }
     }
 }
@@ -14907,6 +16428,17 @@ impl XIGetPropertyItems {
         }
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for XIGetPropertyItems {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        match rng.u8(..3) {
+            0 => Self::Data8(crate::x11_utils::GenerateRandom::generate(rng)),
+            1 => Self::Data16(crate::x11_utils::GenerateRandom::generate(rng)),
+            2 => Self::Data32(crate::x11_utils::GenerateRandom::generate(rng)),
+            _ => unreachable!()
+        }
+    }
+}
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -14962,6 +16494,19 @@ impl Serialize for XIGetPropertyReply {
         format.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 11]);
         self.items.serialize_into(bytes, u8::from(format), u32::from(self.num_items));
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for XIGetPropertyReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            type_: crate::x11_utils::GenerateRandom::generate(rng),
+            bytes_after: crate::x11_utils::GenerateRandom::generate(rng),
+            num_items: crate::x11_utils::GenerateRandom::generate(rng),
+            items: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -15081,6 +16626,16 @@ impl XIGetSelectedEventsReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for XIGetSelectedEventsReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            masks: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -15126,6 +16681,16 @@ impl Serialize for BarrierReleasePointerInfo {
         bytes.extend_from_slice(&[0; 2]);
         self.barrier.serialize_into(bytes);
         self.eventid.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for BarrierReleasePointerInfo {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            deviceid: crate::x11_utils::GenerateRandom::generate(rng),
+            barrier: crate::x11_utils::GenerateRandom::generate(rng),
+            eventid: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -15296,6 +16861,20 @@ impl Serialize for DeviceValuatorEvent {
         self.num_valuators.serialize_into(bytes);
         self.first_valuator.serialize_into(bytes);
         self.valuators.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for DeviceValuatorEvent {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            response_type: crate::x11_utils::GenerateRandom::generate(rng),
+            device_id: crate::x11_utils::GenerateRandom::generate(rng),
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            device_state: crate::x11_utils::GenerateRandom::generate(rng),
+            num_valuators: crate::x11_utils::GenerateRandom::generate(rng),
+            first_valuator: crate::x11_utils::GenerateRandom::generate(rng),
+            valuators: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 impl From<&DeviceValuatorEvent> for [u8; 32] {
@@ -15537,6 +17116,27 @@ impl Serialize for DeviceKeyPressEvent {
         self.device_id.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for DeviceKeyPressEvent {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            response_type: crate::x11_utils::GenerateRandom::generate(rng),
+            detail: crate::x11_utils::GenerateRandom::generate(rng),
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            time: crate::x11_utils::GenerateRandom::generate(rng),
+            root: crate::x11_utils::GenerateRandom::generate(rng),
+            event: crate::x11_utils::GenerateRandom::generate(rng),
+            child: crate::x11_utils::GenerateRandom::generate(rng),
+            root_x: crate::x11_utils::GenerateRandom::generate(rng),
+            root_y: crate::x11_utils::GenerateRandom::generate(rng),
+            event_x: crate::x11_utils::GenerateRandom::generate(rng),
+            event_y: crate::x11_utils::GenerateRandom::generate(rng),
+            state: crate::x11_utils::GenerateRandom::generate(rng),
+            same_screen: crate::x11_utils::GenerateRandom::generate(rng),
+            device_id: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 impl From<&DeviceKeyPressEvent> for [u8; 32] {
     fn from(input: &DeviceKeyPressEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -15699,6 +17299,20 @@ impl Serialize for DeviceFocusInEvent {
         u8::from(self.mode).serialize_into(bytes);
         self.device_id.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 18]);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for DeviceFocusInEvent {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            response_type: crate::x11_utils::GenerateRandom::generate(rng),
+            detail: crate::x11_utils::GenerateRandom::generate(rng),
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            time: crate::x11_utils::GenerateRandom::generate(rng),
+            window: crate::x11_utils::GenerateRandom::generate(rng),
+            mode: crate::x11_utils::GenerateRandom::generate(rng),
+            device_id: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 impl From<&DeviceFocusInEvent> for [u8; 32] {
@@ -15954,6 +17568,24 @@ impl Serialize for DeviceStateNotifyEvent {
         self.valuators.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for DeviceStateNotifyEvent {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            response_type: crate::x11_utils::GenerateRandom::generate(rng),
+            device_id: crate::x11_utils::GenerateRandom::generate(rng),
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            time: crate::x11_utils::GenerateRandom::generate(rng),
+            num_keys: crate::x11_utils::GenerateRandom::generate(rng),
+            num_buttons: crate::x11_utils::GenerateRandom::generate(rng),
+            num_valuators: crate::x11_utils::GenerateRandom::generate(rng),
+            classes_reported: crate::x11_utils::GenerateRandom::generate(rng),
+            buttons: crate::x11_utils::GenerateRandom::generate(rng),
+            keys: crate::x11_utils::GenerateRandom::generate(rng),
+            valuators: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 impl From<&DeviceStateNotifyEvent> for [u8; 32] {
     fn from(input: &DeviceStateNotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -16098,6 +17730,20 @@ impl Serialize for DeviceMappingNotifyEvent {
         bytes.extend_from_slice(&[0; 1]);
         self.time.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 20]);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for DeviceMappingNotifyEvent {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            response_type: crate::x11_utils::GenerateRandom::generate(rng),
+            device_id: crate::x11_utils::GenerateRandom::generate(rng),
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            request: crate::x11_utils::GenerateRandom::generate(rng),
+            first_keycode: crate::x11_utils::GenerateRandom::generate(rng),
+            count: crate::x11_utils::GenerateRandom::generate(rng),
+            time: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 impl From<&DeviceMappingNotifyEvent> for [u8; 32] {
@@ -16302,6 +17948,18 @@ impl Serialize for ChangeDeviceNotifyEvent {
         bytes.extend_from_slice(&[0; 23]);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for ChangeDeviceNotifyEvent {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            response_type: crate::x11_utils::GenerateRandom::generate(rng),
+            device_id: crate::x11_utils::GenerateRandom::generate(rng),
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            time: crate::x11_utils::GenerateRandom::generate(rng),
+            request: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 impl From<&ChangeDeviceNotifyEvent> for [u8; 32] {
     fn from(input: &ChangeDeviceNotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -16424,6 +18082,17 @@ impl Serialize for DeviceKeyStateNotifyEvent {
         bytes.extend_from_slice(&self.keys);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for DeviceKeyStateNotifyEvent {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            response_type: crate::x11_utils::GenerateRandom::generate(rng),
+            device_id: crate::x11_utils::GenerateRandom::generate(rng),
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            keys: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 impl From<&DeviceKeyStateNotifyEvent> for [u8; 32] {
     fn from(input: &DeviceKeyStateNotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -16542,6 +18211,17 @@ impl Serialize for DeviceButtonStateNotifyEvent {
         self.device_id.serialize_into(bytes);
         self.sequence.serialize_into(bytes);
         bytes.extend_from_slice(&self.buttons);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for DeviceButtonStateNotifyEvent {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            response_type: crate::x11_utils::GenerateRandom::generate(rng),
+            device_id: crate::x11_utils::GenerateRandom::generate(rng),
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            buttons: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 impl From<&DeviceButtonStateNotifyEvent> for [u8; 32] {
@@ -16760,6 +18440,19 @@ impl Serialize for DevicePresenceNotifyEvent {
         bytes.extend_from_slice(&[0; 20]);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for DevicePresenceNotifyEvent {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            response_type: crate::x11_utils::GenerateRandom::generate(rng),
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            time: crate::x11_utils::GenerateRandom::generate(rng),
+            devchange: crate::x11_utils::GenerateRandom::generate(rng),
+            device_id: crate::x11_utils::GenerateRandom::generate(rng),
+            control: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 impl From<&DevicePresenceNotifyEvent> for [u8; 32] {
     fn from(input: &DevicePresenceNotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -16893,6 +18586,19 @@ impl Serialize for DevicePropertyNotifyEvent {
         self.property.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 19]);
         self.device_id.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for DevicePropertyNotifyEvent {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            response_type: crate::x11_utils::GenerateRandom::generate(rng),
+            state: crate::x11_utils::GenerateRandom::generate(rng),
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            time: crate::x11_utils::GenerateRandom::generate(rng),
+            property: crate::x11_utils::GenerateRandom::generate(rng),
+            device_id: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 impl From<&DevicePropertyNotifyEvent> for [u8; 32] {
@@ -17093,6 +18799,23 @@ impl DeviceChangedEvent {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for DeviceChangedEvent {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            response_type: crate::x11_utils::GenerateRandom::generate(rng),
+            extension: crate::x11_utils::GenerateRandom::generate(rng),
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            event_type: crate::x11_utils::GenerateRandom::generate(rng),
+            deviceid: crate::x11_utils::GenerateRandom::generate(rng),
+            time: crate::x11_utils::GenerateRandom::generate(rng),
+            sourceid: crate::x11_utils::GenerateRandom::generate(rng),
+            reason: crate::x11_utils::GenerateRandom::generate(rng),
+            classes: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -17279,6 +19002,35 @@ impl KeyPressEvent {
     pub fn valuators_len(&self) -> u16 {
         self.valuator_mask.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for KeyPressEvent {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            response_type: crate::x11_utils::GenerateRandom::generate(rng),
+            extension: crate::x11_utils::GenerateRandom::generate(rng),
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            event_type: crate::x11_utils::GenerateRandom::generate(rng),
+            deviceid: crate::x11_utils::GenerateRandom::generate(rng),
+            time: crate::x11_utils::GenerateRandom::generate(rng),
+            detail: crate::x11_utils::GenerateRandom::generate(rng),
+            root: crate::x11_utils::GenerateRandom::generate(rng),
+            event: crate::x11_utils::GenerateRandom::generate(rng),
+            child: crate::x11_utils::GenerateRandom::generate(rng),
+            root_x: crate::x11_utils::GenerateRandom::generate(rng),
+            root_y: crate::x11_utils::GenerateRandom::generate(rng),
+            event_x: crate::x11_utils::GenerateRandom::generate(rng),
+            event_y: crate::x11_utils::GenerateRandom::generate(rng),
+            sourceid: crate::x11_utils::GenerateRandom::generate(rng),
+            flags: crate::x11_utils::GenerateRandom::generate(rng),
+            mods: crate::x11_utils::GenerateRandom::generate(rng),
+            group: crate::x11_utils::GenerateRandom::generate(rng),
+            button_mask: crate::x11_utils::GenerateRandom::generate(rng),
+            valuator_mask: crate::x11_utils::GenerateRandom::generate(rng),
+            axisvalues: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -17471,6 +19223,35 @@ impl ButtonPressEvent {
     pub fn valuators_len(&self) -> u16 {
         self.valuator_mask.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for ButtonPressEvent {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            response_type: crate::x11_utils::GenerateRandom::generate(rng),
+            extension: crate::x11_utils::GenerateRandom::generate(rng),
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            event_type: crate::x11_utils::GenerateRandom::generate(rng),
+            deviceid: crate::x11_utils::GenerateRandom::generate(rng),
+            time: crate::x11_utils::GenerateRandom::generate(rng),
+            detail: crate::x11_utils::GenerateRandom::generate(rng),
+            root: crate::x11_utils::GenerateRandom::generate(rng),
+            event: crate::x11_utils::GenerateRandom::generate(rng),
+            child: crate::x11_utils::GenerateRandom::generate(rng),
+            root_x: crate::x11_utils::GenerateRandom::generate(rng),
+            root_y: crate::x11_utils::GenerateRandom::generate(rng),
+            event_x: crate::x11_utils::GenerateRandom::generate(rng),
+            event_y: crate::x11_utils::GenerateRandom::generate(rng),
+            sourceid: crate::x11_utils::GenerateRandom::generate(rng),
+            flags: crate::x11_utils::GenerateRandom::generate(rng),
+            mods: crate::x11_utils::GenerateRandom::generate(rng),
+            group: crate::x11_utils::GenerateRandom::generate(rng),
+            button_mask: crate::x11_utils::GenerateRandom::generate(rng),
+            valuator_mask: crate::x11_utils::GenerateRandom::generate(rng),
+            axisvalues: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -17765,6 +19546,35 @@ impl EnterEvent {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for EnterEvent {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            response_type: crate::x11_utils::GenerateRandom::generate(rng),
+            extension: crate::x11_utils::GenerateRandom::generate(rng),
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            event_type: crate::x11_utils::GenerateRandom::generate(rng),
+            deviceid: crate::x11_utils::GenerateRandom::generate(rng),
+            time: crate::x11_utils::GenerateRandom::generate(rng),
+            sourceid: crate::x11_utils::GenerateRandom::generate(rng),
+            mode: crate::x11_utils::GenerateRandom::generate(rng),
+            detail: crate::x11_utils::GenerateRandom::generate(rng),
+            root: crate::x11_utils::GenerateRandom::generate(rng),
+            event: crate::x11_utils::GenerateRandom::generate(rng),
+            child: crate::x11_utils::GenerateRandom::generate(rng),
+            root_x: crate::x11_utils::GenerateRandom::generate(rng),
+            root_y: crate::x11_utils::GenerateRandom::generate(rng),
+            event_x: crate::x11_utils::GenerateRandom::generate(rng),
+            event_y: crate::x11_utils::GenerateRandom::generate(rng),
+            same_screen: crate::x11_utils::GenerateRandom::generate(rng),
+            focus: crate::x11_utils::GenerateRandom::generate(rng),
+            mods: crate::x11_utils::GenerateRandom::generate(rng),
+            group: crate::x11_utils::GenerateRandom::generate(rng),
+            buttons: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the Leave event
 pub const LEAVE_EVENT: u16 = 8;
@@ -17911,6 +19721,18 @@ impl Serialize for HierarchyInfo {
         u32::from(self.flags).serialize_into(bytes);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for HierarchyInfo {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            deviceid: crate::x11_utils::GenerateRandom::generate(rng),
+            attachment: crate::x11_utils::GenerateRandom::generate(rng),
+            type_: crate::x11_utils::GenerateRandom::generate(rng),
+            enabled: crate::x11_utils::GenerateRandom::generate(rng),
+            flags: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the Hierarchy event
 pub const HIERARCHY_EVENT: u16 = 11;
@@ -17985,6 +19807,22 @@ impl HierarchyEvent {
     pub fn num_infos(&self) -> u16 {
         self.infos.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for HierarchyEvent {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            response_type: crate::x11_utils::GenerateRandom::generate(rng),
+            extension: crate::x11_utils::GenerateRandom::generate(rng),
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            event_type: crate::x11_utils::GenerateRandom::generate(rng),
+            deviceid: crate::x11_utils::GenerateRandom::generate(rng),
+            time: crate::x11_utils::GenerateRandom::generate(rng),
+            flags: crate::x11_utils::GenerateRandom::generate(rng),
+            infos: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -18158,6 +19996,22 @@ impl Serialize for PropertyEvent {
         bytes.extend_from_slice(&[0; 11]);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for PropertyEvent {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            response_type: crate::x11_utils::GenerateRandom::generate(rng),
+            extension: crate::x11_utils::GenerateRandom::generate(rng),
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            event_type: crate::x11_utils::GenerateRandom::generate(rng),
+            deviceid: crate::x11_utils::GenerateRandom::generate(rng),
+            time: crate::x11_utils::GenerateRandom::generate(rng),
+            property: crate::x11_utils::GenerateRandom::generate(rng),
+            what: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the RawKeyPress event
 pub const RAW_KEY_PRESS_EVENT: u16 = 13;
@@ -18246,6 +20100,26 @@ impl RawKeyPressEvent {
     pub fn valuators_len(&self) -> u16 {
         self.valuator_mask.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for RawKeyPressEvent {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            response_type: crate::x11_utils::GenerateRandom::generate(rng),
+            extension: crate::x11_utils::GenerateRandom::generate(rng),
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            event_type: crate::x11_utils::GenerateRandom::generate(rng),
+            deviceid: crate::x11_utils::GenerateRandom::generate(rng),
+            time: crate::x11_utils::GenerateRandom::generate(rng),
+            detail: crate::x11_utils::GenerateRandom::generate(rng),
+            sourceid: crate::x11_utils::GenerateRandom::generate(rng),
+            flags: crate::x11_utils::GenerateRandom::generate(rng),
+            valuator_mask: crate::x11_utils::GenerateRandom::generate(rng),
+            axisvalues: crate::x11_utils::GenerateRandom::generate(rng),
+            axisvalues_raw: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -18340,6 +20214,26 @@ impl RawButtonPressEvent {
     pub fn valuators_len(&self) -> u16 {
         self.valuator_mask.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for RawButtonPressEvent {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            response_type: crate::x11_utils::GenerateRandom::generate(rng),
+            extension: crate::x11_utils::GenerateRandom::generate(rng),
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            event_type: crate::x11_utils::GenerateRandom::generate(rng),
+            deviceid: crate::x11_utils::GenerateRandom::generate(rng),
+            time: crate::x11_utils::GenerateRandom::generate(rng),
+            detail: crate::x11_utils::GenerateRandom::generate(rng),
+            sourceid: crate::x11_utils::GenerateRandom::generate(rng),
+            flags: crate::x11_utils::GenerateRandom::generate(rng),
+            valuator_mask: crate::x11_utils::GenerateRandom::generate(rng),
+            axisvalues: crate::x11_utils::GenerateRandom::generate(rng),
+            axisvalues_raw: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -18541,6 +20435,35 @@ impl TouchBeginEvent {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for TouchBeginEvent {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            response_type: crate::x11_utils::GenerateRandom::generate(rng),
+            extension: crate::x11_utils::GenerateRandom::generate(rng),
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            event_type: crate::x11_utils::GenerateRandom::generate(rng),
+            deviceid: crate::x11_utils::GenerateRandom::generate(rng),
+            time: crate::x11_utils::GenerateRandom::generate(rng),
+            detail: crate::x11_utils::GenerateRandom::generate(rng),
+            root: crate::x11_utils::GenerateRandom::generate(rng),
+            event: crate::x11_utils::GenerateRandom::generate(rng),
+            child: crate::x11_utils::GenerateRandom::generate(rng),
+            root_x: crate::x11_utils::GenerateRandom::generate(rng),
+            root_y: crate::x11_utils::GenerateRandom::generate(rng),
+            event_x: crate::x11_utils::GenerateRandom::generate(rng),
+            event_y: crate::x11_utils::GenerateRandom::generate(rng),
+            sourceid: crate::x11_utils::GenerateRandom::generate(rng),
+            flags: crate::x11_utils::GenerateRandom::generate(rng),
+            mods: crate::x11_utils::GenerateRandom::generate(rng),
+            group: crate::x11_utils::GenerateRandom::generate(rng),
+            button_mask: crate::x11_utils::GenerateRandom::generate(rng),
+            valuator_mask: crate::x11_utils::GenerateRandom::generate(rng),
+            axisvalues: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the TouchUpdate event
 pub const TOUCH_UPDATE_EVENT: u16 = 19;
@@ -18736,6 +20659,26 @@ impl Serialize for TouchOwnershipEvent {
         bytes.extend_from_slice(&[0; 8]);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for TouchOwnershipEvent {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            response_type: crate::x11_utils::GenerateRandom::generate(rng),
+            extension: crate::x11_utils::GenerateRandom::generate(rng),
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            event_type: crate::x11_utils::GenerateRandom::generate(rng),
+            deviceid: crate::x11_utils::GenerateRandom::generate(rng),
+            time: crate::x11_utils::GenerateRandom::generate(rng),
+            touchid: crate::x11_utils::GenerateRandom::generate(rng),
+            root: crate::x11_utils::GenerateRandom::generate(rng),
+            event: crate::x11_utils::GenerateRandom::generate(rng),
+            child: crate::x11_utils::GenerateRandom::generate(rng),
+            sourceid: crate::x11_utils::GenerateRandom::generate(rng),
+            flags: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the RawTouchBegin event
 pub const RAW_TOUCH_BEGIN_EVENT: u16 = 22;
@@ -18824,6 +20767,26 @@ impl RawTouchBeginEvent {
     pub fn valuators_len(&self) -> u16 {
         self.valuator_mask.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for RawTouchBeginEvent {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            response_type: crate::x11_utils::GenerateRandom::generate(rng),
+            extension: crate::x11_utils::GenerateRandom::generate(rng),
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            event_type: crate::x11_utils::GenerateRandom::generate(rng),
+            deviceid: crate::x11_utils::GenerateRandom::generate(rng),
+            time: crate::x11_utils::GenerateRandom::generate(rng),
+            detail: crate::x11_utils::GenerateRandom::generate(rng),
+            sourceid: crate::x11_utils::GenerateRandom::generate(rng),
+            flags: crate::x11_utils::GenerateRandom::generate(rng),
+            valuator_mask: crate::x11_utils::GenerateRandom::generate(rng),
+            axisvalues: crate::x11_utils::GenerateRandom::generate(rng),
+            axisvalues_raw: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -19061,6 +21024,31 @@ impl Serialize for BarrierHitEvent {
         self.root_y.serialize_into(bytes);
         self.dx.serialize_into(bytes);
         self.dy.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for BarrierHitEvent {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            response_type: crate::x11_utils::GenerateRandom::generate(rng),
+            extension: crate::x11_utils::GenerateRandom::generate(rng),
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            event_type: crate::x11_utils::GenerateRandom::generate(rng),
+            deviceid: crate::x11_utils::GenerateRandom::generate(rng),
+            time: crate::x11_utils::GenerateRandom::generate(rng),
+            eventid: crate::x11_utils::GenerateRandom::generate(rng),
+            root: crate::x11_utils::GenerateRandom::generate(rng),
+            event: crate::x11_utils::GenerateRandom::generate(rng),
+            barrier: crate::x11_utils::GenerateRandom::generate(rng),
+            dtime: crate::x11_utils::GenerateRandom::generate(rng),
+            flags: crate::x11_utils::GenerateRandom::generate(rng),
+            sourceid: crate::x11_utils::GenerateRandom::generate(rng),
+            root_x: crate::x11_utils::GenerateRandom::generate(rng),
+            root_y: crate::x11_utils::GenerateRandom::generate(rng),
+            dx: crate::x11_utils::GenerateRandom::generate(rng),
+            dy: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -19353,6 +21341,38 @@ impl Serialize for GesturePinchBeginEvent {
         u32::from(self.flags).serialize_into(bytes);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GesturePinchBeginEvent {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            response_type: crate::x11_utils::GenerateRandom::generate(rng),
+            extension: crate::x11_utils::GenerateRandom::generate(rng),
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            event_type: crate::x11_utils::GenerateRandom::generate(rng),
+            deviceid: crate::x11_utils::GenerateRandom::generate(rng),
+            time: crate::x11_utils::GenerateRandom::generate(rng),
+            detail: crate::x11_utils::GenerateRandom::generate(rng),
+            root: crate::x11_utils::GenerateRandom::generate(rng),
+            event: crate::x11_utils::GenerateRandom::generate(rng),
+            child: crate::x11_utils::GenerateRandom::generate(rng),
+            root_x: crate::x11_utils::GenerateRandom::generate(rng),
+            root_y: crate::x11_utils::GenerateRandom::generate(rng),
+            event_x: crate::x11_utils::GenerateRandom::generate(rng),
+            event_y: crate::x11_utils::GenerateRandom::generate(rng),
+            delta_x: crate::x11_utils::GenerateRandom::generate(rng),
+            delta_y: crate::x11_utils::GenerateRandom::generate(rng),
+            delta_unaccel_x: crate::x11_utils::GenerateRandom::generate(rng),
+            delta_unaccel_y: crate::x11_utils::GenerateRandom::generate(rng),
+            scale: crate::x11_utils::GenerateRandom::generate(rng),
+            delta_angle: crate::x11_utils::GenerateRandom::generate(rng),
+            sourceid: crate::x11_utils::GenerateRandom::generate(rng),
+            mods: crate::x11_utils::GenerateRandom::generate(rng),
+            group: crate::x11_utils::GenerateRandom::generate(rng),
+            flags: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the GesturePinchUpdate event
 pub const GESTURE_PINCH_UPDATE_EVENT: u16 = 28;
@@ -19629,6 +21649,36 @@ impl Serialize for GestureSwipeBeginEvent {
         self.mods.serialize_into(bytes);
         self.group.serialize_into(bytes);
         u32::from(self.flags).serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GestureSwipeBeginEvent {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            response_type: crate::x11_utils::GenerateRandom::generate(rng),
+            extension: crate::x11_utils::GenerateRandom::generate(rng),
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            event_type: crate::x11_utils::GenerateRandom::generate(rng),
+            deviceid: crate::x11_utils::GenerateRandom::generate(rng),
+            time: crate::x11_utils::GenerateRandom::generate(rng),
+            detail: crate::x11_utils::GenerateRandom::generate(rng),
+            root: crate::x11_utils::GenerateRandom::generate(rng),
+            event: crate::x11_utils::GenerateRandom::generate(rng),
+            child: crate::x11_utils::GenerateRandom::generate(rng),
+            root_x: crate::x11_utils::GenerateRandom::generate(rng),
+            root_y: crate::x11_utils::GenerateRandom::generate(rng),
+            event_x: crate::x11_utils::GenerateRandom::generate(rng),
+            event_y: crate::x11_utils::GenerateRandom::generate(rng),
+            delta_x: crate::x11_utils::GenerateRandom::generate(rng),
+            delta_y: crate::x11_utils::GenerateRandom::generate(rng),
+            delta_unaccel_x: crate::x11_utils::GenerateRandom::generate(rng),
+            delta_unaccel_y: crate::x11_utils::GenerateRandom::generate(rng),
+            sourceid: crate::x11_utils::GenerateRandom::generate(rng),
+            mods: crate::x11_utils::GenerateRandom::generate(rng),
+            group: crate::x11_utils::GenerateRandom::generate(rng),
+            flags: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 

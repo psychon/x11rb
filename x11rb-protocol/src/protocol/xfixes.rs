@@ -185,6 +185,17 @@ impl Serialize for QueryVersionReply {
         bytes.extend_from_slice(&[0; 16]);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for QueryVersionReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            major_version: crate::x11_utils::GenerateRandom::generate(rng),
+            minor_version: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -697,6 +708,21 @@ impl Serialize for SelectionNotifyEvent {
         bytes.extend_from_slice(&[0; 8]);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for SelectionNotifyEvent {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            response_type: crate::x11_utils::GenerateRandom::generate(rng),
+            subtype: crate::x11_utils::GenerateRandom::generate(rng),
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            window: crate::x11_utils::GenerateRandom::generate(rng),
+            owner: crate::x11_utils::GenerateRandom::generate(rng),
+            selection: crate::x11_utils::GenerateRandom::generate(rng),
+            timestamp: crate::x11_utils::GenerateRandom::generate(rng),
+            selection_timestamp: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 impl From<&SelectionNotifyEvent> for [u8; 32] {
     fn from(input: &SelectionNotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -1031,6 +1057,20 @@ impl Serialize for CursorNotifyEvent {
         bytes.extend_from_slice(&[0; 12]);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for CursorNotifyEvent {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            response_type: crate::x11_utils::GenerateRandom::generate(rng),
+            subtype: crate::x11_utils::GenerateRandom::generate(rng),
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            window: crate::x11_utils::GenerateRandom::generate(rng),
+            cursor_serial: crate::x11_utils::GenerateRandom::generate(rng),
+            timestamp: crate::x11_utils::GenerateRandom::generate(rng),
+            name: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 impl From<&CursorNotifyEvent> for [u8; 32] {
     fn from(input: &CursorNotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -1253,6 +1293,23 @@ impl Serialize for GetCursorImageReply {
         bytes.extend_from_slice(&[0; 8]);
         assert_eq!(self.cursor_image.len(), usize::try_from(u32::from(self.width).checked_mul(u32::from(self.height)).unwrap()).unwrap(), "`cursor_image` has an incorrect length");
         self.cursor_image.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetCursorImageReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            x: crate::x11_utils::GenerateRandom::generate(rng),
+            y: crate::x11_utils::GenerateRandom::generate(rng),
+            width: crate::x11_utils::GenerateRandom::generate(rng),
+            height: crate::x11_utils::GenerateRandom::generate(rng),
+            xhot: crate::x11_utils::GenerateRandom::generate(rng),
+            yhot: crate::x11_utils::GenerateRandom::generate(rng),
+            cursor_serial: crate::x11_utils::GenerateRandom::generate(rng),
+            cursor_image: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -2367,6 +2424,16 @@ impl FetchRegionReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for FetchRegionReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            extents: crate::x11_utils::GenerateRandom::generate(rng),
+            rectangles: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the SetGCClipRegion request
 pub const SET_GC_CLIP_REGION_REQUEST: u8 = 20;
@@ -2791,6 +2858,17 @@ impl GetCursorNameReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetCursorNameReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            atom: crate::x11_utils::GenerateRandom::generate(rng),
+            name: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the GetCursorImageAndName request
 pub const GET_CURSOR_IMAGE_AND_NAME_REQUEST: u8 = 25;
@@ -2926,6 +3004,25 @@ impl GetCursorImageAndNameReply {
     pub fn nbytes(&self) -> u16 {
         self.name.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetCursorImageAndNameReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            x: crate::x11_utils::GenerateRandom::generate(rng),
+            y: crate::x11_utils::GenerateRandom::generate(rng),
+            width: crate::x11_utils::GenerateRandom::generate(rng),
+            height: crate::x11_utils::GenerateRandom::generate(rng),
+            xhot: crate::x11_utils::GenerateRandom::generate(rng),
+            yhot: crate::x11_utils::GenerateRandom::generate(rng),
+            cursor_serial: crate::x11_utils::GenerateRandom::generate(rng),
+            cursor_atom: crate::x11_utils::GenerateRandom::generate(rng),
+            cursor_image: crate::x11_utils::GenerateRandom::generate(rng),
+            name: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -3733,6 +3830,16 @@ impl Serialize for GetClientDisconnectModeReply {
         self.length.serialize_into(bytes);
         u32::from(self.disconnect_mode).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 20]);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetClientDisconnectModeReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            disconnect_mode: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 

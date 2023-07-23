@@ -310,6 +310,30 @@ pub(super) fn emit_struct_type(
         }
         outln!(out, "}}");
     }
+
+    if !has_fds {
+        outln!(out, "#[cfg(test)]");
+        outln!(out, "impl crate::x11_utils::GenerateRandom for {name} {{");
+        out.indented(|out| {
+            outln!(out, "fn generate(rng: &mut fastrand::Rng) -> Self {{");
+            out.indented(|out| {
+                outln!(out, "Self {{");
+                out.indented(|out| {
+                    for field in fields.iter() {
+                        if generator.field_is_visible(field, &deducible_fields) {
+                            let field_name = field.name().unwrap();
+                            if !skip_length_field || field_name != "length" {
+                                outln!(out, "{}: crate::x11_utils::GenerateRandom::generate(rng),", to_rust_variable_name(field_name));
+                            }
+                        }
+                    }
+                });
+                outln!(out, "}}");
+            });
+            outln!(out, "}}");
+        });
+        outln!(out, "}}");
+    }
 }
 
 fn generate_switches_for_fields(

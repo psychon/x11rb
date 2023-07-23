@@ -175,6 +175,17 @@ impl Serialize for QueryVersionReply {
         bytes.extend_from_slice(&[0; 20]);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for QueryVersionReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            server_major_version: crate::x11_utils::GenerateRandom::generate(rng),
+            server_minor_version: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the Start request
 pub const START_REQUEST: u8 = 1;
@@ -305,6 +316,15 @@ impl Serialize for StartReply {
         bytes.extend_from_slice(&[0; 24]);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for StartReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the End request
 pub const END_REQUEST: u8 = 2;
@@ -433,6 +453,15 @@ impl Serialize for EndReply {
         self.sequence.serialize_into(bytes);
         self.length.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 24]);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for EndReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -570,6 +599,13 @@ impl Serialize for Event {
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(32);
         bytes.extend_from_slice(&[0; 32]);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for Event {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+        }
     }
 }
 
@@ -803,6 +839,15 @@ impl Serialize for SendReply {
         bytes.extend_from_slice(&[0; 24]);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for SendReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the SelectInput request
 pub const SELECT_INPUT_REQUEST: u8 = 4;
@@ -931,6 +976,15 @@ impl Serialize for SelectInputReply {
         self.sequence.serialize_into(bytes);
         self.length.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 24]);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for SelectInputReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 

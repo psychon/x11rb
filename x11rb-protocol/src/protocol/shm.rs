@@ -116,6 +116,20 @@ impl Serialize for CompletionEvent {
         self.offset.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for CompletionEvent {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            response_type: crate::x11_utils::GenerateRandom::generate(rng),
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            drawable: crate::x11_utils::GenerateRandom::generate(rng),
+            minor_event: crate::x11_utils::GenerateRandom::generate(rng),
+            major_event: crate::x11_utils::GenerateRandom::generate(rng),
+            shmseg: crate::x11_utils::GenerateRandom::generate(rng),
+            offset: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 impl From<&CompletionEvent> for [u8; 32] {
     fn from(input: &CompletionEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -311,6 +325,21 @@ impl Serialize for QueryVersionReply {
         self.gid.serialize_into(bytes);
         self.pixmap_format.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 15]);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for QueryVersionReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            shared_pixmaps: crate::x11_utils::GenerateRandom::generate(rng),
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            major_version: crate::x11_utils::GenerateRandom::generate(rng),
+            minor_version: crate::x11_utils::GenerateRandom::generate(rng),
+            uid: crate::x11_utils::GenerateRandom::generate(rng),
+            gid: crate::x11_utils::GenerateRandom::generate(rng),
+            pixmap_format: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -755,6 +784,18 @@ impl Serialize for GetImageReply {
         self.length.serialize_into(bytes);
         self.visual.serialize_into(bytes);
         self.size.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetImageReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            depth: crate::x11_utils::GenerateRandom::generate(rng),
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            visual: crate::x11_utils::GenerateRandom::generate(rng),
+            size: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 

@@ -344,6 +344,15 @@ impl Serialize for Int64 {
         self.lo.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for Int64 {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            hi: crate::x11_utils::GenerateRandom::generate(rng),
+            lo: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -398,6 +407,16 @@ impl Systemcounter {
     pub fn name_len(&self) -> u16 {
         self.name.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for Systemcounter {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            counter: crate::x11_utils::GenerateRandom::generate(rng),
+            resolution: crate::x11_utils::GenerateRandom::generate(rng),
+            name: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -459,6 +478,17 @@ impl Serialize for Trigger {
         u32::from(self.test_type).serialize_into(bytes);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for Trigger {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            counter: crate::x11_utils::GenerateRandom::generate(rng),
+            wait_type: crate::x11_utils::GenerateRandom::generate(rng),
+            wait_value: crate::x11_utils::GenerateRandom::generate(rng),
+            test_type: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -514,6 +544,15 @@ impl Serialize for Waitcondition {
         bytes.reserve(28);
         self.trigger.serialize_into(bytes);
         self.event_threshold.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for Waitcondition {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            trigger: crate::x11_utils::GenerateRandom::generate(rng),
+            event_threshold: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -664,6 +703,17 @@ impl Serialize for InitializeReply {
         bytes.extend_from_slice(&[0; 22]);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for InitializeReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            major_version: crate::x11_utils::GenerateRandom::generate(rng),
+            minor_version: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the ListSystemCounters request
 pub const LIST_SYSTEM_COUNTERS_REQUEST: u8 = 1;
@@ -770,6 +820,16 @@ impl ListSystemCountersReply {
     pub fn counters_len(&self) -> u32 {
         self.counters.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for ListSystemCountersReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            counters: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -1004,6 +1064,16 @@ impl Serialize for QueryCounterReply {
         self.sequence.serialize_into(bytes);
         self.length.serialize_into(bytes);
         self.counter_value.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for QueryCounterReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            counter_value: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -1324,6 +1394,19 @@ impl CreateAlarmAux {
         expr_value
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for CreateAlarmAux {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            counter: crate::x11_utils::GenerateRandom::generate(rng),
+            value_type: crate::x11_utils::GenerateRandom::generate(rng),
+            value: crate::x11_utils::GenerateRandom::generate(rng),
+            test_type: crate::x11_utils::GenerateRandom::generate(rng),
+            delta: crate::x11_utils::GenerateRandom::generate(rng),
+            events: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 impl CreateAlarmAux {
     /// Create a new instance with all fields unset / not present.
     pub fn new() -> Self {
@@ -1561,6 +1644,19 @@ impl ChangeAlarmAux {
             expr_value |= u32::from(CA::EVENTS);
         }
         expr_value
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for ChangeAlarmAux {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            counter: crate::x11_utils::GenerateRandom::generate(rng),
+            value_type: crate::x11_utils::GenerateRandom::generate(rng),
+            value: crate::x11_utils::GenerateRandom::generate(rng),
+            test_type: crate::x11_utils::GenerateRandom::generate(rng),
+            delta: crate::x11_utils::GenerateRandom::generate(rng),
+            events: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 impl ChangeAlarmAux {
@@ -1887,6 +1983,19 @@ impl Serialize for QueryAlarmReply {
         bytes.extend_from_slice(&[0; 2]);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for QueryAlarmReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            trigger: crate::x11_utils::GenerateRandom::generate(rng),
+            delta: crate::x11_utils::GenerateRandom::generate(rng),
+            events: crate::x11_utils::GenerateRandom::generate(rng),
+            state: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the SetPriority request
 pub const SET_PRIORITY_REQUEST: u8 = 12;
@@ -2058,6 +2167,16 @@ impl Serialize for GetPriorityReply {
         self.sequence.serialize_into(bytes);
         self.length.serialize_into(bytes);
         self.priority.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetPriorityReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            priority: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -2422,6 +2541,16 @@ impl Serialize for QueryFenceReply {
         bytes.extend_from_slice(&[0; 23]);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for QueryFenceReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            triggered: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the AwaitFence request
 pub const AWAIT_FENCE_REQUEST: u8 = 19;
@@ -2584,6 +2713,22 @@ impl Serialize for CounterNotifyEvent {
         bytes.extend_from_slice(&[0; 1]);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for CounterNotifyEvent {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            response_type: crate::x11_utils::GenerateRandom::generate(rng),
+            kind: crate::x11_utils::GenerateRandom::generate(rng),
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            counter: crate::x11_utils::GenerateRandom::generate(rng),
+            wait_value: crate::x11_utils::GenerateRandom::generate(rng),
+            counter_value: crate::x11_utils::GenerateRandom::generate(rng),
+            timestamp: crate::x11_utils::GenerateRandom::generate(rng),
+            count: crate::x11_utils::GenerateRandom::generate(rng),
+            destroyed: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 impl From<&CounterNotifyEvent> for [u8; 32] {
     fn from(input: &CounterNotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -2728,6 +2873,21 @@ impl Serialize for AlarmNotifyEvent {
         self.timestamp.serialize_into(bytes);
         u8::from(self.state).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 3]);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for AlarmNotifyEvent {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            response_type: crate::x11_utils::GenerateRandom::generate(rng),
+            kind: crate::x11_utils::GenerateRandom::generate(rng),
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            alarm: crate::x11_utils::GenerateRandom::generate(rng),
+            counter_value: crate::x11_utils::GenerateRandom::generate(rng),
+            alarm_value: crate::x11_utils::GenerateRandom::generate(rng),
+            timestamp: crate::x11_utils::GenerateRandom::generate(rng),
+            state: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 impl From<&AlarmNotifyEvent> for [u8; 32] {

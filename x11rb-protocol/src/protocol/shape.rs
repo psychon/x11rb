@@ -293,6 +293,23 @@ impl Serialize for NotifyEvent {
         bytes.extend_from_slice(&[0; 11]);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for NotifyEvent {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            response_type: crate::x11_utils::GenerateRandom::generate(rng),
+            shape_kind: crate::x11_utils::GenerateRandom::generate(rng),
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            affected_window: crate::x11_utils::GenerateRandom::generate(rng),
+            extents_x: crate::x11_utils::GenerateRandom::generate(rng),
+            extents_y: crate::x11_utils::GenerateRandom::generate(rng),
+            extents_width: crate::x11_utils::GenerateRandom::generate(rng),
+            extents_height: crate::x11_utils::GenerateRandom::generate(rng),
+            server_time: crate::x11_utils::GenerateRandom::generate(rng),
+            shaped: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 impl From<&NotifyEvent> for [u8; 32] {
     fn from(input: &NotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -451,6 +468,17 @@ impl Serialize for QueryVersionReply {
         self.length.serialize_into(bytes);
         self.major_version.serialize_into(bytes);
         self.minor_version.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for QueryVersionReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            major_version: crate::x11_utils::GenerateRandom::generate(rng),
+            minor_version: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -986,6 +1014,25 @@ impl Serialize for QueryExtentsReply {
         self.clip_shape_extents_height.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for QueryExtentsReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            bounding_shaped: crate::x11_utils::GenerateRandom::generate(rng),
+            clip_shaped: crate::x11_utils::GenerateRandom::generate(rng),
+            bounding_shape_extents_x: crate::x11_utils::GenerateRandom::generate(rng),
+            bounding_shape_extents_y: crate::x11_utils::GenerateRandom::generate(rng),
+            bounding_shape_extents_width: crate::x11_utils::GenerateRandom::generate(rng),
+            bounding_shape_extents_height: crate::x11_utils::GenerateRandom::generate(rng),
+            clip_shape_extents_x: crate::x11_utils::GenerateRandom::generate(rng),
+            clip_shape_extents_y: crate::x11_utils::GenerateRandom::generate(rng),
+            clip_shape_extents_width: crate::x11_utils::GenerateRandom::generate(rng),
+            clip_shape_extents_height: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the SelectInput request
 pub const SELECT_INPUT_REQUEST: u8 = 6;
@@ -1154,6 +1201,16 @@ impl Serialize for InputSelectedReply {
         self.length.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for InputSelectedReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            enabled: crate::x11_utils::GenerateRandom::generate(rng),
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the GetRectangles request
 pub const GET_RECTANGLES_REQUEST: u8 = 8;
@@ -1281,6 +1338,17 @@ impl GetRectanglesReply {
     pub fn rectangles_len(&self) -> u32 {
         self.rectangles.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetRectanglesReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            ordering: crate::x11_utils::GenerateRandom::generate(rng),
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            rectangles: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 

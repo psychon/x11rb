@@ -153,6 +153,17 @@ impl Serialize for GetVersionReply {
         self.server_minor_version.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetVersionReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            server_major_version: crate::x11_utils::GenerateRandom::generate(rng),
+            server_minor_version: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the Capable request
 pub const CAPABLE_REQUEST: u8 = 1;
@@ -276,6 +287,16 @@ impl Serialize for CapableReply {
         self.length.serialize_into(bytes);
         self.capable.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 23]);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for CapableReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            capable: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -409,6 +430,18 @@ impl Serialize for GetTimeoutsReply {
         self.suspend_timeout.serialize_into(bytes);
         self.off_timeout.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 18]);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetTimeoutsReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            standby_timeout: crate::x11_utils::GenerateRandom::generate(rng),
+            suspend_timeout: crate::x11_utils::GenerateRandom::generate(rng),
+            off_timeout: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -816,6 +849,17 @@ impl Serialize for InfoReply {
         u16::from(self.power_level).serialize_into(bytes);
         self.state.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 21]);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for InfoReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            power_level: crate::x11_utils::GenerateRandom::generate(rng),
+            state: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 

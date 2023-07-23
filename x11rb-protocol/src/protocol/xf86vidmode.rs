@@ -366,6 +366,25 @@ impl Serialize for ModeInfo {
         self.privsize.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for ModeInfo {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            dotclock: crate::x11_utils::GenerateRandom::generate(rng),
+            hdisplay: crate::x11_utils::GenerateRandom::generate(rng),
+            hsyncstart: crate::x11_utils::GenerateRandom::generate(rng),
+            hsyncend: crate::x11_utils::GenerateRandom::generate(rng),
+            htotal: crate::x11_utils::GenerateRandom::generate(rng),
+            hskew: crate::x11_utils::GenerateRandom::generate(rng),
+            vdisplay: crate::x11_utils::GenerateRandom::generate(rng),
+            vsyncstart: crate::x11_utils::GenerateRandom::generate(rng),
+            vsyncend: crate::x11_utils::GenerateRandom::generate(rng),
+            vtotal: crate::x11_utils::GenerateRandom::generate(rng),
+            flags: crate::x11_utils::GenerateRandom::generate(rng),
+            privsize: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the QueryVersion request
 pub const QUERY_VERSION_REQUEST: u8 = 0;
@@ -471,6 +490,17 @@ impl Serialize for QueryVersionReply {
         self.length.serialize_into(bytes);
         self.major_version.serialize_into(bytes);
         self.minor_version.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for QueryVersionReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            major_version: crate::x11_utils::GenerateRandom::generate(rng),
+            minor_version: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -626,6 +656,27 @@ impl GetModeLineReply {
     pub fn privsize(&self) -> u32 {
         self.private.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetModeLineReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            dotclock: crate::x11_utils::GenerateRandom::generate(rng),
+            hdisplay: crate::x11_utils::GenerateRandom::generate(rng),
+            hsyncstart: crate::x11_utils::GenerateRandom::generate(rng),
+            hsyncend: crate::x11_utils::GenerateRandom::generate(rng),
+            htotal: crate::x11_utils::GenerateRandom::generate(rng),
+            hskew: crate::x11_utils::GenerateRandom::generate(rng),
+            vdisplay: crate::x11_utils::GenerateRandom::generate(rng),
+            vsyncstart: crate::x11_utils::GenerateRandom::generate(rng),
+            vsyncend: crate::x11_utils::GenerateRandom::generate(rng),
+            vtotal: crate::x11_utils::GenerateRandom::generate(rng),
+            flags: crate::x11_utils::GenerateRandom::generate(rng),
+            private: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -1029,6 +1080,20 @@ impl GetMonitorReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetMonitorReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            hsync: crate::x11_utils::GenerateRandom::generate(rng),
+            vsync: crate::x11_utils::GenerateRandom::generate(rng),
+            vendor: crate::x11_utils::GenerateRandom::generate(rng),
+            alignment_pad: crate::x11_utils::GenerateRandom::generate(rng),
+            model: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the LockModeSwitch request
 pub const LOCK_MODE_SWITCH_REQUEST: u8 = 5;
@@ -1202,6 +1267,16 @@ impl GetAllModeLinesReply {
     pub fn modecount(&self) -> u32 {
         self.modeinfo.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetAllModeLinesReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            modeinfo: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -1896,6 +1971,16 @@ impl Serialize for ValidateModeLineReply {
         bytes.extend_from_slice(&[0; 20]);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for ValidateModeLineReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            status: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the SwitchToMode request
 pub const SWITCH_TO_MODE_REQUEST: u8 = 10;
@@ -2206,6 +2291,17 @@ impl Serialize for GetViewPortReply {
         bytes.extend_from_slice(&[0; 16]);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetViewPortReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            x: crate::x11_utils::GenerateRandom::generate(rng),
+            y: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the SetViewPort request
 pub const SET_VIEW_PORT_REQUEST: u8 = 12;
@@ -2385,6 +2481,19 @@ impl Serialize for GetDotClocksReply {
         bytes.extend_from_slice(&[0; 12]);
         assert_eq!(self.clock.len(), usize::try_from(1u32.checked_sub(u32::from(self.flags) & 1u32).unwrap().checked_mul(u32::from(self.clocks)).unwrap()).unwrap(), "`clock` has an incorrect length");
         self.clock.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetDotClocksReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            flags: crate::x11_utils::GenerateRandom::generate(rng),
+            clocks: crate::x11_utils::GenerateRandom::generate(rng),
+            maxclocks: crate::x11_utils::GenerateRandom::generate(rng),
+            clock: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -2702,6 +2811,18 @@ impl Serialize for GetGammaReply {
         bytes.extend_from_slice(&[0; 12]);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetGammaReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            red: crate::x11_utils::GenerateRandom::generate(rng),
+            green: crate::x11_utils::GenerateRandom::generate(rng),
+            blue: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the GetGammaRamp request
 pub const GET_GAMMA_RAMP_REQUEST: u8 = 17;
@@ -2815,6 +2936,19 @@ impl Serialize for GetGammaRampReply {
         self.green.serialize_into(bytes);
         assert_eq!(self.blue.len(), usize::try_from(u32::from(self.size).checked_add(1u32).unwrap() & (!1u32)).unwrap(), "`blue` has an incorrect length");
         self.blue.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetGammaRampReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            size: crate::x11_utils::GenerateRandom::generate(rng),
+            red: crate::x11_utils::GenerateRandom::generate(rng),
+            green: crate::x11_utils::GenerateRandom::generate(rng),
+            blue: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -3039,6 +3173,16 @@ impl Serialize for GetGammaRampSizeReply {
         bytes.extend_from_slice(&[0; 22]);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetGammaRampSizeReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            size: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the GetPermissions request
 pub const GET_PERMISSIONS_REQUEST: u8 = 20;
@@ -3173,6 +3317,16 @@ impl Serialize for GetPermissionsReply {
         self.length.serialize_into(bytes);
         u32::from(self.permissions).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 20]);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetPermissionsReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            permissions: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 

@@ -161,6 +161,15 @@ impl Serialize for SwapInfo {
         bytes.extend_from_slice(&[0; 3]);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for SwapInfo {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            window: crate::x11_utils::GenerateRandom::generate(rng),
+            swap_action: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -188,6 +197,14 @@ impl Serialize for BufferAttributes {
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(4);
         self.window.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for BufferAttributes {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            window: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -233,6 +250,16 @@ impl Serialize for VisualInfo {
         bytes.extend_from_slice(&[0; 2]);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for VisualInfo {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            visual_id: crate::x11_utils::GenerateRandom::generate(rng),
+            depth: crate::x11_utils::GenerateRandom::generate(rng),
+            perf_level: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -273,6 +300,14 @@ impl VisualInfos {
     pub fn n_infos(&self) -> u32 {
         self.infos.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for VisualInfos {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            infos: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -427,6 +462,17 @@ impl Serialize for QueryVersionReply {
         self.major_version.serialize_into(bytes);
         self.minor_version.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 22]);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for QueryVersionReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            major_version: crate::x11_utils::GenerateRandom::generate(rng),
+            minor_version: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -862,6 +908,16 @@ impl GetVisualInfoReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetVisualInfoReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            supported_visuals: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the GetBackBufferAttributes request
 pub const GET_BACK_BUFFER_ATTRIBUTES_REQUEST: u8 = 7;
@@ -1002,6 +1058,16 @@ impl Serialize for GetBackBufferAttributesReply {
         self.length.serialize_into(bytes);
         self.attributes.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 20]);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetBackBufferAttributesReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            attributes: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 

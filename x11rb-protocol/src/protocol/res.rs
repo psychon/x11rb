@@ -72,6 +72,15 @@ impl Serialize for Client {
         self.resource_mask.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for Client {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            resource_base: crate::x11_utils::GenerateRandom::generate(rng),
+            resource_mask: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -107,6 +116,15 @@ impl Serialize for Type {
         bytes.reserve(8);
         self.resource_type.serialize_into(bytes);
         self.count.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for Type {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            resource_type: crate::x11_utils::GenerateRandom::generate(rng),
+            count: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -206,6 +224,15 @@ impl Serialize for ClientIdSpec {
         u32::from(self.mask).serialize_into(bytes);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for ClientIdSpec {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            client: crate::x11_utils::GenerateRandom::generate(rng),
+            mask: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -253,6 +280,15 @@ impl ClientIdValue {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for ClientIdValue {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            spec: crate::x11_utils::GenerateRandom::generate(rng),
+            value: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -288,6 +324,15 @@ impl Serialize for ResourceIdSpec {
         bytes.reserve(8);
         self.resource.serialize_into(bytes);
         self.type_.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for ResourceIdSpec {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            resource: crate::x11_utils::GenerateRandom::generate(rng),
+            type_: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -347,6 +392,17 @@ impl Serialize for ResourceSizeSpec {
         self.use_count.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for ResourceSizeSpec {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            spec: crate::x11_utils::GenerateRandom::generate(rng),
+            bytes: crate::x11_utils::GenerateRandom::generate(rng),
+            ref_count: crate::x11_utils::GenerateRandom::generate(rng),
+            use_count: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -391,6 +447,15 @@ impl ResourceSizeValue {
     pub fn num_cross_references(&self) -> u32 {
         self.cross_references.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for ResourceSizeValue {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            size: crate::x11_utils::GenerateRandom::generate(rng),
+            cross_references: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -513,6 +578,17 @@ impl Serialize for QueryVersionReply {
         self.server_minor.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for QueryVersionReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            server_major: crate::x11_utils::GenerateRandom::generate(rng),
+            server_minor: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the QueryClients request
 pub const QUERY_CLIENTS_REQUEST: u8 = 1;
@@ -619,6 +695,16 @@ impl QueryClientsReply {
     pub fn num_clients(&self) -> u32 {
         self.clients.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for QueryClientsReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            clients: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -736,6 +822,16 @@ impl QueryClientResourcesReply {
     pub fn num_types(&self) -> u32 {
         self.types.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for QueryClientResourcesReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            types: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -856,6 +952,17 @@ impl Serialize for QueryClientPixmapBytesReply {
         self.length.serialize_into(bytes);
         self.bytes.serialize_into(bytes);
         self.bytes_overflow.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for QueryClientPixmapBytesReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            bytes: crate::x11_utils::GenerateRandom::generate(rng),
+            bytes_overflow: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -985,6 +1092,16 @@ impl QueryClientIdsReply {
     pub fn num_ids(&self) -> u32 {
         self.ids.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for QueryClientIdsReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            ids: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -1123,6 +1240,16 @@ impl QueryResourceBytesReply {
     pub fn num_sizes(&self) -> u32 {
         self.sizes.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for QueryResourceBytesReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            sizes: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 

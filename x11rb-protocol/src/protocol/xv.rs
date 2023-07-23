@@ -588,6 +588,15 @@ impl Serialize for Rational {
         self.denominator.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for Rational {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            numerator: crate::x11_utils::GenerateRandom::generate(rng),
+            denominator: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -625,6 +634,15 @@ impl Serialize for Format {
         self.visual.serialize_into(bytes);
         self.depth.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 3]);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for Format {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            visual: crate::x11_utils::GenerateRandom::generate(rng),
+            depth: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -708,6 +726,18 @@ impl AdaptorInfo {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for AdaptorInfo {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            base_id: crate::x11_utils::GenerateRandom::generate(rng),
+            num_ports: crate::x11_utils::GenerateRandom::generate(rng),
+            type_: crate::x11_utils::GenerateRandom::generate(rng),
+            name: crate::x11_utils::GenerateRandom::generate(rng),
+            formats: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -770,6 +800,18 @@ impl EncodingInfo {
     pub fn name_size(&self) -> u16 {
         self.name.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for EncodingInfo {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            encoding: crate::x11_utils::GenerateRandom::generate(rng),
+            width: crate::x11_utils::GenerateRandom::generate(rng),
+            height: crate::x11_utils::GenerateRandom::generate(rng),
+            rate: crate::x11_utils::GenerateRandom::generate(rng),
+            name: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -848,6 +890,19 @@ impl Image {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for Image {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            id: crate::x11_utils::GenerateRandom::generate(rng),
+            width: crate::x11_utils::GenerateRandom::generate(rng),
+            height: crate::x11_utils::GenerateRandom::generate(rng),
+            pitches: crate::x11_utils::GenerateRandom::generate(rng),
+            offsets: crate::x11_utils::GenerateRandom::generate(rng),
+            data: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -906,6 +961,17 @@ impl AttributeInfo {
     pub fn size(&self) -> u32 {
         self.name.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for AttributeInfo {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            flags: crate::x11_utils::GenerateRandom::generate(rng),
+            min: crate::x11_utils::GenerateRandom::generate(rng),
+            max: crate::x11_utils::GenerateRandom::generate(rng),
+            name: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -1157,6 +1223,35 @@ impl Serialize for ImageFormatInfo {
         bytes.extend_from_slice(&[0; 11]);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for ImageFormatInfo {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            id: crate::x11_utils::GenerateRandom::generate(rng),
+            type_: crate::x11_utils::GenerateRandom::generate(rng),
+            byte_order: crate::x11_utils::GenerateRandom::generate(rng),
+            guid: crate::x11_utils::GenerateRandom::generate(rng),
+            bpp: crate::x11_utils::GenerateRandom::generate(rng),
+            num_planes: crate::x11_utils::GenerateRandom::generate(rng),
+            depth: crate::x11_utils::GenerateRandom::generate(rng),
+            red_mask: crate::x11_utils::GenerateRandom::generate(rng),
+            green_mask: crate::x11_utils::GenerateRandom::generate(rng),
+            blue_mask: crate::x11_utils::GenerateRandom::generate(rng),
+            format: crate::x11_utils::GenerateRandom::generate(rng),
+            y_sample_bits: crate::x11_utils::GenerateRandom::generate(rng),
+            u_sample_bits: crate::x11_utils::GenerateRandom::generate(rng),
+            v_sample_bits: crate::x11_utils::GenerateRandom::generate(rng),
+            vhorz_y_period: crate::x11_utils::GenerateRandom::generate(rng),
+            vhorz_u_period: crate::x11_utils::GenerateRandom::generate(rng),
+            vhorz_v_period: crate::x11_utils::GenerateRandom::generate(rng),
+            vvert_y_period: crate::x11_utils::GenerateRandom::generate(rng),
+            vvert_u_period: crate::x11_utils::GenerateRandom::generate(rng),
+            vvert_v_period: crate::x11_utils::GenerateRandom::generate(rng),
+            vcomp_order: crate::x11_utils::GenerateRandom::generate(rng),
+            vscanline_order: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the BadPort error
 pub const BAD_PORT_ERROR: u8 = 0;
@@ -1232,6 +1327,19 @@ impl Serialize for VideoNotifyEvent {
         self.time.serialize_into(bytes);
         self.drawable.serialize_into(bytes);
         self.port.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for VideoNotifyEvent {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            response_type: crate::x11_utils::GenerateRandom::generate(rng),
+            reason: crate::x11_utils::GenerateRandom::generate(rng),
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            time: crate::x11_utils::GenerateRandom::generate(rng),
+            drawable: crate::x11_utils::GenerateRandom::generate(rng),
+            port: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 impl From<&VideoNotifyEvent> for [u8; 32] {
@@ -1355,6 +1463,19 @@ impl Serialize for PortNotifyEvent {
         self.port.serialize_into(bytes);
         self.attribute.serialize_into(bytes);
         self.value.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for PortNotifyEvent {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            response_type: crate::x11_utils::GenerateRandom::generate(rng),
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            time: crate::x11_utils::GenerateRandom::generate(rng),
+            port: crate::x11_utils::GenerateRandom::generate(rng),
+            attribute: crate::x11_utils::GenerateRandom::generate(rng),
+            value: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 impl From<&PortNotifyEvent> for [u8; 32] {
@@ -1514,6 +1635,17 @@ impl Serialize for QueryExtensionReply {
         self.minor.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for QueryExtensionReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            major: crate::x11_utils::GenerateRandom::generate(rng),
+            minor: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the QueryAdaptors request
 pub const QUERY_ADAPTORS_REQUEST: u8 = 1;
@@ -1629,6 +1761,16 @@ impl QueryAdaptorsReply {
     pub fn num_adaptors(&self) -> u16 {
         self.info.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for QueryAdaptorsReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            info: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -1748,6 +1890,16 @@ impl QueryEncodingsReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for QueryEncodingsReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            info: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the GrabPort request
 pub const GRAB_PORT_REQUEST: u8 = 3;
@@ -1861,6 +2013,16 @@ impl Serialize for GrabPortReply {
         u8::from(self.result).serialize_into(bytes);
         self.sequence.serialize_into(bytes);
         self.length.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GrabPortReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            result: crate::x11_utils::GenerateRandom::generate(rng),
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -2726,6 +2888,17 @@ impl Serialize for QueryBestSizeReply {
         self.actual_height.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for QueryBestSizeReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            actual_width: crate::x11_utils::GenerateRandom::generate(rng),
+            actual_height: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the SetPortAttribute request
 pub const SET_PORT_ATTRIBUTE_REQUEST: u8 = 13;
@@ -2915,6 +3088,16 @@ impl Serialize for GetPortAttributeReply {
         self.value.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetPortAttributeReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            value: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the QueryPortAttributes request
 pub const QUERY_PORT_ATTRIBUTES_REQUEST: u8 = 15;
@@ -3035,6 +3218,17 @@ impl QueryPortAttributesReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for QueryPortAttributesReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            text_size: crate::x11_utils::GenerateRandom::generate(rng),
+            attributes: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the ListImageFormats request
 pub const LIST_IMAGE_FORMATS_REQUEST: u8 = 16;
@@ -3150,6 +3344,16 @@ impl ListImageFormatsReply {
     pub fn num_formats(&self) -> u32 {
         self.format.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for ListImageFormatsReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            format: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -3300,6 +3504,20 @@ impl QueryImageAttributesReply {
     pub fn num_planes(&self) -> u32 {
         self.pitches.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for QueryImageAttributesReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            data_size: crate::x11_utils::GenerateRandom::generate(rng),
+            width: crate::x11_utils::GenerateRandom::generate(rng),
+            height: crate::x11_utils::GenerateRandom::generate(rng),
+            pitches: crate::x11_utils::GenerateRandom::generate(rng),
+            offsets: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 

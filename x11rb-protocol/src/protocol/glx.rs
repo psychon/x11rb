@@ -209,6 +209,25 @@ impl Serialize for PbufferClobberEvent {
         bytes.extend_from_slice(&[0; 4]);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for PbufferClobberEvent {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            response_type: crate::x11_utils::GenerateRandom::generate(rng),
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            event_type: crate::x11_utils::GenerateRandom::generate(rng),
+            draw_type: crate::x11_utils::GenerateRandom::generate(rng),
+            drawable: crate::x11_utils::GenerateRandom::generate(rng),
+            b_mask: crate::x11_utils::GenerateRandom::generate(rng),
+            aux_buffer: crate::x11_utils::GenerateRandom::generate(rng),
+            x: crate::x11_utils::GenerateRandom::generate(rng),
+            y: crate::x11_utils::GenerateRandom::generate(rng),
+            width: crate::x11_utils::GenerateRandom::generate(rng),
+            height: crate::x11_utils::GenerateRandom::generate(rng),
+            count: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 impl From<&PbufferClobberEvent> for [u8; 32] {
     fn from(input: &PbufferClobberEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -361,6 +380,22 @@ impl Serialize for BufferSwapCompleteEvent {
         self.msc_hi.serialize_into(bytes);
         self.msc_lo.serialize_into(bytes);
         self.sbc.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for BufferSwapCompleteEvent {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            response_type: crate::x11_utils::GenerateRandom::generate(rng),
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            event_type: crate::x11_utils::GenerateRandom::generate(rng),
+            drawable: crate::x11_utils::GenerateRandom::generate(rng),
+            ust_hi: crate::x11_utils::GenerateRandom::generate(rng),
+            ust_lo: crate::x11_utils::GenerateRandom::generate(rng),
+            msc_hi: crate::x11_utils::GenerateRandom::generate(rng),
+            msc_lo: crate::x11_utils::GenerateRandom::generate(rng),
+            sbc: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 impl From<&BufferSwapCompleteEvent> for [u8; 32] {
@@ -985,6 +1020,16 @@ impl Serialize for MakeCurrentReply {
         bytes.extend_from_slice(&[0; 20]);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for MakeCurrentReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            context_tag: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the IsDirect request
 pub const IS_DIRECT_REQUEST: u8 = 6;
@@ -1117,6 +1162,16 @@ impl Serialize for IsDirectReply {
         self.length.serialize_into(bytes);
         self.is_direct.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 23]);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for IsDirectReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            is_direct: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -1263,6 +1318,17 @@ impl Serialize for QueryVersionReply {
         self.major_version.serialize_into(bytes);
         self.minor_version.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 16]);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for QueryVersionReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            major_version: crate::x11_utils::GenerateRandom::generate(rng),
+            minor_version: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -1906,6 +1972,17 @@ impl GetVisualConfigsReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetVisualConfigsReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            num_visuals: crate::x11_utils::GenerateRandom::generate(rng),
+            num_properties: crate::x11_utils::GenerateRandom::generate(rng),
+            property_list: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the DestroyGLXPixmap request
 pub const DESTROY_GLX_PIXMAP_REQUEST: u8 = 15;
@@ -2177,6 +2254,17 @@ impl VendorPrivateWithReplyReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for VendorPrivateWithReplyReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            retval: crate::x11_utils::GenerateRandom::generate(rng),
+            data1: crate::x11_utils::GenerateRandom::generate(rng),
+            data2: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the QueryExtensionsString request
 pub const QUERY_EXTENSIONS_STRING_REQUEST: u8 = 18;
@@ -2313,6 +2401,16 @@ impl Serialize for QueryExtensionsStringReply {
         bytes.extend_from_slice(&[0; 16]);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for QueryExtensionsStringReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            n: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the QueryServerString request
 pub const QUERY_SERVER_STRING_REQUEST: u8 = 19;
@@ -2439,6 +2537,16 @@ impl QueryServerStringReply {
     pub fn str_len(&self) -> u32 {
         self.string.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for QueryServerStringReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            string: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -2641,6 +2749,17 @@ impl GetFBConfigsReply {
     pub fn length(&self) -> u32 {
         self.property_list.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetFBConfigsReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            num_fb_configs: crate::x11_utils::GenerateRandom::generate(rng),
+            num_properties: crate::x11_utils::GenerateRandom::generate(rng),
+            property_list: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -3011,6 +3130,16 @@ impl QueryContextReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for QueryContextReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            attribs: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the MakeContextCurrent request
 pub const MAKE_CONTEXT_CURRENT_REQUEST: u8 = 26;
@@ -3167,6 +3296,16 @@ impl Serialize for MakeContextCurrentReply {
         self.length.serialize_into(bytes);
         self.context_tag.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 20]);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for MakeContextCurrentReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            context_tag: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -3432,6 +3571,16 @@ impl GetDrawableAttributesReply {
         self.attribs.len()
             .checked_div(2).unwrap()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetDrawableAttributesReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            attribs: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -4315,6 +4464,16 @@ impl Serialize for GenListsReply {
         self.ret_val.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GenListsReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            ret_val: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the FeedbackBuffer request
 pub const FEEDBACK_BUFFER_REQUEST: u8 = 105;
@@ -4576,6 +4735,18 @@ impl RenderModeReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for RenderModeReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            ret_val: crate::x11_utils::GenerateRandom::generate(rng),
+            new_mode: crate::x11_utils::GenerateRandom::generate(rng),
+            data: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -4745,6 +4916,15 @@ impl Serialize for FinishReply {
         bytes.extend_from_slice(&[0; 1]);
         self.sequence.serialize_into(bytes);
         self.length.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for FinishReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -5062,6 +5242,15 @@ impl ReadPixelsReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for ReadPixelsReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            data: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the GetBooleanv request
 pub const GET_BOOLEANV_REQUEST: u8 = 112;
@@ -5192,6 +5381,17 @@ impl GetBooleanvReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetBooleanvReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            datum: crate::x11_utils::GenerateRandom::generate(rng),
+            data: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the GetClipPlane request
 pub const GET_CLIP_PLANE_REQUEST: u8 = 113;
@@ -5313,6 +5513,15 @@ impl GetClipPlaneReply {
         self.data.len()
             .checked_mul(2).unwrap()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetClipPlaneReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            data: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -5445,6 +5654,17 @@ impl GetDoublevReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetDoublevReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            datum: crate::x11_utils::GenerateRandom::generate(rng),
+            data: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the GetError request
 pub const GET_ERROR_REQUEST: u8 = 115;
@@ -5555,6 +5775,16 @@ impl Serialize for GetErrorReply {
         self.sequence.serialize_into(bytes);
         self.length.serialize_into(bytes);
         self.error.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetErrorReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            error: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -5687,6 +5917,17 @@ impl GetFloatvReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetFloatvReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            datum: crate::x11_utils::GenerateRandom::generate(rng),
+            data: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the GetIntegerv request
 pub const GET_INTEGERV_REQUEST: u8 = 117;
@@ -5815,6 +6056,17 @@ impl GetIntegervReply {
     pub fn n(&self) -> u32 {
         self.data.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetIntegervReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            datum: crate::x11_utils::GenerateRandom::generate(rng),
+            data: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -5955,6 +6207,17 @@ impl GetLightfvReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetLightfvReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            datum: crate::x11_utils::GenerateRandom::generate(rng),
+            data: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the GetLightiv request
 pub const GET_LIGHTIV_REQUEST: u8 = 119;
@@ -6091,6 +6354,17 @@ impl GetLightivReply {
     pub fn n(&self) -> u32 {
         self.data.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetLightivReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            datum: crate::x11_utils::GenerateRandom::generate(rng),
+            data: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -6231,6 +6505,17 @@ impl GetMapdvReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetMapdvReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            datum: crate::x11_utils::GenerateRandom::generate(rng),
+            data: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the GetMapfv request
 pub const GET_MAPFV_REQUEST: u8 = 121;
@@ -6367,6 +6652,17 @@ impl GetMapfvReply {
     pub fn n(&self) -> u32 {
         self.data.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetMapfvReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            datum: crate::x11_utils::GenerateRandom::generate(rng),
+            data: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -6507,6 +6803,17 @@ impl GetMapivReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetMapivReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            datum: crate::x11_utils::GenerateRandom::generate(rng),
+            data: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the GetMaterialfv request
 pub const GET_MATERIALFV_REQUEST: u8 = 123;
@@ -6643,6 +6950,17 @@ impl GetMaterialfvReply {
     pub fn n(&self) -> u32 {
         self.data.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetMaterialfvReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            datum: crate::x11_utils::GenerateRandom::generate(rng),
+            data: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -6783,6 +7101,17 @@ impl GetMaterialivReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetMaterialivReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            datum: crate::x11_utils::GenerateRandom::generate(rng),
+            data: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the GetPixelMapfv request
 pub const GET_PIXEL_MAPFV_REQUEST: u8 = 125;
@@ -6911,6 +7240,17 @@ impl GetPixelMapfvReply {
     pub fn n(&self) -> u32 {
         self.data.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetPixelMapfvReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            datum: crate::x11_utils::GenerateRandom::generate(rng),
+            data: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -7043,6 +7383,17 @@ impl GetPixelMapuivReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetPixelMapuivReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            datum: crate::x11_utils::GenerateRandom::generate(rng),
+            data: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the GetPixelMapusv request
 pub const GET_PIXEL_MAPUSV_REQUEST: u8 = 127;
@@ -7173,6 +7524,17 @@ impl GetPixelMapusvReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetPixelMapusvReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            datum: crate::x11_utils::GenerateRandom::generate(rng),
+            data: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the GetPolygonStipple request
 pub const GET_POLYGON_STIPPLE_REQUEST: u8 = 128;
@@ -7296,6 +7658,15 @@ impl GetPolygonStippleReply {
         self.data.len()
             .checked_div(4).unwrap()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetPolygonStippleReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            data: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -7424,6 +7795,16 @@ impl GetStringReply {
     pub fn n(&self) -> u32 {
         self.string.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetStringReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            string: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -7564,6 +7945,17 @@ impl GetTexEnvfvReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetTexEnvfvReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            datum: crate::x11_utils::GenerateRandom::generate(rng),
+            data: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the GetTexEnviv request
 pub const GET_TEX_ENVIV_REQUEST: u8 = 131;
@@ -7700,6 +8092,17 @@ impl GetTexEnvivReply {
     pub fn n(&self) -> u32 {
         self.data.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetTexEnvivReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            datum: crate::x11_utils::GenerateRandom::generate(rng),
+            data: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -7840,6 +8243,17 @@ impl GetTexGendvReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetTexGendvReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            datum: crate::x11_utils::GenerateRandom::generate(rng),
+            data: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the GetTexGenfv request
 pub const GET_TEX_GENFV_REQUEST: u8 = 133;
@@ -7978,6 +8392,17 @@ impl GetTexGenfvReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetTexGenfvReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            datum: crate::x11_utils::GenerateRandom::generate(rng),
+            data: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the GetTexGeniv request
 pub const GET_TEX_GENIV_REQUEST: u8 = 134;
@@ -8114,6 +8539,17 @@ impl GetTexGenivReply {
     pub fn n(&self) -> u32 {
         self.data.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetTexGenivReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            datum: crate::x11_utils::GenerateRandom::generate(rng),
+            data: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -8284,6 +8720,18 @@ impl GetTexImageReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetTexImageReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            width: crate::x11_utils::GenerateRandom::generate(rng),
+            height: crate::x11_utils::GenerateRandom::generate(rng),
+            depth: crate::x11_utils::GenerateRandom::generate(rng),
+            data: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the GetTexParameterfv request
 pub const GET_TEX_PARAMETERFV_REQUEST: u8 = 136;
@@ -8422,6 +8870,17 @@ impl GetTexParameterfvReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetTexParameterfvReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            datum: crate::x11_utils::GenerateRandom::generate(rng),
+            data: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the GetTexParameteriv request
 pub const GET_TEX_PARAMETERIV_REQUEST: u8 = 137;
@@ -8558,6 +9017,17 @@ impl GetTexParameterivReply {
     pub fn n(&self) -> u32 {
         self.data.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetTexParameterivReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            datum: crate::x11_utils::GenerateRandom::generate(rng),
+            data: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -8706,6 +9176,17 @@ impl GetTexLevelParameterfvReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetTexLevelParameterfvReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            datum: crate::x11_utils::GenerateRandom::generate(rng),
+            data: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the GetTexLevelParameteriv request
 pub const GET_TEX_LEVEL_PARAMETERIV_REQUEST: u8 = 139;
@@ -8852,6 +9333,17 @@ impl GetTexLevelParameterivReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetTexLevelParameterivReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            datum: crate::x11_utils::GenerateRandom::generate(rng),
+            data: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the IsEnabled request
 pub const IS_ENABLED_REQUEST: u8 = 140;
@@ -8972,6 +9464,16 @@ impl Serialize for IsEnabledReply {
         self.ret_val.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for IsEnabledReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            ret_val: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the IsList request
 pub const IS_LIST_REQUEST: u8 = 141;
@@ -9090,6 +9592,16 @@ impl Serialize for IsListReply {
         self.sequence.serialize_into(bytes);
         self.length.serialize_into(bytes);
         self.ret_val.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for IsListReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            ret_val: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -9283,6 +9795,16 @@ impl AreTexturesResidentReply {
         self.data.len()
             .checked_div(4).unwrap()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for AreTexturesResidentReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            ret_val: crate::x11_utils::GenerateRandom::generate(rng),
+            data: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -9481,6 +10003,15 @@ impl GenTexturesReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GenTexturesReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            data: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the IsTexture request
 pub const IS_TEXTURE_REQUEST: u8 = 146;
@@ -9599,6 +10130,16 @@ impl Serialize for IsTextureReply {
         self.sequence.serialize_into(bytes);
         self.length.serialize_into(bytes);
         self.ret_val.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for IsTextureReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            ret_val: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -9755,6 +10296,16 @@ impl GetColorTableReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetColorTableReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            width: crate::x11_utils::GenerateRandom::generate(rng),
+            data: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the GetColorTableParameterfv request
 pub const GET_COLOR_TABLE_PARAMETERFV_REQUEST: u8 = 148;
@@ -9893,6 +10444,17 @@ impl GetColorTableParameterfvReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetColorTableParameterfvReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            datum: crate::x11_utils::GenerateRandom::generate(rng),
+            data: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the GetColorTableParameteriv request
 pub const GET_COLOR_TABLE_PARAMETERIV_REQUEST: u8 = 149;
@@ -10029,6 +10591,17 @@ impl GetColorTableParameterivReply {
     pub fn n(&self) -> u32 {
         self.data.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetColorTableParameterivReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            datum: crate::x11_utils::GenerateRandom::generate(rng),
+            data: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -10188,6 +10761,17 @@ impl GetConvolutionFilterReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetConvolutionFilterReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            width: crate::x11_utils::GenerateRandom::generate(rng),
+            height: crate::x11_utils::GenerateRandom::generate(rng),
+            data: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the GetConvolutionParameterfv request
 pub const GET_CONVOLUTION_PARAMETERFV_REQUEST: u8 = 151;
@@ -10326,6 +10910,17 @@ impl GetConvolutionParameterfvReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetConvolutionParameterfvReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            datum: crate::x11_utils::GenerateRandom::generate(rng),
+            data: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the GetConvolutionParameteriv request
 pub const GET_CONVOLUTION_PARAMETERIV_REQUEST: u8 = 152;
@@ -10462,6 +11057,17 @@ impl GetConvolutionParameterivReply {
     pub fn n(&self) -> u32 {
         self.data.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetConvolutionParameterivReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            datum: crate::x11_utils::GenerateRandom::generate(rng),
+            data: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -10619,6 +11225,17 @@ impl GetSeparableFilterReply {
         self.rows_and_cols.len()
             .checked_div(4).unwrap()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetSeparableFilterReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            row_w: crate::x11_utils::GenerateRandom::generate(rng),
+            col_h: crate::x11_utils::GenerateRandom::generate(rng),
+            rows_and_cols: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -10779,6 +11396,16 @@ impl GetHistogramReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetHistogramReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            width: crate::x11_utils::GenerateRandom::generate(rng),
+            data: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the GetHistogramParameterfv request
 pub const GET_HISTOGRAM_PARAMETERFV_REQUEST: u8 = 155;
@@ -10917,6 +11544,17 @@ impl GetHistogramParameterfvReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetHistogramParameterfvReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            datum: crate::x11_utils::GenerateRandom::generate(rng),
+            data: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the GetHistogramParameteriv request
 pub const GET_HISTOGRAM_PARAMETERIV_REQUEST: u8 = 156;
@@ -11053,6 +11691,17 @@ impl GetHistogramParameterivReply {
     pub fn n(&self) -> u32 {
         self.data.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetHistogramParameterivReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            datum: crate::x11_utils::GenerateRandom::generate(rng),
+            data: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -11208,6 +11857,15 @@ impl GetMinmaxReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetMinmaxReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            data: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the GetMinmaxParameterfv request
 pub const GET_MINMAX_PARAMETERFV_REQUEST: u8 = 158;
@@ -11344,6 +12002,17 @@ impl GetMinmaxParameterfvReply {
     pub fn n(&self) -> u32 {
         self.data.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetMinmaxParameterfvReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            datum: crate::x11_utils::GenerateRandom::generate(rng),
+            data: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -11484,6 +12153,17 @@ impl GetMinmaxParameterivReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetMinmaxParameterivReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            datum: crate::x11_utils::GenerateRandom::generate(rng),
+            data: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the GetCompressedTexImageARB request
 pub const GET_COMPRESSED_TEX_IMAGE_ARB_REQUEST: u8 = 160;
@@ -11620,6 +12300,16 @@ impl GetCompressedTexImageARBReply {
         self.data.len()
             .checked_div(4).unwrap()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetCompressedTexImageARBReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            size: crate::x11_utils::GenerateRandom::generate(rng),
+            data: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -11818,6 +12508,15 @@ impl GenQueriesARBReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GenQueriesARBReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            data: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the IsQueryARB request
 pub const IS_QUERY_ARB_REQUEST: u8 = 163;
@@ -11936,6 +12635,16 @@ impl Serialize for IsQueryARBReply {
         self.sequence.serialize_into(bytes);
         self.length.serialize_into(bytes);
         self.ret_val.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for IsQueryARBReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            ret_val: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -12076,6 +12785,17 @@ impl GetQueryivARBReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetQueryivARBReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            datum: crate::x11_utils::GenerateRandom::generate(rng),
+            data: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the GetQueryObjectivARB request
 pub const GET_QUERY_OBJECTIV_ARB_REQUEST: u8 = 165;
@@ -12214,6 +12934,17 @@ impl GetQueryObjectivARBReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetQueryObjectivARBReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            datum: crate::x11_utils::GenerateRandom::generate(rng),
+            data: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the GetQueryObjectuivARB request
 pub const GET_QUERY_OBJECTUIV_ARB_REQUEST: u8 = 166;
@@ -12350,6 +13081,17 @@ impl GetQueryObjectuivARBReply {
     pub fn n(&self) -> u32 {
         self.data.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetQueryObjectuivARBReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            datum: crate::x11_utils::GenerateRandom::generate(rng),
+            data: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 

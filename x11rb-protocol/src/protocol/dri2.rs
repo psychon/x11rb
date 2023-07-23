@@ -307,6 +307,18 @@ impl Serialize for DRI2Buffer {
         self.flags.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for DRI2Buffer {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            attachment: crate::x11_utils::GenerateRandom::generate(rng),
+            name: crate::x11_utils::GenerateRandom::generate(rng),
+            pitch: crate::x11_utils::GenerateRandom::generate(rng),
+            cpp: crate::x11_utils::GenerateRandom::generate(rng),
+            flags: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -343,6 +355,15 @@ impl Serialize for AttachFormat {
         bytes.reserve(8);
         u32::from(self.attachment).serialize_into(bytes);
         self.format.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for AttachFormat {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            attachment: crate::x11_utils::GenerateRandom::generate(rng),
+            format: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -471,6 +492,17 @@ impl Serialize for QueryVersionReply {
         self.length.serialize_into(bytes);
         self.major_version.serialize_into(bytes);
         self.minor_version.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for QueryVersionReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            major_version: crate::x11_utils::GenerateRandom::generate(rng),
+            minor_version: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -625,6 +657,18 @@ impl ConnectReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for ConnectReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            driver_name: crate::x11_utils::GenerateRandom::generate(rng),
+            alignment_pad: crate::x11_utils::GenerateRandom::generate(rng),
+            device_name: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the Authenticate request
 pub const AUTHENTICATE_REQUEST: u8 = 2;
@@ -743,6 +787,16 @@ impl Serialize for AuthenticateReply {
         self.sequence.serialize_into(bytes);
         self.length.serialize_into(bytes);
         self.authenticated.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for AuthenticateReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            authenticated: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -1004,6 +1058,18 @@ impl GetBuffersReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetBuffersReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            width: crate::x11_utils::GenerateRandom::generate(rng),
+            height: crate::x11_utils::GenerateRandom::generate(rng),
+            buffers: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the CopyRegion request
 pub const COPY_REGION_REQUEST: u8 = 6;
@@ -1130,6 +1196,15 @@ impl Serialize for CopyRegionReply {
         bytes.extend_from_slice(&[0; 1]);
         self.sequence.serialize_into(bytes);
         self.length.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for CopyRegionReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -1283,6 +1358,18 @@ impl GetBuffersWithFormatReply {
     pub fn count(&self) -> u32 {
         self.buffers.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetBuffersWithFormatReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            width: crate::x11_utils::GenerateRandom::generate(rng),
+            height: crate::x11_utils::GenerateRandom::generate(rng),
+            buffers: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -1453,6 +1540,17 @@ impl Serialize for SwapBuffersReply {
         self.swap_lo.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for SwapBuffersReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            swap_hi: crate::x11_utils::GenerateRandom::generate(rng),
+            swap_lo: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the GetMSC request
 pub const GET_MSC_REQUEST: u8 = 9;
@@ -1603,6 +1701,21 @@ impl Serialize for GetMSCReply {
         self.msc_lo.serialize_into(bytes);
         self.sbc_hi.serialize_into(bytes);
         self.sbc_lo.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetMSCReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            ust_hi: crate::x11_utils::GenerateRandom::generate(rng),
+            ust_lo: crate::x11_utils::GenerateRandom::generate(rng),
+            msc_hi: crate::x11_utils::GenerateRandom::generate(rng),
+            msc_lo: crate::x11_utils::GenerateRandom::generate(rng),
+            sbc_hi: crate::x11_utils::GenerateRandom::generate(rng),
+            sbc_lo: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -1805,6 +1918,21 @@ impl Serialize for WaitMSCReply {
         self.sbc_lo.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for WaitMSCReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            ust_hi: crate::x11_utils::GenerateRandom::generate(rng),
+            ust_lo: crate::x11_utils::GenerateRandom::generate(rng),
+            msc_hi: crate::x11_utils::GenerateRandom::generate(rng),
+            msc_lo: crate::x11_utils::GenerateRandom::generate(rng),
+            sbc_hi: crate::x11_utils::GenerateRandom::generate(rng),
+            sbc_lo: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the WaitSBC request
 pub const WAIT_SBC_REQUEST: u8 = 11;
@@ -1971,6 +2099,21 @@ impl Serialize for WaitSBCReply {
         self.msc_lo.serialize_into(bytes);
         self.sbc_hi.serialize_into(bytes);
         self.sbc_lo.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for WaitSBCReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            ust_hi: crate::x11_utils::GenerateRandom::generate(rng),
+            ust_lo: crate::x11_utils::GenerateRandom::generate(rng),
+            msc_hi: crate::x11_utils::GenerateRandom::generate(rng),
+            msc_lo: crate::x11_utils::GenerateRandom::generate(rng),
+            sbc_hi: crate::x11_utils::GenerateRandom::generate(rng),
+            sbc_lo: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -2164,6 +2307,18 @@ impl Serialize for GetParamReply {
         self.value_lo.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetParamReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            is_param_recognized: crate::x11_utils::GenerateRandom::generate(rng),
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            value_hi: crate::x11_utils::GenerateRandom::generate(rng),
+            value_lo: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the BufferSwapComplete event
 pub const BUFFER_SWAP_COMPLETE_EVENT: u8 = 0;
@@ -2262,6 +2417,22 @@ impl Serialize for BufferSwapCompleteEvent {
         self.msc_hi.serialize_into(bytes);
         self.msc_lo.serialize_into(bytes);
         self.sbc.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for BufferSwapCompleteEvent {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            response_type: crate::x11_utils::GenerateRandom::generate(rng),
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            event_type: crate::x11_utils::GenerateRandom::generate(rng),
+            drawable: crate::x11_utils::GenerateRandom::generate(rng),
+            ust_hi: crate::x11_utils::GenerateRandom::generate(rng),
+            ust_lo: crate::x11_utils::GenerateRandom::generate(rng),
+            msc_hi: crate::x11_utils::GenerateRandom::generate(rng),
+            msc_lo: crate::x11_utils::GenerateRandom::generate(rng),
+            sbc: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 impl From<&BufferSwapCompleteEvent> for [u8; 32] {
@@ -2363,6 +2534,16 @@ impl Serialize for InvalidateBuffersEvent {
         bytes.extend_from_slice(&[0; 1]);
         self.sequence.serialize_into(bytes);
         self.drawable.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for InvalidateBuffersEvent {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            response_type: crate::x11_utils::GenerateRandom::generate(rng),
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            drawable: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 impl From<&InvalidateBuffersEvent> for [u8; 32] {

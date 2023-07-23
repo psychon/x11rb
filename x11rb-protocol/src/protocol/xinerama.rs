@@ -80,6 +80,17 @@ impl Serialize for ScreenInfo {
         self.height.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for ScreenInfo {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            x_org: crate::x11_utils::GenerateRandom::generate(rng),
+            y_org: crate::x11_utils::GenerateRandom::generate(rng),
+            width: crate::x11_utils::GenerateRandom::generate(rng),
+            height: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the QueryVersion request
 pub const QUERY_VERSION_REQUEST: u8 = 0;
@@ -200,6 +211,17 @@ impl Serialize for QueryVersionReply {
         self.minor.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for QueryVersionReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            major: crate::x11_utils::GenerateRandom::generate(rng),
+            minor: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the GetState request
 pub const GET_STATE_REQUEST: u8 = 1;
@@ -314,6 +336,17 @@ impl Serialize for GetStateReply {
         self.window.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetStateReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            state: crate::x11_utils::GenerateRandom::generate(rng),
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            window: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the GetScreenCount request
 pub const GET_SCREEN_COUNT_REQUEST: u8 = 2;
@@ -426,6 +459,17 @@ impl Serialize for GetScreenCountReply {
         self.sequence.serialize_into(bytes);
         self.length.serialize_into(bytes);
         self.window.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetScreenCountReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            screen_count: crate::x11_utils::GenerateRandom::generate(rng),
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            window: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -572,6 +616,19 @@ impl Serialize for GetScreenSizeReply {
         self.screen.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetScreenSizeReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            width: crate::x11_utils::GenerateRandom::generate(rng),
+            height: crate::x11_utils::GenerateRandom::generate(rng),
+            window: crate::x11_utils::GenerateRandom::generate(rng),
+            screen: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the IsActive request
 pub const IS_ACTIVE_REQUEST: u8 = 4;
@@ -673,6 +730,16 @@ impl Serialize for IsActiveReply {
         self.sequence.serialize_into(bytes);
         self.length.serialize_into(bytes);
         self.state.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for IsActiveReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            state: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -781,6 +848,16 @@ impl QueryScreensReply {
     pub fn number(&self) -> u32 {
         self.screen_info.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for QueryScreensReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            screen_info: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 

@@ -111,6 +111,15 @@ impl Printer {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for Printer {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            name: crate::x11_utils::GenerateRandom::generate(rng),
+            description: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 pub type Pcontext = u32;
 
@@ -543,6 +552,17 @@ impl Serialize for PrintQueryVersionReply {
         self.minor_version.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for PrintQueryVersionReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            major_version: crate::x11_utils::GenerateRandom::generate(rng),
+            minor_version: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the PrintGetPrinterList request
 pub const PRINT_GET_PRINTER_LIST_REQUEST: u8 = 1;
@@ -687,6 +707,16 @@ impl PrintGetPrinterListReply {
     pub fn list_count(&self) -> u32 {
         self.printers.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for PrintGetPrinterListReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            printers: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -980,6 +1010,16 @@ impl Serialize for PrintGetContextReply {
         self.context.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for PrintGetContextReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            context: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the PrintDestroyContext request
 pub const PRINT_DESTROY_CONTEXT_REQUEST: u8 = 5;
@@ -1134,6 +1174,16 @@ impl Serialize for PrintGetScreenOfContextReply {
         self.sequence.serialize_into(bytes);
         self.length.serialize_into(bytes);
         self.root.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for PrintGetScreenOfContextReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            root: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -1585,6 +1635,18 @@ impl PrintGetDocumentDataReply {
             .try_into().unwrap()
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for PrintGetDocumentDataReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            status_code: crate::x11_utils::GenerateRandom::generate(rng),
+            finished_flag: crate::x11_utils::GenerateRandom::generate(rng),
+            data: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the PrintStartPage request
 pub const PRINT_START_PAGE_REQUEST: u8 = 13;
@@ -1873,6 +1935,17 @@ impl Serialize for PrintInputSelectedReply {
         self.all_events_mask.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for PrintInputSelectedReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            event_mask: crate::x11_utils::GenerateRandom::generate(rng),
+            all_events_mask: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the PrintGetAttributes request
 pub const PRINT_GET_ATTRIBUTES_REQUEST: u8 = 17;
@@ -1998,6 +2071,16 @@ impl PrintGetAttributesReply {
     pub fn string_len(&self) -> u32 {
         self.attributes.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for PrintGetAttributesReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            attributes: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -2146,6 +2229,16 @@ impl PrintGetOneAttributesReply {
     pub fn value_len(&self) -> u32 {
         self.value.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for PrintGetOneAttributesReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            value: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -2378,6 +2471,21 @@ impl Serialize for PrintGetPageDimensionsReply {
         self.reproducible_height.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for PrintGetPageDimensionsReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            width: crate::x11_utils::GenerateRandom::generate(rng),
+            height: crate::x11_utils::GenerateRandom::generate(rng),
+            offset_x: crate::x11_utils::GenerateRandom::generate(rng),
+            offset_y: crate::x11_utils::GenerateRandom::generate(rng),
+            reproducible_width: crate::x11_utils::GenerateRandom::generate(rng),
+            reproducible_height: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the PrintQueryScreens request
 pub const PRINT_QUERY_SCREENS_REQUEST: u8 = 22;
@@ -2484,6 +2592,16 @@ impl PrintQueryScreensReply {
     pub fn list_count(&self) -> u32 {
         self.roots.len()
             .try_into().unwrap()
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for PrintQueryScreensReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            roots: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -2606,6 +2724,17 @@ impl Serialize for PrintSetImageResolutionReply {
         self.previous_resolutions.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for PrintSetImageResolutionReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            status: crate::x11_utils::GenerateRandom::generate(rng),
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            previous_resolutions: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the PrintGetImageResolution request
 pub const PRINT_GET_IMAGE_RESOLUTION_REQUEST: u8 = 24;
@@ -2716,6 +2845,16 @@ impl Serialize for PrintGetImageResolutionReply {
         self.image_resolution.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for PrintGetImageResolutionReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            image_resolution: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the Notify event
 pub const NOTIFY_EVENT: u8 = 0;
@@ -2770,6 +2909,18 @@ impl Serialize for NotifyEvent {
         self.sequence.serialize_into(bytes);
         self.context.serialize_into(bytes);
         self.cancel.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for NotifyEvent {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            response_type: crate::x11_utils::GenerateRandom::generate(rng),
+            detail: crate::x11_utils::GenerateRandom::generate(rng),
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            context: crate::x11_utils::GenerateRandom::generate(rng),
+            cancel: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 impl From<&NotifyEvent> for [u8; 32] {
@@ -2870,6 +3021,17 @@ impl Serialize for AttributNotifyEvent {
         self.detail.serialize_into(bytes);
         self.sequence.serialize_into(bytes);
         self.context.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for AttributNotifyEvent {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            response_type: crate::x11_utils::GenerateRandom::generate(rng),
+            detail: crate::x11_utils::GenerateRandom::generate(rng),
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            context: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 impl From<&AttributNotifyEvent> for [u8; 32] {

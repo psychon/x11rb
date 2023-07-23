@@ -264,6 +264,17 @@ impl Serialize for QueryVersionReply {
         bytes.extend_from_slice(&[0; 16]);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for QueryVersionReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            major_version: crate::x11_utils::GenerateRandom::generate(rng),
+            minor_version: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the Create request
 pub const CREATE_REQUEST: u8 = 1;
@@ -608,6 +619,21 @@ impl Serialize for NotifyEvent {
         self.timestamp.serialize_into(bytes);
         self.area.serialize_into(bytes);
         self.geometry.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for NotifyEvent {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            response_type: crate::x11_utils::GenerateRandom::generate(rng),
+            level: crate::x11_utils::GenerateRandom::generate(rng),
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            drawable: crate::x11_utils::GenerateRandom::generate(rng),
+            damage: crate::x11_utils::GenerateRandom::generate(rng),
+            timestamp: crate::x11_utils::GenerateRandom::generate(rng),
+            area: crate::x11_utils::GenerateRandom::generate(rng),
+            geometry: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 impl From<&NotifyEvent> for [u8; 32] {

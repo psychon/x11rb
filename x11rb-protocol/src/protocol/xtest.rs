@@ -152,6 +152,17 @@ impl Serialize for GetVersionReply {
         self.minor_version.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetVersionReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            major_version: crate::x11_utils::GenerateRandom::generate(rng),
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            minor_version: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -346,6 +357,16 @@ impl Serialize for CompareCursorReply {
         self.same.serialize_into(bytes);
         self.sequence.serialize_into(bytes);
         self.length.serialize_into(bytes);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for CompareCursorReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            same: crate::x11_utils::GenerateRandom::generate(rng),
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 

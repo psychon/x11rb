@@ -136,4 +136,14 @@ impl Serialize for EnableReply {
         self.maximum_request_length.serialize_into(bytes);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for EnableReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            maximum_request_length: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 

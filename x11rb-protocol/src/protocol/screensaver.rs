@@ -386,6 +386,17 @@ impl Serialize for QueryVersionReply {
         bytes.extend_from_slice(&[0; 20]);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for QueryVersionReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            server_major_version: crate::x11_utils::GenerateRandom::generate(rng),
+            server_minor_version: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the QueryInfo request
 pub const QUERY_INFO_REQUEST: u8 = 1;
@@ -537,6 +548,21 @@ impl Serialize for QueryInfoReply {
         self.event_mask.serialize_into(bytes);
         u8::from(self.kind).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 7]);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for QueryInfoReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            state: crate::x11_utils::GenerateRandom::generate(rng),
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            saver_window: crate::x11_utils::GenerateRandom::generate(rng),
+            ms_until_server: crate::x11_utils::GenerateRandom::generate(rng),
+            ms_since_user_input: crate::x11_utils::GenerateRandom::generate(rng),
+            event_mask: crate::x11_utils::GenerateRandom::generate(rng),
+            kind: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 
@@ -860,6 +886,28 @@ impl SetAttributesAux {
             expr_value |= u32::from(xproto::CW::CURSOR);
         }
         expr_value
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for SetAttributesAux {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            background_pixmap: crate::x11_utils::GenerateRandom::generate(rng),
+            background_pixel: crate::x11_utils::GenerateRandom::generate(rng),
+            border_pixmap: crate::x11_utils::GenerateRandom::generate(rng),
+            border_pixel: crate::x11_utils::GenerateRandom::generate(rng),
+            bit_gravity: crate::x11_utils::GenerateRandom::generate(rng),
+            win_gravity: crate::x11_utils::GenerateRandom::generate(rng),
+            backing_store: crate::x11_utils::GenerateRandom::generate(rng),
+            backing_planes: crate::x11_utils::GenerateRandom::generate(rng),
+            backing_pixel: crate::x11_utils::GenerateRandom::generate(rng),
+            override_redirect: crate::x11_utils::GenerateRandom::generate(rng),
+            save_under: crate::x11_utils::GenerateRandom::generate(rng),
+            event_mask: crate::x11_utils::GenerateRandom::generate(rng),
+            do_not_propogate_mask: crate::x11_utils::GenerateRandom::generate(rng),
+            colormap: crate::x11_utils::GenerateRandom::generate(rng),
+            cursor: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 impl SetAttributesAux {
@@ -1288,6 +1336,21 @@ impl Serialize for NotifyEvent {
         u8::from(self.kind).serialize_into(bytes);
         self.forced.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 14]);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for NotifyEvent {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            response_type: crate::x11_utils::GenerateRandom::generate(rng),
+            state: crate::x11_utils::GenerateRandom::generate(rng),
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            time: crate::x11_utils::GenerateRandom::generate(rng),
+            root: crate::x11_utils::GenerateRandom::generate(rng),
+            window: crate::x11_utils::GenerateRandom::generate(rng),
+            kind: crate::x11_utils::GenerateRandom::generate(rng),
+            forced: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 impl From<&NotifyEvent> for [u8; 32] {

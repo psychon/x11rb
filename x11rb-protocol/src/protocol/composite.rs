@@ -253,6 +253,17 @@ impl Serialize for QueryVersionReply {
         bytes.extend_from_slice(&[0; 16]);
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for QueryVersionReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            major_version: crate::x11_utils::GenerateRandom::generate(rng),
+            minor_version: crate::x11_utils::GenerateRandom::generate(rng),
+        }
+    }
+}
 
 /// Opcode for the RedirectWindow request
 pub const REDIRECT_WINDOW_REQUEST: u8 = 1;
@@ -759,6 +770,16 @@ impl Serialize for GetOverlayWindowReply {
         self.length.serialize_into(bytes);
         self.overlay_win.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 20]);
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetOverlayWindowReply {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        Self {
+            sequence: crate::x11_utils::GenerateRandom::generate(rng),
+            length: crate::x11_utils::GenerateRandom::generate(rng),
+            overlay_win: crate::x11_utils::GenerateRandom::generate(rng),
+        }
     }
 }
 

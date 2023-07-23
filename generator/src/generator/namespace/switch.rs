@@ -361,6 +361,49 @@ pub(super) fn emit_switch_type(
         outln!(out, "}}");
     }
 
+    outln!(out, "#[cfg(test)]");
+    outln!(out, "impl crate::x11_utils::GenerateRandom for {name} {{");
+    out.indented(|out| {
+        outln!(out, "fn generate(rng: &mut fastrand::Rng) -> Self {{");
+        out.indented(|out| {
+            match switch.kind {
+                xcbdefs::SwitchKind::BitCase => {
+                    outln!(out, "Self {{");
+                    out.indented(|out| {
+                        for (case, case_info) in switch.cases.iter().zip(case_infos.iter()) {
+                            let field_name = match case_info {
+                                CaseInfo::SingleField(index) => {
+                                    case.fields.borrow()[*index].name().unwrap().to_string()
+                                }
+                                CaseInfo::MultiField(field_name, _) => field_name.to_string(),
+                            };
+                            outln!(out, "{}: crate::x11_utils::GenerateRandom::generate(rng),", to_rust_variable_name(&field_name));
+                        }
+                    });
+                    outln!(out, "}}");
+                }
+                xcbdefs::SwitchKind::Case => {
+                    outln!(out, "match rng.u8(..{}) {{", switch.cases.len());
+                    out.indented(|out| {
+                        for (idx, (case, case_info)) in switch.cases.iter().zip(case_infos.iter()).enumerate() {
+                            let field_name = match case_info {
+                                CaseInfo::SingleField(index) => {
+                                    case.fields.borrow()[*index].name().unwrap().to_string()
+                                }
+                                CaseInfo::MultiField(field_name, _) => field_name.to_string(),
+                            };
+                            outln!(out, "{idx} => Self::{}(crate::x11_utils::GenerateRandom::generate(rng)),", to_rust_type_name(&field_name));
+                        }
+                        outln!(out, "_ => unreachable!()");
+                    });
+                    outln!(out, "}}");
+                }
+            }
+        });
+        outln!(out, "}}");
+    });
+    outln!(out, "}}");
+
     case_infos
 }
 
