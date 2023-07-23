@@ -104,6 +104,20 @@ impl core::fmt::Debug for SO  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for SO {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::SET,
+            Self::UNION,
+            Self::INTERSECT,
+            Self::SUBTRACT,
+            Self::INVERT,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -163,6 +177,18 @@ impl core::fmt::Debug for SK  {
             (Self::INPUT.0.into(), "INPUT", "Input"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for SK {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::BOUNDING,
+            Self::CLIP,
+            Self::INPUT,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
     }
 }
 

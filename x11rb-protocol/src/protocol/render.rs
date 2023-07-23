@@ -94,6 +94,17 @@ impl core::fmt::Debug for PictType  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for PictType {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::INDEXED,
+            Self::DIRECT,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -149,6 +160,16 @@ impl core::fmt::Debug for PictureEnum  {
             (Self::NONE.0.into(), "NONE", "None"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for PictureEnum {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::NONE,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
     }
 }
 
@@ -312,6 +333,68 @@ impl core::fmt::Debug for PictOp  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for PictOp {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::CLEAR,
+            Self::SRC,
+            Self::DST,
+            Self::OVER,
+            Self::OVER_REVERSE,
+            Self::IN,
+            Self::IN_REVERSE,
+            Self::OUT,
+            Self::OUT_REVERSE,
+            Self::ATOP,
+            Self::ATOP_REVERSE,
+            Self::XOR,
+            Self::ADD,
+            Self::SATURATE,
+            Self::DISJOINT_CLEAR,
+            Self::DISJOINT_SRC,
+            Self::DISJOINT_DST,
+            Self::DISJOINT_OVER,
+            Self::DISJOINT_OVER_REVERSE,
+            Self::DISJOINT_IN,
+            Self::DISJOINT_IN_REVERSE,
+            Self::DISJOINT_OUT,
+            Self::DISJOINT_OUT_REVERSE,
+            Self::DISJOINT_ATOP,
+            Self::DISJOINT_ATOP_REVERSE,
+            Self::DISJOINT_XOR,
+            Self::CONJOINT_CLEAR,
+            Self::CONJOINT_SRC,
+            Self::CONJOINT_DST,
+            Self::CONJOINT_OVER,
+            Self::CONJOINT_OVER_REVERSE,
+            Self::CONJOINT_IN,
+            Self::CONJOINT_IN_REVERSE,
+            Self::CONJOINT_OUT,
+            Self::CONJOINT_OUT_REVERSE,
+            Self::CONJOINT_ATOP,
+            Self::CONJOINT_ATOP_REVERSE,
+            Self::CONJOINT_XOR,
+            Self::MULTIPLY,
+            Self::SCREEN,
+            Self::OVERLAY,
+            Self::DARKEN,
+            Self::LIGHTEN,
+            Self::COLOR_DODGE,
+            Self::COLOR_BURN,
+            Self::HARD_LIGHT,
+            Self::SOFT_LIGHT,
+            Self::DIFFERENCE,
+            Self::EXCLUSION,
+            Self::HSL_HUE,
+            Self::HSL_SATURATION,
+            Self::HSL_COLOR,
+            Self::HSL_LUMINOSITY,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -359,6 +442,17 @@ impl core::fmt::Debug for PolyEdge  {
         pretty_print_enum(fmt, self.0, &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for PolyEdge {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::SHARP,
+            Self::SMOOTH,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -404,6 +498,17 @@ impl core::fmt::Debug for PolyMode  {
             (Self::IMPRECISE.0, "IMPRECISE", "Imprecise"),
         ];
         pretty_print_enum(fmt, self.0, &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for PolyMode {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::PRECISE,
+            Self::IMPRECISE,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
     }
 }
 
@@ -476,6 +581,28 @@ impl core::fmt::Debug for CP  {
     }
 }
 bitmask_binop!(CP, u32);
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for CP {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::REPEAT,
+            Self::ALPHA_MAP,
+            Self::ALPHA_X_ORIGIN,
+            Self::ALPHA_Y_ORIGIN,
+            Self::CLIP_X_ORIGIN,
+            Self::CLIP_Y_ORIGIN,
+            Self::CLIP_MASK,
+            Self::GRAPHICS_EXPOSURE,
+            Self::SUBWINDOW_MODE,
+            Self::POLY_EDGE,
+            Self::POLY_MODE,
+            Self::DITHER,
+            Self::COMPONENT_ALPHA,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -531,6 +658,21 @@ impl core::fmt::Debug for SubPixel  {
         pretty_print_enum(fmt, self.0, &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for SubPixel {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::UNKNOWN,
+            Self::HORIZONTAL_RGB,
+            Self::HORIZONTAL_BGR,
+            Self::VERTICAL_RGB,
+            Self::VERTICAL_BGR,
+            Self::NONE,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -580,6 +722,19 @@ impl core::fmt::Debug for Repeat  {
             (Self::REFLECT.0, "REFLECT", "Reflect"),
         ];
         pretty_print_enum(fmt, self.0, &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for Repeat {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::NONE,
+            Self::NORMAL,
+            Self::PAD,
+            Self::REFLECT,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
     }
 }
 

@@ -104,6 +104,19 @@ impl core::fmt::Debug for EventEnum  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for EventEnum {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::CONFIGURE_NOTIFY,
+            Self::COMPLETE_NOTIFY,
+            Self::IDLE_NOTIFY,
+            Self::REDIRECT_NOTIFY,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -158,6 +171,20 @@ impl core::fmt::Debug for EventMask  {
     }
 }
 bitmask_binop!(EventMask, u32);
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for EventMask {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::NO_EVENT,
+            Self::CONFIGURE_NOTIFY,
+            Self::COMPLETE_NOTIFY,
+            Self::IDLE_NOTIFY,
+            Self::REDIRECT_NOTIFY,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -224,6 +251,20 @@ impl core::fmt::Debug for Option  {
     }
 }
 bitmask_binop!(Option, u8);
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for Option {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::NONE,
+            Self::ASYNC,
+            Self::COPY,
+            Self::UST,
+            Self::SUBOPTIMAL,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -288,6 +329,19 @@ impl core::fmt::Debug for Capability  {
     }
 }
 bitmask_binop!(Capability, u8);
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for Capability {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::NONE,
+            Self::ASYNC,
+            Self::FENCE,
+            Self::UST,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -345,6 +399,17 @@ impl core::fmt::Debug for CompleteKind  {
             (Self::NOTIFY_MSC.0.into(), "NOTIFY_MSC", "NotifyMSC"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for CompleteKind {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::PIXMAP,
+            Self::NOTIFY_MSC,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
     }
 }
 
@@ -408,6 +473,19 @@ impl core::fmt::Debug for CompleteMode  {
             (Self::SUBOPTIMAL_COPY.0.into(), "SUBOPTIMAL_COPY", "SuboptimalCopy"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for CompleteMode {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::COPY,
+            Self::FLIP,
+            Self::SKIP,
+            Self::SUBOPTIMAL_COPY,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
     }
 }
 

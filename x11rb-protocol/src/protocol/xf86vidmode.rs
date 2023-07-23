@@ -107,6 +107,28 @@ impl core::fmt::Debug for ModeFlag  {
     }
 }
 bitmask_binop!(ModeFlag, u32);
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for ModeFlag {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::POSITIVE_H_SYNC,
+            Self::NEGATIVE_H_SYNC,
+            Self::POSITIVE_V_SYNC,
+            Self::NEGATIVE_V_SYNC,
+            Self::INTERLACE,
+            Self::COMPOSITE_SYNC,
+            Self::POSITIVE_C_SYNC,
+            Self::NEGATIVE_C_SYNC,
+            Self::H_SKEW,
+            Self::BROADCAST,
+            Self::PIXMUX,
+            Self::DOUBLE_CLOCK,
+            Self::HALF_CLOCK,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -153,6 +175,16 @@ impl core::fmt::Debug for ClockFlag  {
     }
 }
 bitmask_binop!(ClockFlag, u32);
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for ClockFlag {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::PROGRAMABLE,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -201,6 +233,17 @@ impl core::fmt::Debug for Permission  {
     }
 }
 bitmask_binop!(Permission, u32);
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for Permission {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::READ,
+            Self::WRITE,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]

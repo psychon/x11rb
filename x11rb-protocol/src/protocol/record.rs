@@ -279,6 +279,18 @@ impl core::fmt::Debug for HType  {
     }
 }
 bitmask_binop!(HType, u8);
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for HType {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::FROM_SERVER_TIME,
+            Self::FROM_CLIENT_TIME,
+            Self::FROM_CLIENT_SEQUENCE,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 pub type ClientSpec = u32;
 
@@ -340,6 +352,18 @@ impl core::fmt::Debug for CS  {
             (Self::ALL_CLIENTS.0.into(), "ALL_CLIENTS", "AllClients"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for CS {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::CURRENT_CLIENTS,
+            Self::FUTURE_CLIENTS,
+            Self::ALL_CLIENTS,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
     }
 }
 

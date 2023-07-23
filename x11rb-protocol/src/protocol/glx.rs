@@ -468,6 +468,17 @@ impl core::fmt::Debug for PBCET  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for PBCET {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::DAMAGED,
+            Self::SAVED,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -519,6 +530,17 @@ impl core::fmt::Debug for PBCDT  {
             (Self::PBUFFER.0.into(), "PBUFFER", "Pbuffer"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for PBCDT {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::WINDOW,
+            Self::PBUFFER,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
     }
 }
 
@@ -1509,6 +1531,36 @@ impl core::fmt::Debug for GC  {
             (Self::GL_ALL_ATTRIB_BITS.0, "GL_ALL_ATTRIB_BITS", "GL_ALL_ATTRIB_BITS"),
         ];
         pretty_print_enum(fmt, self.0, &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GC {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::GL_CURRENT_BIT,
+            Self::GL_POINT_BIT,
+            Self::GL_LINE_BIT,
+            Self::GL_POLYGON_BIT,
+            Self::GL_POLYGON_STIPPLE_BIT,
+            Self::GL_PIXEL_MODE_BIT,
+            Self::GL_LIGHTING_BIT,
+            Self::GL_FOG_BIT,
+            Self::GL_DEPTH_BUFFER_BIT,
+            Self::GL_ACCUM_BUFFER_BIT,
+            Self::GL_STENCIL_BUFFER_BIT,
+            Self::GL_VIEWPORT_BIT,
+            Self::GL_TRANSFORM_BIT,
+            Self::GL_ENABLE_BIT,
+            Self::GL_COLOR_BUFFER_BIT,
+            Self::GL_HINT_BIT,
+            Self::GL_EVAL_BIT,
+            Self::GL_LIST_BIT,
+            Self::GL_TEXTURE_BIT,
+            Self::GL_SCISSOR_BIT,
+            Self::GL_ALL_ATTRIB_BITS,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
     }
 }
 
@@ -4577,6 +4629,18 @@ impl core::fmt::Debug for RM  {
             (Self::GL_SELECT.0.into(), "GL_SELECT", "GL_SELECT"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for RM {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::GL_RENDER,
+            Self::GL_FEEDBACK,
+            Self::GL_SELECT,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
     }
 }
 

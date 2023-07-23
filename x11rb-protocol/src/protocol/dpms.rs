@@ -621,6 +621,19 @@ impl core::fmt::Debug for DPMSMode  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for DPMSMode {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::ON,
+            Self::STANDBY,
+            Self::SUSPEND,
+            Self::OFF,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 /// Opcode for the ForceLevel request
 pub const FORCE_LEVEL_REQUEST: u8 = 6;

@@ -157,6 +157,17 @@ impl core::fmt::Debug for ClientIdMask  {
     }
 }
 bitmask_binop!(ClientIdMask, u32);
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for ClientIdMask {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::CLIENT_XID,
+            Self::LOCAL_CLIENT_PID,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]

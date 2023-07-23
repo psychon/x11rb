@@ -121,6 +121,21 @@ impl core::fmt::Debug for Rotation  {
     }
 }
 bitmask_binop!(Rotation, u16);
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for Rotation {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::ROTATE0,
+            Self::ROTATE90,
+            Self::ROTATE180,
+            Self::ROTATE270,
+            Self::REFLECT_X,
+            Self::REFLECT_Y,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -417,6 +432,19 @@ impl core::fmt::Debug for SetConfig  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for SetConfig {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::SUCCESS,
+            Self::INVALID_CONFIG_TIME,
+            Self::INVALID_TIME,
+            Self::FAILED,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 /// Opcode for the SetScreenConfig request
 pub const SET_SCREEN_CONFIG_REQUEST: u8 = 2;
@@ -671,6 +699,23 @@ impl core::fmt::Debug for NotifyMask  {
     }
 }
 bitmask_binop!(NotifyMask, u16);
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for NotifyMask {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::SCREEN_CHANGE,
+            Self::CRTC_CHANGE,
+            Self::OUTPUT_CHANGE,
+            Self::OUTPUT_PROPERTY,
+            Self::PROVIDER_CHANGE,
+            Self::PROVIDER_PROPERTY,
+            Self::RESOURCE_CHANGE,
+            Self::LEASE,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 /// Opcode for the SelectInput request
 pub const SELECT_INPUT_REQUEST: u8 = 4;
@@ -1178,6 +1223,29 @@ impl core::fmt::Debug for ModeFlag  {
     }
 }
 bitmask_binop!(ModeFlag, u32);
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for ModeFlag {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::HSYNC_POSITIVE,
+            Self::HSYNC_NEGATIVE,
+            Self::VSYNC_POSITIVE,
+            Self::VSYNC_NEGATIVE,
+            Self::INTERLACE,
+            Self::DOUBLE_SCAN,
+            Self::CSYNC,
+            Self::CSYNC_POSITIVE,
+            Self::CSYNC_NEGATIVE,
+            Self::HSKEW_PRESENT,
+            Self::BCAST,
+            Self::PIXEL_MULTIPLEX,
+            Self::DOUBLE_CLOCK,
+            Self::HALVE_CLOCK,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -1524,6 +1592,18 @@ impl core::fmt::Debug for Connection  {
             (Self::UNKNOWN.0.into(), "UNKNOWN", "Unknown"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for Connection {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::CONNECTED,
+            Self::DISCONNECTED,
+            Self::UNKNOWN,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
     }
 }
 
@@ -3737,6 +3817,19 @@ impl core::fmt::Debug for Transform  {
     }
 }
 bitmask_binop!(Transform, u8);
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for Transform {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::UNIT,
+            Self::SCALE_UP,
+            Self::SCALE_DOWN,
+            Self::PROJECTIVE,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 /// Opcode for the SetCrtcTransform request
 pub const SET_CRTC_TRANSFORM_REQUEST: u8 = 26;
@@ -4796,6 +4889,19 @@ impl core::fmt::Debug for ProviderCapability  {
     }
 }
 bitmask_binop!(ProviderCapability, u32);
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for ProviderCapability {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::SOURCE_OUTPUT,
+            Self::SINK_OUTPUT,
+            Self::SOURCE_OFFLOAD,
+            Self::SINK_OFFLOAD,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 /// Opcode for the GetProviderInfo request
 pub const GET_PROVIDER_INFO_REQUEST: u8 = 33;
@@ -6037,6 +6143,22 @@ impl core::fmt::Debug for Notify  {
             (Self::LEASE.0.into(), "LEASE", "Lease"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for Notify {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::CRTC_CHANGE,
+            Self::OUTPUT_CHANGE,
+            Self::OUTPUT_PROPERTY,
+            Self::PROVIDER_CHANGE,
+            Self::PROVIDER_PROPERTY,
+            Self::RESOURCE_CHANGE,
+            Self::LEASE,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
     }
 }
 

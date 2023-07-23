@@ -303,6 +303,20 @@ impl core::fmt::Debug for DeviceUse  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for DeviceUse {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::IS_X_POINTER,
+            Self::IS_X_KEYBOARD,
+            Self::IS_X_EXTENSION_DEVICE,
+            Self::IS_X_EXTENSION_KEYBOARD,
+            Self::IS_X_EXTENSION_POINTER,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -372,6 +386,22 @@ impl core::fmt::Debug for InputClass  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for InputClass {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::KEY,
+            Self::BUTTON,
+            Self::VALUATOR,
+            Self::FEEDBACK,
+            Self::PROXIMITY,
+            Self::FOCUS,
+            Self::OTHER,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -429,6 +459,17 @@ impl core::fmt::Debug for ValuatorMode  {
             (Self::ABSOLUTE.0.into(), "ABSOLUTE", "Absolute"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for ValuatorMode {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::RELATIVE,
+            Self::ABSOLUTE,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
     }
 }
 
@@ -1704,6 +1745,17 @@ impl core::fmt::Debug for PropagateMode  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for PropagateMode {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::ADD_TO_LIST,
+            Self::DELETE_FROM_LIST,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 /// Opcode for the ChangeDeviceDontPropagateList request
 pub const CHANGE_DEVICE_DONT_PROPAGATE_LIST_REQUEST: u8 = 8;
@@ -2679,6 +2731,16 @@ impl core::fmt::Debug for ModifierDevice  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for ModifierDevice {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::USE_X_KEYBOARD,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 /// Opcode for the GrabDeviceKey request
 pub const GRAB_DEVICE_KEY_REQUEST: u8 = 15;
@@ -3145,6 +3207,21 @@ impl core::fmt::Debug for DeviceInputMode  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for DeviceInputMode {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::ASYNC_THIS_DEVICE,
+            Self::SYNC_THIS_DEVICE,
+            Self::REPLAY_THIS_DEVICE,
+            Self::ASYNC_OTHER_DEVICES,
+            Self::ASYNC_ALL,
+            Self::SYNC_ALL,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 /// Opcode for the AllowDeviceEvents request
 pub const ALLOW_DEVICE_EVENTS_REQUEST: u8 = 19;
@@ -3498,6 +3575,21 @@ impl core::fmt::Debug for FeedbackClass  {
             (Self::BELL.0.into(), "BELL", "Bell"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for FeedbackClass {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::KEYBOARD,
+            Self::POINTER,
+            Self::STRING,
+            Self::INTEGER,
+            Self::LED,
+            Self::BELL,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
     }
 }
 
@@ -5375,6 +5467,28 @@ impl core::fmt::Debug for ChangeFeedbackControlMask  {
     }
 }
 bitmask_binop!(ChangeFeedbackControlMask, u32);
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for ChangeFeedbackControlMask {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::KEY_CLICK_PERCENT,
+            Self::PERCENT,
+            Self::PITCH,
+            Self::DURATION,
+            Self::LED,
+            Self::LED_MODE,
+            Self::KEY,
+            Self::AUTO_REPEAT_MODE,
+            Self::STRING,
+            Self::INTEGER,
+            Self::ACCEL_NUM,
+            Self::ACCEL_DENOM,
+            Self::THRESHOLD,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 /// Opcode for the ChangeFeedbackControl request
 pub const CHANGE_FEEDBACK_CONTROL_REQUEST: u8 = 23;
@@ -6426,6 +6540,17 @@ impl core::fmt::Debug for ValuatorStateModeMask  {
     }
 }
 bitmask_binop!(ValuatorStateModeMask, u8);
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for ValuatorStateModeMask {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::DEVICE_MODE_ABSOLUTE,
+            Self::OUT_OF_PROXIMITY,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -7177,6 +7302,20 @@ impl core::fmt::Debug for DeviceControl  {
             (Self::ABSAREA.0.into(), "ABSAREA", "Absarea"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for DeviceControl {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::RESOLUTION,
+            Self::ABSCALIB,
+            Self::CORE,
+            Self::ENABLE,
+            Self::ABSAREA,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
     }
 }
 
@@ -9054,6 +9193,18 @@ impl core::fmt::Debug for PropertyFormat  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for PropertyFormat {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::M8_BITS,
+            Self::M16_BITS,
+            Self::M32_BITS,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -9679,6 +9830,17 @@ impl core::fmt::Debug for Device  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for Device {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::ALL,
+            Self::ALL_MASTER,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -10167,6 +10329,19 @@ impl core::fmt::Debug for HierarchyChangeType  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for HierarchyChangeType {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::ADD_MASTER,
+            Self::REMOVE_MASTER,
+            Self::ATTACH_SLAVE,
+            Self::DETACH_SLAVE,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -10224,6 +10399,17 @@ impl core::fmt::Debug for ChangeMode  {
             (Self::FLOAT.0.into(), "FLOAT", "Float"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for ChangeMode {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::ATTACH,
+            Self::FLOAT,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
     }
 }
 
@@ -11107,6 +11293,41 @@ impl core::fmt::Debug for XIEventMask  {
     }
 }
 bitmask_binop!(XIEventMask, u32);
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for XIEventMask {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::DEVICE_CHANGED,
+            Self::KEY_PRESS,
+            Self::KEY_RELEASE,
+            Self::BUTTON_PRESS,
+            Self::BUTTON_RELEASE,
+            Self::MOTION,
+            Self::ENTER,
+            Self::LEAVE,
+            Self::FOCUS_IN,
+            Self::FOCUS_OUT,
+            Self::HIERARCHY,
+            Self::PROPERTY,
+            Self::RAW_KEY_PRESS,
+            Self::RAW_KEY_RELEASE,
+            Self::RAW_BUTTON_PRESS,
+            Self::RAW_BUTTON_RELEASE,
+            Self::RAW_MOTION,
+            Self::TOUCH_BEGIN,
+            Self::TOUCH_UPDATE,
+            Self::TOUCH_END,
+            Self::TOUCH_OWNERSHIP,
+            Self::RAW_TOUCH_BEGIN,
+            Self::RAW_TOUCH_UPDATE,
+            Self::RAW_TOUCH_END,
+            Self::BARRIER_HIT,
+            Self::BARRIER_LEAVE,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -11441,6 +11662,21 @@ impl core::fmt::Debug for DeviceClassType  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for DeviceClassType {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::KEY,
+            Self::BUTTON,
+            Self::VALUATOR,
+            Self::SCROLL,
+            Self::TOUCH,
+            Self::GESTURE,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -11500,6 +11736,20 @@ impl core::fmt::Debug for DeviceType  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for DeviceType {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::MASTER_POINTER,
+            Self::MASTER_KEYBOARD,
+            Self::SLAVE_POINTER,
+            Self::SLAVE_KEYBOARD,
+            Self::FLOATING_SLAVE,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -11548,6 +11798,17 @@ impl core::fmt::Debug for ScrollFlags  {
     }
 }
 bitmask_binop!(ScrollFlags, u32);
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for ScrollFlags {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::NO_EMULATION,
+            Self::PREFERRED,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -11599,6 +11860,17 @@ impl core::fmt::Debug for ScrollType  {
             (Self::HORIZONTAL.0.into(), "HORIZONTAL", "Horizontal"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for ScrollType {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::VERTICAL,
+            Self::HORIZONTAL,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
     }
 }
 
@@ -11658,6 +11930,17 @@ impl core::fmt::Debug for TouchMode  {
             (Self::DEPENDENT.0.into(), "DEPENDENT", "Dependent"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for TouchMode {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::DIRECT,
+            Self::DEPENDENT,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
     }
 }
 
@@ -13003,6 +13286,17 @@ impl core::fmt::Debug for GrabOwner  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GrabOwner {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::NO_OWNER,
+            Self::OWNER,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 /// Opcode for the XIGrabDevice request
 pub const XI_GRAB_DEVICE_REQUEST: u8 = 51;
@@ -13338,6 +13632,23 @@ impl core::fmt::Debug for EventMode  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for EventMode {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::ASYNC_DEVICE,
+            Self::SYNC_DEVICE,
+            Self::REPLAY_DEVICE,
+            Self::ASYNC_PAIRED_DEVICE,
+            Self::ASYNC_PAIR,
+            Self::SYNC_PAIR,
+            Self::ACCEPT_TOUCH,
+            Self::REJECT_TOUCH,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 /// Opcode for the XIAllowEvents request
 pub const XI_ALLOW_EVENTS_REQUEST: u8 = 53;
@@ -13482,6 +13793,18 @@ impl core::fmt::Debug for GrabMode22  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GrabMode22 {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::SYNC,
+            Self::ASYNC,
+            Self::TOUCH,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -13551,6 +13874,22 @@ impl core::fmt::Debug for GrabType  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GrabType {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::BUTTON,
+            Self::KEYCODE,
+            Self::ENTER,
+            Self::FOCUS_IN,
+            Self::TOUCH_BEGIN,
+            Self::GESTURE_PINCH_BEGIN,
+            Self::GESTURE_SWIPE_BEGIN,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -13597,6 +13936,16 @@ impl core::fmt::Debug for ModifierMask  {
     }
 }
 bitmask_binop!(ModifierMask, u32);
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for ModifierMask {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::ANY,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -15062,6 +15411,16 @@ impl core::fmt::Debug for MoreEventsMask  {
     }
 }
 bitmask_binop!(MoreEventsMask, u8);
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for MoreEventsMask {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::MORE_EVENTS,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 /// Opcode for the DeviceKeyPress event
 pub const DEVICE_KEY_PRESS_EVENT: u8 = 1;
@@ -15470,6 +15829,20 @@ impl core::fmt::Debug for ClassesReportedMask  {
     }
 }
 bitmask_binop!(ClassesReportedMask, u8);
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for ClassesReportedMask {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::OUT_OF_PROXIMITY,
+            Self::DEVICE_MODE_ABSOLUTE,
+            Self::REPORTING_VALUATORS,
+            Self::REPORTING_BUTTONS,
+            Self::REPORTING_KEYS,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 /// Opcode for the DeviceStateNotify event
 pub const DEVICE_STATE_NOTIFY_EVENT: u8 = 10;
@@ -15834,6 +16207,17 @@ impl core::fmt::Debug for ChangeDevice  {
             (Self::NEW_KEYBOARD.0.into(), "NEW_KEYBOARD", "NewKeyboard"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for ChangeDevice {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::NEW_POINTER,
+            Self::NEW_KEYBOARD,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
     }
 }
 
@@ -16273,6 +16657,21 @@ impl core::fmt::Debug for DeviceChange  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for DeviceChange {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::ADDED,
+            Self::REMOVED,
+            Self::ENABLED,
+            Self::DISABLED,
+            Self::UNRECOVERABLE,
+            Self::CONTROL_CHANGED,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 /// Opcode for the DevicePresenceNotify event
 pub const DEVICE_PRESENCE_NOTIFY_EVENT: u8 = 15;
@@ -16604,6 +17003,17 @@ impl core::fmt::Debug for ChangeReason  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for ChangeReason {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::SLAVE_SWITCH,
+            Self::DEVICE_CHANGE,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 /// Opcode for the DeviceChanged event
 pub const DEVICE_CHANGED_EVENT: u16 = 1;
@@ -16729,6 +17139,16 @@ impl core::fmt::Debug for KeyEventFlags  {
     }
 }
 bitmask_binop!(KeyEventFlags, u32);
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for KeyEventFlags {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::KEY_REPEAT,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 /// Opcode for the KeyPress event
 pub const KEY_PRESS_EVENT: u16 = 2;
@@ -16911,6 +17331,16 @@ impl core::fmt::Debug for PointerEventFlags  {
     }
 }
 bitmask_binop!(PointerEventFlags, u32);
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for PointerEventFlags {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::POINTER_EMULATED,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 /// Opcode for the ButtonPress event
 pub const BUTTON_PRESS_EVENT: u16 = 4;
@@ -17118,6 +17548,21 @@ impl core::fmt::Debug for NotifyMode  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for NotifyMode {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::NORMAL,
+            Self::GRAB,
+            Self::UNGRAB,
+            Self::WHILE_GRABBED,
+            Self::PASSIVE_GRAB,
+            Self::PASSIVE_UNGRAB,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -17187,6 +17632,23 @@ impl core::fmt::Debug for NotifyDetail  {
             (Self::NONE.0.into(), "NONE", "None"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for NotifyDetail {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::ANCESTOR,
+            Self::VIRTUAL,
+            Self::INFERIOR,
+            Self::NONLINEAR,
+            Self::NONLINEAR_VIRTUAL,
+            Self::POINTER,
+            Self::POINTER_ROOT,
+            Self::NONE,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
     }
 }
 
@@ -17375,6 +17837,23 @@ impl core::fmt::Debug for HierarchyMask  {
     }
 }
 bitmask_binop!(HierarchyMask, u32);
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for HierarchyMask {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::MASTER_ADDED,
+            Self::MASTER_REMOVED,
+            Self::SLAVE_ADDED,
+            Self::SLAVE_REMOVED,
+            Self::SLAVE_ATTACHED,
+            Self::SLAVE_DETACHED,
+            Self::DEVICE_ENABLED,
+            Self::DEVICE_DISABLED,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -17567,6 +18046,18 @@ impl core::fmt::Debug for PropertyFlag  {
             (Self::MODIFIED.0.into(), "MODIFIED", "Modified"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for PropertyFlag {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::DELETED,
+            Self::CREATED,
+            Self::MODIFIED,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
     }
 }
 
@@ -17907,6 +18398,17 @@ impl core::fmt::Debug for TouchEventFlags  {
     }
 }
 bitmask_binop!(TouchEventFlags, u32);
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for TouchEventFlags {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::TOUCH_PENDING_END,
+            Self::TOUCH_EMULATING_POINTER,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 /// Opcode for the TouchBegin event
 pub const TOUCH_BEGIN_EVENT: u16 = 18;
@@ -18090,6 +18592,16 @@ impl core::fmt::Debug for TouchOwnershipFlags  {
             (Self::NONE.0, "NONE", "None"),
         ];
         pretty_print_enum(fmt, self.0, &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for TouchOwnershipFlags {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::NONE,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
     }
 }
 
@@ -18370,6 +18882,17 @@ impl core::fmt::Debug for BarrierFlags  {
     }
 }
 bitmask_binop!(BarrierFlags, u32);
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for BarrierFlags {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::POINTER_RELEASED,
+            Self::DEVICE_IS_GRABBED,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 /// Opcode for the BarrierHit event
 pub const BARRIER_HIT_EVENT: u16 = 25;
@@ -18590,6 +19113,16 @@ impl core::fmt::Debug for GesturePinchEventFlags  {
     }
 }
 bitmask_binop!(GesturePinchEventFlags, u32);
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GesturePinchEventFlags {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::GESTURE_PINCH_CANCELLED,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 /// Opcode for the GesturePinchBegin event
 pub const GESTURE_PINCH_BEGIN_EVENT: u16 = 27;
@@ -18874,6 +19407,16 @@ impl core::fmt::Debug for GestureSwipeEventFlags  {
     }
 }
 bitmask_binop!(GestureSwipeEventFlags, u32);
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GestureSwipeEventFlags {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::GESTURE_SWIPE_CANCELLED,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 /// Opcode for the GestureSwipeBegin event
 pub const GESTURE_SWIPE_BEGIN_EVENT: u16 = 30;

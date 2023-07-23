@@ -96,6 +96,18 @@ impl core::fmt::Debug for Kind  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for Kind {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::BLANKED,
+            Self::INTERNAL,
+            Self::EXTERNAL,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -144,6 +156,17 @@ impl core::fmt::Debug for Event  {
     }
 }
 bitmask_binop!(Event, u32);
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for Event {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::NOTIFY_MASK,
+            Self::CYCLE_MASK,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -205,6 +228,19 @@ impl core::fmt::Debug for State  {
             (Self::DISABLED.0.into(), "DISABLED", "Disabled"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for State {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::OFF,
+            Self::ON,
+            Self::CYCLE,
+            Self::DISABLED,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
     }
 }
 

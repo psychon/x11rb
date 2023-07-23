@@ -100,6 +100,26 @@ impl core::fmt::Debug for Attachment  {
         pretty_print_enum(fmt, self.0, &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for Attachment {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::BUFFER_FRONT_LEFT,
+            Self::BUFFER_BACK_LEFT,
+            Self::BUFFER_FRONT_RIGHT,
+            Self::BUFFER_BACK_RIGHT,
+            Self::BUFFER_DEPTH,
+            Self::BUFFER_STENCIL,
+            Self::BUFFER_ACCUM,
+            Self::BUFFER_FAKE_FRONT_LEFT,
+            Self::BUFFER_FAKE_FRONT_RIGHT,
+            Self::BUFFER_DEPTH_STENCIL,
+            Self::BUFFER_HIZ,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -145,6 +165,17 @@ impl core::fmt::Debug for DriverType  {
             (Self::VDPAU.0, "VDPAU", "VDPAU"),
         ];
         pretty_print_enum(fmt, self.0, &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for DriverType {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::DRI,
+            Self::VDPAU,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
     }
 }
 
@@ -200,6 +231,18 @@ impl core::fmt::Debug for EventType  {
             (Self::FLIP_COMPLETE.0.into(), "FLIP_COMPLETE", "FlipComplete"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for EventType {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::EXCHANGE_COMPLETE,
+            Self::BLIT_COMPLETE,
+            Self::FLIP_COMPLETE,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
     }
 }
 

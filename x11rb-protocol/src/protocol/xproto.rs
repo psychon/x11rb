@@ -335,6 +335,21 @@ impl core::fmt::Debug for VisualClass  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for VisualClass {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::STATIC_GRAY,
+            Self::GRAY_SCALE,
+            Self::STATIC_COLOR,
+            Self::PSEUDO_COLOR,
+            Self::TRUE_COLOR,
+            Self::DIRECT_COLOR,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -557,6 +572,41 @@ impl core::fmt::Debug for EventMask  {
     }
 }
 bitmask_binop!(EventMask, u32);
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for EventMask {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::NO_EVENT,
+            Self::KEY_PRESS,
+            Self::KEY_RELEASE,
+            Self::BUTTON_PRESS,
+            Self::BUTTON_RELEASE,
+            Self::ENTER_WINDOW,
+            Self::LEAVE_WINDOW,
+            Self::POINTER_MOTION,
+            Self::POINTER_MOTION_HINT,
+            Self::BUTTON1_MOTION,
+            Self::BUTTON2_MOTION,
+            Self::BUTTON3_MOTION,
+            Self::BUTTON4_MOTION,
+            Self::BUTTON5_MOTION,
+            Self::BUTTON_MOTION,
+            Self::KEYMAP_STATE,
+            Self::EXPOSURE,
+            Self::VISIBILITY_CHANGE,
+            Self::STRUCTURE_NOTIFY,
+            Self::RESIZE_REDIRECT,
+            Self::SUBSTRUCTURE_NOTIFY,
+            Self::SUBSTRUCTURE_REDIRECT,
+            Self::FOCUS_CHANGE,
+            Self::PROPERTY_CHANGE,
+            Self::COLOR_MAP_CHANGE,
+            Self::OWNER_GRAB_BUTTON,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -604,6 +654,18 @@ impl core::fmt::Debug for BackingStore  {
             (Self::ALWAYS.0, "ALWAYS", "Always"),
         ];
         pretty_print_enum(fmt, self.0, &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for BackingStore {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::NOT_USEFUL,
+            Self::WHEN_MAPPED,
+            Self::ALWAYS,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
     }
 }
 
@@ -950,6 +1012,17 @@ impl core::fmt::Debug for ImageOrder  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for ImageOrder {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::LSB_FIRST,
+            Self::MSB_FIRST,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -1157,6 +1230,24 @@ impl core::fmt::Debug for ModMask  {
     }
 }
 bitmask_binop!(ModMask, u16);
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for ModMask {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::SHIFT,
+            Self::LOCK,
+            Self::CONTROL,
+            Self::M1,
+            Self::M2,
+            Self::M3,
+            Self::M4,
+            Self::M5,
+            Self::ANY,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -1233,6 +1324,28 @@ impl core::fmt::Debug for KeyButMask  {
     }
 }
 bitmask_binop!(KeyButMask, u16);
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for KeyButMask {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::SHIFT,
+            Self::LOCK,
+            Self::CONTROL,
+            Self::MOD1,
+            Self::MOD2,
+            Self::MOD3,
+            Self::MOD4,
+            Self::MOD5,
+            Self::BUTTON1,
+            Self::BUTTON2,
+            Self::BUTTON3,
+            Self::BUTTON4,
+            Self::BUTTON5,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -1288,6 +1401,16 @@ impl core::fmt::Debug for WindowEnum  {
             (Self::NONE.0.into(), "NONE", "None"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for WindowEnum {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::NONE,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
     }
 }
 
@@ -1550,6 +1673,21 @@ impl core::fmt::Debug for ButtonMask  {
     }
 }
 bitmask_binop!(ButtonMask, u16);
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for ButtonMask {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::M1,
+            Self::M2,
+            Self::M3,
+            Self::M4,
+            Self::M5,
+            Self::ANY,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 /// Opcode for the ButtonPress event
 pub const BUTTON_PRESS_EVENT: u8 = 4;
@@ -1805,6 +1943,17 @@ impl core::fmt::Debug for Motion  {
             (Self::HINT.0.into(), "HINT", "Hint"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for Motion {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::NORMAL,
+            Self::HINT,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
     }
 }
 
@@ -2073,6 +2222,23 @@ impl core::fmt::Debug for NotifyDetail  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for NotifyDetail {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::ANCESTOR,
+            Self::VIRTUAL,
+            Self::INFERIOR,
+            Self::NONLINEAR,
+            Self::NONLINEAR_VIRTUAL,
+            Self::POINTER,
+            Self::POINTER_ROOT,
+            Self::NONE,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -2134,6 +2300,19 @@ impl core::fmt::Debug for NotifyMode  {
             (Self::WHILE_GRABBED.0.into(), "WHILE_GRABBED", "WhileGrabbed"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for NotifyMode {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::NORMAL,
+            Self::GRAB,
+            Self::UNGRAB,
+            Self::WHILE_GRABBED,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
     }
 }
 
@@ -3034,6 +3213,18 @@ impl core::fmt::Debug for Visibility  {
             (Self::FULLY_OBSCURED.0.into(), "FULLY_OBSCURED", "FullyObscured"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for Visibility {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::UNOBSCURED,
+            Self::PARTIALLY_OBSCURED,
+            Self::FULLY_OBSCURED,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
     }
 }
 
@@ -4553,6 +4744,17 @@ impl core::fmt::Debug for Place  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for Place {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::ON_TOP,
+            Self::ON_BOTTOM,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 /// Opcode for the CirculateNotify event
 pub const CIRCULATE_NOTIFY_EVENT: u8 = 26;
@@ -4749,6 +4951,17 @@ impl core::fmt::Debug for Property  {
             (Self::DELETE.0.into(), "DELETE", "Delete"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for Property {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::NEW_VALUE,
+            Self::DELETE,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
     }
 }
 
@@ -5060,6 +5273,16 @@ impl core::fmt::Debug for Time  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for Time {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::CURRENT_TIME,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -5253,6 +5476,85 @@ impl core::fmt::Debug for AtomEnum  {
             (Self::WM_TRANSIENT_FOR.0.into(), "WM_TRANSIENT_FOR", "WM_TRANSIENT_FOR"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for AtomEnum {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::NONE,
+            Self::ANY,
+            Self::PRIMARY,
+            Self::SECONDARY,
+            Self::ARC,
+            Self::ATOM,
+            Self::BITMAP,
+            Self::CARDINAL,
+            Self::COLORMAP,
+            Self::CURSOR,
+            Self::CUT_BUFFE_R0,
+            Self::CUT_BUFFE_R1,
+            Self::CUT_BUFFE_R2,
+            Self::CUT_BUFFE_R3,
+            Self::CUT_BUFFE_R4,
+            Self::CUT_BUFFE_R5,
+            Self::CUT_BUFFE_R6,
+            Self::CUT_BUFFE_R7,
+            Self::DRAWABLE,
+            Self::FONT,
+            Self::INTEGER,
+            Self::PIXMAP,
+            Self::POINT,
+            Self::RECTANGLE,
+            Self::RESOURCE_MANAGER,
+            Self::RGB_COLOR_MAP,
+            Self::RGB_BEST_MAP,
+            Self::RGB_BLUE_MAP,
+            Self::RGB_DEFAULT_MAP,
+            Self::RGB_GRAY_MAP,
+            Self::RGB_GREEN_MAP,
+            Self::RGB_RED_MAP,
+            Self::STRING,
+            Self::VISUALID,
+            Self::WINDOW,
+            Self::WM_COMMAND,
+            Self::WM_HINTS,
+            Self::WM_CLIENT_MACHINE,
+            Self::WM_ICON_NAME,
+            Self::WM_ICON_SIZE,
+            Self::WM_NAME,
+            Self::WM_NORMAL_HINTS,
+            Self::WM_SIZE_HINTS,
+            Self::WM_ZOOM_HINTS,
+            Self::MIN_SPACE,
+            Self::NORM_SPACE,
+            Self::MAX_SPACE,
+            Self::END_SPACE,
+            Self::SUPERSCRIPT_X,
+            Self::SUPERSCRIPT_Y,
+            Self::SUBSCRIPT_X,
+            Self::SUBSCRIPT_Y,
+            Self::UNDERLINE_POSITION,
+            Self::UNDERLINE_THICKNESS,
+            Self::STRIKEOUT_ASCENT,
+            Self::STRIKEOUT_DESCENT,
+            Self::ITALIC_ANGLE,
+            Self::X_HEIGHT,
+            Self::QUAD_WIDTH,
+            Self::WEIGHT,
+            Self::POINT_SIZE,
+            Self::RESOLUTION,
+            Self::COPYRIGHT,
+            Self::NOTICE,
+            Self::FONT_NAME,
+            Self::FAMILY_NAME,
+            Self::FULL_NAME,
+            Self::CAP_HEIGHT,
+            Self::WM_CLASS,
+            Self::WM_TRANSIENT_FOR,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
     }
 }
 
@@ -5591,6 +5893,17 @@ impl core::fmt::Debug for ColormapState  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for ColormapState {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::UNINSTALLED,
+            Self::INSTALLED,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -5646,6 +5959,16 @@ impl core::fmt::Debug for ColormapEnum  {
             (Self::NONE.0.into(), "NONE", "None"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for ColormapEnum {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::NONE,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
     }
 }
 
@@ -6168,6 +6491,18 @@ impl core::fmt::Debug for Mapping  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for Mapping {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::MODIFIER,
+            Self::KEYBOARD,
+            Self::POINTER,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 /// Opcode for the MappingNotify event
 pub const MAPPING_NOTIFY_EVENT: u8 = 34;
@@ -6478,6 +6813,18 @@ impl core::fmt::Debug for WindowClass  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for WindowClass {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::COPY_FROM_PARENT,
+            Self::INPUT_OUTPUT,
+            Self::INPUT_ONLY,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 /// # Fields
 ///
@@ -6622,6 +6969,30 @@ impl core::fmt::Debug for CW  {
     }
 }
 bitmask_binop!(CW, u32);
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for CW {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::BACK_PIXMAP,
+            Self::BACK_PIXEL,
+            Self::BORDER_PIXMAP,
+            Self::BORDER_PIXEL,
+            Self::BIT_GRAVITY,
+            Self::WIN_GRAVITY,
+            Self::BACKING_STORE,
+            Self::BACKING_PLANES,
+            Self::BACKING_PIXEL,
+            Self::OVERRIDE_REDIRECT,
+            Self::SAVE_UNDER,
+            Self::EVENT_MASK,
+            Self::DONT_PROPAGATE,
+            Self::COLORMAP,
+            Self::CURSOR,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -6693,6 +7064,17 @@ impl core::fmt::Debug for BackPixmap  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for BackPixmap {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::NONE,
+            Self::PARENT_RELATIVE,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -6758,6 +7140,27 @@ impl core::fmt::Debug for Gravity  {
             (Self::STATIC.0, "STATIC", "Static"),
         ];
         pretty_print_enum(fmt, self.0, &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for Gravity {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::BIT_FORGET,
+            Self::WIN_UNMAP,
+            Self::NORTH_WEST,
+            Self::NORTH,
+            Self::NORTH_EAST,
+            Self::WEST,
+            Self::CENTER,
+            Self::EAST,
+            Self::SOUTH_WEST,
+            Self::SOUTH,
+            Self::SOUTH_EAST,
+            Self::STATIC,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
     }
 }
 
@@ -7828,6 +8231,18 @@ impl core::fmt::Debug for MapState  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for MapState {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::UNMAPPED,
+            Self::UNVIEWABLE,
+            Self::VIEWABLE,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 /// Opcode for the GetWindowAttributes request
 pub const GET_WINDOW_ATTRIBUTES_REQUEST: u8 = 3;
@@ -8258,6 +8673,17 @@ impl core::fmt::Debug for SetMode  {
             (Self::DELETE.0.into(), "DELETE", "Delete"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for SetMode {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::INSERT,
+            Self::DELETE,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
     }
 }
 
@@ -8794,6 +9220,22 @@ impl core::fmt::Debug for ConfigWindow  {
     }
 }
 bitmask_binop!(ConfigWindow, u16);
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for ConfigWindow {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::X,
+            Self::Y,
+            Self::WIDTH,
+            Self::HEIGHT,
+            Self::BORDER_WIDTH,
+            Self::SIBLING,
+            Self::STACK_MODE,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -8845,6 +9287,20 @@ impl core::fmt::Debug for StackMode  {
             (Self::OPPOSITE.0, "OPPOSITE", "Opposite"),
         ];
         pretty_print_enum(fmt, self.0, &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for StackMode {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::ABOVE,
+            Self::BELOW,
+            Self::TOP_IF,
+            Self::BOTTOM_IF,
+            Self::OPPOSITE,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
     }
 }
 
@@ -9249,6 +9705,17 @@ impl core::fmt::Debug for Circulate  {
             (Self::LOWER_HIGHEST.0.into(), "LOWER_HIGHEST", "LowerHighest"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for Circulate {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::RAISE_LOWEST,
+            Self::LOWER_HIGHEST,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
     }
 }
 
@@ -10061,6 +10528,18 @@ impl core::fmt::Debug for PropMode  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for PropMode {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::REPLACE,
+            Self::PREPEND,
+            Self::APPEND,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 /// Opcode for the ChangeProperty request
 pub const CHANGE_PROPERTY_REQUEST: u8 = 18;
@@ -10343,6 +10822,16 @@ impl core::fmt::Debug for GetPropertyType  {
             (Self::ANY.0.into(), "ANY", "Any"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetPropertyType {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::ANY,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
     }
 }
 
@@ -11244,6 +11733,17 @@ impl core::fmt::Debug for SendEventDest  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for SendEventDest {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::POINTER_WINDOW,
+            Self::ITEM_FOCUS,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 /// Opcode for the SendEvent request
 pub const SEND_EVENT_REQUEST: u8 = 25;
@@ -11463,6 +11963,17 @@ impl core::fmt::Debug for GrabMode  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GrabMode {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::SYNC,
+            Self::ASYNC,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -11528,6 +12039,20 @@ impl core::fmt::Debug for GrabStatus  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GrabStatus {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::SUCCESS,
+            Self::ALREADY_GRABBED,
+            Self::INVALID_TIME,
+            Self::NOT_VIEWABLE,
+            Self::FROZEN,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -11583,6 +12108,16 @@ impl core::fmt::Debug for CursorEnum  {
             (Self::NONE.0.into(), "NONE", "None"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for CursorEnum {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::NONE,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
     }
 }
 
@@ -11964,6 +12499,21 @@ impl core::fmt::Debug for ButtonIndex  {
             (Self::M5.0.into(), "M5", "M5"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for ButtonIndex {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::ANY,
+            Self::M1,
+            Self::M2,
+            Self::M3,
+            Self::M4,
+            Self::M5,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
     }
 }
 
@@ -12597,6 +13147,16 @@ impl core::fmt::Debug for Grab  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for Grab {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::ANY,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 /// Opcode for the GrabKey request
 pub const GRAB_KEY_REQUEST: u8 = 33;
@@ -12965,6 +13525,23 @@ impl core::fmt::Debug for Allow  {
             (Self::SYNC_BOTH.0.into(), "SYNC_BOTH", "SyncBoth"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for Allow {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::ASYNC_POINTER,
+            Self::SYNC_POINTER,
+            Self::REPLAY_POINTER,
+            Self::ASYNC_KEYBOARD,
+            Self::SYNC_KEYBOARD,
+            Self::REPLAY_KEYBOARD,
+            Self::ASYNC_BOTH,
+            Self::SYNC_BOTH,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
     }
 }
 
@@ -13861,6 +14438,19 @@ impl core::fmt::Debug for InputFocus  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for InputFocus {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::NONE,
+            Self::POINTER_ROOT,
+            Self::PARENT,
+            Self::FOLLOW_KEYBOARD,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 /// Opcode for the SetInputFocus request
 pub const SET_INPUT_FOCUS_REQUEST: u8 = 42;
@@ -14415,6 +15005,17 @@ impl core::fmt::Debug for FontDraw  {
             (Self::RIGHT_TO_LEFT.0.into(), "RIGHT_TO_LEFT", "RightToLeft"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for FontDraw {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::LEFT_TO_RIGHT,
+            Self::RIGHT_TO_LEFT,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
     }
 }
 
@@ -15880,6 +16481,38 @@ impl core::fmt::Debug for GC  {
     }
 }
 bitmask_binop!(GC, u32);
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GC {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::FUNCTION,
+            Self::PLANE_MASK,
+            Self::FOREGROUND,
+            Self::BACKGROUND,
+            Self::LINE_WIDTH,
+            Self::LINE_STYLE,
+            Self::CAP_STYLE,
+            Self::JOIN_STYLE,
+            Self::FILL_STYLE,
+            Self::FILL_RULE,
+            Self::TILE,
+            Self::STIPPLE,
+            Self::TILE_STIPPLE_ORIGIN_X,
+            Self::TILE_STIPPLE_ORIGIN_Y,
+            Self::FONT,
+            Self::SUBWINDOW_MODE,
+            Self::GRAPHICS_EXPOSURES,
+            Self::CLIP_ORIGIN_X,
+            Self::CLIP_ORIGIN_Y,
+            Self::CLIP_MASK,
+            Self::DASH_OFFSET,
+            Self::DASH_LIST,
+            Self::ARC_MODE,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -15955,6 +16588,31 @@ impl core::fmt::Debug for GX  {
         pretty_print_enum(fmt, self.0, &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GX {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::CLEAR,
+            Self::AND,
+            Self::AND_REVERSE,
+            Self::COPY,
+            Self::AND_INVERTED,
+            Self::NOOP,
+            Self::XOR,
+            Self::OR,
+            Self::NOR,
+            Self::EQUIV,
+            Self::INVERT,
+            Self::OR_REVERSE,
+            Self::COPY_INVERTED,
+            Self::OR_INVERTED,
+            Self::NAND,
+            Self::SET,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -16002,6 +16660,18 @@ impl core::fmt::Debug for LineStyle  {
             (Self::DOUBLE_DASH.0, "DOUBLE_DASH", "DoubleDash"),
         ];
         pretty_print_enum(fmt, self.0, &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for LineStyle {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::SOLID,
+            Self::ON_OFF_DASH,
+            Self::DOUBLE_DASH,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
     }
 }
 
@@ -16055,6 +16725,19 @@ impl core::fmt::Debug for CapStyle  {
         pretty_print_enum(fmt, self.0, &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for CapStyle {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::NOT_LAST,
+            Self::BUTT,
+            Self::ROUND,
+            Self::PROJECTING,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -16102,6 +16785,18 @@ impl core::fmt::Debug for JoinStyle  {
             (Self::BEVEL.0, "BEVEL", "Bevel"),
         ];
         pretty_print_enum(fmt, self.0, &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for JoinStyle {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::MITER,
+            Self::ROUND,
+            Self::BEVEL,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
     }
 }
 
@@ -16155,6 +16850,19 @@ impl core::fmt::Debug for FillStyle  {
         pretty_print_enum(fmt, self.0, &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for FillStyle {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::SOLID,
+            Self::TILED,
+            Self::STIPPLED,
+            Self::OPAQUE_STIPPLED,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -16200,6 +16908,17 @@ impl core::fmt::Debug for FillRule  {
             (Self::WINDING.0, "WINDING", "Winding"),
         ];
         pretty_print_enum(fmt, self.0, &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for FillRule {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::EVEN_ODD,
+            Self::WINDING,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
     }
 }
 
@@ -16249,6 +16968,17 @@ impl core::fmt::Debug for SubwindowMode  {
         pretty_print_enum(fmt, self.0, &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for SubwindowMode {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::CLIP_BY_CHILDREN,
+            Self::INCLUDE_INFERIORS,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -16294,6 +17024,17 @@ impl core::fmt::Debug for ArcMode  {
             (Self::PIE_SLICE.0, "PIE_SLICE", "PieSlice"),
         ];
         pretty_print_enum(fmt, self.0, &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for ArcMode {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::CHORD,
+            Self::PIE_SLICE,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
     }
 }
 
@@ -17799,6 +18540,19 @@ impl core::fmt::Debug for ClipOrdering  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for ClipOrdering {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::UNSORTED,
+            Self::Y_SORTED,
+            Self::YX_SORTED,
+            Self::YX_BANDED,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 /// Opcode for the SetClipRectangles request
 pub const SET_CLIP_RECTANGLES_REQUEST: u8 = 59;
@@ -18351,6 +19105,17 @@ impl core::fmt::Debug for CoordMode  {
             (Self::PREVIOUS.0.into(), "PREVIOUS", "Previous"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for CoordMode {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::ORIGIN,
+            Self::PREVIOUS,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
     }
 }
 
@@ -18964,6 +19729,18 @@ impl core::fmt::Debug for PolyShape  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for PolyShape {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::COMPLEX,
+            Self::NONCONVEX,
+            Self::CONVEX,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 /// Opcode for the FillPoly request
 pub const FILL_POLY_REQUEST: u8 = 69;
@@ -19323,6 +20100,18 @@ impl core::fmt::Debug for ImageFormat  {
             (Self::Z_PIXMAP.0.into(), "Z_PIXMAP", "ZPixmap"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for ImageFormat {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::XY_BITMAP,
+            Self::XY_PIXMAP,
+            Self::Z_PIXMAP,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
     }
 }
 
@@ -20106,6 +20895,17 @@ impl core::fmt::Debug for ColormapAlloc  {
             (Self::ALL.0.into(), "ALL", "All"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for ColormapAlloc {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::NONE,
+            Self::ALL,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
     }
 }
 
@@ -21344,6 +22144,18 @@ impl core::fmt::Debug for ColorFlag  {
     }
 }
 bitmask_binop!(ColorFlag, u8);
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for ColorFlag {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::RED,
+            Self::GREEN,
+            Self::BLUE,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -21973,6 +22785,16 @@ impl core::fmt::Debug for PixmapEnum  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for PixmapEnum {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::NONE,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 /// Opcode for the CreateCursor request
 pub const CREATE_CURSOR_REQUEST: u8 = 93;
@@ -22148,6 +22970,16 @@ impl core::fmt::Debug for FontEnum  {
             (Self::NONE.0.into(), "NONE", "None"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for FontEnum {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::NONE,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
     }
 }
 
@@ -22522,6 +23354,18 @@ impl core::fmt::Debug for QueryShapeOf  {
             (Self::FASTEST_STIPPLE.0.into(), "FASTEST_STIPPLE", "FastestStipple"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for QueryShapeOf {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::LARGEST_CURSOR,
+            Self::FASTEST_TILE,
+            Self::FASTEST_STIPPLE,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
     }
 }
 
@@ -23197,6 +24041,23 @@ impl core::fmt::Debug for KB  {
     }
 }
 bitmask_binop!(KB, u32);
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for KB {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::KEY_CLICK_PERCENT,
+            Self::BELL_PERCENT,
+            Self::BELL_PITCH,
+            Self::BELL_DURATION,
+            Self::LED,
+            Self::LED_MODE,
+            Self::KEY,
+            Self::AUTO_REPEAT_MODE,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -23242,6 +24103,17 @@ impl core::fmt::Debug for LedMode  {
             (Self::ON.0, "ON", "On"),
         ];
         pretty_print_enum(fmt, self.0, &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for LedMode {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::OFF,
+            Self::ON,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
     }
 }
 
@@ -23291,6 +24163,18 @@ impl core::fmt::Debug for AutoRepeatMode  {
             (Self::DEFAULT.0, "DEFAULT", "Default"),
         ];
         pretty_print_enum(fmt, self.0, &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for AutoRepeatMode {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::OFF,
+            Self::ON,
+            Self::DEFAULT,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
     }
 }
 
@@ -24062,6 +24946,18 @@ impl core::fmt::Debug for Blanking  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for Blanking {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::NOT_PREFERRED,
+            Self::PREFERRED,
+            Self::DEFAULT,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -24121,6 +25017,18 @@ impl core::fmt::Debug for Exposures  {
             (Self::DEFAULT.0.into(), "DEFAULT", "Default"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for Exposures {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::NOT_ALLOWED,
+            Self::ALLOWED,
+            Self::DEFAULT,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
     }
 }
 
@@ -24398,6 +25306,17 @@ impl core::fmt::Debug for HostMode  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for HostMode {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::INSERT,
+            Self::DELETE,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -24461,6 +25380,20 @@ impl core::fmt::Debug for Family  {
             (Self::INTERNET6.0.into(), "INTERNET6", "Internet6"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for Family {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::INTERNET,
+            Self::DEC_NET,
+            Self::CHAOS,
+            Self::SERVER_INTERPRETED,
+            Self::INTERNET6,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
     }
 }
 
@@ -24770,6 +25703,17 @@ impl core::fmt::Debug for AccessControl  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for AccessControl {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::DISABLE,
+            Self::ENABLE,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 /// Opcode for the SetAccessControl request
 pub const SET_ACCESS_CONTROL_REQUEST: u8 = 111;
@@ -24883,6 +25827,18 @@ impl core::fmt::Debug for CloseDown  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for CloseDown {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::DESTROY_ALL,
+            Self::RETAIN_PERMANENT,
+            Self::RETAIN_TEMPORARY,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 /// Opcode for the SetCloseDownMode request
 pub const SET_CLOSE_DOWN_MODE_REQUEST: u8 = 112;
@@ -24990,6 +25946,16 @@ impl core::fmt::Debug for Kill  {
             (Self::ALL_TEMPORARY.0.into(), "ALL_TEMPORARY", "AllTemporary"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for Kill {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::ALL_TEMPORARY,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
     }
 }
 
@@ -25208,6 +26174,17 @@ impl core::fmt::Debug for ScreenSaver  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for ScreenSaver {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::RESET,
+            Self::ACTIVE,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 /// Opcode for the ForceScreenSaver request
 pub const FORCE_SCREEN_SAVER_REQUEST: u8 = 115;
@@ -25319,6 +26296,18 @@ impl core::fmt::Debug for MappingStatus  {
             (Self::FAILURE.0.into(), "FAILURE", "Failure"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for MappingStatus {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::SUCCESS,
+            Self::BUSY,
+            Self::FAILURE,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
     }
 }
 
@@ -25616,6 +26605,23 @@ impl core::fmt::Debug for MapIndex  {
             (Self::M5.0.into(), "M5", "M5"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for MapIndex {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::SHIFT,
+            Self::LOCK,
+            Self::CONTROL,
+            Self::M1,
+            Self::M2,
+            Self::M3,
+            Self::M4,
+            Self::M5,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
     }
 }
 

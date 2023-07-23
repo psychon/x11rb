@@ -98,6 +98,18 @@ impl core::fmt::Debug for ALARMSTATE  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for ALARMSTATE {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::ACTIVE,
+            Self::INACTIVE,
+            Self::DESTROYED,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 pub type Counter = u32;
 
@@ -153,6 +165,19 @@ impl core::fmt::Debug for TESTTYPE  {
         pretty_print_enum(fmt, self.0, &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for TESTTYPE {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::POSITIVE_TRANSITION,
+            Self::NEGATIVE_TRANSITION,
+            Self::POSITIVE_COMPARISON,
+            Self::NEGATIVE_COMPARISON,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -198,6 +223,17 @@ impl core::fmt::Debug for VALUETYPE  {
             (Self::RELATIVE.0, "RELATIVE", "Relative"),
         ];
         pretty_print_enum(fmt, self.0, &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for VALUETYPE {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::ABSOLUTE,
+            Self::RELATIVE,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
     }
 }
 
@@ -256,6 +292,21 @@ impl core::fmt::Debug for CA  {
     }
 }
 bitmask_binop!(CA, u32);
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for CA {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::COUNTER,
+            Self::VALUE_TYPE,
+            Self::VALUE,
+            Self::TEST_TYPE,
+            Self::DELTA,
+            Self::EVENTS,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]

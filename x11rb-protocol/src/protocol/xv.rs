@@ -107,6 +107,20 @@ impl core::fmt::Debug for Type  {
     }
 }
 bitmask_binop!(Type, u8);
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for Type {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::INPUT_MASK,
+            Self::OUTPUT_MASK,
+            Self::VIDEO_MASK,
+            Self::STILL_MASK,
+            Self::IMAGE_MASK,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -164,6 +178,17 @@ impl core::fmt::Debug for ImageFormatInfoType  {
             (Self::YUV.0.into(), "YUV", "YUV"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for ImageFormatInfoType {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::RGB,
+            Self::YUV,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
     }
 }
 
@@ -225,6 +250,17 @@ impl core::fmt::Debug for ImageFormatInfoFormat  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for ImageFormatInfoFormat {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::PACKED,
+            Self::PLANAR,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -273,6 +309,17 @@ impl core::fmt::Debug for AttributeFlag  {
     }
 }
 bitmask_binop!(AttributeFlag, u32);
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for AttributeFlag {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::GETTABLE,
+            Self::SETTABLE,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -338,6 +385,20 @@ impl core::fmt::Debug for VideoNotifyReason  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for VideoNotifyReason {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::STARTED,
+            Self::STOPPED,
+            Self::BUSY,
+            Self::PREEMPTED,
+            Self::HARD_ERROR,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -395,6 +456,17 @@ impl core::fmt::Debug for ScanlineOrder  {
             (Self::BOTTOM_TO_TOP.0.into(), "BOTTOM_TO_TOP", "BottomToTop"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for ScanlineOrder {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::TOP_TO_BOTTOM,
+            Self::BOTTOM_TO_TOP,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
     }
 }
 
@@ -462,6 +534,21 @@ impl core::fmt::Debug for GrabPortStatus  {
             (Self::BAD_ALLOC.0.into(), "BAD_ALLOC", "BadAlloc"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GrabPortStatus {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::SUCCESS,
+            Self::BAD_EXTENSION,
+            Self::ALREADY_GRABBED,
+            Self::INVALID_TIME,
+            Self::BAD_REPLY,
+            Self::BAD_ALLOC,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
     }
 }
 

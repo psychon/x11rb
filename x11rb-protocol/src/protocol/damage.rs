@@ -102,6 +102,19 @@ impl core::fmt::Debug for ReportLevel  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for ReportLevel {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::RAW_RECTANGLES,
+            Self::DELTA_RECTANGLES,
+            Self::BOUNDING_BOX,
+            Self::NON_EMPTY,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 /// Opcode for the BadDamage error
 pub const BAD_DAMAGE_ERROR: u8 = 0;

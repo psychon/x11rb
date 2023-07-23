@@ -184,6 +184,17 @@ impl core::fmt::Debug for GetDoc  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for GetDoc {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::FINISHED,
+            Self::SECOND_CONSUMER,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -246,6 +257,18 @@ impl core::fmt::Debug for EvMask  {
     }
 }
 bitmask_binop!(EvMask, u8);
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for EvMask {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::NO_EVENT_MASK,
+            Self::PRINT_MASK,
+            Self::ATTRIBUTE_MASK,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -311,6 +334,21 @@ impl core::fmt::Debug for Detail  {
             (Self::END_PAGE_NOTIFY.0.into(), "END_PAGE_NOTIFY", "EndPageNotify"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for Detail {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::START_JOB_NOTIFY,
+            Self::END_JOB_NOTIFY,
+            Self::START_DOC_NOTIFY,
+            Self::END_DOC_NOTIFY,
+            Self::START_PAGE_NOTIFY,
+            Self::END_PAGE_NOTIFY,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
     }
 }
 
@@ -380,6 +418,22 @@ impl core::fmt::Debug for Attr  {
             (Self::SPOOLER_ATTR.0.into(), "SPOOLER_ATTR", "SpoolerAttr"),
         ];
         pretty_print_enum(fmt, self.0.into(), &variants)
+    }
+}
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for Attr {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::JOB_ATTR,
+            Self::DOC_ATTR,
+            Self::PAGE_ATTR,
+            Self::PRINTER_ATTR,
+            Self::SERVER_ATTR,
+            Self::MEDIUM_ATTR,
+            Self::SPOOLER_ATTR,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
     }
 }
 

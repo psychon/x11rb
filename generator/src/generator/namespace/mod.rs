@@ -910,6 +910,25 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             outln!(out, "bitmask_binop!({}, {});", rust_name, raw_type);
         }
 
+        outln!(out, "#[cfg(test)]");
+        outln!(out, "impl crate::x11_utils::GenerateRandom for {rust_name} {{");
+        out.indented(|out| {
+            outln!(out, "fn generate(rng: &mut fastrand::Rng) -> Self {{");
+            out.indented(|out| {
+                outln!(out, "let possible_values = [");
+                out.indented(|out| {
+                    for enum_item in &enum_def.items {
+                        outln!(out, "Self::{},", ename_to_rust(&enum_item.name));
+                    }
+                });
+                outln!(out, "];");
+                outln!(out, "let index = rng.usize(..possible_values.len());");
+                outln!(out, "possible_values[index]");
+            });
+            outln!(out, "}}");
+        });
+        outln!(out, "}}");
+
         outln!(out, "");
     }
 

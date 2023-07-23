@@ -223,6 +223,17 @@ impl core::fmt::Debug for Cursor  {
         pretty_print_enum(fmt, self.0.into(), &variants)
     }
 }
+#[cfg(test)]
+impl crate::x11_utils::GenerateRandom for Cursor {
+    fn generate(rng: &mut fastrand::Rng) -> Self {
+        let possible_values = [
+            Self::NONE,
+            Self::CURRENT,
+        ];
+        let index = rng.usize(..possible_values.len());
+        possible_values[index]
+    }
+}
 
 /// Opcode for the CompareCursor request
 pub const COMPARE_CURSOR_REQUEST: u8 = 1;
