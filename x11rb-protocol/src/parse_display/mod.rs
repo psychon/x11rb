@@ -43,8 +43,7 @@ impl ParsedDisplay {
 #[cfg(feature = "std")]
 pub fn parse_display(dpy_name: Option<&str>) -> Option<ParsedDisplay> {
     fn file_exists(path: &str) -> bool {
-        let path: &std::path::Path = path.as_ref();
-        path.exists()
+        std::path::Path::new(path).exists()
     }
 
     parse_display_with_file_exists_callback(dpy_name, file_exists)
