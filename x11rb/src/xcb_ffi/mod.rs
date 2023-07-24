@@ -17,6 +17,7 @@ use crate::connection::{
     compute_length_field, Connection, ReplyOrError, RequestConnection, RequestKind,
 };
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
+use crate::errors::DisplayParsingError;
 pub use crate::errors::{ConnectError, ConnectionError, ParseError, ReplyError, ReplyOrIdError};
 use crate::extension_manager::ExtensionManager;
 use crate::protocol::xproto::Setup;
@@ -82,7 +83,7 @@ impl XCBConnection {
         match error {
             ERROR => IOError::new(ErrorKind::Other, ConnectionError::UnknownError).into(),
             MEM_INSUFFICIENT => ConnectError::InsufficientMemory,
-            PARSE_ERR => ConnectError::DisplayParsingError,
+            PARSE_ERR => DisplayParsingError::Unknown.into(),
             INVALID_SCREEN => ConnectError::InvalidScreen,
             _ => ConnectError::UnknownError,
             // Not possible here: EXT_NOTSUPPORTED, REQ_LEN_EXCEED, FDPASSING_FAILED

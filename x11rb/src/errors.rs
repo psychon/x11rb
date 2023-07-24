@@ -2,7 +2,7 @@
 
 use crate::x11_utils::X11Error;
 
-pub use x11rb_protocol::errors::{ConnectError, IdsExhausted, ParseError};
+pub use x11rb_protocol::errors::{ConnectError, DisplayParsingError, IdsExhausted, ParseError};
 
 /// An error occurred  while dynamically loading libxcb.
 #[cfg(feature = "dl-libxcb")]
