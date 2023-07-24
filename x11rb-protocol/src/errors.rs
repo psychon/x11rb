@@ -84,7 +84,7 @@ pub enum DisplayParsingError {
     DisplayNotSet,
 
     /// The given value could not be parsed. The input to parsing is provided.
-    MalformedValue(alloc::string::String),
+    MalformedValue(alloc::boxed::Box<str>),
 
     /// The value of `$DISPLAY` is not valid unicode
     NotUnicode,

@@ -76,7 +76,7 @@ fn parse_display_impl(
     dpy_name: &str,
     file_exists: impl Fn(&str) -> bool,
 ) -> Result<ParsedDisplay, DisplayParsingError> {
-    let malformed = || DisplayParsingError::MalformedValue(dpy_name.to_string());
+    let malformed = || DisplayParsingError::MalformedValue(dpy_name.to_string().into());
     let map_malformed = |_| malformed();
 
     if dpy_name.starts_with('/') {
@@ -140,13 +140,15 @@ fn parse_display_direct_path(
                 host: path.to_string(),
                 protocol: Some("unix".to_string()),
                 display: 0,
-                screen: screen
-                    .parse()
-                    .map_err(|_| DisplayParsingError::MalformedValue(dpy_name.to_string()))?,
+                screen: screen.parse().map_err(|_| {
+                    DisplayParsingError::MalformedValue(dpy_name.to_string().into())
+                })?,
             });
         }
     }
-    Err(DisplayParsingError::MalformedValue(dpy_name.to_string()))
+    Err(DisplayParsingError::MalformedValue(
+        dpy_name.to_string().into(),
+    ))
 }
 
 #[cfg(test)]
@@ -230,7 +232,7 @@ mod test {
         assert_eq!(
             do_parse_display(non_existing_file),
             Err(DisplayParsingError::MalformedValue(
-                non_existing_file.to_string()
+                non_existing_file.to_string().into()
             )),
             "Unexpectedly parsed: {}",
             non_existing_file
@@ -568,7 +570,9 @@ mod test {
         ] {
             assert_eq!(
                 do_parse_display(input),
-                Err(DisplayParsingError::MalformedValue(input.to_string())),
+                Err(DisplayParsingError::MalformedValue(
+                    input.to_string().into()
+                )),
                 "Unexpectedly parsed: {}",
                 input
             );
