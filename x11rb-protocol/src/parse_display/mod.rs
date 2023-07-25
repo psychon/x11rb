@@ -1,7 +1,5 @@
 //! Utilities for parsing X11 display strings.
 
-#![cfg(feature = "std")]
-
 mod connect_instruction;
 pub use connect_instruction::ConnectAddress;
 
@@ -47,7 +45,15 @@ pub fn parse_display(dpy_name: Option<&str>) -> Result<ParsedDisplay, DisplayPar
         std::path::Path::new(path).exists()
     }
 
-    parse_display_with_file_exists_callback(dpy_name, file_exists)
+    match dpy_name {
+        Some(dpy_name) => parse_display_with_file_exists_callback(dpy_name, file_exists),
+        // If no dpy name was provided, use the env var. If no env var exists, return an error.
+        None => match std::env::var("DISPLAY") {
+            Ok(dpy_name) => parse_display_with_file_exists_callback(&dpy_name, file_exists),
+            Err(std::env::VarError::NotPresent) => Err(DisplayParsingError::DisplayNotSet),
+            Err(std::env::VarError::NotUnicode(_)) => Err(DisplayParsingError::NotUnicode),
+        },
+    }
 }
 
 /// Parse an X11 display string.
@@ -57,21 +63,6 @@ pub fn parse_display(dpy_name: Option<&str>) -> Result<ParsedDisplay, DisplayPar
 /// The parameter `file_exists` is called to check whether a given string refers to an existing
 /// file. This function does not need to check the file type.
 pub fn parse_display_with_file_exists_callback(
-    dpy_name: Option<&str>,
-    file_exists: impl Fn(&str) -> bool,
-) -> Result<ParsedDisplay, DisplayParsingError> {
-    // If no dpy name was provided, use the env var. If no env var exists, return None.
-    match dpy_name {
-        Some(dpy_name) => parse_display_impl(dpy_name, file_exists),
-        None => match std::env::var("DISPLAY") {
-            Ok(dpy_name) => parse_display_impl(&dpy_name, file_exists),
-            Err(std::env::VarError::NotPresent) => Err(DisplayParsingError::DisplayNotSet),
-            Err(std::env::VarError::NotUnicode(_)) => Err(DisplayParsingError::NotUnicode),
-        },
-    }
-}
-
-fn parse_display_impl(
     dpy_name: &str,
     file_exists: impl Fn(&str) -> bool,
 ) -> Result<ParsedDisplay, DisplayParsingError> {
@@ -598,7 +589,7 @@ mod test {
                 *called += 1;
                 true
             };
-            let result = parse_display_with_file_exists_callback(Some(display), callback);
+            let result = parse_display_with_file_exists_callback(display, callback);
             assert_eq!(*called.borrow(), 1);
             assert_eq!(result, make_unix_path(expected_path, 0));
         }
@@ -628,7 +619,7 @@ mod test {
                     _ => panic!("Unexpected call count {}", *called),
                 }
             };
-            let result = parse_display_with_file_exists_callback(Some(display), callback);
+            let result = parse_display_with_file_exists_callback(display, callback);
             assert_eq!(*called.borrow(), 2);
             assert_eq!(result, make_unix_path(expected_path, 42));
         }
@@ -640,7 +631,7 @@ mod test {
     #[test]
     fn test_file_exists_callback_not_called_without_path() {
         let callback = |path: &str| unreachable!("Called with {path}");
-        let result = parse_display_with_file_exists_callback(Some("foo/bar:1.2"), callback);
+        let result = parse_display_with_file_exists_callback("foo/bar:1.2", callback);
         assert_eq!(
             result,
             Ok(ParsedDisplay {

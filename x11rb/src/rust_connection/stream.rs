@@ -1,7 +1,5 @@
 use std::io::{IoSlice, Result};
 use std::net::{Ipv4Addr, SocketAddr, TcpStream};
-#[cfg(any(target_os = "linux", target_os = "android"))]
-use std::os::unix::ffi::OsStrExt as _;
 #[cfg(unix)]
 use std::os::unix::io::{AsRawFd, IntoRawFd, RawFd};
 #[cfg(unix)]
@@ -166,7 +164,7 @@ impl DefaultStream {
             ConnectAddress::Socket(path) => {
                 // Try abstract unix socket first. If that fails, fall back to normal unix socket
                 #[cfg(any(target_os = "linux", target_os = "android"))]
-                if let Ok(stream) = connect_abstract_unix_stream(path.as_os_str().as_bytes()) {
+                if let Ok(stream) = connect_abstract_unix_stream(path.as_bytes()) {
                     // TODO: Does it make sense to add a constructor similar to from_unix_stream()?
                     // If this is done: Move the set_nonblocking() from
                     // connect_abstract_unix_stream() to that new function.
