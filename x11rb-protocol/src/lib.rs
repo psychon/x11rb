@@ -56,7 +56,6 @@ pub mod resource_manager;
 mod test;
 mod utils;
 pub mod wrapper;
-#[cfg(feature = "std")]
 pub mod xauth;
 
 pub use utils::RawFdContainer;

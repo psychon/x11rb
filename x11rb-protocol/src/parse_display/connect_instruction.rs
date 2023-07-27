@@ -3,8 +3,8 @@
 
 use super::ParsedDisplay;
 use alloc::format;
+use alloc::string::String;
 use alloc::vec::Vec;
-use std::path::PathBuf;
 
 /// A possible address for an X11 server.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -16,7 +16,7 @@ pub enum ConnectAddress<'a> {
     ///
     /// First, the given path should be attempted in the abstract namespace. Only if that fails,
     /// then the named socket with the given name should be tried.
-    Socket(PathBuf),
+    Socket(String),
 }
 
 /// Get an iterator over all of the addresses we should target with a
@@ -40,7 +40,7 @@ pub(super) fn connect_addresses(p: &ParsedDisplay) -> impl Iterator<Item = Conne
     } else {
         if protocol.is_none() || protocol.as_deref() == Some("unix") {
             let file_name = format!("/tmp/.X11-unix/X{}", display);
-            targets.push(ConnectAddress::Socket(file_name.into()));
+            targets.push(ConnectAddress::Socket(file_name));
         }
 
         if protocol.is_none() && host.is_empty() {
@@ -59,7 +59,6 @@ mod tests {
     // make sure iterator properties are clean
     use super::{super::parse_display, ConnectAddress};
     use alloc::{vec, vec::Vec};
-    use std::path::PathBuf;
 
     #[test]
     fn basic_test() {
@@ -70,7 +69,7 @@ mod tests {
         assert_eq!(
             ci,
             vec![
-                ConnectAddress::Socket(PathBuf::from("/tmp/.X11-unix/X0")),
+                ConnectAddress::Socket("/tmp/.X11-unix/X0".into()),
                 ConnectAddress::Hostname("localhost", 6000),
             ]
         );
@@ -93,9 +92,6 @@ mod tests {
 
         let ci = ci.collect::<Vec<_>>();
 
-        assert_eq!(
-            ci,
-            vec![ConnectAddress::Socket(PathBuf::from("/tmp/.X11-unix/X0")),]
-        );
+        assert_eq!(ci, vec![ConnectAddress::Socket("/tmp/.X11-unix/X0".into())]);
     }
 }
