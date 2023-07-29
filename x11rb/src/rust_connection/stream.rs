@@ -351,18 +351,6 @@ fn do_write(
 
     let res = if !fds.is_empty() {
         let fds = fds.iter().map(|fd| fd.as_fd()).collect::<Vec<_>>();
-
-        // Most sendmsg implementations put a limit of at least 0xFF file descriptors.
-        if fds.len() > 0xFF {
-            return Err(std::io::Error::new(
-                std::io::ErrorKind::Other,
-                format!(
-                    "Cannot send more than 0xFF FDs at once, tried to send {}",
-                    fds.len()
-                ),
-            ));
-        }
-
         let rights = SendAncillaryMessage::ScmRights(&fds);
 
         let mut cmsg_space = vec![0u8; rights.size()];

@@ -1511,7 +1511,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                     }
                 }
                 xcbdefs::FieldDef::Fd(_) | xcbdefs::FieldDef::FdList(_) => {
-                    // RawFdContainer cannot be cloned, compared, hashed or made default
+                    // OwnedFd cannot be cloned, compared, hashed or made default
                     derives.clone = false;
                     derives.copy = false;
                     derives.partial_ord = false;

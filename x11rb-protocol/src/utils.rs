@@ -13,22 +13,15 @@
 mod raw_fd_container {
     use std::os::unix::io::OwnedFd;
 
-    /// A simple wrapper around RawFd that closes the fd on drop.
-    ///
-    /// On non-unix systems, this type is empty and does not provide
-    /// any method.
-    pub type RawFdContainer = OwnedFd;
+    pub(crate) type RawFdContainer = OwnedFd;
 }
 
 #[cfg(not(all(feature = "std", unix)))]
 mod raw_fd_container {
     use core::convert::Infallible;
 
-    /// A simple wrapper around RawFd that closes the fd on drop.
-    ///
-    /// On non-unix systems, this type is empty and does not provide
-    /// any method.
-    #[derive(Debug, Hash, PartialEq, Eq)]
+    #[derive(Debug)]
+    #[doc(hidden)]
     pub struct RawFdContainer(Infallible);
 
     impl Drop for RawFdContainer {
@@ -39,7 +32,26 @@ mod raw_fd_container {
     }
 }
 
-pub use raw_fd_container::RawFdContainer;
+/// A type representative of the file descriptors as they are sent to and from the X server.
+///
+/// On `cfg(unix)` platforms, this is a type alias for [`std::os::unix::io::OwnedFd`]. See the
+/// documentation for that type for more information on how it should be used. In most cases it
+/// can be cast into a [`File`] or [`UnixStream`], or otherwise downgraded into the actual
+/// underlying file descriptor.
+///
+/// On non-Unix platforms, this is an uninhabited type in the same vogue as [`Void`]. As handle
+/// passing is an undefined operation on non-Unix implementations of the X11 protocol, instances
+/// of this type cannot exist. No operations can be called on this type. If handle passing is ever
+/// added to any reference implementation of the X11 protocol, this type will be changed to
+/// something that can be used to represent the file descriptors.
+///
+/// Consumers of this type should be careful to check for `cfg(unix)` before using it in any
+/// meaningful way. Otherwise, the program will not compile on non-Unix platforms.
+///
+/// [`File`]: std::fs::File
+/// [`UnixStream`]: std::os::unix::net::UnixStream
+/// [`Void`]: https://docs.rs/void/latest/void/enum.Void.html
+pub type RawFdContainer = raw_fd_container::RawFdContainer;
 
 mod pretty_printer {
     use core::fmt::{Debug, Formatter, Result};
