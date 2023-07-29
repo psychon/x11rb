@@ -3,7 +3,6 @@
 use crate::connection::Connection;
 use crate::Cookie;
 use std::collections::hash_map::{Entry, HashMap};
-use std::future::Future;
 use x11rb::errors::{ConnectionError, ReplyError};
 use x11rb_protocol::protocol::xproto::QueryExtensionReply;
 use x11rb_protocol::x11_utils::{ExtInfoProvider, ExtensionInformation};
@@ -31,99 +30,82 @@ impl Extensions {
     }
 
     /// Prefetch information for a given extension, if this was not yet done.
-    // n.b. notgull: Apparently the resolver for 1.56 is too weak to figure out the lifetimes
-    // here on its own. Manually specifying them like this seems to solve the issue.
-    pub(super) fn prefetch<'f, 't, 'c, C: Connection>(
-        &'t mut self,
-        conn: &'c C,
+    pub(super) async fn prefetch<C: Connection>(
+        &mut self,
+        conn: &C,
         name: &'static str,
-    ) -> impl Future<Output = Result<(), ConnectionError>> + 'f
-    where
-        'c: 'f,
-        't: 'f,
-    {
-        async move {
-            // Check if there is already a cache entry.
-            if let Entry::Vacant(entry) = self.0.entry(name) {
-                tracing::debug!("Prefetching information about '{}' extension", name);
+    ) -> Result<(), ConnectionError> {
+        // Check if there is already a cache entry.
+        if let Entry::Vacant(entry) = self.0.entry(name) {
+            tracing::debug!("Prefetching information about '{}' extension", name);
 
-                // Send a QueryExtension request.
-                let cookie =
-                    crate::protocol::xproto::query_extension(conn, name.as_bytes()).await?;
+            // Send a QueryExtension request.
+            let cookie = crate::protocol::xproto::query_extension(conn, name.as_bytes()).await?;
 
-                // Add the extension to the cache.
-                entry.insert(ExtensionState::Loading(cookie.sequence_number()));
+            // Add the extension to the cache.
+            entry.insert(ExtensionState::Loading(cookie.sequence_number()));
 
-                std::mem::forget(cookie);
-            }
-
-            Ok(())
+            std::mem::forget(cookie);
         }
+
+        Ok(())
     }
 
     /// Get information about an X11 extension.
-    // n.b. notgull: Apparently the resolver for 1.56 is too weak to figure out the lifetimes
-    // here on its own. Manually specifying them like this seems to solve the issue.
-    pub(super) fn information<'f, 't, 'c, C: Connection>(
-        &'t mut self,
-        conn: &'c C,
+    pub(super) async fn information<C: Connection>(
+        &mut self,
+        conn: &C,
         name: &'static str,
-    ) -> impl Future<Output = Result<Option<ExtensionInformation>, ConnectionError>> + 'f
-    where
-        'c: 'f,
-        't: 'f,
-    {
-        async move {
-            // Prefetch the implementation in case this was not yet done
-            self.prefetch(conn, name).await?;
+    ) -> Result<Option<ExtensionInformation>, ConnectionError> {
+        // Prefetch the implementation in case this was not yet done
+        self.prefetch(conn, name).await?;
 
-            // Get the entry from the cache
-            let mut entry = match self.0.entry(name) {
-                Entry::Occupied(o) => o,
-                _ => unreachable!("We just prefetched this."),
-            };
+        // Get the entry from the cache
+        let mut entry = match self.0.entry(name) {
+            Entry::Occupied(o) => o,
+            _ => unreachable!("We just prefetched this."),
+        };
 
-            // Complete the request if we need to.
-            match entry.get() {
-                ExtensionState::Loaded(info) => Ok(*info),
+        // Complete the request if we need to.
+        match entry.get() {
+            ExtensionState::Loaded(info) => Ok(*info),
 
-                ExtensionState::Loading(cookie) => {
-                    tracing::debug!("Waiting for QueryInfo reply for '{}' extension", name);
+            ExtensionState::Loading(cookie) => {
+                tracing::debug!("Waiting for QueryInfo reply for '{}' extension", name);
 
-                    // Load the extension information.
-                    let cookie = Cookie::<'_, _, QueryExtensionReply>::new(conn, *cookie);
+                // Load the extension information.
+                let cookie = Cookie::<'_, _, QueryExtensionReply>::new(conn, *cookie);
 
-                    // Get the reply.
-                    let reply = cookie.reply().await.map_err(|e| {
-                        tracing::warn!(
-                            "Got error {:?} for QueryInfo reply for '{}' extension",
-                            e,
-                            name
-                        );
-                        match e {
-                            ReplyError::ConnectionError(e) => e,
-                            ReplyError::X11Error(_) => ConnectionError::UnknownError,
-                        }
-                    })?;
+                // Get the reply.
+                let reply = cookie.reply().await.map_err(|e| {
+                    tracing::warn!(
+                        "Got error {:?} for QueryInfo reply for '{}' extension",
+                        e,
+                        name
+                    );
+                    match e {
+                        ReplyError::ConnectionError(e) => e,
+                        ReplyError::X11Error(_) => ConnectionError::UnknownError,
+                    }
+                })?;
 
-                    let ext_info = if reply.present {
-                        let info = ExtensionInformation {
-                            major_opcode: reply.major_opcode,
-                            first_event: reply.first_event,
-                            first_error: reply.first_error,
-                        };
-                        tracing::debug!("Extension '{}' is present: {:?}", name, info);
-                        Some(info)
-                    } else {
-                        tracing::debug!("Extension '{}' is not present", name);
-                        None
+                let ext_info = if reply.present {
+                    let info = ExtensionInformation {
+                        major_opcode: reply.major_opcode,
+                        first_event: reply.first_event,
+                        first_error: reply.first_error,
                     };
+                    tracing::debug!("Extension '{}' is present: {:?}", name, info);
+                    Some(info)
+                } else {
+                    tracing::debug!("Extension '{}' is not present", name);
+                    None
+                };
 
-                    // Update the cache.
-                    *entry.get_mut() = ExtensionState::Loaded(ext_info);
+                // Update the cache.
+                *entry.get_mut() = ExtensionState::Loaded(ext_info);
 
-                    Ok(ext_info)
-                }
+                Ok(ext_info)
             }
         }
     }
