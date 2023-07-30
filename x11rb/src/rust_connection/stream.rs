@@ -1,3 +1,4 @@
+use rustix::fd::AsFd;
 use std::io::{IoSlice, Result};
 use std::net::TcpStream;
 #[cfg(unix)]
@@ -142,14 +143,11 @@ pub struct DefaultStream {
     inner: DefaultStreamInner,
 }
 
-#[derive(Debug)]
-enum DefaultStreamInner {
-    TcpStream(TcpStream),
-    #[cfg(unix)]
-    UnixStream(UnixStream),
-    #[cfg(any(target_os = "linux", target_os = "android"))]
-    AbstractUnix(RawFdContainer),
-}
+#[cfg(unix)]
+type DefaultStreamInner = RawFdContainer;
+
+#[cfg(not(unix))]
+type DefaultStreamInner = TcpStream;
 
 /// The address of a peer in a format suitable for xauth.
 ///
@@ -173,9 +171,7 @@ impl DefaultStream {
                     // TODO: Does it make sense to add a constructor similar to from_unix_stream()?
                     // If this is done: Move the set_nonblocking() from
                     // connect_abstract_unix_stream() to that new function.
-                    let stream = Self {
-                        inner: DefaultStreamInner::AbstractUnix(stream),
-                    };
+                    let stream = DefaultStream { inner: stream };
                     return Ok((stream, peer_addr::local()));
                 }
 
@@ -207,7 +203,7 @@ impl DefaultStream {
         let peer_addr = peer_addr::tcp(&stream.peer_addr()?);
         stream.set_nonblocking(true)?;
         let result = Self {
-            inner: DefaultStreamInner::TcpStream(stream),
+            inner: stream.into(),
         };
         Ok((result, peer_addr))
     }
@@ -221,63 +217,41 @@ impl DefaultStream {
     pub fn from_unix_stream(stream: UnixStream) -> Result<(Self, PeerAddr)> {
         stream.set_nonblocking(true)?;
         let result = Self {
-            inner: DefaultStreamInner::UnixStream(stream),
+            inner: stream.into(),
         };
         Ok((result, peer_addr::local()))
     }
 
     fn as_fd(&self) -> rustix::fd::BorrowedFd<'_> {
-        use rustix::fd::AsFd;
-
-        match self.inner {
-            DefaultStreamInner::TcpStream(ref stream) => stream.as_fd(),
-            #[cfg(unix)]
-            DefaultStreamInner::UnixStream(ref stream) => stream.as_fd(),
-            #[cfg(any(target_os = "linux", target_os = "android"))]
-            DefaultStreamInner::AbstractUnix(ref stream) => stream.as_fd(),
-        }
+        self.inner.as_fd()
     }
 }
 
 #[cfg(unix)]
 impl AsRawFd for DefaultStream {
     fn as_raw_fd(&self) -> RawFd {
-        match self.inner {
-            DefaultStreamInner::TcpStream(ref stream) => stream.as_raw_fd(),
-            DefaultStreamInner::UnixStream(ref stream) => stream.as_raw_fd(),
-            #[cfg(any(target_os = "linux", target_os = "android"))]
-            DefaultStreamInner::AbstractUnix(ref stream) => stream.as_raw_fd(),
-        }
+        self.inner.as_raw_fd()
     }
 }
 
 #[cfg(unix)]
 impl IntoRawFd for DefaultStream {
     fn into_raw_fd(self) -> RawFd {
-        match self.inner {
-            DefaultStreamInner::TcpStream(stream) => stream.into_raw_fd(),
-            DefaultStreamInner::UnixStream(stream) => stream.into_raw_fd(),
-            #[cfg(any(target_os = "linux", target_os = "android"))]
-            DefaultStreamInner::AbstractUnix(stream) => stream.into_raw_fd(),
-        }
+        self.inner.into_raw_fd()
     }
 }
 
 #[cfg(windows)]
 impl AsRawSocket for DefaultStream {
     fn as_raw_socket(&self) -> RawSocket {
-        match self.inner {
-            DefaultStreamInner::TcpStream(ref stream) => stream.as_raw_socket(),
-        }
+        self.inner.as_raw_socket()
     }
 }
 
 #[cfg(windows)]
 impl IntoRawSocket for DefaultStream {
     fn into_raw_socket(self) -> RawSocket {
-        match self.inner {
-            DefaultStreamInner::TcpStream(stream) => stream.into_raw_socket(),
-        }
+        self.inner.into_raw_socket()
     }
 }
 
@@ -287,7 +261,7 @@ fn do_write(
     bufs: &[IoSlice<'_>],
     fds: &mut Vec<RawFdContainer>,
 ) -> Result<usize> {
-    use rustix::fd::{AsFd, BorrowedFd};
+    use rustix::fd::BorrowedFd;
     use rustix::io::Errno;
     use rustix::net::{sendmsg, SendAncillaryBuffer, SendAncillaryMessage, SendFlags};
 
@@ -397,13 +371,8 @@ impl Stream for DefaultStream {
             // No FDs are read, so nothing needs to be done with fd_storage
             let _ = fd_storage;
             loop {
-                let read_result = match self.inner {
-                    DefaultStreamInner::TcpStream(ref stream) => {
-                        // Use `impl Read for &TcpStream` to avoid needing a mutable `TcpStream`.
-                        (&mut &*stream).read(buf)
-                    }
-                };
-                match read_result {
+                // Use `impl Read for &TcpStream` to avoid needing a mutable `TcpStream`.
+                match (&mut &self.inner).read(buf) {
                     Ok(n) => return Ok(n),
                     // try again
                     Err(ref e) if e.kind() == std::io::ErrorKind::Interrupted => {}
@@ -425,13 +394,8 @@ impl Stream for DefaultStream {
                 return Err(Error::new(ErrorKind::Other, "FD passing is unsupported"));
             }
             loop {
-                let write_result = match self.inner {
-                    DefaultStreamInner::TcpStream(ref stream) => {
-                        // Use `impl Write for &TcpStream` to avoid needing a mutable `TcpStream`.
-                        (&mut &*stream).write(buf)
-                    }
-                };
-                match write_result {
+                // Use `impl Write for &TcpStream` to avoid needing a mutable `TcpStream`.
+                match (&mut &self.inner).write(buf) {
                     Ok(n) => return Ok(n),
                     // try again
                     Err(ref e) if e.kind() == std::io::ErrorKind::Interrupted => {}
@@ -453,13 +417,8 @@ impl Stream for DefaultStream {
                 return Err(Error::new(ErrorKind::Other, "FD passing is unsupported"));
             }
             loop {
-                let write_result = match self.inner {
-                    DefaultStreamInner::TcpStream(ref stream) => {
-                        // Use `impl Write for &TcpStream` to avoid needing a mutable `TcpStream`.
-                        (&mut &*stream).write_vectored(bufs)
-                    }
-                };
-                match write_result {
+                // Use `impl Write for &TcpStream` to avoid needing a mutable `TcpStream`.
+                match (&mut &self.inner).write_vectored(bufs) {
                     Ok(n) => return Ok(n),
                     // try again
                     Err(ref e) if e.kind() == std::io::ErrorKind::Interrupted => {}
