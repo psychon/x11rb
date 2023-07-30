@@ -1,5 +1,5 @@
 use std::io::{IoSlice, Result};
-use std::net::{Ipv4Addr, SocketAddr, TcpStream};
+use std::net::TcpStream;
 #[cfg(unix)]
 use std::os::unix::io::{AsRawFd, IntoRawFd, RawFd};
 #[cfg(unix)]
@@ -176,8 +176,7 @@ impl DefaultStream {
                     let stream = Self {
                         inner: DefaultStreamInner::AbstractUnix(stream),
                     };
-                    let peer_addr = stream.peer_addr()?;
-                    return Ok((stream, peer_addr))
+                    return Ok((stream, peer_addr::local()));
                 }
 
                 // connect over Unix domain socket
@@ -205,11 +204,11 @@ impl DefaultStream {
     ///
     /// This returns the peer address in a format suitable for [`x11rb_protocol::xauth::get_auth`].
     pub fn from_tcp_stream(stream: TcpStream) -> Result<(Self, PeerAddr)> {
+        let peer_addr = peer_addr::tcp(&stream.peer_addr()?);
         stream.set_nonblocking(true)?;
         let result = Self {
             inner: DefaultStreamInner::TcpStream(stream),
         };
-        let peer_addr = result.peer_addr()?;
         Ok((result, peer_addr))
     }
 
@@ -224,59 +223,7 @@ impl DefaultStream {
         let result = Self {
             inner: DefaultStreamInner::UnixStream(stream),
         };
-        let peer_addr = result.peer_addr()?;
-        Ok((result, peer_addr))
-    }
-
-    /// Get the peer's address in a format suitable for xauth.
-    ///
-    /// The returned values can be directly given to `super::xauth::get_auth` as `family` and
-    /// `address`.
-    pub fn peer_addr(&self) -> Result<(Family, Vec<u8>)> {
-        match self.inner {
-            DefaultStreamInner::TcpStream(ref stream) => {
-                // Get the v4 address of the other end (if there is one)
-                let ip = match stream.peer_addr()? {
-                    SocketAddr::V4(addr) => *addr.ip(),
-                    SocketAddr::V6(addr) => {
-                        let ip = addr.ip();
-                        if ip.is_loopback() {
-                            // This is a local connection.
-                            // Use LOCALHOST to cause a fall-through in the code below.
-                            Ipv4Addr::LOCALHOST
-                        } else if let Some(ip) = ip.to_ipv4() {
-                            // Let the ipv4 code below handle this
-                            ip
-                        } else {
-                            // Okay, this is really a v6 address
-                            return Ok((Family::INTERNET6, ip.octets().to_vec()));
-                        }
-                    }
-                };
-
-                // Handle the v4 address
-                if !ip.is_loopback() {
-                    return Ok((Family::INTERNET, ip.octets().to_vec()));
-                } else {
-                    // This is only reached for loopback addresses. The code below handles this.
-                }
-            }
-            #[cfg(unix)]
-            DefaultStreamInner::UnixStream(_) => {
-                // Fall through to the code below.
-            }
-            #[cfg(any(target_os = "linux", target_os = "android"))]
-            DefaultStreamInner::AbstractUnix(_) => {
-                // Fall through to the code below.
-            }
-        };
-
-        // If we get to here: This is a local connection. Use the host name as address.
-        let hostname = gethostname::gethostname()
-            .to_str()
-            .map(|name| name.as_bytes().to_vec())
-            .unwrap_or_else(Vec::new);
-        Ok((Family::LOCAL, hostname))
+        Ok((result, peer_addr::local()))
     }
 
     fn as_fd(&self) -> rustix::fd::BorrowedFd<'_> {
@@ -605,5 +552,47 @@ mod recvmsg {
             }
             fd
         })
+    }
+}
+
+mod peer_addr {
+    use super::{Family, PeerAddr};
+    use std::net::{Ipv4Addr, SocketAddr};
+
+    // Get xauth information representing a local connection
+    pub(super) fn local() -> PeerAddr {
+        let hostname = gethostname::gethostname()
+            .to_str()
+            .map(|name| name.as_bytes().to_vec())
+            .unwrap_or_else(Vec::new);
+        (Family::LOCAL, hostname)
+    }
+
+    // Get xauth information representing a TCP connection to the given address
+    pub(super) fn tcp(addr: &SocketAddr) -> PeerAddr {
+        let ip = match addr {
+            SocketAddr::V4(addr) => *addr.ip(),
+            SocketAddr::V6(addr) => {
+                let ip = addr.ip();
+                if ip.is_loopback() {
+                    // This is a local connection.
+                    // Use LOCALHOST to cause a fall-through in the code below.
+                    Ipv4Addr::LOCALHOST
+                } else if let Some(ip) = ip.to_ipv4() {
+                    // Let the ipv4 code below handle this
+                    ip
+                } else {
+                    // Okay, this is really a v6 address
+                    return (Family::INTERNET6, ip.octets().to_vec());
+                }
+            }
+        };
+
+        // Handle the v4 address
+        if ip.is_loopback() {
+            local()
+        } else {
+            (Family::INTERNET, ip.octets().to_vec())
+        }
     }
 }
