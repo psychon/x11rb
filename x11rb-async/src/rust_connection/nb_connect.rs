@@ -53,14 +53,13 @@ pub(super) async fn connect(
 async fn connect_to_addr(addr: ConnectAddress<'_>) -> io::Result<(DefaultStream, PeerAddr)> {
     let start = Instant::now();
     match connect_to_addr_impl(&addr).await {
-        Ok(stream) => {
+        Ok(result) => {
             tracing::trace!(
                 "Connected to X11 server via {:?} in {:?}",
                 addr,
                 start.elapsed()
             );
-            let peer_addr = stream.peer_addr()?;
-            Ok((stream, peer_addr))
+            Ok(result)
         }
         Err(e) => {
             tracing::debug!("Failed to connect to X11 server via {:?}: {:?}", addr, e);
@@ -69,7 +68,7 @@ async fn connect_to_addr(addr: ConnectAddress<'_>) -> io::Result<(DefaultStream,
     }
 }
 
-async fn connect_to_addr_impl(addr: &ConnectAddress<'_>) -> io::Result<DefaultStream> {
+async fn connect_to_addr_impl(addr: &ConnectAddress<'_>) -> io::Result<(DefaultStream, PeerAddr)> {
     match addr {
         ConnectAddress::Hostname(host, port) => {
             let mut err = None;

@@ -163,9 +163,7 @@ impl DefaultStream {
             ConnectAddress::Hostname(host, port) => {
                 // connect over TCP
                 let stream = TcpStream::connect((*host, *port))?;
-                let stream = Self::from_tcp_stream(stream)?;
-                let peer_addr = stream.peer_addr()?;
-                Ok((stream, peer_addr))
+                Self::from_tcp_stream(stream)
             }
             #[cfg(unix)]
             ConnectAddress::Socket(path) => {
@@ -184,9 +182,7 @@ impl DefaultStream {
 
                 // connect over Unix domain socket
                 let stream = UnixStream::connect(path)?;
-                let stream = Self::from_unix_stream(stream)?;
-                let peer_addr = stream.peer_addr()?;
-                Ok((stream, peer_addr))
+                Self::from_unix_stream(stream)
             }
             #[cfg(not(unix))]
             ConnectAddress::Socket(_) => {
@@ -206,22 +202,30 @@ impl DefaultStream {
     /// Creates a new `Stream` from an already connected `TcpStream`.
     ///
     /// The stream will be set in non-blocking mode.
-    pub fn from_tcp_stream(stream: TcpStream) -> Result<Self> {
+    ///
+    /// This returns the peer address in a format suitable for [`x11rb_protocol::xauth::get_auth`].
+    pub fn from_tcp_stream(stream: TcpStream) -> Result<(Self, PeerAddr)> {
         stream.set_nonblocking(true)?;
-        Ok(Self {
+        let result = Self {
             inner: DefaultStreamInner::TcpStream(stream),
-        })
+        };
+        let peer_addr = result.peer_addr()?;
+        Ok((result, peer_addr))
     }
 
     /// Creates a new `Stream` from an already connected `UnixStream`.
     ///
     /// The stream will be set in non-blocking mode.
+    ///
+    /// This returns the peer address in a format suitable for [`x11rb_protocol::xauth::get_auth`].
     #[cfg(unix)]
-    pub fn from_unix_stream(stream: UnixStream) -> Result<Self> {
+    pub fn from_unix_stream(stream: UnixStream) -> Result<(Self, PeerAddr)> {
         stream.set_nonblocking(true)?;
-        Ok(Self {
+        let result = Self {
             inner: DefaultStreamInner::UnixStream(stream),
-        })
+        };
+        let peer_addr = result.peer_addr()?;
+        Ok((result, peer_addr))
     }
 
     /// Get the peer's address in a format suitable for xauth.
