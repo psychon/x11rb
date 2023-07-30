@@ -24,6 +24,7 @@ macro_rules! property_cookie {
         {
             /// Get the reply that the server sent.
             pub fn reply(self) -> Result<Option<$struct_name>, ReplyError> {
+                #[allow(clippy::redundant_closure_call)]
                 Ok($from_reply(self.0.reply()?)?)
             }
 
