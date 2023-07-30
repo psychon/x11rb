@@ -1,11 +1,11 @@
 //! Either `AtomicU64` or emulating `AtomicU64` through a `Mutex`.
 
 // Use the `AtomicU64` from the standard library if we're on a platform that supports atomic
-// 64-bit operations. If we can't tell, just fall back to the `Mutex` implementation anyways.
-#[cfg(all(not(x11rb_no_target_has_atomic), target_has_atomic = "64"))]
+// 64-bit operations.
+#[cfg(target_has_atomic = "64")]
 pub(crate) use std::sync::atomic::AtomicU64;
 
-#[cfg(any(x11rb_no_target_has_atomic, not(target_has_atomic = "64")))]
+#[cfg(not(target_has_atomic = "64"))]
 mod impl_ {
     use std::sync::atomic::Ordering;
     use std::sync::Mutex;
@@ -31,5 +31,5 @@ mod impl_ {
     }
 }
 
-#[cfg(any(x11rb_no_target_has_atomic, not(target_has_atomic = "64")))]
+#[cfg(not(target_has_atomic = "64"))]
 pub(crate) use self::impl_::AtomicU64;
