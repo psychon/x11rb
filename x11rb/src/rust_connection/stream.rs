@@ -1,5 +1,6 @@
+use rustix::fd::AsFd;
 use std::io::{IoSlice, Result};
-use std::net::{Ipv4Addr, SocketAddr, TcpStream};
+use std::net::TcpStream;
 #[cfg(unix)]
 use std::os::unix::io::{AsRawFd, IntoRawFd, RawFd};
 #[cfg(unix)]
@@ -142,18 +143,20 @@ pub struct DefaultStream {
     inner: DefaultStreamInner,
 }
 
-#[derive(Debug)]
-enum DefaultStreamInner {
-    TcpStream(TcpStream),
-    #[cfg(unix)]
-    UnixStream(UnixStream),
-    #[cfg(any(target_os = "linux", target_os = "android"))]
-    AbstractUnix(RawFdContainer),
-}
+#[cfg(unix)]
+type DefaultStreamInner = RawFdContainer;
+
+#[cfg(not(unix))]
+type DefaultStreamInner = TcpStream;
+
+/// The address of a peer in a format suitable for xauth.
+///
+/// These values can be directly given to [`x11rb_protocol::xauth::get_auth`].
+type PeerAddr = (Family, Vec<u8>);
 
 impl DefaultStream {
     /// Try to connect to the X11 server described by the given arguments.
-    pub fn connect(addr: &ConnectAddress<'_>) -> Result<Self> {
+    pub fn connect(addr: &ConnectAddress<'_>) -> Result<(Self, PeerAddr)> {
         match addr {
             ConnectAddress::Hostname(host, port) => {
                 // connect over TCP
@@ -168,9 +171,8 @@ impl DefaultStream {
                     // TODO: Does it make sense to add a constructor similar to from_unix_stream()?
                     // If this is done: Move the set_nonblocking() from
                     // connect_abstract_unix_stream() to that new function.
-                    return Ok(Self {
-                        inner: DefaultStreamInner::AbstractUnix(stream),
-                    });
+                    let stream = DefaultStream { inner: stream };
+                    return Ok((stream, peer_addr::local()));
                 }
 
                 // connect over Unix domain socket
@@ -195,127 +197,61 @@ impl DefaultStream {
     /// Creates a new `Stream` from an already connected `TcpStream`.
     ///
     /// The stream will be set in non-blocking mode.
-    pub fn from_tcp_stream(stream: TcpStream) -> Result<Self> {
+    ///
+    /// This returns the peer address in a format suitable for [`x11rb_protocol::xauth::get_auth`].
+    pub fn from_tcp_stream(stream: TcpStream) -> Result<(Self, PeerAddr)> {
+        let peer_addr = peer_addr::tcp(&stream.peer_addr()?);
         stream.set_nonblocking(true)?;
-        Ok(Self {
-            inner: DefaultStreamInner::TcpStream(stream),
-        })
+        let result = Self {
+            inner: stream.into(),
+        };
+        Ok((result, peer_addr))
     }
 
     /// Creates a new `Stream` from an already connected `UnixStream`.
     ///
     /// The stream will be set in non-blocking mode.
-    #[cfg(unix)]
-    pub fn from_unix_stream(stream: UnixStream) -> Result<Self> {
-        stream.set_nonblocking(true)?;
-        Ok(Self {
-            inner: DefaultStreamInner::UnixStream(stream),
-        })
-    }
-
-    /// Get the peer's address in a format suitable for xauth.
     ///
-    /// The returned values can be directly given to `super::xauth::get_auth` as `family` and
-    /// `address`.
-    pub fn peer_addr(&self) -> Result<(Family, Vec<u8>)> {
-        match self.inner {
-            DefaultStreamInner::TcpStream(ref stream) => {
-                // Get the v4 address of the other end (if there is one)
-                let ip = match stream.peer_addr()? {
-                    SocketAddr::V4(addr) => *addr.ip(),
-                    SocketAddr::V6(addr) => {
-                        let ip = addr.ip();
-                        if ip.is_loopback() {
-                            // This is a local connection.
-                            // Use LOCALHOST to cause a fall-through in the code below.
-                            Ipv4Addr::LOCALHOST
-                        } else if let Some(ip) = ip.to_ipv4() {
-                            // Let the ipv4 code below handle this
-                            ip
-                        } else {
-                            // Okay, this is really a v6 address
-                            return Ok((Family::INTERNET6, ip.octets().to_vec()));
-                        }
-                    }
-                };
-
-                // Handle the v4 address
-                if !ip.is_loopback() {
-                    return Ok((Family::INTERNET, ip.octets().to_vec()));
-                } else {
-                    // This is only reached for loopback addresses. The code below handles this.
-                }
-            }
-            #[cfg(unix)]
-            DefaultStreamInner::UnixStream(_) => {
-                // Fall through to the code below.
-            }
-            #[cfg(any(target_os = "linux", target_os = "android"))]
-            DefaultStreamInner::AbstractUnix(_) => {
-                // Fall through to the code below.
-            }
+    /// This returns the peer address in a format suitable for [`x11rb_protocol::xauth::get_auth`].
+    #[cfg(unix)]
+    pub fn from_unix_stream(stream: UnixStream) -> Result<(Self, PeerAddr)> {
+        stream.set_nonblocking(true)?;
+        let result = Self {
+            inner: stream.into(),
         };
-
-        // If we get to here: This is a local connection. Use the host name as address.
-        let hostname = gethostname::gethostname()
-            .to_str()
-            .map(|name| name.as_bytes().to_vec())
-            .unwrap_or_else(Vec::new);
-        Ok((Family::LOCAL, hostname))
+        Ok((result, peer_addr::local()))
     }
 
     fn as_fd(&self) -> rustix::fd::BorrowedFd<'_> {
-        use rustix::fd::AsFd;
-
-        match self.inner {
-            DefaultStreamInner::TcpStream(ref stream) => stream.as_fd(),
-            #[cfg(unix)]
-            DefaultStreamInner::UnixStream(ref stream) => stream.as_fd(),
-            #[cfg(any(target_os = "linux", target_os = "android"))]
-            DefaultStreamInner::AbstractUnix(ref stream) => stream.as_fd(),
-        }
+        self.inner.as_fd()
     }
 }
 
 #[cfg(unix)]
 impl AsRawFd for DefaultStream {
     fn as_raw_fd(&self) -> RawFd {
-        match self.inner {
-            DefaultStreamInner::TcpStream(ref stream) => stream.as_raw_fd(),
-            DefaultStreamInner::UnixStream(ref stream) => stream.as_raw_fd(),
-            #[cfg(any(target_os = "linux", target_os = "android"))]
-            DefaultStreamInner::AbstractUnix(ref stream) => stream.as_raw_fd(),
-        }
+        self.inner.as_raw_fd()
     }
 }
 
 #[cfg(unix)]
 impl IntoRawFd for DefaultStream {
     fn into_raw_fd(self) -> RawFd {
-        match self.inner {
-            DefaultStreamInner::TcpStream(stream) => stream.into_raw_fd(),
-            DefaultStreamInner::UnixStream(stream) => stream.into_raw_fd(),
-            #[cfg(any(target_os = "linux", target_os = "android"))]
-            DefaultStreamInner::AbstractUnix(stream) => stream.into_raw_fd(),
-        }
+        self.inner.into_raw_fd()
     }
 }
 
 #[cfg(windows)]
 impl AsRawSocket for DefaultStream {
     fn as_raw_socket(&self) -> RawSocket {
-        match self.inner {
-            DefaultStreamInner::TcpStream(ref stream) => stream.as_raw_socket(),
-        }
+        self.inner.as_raw_socket()
     }
 }
 
 #[cfg(windows)]
 impl IntoRawSocket for DefaultStream {
     fn into_raw_socket(self) -> RawSocket {
-        match self.inner {
-            DefaultStreamInner::TcpStream(stream) => stream.into_raw_socket(),
-        }
+        self.inner.into_raw_socket()
     }
 }
 
@@ -325,7 +261,7 @@ fn do_write(
     bufs: &[IoSlice<'_>],
     fds: &mut Vec<RawFdContainer>,
 ) -> Result<usize> {
-    use rustix::fd::{AsFd, BorrowedFd};
+    use rustix::fd::BorrowedFd;
     use rustix::io::Errno;
     use rustix::net::{sendmsg, SendAncillaryBuffer, SendAncillaryMessage, SendFlags};
 
@@ -435,13 +371,8 @@ impl Stream for DefaultStream {
             // No FDs are read, so nothing needs to be done with fd_storage
             let _ = fd_storage;
             loop {
-                let read_result = match self.inner {
-                    DefaultStreamInner::TcpStream(ref stream) => {
-                        // Use `impl Read for &TcpStream` to avoid needing a mutable `TcpStream`.
-                        (&mut &*stream).read(buf)
-                    }
-                };
-                match read_result {
+                // Use `impl Read for &TcpStream` to avoid needing a mutable `TcpStream`.
+                match (&mut &self.inner).read(buf) {
                     Ok(n) => return Ok(n),
                     // try again
                     Err(ref e) if e.kind() == std::io::ErrorKind::Interrupted => {}
@@ -463,13 +394,8 @@ impl Stream for DefaultStream {
                 return Err(Error::new(ErrorKind::Other, "FD passing is unsupported"));
             }
             loop {
-                let write_result = match self.inner {
-                    DefaultStreamInner::TcpStream(ref stream) => {
-                        // Use `impl Write for &TcpStream` to avoid needing a mutable `TcpStream`.
-                        (&mut &*stream).write(buf)
-                    }
-                };
-                match write_result {
+                // Use `impl Write for &TcpStream` to avoid needing a mutable `TcpStream`.
+                match (&mut &self.inner).write(buf) {
                     Ok(n) => return Ok(n),
                     // try again
                     Err(ref e) if e.kind() == std::io::ErrorKind::Interrupted => {}
@@ -491,13 +417,8 @@ impl Stream for DefaultStream {
                 return Err(Error::new(ErrorKind::Other, "FD passing is unsupported"));
             }
             loop {
-                let write_result = match self.inner {
-                    DefaultStreamInner::TcpStream(ref stream) => {
-                        // Use `impl Write for &TcpStream` to avoid needing a mutable `TcpStream`.
-                        (&mut &*stream).write_vectored(bufs)
-                    }
-                };
-                match write_result {
+                // Use `impl Write for &TcpStream` to avoid needing a mutable `TcpStream`.
+                match (&mut &self.inner).write_vectored(bufs) {
                     Ok(n) => return Ok(n),
                     // try again
                     Err(ref e) if e.kind() == std::io::ErrorKind::Interrupted => {}
@@ -590,5 +511,47 @@ mod recvmsg {
             }
             fd
         })
+    }
+}
+
+mod peer_addr {
+    use super::{Family, PeerAddr};
+    use std::net::{Ipv4Addr, SocketAddr};
+
+    // Get xauth information representing a local connection
+    pub(super) fn local() -> PeerAddr {
+        let hostname = gethostname::gethostname()
+            .to_str()
+            .map(|name| name.as_bytes().to_vec())
+            .unwrap_or_else(Vec::new);
+        (Family::LOCAL, hostname)
+    }
+
+    // Get xauth information representing a TCP connection to the given address
+    pub(super) fn tcp(addr: &SocketAddr) -> PeerAddr {
+        let ip = match addr {
+            SocketAddr::V4(addr) => *addr.ip(),
+            SocketAddr::V6(addr) => {
+                let ip = addr.ip();
+                if ip.is_loopback() {
+                    // This is a local connection.
+                    // Use LOCALHOST to cause a fall-through in the code below.
+                    Ipv4Addr::LOCALHOST
+                } else if let Some(ip) = ip.to_ipv4() {
+                    // Let the ipv4 code below handle this
+                    ip
+                } else {
+                    // Okay, this is really a v6 address
+                    return (Family::INTERNET6, ip.octets().to_vec());
+                }
+            }
+        };
+
+        // Handle the v4 address
+        if ip.is_loopback() {
+            local()
+        } else {
+            (Family::INTERNET, ip.octets().to_vec())
+        }
     }
 }

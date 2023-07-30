@@ -122,7 +122,7 @@ impl RustConnection<DefaultStream> {
         for addr in parsed_display.connect_instruction() {
             let start = Instant::now();
             match DefaultStream::connect(&addr) {
-                Ok(stream) => {
+                Ok((stream, (family, address))) => {
                     crate::trace!(
                         "Connected to X11 server via {:?} in {:?}",
                         addr,
@@ -130,7 +130,6 @@ impl RustConnection<DefaultStream> {
                     );
 
                     // we found a stream, get auth information
-                    let (family, address) = stream.peer_addr()?;
                     let (auth_name, auth_data) = get_auth(family, &address, parsed_display.display)
                         // Ignore all errors while determining auth; instead we just try without auth info.
                         .unwrap_or(None)
