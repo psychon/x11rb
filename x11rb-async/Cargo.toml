@@ -10,7 +10,7 @@ authors = [
 repository = "https://github.com/psychon/x11rb"
 readme = "../README.md"
 edition = "2021"
-rust-version = "1.56"
+rust-version = "1.63"
 license = "MIT OR Apache-2.0"
 keywords = ["xcb", "X11", "async"]
 
@@ -24,9 +24,10 @@ tracing = { version = "0.1", default-features = false }
 x11rb = { version = "0.12.0", path = "../x11rb", default-features = false }
 x11rb-protocol = { version = "0.12.0", path = "../x11rb-protocol" }
 
-[target.'cfg(unix)'.dev-dependencies.nix]
-version = "0.26"
+[target.'cfg(unix)'.dev-dependencies.rustix]
+version = "0.38"
 default-features = false
+features = ["pipe"]
 
 [features]
 # Enable this feature to enable all the X11 extensions
@@ -98,6 +99,7 @@ all-features = true
 
 [dev-dependencies]
 async-executor = "1.5.0"
+libc = "0.2.147"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 [[example]]

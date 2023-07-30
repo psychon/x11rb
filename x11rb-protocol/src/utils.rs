@@ -11,81 +11,17 @@
 
 #[cfg(all(feature = "std", unix))]
 mod raw_fd_container {
-    use std::mem::forget;
-    use std::os::unix::io::{AsRawFd, IntoRawFd, RawFd};
+    use std::os::unix::io::OwnedFd;
 
-    /// A simple wrapper around RawFd that closes the fd on drop.
-    ///
-    /// On non-unix systems, this type is empty and does not provide
-    /// any method.
-    #[derive(Debug, Hash, PartialEq, Eq)]
-    pub struct RawFdContainer(RawFd);
-
-    impl Drop for RawFdContainer {
-        fn drop(&mut self) {
-            let _ = nix::unistd::close(self.0);
-        }
-    }
-
-    impl RawFdContainer {
-        /// Create a new `RawFdContainer` for the given `RawFd`.
-        ///
-        /// The `RawFdContainer` takes ownership of the `RawFd` and closes it on drop.
-        pub fn new(fd: RawFd) -> Self {
-            RawFdContainer(fd)
-        }
-
-        /// Tries to clone the `RawFdContainer` creating a new FD
-        /// with `dup`. The new `RawFdContainer` will take ownership
-        /// of the `dup`ed version, whereas the original `RawFdContainer`
-        /// will keep the ownership of its FD.
-        pub fn try_clone(&self) -> Result<Self, std::io::Error> {
-            Ok(Self::new(nix::unistd::dup(self.0)?))
-        }
-
-        /// Get the `RawFd` out of this `RawFdContainer`.
-        ///
-        /// This function would be an implementation of `IntoRawFd` if that were possible. However, it
-        /// causes a conflict with an `impl` from libcore...
-        pub fn into_raw_fd(self) -> RawFd {
-            let fd = self.0;
-            forget(self);
-            fd
-        }
-
-        /// Consumes the `RawFdContainer` and closes the wrapped FD with
-        /// the `close` system call.
-        ///
-        /// This is similar to dropping the `RawFdContainer`, but it allows
-        /// the caller to handle errors.
-        pub fn close(self) -> Result<(), std::io::Error> {
-            let fd = self.into_raw_fd();
-            nix::unistd::close(fd).map_err(|e| e.into())
-        }
-    }
-
-    impl<T: IntoRawFd> From<T> for RawFdContainer {
-        fn from(fd: T) -> Self {
-            Self::new(fd.into_raw_fd())
-        }
-    }
-
-    impl AsRawFd for RawFdContainer {
-        fn as_raw_fd(&self) -> RawFd {
-            self.0
-        }
-    }
+    pub(crate) type RawFdContainer = OwnedFd;
 }
 
 #[cfg(not(all(feature = "std", unix)))]
 mod raw_fd_container {
     use core::convert::Infallible;
 
-    /// A simple wrapper around RawFd that closes the fd on drop.
-    ///
-    /// On non-unix systems, this type is empty and does not provide
-    /// any method.
-    #[derive(Debug, Hash, PartialEq, Eq)]
+    #[derive(Debug)]
+    #[doc(hidden)]
     pub struct RawFdContainer(Infallible);
 
     impl Drop for RawFdContainer {
@@ -96,7 +32,26 @@ mod raw_fd_container {
     }
 }
 
-pub use raw_fd_container::RawFdContainer;
+/// A type representative of the file descriptors as they are sent to and from the X server.
+///
+/// On `cfg(unix)` platforms, this is a type alias for [`std::os::unix::io::OwnedFd`]. See the
+/// documentation for that type for more information on how it should be used. In most cases it
+/// can be cast into a [`File`] or [`UnixStream`], or otherwise downgraded into the actual
+/// underlying file descriptor.
+///
+/// On non-Unix platforms, this is an uninhabited type in the same vogue as [`Void`]. As handle
+/// passing is an undefined operation on non-Unix implementations of the X11 protocol, instances
+/// of this type cannot exist. No operations can be called on this type. If handle passing is ever
+/// added to any reference implementation of the X11 protocol, this type will be changed to
+/// something that can be used to represent the file descriptors.
+///
+/// Consumers of this type should be careful to check for `cfg(unix)` before using it in any
+/// meaningful way. Otherwise, the program will not compile on non-Unix platforms.
+///
+/// [`File`]: std::fs::File
+/// [`UnixStream`]: std::os::unix::net::UnixStream
+/// [`Void`]: https://docs.rs/void/latest/void/enum.Void.html
+pub type RawFdContainer = raw_fd_container::RawFdContainer;
 
 mod pretty_printer {
     use core::fmt::{Debug, Formatter, Result};

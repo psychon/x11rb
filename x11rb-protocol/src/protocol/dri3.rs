@@ -226,7 +226,7 @@ impl crate::x11_utils::ReplyFDsRequest for OpenRequest {
     type Reply = OpenReply;
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug)]
 pub struct OpenReply {
     pub nfd: u8,
     pub sequence: u16,
@@ -308,7 +308,7 @@ impl Serialize for OpenReply {
 
 /// Opcode for the PixmapFromBuffer request
 pub const PIXMAP_FROM_BUFFER_REQUEST: u8 = 2;
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug)]
 pub struct PixmapFromBufferRequest {
     pub pixmap: xproto::Pixmap,
     pub drawable: xproto::Drawable,
@@ -460,7 +460,7 @@ impl crate::x11_utils::ReplyFDsRequest for BufferFromPixmapRequest {
     type Reply = BufferFromPixmapReply;
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug)]
 pub struct BufferFromPixmapReply {
     pub nfd: u8,
     pub sequence: u16,
@@ -566,7 +566,7 @@ impl Serialize for BufferFromPixmapReply {
 
 /// Opcode for the FenceFromFD request
 pub const FENCE_FROM_FD_REQUEST: u8 = 4;
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug)]
 pub struct FenceFromFDRequest {
     pub drawable: xproto::Drawable,
     pub fence: u32,
@@ -699,7 +699,7 @@ impl crate::x11_utils::ReplyFDsRequest for FDFromFenceRequest {
     type Reply = FDFromFenceReply;
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug)]
 pub struct FDFromFenceReply {
     pub nfd: u8,
     pub sequence: u16,
@@ -930,7 +930,7 @@ impl GetSupportedModifiersReply {
 
 /// Opcode for the PixmapFromBuffers request
 pub const PIXMAP_FROM_BUFFERS_REQUEST: u8 = 7;
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug)]
 pub struct PixmapFromBuffersRequest {
     pub pixmap: xproto::Pixmap,
     pub window: xproto::Window,
@@ -1157,7 +1157,7 @@ impl crate::x11_utils::ReplyFDsRequest for BuffersFromPixmapRequest {
     type Reply = BuffersFromPixmapReply;
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug)]
 pub struct BuffersFromPixmapReply {
     pub sequence: u16,
     pub length: u32,
