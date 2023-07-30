@@ -17,8 +17,12 @@ use x11rb::errors::ConnectError;
 use x11rb::rust_connection::DefaultStream;
 use x11rb_protocol::parse_display::{ConnectAddress, ParsedDisplay};
 
+type PeerAddr = (x11rb_protocol::xauth::Family, Vec<u8>);
+
 /// Connect to a `DefaultStream` asynchronously from a display string.
-pub(super) async fn connect(addrs: &ParsedDisplay) -> Result<(DefaultStream, usize), ConnectError> {
+pub(super) async fn connect(
+    addrs: &ParsedDisplay,
+) -> Result<(DefaultStream, usize, PeerAddr), ConnectError> {
     let screen: usize = addrs.screen.into();
     let mut err = None;
 
@@ -36,7 +40,7 @@ pub(super) async fn connect(addrs: &ParsedDisplay) -> Result<(DefaultStream, usi
             }
         })
         .await
-        .map(|stream| (stream, screen))
+        .map(|(stream, peer_addr)| (stream, screen, peer_addr))
         .ok_or_else(|| {
             let io_err =
                 err.unwrap_or_else(|| io::Error::new(io::ErrorKind::Other, "no address resolved"));
@@ -46,7 +50,7 @@ pub(super) async fn connect(addrs: &ParsedDisplay) -> Result<(DefaultStream, usi
 }
 
 /// Connect to a `DefaultStream` asynchronously.
-async fn connect_to_addr(addr: ConnectAddress<'_>) -> io::Result<DefaultStream> {
+async fn connect_to_addr(addr: ConnectAddress<'_>) -> io::Result<(DefaultStream, PeerAddr)> {
     let start = Instant::now();
     match connect_to_addr_impl(&addr).await {
         Ok(stream) => {
@@ -55,7 +59,8 @@ async fn connect_to_addr(addr: ConnectAddress<'_>) -> io::Result<DefaultStream> 
                 addr,
                 start.elapsed()
             );
-            Ok(stream)
+            let peer_addr = stream.peer_addr()?;
+            Ok((stream, peer_addr))
         }
         Err(e) => {
             tracing::debug!("Failed to connect to X11 server via {:?}: {:?}", addr, e);
