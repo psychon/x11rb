@@ -151,14 +151,21 @@ enum DefaultStreamInner {
     AbstractUnix(RawFdContainer),
 }
 
+/// The address of a peer in a format suitable for xauth.
+///
+/// These values can be directly given to [`x11rb_protocol::xauth::get_auth`].
+type PeerAddr = (Family, Vec<u8>);
+
 impl DefaultStream {
     /// Try to connect to the X11 server described by the given arguments.
-    pub fn connect(addr: &ConnectAddress<'_>) -> Result<Self> {
+    pub fn connect(addr: &ConnectAddress<'_>) -> Result<(Self, PeerAddr)> {
         match addr {
             ConnectAddress::Hostname(host, port) => {
                 // connect over TCP
                 let stream = TcpStream::connect((*host, *port))?;
-                Self::from_tcp_stream(stream)
+                let stream = Self::from_tcp_stream(stream)?;
+                let peer_addr = stream.peer_addr()?;
+                Ok((stream, peer_addr))
             }
             #[cfg(unix)]
             ConnectAddress::Socket(path) => {
@@ -168,14 +175,18 @@ impl DefaultStream {
                     // TODO: Does it make sense to add a constructor similar to from_unix_stream()?
                     // If this is done: Move the set_nonblocking() from
                     // connect_abstract_unix_stream() to that new function.
-                    return Ok(Self {
+                    let stream = Self {
                         inner: DefaultStreamInner::AbstractUnix(stream),
-                    });
+                    };
+                    let peer_addr = stream.peer_addr()?;
+                    return Ok((stream, peer_addr))
                 }
 
                 // connect over Unix domain socket
                 let stream = UnixStream::connect(path)?;
-                Self::from_unix_stream(stream)
+                let stream = Self::from_unix_stream(stream)?;
+                let peer_addr = stream.peer_addr()?;
+                Ok((stream, peer_addr))
             }
             #[cfg(not(unix))]
             ConnectAddress::Socket(_) => {
