@@ -20,15 +20,9 @@ serde = { version = "1", features = ["derive"], optional = true }
 [dev-dependencies]
 criterion = "0.4"
 
-[target.'cfg(unix)'.dependencies.rustix]
-version = "0.38"
-default-features = false
-features = ["std"]
-optional = true
-
 [features]
 default = ["std"]
-std = ["rustix"]
+std = []
 
 # Enable utility functions in `x11rb::resource_manager` for querying the
 # resource databases.
