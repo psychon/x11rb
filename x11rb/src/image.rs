@@ -722,7 +722,24 @@ impl<'a> Image<'a> {
     /// The server's maximum request size is honored. This means that a too large `PutImage`
     /// request is automatically split up into smaller pieces. Thus, if this function returns an
     /// error, the image could already be partially sent.
+    ///
+    /// Before uploading, the image is translated into the server's native format via
+    /// [`Image::native`]. This may convert the image to another format, which can be slow. If you
+    /// intend to upload the same image multiple times, it is likely more efficient to call
+    /// [`Image::native`] once initially so that the conversion is not repeated on each upload.
     pub fn put<'c, Conn: Connection>(
+        &self,
+        conn: &'c Conn,
+        drawable: Drawable,
+        gc: Gcontext,
+        dst_x: i16,
+        dst_y: i16,
+    ) -> Result<Vec<VoidCookie<'c, Conn>>, ConnectionError> {
+        self.native(conn.setup())?
+            .put_impl(conn, drawable, gc, dst_x, dst_y)
+    }
+
+    fn put_impl<'c, Conn: Connection>(
         &self,
         conn: &'c Conn,
         drawable: Drawable,
