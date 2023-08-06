@@ -959,6 +959,19 @@ impl<'a> Image<'a> {
             }
         }
     }
+
+    /// Get a version of this image with `'static` lifetime.
+    ///
+    /// If the image was constructed from a `Cow::Borrowed`, this clones the contained data.
+    /// Otherwise, this simply returns `self`.
+    pub fn into_owned(self) -> Image<'static> {
+        // It would be great if we could just implement ToOwned, but that requires implementing
+        // Borrow, which we cannot do. Thus, this function exists as a work-around.
+        Image {
+            data: self.data.into_owned().into(),
+            ..self
+        }
+    }
 }
 
 fn compute_depth_1_address(x: usize, order: ImageOrder) -> (usize, usize) {
@@ -1010,6 +1023,33 @@ mod test_image {
         assert_eq!(image.bits_per_pixel(), BitsPerPixel::B8);
         assert_eq!(image.byte_order(), ImageOrder::MsbFirst);
         assert_eq!(image.data(), [42, 125]);
+    }
+
+    #[test]
+    fn test_into_owned_keeps_owned_data() {
+        fn with_data(data: Cow<'_, [u8]>) -> *const u8 {
+            let orig_ptr = data.as_ptr();
+            let image = Image::new(
+                1,
+                1,
+                ScanlinePad::Pad8,
+                1,
+                BitsPerPixel::B1,
+                ImageOrder::MsbFirst,
+                data,
+            )
+            .unwrap();
+            assert_eq!(image.data().as_ptr(), orig_ptr);
+            image.into_owned().data().as_ptr()
+        }
+
+        // Cow::Borrowed is copied
+        let data = vec![0];
+        let orig_ptr = data.as_ptr();
+        assert_ne!(with_data(Cow::Borrowed(&data)), orig_ptr);
+
+        // Cow::Owned is kept
+        assert_eq!(with_data(Cow::Owned(data)), orig_ptr);
     }
 
     #[test]
