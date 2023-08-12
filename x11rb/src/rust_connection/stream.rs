@@ -520,10 +520,9 @@ mod peer_addr {
 
     // Get xauth information representing a local connection
     pub(super) fn local() -> PeerAddr {
-        let hostname = gethostname::gethostname()
+        let hostname = crate::hostname()
             .to_str()
-            .map(|name| name.as_bytes().to_vec())
-            .unwrap_or_else(Vec::new);
+            .map_or_else(Vec::new, |s| s.as_bytes().to_vec());
         (Family::LOCAL, hostname)
     }
 

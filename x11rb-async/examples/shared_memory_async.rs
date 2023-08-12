@@ -1,10 +1,9 @@
 use std::fs::{remove_file, File, OpenOptions};
 use std::io::{Result as IOResult, Write};
-use std::os::unix::io::AsRawFd;
 use std::ptr::null_mut;
 
 use async_executor::LocalExecutor;
-use libc::{mmap, MAP_FAILED, MAP_SHARED, PROT_READ, PROT_WRITE};
+use rustix::mm;
 
 use x11rb_async::connection::Connection;
 use x11rb_async::errors::{ConnectionError, ReplyError, ReplyOrIdError};
@@ -120,20 +119,23 @@ async fn receive_fd(conn: &impl Connection, screen_num: usize) -> Result<(), Rep
     let shm::CreateSegmentReply { shm_fd, .. } = reply;
 
     let addr = unsafe {
-        mmap(
+        mm::mmap(
             null_mut(),
-            segment_size as _,
-            PROT_READ | PROT_WRITE,
-            MAP_SHARED,
-            shm_fd.as_raw_fd(),
+            segment_size as usize,
+            mm::ProtFlags::READ | mm::ProtFlags::WRITE,
+            mm::MapFlags::SHARED,
+            &shm_fd,
             0,
         )
     };
-    if addr == MAP_FAILED {
-        conn.shm_detach(shmseg).await?;
-        return Err(ConnectionError::InsufficientMemory.into());
-    }
 
+    let addr = match addr {
+        Ok(addr) => addr,
+        Err(_) => {
+            conn.shm_detach(shmseg).await?;
+            return Err(ConnectionError::InsufficientMemory.into());
+        }
+    };
     unsafe {
         let slice = std::slice::from_raw_parts_mut(addr as *mut u8, segment_size as _);
         slice.copy_from_slice(&TEMP_FILE_CONTENT);
