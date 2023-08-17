@@ -166,7 +166,7 @@ property_cookie! {
     |reply| WmSizeHints::from_reply(&reply),
 }
 
-const NUM_WM_SIZE_HINTS_ELEMENTS: u32 = 18;
+const NUM_WM_SIZE_HINTS_ELEMENTS: u16 = 18;
 
 impl<'a, Conn> WmSizeHintsCookie<'a, Conn>
 where
@@ -185,7 +185,7 @@ where
             property,
             AtomEnum::WM_SIZE_HINTS,
             0,
-            NUM_WM_SIZE_HINTS_ELEMENTS,
+            NUM_WM_SIZE_HINTS_ELEMENTS.into(),
         )?))
     }
 }
@@ -332,7 +332,7 @@ impl WmSizeHints {
             property.into(),
             AtomEnum::WM_SIZE_HINTS,
             32,
-            NUM_WM_SIZE_HINTS_ELEMENTS,
+            NUM_WM_SIZE_HINTS_ELEMENTS.into(),
             &data,
         )
     }
@@ -397,8 +397,7 @@ impl TryParse for WmSizeHints {
 impl Serialize for WmSizeHints {
     type Bytes = Vec<u8>;
     fn serialize(&self) -> Self::Bytes {
-        // 18*4 surely fits into an usize, so this unwrap() cannot trigger
-        let mut result = Vec::with_capacity((NUM_WM_SIZE_HINTS_ELEMENTS * 4).try_into().unwrap());
+        let mut result = Vec::with_capacity((NUM_WM_SIZE_HINTS_ELEMENTS * 4).into());
         self.serialize_into(&mut result);
         result
     }

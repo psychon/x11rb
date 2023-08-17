@@ -341,10 +341,7 @@ macro_rules! multiple_reply_cookie {
             type Item = Result<$reply, ReplyError>;
 
             fn next(&mut self) -> Option<Self::Item> {
-                let cookie = match self.0.take() {
-                    None => return None,
-                    Some(cookie) => cookie,
-                };
+                let cookie = self.0.take()?;
                 let reply = cookie
                     .connection
                     .wait_for_reply_or_error(cookie.sequence_number);
