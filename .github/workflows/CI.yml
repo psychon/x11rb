@@ -176,13 +176,9 @@ jobs:
 
   non-amd64-test:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        include:
-          - cross_target: mips64-unknown-linux-gnuabi64
-          - cross_target: powerpc-unknown-linux-gnu
     env:
-      CROSS_TARGET: ${{ matrix.cross_target }}
+      # used to test big endian and lack of 64-bit atomics
+      CROSS_TARGET: powerpc-unknown-linux-gnu
     steps:
     - uses: actions/checkout@v3
     - uses: dtolnay/rust-toolchain@stable
