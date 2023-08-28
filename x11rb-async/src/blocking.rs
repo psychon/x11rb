@@ -132,10 +132,7 @@ impl<C: BlConnection + Send + Sync + 'static> RequestConnection for BlockingConn
         &self,
         name: &'static str,
     ) -> Fut<'_, Option<x11rb::x11_utils::ExtensionInformation>, ConnectionError> {
-        Box::pin(self.with_conn(move |conn| {
-            let name = name;
-            conn.extension_information(name)
-        }))
+        Box::pin(self.with_conn(move |conn| conn.extension_information(name)))
     }
 
     fn prefetch_extension_information(&self, name: &'static str) -> Fut<'_, (), ConnectionError> {
