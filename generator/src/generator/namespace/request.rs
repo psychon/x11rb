@@ -846,18 +846,17 @@ fn emit_request_struct(
             );
 
             let fds_arg = if gathered.fd_lists.is_empty() {
-                format!(
-                    "vec![{}]",
-                    gathered
-                        .single_fds
-                        .iter()
-                        .enumerate()
-                        .map(|(i, single_fd)| {
-                            let sep = if i == 0 { "" } else { ", " };
-                            format!("{}self.{}", sep, single_fd)
-                        })
-                        .collect::<String>(),
-                )
+                let mut fds_arg = String::from("vec![");
+                let mut sep = "";
+                for single_fd in &gathered.single_fds {
+                    fds_arg.push_str(sep);
+                    fds_arg.push_str("self.");
+                    fds_arg.push_str(single_fd);
+
+                    sep = ", ";
+                }
+                fds_arg.push(']');
+                fds_arg
             } else if gathered.fd_lists.len() == 1 && gathered.single_fds.is_empty() {
                 format!("self.{}", gathered.fd_lists[0])
             } else {
