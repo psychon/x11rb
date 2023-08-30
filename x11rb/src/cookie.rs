@@ -115,6 +115,22 @@ where
             DiscardMode::DiscardReplyAndError,
         )
     }
+
+    /// Move this cookie to refer to another connection instance.
+    ///
+    /// This function may only be used if both connections are "basically the same". For example, a
+    /// Cookie for a connection `C` can be moved to `Rc<C>` since that still refers to the same
+    /// underlying connection.
+    pub(crate) fn replace_connection<C2: RequestConnection + ?Sized>(
+        self,
+        connection: &C2,
+    ) -> VoidCookie<'_, C2> {
+        let (_, sequence_number) = self.consume();
+        VoidCookie {
+            connection,
+            sequence_number,
+        }
+    }
 }
 
 impl<C> Drop for VoidCookie<'_, C>
@@ -161,6 +177,21 @@ where
         // Prevent drop() from running
         std::mem::forget(self);
         number
+    }
+
+    /// Move this cookie to refer to another connection instance.
+    ///
+    /// This function may only be used if both connections are "basically the same". For example, a
+    /// Cookie for a connection `C` can be moved to `Rc<C>` since that still refers to the same
+    /// underlying connection.
+    fn replace_connection<C2: RequestConnection + ?Sized>(
+        self,
+        connection: &C2,
+    ) -> RawCookie<'_, C2> {
+        RawCookie {
+            connection,
+            sequence_number: self.into_sequence_number(),
+        }
     }
 }
 
@@ -255,6 +286,21 @@ where
     pub(crate) fn into_sequence_number(self) -> SequenceNumber {
         self.raw_cookie.into_sequence_number()
     }
+
+    /// Move this cookie to refer to another connection instance.
+    ///
+    /// This function may only be used if both connections are "basically the same". For example, a
+    /// Cookie for a connection `C` can be moved to `Rc<C>` since that still refers to the same
+    /// underlying connection.
+    pub(crate) fn replace_connection<C2: RequestConnection + ?Sized>(
+        self,
+        connection: &C2,
+    ) -> Cookie<'_, C2, R> {
+        Cookie {
+            raw_cookie: self.raw_cookie.replace_connection(connection),
+            phantom: PhantomData,
+        }
+    }
 }
 
 /// A handle to a response containing `RawFd` from the X11 server.
@@ -306,6 +352,21 @@ where
     pub fn reply(self) -> Result<R, ReplyError> {
         let (buffer, mut fds) = self.raw_reply()?;
         Ok(R::try_parse_fd(buffer.as_ref(), &mut fds)?.0)
+    }
+
+    /// Move this cookie to refer to another connection instance.
+    ///
+    /// This function may only be used if both connections are "basically the same". For example, a
+    /// Cookie for a connection `C` can be moved to `Rc<C>` since that still refers to the same
+    /// underlying connection.
+    pub(crate) fn replace_connection<C2: RequestConnection + ?Sized>(
+        self,
+        connection: &C2,
+    ) -> CookieWithFds<'_, C2, R> {
+        CookieWithFds {
+            raw_cookie: self.raw_cookie.replace_connection(connection),
+            phantom: PhantomData,
+        }
     }
 }
 
