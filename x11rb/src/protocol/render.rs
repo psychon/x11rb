@@ -714,7 +714,9 @@ impl<'c, C: X11Connection> PictureWrapper<&'c C>
         let cookie = create_picture(conn, pid, drawable, format, value_list)?;
         Ok((Self::for_picture(conn, pid), cookie))
     }
-
+}
+impl<C: X11Connection> PictureWrapper<C>
+{
     /// Create a new Picture and return a Picture wrapper
     ///
     /// This is a thin wrapper around [create_picture] that allocates an id for the Picture.
@@ -722,9 +724,11 @@ impl<'c, C: X11Connection> PictureWrapper<&'c C>
     /// it in `Drop`.
     ///
     /// Errors can come from the call to [X11Connection::generate_id] or [create_picture].
-    pub fn create_picture(conn: &'c C, drawable: xproto::Drawable, format: Pictformat, value_list: &CreatePictureAux) -> Result<Self, ReplyOrIdError>
+    pub fn create_picture(conn: C, drawable: xproto::Drawable, format: Pictformat, value_list: &CreatePictureAux) -> Result<Self, ReplyOrIdError>
     {
-        Ok(Self::create_picture_and_get_cookie(conn, drawable, format, value_list)?.0)
+        let pid = conn.generate_id()?;
+        let _ = create_picture(&conn, pid, drawable, format, value_list)?;
+        Ok(Self::for_picture(conn, pid))
     }
 }
 
@@ -744,7 +748,9 @@ impl<'c, C: X11Connection> PictureWrapper<&'c C>
         let cookie = create_solid_fill(conn, picture, color)?;
         Ok((Self::for_picture(conn, picture), cookie))
     }
-
+}
+impl<C: X11Connection> PictureWrapper<C>
+{
     /// Create a new Picture and return a Picture wrapper
     ///
     /// This is a thin wrapper around [create_solid_fill] that allocates an id for the Picture.
@@ -752,9 +758,11 @@ impl<'c, C: X11Connection> PictureWrapper<&'c C>
     /// it in `Drop`.
     ///
     /// Errors can come from the call to [X11Connection::generate_id] or [create_solid_fill].
-    pub fn create_solid_fill(conn: &'c C, color: Color) -> Result<Self, ReplyOrIdError>
+    pub fn create_solid_fill(conn: C, color: Color) -> Result<Self, ReplyOrIdError>
     {
-        Ok(Self::create_solid_fill_and_get_cookie(conn, color)?.0)
+        let picture = conn.generate_id()?;
+        let _ = create_solid_fill(&conn, picture, color)?;
+        Ok(Self::for_picture(conn, picture))
     }
 }
 
@@ -774,7 +782,9 @@ impl<'c, C: X11Connection> PictureWrapper<&'c C>
         let cookie = create_linear_gradient(conn, picture, p1, p2, stops, colors)?;
         Ok((Self::for_picture(conn, picture), cookie))
     }
-
+}
+impl<C: X11Connection> PictureWrapper<C>
+{
     /// Create a new Picture and return a Picture wrapper
     ///
     /// This is a thin wrapper around [create_linear_gradient] that allocates an id for the Picture.
@@ -782,9 +792,11 @@ impl<'c, C: X11Connection> PictureWrapper<&'c C>
     /// it in `Drop`.
     ///
     /// Errors can come from the call to [X11Connection::generate_id] or [create_linear_gradient].
-    pub fn create_linear_gradient(conn: &'c C, p1: Pointfix, p2: Pointfix, stops: &[Fixed], colors: &[Color]) -> Result<Self, ReplyOrIdError>
+    pub fn create_linear_gradient(conn: C, p1: Pointfix, p2: Pointfix, stops: &[Fixed], colors: &[Color]) -> Result<Self, ReplyOrIdError>
     {
-        Ok(Self::create_linear_gradient_and_get_cookie(conn, p1, p2, stops, colors)?.0)
+        let picture = conn.generate_id()?;
+        let _ = create_linear_gradient(&conn, picture, p1, p2, stops, colors)?;
+        Ok(Self::for_picture(conn, picture))
     }
 }
 
@@ -804,7 +816,9 @@ impl<'c, C: X11Connection> PictureWrapper<&'c C>
         let cookie = create_radial_gradient(conn, picture, inner, outer, inner_radius, outer_radius, stops, colors)?;
         Ok((Self::for_picture(conn, picture), cookie))
     }
-
+}
+impl<C: X11Connection> PictureWrapper<C>
+{
     /// Create a new Picture and return a Picture wrapper
     ///
     /// This is a thin wrapper around [create_radial_gradient] that allocates an id for the Picture.
@@ -812,9 +826,11 @@ impl<'c, C: X11Connection> PictureWrapper<&'c C>
     /// it in `Drop`.
     ///
     /// Errors can come from the call to [X11Connection::generate_id] or [create_radial_gradient].
-    pub fn create_radial_gradient(conn: &'c C, inner: Pointfix, outer: Pointfix, inner_radius: Fixed, outer_radius: Fixed, stops: &[Fixed], colors: &[Color]) -> Result<Self, ReplyOrIdError>
+    pub fn create_radial_gradient(conn: C, inner: Pointfix, outer: Pointfix, inner_radius: Fixed, outer_radius: Fixed, stops: &[Fixed], colors: &[Color]) -> Result<Self, ReplyOrIdError>
     {
-        Ok(Self::create_radial_gradient_and_get_cookie(conn, inner, outer, inner_radius, outer_radius, stops, colors)?.0)
+        let picture = conn.generate_id()?;
+        let _ = create_radial_gradient(&conn, picture, inner, outer, inner_radius, outer_radius, stops, colors)?;
+        Ok(Self::for_picture(conn, picture))
     }
 }
 
@@ -834,7 +850,9 @@ impl<'c, C: X11Connection> PictureWrapper<&'c C>
         let cookie = create_conical_gradient(conn, picture, center, angle, stops, colors)?;
         Ok((Self::for_picture(conn, picture), cookie))
     }
-
+}
+impl<C: X11Connection> PictureWrapper<C>
+{
     /// Create a new Picture and return a Picture wrapper
     ///
     /// This is a thin wrapper around [create_conical_gradient] that allocates an id for the Picture.
@@ -842,9 +860,11 @@ impl<'c, C: X11Connection> PictureWrapper<&'c C>
     /// it in `Drop`.
     ///
     /// Errors can come from the call to [X11Connection::generate_id] or [create_conical_gradient].
-    pub fn create_conical_gradient(conn: &'c C, center: Pointfix, angle: Fixed, stops: &[Fixed], colors: &[Color]) -> Result<Self, ReplyOrIdError>
+    pub fn create_conical_gradient(conn: C, center: Pointfix, angle: Fixed, stops: &[Fixed], colors: &[Color]) -> Result<Self, ReplyOrIdError>
     {
-        Ok(Self::create_conical_gradient_and_get_cookie(conn, center, angle, stops, colors)?.0)
+        let picture = conn.generate_id()?;
+        let _ = create_conical_gradient(&conn, picture, center, angle, stops, colors)?;
+        Ok(Self::for_picture(conn, picture))
     }
 }
 
@@ -907,7 +927,9 @@ impl<'c, C: X11Connection> GlyphsetWrapper<&'c C>
         let cookie = create_glyph_set(conn, gsid, format)?;
         Ok((Self::for_glyphset(conn, gsid), cookie))
     }
-
+}
+impl<C: X11Connection> GlyphsetWrapper<C>
+{
     /// Create a new Glyphset and return a Glyphset wrapper
     ///
     /// This is a thin wrapper around [create_glyph_set] that allocates an id for the Glyphset.
@@ -915,9 +937,11 @@ impl<'c, C: X11Connection> GlyphsetWrapper<&'c C>
     /// it in `Drop`.
     ///
     /// Errors can come from the call to [X11Connection::generate_id] or [create_glyph_set].
-    pub fn create_glyph_set(conn: &'c C, format: Pictformat) -> Result<Self, ReplyOrIdError>
+    pub fn create_glyph_set(conn: C, format: Pictformat) -> Result<Self, ReplyOrIdError>
     {
-        Ok(Self::create_glyph_set_and_get_cookie(conn, format)?.0)
+        let gsid = conn.generate_id()?;
+        let _ = create_glyph_set(&conn, gsid, format)?;
+        Ok(Self::for_glyphset(conn, gsid))
     }
 }
 

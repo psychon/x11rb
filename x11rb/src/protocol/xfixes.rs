@@ -753,7 +753,9 @@ impl<'c, C: X11Connection> RegionWrapper<&'c C>
         let cookie = create_region(conn, region, rectangles)?;
         Ok((Self::for_region(conn, region), cookie))
     }
-
+}
+impl<C: X11Connection> RegionWrapper<C>
+{
     /// Create a new Region and return a Region wrapper
     ///
     /// This is a thin wrapper around [create_region] that allocates an id for the Region.
@@ -761,9 +763,11 @@ impl<'c, C: X11Connection> RegionWrapper<&'c C>
     /// it in `Drop`.
     ///
     /// Errors can come from the call to [X11Connection::generate_id] or [create_region].
-    pub fn create_region(conn: &'c C, rectangles: &[xproto::Rectangle]) -> Result<Self, ReplyOrIdError>
+    pub fn create_region(conn: C, rectangles: &[xproto::Rectangle]) -> Result<Self, ReplyOrIdError>
     {
-        Ok(Self::create_region_and_get_cookie(conn, rectangles)?.0)
+        let region = conn.generate_id()?;
+        let _ = create_region(&conn, region, rectangles)?;
+        Ok(Self::for_region(conn, region))
     }
 }
 
@@ -783,7 +787,9 @@ impl<'c, C: X11Connection> RegionWrapper<&'c C>
         let cookie = create_region_from_bitmap(conn, region, bitmap)?;
         Ok((Self::for_region(conn, region), cookie))
     }
-
+}
+impl<C: X11Connection> RegionWrapper<C>
+{
     /// Create a new Region and return a Region wrapper
     ///
     /// This is a thin wrapper around [create_region_from_bitmap] that allocates an id for the Region.
@@ -791,9 +797,11 @@ impl<'c, C: X11Connection> RegionWrapper<&'c C>
     /// it in `Drop`.
     ///
     /// Errors can come from the call to [X11Connection::generate_id] or [create_region_from_bitmap].
-    pub fn create_region_from_bitmap(conn: &'c C, bitmap: xproto::Pixmap) -> Result<Self, ReplyOrIdError>
+    pub fn create_region_from_bitmap(conn: C, bitmap: xproto::Pixmap) -> Result<Self, ReplyOrIdError>
     {
-        Ok(Self::create_region_from_bitmap_and_get_cookie(conn, bitmap)?.0)
+        let region = conn.generate_id()?;
+        let _ = create_region_from_bitmap(&conn, region, bitmap)?;
+        Ok(Self::for_region(conn, region))
     }
 }
 
@@ -813,7 +821,9 @@ impl<'c, C: X11Connection> RegionWrapper<&'c C>
         let cookie = create_region_from_window(conn, region, window, kind)?;
         Ok((Self::for_region(conn, region), cookie))
     }
-
+}
+impl<C: X11Connection> RegionWrapper<C>
+{
     /// Create a new Region and return a Region wrapper
     ///
     /// This is a thin wrapper around [create_region_from_window] that allocates an id for the Region.
@@ -821,9 +831,11 @@ impl<'c, C: X11Connection> RegionWrapper<&'c C>
     /// it in `Drop`.
     ///
     /// Errors can come from the call to [X11Connection::generate_id] or [create_region_from_window].
-    pub fn create_region_from_window(conn: &'c C, window: xproto::Window, kind: shape::SK) -> Result<Self, ReplyOrIdError>
+    pub fn create_region_from_window(conn: C, window: xproto::Window, kind: shape::SK) -> Result<Self, ReplyOrIdError>
     {
-        Ok(Self::create_region_from_window_and_get_cookie(conn, window, kind)?.0)
+        let region = conn.generate_id()?;
+        let _ = create_region_from_window(&conn, region, window, kind)?;
+        Ok(Self::for_region(conn, region))
     }
 }
 
@@ -843,7 +855,9 @@ impl<'c, C: X11Connection> RegionWrapper<&'c C>
         let cookie = create_region_from_gc(conn, region, gc)?;
         Ok((Self::for_region(conn, region), cookie))
     }
-
+}
+impl<C: X11Connection> RegionWrapper<C>
+{
     /// Create a new Region and return a Region wrapper
     ///
     /// This is a thin wrapper around [create_region_from_gc] that allocates an id for the Region.
@@ -851,9 +865,11 @@ impl<'c, C: X11Connection> RegionWrapper<&'c C>
     /// it in `Drop`.
     ///
     /// Errors can come from the call to [X11Connection::generate_id] or [create_region_from_gc].
-    pub fn create_region_from_gc(conn: &'c C, gc: xproto::Gcontext) -> Result<Self, ReplyOrIdError>
+    pub fn create_region_from_gc(conn: C, gc: xproto::Gcontext) -> Result<Self, ReplyOrIdError>
     {
-        Ok(Self::create_region_from_gc_and_get_cookie(conn, gc)?.0)
+        let region = conn.generate_id()?;
+        let _ = create_region_from_gc(&conn, region, gc)?;
+        Ok(Self::for_region(conn, region))
     }
 }
 
@@ -873,7 +889,9 @@ impl<'c, C: X11Connection> RegionWrapper<&'c C>
         let cookie = create_region_from_picture(conn, region, picture)?;
         Ok((Self::for_region(conn, region), cookie))
     }
-
+}
+impl<C: X11Connection> RegionWrapper<C>
+{
     /// Create a new Region and return a Region wrapper
     ///
     /// This is a thin wrapper around [create_region_from_picture] that allocates an id for the Region.
@@ -881,9 +899,11 @@ impl<'c, C: X11Connection> RegionWrapper<&'c C>
     /// it in `Drop`.
     ///
     /// Errors can come from the call to [X11Connection::generate_id] or [create_region_from_picture].
-    pub fn create_region_from_picture(conn: &'c C, picture: render::Picture) -> Result<Self, ReplyOrIdError>
+    pub fn create_region_from_picture(conn: C, picture: render::Picture) -> Result<Self, ReplyOrIdError>
     {
-        Ok(Self::create_region_from_picture_and_get_cookie(conn, picture)?.0)
+        let region = conn.generate_id()?;
+        let _ = create_region_from_picture(&conn, region, picture)?;
+        Ok(Self::for_region(conn, region))
     }
 }
 
@@ -904,7 +924,9 @@ impl<'c, C: X11Connection> RegionWrapper<&'c C>
         let cookie = super::composite::create_region_from_border_clip(conn, region, window)?;
         Ok((Self::for_region(conn, region), cookie))
     }
-
+}
+impl<C: X11Connection> RegionWrapper<C>
+{
     /// Create a new Region and return a Region wrapper
     ///
     /// This is a thin wrapper around [super::composite::create_region_from_border_clip] that allocates an id for the Region.
@@ -913,9 +935,11 @@ impl<'c, C: X11Connection> RegionWrapper<&'c C>
     ///
     /// Errors can come from the call to [X11Connection::generate_id] or [super::composite::create_region_from_border_clip].
     #[cfg(feature = "composite")]
-    pub fn composite_create_region_from_border_clip(conn: &'c C, window: xproto::Window) -> Result<Self, ReplyOrIdError>
+    pub fn composite_create_region_from_border_clip(conn: C, window: xproto::Window) -> Result<Self, ReplyOrIdError>
     {
-        Ok(Self::composite_create_region_from_border_clip_and_get_cookie(conn, window)?.0)
+        let region = conn.generate_id()?;
+        let _ = super::composite::create_region_from_border_clip(&conn, region, window)?;
+        Ok(Self::for_region(conn, region))
     }
 }
 

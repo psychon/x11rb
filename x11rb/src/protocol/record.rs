@@ -230,7 +230,9 @@ impl<'c, C: X11Connection> ContextWrapper<&'c C>
         let cookie = create_context(conn, context, element_header, client_specs, ranges)?;
         Ok((Self::for_context(conn, context), cookie))
     }
-
+}
+impl<C: X11Connection> ContextWrapper<C>
+{
     /// Create a new Context and return a Context wrapper
     ///
     /// This is a thin wrapper around [create_context] that allocates an id for the Context.
@@ -238,9 +240,11 @@ impl<'c, C: X11Connection> ContextWrapper<&'c C>
     /// it in `Drop`.
     ///
     /// Errors can come from the call to [X11Connection::generate_id] or [create_context].
-    pub fn create_context(conn: &'c C, element_header: ElementHeader, client_specs: &[ClientSpec], ranges: &[Range]) -> Result<Self, ReplyOrIdError>
+    pub fn create_context(conn: C, element_header: ElementHeader, client_specs: &[ClientSpec], ranges: &[Range]) -> Result<Self, ReplyOrIdError>
     {
-        Ok(Self::create_context_and_get_cookie(conn, element_header, client_specs, ranges)?.0)
+        let context = conn.generate_id()?;
+        let _ = create_context(&conn, context, element_header, client_specs, ranges)?;
+        Ok(Self::for_context(conn, context))
     }
 }
 

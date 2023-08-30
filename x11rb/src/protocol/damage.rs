@@ -325,7 +325,9 @@ impl<'c, C: X11Connection> DamageWrapper<&'c C>
         let cookie = create(conn, damage, drawable, level)?;
         Ok((Self::for_damage(conn, damage), cookie))
     }
-
+}
+impl<C: X11Connection> DamageWrapper<C>
+{
     /// Create a new Damage and return a Damage wrapper
     ///
     /// This is a thin wrapper around [create] that allocates an id for the Damage.
@@ -333,9 +335,11 @@ impl<'c, C: X11Connection> DamageWrapper<&'c C>
     /// it in `Drop`.
     ///
     /// Errors can come from the call to [X11Connection::generate_id] or [create].
-    pub fn create(conn: &'c C, drawable: xproto::Drawable, level: ReportLevel) -> Result<Self, ReplyOrIdError>
+    pub fn create(conn: C, drawable: xproto::Drawable, level: ReportLevel) -> Result<Self, ReplyOrIdError>
     {
-        Ok(Self::create_and_get_cookie(conn, drawable, level)?.0)
+        let damage = conn.generate_id()?;
+        let _ = create(&conn, damage, drawable, level)?;
+        Ok(Self::for_damage(conn, damage))
     }
 }
 

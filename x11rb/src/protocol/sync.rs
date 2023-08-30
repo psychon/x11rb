@@ -434,7 +434,9 @@ impl<'c, C: X11Connection> CounterWrapper<&'c C>
         let cookie = create_counter(conn, id, initial_value)?;
         Ok((Self::for_counter(conn, id), cookie))
     }
-
+}
+impl<C: X11Connection> CounterWrapper<C>
+{
     /// Create a new Counter and return a Counter wrapper
     ///
     /// This is a thin wrapper around [create_counter] that allocates an id for the Counter.
@@ -442,9 +444,11 @@ impl<'c, C: X11Connection> CounterWrapper<&'c C>
     /// it in `Drop`.
     ///
     /// Errors can come from the call to [X11Connection::generate_id] or [create_counter].
-    pub fn create_counter(conn: &'c C, initial_value: Int64) -> Result<Self, ReplyOrIdError>
+    pub fn create_counter(conn: C, initial_value: Int64) -> Result<Self, ReplyOrIdError>
     {
-        Ok(Self::create_counter_and_get_cookie(conn, initial_value)?.0)
+        let id = conn.generate_id()?;
+        let _ = create_counter(&conn, id, initial_value)?;
+        Ok(Self::for_counter(conn, id))
     }
 }
 
@@ -507,7 +511,9 @@ impl<'c, C: X11Connection> AlarmWrapper<&'c C>
         let cookie = create_alarm(conn, id, value_list)?;
         Ok((Self::for_alarm(conn, id), cookie))
     }
-
+}
+impl<C: X11Connection> AlarmWrapper<C>
+{
     /// Create a new Alarm and return a Alarm wrapper
     ///
     /// This is a thin wrapper around [create_alarm] that allocates an id for the Alarm.
@@ -515,9 +521,11 @@ impl<'c, C: X11Connection> AlarmWrapper<&'c C>
     /// it in `Drop`.
     ///
     /// Errors can come from the call to [X11Connection::generate_id] or [create_alarm].
-    pub fn create_alarm(conn: &'c C, value_list: &CreateAlarmAux) -> Result<Self, ReplyOrIdError>
+    pub fn create_alarm(conn: C, value_list: &CreateAlarmAux) -> Result<Self, ReplyOrIdError>
     {
-        Ok(Self::create_alarm_and_get_cookie(conn, value_list)?.0)
+        let id = conn.generate_id()?;
+        let _ = create_alarm(&conn, id, value_list)?;
+        Ok(Self::for_alarm(conn, id))
     }
 }
 
@@ -580,7 +588,9 @@ impl<'c, C: X11Connection> FenceWrapper<&'c C>
         let cookie = create_fence(conn, drawable, fence, initially_triggered)?;
         Ok((Self::for_fence(conn, fence), cookie))
     }
-
+}
+impl<C: X11Connection> FenceWrapper<C>
+{
     /// Create a new Fence and return a Fence wrapper
     ///
     /// This is a thin wrapper around [create_fence] that allocates an id for the Fence.
@@ -588,9 +598,11 @@ impl<'c, C: X11Connection> FenceWrapper<&'c C>
     /// it in `Drop`.
     ///
     /// Errors can come from the call to [X11Connection::generate_id] or [create_fence].
-    pub fn create_fence(conn: &'c C, drawable: xproto::Drawable, initially_triggered: bool) -> Result<Self, ReplyOrIdError>
+    pub fn create_fence(conn: C, drawable: xproto::Drawable, initially_triggered: bool) -> Result<Self, ReplyOrIdError>
     {
-        Ok(Self::create_fence_and_get_cookie(conn, drawable, initially_triggered)?.0)
+        let fence = conn.generate_id()?;
+        let _ = create_fence(&conn, drawable, fence, initially_triggered)?;
+        Ok(Self::for_fence(conn, fence))
     }
 }
 
@@ -613,7 +625,9 @@ impl<'c, C: X11Connection> FenceWrapper<&'c C>
         let cookie = super::dri3::fence_from_fd(conn, drawable, fence, initially_triggered, fence_fd)?;
         Ok((Self::for_fence(conn, fence), cookie))
     }
-
+}
+impl<C: X11Connection> FenceWrapper<C>
+{
     /// Create a new Fence and return a Fence wrapper
     ///
     /// This is a thin wrapper around [super::dri3::fence_from_fd] that allocates an id for the Fence.
@@ -622,11 +636,13 @@ impl<'c, C: X11Connection> FenceWrapper<&'c C>
     ///
     /// Errors can come from the call to [X11Connection::generate_id] or [super::dri3::fence_from_fd].
     #[cfg(feature = "dri3")]
-    pub fn dri3_fence_from_fd<A>(conn: &'c C, drawable: xproto::Drawable, initially_triggered: bool, fence_fd: A) -> Result<Self, ReplyOrIdError>
+    pub fn dri3_fence_from_fd<A>(conn: C, drawable: xproto::Drawable, initially_triggered: bool, fence_fd: A) -> Result<Self, ReplyOrIdError>
     where
         A: Into<RawFdContainer>,
     {
-        Ok(Self::dri3_fence_from_fd_and_get_cookie(conn, drawable, initially_triggered, fence_fd)?.0)
+        let fence = conn.generate_id()?;
+        let _ = super::dri3::fence_from_fd(&conn, drawable, fence, initially_triggered, fence_fd)?;
+        Ok(Self::for_fence(conn, fence))
     }
 }
 

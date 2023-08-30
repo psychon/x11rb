@@ -5522,7 +5522,9 @@ impl<'c, C: X11Connection> PixmapWrapper<&'c C>
         let cookie = create_pixmap(conn, depth, pid, drawable, width, height)?;
         Ok((Self::for_pixmap(conn, pid), cookie))
     }
-
+}
+impl<C: X11Connection> PixmapWrapper<C>
+{
     /// Create a new Pixmap and return a Pixmap wrapper
     ///
     /// This is a thin wrapper around [create_pixmap] that allocates an id for the Pixmap.
@@ -5530,9 +5532,11 @@ impl<'c, C: X11Connection> PixmapWrapper<&'c C>
     /// it in `Drop`.
     ///
     /// Errors can come from the call to [X11Connection::generate_id] or [create_pixmap].
-    pub fn create_pixmap(conn: &'c C, depth: u8, drawable: Drawable, width: u16, height: u16) -> Result<Self, ReplyOrIdError>
+    pub fn create_pixmap(conn: C, depth: u8, drawable: Drawable, width: u16, height: u16) -> Result<Self, ReplyOrIdError>
     {
-        Ok(Self::create_pixmap_and_get_cookie(conn, depth, drawable, width, height)?.0)
+        let pid = conn.generate_id()?;
+        let _ = create_pixmap(&conn, depth, pid, drawable, width, height)?;
+        Ok(Self::for_pixmap(conn, pid))
     }
 }
 
@@ -5595,7 +5599,9 @@ impl<'c, C: X11Connection> WindowWrapper<&'c C>
         let cookie = create_window(conn, depth, wid, parent, x, y, width, height, border_width, class, visual, value_list)?;
         Ok((Self::for_window(conn, wid), cookie))
     }
-
+}
+impl<C: X11Connection> WindowWrapper<C>
+{
     /// Create a new Window and return a Window wrapper
     ///
     /// This is a thin wrapper around [create_window] that allocates an id for the Window.
@@ -5603,9 +5609,11 @@ impl<'c, C: X11Connection> WindowWrapper<&'c C>
     /// it in `Drop`.
     ///
     /// Errors can come from the call to [X11Connection::generate_id] or [create_window].
-    pub fn create_window(conn: &'c C, depth: u8, parent: Window, x: i16, y: i16, width: u16, height: u16, border_width: u16, class: WindowClass, visual: Visualid, value_list: &CreateWindowAux) -> Result<Self, ReplyOrIdError>
+    pub fn create_window(conn: C, depth: u8, parent: Window, x: i16, y: i16, width: u16, height: u16, border_width: u16, class: WindowClass, visual: Visualid, value_list: &CreateWindowAux) -> Result<Self, ReplyOrIdError>
     {
-        Ok(Self::create_window_and_get_cookie(conn, depth, parent, x, y, width, height, border_width, class, visual, value_list)?.0)
+        let wid = conn.generate_id()?;
+        let _ = create_window(&conn, depth, wid, parent, x, y, width, height, border_width, class, visual, value_list)?;
+        Ok(Self::for_window(conn, wid))
     }
 }
 
@@ -5668,7 +5676,9 @@ impl<'c, C: X11Connection> FontWrapper<&'c C>
         let cookie = open_font(conn, fid, name)?;
         Ok((Self::for_font(conn, fid), cookie))
     }
-
+}
+impl<C: X11Connection> FontWrapper<C>
+{
     /// Create a new Font and return a Font wrapper
     ///
     /// This is a thin wrapper around [open_font] that allocates an id for the Font.
@@ -5676,9 +5686,11 @@ impl<'c, C: X11Connection> FontWrapper<&'c C>
     /// it in `Drop`.
     ///
     /// Errors can come from the call to [X11Connection::generate_id] or [open_font].
-    pub fn open_font(conn: &'c C, name: &[u8]) -> Result<Self, ReplyOrIdError>
+    pub fn open_font(conn: C, name: &[u8]) -> Result<Self, ReplyOrIdError>
     {
-        Ok(Self::open_font_and_get_cookie(conn, name)?.0)
+        let fid = conn.generate_id()?;
+        let _ = open_font(&conn, fid, name)?;
+        Ok(Self::for_font(conn, fid))
     }
 }
 
@@ -5741,7 +5753,9 @@ impl<'c, C: X11Connection> GcontextWrapper<&'c C>
         let cookie = create_gc(conn, cid, drawable, value_list)?;
         Ok((Self::for_gcontext(conn, cid), cookie))
     }
-
+}
+impl<C: X11Connection> GcontextWrapper<C>
+{
     /// Create a new Gcontext and return a Gcontext wrapper
     ///
     /// This is a thin wrapper around [create_gc] that allocates an id for the Gcontext.
@@ -5749,9 +5763,11 @@ impl<'c, C: X11Connection> GcontextWrapper<&'c C>
     /// it in `Drop`.
     ///
     /// Errors can come from the call to [X11Connection::generate_id] or [create_gc].
-    pub fn create_gc(conn: &'c C, drawable: Drawable, value_list: &CreateGCAux) -> Result<Self, ReplyOrIdError>
+    pub fn create_gc(conn: C, drawable: Drawable, value_list: &CreateGCAux) -> Result<Self, ReplyOrIdError>
     {
-        Ok(Self::create_gc_and_get_cookie(conn, drawable, value_list)?.0)
+        let cid = conn.generate_id()?;
+        let _ = create_gc(&conn, cid, drawable, value_list)?;
+        Ok(Self::for_gcontext(conn, cid))
     }
 }
 
@@ -5814,7 +5830,9 @@ impl<'c, C: X11Connection> ColormapWrapper<&'c C>
         let cookie = create_colormap(conn, alloc, mid, window, visual)?;
         Ok((Self::for_colormap(conn, mid), cookie))
     }
-
+}
+impl<C: X11Connection> ColormapWrapper<C>
+{
     /// Create a new Colormap and return a Colormap wrapper
     ///
     /// This is a thin wrapper around [create_colormap] that allocates an id for the Colormap.
@@ -5822,9 +5840,11 @@ impl<'c, C: X11Connection> ColormapWrapper<&'c C>
     /// it in `Drop`.
     ///
     /// Errors can come from the call to [X11Connection::generate_id] or [create_colormap].
-    pub fn create_colormap(conn: &'c C, alloc: ColormapAlloc, window: Window, visual: Visualid) -> Result<Self, ReplyOrIdError>
+    pub fn create_colormap(conn: C, alloc: ColormapAlloc, window: Window, visual: Visualid) -> Result<Self, ReplyOrIdError>
     {
-        Ok(Self::create_colormap_and_get_cookie(conn, alloc, window, visual)?.0)
+        let mid = conn.generate_id()?;
+        let _ = create_colormap(&conn, alloc, mid, window, visual)?;
+        Ok(Self::for_colormap(conn, mid))
     }
 }
 
@@ -5889,7 +5909,9 @@ impl<'c, C: X11Connection> CursorWrapper<&'c C>
         let cookie = create_cursor(conn, cid, source, mask, fore_red, fore_green, fore_blue, back_red, back_green, back_blue, x, y)?;
         Ok((Self::for_cursor(conn, cid), cookie))
     }
-
+}
+impl<C: X11Connection> CursorWrapper<C>
+{
     /// Create a new Cursor and return a Cursor wrapper
     ///
     /// This is a thin wrapper around [create_cursor] that allocates an id for the Cursor.
@@ -5897,11 +5919,13 @@ impl<'c, C: X11Connection> CursorWrapper<&'c C>
     /// it in `Drop`.
     ///
     /// Errors can come from the call to [X11Connection::generate_id] or [create_cursor].
-    pub fn create_cursor<A>(conn: &'c C, source: Pixmap, mask: A, fore_red: u16, fore_green: u16, fore_blue: u16, back_red: u16, back_green: u16, back_blue: u16, x: u16, y: u16) -> Result<Self, ReplyOrIdError>
+    pub fn create_cursor<A>(conn: C, source: Pixmap, mask: A, fore_red: u16, fore_green: u16, fore_blue: u16, back_red: u16, back_green: u16, back_blue: u16, x: u16, y: u16) -> Result<Self, ReplyOrIdError>
     where
         A: Into<Pixmap>,
     {
-        Ok(Self::create_cursor_and_get_cookie(conn, source, mask, fore_red, fore_green, fore_blue, back_red, back_green, back_blue, x, y)?.0)
+        let cid = conn.generate_id()?;
+        let _ = create_cursor(&conn, cid, source, mask, fore_red, fore_green, fore_blue, back_red, back_green, back_blue, x, y)?;
+        Ok(Self::for_cursor(conn, cid))
     }
 }
 
@@ -5923,7 +5947,9 @@ impl<'c, C: X11Connection> CursorWrapper<&'c C>
         let cookie = create_glyph_cursor(conn, cid, source_font, mask_font, source_char, mask_char, fore_red, fore_green, fore_blue, back_red, back_green, back_blue)?;
         Ok((Self::for_cursor(conn, cid), cookie))
     }
-
+}
+impl<C: X11Connection> CursorWrapper<C>
+{
     /// Create a new Cursor and return a Cursor wrapper
     ///
     /// This is a thin wrapper around [create_glyph_cursor] that allocates an id for the Cursor.
@@ -5931,11 +5957,13 @@ impl<'c, C: X11Connection> CursorWrapper<&'c C>
     /// it in `Drop`.
     ///
     /// Errors can come from the call to [X11Connection::generate_id] or [create_glyph_cursor].
-    pub fn create_glyph_cursor<A>(conn: &'c C, source_font: Font, mask_font: A, source_char: u16, mask_char: u16, fore_red: u16, fore_green: u16, fore_blue: u16, back_red: u16, back_green: u16, back_blue: u16) -> Result<Self, ReplyOrIdError>
+    pub fn create_glyph_cursor<A>(conn: C, source_font: Font, mask_font: A, source_char: u16, mask_char: u16, fore_red: u16, fore_green: u16, fore_blue: u16, back_red: u16, back_green: u16, back_blue: u16) -> Result<Self, ReplyOrIdError>
     where
         A: Into<Font>,
     {
-        Ok(Self::create_glyph_cursor_and_get_cookie(conn, source_font, mask_font, source_char, mask_char, fore_red, fore_green, fore_blue, back_red, back_green, back_blue)?.0)
+        let cid = conn.generate_id()?;
+        let _ = create_glyph_cursor(&conn, cid, source_font, mask_font, source_char, mask_char, fore_red, fore_green, fore_blue, back_red, back_green, back_blue)?;
+        Ok(Self::for_cursor(conn, cid))
     }
 }
 

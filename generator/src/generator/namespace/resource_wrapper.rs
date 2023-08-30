@@ -190,7 +190,7 @@ fn generate_creator(
         ),
         None => (function_raw_name.clone(), function_raw_name),
     };
-    let mut function_args = "conn: &'c C".to_string();
+    let mut function_args = String::new();
     let mut forward_args_with_resource = Vec::new();
     let mut forward_args_without_resource = Vec::new();
     let mut generics = Vec::new();
@@ -276,7 +276,6 @@ fn generate_creator(
 
     outln!(out, "impl<'c, C: X11Connection> {}<&'c C>", wrapper_name);
     outln!(out, "{{");
-
     out.indented(|out| {
         outln!(
             out,
@@ -312,7 +311,7 @@ fn generate_creator(
         }
         outln!(
             out,
-            "pub fn {}_and_get_cookie{}({}) -> Result<(Self, VoidCookie<'c, C>), ReplyOrIdError>",
+            "pub fn {}_and_get_cookie{}(conn: &'c C{}) -> Result<(Self, VoidCookie<'c, C>), ReplyOrIdError>",
             function_raw_name,
             generics_decl,
             function_args,
@@ -337,8 +336,12 @@ fn generate_creator(
             request_info.created_argument,
         );
         outln!(out, "}}");
-        outln!(out, "");
+    });
+    outln!(out, "}}");
 
+    outln!(out, "impl<C: X11Connection> {}<C>", wrapper_name);
+    outln!(out, "{{");
+    out.indented(|out| {
         outln!(
             out,
             "/// Create a new {name} and return a {name} wrapper",
@@ -369,7 +372,7 @@ fn generate_creator(
         }
         outln!(
             out,
-            "pub fn {}{}({}) -> Result<Self, ReplyOrIdError>",
+            "pub fn {}{}(conn: C{}) -> Result<Self, ReplyOrIdError>",
             function_raw_name,
             generics_decl,
             function_args,
@@ -378,9 +381,20 @@ fn generate_creator(
         outln!(out, "{{");
         outln!(
             out.indent(),
-            "Ok(Self::{}_and_get_cookie(conn, {})?.0)",
-            function_raw_name,
-            forward_args_without_resource.join(", "),
+            "let {} = conn.generate_id()?;",
+            request_info.created_argument,
+        );
+        outln!(
+            out.indent(),
+            "let _ = {}(&conn, {})?;",
+            function_name,
+            forward_args_with_resource.join(", "),
+        );
+        outln!(
+            out.indent(),
+            "Ok(Self::for_{}(conn, {}))",
+            lower_name,
+            request_info.created_argument,
         );
         outln!(out, "}}");
     });
