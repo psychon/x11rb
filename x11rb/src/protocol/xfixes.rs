@@ -713,12 +713,12 @@ impl<C: RequestConnection + ?Sized> ConnectionExt for C {}
 /// Any errors during `Drop` are silently ignored. Most likely an error here means that your
 /// X11 connection is broken and later requests will also fail.
 #[derive(Debug)]
-pub struct RegionWrapper<'c, C: RequestConnection>(&'c C, Region);
+pub struct RegionWrapper<C: RequestConnection>(C, Region);
 
-impl<'c, C: RequestConnection> RegionWrapper<'c, C>
+impl<C: RequestConnection> RegionWrapper<C>
 {
     /// Assume ownership of the given resource and destroy it in `Drop`.
-    pub fn for_region(conn: &'c C, id: Region) -> Self {
+    pub fn for_region(conn: C, id: Region) -> Self {
         RegionWrapper(conn, id)
     }
 
@@ -737,7 +737,7 @@ impl<'c, C: RequestConnection> RegionWrapper<'c, C>
     }
 }
 
-impl<'c, C: X11Connection> RegionWrapper<'c, C>
+impl<'c, C: X11Connection> RegionWrapper<&'c C>
 {
 
     /// Create a new Region and return a Region wrapper and a cookie.
@@ -908,14 +908,14 @@ impl<'c, C: X11Connection> RegionWrapper<'c, C>
 #[allow(unused_imports)]
 use super::composite;
 
-impl<C: RequestConnection> From<&RegionWrapper<'_, C>> for Region {
-    fn from(from: &RegionWrapper<'_, C>) -> Self {
+impl<C: RequestConnection> From<&RegionWrapper<C>> for Region {
+    fn from(from: &RegionWrapper<C>) -> Self {
         from.1
     }
 }
 
-impl<C: RequestConnection> Drop for RegionWrapper<'_, C> {
+impl<C: RequestConnection> Drop for RegionWrapper<C> {
     fn drop(&mut self) {
-        let _ = destroy_region(self.0, self.1);
+        let _ = destroy_region(&self.0, self.1);
     }
 }

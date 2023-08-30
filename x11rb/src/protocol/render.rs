@@ -674,12 +674,12 @@ impl<C: RequestConnection + ?Sized> ConnectionExt for C {}
 /// Any errors during `Drop` are silently ignored. Most likely an error here means that your
 /// X11 connection is broken and later requests will also fail.
 #[derive(Debug)]
-pub struct PictureWrapper<'c, C: RequestConnection>(&'c C, Picture);
+pub struct PictureWrapper<C: RequestConnection>(C, Picture);
 
-impl<'c, C: RequestConnection> PictureWrapper<'c, C>
+impl<C: RequestConnection> PictureWrapper<C>
 {
     /// Assume ownership of the given resource and destroy it in `Drop`.
-    pub fn for_picture(conn: &'c C, id: Picture) -> Self {
+    pub fn for_picture(conn: C, id: Picture) -> Self {
         PictureWrapper(conn, id)
     }
 
@@ -698,7 +698,7 @@ impl<'c, C: RequestConnection> PictureWrapper<'c, C>
     }
 }
 
-impl<'c, C: X11Connection> PictureWrapper<'c, C>
+impl<'c, C: X11Connection> PictureWrapper<&'c C>
 {
 
     /// Create a new Picture and return a Picture wrapper and a cookie.
@@ -837,15 +837,15 @@ impl<'c, C: X11Connection> PictureWrapper<'c, C>
     }
 }
 
-impl<C: RequestConnection> From<&PictureWrapper<'_, C>> for Picture {
-    fn from(from: &PictureWrapper<'_, C>) -> Self {
+impl<C: RequestConnection> From<&PictureWrapper<C>> for Picture {
+    fn from(from: &PictureWrapper<C>) -> Self {
         from.1
     }
 }
 
-impl<C: RequestConnection> Drop for PictureWrapper<'_, C> {
+impl<C: RequestConnection> Drop for PictureWrapper<C> {
     fn drop(&mut self) {
-        let _ = free_picture(self.0, self.1);
+        let _ = free_picture(&self.0, self.1);
     }
 }
 
@@ -856,12 +856,12 @@ impl<C: RequestConnection> Drop for PictureWrapper<'_, C> {
 /// Any errors during `Drop` are silently ignored. Most likely an error here means that your
 /// X11 connection is broken and later requests will also fail.
 #[derive(Debug)]
-pub struct GlyphsetWrapper<'c, C: RequestConnection>(&'c C, Glyphset);
+pub struct GlyphsetWrapper<C: RequestConnection>(C, Glyphset);
 
-impl<'c, C: RequestConnection> GlyphsetWrapper<'c, C>
+impl<C: RequestConnection> GlyphsetWrapper<C>
 {
     /// Assume ownership of the given resource and destroy it in `Drop`.
-    pub fn for_glyphset(conn: &'c C, id: Glyphset) -> Self {
+    pub fn for_glyphset(conn: C, id: Glyphset) -> Self {
         GlyphsetWrapper(conn, id)
     }
 
@@ -880,7 +880,7 @@ impl<'c, C: RequestConnection> GlyphsetWrapper<'c, C>
     }
 }
 
-impl<'c, C: X11Connection> GlyphsetWrapper<'c, C>
+impl<'c, C: X11Connection> GlyphsetWrapper<&'c C>
 {
 
     /// Create a new Glyphset and return a Glyphset wrapper and a cookie.
@@ -911,14 +911,14 @@ impl<'c, C: X11Connection> GlyphsetWrapper<'c, C>
     }
 }
 
-impl<C: RequestConnection> From<&GlyphsetWrapper<'_, C>> for Glyphset {
-    fn from(from: &GlyphsetWrapper<'_, C>) -> Self {
+impl<C: RequestConnection> From<&GlyphsetWrapper<C>> for Glyphset {
+    fn from(from: &GlyphsetWrapper<C>) -> Self {
         from.1
     }
 }
 
-impl<C: RequestConnection> Drop for GlyphsetWrapper<'_, C> {
+impl<C: RequestConnection> Drop for GlyphsetWrapper<C> {
     fn drop(&mut self) {
-        let _ = free_glyph_set(self.0, self.1);
+        let _ = free_glyph_set(&self.0, self.1);
     }
 }

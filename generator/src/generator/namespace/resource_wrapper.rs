@@ -38,12 +38,12 @@ pub(super) fn generate(
     outln!(out, "#[derive(Debug)]");
     outln!(
         out,
-        "pub struct {wrapper}<'c, C: RequestConnection>(&'c C, {name});",
+        "pub struct {wrapper}<C: RequestConnection>(C, {name});",
         name = info.resource_name,
         wrapper = wrapper,
     );
     outln!(out, "");
-    outln!(out, "impl<'c, C: RequestConnection> {}<'c, C>", wrapper);
+    outln!(out, "impl<C: RequestConnection> {}<C>", wrapper);
     outln!(out, "{{");
     out.indented(|out| {
         outln!(
@@ -52,7 +52,7 @@ pub(super) fn generate(
         );
         outln!(
             out,
-            "pub fn for_{}(conn: &'c C, id: {}) -> Self {{",
+            "pub fn for_{}(conn: C, id: {}) -> Self {{",
             lower_name,
             info.resource_name,
         );
@@ -96,7 +96,7 @@ pub(super) fn generate(
 
     let mut uses = BTreeSet::new();
 
-    outln!(out, "impl<'c, C: X11Connection> {}<'c, C>", wrapper);
+    outln!(out, "impl<'c, C: X11Connection> {}<&'c C>", wrapper);
     outln!(out, "{{");
     out.indented(|out| {
         for create_request in info.create_requests.iter() {
@@ -121,25 +121,21 @@ pub(super) fn generate(
     outln!(out, "");
     outln!(
         out,
-        "impl<C: RequestConnection> From<&{wrapper}<'_, C>> for {name} {{",
+        "impl<C: RequestConnection> From<&{wrapper}<C>> for {name} {{",
         name = info.resource_name,
         wrapper = wrapper,
     );
     out.indented(|out| {
-        outln!(out, "fn from(from: &{}<'_, C>) -> Self {{", wrapper);
+        outln!(out, "fn from(from: &{}<C>) -> Self {{", wrapper);
         outln!(out.indent(), "from.1");
         outln!(out, "}}");
     });
     outln!(out, "}}");
     outln!(out, "");
-    outln!(
-        out,
-        "impl<C: RequestConnection> Drop for {}<'_, C> {{",
-        wrapper,
-    );
+    outln!(out, "impl<C: RequestConnection> Drop for {}<C> {{", wrapper,);
     out.indented(|out| {
         outln!(out, "fn drop(&mut self) {{");
-        outln!(out.indent(), "let _ = {}(self.0, self.1);", free_function);
+        outln!(out.indent(), "let _ = {}(&self.0, self.1);", free_function);
         outln!(out, "}}");
     });
     outln!(out, "}}");

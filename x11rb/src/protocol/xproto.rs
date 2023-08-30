@@ -5482,12 +5482,12 @@ impl<C: RequestConnection + ?Sized> ConnectionExt for C {}
 /// Any errors during `Drop` are silently ignored. Most likely an error here means that your
 /// X11 connection is broken and later requests will also fail.
 #[derive(Debug)]
-pub struct PixmapWrapper<'c, C: RequestConnection>(&'c C, Pixmap);
+pub struct PixmapWrapper<C: RequestConnection>(C, Pixmap);
 
-impl<'c, C: RequestConnection> PixmapWrapper<'c, C>
+impl<C: RequestConnection> PixmapWrapper<C>
 {
     /// Assume ownership of the given resource and destroy it in `Drop`.
-    pub fn for_pixmap(conn: &'c C, id: Pixmap) -> Self {
+    pub fn for_pixmap(conn: C, id: Pixmap) -> Self {
         PixmapWrapper(conn, id)
     }
 
@@ -5506,7 +5506,7 @@ impl<'c, C: RequestConnection> PixmapWrapper<'c, C>
     }
 }
 
-impl<'c, C: X11Connection> PixmapWrapper<'c, C>
+impl<'c, C: X11Connection> PixmapWrapper<&'c C>
 {
 
     /// Create a new Pixmap and return a Pixmap wrapper and a cookie.
@@ -5537,15 +5537,15 @@ impl<'c, C: X11Connection> PixmapWrapper<'c, C>
     }
 }
 
-impl<C: RequestConnection> From<&PixmapWrapper<'_, C>> for Pixmap {
-    fn from(from: &PixmapWrapper<'_, C>) -> Self {
+impl<C: RequestConnection> From<&PixmapWrapper<C>> for Pixmap {
+    fn from(from: &PixmapWrapper<C>) -> Self {
         from.1
     }
 }
 
-impl<C: RequestConnection> Drop for PixmapWrapper<'_, C> {
+impl<C: RequestConnection> Drop for PixmapWrapper<C> {
     fn drop(&mut self) {
-        let _ = free_pixmap(self.0, self.1);
+        let _ = free_pixmap(&self.0, self.1);
     }
 }
 
@@ -5556,12 +5556,12 @@ impl<C: RequestConnection> Drop for PixmapWrapper<'_, C> {
 /// Any errors during `Drop` are silently ignored. Most likely an error here means that your
 /// X11 connection is broken and later requests will also fail.
 #[derive(Debug)]
-pub struct WindowWrapper<'c, C: RequestConnection>(&'c C, Window);
+pub struct WindowWrapper<C: RequestConnection>(C, Window);
 
-impl<'c, C: RequestConnection> WindowWrapper<'c, C>
+impl<C: RequestConnection> WindowWrapper<C>
 {
     /// Assume ownership of the given resource and destroy it in `Drop`.
-    pub fn for_window(conn: &'c C, id: Window) -> Self {
+    pub fn for_window(conn: C, id: Window) -> Self {
         WindowWrapper(conn, id)
     }
 
@@ -5580,7 +5580,7 @@ impl<'c, C: RequestConnection> WindowWrapper<'c, C>
     }
 }
 
-impl<'c, C: X11Connection> WindowWrapper<'c, C>
+impl<'c, C: X11Connection> WindowWrapper<&'c C>
 {
 
     /// Create a new Window and return a Window wrapper and a cookie.
@@ -5611,15 +5611,15 @@ impl<'c, C: X11Connection> WindowWrapper<'c, C>
     }
 }
 
-impl<C: RequestConnection> From<&WindowWrapper<'_, C>> for Window {
-    fn from(from: &WindowWrapper<'_, C>) -> Self {
+impl<C: RequestConnection> From<&WindowWrapper<C>> for Window {
+    fn from(from: &WindowWrapper<C>) -> Self {
         from.1
     }
 }
 
-impl<C: RequestConnection> Drop for WindowWrapper<'_, C> {
+impl<C: RequestConnection> Drop for WindowWrapper<C> {
     fn drop(&mut self) {
-        let _ = destroy_window(self.0, self.1);
+        let _ = destroy_window(&self.0, self.1);
     }
 }
 
@@ -5630,12 +5630,12 @@ impl<C: RequestConnection> Drop for WindowWrapper<'_, C> {
 /// Any errors during `Drop` are silently ignored. Most likely an error here means that your
 /// X11 connection is broken and later requests will also fail.
 #[derive(Debug)]
-pub struct FontWrapper<'c, C: RequestConnection>(&'c C, Font);
+pub struct FontWrapper<C: RequestConnection>(C, Font);
 
-impl<'c, C: RequestConnection> FontWrapper<'c, C>
+impl<C: RequestConnection> FontWrapper<C>
 {
     /// Assume ownership of the given resource and destroy it in `Drop`.
-    pub fn for_font(conn: &'c C, id: Font) -> Self {
+    pub fn for_font(conn: C, id: Font) -> Self {
         FontWrapper(conn, id)
     }
 
@@ -5654,7 +5654,7 @@ impl<'c, C: RequestConnection> FontWrapper<'c, C>
     }
 }
 
-impl<'c, C: X11Connection> FontWrapper<'c, C>
+impl<'c, C: X11Connection> FontWrapper<&'c C>
 {
 
     /// Create a new Font and return a Font wrapper and a cookie.
@@ -5685,15 +5685,15 @@ impl<'c, C: X11Connection> FontWrapper<'c, C>
     }
 }
 
-impl<C: RequestConnection> From<&FontWrapper<'_, C>> for Font {
-    fn from(from: &FontWrapper<'_, C>) -> Self {
+impl<C: RequestConnection> From<&FontWrapper<C>> for Font {
+    fn from(from: &FontWrapper<C>) -> Self {
         from.1
     }
 }
 
-impl<C: RequestConnection> Drop for FontWrapper<'_, C> {
+impl<C: RequestConnection> Drop for FontWrapper<C> {
     fn drop(&mut self) {
-        let _ = close_font(self.0, self.1);
+        let _ = close_font(&self.0, self.1);
     }
 }
 
@@ -5704,12 +5704,12 @@ impl<C: RequestConnection> Drop for FontWrapper<'_, C> {
 /// Any errors during `Drop` are silently ignored. Most likely an error here means that your
 /// X11 connection is broken and later requests will also fail.
 #[derive(Debug)]
-pub struct GcontextWrapper<'c, C: RequestConnection>(&'c C, Gcontext);
+pub struct GcontextWrapper<C: RequestConnection>(C, Gcontext);
 
-impl<'c, C: RequestConnection> GcontextWrapper<'c, C>
+impl<C: RequestConnection> GcontextWrapper<C>
 {
     /// Assume ownership of the given resource and destroy it in `Drop`.
-    pub fn for_gcontext(conn: &'c C, id: Gcontext) -> Self {
+    pub fn for_gcontext(conn: C, id: Gcontext) -> Self {
         GcontextWrapper(conn, id)
     }
 
@@ -5728,7 +5728,7 @@ impl<'c, C: RequestConnection> GcontextWrapper<'c, C>
     }
 }
 
-impl<'c, C: X11Connection> GcontextWrapper<'c, C>
+impl<'c, C: X11Connection> GcontextWrapper<&'c C>
 {
 
     /// Create a new Gcontext and return a Gcontext wrapper and a cookie.
@@ -5759,15 +5759,15 @@ impl<'c, C: X11Connection> GcontextWrapper<'c, C>
     }
 }
 
-impl<C: RequestConnection> From<&GcontextWrapper<'_, C>> for Gcontext {
-    fn from(from: &GcontextWrapper<'_, C>) -> Self {
+impl<C: RequestConnection> From<&GcontextWrapper<C>> for Gcontext {
+    fn from(from: &GcontextWrapper<C>) -> Self {
         from.1
     }
 }
 
-impl<C: RequestConnection> Drop for GcontextWrapper<'_, C> {
+impl<C: RequestConnection> Drop for GcontextWrapper<C> {
     fn drop(&mut self) {
-        let _ = free_gc(self.0, self.1);
+        let _ = free_gc(&self.0, self.1);
     }
 }
 
@@ -5778,12 +5778,12 @@ impl<C: RequestConnection> Drop for GcontextWrapper<'_, C> {
 /// Any errors during `Drop` are silently ignored. Most likely an error here means that your
 /// X11 connection is broken and later requests will also fail.
 #[derive(Debug)]
-pub struct ColormapWrapper<'c, C: RequestConnection>(&'c C, Colormap);
+pub struct ColormapWrapper<C: RequestConnection>(C, Colormap);
 
-impl<'c, C: RequestConnection> ColormapWrapper<'c, C>
+impl<C: RequestConnection> ColormapWrapper<C>
 {
     /// Assume ownership of the given resource and destroy it in `Drop`.
-    pub fn for_colormap(conn: &'c C, id: Colormap) -> Self {
+    pub fn for_colormap(conn: C, id: Colormap) -> Self {
         ColormapWrapper(conn, id)
     }
 
@@ -5802,7 +5802,7 @@ impl<'c, C: RequestConnection> ColormapWrapper<'c, C>
     }
 }
 
-impl<'c, C: X11Connection> ColormapWrapper<'c, C>
+impl<'c, C: X11Connection> ColormapWrapper<&'c C>
 {
 
     /// Create a new Colormap and return a Colormap wrapper and a cookie.
@@ -5833,15 +5833,15 @@ impl<'c, C: X11Connection> ColormapWrapper<'c, C>
     }
 }
 
-impl<C: RequestConnection> From<&ColormapWrapper<'_, C>> for Colormap {
-    fn from(from: &ColormapWrapper<'_, C>) -> Self {
+impl<C: RequestConnection> From<&ColormapWrapper<C>> for Colormap {
+    fn from(from: &ColormapWrapper<C>) -> Self {
         from.1
     }
 }
 
-impl<C: RequestConnection> Drop for ColormapWrapper<'_, C> {
+impl<C: RequestConnection> Drop for ColormapWrapper<C> {
     fn drop(&mut self) {
-        let _ = free_colormap(self.0, self.1);
+        let _ = free_colormap(&self.0, self.1);
     }
 }
 
@@ -5852,12 +5852,12 @@ impl<C: RequestConnection> Drop for ColormapWrapper<'_, C> {
 /// Any errors during `Drop` are silently ignored. Most likely an error here means that your
 /// X11 connection is broken and later requests will also fail.
 #[derive(Debug)]
-pub struct CursorWrapper<'c, C: RequestConnection>(&'c C, Cursor);
+pub struct CursorWrapper<C: RequestConnection>(C, Cursor);
 
-impl<'c, C: RequestConnection> CursorWrapper<'c, C>
+impl<C: RequestConnection> CursorWrapper<C>
 {
     /// Assume ownership of the given resource and destroy it in `Drop`.
-    pub fn for_cursor(conn: &'c C, id: Cursor) -> Self {
+    pub fn for_cursor(conn: C, id: Cursor) -> Self {
         CursorWrapper(conn, id)
     }
 
@@ -5876,7 +5876,7 @@ impl<'c, C: RequestConnection> CursorWrapper<'c, C>
     }
 }
 
-impl<'c, C: X11Connection> CursorWrapper<'c, C>
+impl<'c, C: X11Connection> CursorWrapper<&'c C>
 {
 
     /// Create a new Cursor and return a Cursor wrapper and a cookie.
@@ -5942,14 +5942,14 @@ impl<'c, C: X11Connection> CursorWrapper<'c, C>
     }
 }
 
-impl<C: RequestConnection> From<&CursorWrapper<'_, C>> for Cursor {
-    fn from(from: &CursorWrapper<'_, C>) -> Self {
+impl<C: RequestConnection> From<&CursorWrapper<C>> for Cursor {
+    fn from(from: &CursorWrapper<C>) -> Self {
         from.1
     }
 }
 
-impl<C: RequestConnection> Drop for CursorWrapper<'_, C> {
+impl<C: RequestConnection> Drop for CursorWrapper<C> {
     fn drop(&mut self) {
-        let _ = free_cursor(self.0, self.1);
+        let _ = free_cursor(&self.0, self.1);
     }
 }

@@ -190,12 +190,12 @@ impl<C: RequestConnection + ?Sized> ConnectionExt for C {}
 /// Any errors during `Drop` are silently ignored. Most likely an error here means that your
 /// X11 connection is broken and later requests will also fail.
 #[derive(Debug)]
-pub struct ContextWrapper<'c, C: RequestConnection>(&'c C, Context);
+pub struct ContextWrapper<C: RequestConnection>(C, Context);
 
-impl<'c, C: RequestConnection> ContextWrapper<'c, C>
+impl<C: RequestConnection> ContextWrapper<C>
 {
     /// Assume ownership of the given resource and destroy it in `Drop`.
-    pub fn for_context(conn: &'c C, id: Context) -> Self {
+    pub fn for_context(conn: C, id: Context) -> Self {
         ContextWrapper(conn, id)
     }
 
@@ -214,7 +214,7 @@ impl<'c, C: RequestConnection> ContextWrapper<'c, C>
     }
 }
 
-impl<'c, C: X11Connection> ContextWrapper<'c, C>
+impl<'c, C: X11Connection> ContextWrapper<&'c C>
 {
 
     /// Create a new Context and return a Context wrapper and a cookie.
@@ -245,14 +245,14 @@ impl<'c, C: X11Connection> ContextWrapper<'c, C>
     }
 }
 
-impl<C: RequestConnection> From<&ContextWrapper<'_, C>> for Context {
-    fn from(from: &ContextWrapper<'_, C>) -> Self {
+impl<C: RequestConnection> From<&ContextWrapper<C>> for Context {
+    fn from(from: &ContextWrapper<C>) -> Self {
         from.1
     }
 }
 
-impl<C: RequestConnection> Drop for ContextWrapper<'_, C> {
+impl<C: RequestConnection> Drop for ContextWrapper<C> {
     fn drop(&mut self) {
-        let _ = free_context(self.0, self.1);
+        let _ = free_context(&self.0, self.1);
     }
 }

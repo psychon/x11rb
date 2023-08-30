@@ -437,12 +437,12 @@ impl<C: RequestConnection + ?Sized> ConnectionExt for C {}
 /// Any errors during `Drop` are silently ignored. Most likely an error here means that your
 /// X11 connection is broken and later requests will also fail.
 #[derive(Debug)]
-pub struct SegWrapper<'c, C: RequestConnection>(&'c C, Seg);
+pub struct SegWrapper<C: RequestConnection>(C, Seg);
 
-impl<'c, C: RequestConnection> SegWrapper<'c, C>
+impl<C: RequestConnection> SegWrapper<C>
 {
     /// Assume ownership of the given resource and destroy it in `Drop`.
-    pub fn for_seg(conn: &'c C, id: Seg) -> Self {
+    pub fn for_seg(conn: C, id: Seg) -> Self {
         SegWrapper(conn, id)
     }
 
@@ -461,7 +461,7 @@ impl<'c, C: RequestConnection> SegWrapper<'c, C>
     }
 }
 
-impl<'c, C: X11Connection> SegWrapper<'c, C>
+impl<'c, C: X11Connection> SegWrapper<&'c C>
 {
 
     /// Create a new Seg and return a Seg wrapper and a cookie.
@@ -523,14 +523,14 @@ impl<'c, C: X11Connection> SegWrapper<'c, C>
     }
 }
 
-impl<C: RequestConnection> From<&SegWrapper<'_, C>> for Seg {
-    fn from(from: &SegWrapper<'_, C>) -> Self {
+impl<C: RequestConnection> From<&SegWrapper<C>> for Seg {
+    fn from(from: &SegWrapper<C>) -> Self {
         from.1
     }
 }
 
-impl<C: RequestConnection> Drop for SegWrapper<'_, C> {
+impl<C: RequestConnection> Drop for SegWrapper<C> {
     fn drop(&mut self) {
-        let _ = detach(self.0, self.1);
+        let _ = detach(&self.0, self.1);
     }
 }

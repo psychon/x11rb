@@ -285,12 +285,12 @@ impl<C: RequestConnection + ?Sized> ConnectionExt for C {}
 /// Any errors during `Drop` are silently ignored. Most likely an error here means that your
 /// X11 connection is broken and later requests will also fail.
 #[derive(Debug)]
-pub struct DamageWrapper<'c, C: RequestConnection>(&'c C, Damage);
+pub struct DamageWrapper<C: RequestConnection>(C, Damage);
 
-impl<'c, C: RequestConnection> DamageWrapper<'c, C>
+impl<C: RequestConnection> DamageWrapper<C>
 {
     /// Assume ownership of the given resource and destroy it in `Drop`.
-    pub fn for_damage(conn: &'c C, id: Damage) -> Self {
+    pub fn for_damage(conn: C, id: Damage) -> Self {
         DamageWrapper(conn, id)
     }
 
@@ -309,7 +309,7 @@ impl<'c, C: RequestConnection> DamageWrapper<'c, C>
     }
 }
 
-impl<'c, C: X11Connection> DamageWrapper<'c, C>
+impl<'c, C: X11Connection> DamageWrapper<&'c C>
 {
 
     /// Create a new Damage and return a Damage wrapper and a cookie.
@@ -340,14 +340,14 @@ impl<'c, C: X11Connection> DamageWrapper<'c, C>
     }
 }
 
-impl<C: RequestConnection> From<&DamageWrapper<'_, C>> for Damage {
-    fn from(from: &DamageWrapper<'_, C>) -> Self {
+impl<C: RequestConnection> From<&DamageWrapper<C>> for Damage {
+    fn from(from: &DamageWrapper<C>) -> Self {
         from.1
     }
 }
 
-impl<C: RequestConnection> Drop for DamageWrapper<'_, C> {
+impl<C: RequestConnection> Drop for DamageWrapper<C> {
     fn drop(&mut self) {
-        let _ = destroy(self.0, self.1);
+        let _ = destroy(&self.0, self.1);
     }
 }
