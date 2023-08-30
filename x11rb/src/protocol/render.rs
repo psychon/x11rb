@@ -700,7 +700,6 @@ impl<C: RequestConnection> PictureWrapper<C>
 
 impl<'c, C: X11Connection> PictureWrapper<&'c C>
 {
-
     /// Create a new Picture and return a Picture wrapper and a cookie.
     ///
     /// This is a thin wrapper around [create_picture] that allocates an id for the Picture.
@@ -727,7 +726,10 @@ impl<'c, C: X11Connection> PictureWrapper<&'c C>
     {
         Ok(Self::create_picture_and_get_cookie(conn, drawable, format, value_list)?.0)
     }
+}
 
+impl<'c, C: X11Connection> PictureWrapper<&'c C>
+{
     /// Create a new Picture and return a Picture wrapper and a cookie.
     ///
     /// This is a thin wrapper around [create_solid_fill] that allocates an id for the Picture.
@@ -754,7 +756,10 @@ impl<'c, C: X11Connection> PictureWrapper<&'c C>
     {
         Ok(Self::create_solid_fill_and_get_cookie(conn, color)?.0)
     }
+}
 
+impl<'c, C: X11Connection> PictureWrapper<&'c C>
+{
     /// Create a new Picture and return a Picture wrapper and a cookie.
     ///
     /// This is a thin wrapper around [create_linear_gradient] that allocates an id for the Picture.
@@ -781,7 +786,10 @@ impl<'c, C: X11Connection> PictureWrapper<&'c C>
     {
         Ok(Self::create_linear_gradient_and_get_cookie(conn, p1, p2, stops, colors)?.0)
     }
+}
 
+impl<'c, C: X11Connection> PictureWrapper<&'c C>
+{
     /// Create a new Picture and return a Picture wrapper and a cookie.
     ///
     /// This is a thin wrapper around [create_radial_gradient] that allocates an id for the Picture.
@@ -808,7 +816,10 @@ impl<'c, C: X11Connection> PictureWrapper<&'c C>
     {
         Ok(Self::create_radial_gradient_and_get_cookie(conn, inner, outer, inner_radius, outer_radius, stops, colors)?.0)
     }
+}
 
+impl<'c, C: X11Connection> PictureWrapper<&'c C>
+{
     /// Create a new Picture and return a Picture wrapper and a cookie.
     ///
     /// This is a thin wrapper around [create_conical_gradient] that allocates an id for the Picture.
@@ -882,7 +893,6 @@ impl<C: RequestConnection> GlyphsetWrapper<C>
 
 impl<'c, C: X11Connection> GlyphsetWrapper<&'c C>
 {
-
     /// Create a new Glyphset and return a Glyphset wrapper and a cookie.
     ///
     /// This is a thin wrapper around [create_glyph_set] that allocates an id for the Glyphset.

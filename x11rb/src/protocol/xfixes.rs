@@ -739,7 +739,6 @@ impl<C: RequestConnection> RegionWrapper<C>
 
 impl<'c, C: X11Connection> RegionWrapper<&'c C>
 {
-
     /// Create a new Region and return a Region wrapper and a cookie.
     ///
     /// This is a thin wrapper around [create_region] that allocates an id for the Region.
@@ -766,7 +765,10 @@ impl<'c, C: X11Connection> RegionWrapper<&'c C>
     {
         Ok(Self::create_region_and_get_cookie(conn, rectangles)?.0)
     }
+}
 
+impl<'c, C: X11Connection> RegionWrapper<&'c C>
+{
     /// Create a new Region and return a Region wrapper and a cookie.
     ///
     /// This is a thin wrapper around [create_region_from_bitmap] that allocates an id for the Region.
@@ -793,7 +795,10 @@ impl<'c, C: X11Connection> RegionWrapper<&'c C>
     {
         Ok(Self::create_region_from_bitmap_and_get_cookie(conn, bitmap)?.0)
     }
+}
 
+impl<'c, C: X11Connection> RegionWrapper<&'c C>
+{
     /// Create a new Region and return a Region wrapper and a cookie.
     ///
     /// This is a thin wrapper around [create_region_from_window] that allocates an id for the Region.
@@ -820,7 +825,10 @@ impl<'c, C: X11Connection> RegionWrapper<&'c C>
     {
         Ok(Self::create_region_from_window_and_get_cookie(conn, window, kind)?.0)
     }
+}
 
+impl<'c, C: X11Connection> RegionWrapper<&'c C>
+{
     /// Create a new Region and return a Region wrapper and a cookie.
     ///
     /// This is a thin wrapper around [create_region_from_gc] that allocates an id for the Region.
@@ -847,7 +855,10 @@ impl<'c, C: X11Connection> RegionWrapper<&'c C>
     {
         Ok(Self::create_region_from_gc_and_get_cookie(conn, gc)?.0)
     }
+}
 
+impl<'c, C: X11Connection> RegionWrapper<&'c C>
+{
     /// Create a new Region and return a Region wrapper and a cookie.
     ///
     /// This is a thin wrapper around [create_region_from_picture] that allocates an id for the Region.
@@ -874,7 +885,10 @@ impl<'c, C: X11Connection> RegionWrapper<&'c C>
     {
         Ok(Self::create_region_from_picture_and_get_cookie(conn, picture)?.0)
     }
+}
 
+impl<'c, C: X11Connection> RegionWrapper<&'c C>
+{
     /// Create a new Region and return a Region wrapper and a cookie.
     ///
     /// This is a thin wrapper around [super::composite::create_region_from_border_clip] that allocates an id for the Region.
@@ -904,10 +918,10 @@ impl<'c, C: X11Connection> RegionWrapper<&'c C>
         Ok(Self::composite_create_region_from_border_clip_and_get_cookie(conn, window)?.0)
     }
 }
+
 #[cfg(feature = "composite")]
 #[allow(unused_imports)]
 use super::composite;
-
 impl<C: RequestConnection> From<&RegionWrapper<C>> for Region {
     fn from(from: &RegionWrapper<C>) -> Self {
         from.1

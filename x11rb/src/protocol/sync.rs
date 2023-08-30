@@ -420,7 +420,6 @@ impl<C: RequestConnection> CounterWrapper<C>
 
 impl<'c, C: X11Connection> CounterWrapper<&'c C>
 {
-
     /// Create a new Counter and return a Counter wrapper and a cookie.
     ///
     /// This is a thin wrapper around [create_counter] that allocates an id for the Counter.
@@ -494,7 +493,6 @@ impl<C: RequestConnection> AlarmWrapper<C>
 
 impl<'c, C: X11Connection> AlarmWrapper<&'c C>
 {
-
     /// Create a new Alarm and return a Alarm wrapper and a cookie.
     ///
     /// This is a thin wrapper around [create_alarm] that allocates an id for the Alarm.
@@ -568,7 +566,6 @@ impl<C: RequestConnection> FenceWrapper<C>
 
 impl<'c, C: X11Connection> FenceWrapper<&'c C>
 {
-
     /// Create a new Fence and return a Fence wrapper and a cookie.
     ///
     /// This is a thin wrapper around [create_fence] that allocates an id for the Fence.
@@ -595,7 +592,10 @@ impl<'c, C: X11Connection> FenceWrapper<&'c C>
     {
         Ok(Self::create_fence_and_get_cookie(conn, drawable, initially_triggered)?.0)
     }
+}
 
+impl<'c, C: X11Connection> FenceWrapper<&'c C>
+{
     /// Create a new Fence and return a Fence wrapper and a cookie.
     ///
     /// This is a thin wrapper around [super::dri3::fence_from_fd] that allocates an id for the Fence.
@@ -629,10 +629,10 @@ impl<'c, C: X11Connection> FenceWrapper<&'c C>
         Ok(Self::dri3_fence_from_fd_and_get_cookie(conn, drawable, initially_triggered, fence_fd)?.0)
     }
 }
+
 #[cfg(feature = "dri3")]
 #[allow(unused_imports)]
 use super::dri3;
-
 impl<C: RequestConnection> From<&FenceWrapper<C>> for Fence {
     fn from(from: &FenceWrapper<C>) -> Self {
         from.1

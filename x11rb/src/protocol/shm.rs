@@ -463,7 +463,6 @@ impl<C: RequestConnection> SegWrapper<C>
 
 impl<'c, C: X11Connection> SegWrapper<&'c C>
 {
-
     /// Create a new Seg and return a Seg wrapper and a cookie.
     ///
     /// This is a thin wrapper around [attach] that allocates an id for the Seg.
@@ -490,7 +489,10 @@ impl<'c, C: X11Connection> SegWrapper<&'c C>
     {
         Ok(Self::attach_and_get_cookie(conn, shmid, read_only)?.0)
     }
+}
 
+impl<'c, C: X11Connection> SegWrapper<&'c C>
+{
     /// Create a new Seg and return a Seg wrapper and a cookie.
     ///
     /// This is a thin wrapper around [attach_fd] that allocates an id for the Seg.

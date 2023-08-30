@@ -5508,7 +5508,6 @@ impl<C: RequestConnection> PixmapWrapper<C>
 
 impl<'c, C: X11Connection> PixmapWrapper<&'c C>
 {
-
     /// Create a new Pixmap and return a Pixmap wrapper and a cookie.
     ///
     /// This is a thin wrapper around [create_pixmap] that allocates an id for the Pixmap.
@@ -5582,7 +5581,6 @@ impl<C: RequestConnection> WindowWrapper<C>
 
 impl<'c, C: X11Connection> WindowWrapper<&'c C>
 {
-
     /// Create a new Window and return a Window wrapper and a cookie.
     ///
     /// This is a thin wrapper around [create_window] that allocates an id for the Window.
@@ -5656,7 +5654,6 @@ impl<C: RequestConnection> FontWrapper<C>
 
 impl<'c, C: X11Connection> FontWrapper<&'c C>
 {
-
     /// Create a new Font and return a Font wrapper and a cookie.
     ///
     /// This is a thin wrapper around [open_font] that allocates an id for the Font.
@@ -5730,7 +5727,6 @@ impl<C: RequestConnection> GcontextWrapper<C>
 
 impl<'c, C: X11Connection> GcontextWrapper<&'c C>
 {
-
     /// Create a new Gcontext and return a Gcontext wrapper and a cookie.
     ///
     /// This is a thin wrapper around [create_gc] that allocates an id for the Gcontext.
@@ -5804,7 +5800,6 @@ impl<C: RequestConnection> ColormapWrapper<C>
 
 impl<'c, C: X11Connection> ColormapWrapper<&'c C>
 {
-
     /// Create a new Colormap and return a Colormap wrapper and a cookie.
     ///
     /// This is a thin wrapper around [create_colormap] that allocates an id for the Colormap.
@@ -5878,7 +5873,6 @@ impl<C: RequestConnection> CursorWrapper<C>
 
 impl<'c, C: X11Connection> CursorWrapper<&'c C>
 {
-
     /// Create a new Cursor and return a Cursor wrapper and a cookie.
     ///
     /// This is a thin wrapper around [create_cursor] that allocates an id for the Cursor.
@@ -5909,7 +5903,10 @@ impl<'c, C: X11Connection> CursorWrapper<&'c C>
     {
         Ok(Self::create_cursor_and_get_cookie(conn, source, mask, fore_red, fore_green, fore_blue, back_red, back_green, back_blue, x, y)?.0)
     }
+}
 
+impl<'c, C: X11Connection> CursorWrapper<&'c C>
+{
     /// Create a new Cursor and return a Cursor wrapper and a cookie.
     ///
     /// This is a thin wrapper around [create_glyph_cursor] that allocates an id for the Cursor.

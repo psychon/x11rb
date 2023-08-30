@@ -311,7 +311,6 @@ impl<C: RequestConnection> DamageWrapper<C>
 
 impl<'c, C: X11Connection> DamageWrapper<&'c C>
 {
-
     /// Create a new Damage and return a Damage wrapper and a cookie.
     ///
     /// This is a thin wrapper around [create] that allocates an id for the Damage.

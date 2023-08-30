@@ -216,7 +216,6 @@ impl<C: RequestConnection> ContextWrapper<C>
 
 impl<'c, C: X11Connection> ContextWrapper<&'c C>
 {
-
     /// Create a new Context and return a Context wrapper and a cookie.
     ///
     /// This is a thin wrapper around [create_context] that allocates an id for the Context.
