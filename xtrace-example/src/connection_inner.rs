@@ -149,7 +149,7 @@ impl ConnectionInner {
 
     /// Handle an X11 event sent by the server
     pub fn server_event(&mut self, packet: &[u8]) {
-        fn do_parse(inner: &mut ConnectionInner, packet: &[u8]) -> Result<(), ParseError> {
+        fn do_parse(inner: &ConnectionInner, packet: &[u8]) -> Result<(), ParseError> {
             let event = Event::parse(packet, &inner.ext_info)?;
             println!(
                 "server ({}): {:?}",
