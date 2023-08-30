@@ -4,11 +4,14 @@
 use std::io::IoSlice;
 
 use x11rb_protocol::x11_utils::{ReplyFDsRequest, ReplyRequest, VoidRequest};
-use x11rb_protocol::{DiscardMode, SequenceNumber};
+use x11rb_protocol::{DiscardMode, RawEventAndSeqNumber, SequenceNumber};
 
-use crate::connection::{BufWithFds, ReplyOrError, RequestConnection, RequestKind};
+use crate::connection::{
+    BufWithFds, Connection, EventAndSeqNumber, ReplyOrError, RequestConnection, RequestKind,
+};
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
-use crate::errors::{ConnectionError, ParseError, ReplyError};
+use crate::errors::{ConnectionError, ParseError, ReplyError, ReplyOrIdError};
+use crate::protocol::xproto::Setup;
 use crate::protocol::Event;
 use crate::utils::RawFdContainer;
 use crate::x11_utils::{ExtensionInformation, TryParse, TryParseFd, X11Error};
@@ -171,20 +174,80 @@ macro_rules! impl_deref_request_connection_inner {
     };
 }
 
-macro_rules! impl_deref_request_connection {
-    ($type:ty) => {
-        impl<C: RequestConnection + ?Sized> RequestConnection for $type {
-            impl_deref_request_connection_inner!();
+macro_rules! impl_deref_connection_inner {
+    () => {
+        fn wait_for_event(&self) -> Result<Event, ConnectionError> {
+            (**self).wait_for_event()
+        }
+
+        fn wait_for_raw_event(&self) -> Result<Self::Buf, ConnectionError> {
+            (**self).wait_for_raw_event()
+        }
+
+        fn wait_for_event_with_sequence(&self) -> Result<EventAndSeqNumber, ConnectionError> {
+            (**self).wait_for_event_with_sequence()
+        }
+
+        fn wait_for_raw_event_with_sequence(
+            &self,
+        ) -> Result<RawEventAndSeqNumber<Self::Buf>, ConnectionError> {
+            (**self).wait_for_raw_event_with_sequence()
+        }
+
+        fn poll_for_event(&self) -> Result<Option<Event>, ConnectionError> {
+            (**self).poll_for_event()
+        }
+
+        fn poll_for_raw_event(&self) -> Result<Option<Self::Buf>, ConnectionError> {
+            (**self).poll_for_raw_event()
+        }
+
+        fn poll_for_event_with_sequence(
+            &self,
+        ) -> Result<Option<EventAndSeqNumber>, ConnectionError> {
+            (**self).poll_for_event_with_sequence()
+        }
+
+        fn poll_for_raw_event_with_sequence(
+            &self,
+        ) -> Result<Option<RawEventAndSeqNumber<Self::Buf>>, ConnectionError> {
+            (**self).poll_for_raw_event_with_sequence()
+        }
+
+        fn flush(&self) -> Result<(), ConnectionError> {
+            (**self).flush()
+        }
+
+        fn setup(&self) -> &Setup {
+            (**self).setup()
+        }
+
+        fn generate_id(&self) -> Result<u32, ReplyOrIdError> {
+            (**self).generate_id()
         }
     };
 }
 
-impl_deref_request_connection!(&C);
-impl_deref_request_connection!(&mut C);
-impl_deref_request_connection!(Box<C>);
-impl_deref_request_connection!(std::sync::Arc<C>);
-impl_deref_request_connection!(std::rc::Rc<C>);
+macro_rules! impl_deref_connection {
+    ($type:ty) => {
+        impl<C: RequestConnection + ?Sized> RequestConnection for $type {
+            impl_deref_request_connection_inner!();
+        }
+        impl<C: Connection + ?Sized> Connection for $type {
+            impl_deref_connection_inner!();
+        }
+    };
+}
+
+impl_deref_connection!(&C);
+impl_deref_connection!(&mut C);
+impl_deref_connection!(Box<C>);
+impl_deref_connection!(std::sync::Arc<C>);
+impl_deref_connection!(std::rc::Rc<C>);
 
 impl<C: RequestConnection + ToOwned + ?Sized> RequestConnection for std::borrow::Cow<'_, C> {
     impl_deref_request_connection_inner!();
+}
+impl<C: Connection + ToOwned + ?Sized> Connection for std::borrow::Cow<'_, C> {
+    impl_deref_connection_inner!();
 }
