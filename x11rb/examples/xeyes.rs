@@ -236,10 +236,10 @@ fn setup_window<C: Connection>(
 }
 
 fn create_gc_with_foreground<C: Connection>(
-    conn: &C,
+    conn: C,
     win_id: Window,
     foreground: u32,
-) -> Result<GcontextWrapper<'_, C>, ReplyOrIdError> {
+) -> Result<GcontextWrapper<C>, ReplyOrIdError> {
     GcontextWrapper::create_gc(
         conn,
         win_id,
@@ -253,8 +253,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let (conn, screen_num) = connect(None).expect("Failed to connect to the X11 server");
 
     // The following is only needed for start_timeout_thread(), which is used for 'tests'
-    let conn1 = std::sync::Arc::new(conn);
-    let conn = &*conn1;
+    let conn = std::sync::Arc::new(conn);
 
     let screen = &conn.setup().roots[screen_num];
 
@@ -268,17 +267,17 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .is_some();
     let (wm_protocols, wm_delete_window) =
         (wm_protocols.reply()?.atom, wm_delete_window.reply()?.atom);
-    let win_id = setup_window(conn, screen, window_size, wm_protocols, wm_delete_window)?;
+    let win_id = setup_window(&conn, screen, window_size, wm_protocols, wm_delete_window)?;
     let mut pixmap = PixmapWrapper::create_pixmap(
-        conn,
+        conn.clone(),
         screen.root_depth,
         win_id,
         window_size.0,
         window_size.1,
     )?;
 
-    let black_gc = create_gc_with_foreground(conn, win_id, screen.black_pixel)?;
-    let white_gc = create_gc_with_foreground(conn, win_id, screen.white_pixel)?;
+    let black_gc = create_gc_with_foreground(&conn, win_id, screen.black_pixel)?;
+    let white_gc = create_gc_with_foreground(&conn, win_id, screen.white_pixel)?;
 
     conn.flush()?;
 
@@ -286,7 +285,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut need_reshape = false;
     let mut mouse_position = (0, 0);
 
-    util::start_timeout_thread(conn1.clone(), win_id);
+    util::start_timeout_thread(conn.clone(), win_id);
 
     loop {
         let event = conn.wait_for_event()?;
@@ -301,7 +300,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 Event::ConfigureNotify(event) => {
                     window_size = (event.width, event.height);
                     pixmap = PixmapWrapper::create_pixmap(
-                        conn,
+                        conn.clone(),
                         screen.root_depth,
                         win_id,
                         window_size.0,
@@ -335,20 +334,20 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
 
         if need_reshape && has_shape {
-            shape_window(conn, win_id, window_size)?;
+            shape_window(&conn, win_id, window_size)?;
             need_reshape = false;
         }
         if need_repaint {
             // Draw new pupils
             let pos = compute_pupils(window_size, mouse_position);
             draw_eyes(
-                conn,
+                &conn,
                 pixmap.pixmap(),
                 black_gc.gcontext(),
                 white_gc.gcontext(),
                 window_size,
             )?;
-            draw_pupils(conn, pixmap.pixmap(), black_gc.gcontext(), pos)?;
+            draw_pupils(&conn, pixmap.pixmap(), black_gc.gcontext(), pos)?;
 
             // Copy drawing from pixmap to window
             conn.copy_area(

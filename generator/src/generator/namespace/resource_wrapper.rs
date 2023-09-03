@@ -38,12 +38,12 @@ pub(super) fn generate(
     outln!(out, "#[derive(Debug)]");
     outln!(
         out,
-        "pub struct {wrapper}<'c, C: RequestConnection>(&'c C, {name});",
+        "pub struct {wrapper}<C: RequestConnection>(C, {name});",
         name = info.resource_name,
         wrapper = wrapper,
     );
     outln!(out, "");
-    outln!(out, "impl<'c, C: RequestConnection> {}<'c, C>", wrapper);
+    outln!(out, "impl<C: RequestConnection> {}<C>", wrapper);
     outln!(out, "{{");
     out.indented(|out| {
         outln!(
@@ -52,7 +52,7 @@ pub(super) fn generate(
         );
         outln!(
             out,
-            "pub fn for_{}(conn: &'c C, id: {}) -> Self {{",
+            "pub fn for_{}(conn: C, id: {}) -> Self {{",
             lower_name,
             info.resource_name,
         );
@@ -96,50 +96,40 @@ pub(super) fn generate(
 
     let mut uses = BTreeSet::new();
 
-    outln!(out, "impl<'c, C: X11Connection> {}<'c, C>", wrapper);
-    outln!(out, "{{");
-    out.indented(|out| {
-        for create_request in info.create_requests.iter() {
-            generate_creator(
-                generator,
-                out,
-                create_request,
-                info.resource_name,
-                &wrapper,
-                &lower_name,
-                &mut uses,
-            );
-        }
-    });
-    outln!(out, "}}");
+    for create_request in info.create_requests.iter() {
+        generate_creator(
+            generator,
+            out,
+            create_request,
+            info.resource_name,
+            &wrapper,
+            &lower_name,
+            &mut uses,
+        );
+    }
     // Add "use"s for other extensions that appear in the wrapper type
     for header in uses.iter() {
         outln!(out, "#[cfg(feature = \"{}\")]", header);
         outln!(out, "#[allow(unused_imports)]");
         outln!(out, "use super::{};", header);
     }
-    outln!(out, "");
     outln!(
         out,
-        "impl<C: RequestConnection> From<&{wrapper}<'_, C>> for {name} {{",
+        "impl<C: RequestConnection> From<&{wrapper}<C>> for {name} {{",
         name = info.resource_name,
         wrapper = wrapper,
     );
     out.indented(|out| {
-        outln!(out, "fn from(from: &{}<'_, C>) -> Self {{", wrapper);
+        outln!(out, "fn from(from: &{}<C>) -> Self {{", wrapper);
         outln!(out.indent(), "from.1");
         outln!(out, "}}");
     });
     outln!(out, "}}");
     outln!(out, "");
-    outln!(
-        out,
-        "impl<C: RequestConnection> Drop for {}<'_, C> {{",
-        wrapper,
-    );
+    outln!(out, "impl<C: RequestConnection> Drop for {}<C> {{", wrapper,);
     out.indented(|out| {
         outln!(out, "fn drop(&mut self) {{");
-        outln!(out.indent(), "let _ = {}(self.0, self.1);", free_function);
+        outln!(out.indent(), "let _ = {}(&self.0, self.1);", free_function);
         outln!(out, "}}");
     });
     outln!(out, "}}");
@@ -200,7 +190,7 @@ fn generate_creator(
         ),
         None => (function_raw_name.clone(), function_raw_name),
     };
-    let mut function_args = "conn: &'c C".to_string();
+    let mut function_args = String::new();
     let mut forward_args_with_resource = Vec::new();
     let mut forward_args_without_resource = Vec::new();
     let mut generics = Vec::new();
@@ -284,112 +274,132 @@ fn generate_creator(
         format!("<{}>", generics.join(", "))
     };
 
-    outln!(out, "");
-    outln!(
-        out,
-        "/// Create a new {name} and return a {name} wrapper and a cookie.",
-        name = resource_name,
-    );
-    outln!(out, "///");
-    outln!(
-        out,
-        "/// This is a thin wrapper around [{}] that allocates an id for the {}.",
-        function_name,
-        resource_name,
-    );
-    outln!(
-        out,
-        "/// This function returns the resulting `{}` that owns the created {} and frees",
-        wrapper_name,
-        resource_name,
-    );
-    outln!(
-        out,
-        "/// it in `Drop`. This also returns a `VoidCookie` that comes from the call to",
-    );
-    outln!(out, "/// [{}].", function_name);
-    outln!(out, "///");
-    outln!(
-        out,
-        "/// Errors can come from the call to [X11Connection::generate_id] or [{}].",
-        function_name,
-    );
-    if has_feature {
-        outln!(out, "#[cfg(feature = \"{}\")]", request_ns.header);
-    }
-    outln!(
-        out,
-        "pub fn {}_and_get_cookie{}({}) -> Result<(Self, VoidCookie<'c, C>), ReplyOrIdError>",
-        function_raw_name,
-        generics_decl,
-        function_args,
-    );
-    emit_where(out, &wheres);
+    outln!(out, "impl<'c, C: X11Connection> {}<&'c C>", wrapper_name);
     outln!(out, "{{");
-    outln!(
-        out.indent(),
-        "let {} = conn.generate_id()?;",
-        request_info.created_argument,
-    );
-    outln!(
-        out.indent(),
-        "let cookie = {}(conn, {})?;",
-        function_name,
-        forward_args_with_resource.join(", "),
-    );
-    outln!(
-        out.indent(),
-        "Ok((Self::for_{}(conn, {}), cookie))",
-        lower_name,
-        request_info.created_argument,
-    );
+    out.indented(|out| {
+        outln!(
+            out,
+            "/// Create a new {name} and return a {name} wrapper and a cookie.",
+            name = resource_name,
+        );
+        outln!(out, "///");
+        outln!(
+            out,
+            "/// This is a thin wrapper around [{}] that allocates an id for the {}.",
+            function_name,
+            resource_name,
+        );
+        outln!(
+            out,
+            "/// This function returns the resulting `{}` that owns the created {} and frees",
+            wrapper_name,
+            resource_name,
+        );
+        outln!(
+            out,
+            "/// it in `Drop`. This also returns a `VoidCookie` that comes from the call to",
+        );
+        outln!(out, "/// [{}].", function_name);
+        outln!(out, "///");
+        outln!(
+            out,
+            "/// Errors can come from the call to [X11Connection::generate_id] or [{}].",
+            function_name,
+        );
+        if has_feature {
+            outln!(out, "#[cfg(feature = \"{}\")]", request_ns.header);
+        }
+        outln!(
+            out,
+            "pub fn {}_and_get_cookie{}(conn: &'c C{}) -> Result<(Self, VoidCookie<'c, C>), ReplyOrIdError>",
+            function_raw_name,
+            generics_decl,
+            function_args,
+        );
+        emit_where(out, &wheres);
+        outln!(out, "{{");
+        outln!(
+            out.indent(),
+            "let {} = conn.generate_id()?;",
+            request_info.created_argument,
+        );
+        outln!(
+            out.indent(),
+            "let cookie = {}(conn, {})?;",
+            function_name,
+            forward_args_with_resource.join(", "),
+        );
+        outln!(
+            out.indent(),
+            "Ok((Self::for_{}(conn, {}), cookie))",
+            lower_name,
+            request_info.created_argument,
+        );
+        outln!(out, "}}");
+    });
     outln!(out, "}}");
-    outln!(out, "");
 
-    outln!(
-        out,
-        "/// Create a new {name} and return a {name} wrapper",
-        name = resource_name,
-    );
-    outln!(out, "///");
-    outln!(
-        out,
-        "/// This is a thin wrapper around [{}] that allocates an id for the {}.",
-        function_name,
-        resource_name,
-    );
-    outln!(
-        out,
-        "/// This function returns the resulting `{}` that owns the created {} and frees",
-        wrapper_name,
-        resource_name,
-    );
-    outln!(out, "/// it in `Drop`.");
-    outln!(out, "///");
-    outln!(
-        out,
-        "/// Errors can come from the call to [X11Connection::generate_id] or [{}].",
-        function_name,
-    );
-    if has_feature {
-        outln!(out, "#[cfg(feature = \"{}\")]", request_ns.header);
-    }
-    outln!(
-        out,
-        "pub fn {}{}({}) -> Result<Self, ReplyOrIdError>",
-        function_raw_name,
-        generics_decl,
-        function_args,
-    );
-    emit_where(out, &wheres);
+    outln!(out, "impl<C: X11Connection> {}<C>", wrapper_name);
     outln!(out, "{{");
-    outln!(
-        out.indent(),
-        "Ok(Self::{}_and_get_cookie(conn, {})?.0)",
-        function_raw_name,
-        forward_args_without_resource.join(", "),
-    );
+    out.indented(|out| {
+        outln!(
+            out,
+            "/// Create a new {name} and return a {name} wrapper",
+            name = resource_name,
+        );
+        outln!(out, "///");
+        outln!(
+            out,
+            "/// This is a thin wrapper around [{}] that allocates an id for the {}.",
+            function_name,
+            resource_name,
+        );
+        outln!(
+            out,
+            "/// This function returns the resulting `{}` that owns the created {} and frees",
+            wrapper_name,
+            resource_name,
+        );
+        outln!(out, "/// it in `Drop`.");
+        outln!(out, "///");
+        outln!(
+            out,
+            "/// Errors can come from the call to [X11Connection::generate_id] or [{}].",
+            function_name,
+        );
+        if has_feature {
+            outln!(out, "#[cfg(feature = \"{}\")]", request_ns.header);
+        }
+        outln!(
+            out,
+            "pub fn {}{}(conn: C{}) -> Result<Self, ReplyOrIdError>",
+            function_raw_name,
+            generics_decl,
+            function_args,
+        );
+        emit_where(out, &wheres);
+        outln!(out, "{{");
+        outln!(
+            out.indent(),
+            "let {} = conn.generate_id()?;",
+            request_info.created_argument,
+        );
+        outln!(
+            out.indent(),
+            "let _ = {}(&conn, {})?;",
+            function_name,
+            forward_args_with_resource.join(", "),
+        );
+        outln!(
+            out.indent(),
+            "Ok(Self::for_{}(conn, {}))",
+            lower_name,
+            request_info.created_argument,
+        );
+        outln!(out, "}}");
+    });
     outln!(out, "}}");
+    outln!(out, "");
 }
 
 fn emit_where(out: &mut Output, wheres: &[String]) {

@@ -394,12 +394,12 @@ impl<C: RequestConnection + ?Sized> ConnectionExt for C {}
 /// Any errors during `Drop` are silently ignored. Most likely an error here means that your
 /// X11 connection is broken and later requests will also fail.
 #[derive(Debug)]
-pub struct CounterWrapper<'c, C: RequestConnection>(&'c C, Counter);
+pub struct CounterWrapper<C: RequestConnection>(C, Counter);
 
-impl<'c, C: RequestConnection> CounterWrapper<'c, C>
+impl<C: RequestConnection> CounterWrapper<C>
 {
     /// Assume ownership of the given resource and destroy it in `Drop`.
-    pub fn for_counter(conn: &'c C, id: Counter) -> Self {
+    pub fn for_counter(conn: C, id: Counter) -> Self {
         CounterWrapper(conn, id)
     }
 
@@ -418,9 +418,8 @@ impl<'c, C: RequestConnection> CounterWrapper<'c, C>
     }
 }
 
-impl<'c, C: X11Connection> CounterWrapper<'c, C>
+impl<'c, C: X11Connection> CounterWrapper<&'c C>
 {
-
     /// Create a new Counter and return a Counter wrapper and a cookie.
     ///
     /// This is a thin wrapper around [create_counter] that allocates an id for the Counter.
@@ -435,7 +434,9 @@ impl<'c, C: X11Connection> CounterWrapper<'c, C>
         let cookie = create_counter(conn, id, initial_value)?;
         Ok((Self::for_counter(conn, id), cookie))
     }
-
+}
+impl<C: X11Connection> CounterWrapper<C>
+{
     /// Create a new Counter and return a Counter wrapper
     ///
     /// This is a thin wrapper around [create_counter] that allocates an id for the Counter.
@@ -443,21 +444,23 @@ impl<'c, C: X11Connection> CounterWrapper<'c, C>
     /// it in `Drop`.
     ///
     /// Errors can come from the call to [X11Connection::generate_id] or [create_counter].
-    pub fn create_counter(conn: &'c C, initial_value: Int64) -> Result<Self, ReplyOrIdError>
+    pub fn create_counter(conn: C, initial_value: Int64) -> Result<Self, ReplyOrIdError>
     {
-        Ok(Self::create_counter_and_get_cookie(conn, initial_value)?.0)
+        let id = conn.generate_id()?;
+        let _ = create_counter(&conn, id, initial_value)?;
+        Ok(Self::for_counter(conn, id))
     }
 }
 
-impl<C: RequestConnection> From<&CounterWrapper<'_, C>> for Counter {
-    fn from(from: &CounterWrapper<'_, C>) -> Self {
+impl<C: RequestConnection> From<&CounterWrapper<C>> for Counter {
+    fn from(from: &CounterWrapper<C>) -> Self {
         from.1
     }
 }
 
-impl<C: RequestConnection> Drop for CounterWrapper<'_, C> {
+impl<C: RequestConnection> Drop for CounterWrapper<C> {
     fn drop(&mut self) {
-        let _ = destroy_counter(self.0, self.1);
+        let _ = destroy_counter(&self.0, self.1);
     }
 }
 
@@ -468,12 +471,12 @@ impl<C: RequestConnection> Drop for CounterWrapper<'_, C> {
 /// Any errors during `Drop` are silently ignored. Most likely an error here means that your
 /// X11 connection is broken and later requests will also fail.
 #[derive(Debug)]
-pub struct AlarmWrapper<'c, C: RequestConnection>(&'c C, Alarm);
+pub struct AlarmWrapper<C: RequestConnection>(C, Alarm);
 
-impl<'c, C: RequestConnection> AlarmWrapper<'c, C>
+impl<C: RequestConnection> AlarmWrapper<C>
 {
     /// Assume ownership of the given resource and destroy it in `Drop`.
-    pub fn for_alarm(conn: &'c C, id: Alarm) -> Self {
+    pub fn for_alarm(conn: C, id: Alarm) -> Self {
         AlarmWrapper(conn, id)
     }
 
@@ -492,9 +495,8 @@ impl<'c, C: RequestConnection> AlarmWrapper<'c, C>
     }
 }
 
-impl<'c, C: X11Connection> AlarmWrapper<'c, C>
+impl<'c, C: X11Connection> AlarmWrapper<&'c C>
 {
-
     /// Create a new Alarm and return a Alarm wrapper and a cookie.
     ///
     /// This is a thin wrapper around [create_alarm] that allocates an id for the Alarm.
@@ -509,7 +511,9 @@ impl<'c, C: X11Connection> AlarmWrapper<'c, C>
         let cookie = create_alarm(conn, id, value_list)?;
         Ok((Self::for_alarm(conn, id), cookie))
     }
-
+}
+impl<C: X11Connection> AlarmWrapper<C>
+{
     /// Create a new Alarm and return a Alarm wrapper
     ///
     /// This is a thin wrapper around [create_alarm] that allocates an id for the Alarm.
@@ -517,21 +521,23 @@ impl<'c, C: X11Connection> AlarmWrapper<'c, C>
     /// it in `Drop`.
     ///
     /// Errors can come from the call to [X11Connection::generate_id] or [create_alarm].
-    pub fn create_alarm(conn: &'c C, value_list: &CreateAlarmAux) -> Result<Self, ReplyOrIdError>
+    pub fn create_alarm(conn: C, value_list: &CreateAlarmAux) -> Result<Self, ReplyOrIdError>
     {
-        Ok(Self::create_alarm_and_get_cookie(conn, value_list)?.0)
+        let id = conn.generate_id()?;
+        let _ = create_alarm(&conn, id, value_list)?;
+        Ok(Self::for_alarm(conn, id))
     }
 }
 
-impl<C: RequestConnection> From<&AlarmWrapper<'_, C>> for Alarm {
-    fn from(from: &AlarmWrapper<'_, C>) -> Self {
+impl<C: RequestConnection> From<&AlarmWrapper<C>> for Alarm {
+    fn from(from: &AlarmWrapper<C>) -> Self {
         from.1
     }
 }
 
-impl<C: RequestConnection> Drop for AlarmWrapper<'_, C> {
+impl<C: RequestConnection> Drop for AlarmWrapper<C> {
     fn drop(&mut self) {
-        let _ = destroy_alarm(self.0, self.1);
+        let _ = destroy_alarm(&self.0, self.1);
     }
 }
 
@@ -542,12 +548,12 @@ impl<C: RequestConnection> Drop for AlarmWrapper<'_, C> {
 /// Any errors during `Drop` are silently ignored. Most likely an error here means that your
 /// X11 connection is broken and later requests will also fail.
 #[derive(Debug)]
-pub struct FenceWrapper<'c, C: RequestConnection>(&'c C, Fence);
+pub struct FenceWrapper<C: RequestConnection>(C, Fence);
 
-impl<'c, C: RequestConnection> FenceWrapper<'c, C>
+impl<C: RequestConnection> FenceWrapper<C>
 {
     /// Assume ownership of the given resource and destroy it in `Drop`.
-    pub fn for_fence(conn: &'c C, id: Fence) -> Self {
+    pub fn for_fence(conn: C, id: Fence) -> Self {
         FenceWrapper(conn, id)
     }
 
@@ -566,9 +572,8 @@ impl<'c, C: RequestConnection> FenceWrapper<'c, C>
     }
 }
 
-impl<'c, C: X11Connection> FenceWrapper<'c, C>
+impl<'c, C: X11Connection> FenceWrapper<&'c C>
 {
-
     /// Create a new Fence and return a Fence wrapper and a cookie.
     ///
     /// This is a thin wrapper around [create_fence] that allocates an id for the Fence.
@@ -583,7 +588,9 @@ impl<'c, C: X11Connection> FenceWrapper<'c, C>
         let cookie = create_fence(conn, drawable, fence, initially_triggered)?;
         Ok((Self::for_fence(conn, fence), cookie))
     }
-
+}
+impl<C: X11Connection> FenceWrapper<C>
+{
     /// Create a new Fence and return a Fence wrapper
     ///
     /// This is a thin wrapper around [create_fence] that allocates an id for the Fence.
@@ -591,11 +598,16 @@ impl<'c, C: X11Connection> FenceWrapper<'c, C>
     /// it in `Drop`.
     ///
     /// Errors can come from the call to [X11Connection::generate_id] or [create_fence].
-    pub fn create_fence(conn: &'c C, drawable: xproto::Drawable, initially_triggered: bool) -> Result<Self, ReplyOrIdError>
+    pub fn create_fence(conn: C, drawable: xproto::Drawable, initially_triggered: bool) -> Result<Self, ReplyOrIdError>
     {
-        Ok(Self::create_fence_and_get_cookie(conn, drawable, initially_triggered)?.0)
+        let fence = conn.generate_id()?;
+        let _ = create_fence(&conn, drawable, fence, initially_triggered)?;
+        Ok(Self::for_fence(conn, fence))
     }
+}
 
+impl<'c, C: X11Connection> FenceWrapper<&'c C>
+{
     /// Create a new Fence and return a Fence wrapper and a cookie.
     ///
     /// This is a thin wrapper around [super::dri3::fence_from_fd] that allocates an id for the Fence.
@@ -613,7 +625,9 @@ impl<'c, C: X11Connection> FenceWrapper<'c, C>
         let cookie = super::dri3::fence_from_fd(conn, drawable, fence, initially_triggered, fence_fd)?;
         Ok((Self::for_fence(conn, fence), cookie))
     }
-
+}
+impl<C: X11Connection> FenceWrapper<C>
+{
     /// Create a new Fence and return a Fence wrapper
     ///
     /// This is a thin wrapper around [super::dri3::fence_from_fd] that allocates an id for the Fence.
@@ -622,25 +636,27 @@ impl<'c, C: X11Connection> FenceWrapper<'c, C>
     ///
     /// Errors can come from the call to [X11Connection::generate_id] or [super::dri3::fence_from_fd].
     #[cfg(feature = "dri3")]
-    pub fn dri3_fence_from_fd<A>(conn: &'c C, drawable: xproto::Drawable, initially_triggered: bool, fence_fd: A) -> Result<Self, ReplyOrIdError>
+    pub fn dri3_fence_from_fd<A>(conn: C, drawable: xproto::Drawable, initially_triggered: bool, fence_fd: A) -> Result<Self, ReplyOrIdError>
     where
         A: Into<RawFdContainer>,
     {
-        Ok(Self::dri3_fence_from_fd_and_get_cookie(conn, drawable, initially_triggered, fence_fd)?.0)
+        let fence = conn.generate_id()?;
+        let _ = super::dri3::fence_from_fd(&conn, drawable, fence, initially_triggered, fence_fd)?;
+        Ok(Self::for_fence(conn, fence))
     }
 }
+
 #[cfg(feature = "dri3")]
 #[allow(unused_imports)]
 use super::dri3;
-
-impl<C: RequestConnection> From<&FenceWrapper<'_, C>> for Fence {
-    fn from(from: &FenceWrapper<'_, C>) -> Self {
+impl<C: RequestConnection> From<&FenceWrapper<C>> for Fence {
+    fn from(from: &FenceWrapper<C>) -> Self {
         from.1
     }
 }
 
-impl<C: RequestConnection> Drop for FenceWrapper<'_, C> {
+impl<C: RequestConnection> Drop for FenceWrapper<C> {
     fn drop(&mut self) {
-        let _ = destroy_fence(self.0, self.1);
+        let _ = destroy_fence(&self.0, self.1);
     }
 }

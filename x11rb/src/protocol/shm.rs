@@ -437,12 +437,12 @@ impl<C: RequestConnection + ?Sized> ConnectionExt for C {}
 /// Any errors during `Drop` are silently ignored. Most likely an error here means that your
 /// X11 connection is broken and later requests will also fail.
 #[derive(Debug)]
-pub struct SegWrapper<'c, C: RequestConnection>(&'c C, Seg);
+pub struct SegWrapper<C: RequestConnection>(C, Seg);
 
-impl<'c, C: RequestConnection> SegWrapper<'c, C>
+impl<C: RequestConnection> SegWrapper<C>
 {
     /// Assume ownership of the given resource and destroy it in `Drop`.
-    pub fn for_seg(conn: &'c C, id: Seg) -> Self {
+    pub fn for_seg(conn: C, id: Seg) -> Self {
         SegWrapper(conn, id)
     }
 
@@ -461,9 +461,8 @@ impl<'c, C: RequestConnection> SegWrapper<'c, C>
     }
 }
 
-impl<'c, C: X11Connection> SegWrapper<'c, C>
+impl<'c, C: X11Connection> SegWrapper<&'c C>
 {
-
     /// Create a new Seg and return a Seg wrapper and a cookie.
     ///
     /// This is a thin wrapper around [attach] that allocates an id for the Seg.
@@ -478,7 +477,9 @@ impl<'c, C: X11Connection> SegWrapper<'c, C>
         let cookie = attach(conn, shmseg, shmid, read_only)?;
         Ok((Self::for_seg(conn, shmseg), cookie))
     }
-
+}
+impl<C: X11Connection> SegWrapper<C>
+{
     /// Create a new Seg and return a Seg wrapper
     ///
     /// This is a thin wrapper around [attach] that allocates an id for the Seg.
@@ -486,11 +487,16 @@ impl<'c, C: X11Connection> SegWrapper<'c, C>
     /// it in `Drop`.
     ///
     /// Errors can come from the call to [X11Connection::generate_id] or [attach].
-    pub fn attach(conn: &'c C, shmid: u32, read_only: bool) -> Result<Self, ReplyOrIdError>
+    pub fn attach(conn: C, shmid: u32, read_only: bool) -> Result<Self, ReplyOrIdError>
     {
-        Ok(Self::attach_and_get_cookie(conn, shmid, read_only)?.0)
+        let shmseg = conn.generate_id()?;
+        let _ = attach(&conn, shmseg, shmid, read_only)?;
+        Ok(Self::for_seg(conn, shmseg))
     }
+}
 
+impl<'c, C: X11Connection> SegWrapper<&'c C>
+{
     /// Create a new Seg and return a Seg wrapper and a cookie.
     ///
     /// This is a thin wrapper around [attach_fd] that allocates an id for the Seg.
@@ -507,7 +513,9 @@ impl<'c, C: X11Connection> SegWrapper<'c, C>
         let cookie = attach_fd(conn, shmseg, shm_fd, read_only)?;
         Ok((Self::for_seg(conn, shmseg), cookie))
     }
-
+}
+impl<C: X11Connection> SegWrapper<C>
+{
     /// Create a new Seg and return a Seg wrapper
     ///
     /// This is a thin wrapper around [attach_fd] that allocates an id for the Seg.
@@ -515,22 +523,24 @@ impl<'c, C: X11Connection> SegWrapper<'c, C>
     /// it in `Drop`.
     ///
     /// Errors can come from the call to [X11Connection::generate_id] or [attach_fd].
-    pub fn attach_fd<A>(conn: &'c C, shm_fd: A, read_only: bool) -> Result<Self, ReplyOrIdError>
+    pub fn attach_fd<A>(conn: C, shm_fd: A, read_only: bool) -> Result<Self, ReplyOrIdError>
     where
         A: Into<RawFdContainer>,
     {
-        Ok(Self::attach_fd_and_get_cookie(conn, shm_fd, read_only)?.0)
+        let shmseg = conn.generate_id()?;
+        let _ = attach_fd(&conn, shmseg, shm_fd, read_only)?;
+        Ok(Self::for_seg(conn, shmseg))
     }
 }
 
-impl<C: RequestConnection> From<&SegWrapper<'_, C>> for Seg {
-    fn from(from: &SegWrapper<'_, C>) -> Self {
+impl<C: RequestConnection> From<&SegWrapper<C>> for Seg {
+    fn from(from: &SegWrapper<C>) -> Self {
         from.1
     }
 }
 
-impl<C: RequestConnection> Drop for SegWrapper<'_, C> {
+impl<C: RequestConnection> Drop for SegWrapper<C> {
     fn drop(&mut self) {
-        let _ = detach(self.0, self.1);
+        let _ = detach(&self.0, self.1);
     }
 }

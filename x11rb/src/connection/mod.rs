@@ -17,6 +17,8 @@ use crate::x11_utils::{ExtensionInformation, TryParse, TryParseFd, X11Error};
 
 pub use x11rb_protocol::{DiscardMode, RawEventAndSeqNumber, SequenceNumber};
 
+mod impls;
+
 // Used to avoid too-complex types.
 /// A combination of a buffer and a list of file descriptors.
 pub type BufWithFds<B> = (B, Vec<RawFdContainer>);
