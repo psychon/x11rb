@@ -1,9 +1,13 @@
 #![allow(clippy::cognitive_complexity, clippy::too_many_arguments)]
 
+use std::borrow::Cow;
 use std::cell::RefCell;
 use std::collections::{HashMap, HashSet};
 use std::fmt::Write;
 use std::rc::Rc;
+use std::sync::OnceLock;
+
+use regex::Regex;
 
 use xcbgen::defs as xcbdefs;
 
@@ -1092,7 +1096,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 if line.trim().is_empty() {
                     outln!(out, "///");
                 } else {
-                    outln!(out, "/// {}", line.trim());
+                    outln!(out, "/// {}", add_doc_markup(line.trim()));
                 }
             }
         }
@@ -1594,4 +1598,11 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             xcbdefs::FieldDef::VirtualLen(_) => false,
         }
     }
+}
+
+fn add_doc_markup(line: &str) -> Cow<'_, str> {
+    // The regex finds URLs and is used to marks them as hyperlinks for rustdoc
+    static REGEX: OnceLock<Regex> = OnceLock::new();
+    let regex = REGEX.get_or_init(|| Regex::new("https?://[a-zA-Z0-9-_/\\.]+").unwrap());
+    regex.replace_all(line, "<$0>")
 }

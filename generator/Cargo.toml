@@ -9,3 +9,4 @@ publish = false
 [dependencies]
 roxmltree = "0.18.0"
 xcbgen = { path = "../xcbgen-rs" }
+regex = "1.9"
