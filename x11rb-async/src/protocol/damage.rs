@@ -131,7 +131,7 @@ where
 /// Remove regions from a previously created Damage object..
 ///
 /// This updates the regions of damage recorded in a a Damage object.
-/// See https://www.x.org/releases/current/doc/damageproto/damageproto.txt
+/// See <https://www.x.org/releases/current/doc/damageproto/damageproto.txt>
 /// for details.
 ///
 /// # Fields
@@ -158,7 +158,7 @@ where
 /// Add a region to a previously created Damage object..
 ///
 /// This updates the regions of damage recorded in a a Damage object.
-/// See https://www.x.org/releases/current/doc/damageproto/damageproto.txt
+/// See <https://www.x.org/releases/current/doc/damageproto/damageproto.txt>
 /// for details.
 ///
 /// # Fields
@@ -245,7 +245,7 @@ pub trait ConnectionExt: RequestConnection {
     /// Remove regions from a previously created Damage object..
     ///
     /// This updates the regions of damage recorded in a a Damage object.
-    /// See https://www.x.org/releases/current/doc/damageproto/damageproto.txt
+    /// See <https://www.x.org/releases/current/doc/damageproto/damageproto.txt>
     /// for details.
     ///
     /// # Fields
@@ -261,7 +261,7 @@ pub trait ConnectionExt: RequestConnection {
     /// Add a region to a previously created Damage object..
     ///
     /// This updates the regions of damage recorded in a a Damage object.
-    /// See https://www.x.org/releases/current/doc/damageproto/damageproto.txt
+    /// See <https://www.x.org/releases/current/doc/damageproto/damageproto.txt>
     /// for details.
     ///
     /// # Fields
