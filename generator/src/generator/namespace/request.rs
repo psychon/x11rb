@@ -949,6 +949,10 @@ fn emit_request_struct(
             "/// Parse this request given its header, its body, and any fds that go along \
              with it"
         );
+        outln!(
+            out,
+            "#[cfg(feature = \"extra-traits\")]"
+        );
         if gathered.has_fds() {
             outln!(
                 out,

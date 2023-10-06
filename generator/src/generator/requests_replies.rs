@@ -203,6 +203,7 @@ pub(super) fn generate(out: &mut Output, module: &xcbdefs::Module, mut enum_case
             out,
             "#[allow(clippy::cognitive_complexity, clippy::single_match)]"
         );
+        outln!(out, "#[cfg(feature = \"extra-traits\")]");
         outln!(out, "pub fn parse(");
         out.indented(|out| {
             outln!(out, "header: RequestHeader,");
