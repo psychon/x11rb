@@ -131,19 +131,21 @@ mod tests {
     use alloc::{vec, vec::Vec};
 
     fn test_packets(packets: Vec<Vec<u8>>) {
-        let mut reader = PacketReader::default();
-        for mut packet in packets {
-            let original_packet = packet.clone();
+        // Combine all packet data into one big chunk and test that the packet reader splits things
+        let mut all_data = packets.iter().flatten().copied().collect::<Vec<u8>>();
 
+        let mut reader = PacketReader::default();
+        for (i, packet) in packets.into_iter().enumerate() {
+            std::println!("Checking packet {i}");
             loop {
                 let buffer = reader.buffer();
-                let amount = std::cmp::min(buffer.len(), packet.len());
-                buffer.copy_from_slice(&packet[..amount]);
-                let _ = packet.drain(..amount);
+                let amount = std::cmp::min(buffer.len(), all_data.len());
+                buffer.copy_from_slice(&all_data[..amount]);
+                let _ = all_data.drain(..amount);
 
                 if let Some(read_packet) = reader.advance(amount) {
-                    assert_eq!(read_packet, original_packet);
-                    return;
+                    assert_eq!(read_packet, packet);
+                    break;
                 }
             }
         }
@@ -193,9 +195,12 @@ mod tests {
             let variation = ((i - 50) * (i - 50)) as f32;
             let variation = -1.0 / 25.0 * variation + 100.0;
             let variation = variation as usize;
+            // round to a multiple of 4
+            let variation = variation / 4 * 4;
 
             let mut len = 1200 + variation;
             let mut packet = vec![0; len];
+            assert_eq!(0, len % 4);
             len = (len - 32) / 4;
 
             // write "len" to bytes 4..8 in the packet
@@ -219,11 +224,14 @@ mod tests {
                 let variation = ((i - 50) * (i - 50)) as f32;
                 let variation = -1.0 / 25.0 * variation + 100.0;
                 let variation = variation as usize;
+                // round to a multiple of 4
+                let variation = variation / 4 * 4;
 
                 1200 + variation
             } else {
                 32
             };
+            assert_eq!(0, len % 4);
             let mut packet = vec![0; len];
             len = (len - 32) / 4;
 
