@@ -465,6 +465,7 @@ impl QueryVersionRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != QUERY_VERSION_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -623,6 +624,7 @@ impl<'input> CreateContextRequest<'input> {
         ([request0.into(), client_specs_bytes.into(), ranges_bytes.into(), padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CREATE_CONTEXT_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -727,6 +729,7 @@ impl<'input> RegisterClientsRequest<'input> {
         ([request0.into(), client_specs_bytes.into(), ranges_bytes.into(), padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != REGISTER_CLIENTS_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -816,6 +819,7 @@ impl<'input> UnregisterClientsRequest<'input> {
         ([request0.into(), client_specs_bytes.into(), padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != UNREGISTER_CLIENTS_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -886,6 +890,7 @@ impl GetContextRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_CONTEXT_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1023,6 +1028,7 @@ impl EnableContextRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != ENABLE_CONTEXT_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1172,6 +1178,7 @@ impl DisableContextRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != DISABLE_CONTEXT_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1232,6 +1239,7 @@ impl FreeContextRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != FREE_CONTEXT_REQUEST {
             return Err(ParseError::InvalidValue);

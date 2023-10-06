@@ -74,6 +74,7 @@ impl GetVersionRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_VERSION_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -280,6 +281,7 @@ impl CompareCursorRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != COMPARE_CURSOR_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -442,6 +444,7 @@ impl FakeInputRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != FAKE_INPUT_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -517,6 +520,7 @@ impl GrabControlRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GRAB_CONTROL_REQUEST {
             return Err(ParseError::InvalidValue);

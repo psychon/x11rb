@@ -1379,6 +1379,7 @@ impl QueryVersionRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != QUERY_VERSION_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1526,6 +1527,7 @@ impl QueryPictFormatsRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != QUERY_PICT_FORMATS_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1709,6 +1711,7 @@ impl QueryPictIndexValuesRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != QUERY_PICT_INDEX_VALUES_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -2184,6 +2187,7 @@ impl<'input> CreatePictureRequest<'input> {
         ([request0.into(), value_list_bytes.into(), padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CREATE_PICTURE_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -2592,6 +2596,7 @@ impl<'input> ChangePictureRequest<'input> {
         ([request0.into(), value_list_bytes.into(), padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CHANGE_PICTURE_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -2675,6 +2680,7 @@ impl<'input> SetPictureClipRectanglesRequest<'input> {
         ([request0.into(), rectangles_bytes.into(), padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_PICTURE_CLIP_RECTANGLES_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -2757,6 +2763,7 @@ impl FreePictureRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != FREE_PICTURE_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -2867,6 +2874,7 @@ impl CompositeRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != COMPOSITE_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -2982,6 +2990,7 @@ impl<'input> TrapezoidsRequest<'input> {
         ([request0.into(), traps_bytes.into(), padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != TRAPEZOIDS_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -3106,6 +3115,7 @@ impl<'input> TrianglesRequest<'input> {
         ([request0.into(), triangles_bytes.into(), padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != TRIANGLES_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -3230,6 +3240,7 @@ impl<'input> TriStripRequest<'input> {
         ([request0.into(), points_bytes.into(), padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != TRI_STRIP_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -3354,6 +3365,7 @@ impl<'input> TriFanRequest<'input> {
         ([request0.into(), points_bytes.into(), padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != TRI_FAN_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -3453,6 +3465,7 @@ impl CreateGlyphSetRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CREATE_GLYPH_SET_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -3521,6 +3534,7 @@ impl ReferenceGlyphSetRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != REFERENCE_GLYPH_SET_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -3583,6 +3597,7 @@ impl FreeGlyphSetRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != FREE_GLYPH_SET_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -3660,6 +3675,7 @@ impl<'input> AddGlyphsRequest<'input> {
         ([request0.into(), glyphids_bytes.into(), glyphs_bytes.into(), self.data, padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != ADD_GLYPHS_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -3741,6 +3757,7 @@ impl<'input> FreeGlyphsRequest<'input> {
         ([request0.into(), glyphs_bytes.into(), padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != FREE_GLYPHS_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -3853,6 +3870,7 @@ impl<'input> CompositeGlyphs8Request<'input> {
         ([request0.into(), self.glyphcmds, padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != COMPOSITE_GLYPHS8_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -3978,6 +3996,7 @@ impl<'input> CompositeGlyphs16Request<'input> {
         ([request0.into(), self.glyphcmds, padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != COMPOSITE_GLYPHS16_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -4103,6 +4122,7 @@ impl<'input> CompositeGlyphs32Request<'input> {
         ([request0.into(), self.glyphcmds, padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != COMPOSITE_GLYPHS32_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -4213,6 +4233,7 @@ impl<'input> FillRectanglesRequest<'input> {
         ([request0.into(), rects_bytes.into(), padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != FILL_RECTANGLES_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -4311,6 +4332,7 @@ impl CreateCursorRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CREATE_CURSOR_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -4515,6 +4537,7 @@ impl SetPictureTransformRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_PICTURE_TRANSFORM_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -4577,6 +4600,7 @@ impl QueryFiltersRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != QUERY_FILTERS_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -4742,6 +4766,7 @@ impl<'input> SetPictureFilterRequest<'input> {
         ([request0.into(), self.filter, padding0.into(), values_bytes.into(), padding1.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_PICTURE_FILTER_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -4876,6 +4901,7 @@ impl<'input> CreateAnimCursorRequest<'input> {
         ([request0.into(), cursors_bytes.into(), padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CREATE_ANIM_CURSOR_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -5077,6 +5103,7 @@ impl<'input> AddTrapsRequest<'input> {
         ([request0.into(), traps_bytes.into(), padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != ADD_TRAPS_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -5169,6 +5196,7 @@ impl CreateSolidFillRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CREATE_SOLID_FILL_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -5266,6 +5294,7 @@ impl<'input> CreateLinearGradientRequest<'input> {
         ([request0.into(), stops_bytes.into(), colors_bytes.into(), padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CREATE_LINEAR_GRADIENT_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -5392,6 +5421,7 @@ impl<'input> CreateRadialGradientRequest<'input> {
         ([request0.into(), stops_bytes.into(), colors_bytes.into(), padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CREATE_RADIAL_GRADIENT_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -5508,6 +5538,7 @@ impl<'input> CreateConicalGradientRequest<'input> {
         ([request0.into(), stops_bytes.into(), colors_bytes.into(), padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CREATE_CONICAL_GRADIENT_REQUEST {
             return Err(ParseError::InvalidValue);

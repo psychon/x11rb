@@ -265,6 +265,7 @@ impl QueryVersionRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != QUERY_VERSION_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -508,6 +509,7 @@ impl SetScreenConfigRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_SCREEN_CONFIG_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -756,6 +758,7 @@ impl SelectInputRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SELECT_INPUT_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -820,6 +823,7 @@ impl GetScreenInfoRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_SCREEN_INFO_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -979,6 +983,7 @@ impl GetScreenSizeRangeRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_SCREEN_SIZE_RANGE_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1159,6 +1164,7 @@ impl SetScreenSizeRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_SCREEN_SIZE_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1412,6 +1418,7 @@ impl GetScreenResourcesRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_SCREEN_RESOURCES_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1674,6 +1681,7 @@ impl GetOutputInfoRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_OUTPUT_INFO_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1888,6 +1896,7 @@ impl ListOutputPropertiesRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != LIST_OUTPUT_PROPERTIES_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -2025,6 +2034,7 @@ impl QueryOutputPropertyRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != QUERY_OUTPUT_PROPERTY_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -2183,6 +2193,7 @@ impl<'input> ConfigureOutputPropertyRequest<'input> {
         ([request0.into(), values_bytes.into(), padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CONFIGURE_OUTPUT_PROPERTY_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -2300,6 +2311,7 @@ impl<'input> ChangeOutputPropertyRequest<'input> {
         ([request0.into(), self.data, padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CHANGE_OUTPUT_PROPERTY_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -2392,6 +2404,7 @@ impl DeleteOutputPropertyRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != DELETE_OUTPUT_PROPERTY_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -2486,6 +2499,7 @@ impl GetOutputPropertyRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_OUTPUT_PROPERTY_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -2662,6 +2676,7 @@ impl<'input> CreateModeRequest<'input> {
         ([request0.into(), self.name, padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CREATE_MODE_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -2822,6 +2837,7 @@ impl DestroyModeRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != DESTROY_MODE_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -2888,6 +2904,7 @@ impl AddOutputModeRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != ADD_OUTPUT_MODE_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -2956,6 +2973,7 @@ impl DeleteOutputModeRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != DELETE_OUTPUT_MODE_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -3024,6 +3042,7 @@ impl GetCrtcInfoRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_CRTC_INFO_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -3239,6 +3258,7 @@ impl<'input> SetCrtcConfigRequest<'input> {
         ([request0.into(), outputs_bytes.into(), padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_CRTC_CONFIG_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -3426,6 +3446,7 @@ impl GetCrtcGammaSizeRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_CRTC_GAMMA_SIZE_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -3574,6 +3595,7 @@ impl GetCrtcGammaRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_CRTC_GAMMA_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -3732,6 +3754,7 @@ impl<'input> SetCrtcGammaRequest<'input> {
         ([request0.into(), red_bytes.into(), green_bytes.into(), blue_bytes.into(), padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_CRTC_GAMMA_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -3809,6 +3832,7 @@ impl GetScreenResourcesCurrentRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_SCREEN_RESOURCES_CURRENT_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -4121,6 +4145,7 @@ impl<'input> SetCrtcTransformRequest<'input> {
         ([request0.into(), self.filter_name, padding0.into(), filter_params_bytes.into(), padding1.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_CRTC_TRANSFORM_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -4209,6 +4234,7 @@ impl GetCrtcTransformRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_CRTC_TRANSFORM_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -4421,6 +4447,7 @@ impl GetPanningRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_PANNING_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -4676,6 +4703,7 @@ impl SetPanningRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_PANNING_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -4837,6 +4865,7 @@ impl SetOutputPrimaryRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_OUTPUT_PRIMARY_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -4899,6 +4928,7 @@ impl GetOutputPrimaryRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_OUTPUT_PRIMARY_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -5025,6 +5055,7 @@ impl GetProvidersRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_PROVIDERS_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -5217,6 +5248,7 @@ impl GetProviderInfoRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_PROVIDER_INFO_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -5432,6 +5464,7 @@ impl SetProviderOffloadSinkRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_PROVIDER_OFFLOAD_SINK_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -5508,6 +5541,7 @@ impl SetProviderOutputSourceRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_PROVIDER_OUTPUT_SOURCE_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -5572,6 +5606,7 @@ impl ListProviderPropertiesRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != LIST_PROVIDER_PROPERTIES_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -5709,6 +5744,7 @@ impl QueryProviderPropertyRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != QUERY_PROVIDER_PROPERTY_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -5867,6 +5903,7 @@ impl<'input> ConfigureProviderPropertyRequest<'input> {
         ([request0.into(), values_bytes.into(), padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CONFIGURE_PROVIDER_PROPERTY_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -5984,6 +6021,7 @@ impl<'input> ChangeProviderPropertyRequest<'input> {
         ([request0.into(), self.data, padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CHANGE_PROVIDER_PROPERTY_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -6075,6 +6113,7 @@ impl DeleteProviderPropertyRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != DELETE_PROVIDER_PROPERTY_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -6169,6 +6208,7 @@ impl GetProviderPropertyRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_PROVIDER_PROPERTY_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -7118,6 +7158,7 @@ impl GetMonitorsRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_MONITORS_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -7262,6 +7303,7 @@ impl SetMonitorRequest {
         ([request0.into(), monitorinfo_bytes.into(), padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_MONITOR_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -7330,6 +7372,7 @@ impl DeleteMonitorRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != DELETE_MONITOR_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -7414,6 +7457,7 @@ impl<'input> CreateLeaseRequest<'input> {
         ([request0.into(), crtcs_bytes.into(), outputs_bytes.into(), padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CREATE_LEASE_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -7584,6 +7628,7 @@ impl FreeLeaseRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != FREE_LEASE_REQUEST {
             return Err(ParseError::InvalidValue);

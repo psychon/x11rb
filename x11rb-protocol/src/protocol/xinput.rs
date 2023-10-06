@@ -130,6 +130,7 @@ impl<'input> GetExtensionVersionRequest<'input> {
         ([request0.into(), self.name, padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_EXTENSION_VERSION_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1082,6 +1083,7 @@ impl ListInputDevicesRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != LIST_INPUT_DEVICES_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1267,6 +1269,7 @@ impl OpenDeviceRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != OPEN_DEVICE_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1406,6 +1409,7 @@ impl CloseDeviceRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CLOSE_DEVICE_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1469,6 +1473,7 @@ impl SetDeviceModeRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_DEVICE_MODE_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1635,6 +1640,7 @@ impl<'input> SelectExtensionEventRequest<'input> {
         ([request0.into(), classes_bytes.into(), padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SELECT_EXTENSION_EVENT_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1706,6 +1712,7 @@ impl GetSelectedExtensionEventsRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_SELECTED_EXTENSION_EVENTS_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1929,6 +1936,7 @@ impl<'input> ChangeDeviceDontPropagateListRequest<'input> {
         ([request0.into(), classes_bytes.into(), padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CHANGE_DEVICE_DONT_PROPAGATE_LIST_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -2004,6 +2012,7 @@ impl GetDeviceDontPropagateListRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_DEVICE_DONT_PROPAGATE_LIST_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -2183,6 +2192,7 @@ impl GetDeviceMotionEventsRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_DEVICE_MOTION_EVENTS_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -2336,6 +2346,7 @@ impl ChangeKeyboardDeviceRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CHANGE_KEYBOARD_DEVICE_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -2492,6 +2503,7 @@ impl ChangePointerDeviceRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CHANGE_POINTER_DEVICE_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -2677,6 +2689,7 @@ impl<'input> GrabDeviceRequest<'input> {
         ([request0.into(), classes_bytes.into(), padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GRAB_DEVICE_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -2862,6 +2875,7 @@ impl UngrabDeviceRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != UNGRAB_DEVICE_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -3015,6 +3029,7 @@ impl<'input> GrabDeviceKeyRequest<'input> {
         ([request0.into(), classes_bytes.into(), padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GRAB_DEVICE_KEY_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -3126,6 +3141,7 @@ impl UngrabDeviceKeyRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != UNGRAB_DEVICE_KEY_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -3228,6 +3244,7 @@ impl<'input> GrabDeviceButtonRequest<'input> {
         ([request0.into(), classes_bytes.into(), padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GRAB_DEVICE_BUTTON_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -3339,6 +3356,7 @@ impl UngrabDeviceButtonRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != UNGRAB_DEVICE_BUTTON_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -3484,6 +3502,7 @@ impl AllowDeviceEventsRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != ALLOW_DEVICE_EVENTS_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -3550,6 +3569,7 @@ impl GetDeviceFocusRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_DEVICE_FOCUS_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -3724,6 +3744,7 @@ impl SetDeviceFocusRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_DEVICE_FOCUS_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -4850,6 +4871,7 @@ impl GetFeedbackControlRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_FEEDBACK_CONTROL_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -5957,6 +5979,7 @@ impl ChangeFeedbackControlRequest {
         ([request0.into(), feedback_bytes.into(), padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CHANGE_FEEDBACK_CONTROL_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -6029,6 +6052,7 @@ impl GetDeviceKeyMappingRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_DEVICE_KEY_MAPPING_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -6178,6 +6202,7 @@ impl<'input> ChangeDeviceKeyMappingRequest<'input> {
         ([request0.into(), keysyms_bytes.into(), padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CHANGE_DEVICE_KEY_MAPPING_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -6256,6 +6281,7 @@ impl GetDeviceModifierMappingRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_DEVICE_MODIFIER_MAPPING_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -6399,6 +6425,7 @@ impl<'input> SetDeviceModifierMappingRequest<'input> {
         ([request0.into(), self.keymaps, padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_DEVICE_MODIFIER_MAPPING_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -6561,6 +6588,7 @@ impl GetDeviceButtonMappingRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_DEVICE_BUTTON_MAPPING_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -6707,6 +6735,7 @@ impl<'input> SetDeviceButtonMappingRequest<'input> {
         ([request0.into(), self.map, padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_DEVICE_BUTTON_MAPPING_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -7485,6 +7514,7 @@ impl QueryDeviceStateRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != QUERY_DEVICE_STATE_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -7624,6 +7654,7 @@ impl DeviceBellRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != DEVICE_BELL_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -7699,6 +7730,7 @@ impl<'input> SetDeviceValuatorsRequest<'input> {
         ([request0.into(), valuators_bytes.into(), padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_DEVICE_VALUATORS_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -8727,6 +8759,7 @@ impl GetDeviceControlRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_DEVICE_CONTROL_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -9644,6 +9677,7 @@ impl ChangeDeviceControlRequest {
         ([request0.into(), control_bytes.into(), padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CHANGE_DEVICE_CONTROL_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -9800,6 +9834,7 @@ impl ListDevicePropertiesRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != LIST_DEVICE_PROPERTIES_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -10146,6 +10181,7 @@ impl<'input> ChangeDevicePropertyRequest<'input> {
         ([request0.into(), items_bytes.into(), padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CHANGE_DEVICE_PROPERTY_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -10236,6 +10272,7 @@ impl DeleteDevicePropertyRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != DELETE_DEVICE_PROPERTY_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -10325,6 +10362,7 @@ impl GetDevicePropertyRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_DEVICE_PROPERTY_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -10775,6 +10813,7 @@ impl XIQueryPointerRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != XI_QUERY_POINTER_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -10980,6 +11019,7 @@ impl XIWarpPointerRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != XI_WARP_POINTER_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -11069,6 +11109,7 @@ impl XIChangeCursorRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != XI_CHANGE_CURSOR_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -11842,6 +11883,7 @@ impl<'input> XIChangeHierarchyRequest<'input> {
         ([request0.into(), changes_bytes.into(), padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != XI_CHANGE_HIERARCHY_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -11916,6 +11958,7 @@ impl XISetClientPointerRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != XI_SET_CLIENT_POINTER_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -11979,6 +12022,7 @@ impl XIGetClientPointerRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != XI_GET_CLIENT_POINTER_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -12303,6 +12347,7 @@ impl<'input> XISelectEventsRequest<'input> {
         ([request0.into(), masks_bytes.into(), padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != XI_SELECT_EVENTS_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -12376,6 +12421,7 @@ impl XIQueryVersionRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != XI_QUERY_VERSION_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -13864,6 +13910,7 @@ impl XIQueryDeviceRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != XI_QUERY_DEVICE_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -14008,6 +14055,7 @@ impl XISetFocusRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != XI_SET_FOCUS_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -14073,6 +14121,7 @@ impl XIGetFocusRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != XI_GET_FOCUS_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -14328,6 +14377,7 @@ impl<'input> XIGrabDeviceRequest<'input> {
         ([request0.into(), mask_bytes.into(), padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != XI_GRAB_DEVICE_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -14515,6 +14565,7 @@ impl XIUngrabDeviceRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != XI_UNGRAB_DEVICE_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -14669,6 +14720,7 @@ impl XIAllowEventsRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != XI_ALLOW_EVENTS_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -15014,6 +15066,7 @@ impl<'input> XIPassiveGrabDeviceRequest<'input> {
         ([request0.into(), mask_bytes.into(), modifiers_bytes.into(), padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != XI_PASSIVE_GRAB_DEVICE_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -15213,6 +15266,7 @@ impl<'input> XIPassiveUngrabDeviceRequest<'input> {
         ([request0.into(), modifiers_bytes.into(), padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != XI_PASSIVE_UNGRAB_DEVICE_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -15294,6 +15348,7 @@ impl XIListPropertiesRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != XI_LIST_PROPERTIES_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -15578,6 +15633,7 @@ impl<'input> XIChangePropertyRequest<'input> {
         ([request0.into(), items_bytes.into(), padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != XI_CHANGE_PROPERTY_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -15667,6 +15723,7 @@ impl XIDeletePropertyRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != XI_DELETE_PROPERTY_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -15756,6 +15813,7 @@ impl XIGetPropertyRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != XI_GET_PROPERTY_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -16017,6 +16075,7 @@ impl XIGetSelectedEventsRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != XI_GET_SELECTED_EVENTS_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -16207,6 +16266,7 @@ impl<'input> XIBarrierReleasePointerRequest<'input> {
         ([request0.into(), barriers_bytes.into(), padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != XI_BARRIER_RELEASE_POINTER_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -20918,6 +20978,7 @@ impl<'input> SendExtensionEventRequest<'input> {
         ([request0.into(), events_bytes.into(), classes_bytes.into(), padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SEND_EXTENSION_EVENT_REQUEST {
             return Err(ParseError::InvalidValue);

@@ -419,6 +419,7 @@ impl PrintQueryVersionRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != PRINT_QUERY_VERSION_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -561,6 +562,7 @@ impl<'input> PrintGetPrinterListRequest<'input> {
         ([request0.into(), self.printer_name, padding0.into(), self.locale, padding1.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != PRINT_GET_PRINTER_LIST_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -700,6 +702,7 @@ impl PrintRehashPrinterListRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != PRINT_REHASH_PRINTER_LIST_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -778,6 +781,7 @@ impl<'input> CreateContextRequest<'input> {
         ([request0.into(), self.printer_name, padding0.into(), self.locale, padding1.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CREATE_CONTEXT_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -856,6 +860,7 @@ impl PrintSetContextRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != PRINT_SET_CONTEXT_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -909,6 +914,7 @@ impl PrintGetContextRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != PRINT_GET_CONTEXT_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1033,6 +1039,7 @@ impl PrintDestroyContextRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != PRINT_DESTROY_CONTEXT_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1086,6 +1093,7 @@ impl PrintGetScreenOfContextRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != PRINT_GET_SCREEN_OF_CONTEXT_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1210,6 +1218,7 @@ impl PrintStartJobRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != PRINT_START_JOB_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1270,6 +1279,7 @@ impl PrintEndJobRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != PRINT_END_JOB_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1330,6 +1340,7 @@ impl PrintStartDocRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != PRINT_START_DOC_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1390,6 +1401,7 @@ impl PrintEndDocRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != PRINT_END_DOC_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1476,6 +1488,7 @@ impl<'input> PrintPutDocumentDataRequest<'input> {
         ([request0.into(), self.data, padding0.into(), self.doc_format, padding1.into(), self.options, padding2.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != PRINT_PUT_DOCUMENT_DATA_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1568,6 +1581,7 @@ impl PrintGetDocumentDataRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != PRINT_GET_DOCUMENT_DATA_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1708,6 +1722,7 @@ impl PrintStartPageRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != PRINT_START_PAGE_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1768,6 +1783,7 @@ impl PrintEndPageRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != PRINT_END_PAGE_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1835,6 +1851,7 @@ impl PrintSelectInputRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != PRINT_SELECT_INPUT_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1897,6 +1914,7 @@ impl PrintInputSelectedRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != PRINT_INPUT_SELECTED_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -2037,6 +2055,7 @@ impl PrintGetAttributesRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != PRINT_GET_ATTRIBUTES_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -2188,6 +2207,7 @@ impl<'input> PrintGetOneAttributesRequest<'input> {
         ([request0.into(), self.name, padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != PRINT_GET_ONE_ATTRIBUTES_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -2352,6 +2372,7 @@ impl<'input> PrintSetAttributesRequest<'input> {
         ([request0.into(), self.attributes, padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != PRINT_SET_ATTRIBUTES_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -2431,6 +2452,7 @@ impl PrintGetPageDimensionsRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != PRINT_GET_PAGE_DIMENSIONS_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -2578,6 +2600,7 @@ impl PrintQueryScreensRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != PRINT_QUERY_SCREENS_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -2713,6 +2736,7 @@ impl PrintSetImageResolutionRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != PRINT_SET_IMAGE_RESOLUTION_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -2841,6 +2865,7 @@ impl PrintGetImageResolutionRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != PRINT_GET_IMAGE_RESOLUTION_REQUEST {
             return Err(ParseError::InvalidValue);

@@ -360,6 +360,7 @@ impl QueryVersionRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != QUERY_VERSION_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -488,6 +489,7 @@ impl GetModeLineRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_MODE_LINE_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -723,6 +725,7 @@ impl<'input> ModModeLineRequest<'input> {
         ([request0.into(), self.private, padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != MOD_MODE_LINE_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -828,6 +831,7 @@ impl SwitchModeRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SWITCH_MODE_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -890,6 +894,7 @@ impl GetMonitorRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_MONITOR_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1088,6 +1093,7 @@ impl LockModeSwitchRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != LOCK_MODE_SWITCH_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1150,6 +1156,7 @@ impl GetAllModeLinesRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_ALL_MODE_LINES_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1416,6 +1423,7 @@ impl<'input> AddModeLineRequest<'input> {
         ([request0.into(), self.private, padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != ADD_MODE_LINE_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1630,6 +1638,7 @@ impl<'input> DeleteModeLineRequest<'input> {
         ([request0.into(), self.private, padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != DELETE_MODE_LINE_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1808,6 +1817,7 @@ impl<'input> ValidateModeLineRequest<'input> {
         ([request0.into(), self.private, padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != VALIDATE_MODE_LINE_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -2074,6 +2084,7 @@ impl<'input> SwitchToModeRequest<'input> {
         ([request0.into(), self.private, padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SWITCH_TO_MODE_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -2180,6 +2191,7 @@ impl GetViewPortRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_VIEW_PORT_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -2345,6 +2357,7 @@ impl SetViewPortRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_VIEW_PORT_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -2410,6 +2423,7 @@ impl GetDotClocksRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_DOT_CLOCKS_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -2537,6 +2551,7 @@ impl SetClientVersionRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_CLIENT_VERSION_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -2629,6 +2644,7 @@ impl SetGammaRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_GAMMA_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -2721,6 +2737,7 @@ impl GetGammaRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_GAMMA_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -2880,6 +2897,7 @@ impl GetGammaRampRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_GAMMA_RAMP_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -3023,6 +3041,7 @@ impl<'input> SetGammaRampRequest<'input> {
         ([request0.into(), red_bytes.into(), green_bytes.into(), blue_bytes.into(), padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_GAMMA_RAMP_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -3101,6 +3120,7 @@ impl GetGammaRampSizeRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_GAMMA_RAMP_SIZE_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -3250,6 +3270,7 @@ impl GetPermissionsRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_PERMISSIONS_REQUEST {
             return Err(ParseError::InvalidValue);

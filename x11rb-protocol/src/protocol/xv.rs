@@ -1413,6 +1413,7 @@ impl QueryExtensionRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != QUERY_EXTENSION_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1541,6 +1542,7 @@ impl QueryAdaptorsRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != QUERY_ADAPTORS_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1672,6 +1674,7 @@ impl QueryEncodingsRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != QUERY_ENCODINGS_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1809,6 +1812,7 @@ impl GrabPortRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GRAB_PORT_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1938,6 +1942,7 @@ impl UngrabPortRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != UNGRAB_PORT_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -2044,6 +2049,7 @@ impl PutVideoRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != PUT_VIDEO_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -2168,6 +2174,7 @@ impl PutStillRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != PUT_STILL_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -2292,6 +2299,7 @@ impl GetVideoRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_VIDEO_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -2416,6 +2424,7 @@ impl GetStillRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_STILL_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -2502,6 +2511,7 @@ impl StopVideoRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != STOP_VIDEO_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -2570,6 +2580,7 @@ impl SelectVideoNotifyRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SELECT_VIDEO_NOTIFY_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -2639,6 +2650,7 @@ impl SelectPortNotifyRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SELECT_PORT_NOTIFY_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -2724,6 +2736,7 @@ impl QueryBestSizeRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != QUERY_BEST_SIZE_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -2877,6 +2890,7 @@ impl SetPortAttributeRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_PORT_ATTRIBUTE_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -2947,6 +2961,7 @@ impl GetPortAttributeRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_PORT_ATTRIBUTE_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -3075,6 +3090,7 @@ impl QueryPortAttributesRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != QUERY_PORT_ATTRIBUTES_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -3209,6 +3225,7 @@ impl ListImageFormatsRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != LIST_IMAGE_FORMATS_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -3354,6 +3371,7 @@ impl QueryImageAttributesRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != QUERY_IMAGE_ATTRIBUTES_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -3566,6 +3584,7 @@ impl<'input> PutImageRequest<'input> {
         ([request0.into(), self.data, padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != PUT_IMAGE_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -3750,6 +3769,7 @@ impl ShmPutImageRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "extra-traits")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SHM_PUT_IMAGE_REQUEST {
             return Err(ParseError::InvalidValue);
