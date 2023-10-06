@@ -465,11 +465,18 @@ impl core::fmt::Debug for GrabPortStatus  {
     }
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Rational {
     pub numerator: i32,
     pub denominator: i32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for Rational {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("Rational").finish_non_exhaustive()
+    }
 }
 impl TryParse for Rational {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -502,11 +509,18 @@ impl Serialize for Rational {
     }
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Format {
     pub visual: xproto::Visualid,
     pub depth: u8,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for Format {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("Format").finish_non_exhaustive()
+    }
 }
 impl TryParse for Format {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -541,7 +555,8 @@ impl Serialize for Format {
     }
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct AdaptorInfo {
     pub base_id: Port,
@@ -549,6 +564,12 @@ pub struct AdaptorInfo {
     pub type_: Type,
     pub name: Vec<u8>,
     pub formats: Vec<Format>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for AdaptorInfo {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("AdaptorInfo").finish_non_exhaustive()
+    }
 }
 impl TryParse for AdaptorInfo {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -622,7 +643,8 @@ impl AdaptorInfo {
     }
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct EncodingInfo {
     pub encoding: Encoding,
@@ -630,6 +652,12 @@ pub struct EncodingInfo {
     pub height: u16,
     pub rate: Rational,
     pub name: Vec<u8>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for EncodingInfo {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("EncodingInfo").finish_non_exhaustive()
+    }
 }
 impl TryParse for EncodingInfo {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -686,7 +714,8 @@ impl EncodingInfo {
     }
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Image {
     pub id: u32,
@@ -695,6 +724,12 @@ pub struct Image {
     pub pitches: Vec<u32>,
     pub offsets: Vec<u32>,
     pub data: Vec<u8>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for Image {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("Image").finish_non_exhaustive()
+    }
 }
 impl TryParse for Image {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -762,13 +797,20 @@ impl Image {
     }
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct AttributeInfo {
     pub flags: AttributeFlag,
     pub min: i32,
     pub max: i32,
     pub name: Vec<u8>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for AttributeInfo {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("AttributeInfo").finish_non_exhaustive()
+    }
 }
 impl TryParse for AttributeInfo {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -822,7 +864,8 @@ impl AttributeInfo {
     }
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ImageFormatInfo {
     pub id: u32,
@@ -847,6 +890,12 @@ pub struct ImageFormatInfo {
     pub vvert_v_period: u32,
     pub vcomp_order: [u8; 32],
     pub vscanline_order: ScanlineOrder,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for ImageFormatInfo {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("ImageFormatInfo").finish_non_exhaustive()
+    }
 }
 impl TryParse for ImageFormatInfo {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -1082,7 +1131,8 @@ pub const BAD_CONTROL_ERROR: u8 = 2;
 
 /// Opcode for the VideoNotify event
 pub const VIDEO_NOTIFY_EVENT: u8 = 0;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct VideoNotifyEvent {
     pub response_type: u8,
@@ -1091,6 +1141,12 @@ pub struct VideoNotifyEvent {
     pub time: xproto::Timestamp,
     pub drawable: xproto::Drawable,
     pub port: Port,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for VideoNotifyEvent {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("VideoNotifyEvent").finish_non_exhaustive()
+    }
 }
 impl TryParse for VideoNotifyEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -1200,7 +1256,8 @@ impl From<VideoNotifyEvent> for [u8; 32] {
 
 /// Opcode for the PortNotify event
 pub const PORT_NOTIFY_EVENT: u8 = 1;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PortNotifyEvent {
     pub response_type: u8,
@@ -1209,6 +1266,12 @@ pub struct PortNotifyEvent {
     pub port: Port,
     pub attribute: xproto::Atom,
     pub value: i32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for PortNotifyEvent {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("PortNotifyEvent").finish_non_exhaustive()
+    }
 }
 impl TryParse for PortNotifyEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -1323,9 +1386,16 @@ impl From<PortNotifyEvent> for [u8; 32] {
 
 /// Opcode for the QueryExtension request
 pub const QUERY_EXTENSION_REQUEST: u8 = 0;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryExtensionRequest;
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for QueryExtensionRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("QueryExtensionRequest").finish_non_exhaustive()
+    }
+}
 impl QueryExtensionRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -1366,13 +1436,20 @@ impl crate::x11_utils::ReplyRequest for QueryExtensionRequest {
     type Reply = QueryExtensionReply;
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryExtensionReply {
     pub sequence: u16,
     pub length: u32,
     pub major: u16,
     pub minor: u16,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for QueryExtensionReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("QueryExtensionReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for QueryExtensionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -1430,10 +1507,17 @@ impl Serialize for QueryExtensionReply {
 
 /// Opcode for the QueryAdaptors request
 pub const QUERY_ADAPTORS_REQUEST: u8 = 1;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryAdaptorsRequest {
     pub window: xproto::Window,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for QueryAdaptorsRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("QueryAdaptorsRequest").finish_non_exhaustive()
+    }
 }
 impl QueryAdaptorsRequest {
     /// Serialize this request into bytes for the provided connection
@@ -1482,12 +1566,19 @@ impl crate::x11_utils::ReplyRequest for QueryAdaptorsRequest {
     type Reply = QueryAdaptorsReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryAdaptorsReply {
     pub sequence: u16,
     pub length: u32,
     pub info: Vec<AdaptorInfo>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for QueryAdaptorsReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("QueryAdaptorsReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for QueryAdaptorsReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -1547,10 +1638,17 @@ impl QueryAdaptorsReply {
 
 /// Opcode for the QueryEncodings request
 pub const QUERY_ENCODINGS_REQUEST: u8 = 2;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryEncodingsRequest {
     pub port: Port,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for QueryEncodingsRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("QueryEncodingsRequest").finish_non_exhaustive()
+    }
 }
 impl QueryEncodingsRequest {
     /// Serialize this request into bytes for the provided connection
@@ -1599,12 +1697,19 @@ impl crate::x11_utils::ReplyRequest for QueryEncodingsRequest {
     type Reply = QueryEncodingsReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryEncodingsReply {
     pub sequence: u16,
     pub length: u32,
     pub info: Vec<EncodingInfo>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for QueryEncodingsReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("QueryEncodingsReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for QueryEncodingsReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -1664,11 +1769,18 @@ impl QueryEncodingsReply {
 
 /// Opcode for the GrabPort request
 pub const GRAB_PORT_REQUEST: u8 = 3;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GrabPortRequest {
     pub port: Port,
     pub time: xproto::Timestamp,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GrabPortRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GrabPortRequest").finish_non_exhaustive()
+    }
 }
 impl GrabPortRequest {
     /// Serialize this request into bytes for the provided connection
@@ -1724,12 +1836,19 @@ impl crate::x11_utils::ReplyRequest for GrabPortRequest {
     type Reply = GrabPortReply;
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GrabPortReply {
     pub result: GrabPortStatus,
     pub sequence: u16,
     pub length: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GrabPortReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GrabPortReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GrabPortReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -1779,11 +1898,18 @@ impl Serialize for GrabPortReply {
 
 /// Opcode for the UngrabPort request
 pub const UNGRAB_PORT_REQUEST: u8 = 4;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct UngrabPortRequest {
     pub port: Port,
     pub time: xproto::Timestamp,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for UngrabPortRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("UngrabPortRequest").finish_non_exhaustive()
+    }
 }
 impl UngrabPortRequest {
     /// Serialize this request into bytes for the provided connection
@@ -1840,7 +1966,8 @@ impl crate::x11_utils::VoidRequest for UngrabPortRequest {
 
 /// Opcode for the PutVideo request
 pub const PUT_VIDEO_REQUEST: u8 = 5;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PutVideoRequest {
     pub port: Port,
@@ -1854,6 +1981,12 @@ pub struct PutVideoRequest {
     pub drw_y: i16,
     pub drw_w: u16,
     pub drw_h: u16,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for PutVideoRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("PutVideoRequest").finish_non_exhaustive()
+    }
 }
 impl PutVideoRequest {
     /// Serialize this request into bytes for the provided connection
@@ -1957,7 +2090,8 @@ impl crate::x11_utils::VoidRequest for PutVideoRequest {
 
 /// Opcode for the PutStill request
 pub const PUT_STILL_REQUEST: u8 = 6;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PutStillRequest {
     pub port: Port,
@@ -1971,6 +2105,12 @@ pub struct PutStillRequest {
     pub drw_y: i16,
     pub drw_w: u16,
     pub drw_h: u16,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for PutStillRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("PutStillRequest").finish_non_exhaustive()
+    }
 }
 impl PutStillRequest {
     /// Serialize this request into bytes for the provided connection
@@ -2074,7 +2214,8 @@ impl crate::x11_utils::VoidRequest for PutStillRequest {
 
 /// Opcode for the GetVideo request
 pub const GET_VIDEO_REQUEST: u8 = 7;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetVideoRequest {
     pub port: Port,
@@ -2088,6 +2229,12 @@ pub struct GetVideoRequest {
     pub drw_y: i16,
     pub drw_w: u16,
     pub drw_h: u16,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetVideoRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetVideoRequest").finish_non_exhaustive()
+    }
 }
 impl GetVideoRequest {
     /// Serialize this request into bytes for the provided connection
@@ -2191,7 +2338,8 @@ impl crate::x11_utils::VoidRequest for GetVideoRequest {
 
 /// Opcode for the GetStill request
 pub const GET_STILL_REQUEST: u8 = 8;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetStillRequest {
     pub port: Port,
@@ -2205,6 +2353,12 @@ pub struct GetStillRequest {
     pub drw_y: i16,
     pub drw_w: u16,
     pub drw_h: u16,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetStillRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetStillRequest").finish_non_exhaustive()
+    }
 }
 impl GetStillRequest {
     /// Serialize this request into bytes for the provided connection
@@ -2308,11 +2462,18 @@ impl crate::x11_utils::VoidRequest for GetStillRequest {
 
 /// Opcode for the StopVideo request
 pub const STOP_VIDEO_REQUEST: u8 = 9;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct StopVideoRequest {
     pub port: Port,
     pub drawable: xproto::Drawable,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for StopVideoRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("StopVideoRequest").finish_non_exhaustive()
+    }
 }
 impl StopVideoRequest {
     /// Serialize this request into bytes for the provided connection
@@ -2369,11 +2530,18 @@ impl crate::x11_utils::VoidRequest for StopVideoRequest {
 
 /// Opcode for the SelectVideoNotify request
 pub const SELECT_VIDEO_NOTIFY_REQUEST: u8 = 10;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SelectVideoNotifyRequest {
     pub drawable: xproto::Drawable,
     pub onoff: bool,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for SelectVideoNotifyRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SelectVideoNotifyRequest").finish_non_exhaustive()
+    }
 }
 impl SelectVideoNotifyRequest {
     /// Serialize this request into bytes for the provided connection
@@ -2431,11 +2599,18 @@ impl crate::x11_utils::VoidRequest for SelectVideoNotifyRequest {
 
 /// Opcode for the SelectPortNotify request
 pub const SELECT_PORT_NOTIFY_REQUEST: u8 = 11;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SelectPortNotifyRequest {
     pub port: Port,
     pub onoff: bool,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for SelectPortNotifyRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SelectPortNotifyRequest").finish_non_exhaustive()
+    }
 }
 impl SelectPortNotifyRequest {
     /// Serialize this request into bytes for the provided connection
@@ -2493,7 +2668,8 @@ impl crate::x11_utils::VoidRequest for SelectPortNotifyRequest {
 
 /// Opcode for the QueryBestSize request
 pub const QUERY_BEST_SIZE_REQUEST: u8 = 12;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryBestSizeRequest {
     pub port: Port,
@@ -2502,6 +2678,12 @@ pub struct QueryBestSizeRequest {
     pub drw_w: u16,
     pub drw_h: u16,
     pub motion: bool,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for QueryBestSizeRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("QueryBestSizeRequest").finish_non_exhaustive()
+    }
 }
 impl QueryBestSizeRequest {
     /// Serialize this request into bytes for the provided connection
@@ -2578,13 +2760,20 @@ impl crate::x11_utils::ReplyRequest for QueryBestSizeRequest {
     type Reply = QueryBestSizeReply;
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryBestSizeReply {
     pub sequence: u16,
     pub length: u32,
     pub actual_width: u16,
     pub actual_height: u16,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for QueryBestSizeReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("QueryBestSizeReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for QueryBestSizeReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -2642,12 +2831,19 @@ impl Serialize for QueryBestSizeReply {
 
 /// Opcode for the SetPortAttribute request
 pub const SET_PORT_ATTRIBUTE_REQUEST: u8 = 13;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetPortAttributeRequest {
     pub port: Port,
     pub attribute: xproto::Atom,
     pub value: i32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for SetPortAttributeRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SetPortAttributeRequest").finish_non_exhaustive()
+    }
 }
 impl SetPortAttributeRequest {
     /// Serialize this request into bytes for the provided connection
@@ -2711,11 +2907,18 @@ impl crate::x11_utils::VoidRequest for SetPortAttributeRequest {
 
 /// Opcode for the GetPortAttribute request
 pub const GET_PORT_ATTRIBUTE_REQUEST: u8 = 14;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetPortAttributeRequest {
     pub port: Port,
     pub attribute: xproto::Atom,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetPortAttributeRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetPortAttributeRequest").finish_non_exhaustive()
+    }
 }
 impl GetPortAttributeRequest {
     /// Serialize this request into bytes for the provided connection
@@ -2771,12 +2974,19 @@ impl crate::x11_utils::ReplyRequest for GetPortAttributeRequest {
     type Reply = GetPortAttributeReply;
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetPortAttributeReply {
     pub sequence: u16,
     pub length: u32,
     pub value: i32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetPortAttributeReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetPortAttributeReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetPortAttributeReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -2831,10 +3041,17 @@ impl Serialize for GetPortAttributeReply {
 
 /// Opcode for the QueryPortAttributes request
 pub const QUERY_PORT_ATTRIBUTES_REQUEST: u8 = 15;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryPortAttributesRequest {
     pub port: Port,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for QueryPortAttributesRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("QueryPortAttributesRequest").finish_non_exhaustive()
+    }
 }
 impl QueryPortAttributesRequest {
     /// Serialize this request into bytes for the provided connection
@@ -2883,13 +3100,20 @@ impl crate::x11_utils::ReplyRequest for QueryPortAttributesRequest {
     type Reply = QueryPortAttributesReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryPortAttributesReply {
     pub sequence: u16,
     pub length: u32,
     pub text_size: u32,
     pub attributes: Vec<AttributeInfo>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for QueryPortAttributesReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("QueryPortAttributesReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for QueryPortAttributesReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -2951,10 +3175,17 @@ impl QueryPortAttributesReply {
 
 /// Opcode for the ListImageFormats request
 pub const LIST_IMAGE_FORMATS_REQUEST: u8 = 16;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ListImageFormatsRequest {
     pub port: Port,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for ListImageFormatsRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("ListImageFormatsRequest").finish_non_exhaustive()
+    }
 }
 impl ListImageFormatsRequest {
     /// Serialize this request into bytes for the provided connection
@@ -3003,12 +3234,19 @@ impl crate::x11_utils::ReplyRequest for ListImageFormatsRequest {
     type Reply = ListImageFormatsReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ListImageFormatsReply {
     pub sequence: u16,
     pub length: u32,
     pub format: Vec<ImageFormatInfo>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for ListImageFormatsReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("ListImageFormatsReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for ListImageFormatsReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -3068,13 +3306,20 @@ impl ListImageFormatsReply {
 
 /// Opcode for the QueryImageAttributes request
 pub const QUERY_IMAGE_ATTRIBUTES_REQUEST: u8 = 17;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryImageAttributesRequest {
     pub port: Port,
     pub id: u32,
     pub width: u16,
     pub height: u16,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for QueryImageAttributesRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("QueryImageAttributesRequest").finish_non_exhaustive()
+    }
 }
 impl QueryImageAttributesRequest {
     /// Serialize this request into bytes for the provided connection
@@ -3140,7 +3385,8 @@ impl crate::x11_utils::ReplyRequest for QueryImageAttributesRequest {
     type Reply = QueryImageAttributesReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryImageAttributesReply {
     pub sequence: u16,
@@ -3150,6 +3396,12 @@ pub struct QueryImageAttributesReply {
     pub height: u16,
     pub pitches: Vec<u32>,
     pub offsets: Vec<u32>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for QueryImageAttributesReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("QueryImageAttributesReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for QueryImageAttributesReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -3218,7 +3470,8 @@ impl QueryImageAttributesReply {
 
 /// Opcode for the PutImage request
 pub const PUT_IMAGE_REQUEST: u8 = 18;
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PutImageRequest<'input> {
     pub port: Port,
@@ -3236,6 +3489,12 @@ pub struct PutImageRequest<'input> {
     pub width: u16,
     pub height: u16,
     pub data: Cow<'input, [u8]>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl<'input> core::fmt::Debug for PutImageRequest<'input> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("PutImageRequest").finish_non_exhaustive()
+    }
 }
 impl<'input> PutImageRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -3381,7 +3640,8 @@ impl<'input> crate::x11_utils::VoidRequest for PutImageRequest<'input> {
 
 /// Opcode for the ShmPutImage request
 pub const SHM_PUT_IMAGE_REQUEST: u8 = 19;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ShmPutImageRequest {
     pub port: Port,
@@ -3401,6 +3661,12 @@ pub struct ShmPutImageRequest {
     pub width: u16,
     pub height: u16,
     pub send_event: u8,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for ShmPutImageRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("ShmPutImageRequest").finish_non_exhaustive()
+    }
 }
 impl ShmPutImageRequest {
     /// Serialize this request into bytes for the provided connection

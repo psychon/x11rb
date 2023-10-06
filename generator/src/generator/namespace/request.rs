@@ -425,9 +425,17 @@ fn emit_request_struct(
 
     let mut derives = Derives::all();
     generator.filter_derives_for_fields(&mut derives, &request_def.fields.borrow(), true);
+    let extras = derives.extra_traits_list();
     let derives = derives.to_list();
     if !derives.is_empty() {
         outln!(out, "#[derive({})]", derives.join(", "));
+    }
+    if !extras.is_empty() {
+        outln!(
+            out,
+            "#[cfg_attr(feature = \"extra-traits\", derive({}))]",
+            extras.join(", ")
+        );
     }
     if !gathered.has_fds() {
         outln!(
@@ -466,6 +474,30 @@ fn emit_request_struct(
     if has_members {
         outln!(out, "}}",);
     }
+
+    // Implement `Debug` manually if `extra-traits` is not enabled.
+    outln!(out, "#[cfg(not(feature = \"extra-traits\"))]");
+    outln!(
+        out,
+        "impl{lifetime} core::fmt::Debug for {name}Request{lifetime} {{",
+        lifetime = struct_lifetime_block,
+        name = name
+    );
+    out.indented(|out| {
+        outln!(
+            out,
+            "fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {{"
+        );
+        out.indented(|out| {
+            outln!(
+                out,
+                "f.debug_struct(\"{name}Request\").finish_non_exhaustive()",
+                name = name
+            );
+        });
+        outln!(out, "}}");
+    });
+    outln!(out, "}}");
 
     // Methods implemented on every request
     outln!(

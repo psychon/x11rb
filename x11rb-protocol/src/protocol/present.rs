@@ -415,11 +415,18 @@ impl core::fmt::Debug for CompleteMode  {
     }
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Notify {
     pub window: xproto::Window,
     pub serial: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for Notify {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("Notify").finish_non_exhaustive()
+    }
 }
 impl TryParse for Notify {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -454,11 +461,18 @@ impl Serialize for Notify {
 
 /// Opcode for the QueryVersion request
 pub const QUERY_VERSION_REQUEST: u8 = 0;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryVersionRequest {
     pub major_version: u32,
     pub minor_version: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for QueryVersionRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("QueryVersionRequest").finish_non_exhaustive()
+    }
 }
 impl QueryVersionRequest {
     /// Serialize this request into bytes for the provided connection
@@ -514,13 +528,20 @@ impl crate::x11_utils::ReplyRequest for QueryVersionRequest {
     type Reply = QueryVersionReply;
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryVersionReply {
     pub sequence: u16,
     pub length: u32,
     pub major_version: u32,
     pub minor_version: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for QueryVersionReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("QueryVersionReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for QueryVersionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -582,7 +603,8 @@ impl Serialize for QueryVersionReply {
 
 /// Opcode for the Pixmap request
 pub const PIXMAP_REQUEST: u8 = 1;
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PixmapRequest<'input> {
     pub window: xproto::Window,
@@ -600,6 +622,12 @@ pub struct PixmapRequest<'input> {
     pub divisor: u64,
     pub remainder: u64,
     pub notifies: Cow<'input, [Notify]>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl<'input> core::fmt::Debug for PixmapRequest<'input> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("PixmapRequest").finish_non_exhaustive()
+    }
 }
 impl<'input> PixmapRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -786,7 +814,8 @@ impl<'input> crate::x11_utils::VoidRequest for PixmapRequest<'input> {
 
 /// Opcode for the NotifyMSC request
 pub const NOTIFY_MSC_REQUEST: u8 = 2;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct NotifyMSCRequest {
     pub window: xproto::Window,
@@ -794,6 +823,12 @@ pub struct NotifyMSCRequest {
     pub target_msc: u64,
     pub divisor: u64,
     pub remainder: u64,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for NotifyMSCRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("NotifyMSCRequest").finish_non_exhaustive()
+    }
 }
 impl NotifyMSCRequest {
     /// Serialize this request into bytes for the provided connection
@@ -890,12 +925,19 @@ pub type Event = u32;
 
 /// Opcode for the SelectInput request
 pub const SELECT_INPUT_REQUEST: u8 = 3;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SelectInputRequest {
     pub eid: Event,
     pub window: xproto::Window,
     pub event_mask: EventMask,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for SelectInputRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SelectInputRequest").finish_non_exhaustive()
+    }
 }
 impl SelectInputRequest {
     /// Serialize this request into bytes for the provided connection
@@ -960,10 +1002,17 @@ impl crate::x11_utils::VoidRequest for SelectInputRequest {
 
 /// Opcode for the QueryCapabilities request
 pub const QUERY_CAPABILITIES_REQUEST: u8 = 4;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryCapabilitiesRequest {
     pub target: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for QueryCapabilitiesRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("QueryCapabilitiesRequest").finish_non_exhaustive()
+    }
 }
 impl QueryCapabilitiesRequest {
     /// Serialize this request into bytes for the provided connection
@@ -1012,12 +1061,19 @@ impl crate::x11_utils::ReplyRequest for QueryCapabilitiesRequest {
     type Reply = QueryCapabilitiesReply;
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryCapabilitiesReply {
     pub sequence: u16,
     pub length: u32,
     pub capabilities: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for QueryCapabilitiesReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("QueryCapabilitiesReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for QueryCapabilitiesReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -1072,7 +1128,8 @@ impl Serialize for QueryCapabilitiesReply {
 
 /// Opcode for the Generic event
 pub const GENERIC_EVENT: u8 = 0;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GenericEvent {
     pub response_type: u8,
@@ -1081,6 +1138,12 @@ pub struct GenericEvent {
     pub length: u32,
     pub evtype: u16,
     pub event: Event,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GenericEvent {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GenericEvent").finish_non_exhaustive()
+    }
 }
 impl TryParse for GenericEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -1191,7 +1254,8 @@ impl From<GenericEvent> for [u8; 32] {
 
 /// Opcode for the ConfigureNotify event
 pub const CONFIGURE_NOTIFY_EVENT: u16 = 0;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ConfigureNotifyEvent {
     pub response_type: u8,
@@ -1210,6 +1274,12 @@ pub struct ConfigureNotifyEvent {
     pub pixmap_width: u16,
     pub pixmap_height: u16,
     pub pixmap_flags: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for ConfigureNotifyEvent {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("ConfigureNotifyEvent").finish_non_exhaustive()
+    }
 }
 impl TryParse for ConfigureNotifyEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -1324,7 +1394,8 @@ impl Serialize for ConfigureNotifyEvent {
 
 /// Opcode for the CompleteNotify event
 pub const COMPLETE_NOTIFY_EVENT: u16 = 1;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CompleteNotifyEvent {
     pub response_type: u8,
@@ -1339,6 +1410,12 @@ pub struct CompleteNotifyEvent {
     pub serial: u32,
     pub ust: u64,
     pub msc: u64,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for CompleteNotifyEvent {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("CompleteNotifyEvent").finish_non_exhaustive()
+    }
 }
 impl TryParse for CompleteNotifyEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -1441,7 +1518,8 @@ impl Serialize for CompleteNotifyEvent {
 
 /// Opcode for the IdleNotify event
 pub const IDLE_NOTIFY_EVENT: u16 = 2;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct IdleNotifyEvent {
     pub response_type: u8,
@@ -1454,6 +1532,12 @@ pub struct IdleNotifyEvent {
     pub serial: u32,
     pub pixmap: xproto::Pixmap,
     pub idle_fence: sync::Fence,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for IdleNotifyEvent {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("IdleNotifyEvent").finish_non_exhaustive()
+    }
 }
 impl TryParse for IdleNotifyEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -1542,7 +1626,8 @@ impl Serialize for IdleNotifyEvent {
 
 /// Opcode for the RedirectNotify event
 pub const REDIRECT_NOTIFY_EVENT: u16 = 3;
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct RedirectNotifyEvent {
     pub response_type: u8,
@@ -1570,6 +1655,12 @@ pub struct RedirectNotifyEvent {
     pub divisor: u64,
     pub remainder: u64,
     pub notifies: Vec<Notify>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for RedirectNotifyEvent {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("RedirectNotifyEvent").finish_non_exhaustive()
+    }
 }
 impl TryParse for RedirectNotifyEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {

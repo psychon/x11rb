@@ -38,11 +38,18 @@ pub const X11_XML_VERSION: (u32, u32) = (1, 3);
 
 /// Opcode for the QueryVersion request
 pub const QUERY_VERSION_REQUEST: u8 = 0;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryVersionRequest {
     pub major_version: u32,
     pub minor_version: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for QueryVersionRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("QueryVersionRequest").finish_non_exhaustive()
+    }
 }
 impl QueryVersionRequest {
     /// Serialize this request into bytes for the provided connection
@@ -98,13 +105,20 @@ impl crate::x11_utils::ReplyRequest for QueryVersionRequest {
     type Reply = QueryVersionReply;
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryVersionReply {
     pub sequence: u16,
     pub length: u32,
     pub major_version: u32,
     pub minor_version: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for QueryVersionReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("QueryVersionReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for QueryVersionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -166,11 +180,18 @@ impl Serialize for QueryVersionReply {
 
 /// Opcode for the Open request
 pub const OPEN_REQUEST: u8 = 1;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct OpenRequest {
     pub drawable: xproto::Drawable,
     pub provider: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for OpenRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("OpenRequest").finish_non_exhaustive()
+    }
 }
 impl OpenRequest {
     /// Serialize this request into bytes for the provided connection
@@ -226,12 +247,18 @@ impl crate::x11_utils::ReplyFDsRequest for OpenRequest {
     type Reply = OpenReply;
 }
 
-#[derive(Debug)]
+#[cfg_attr(feature = "extra-traits", derive(Debug))]
 pub struct OpenReply {
     pub nfd: u8,
     pub sequence: u16,
     pub length: u32,
     pub device_fd: RawFdContainer,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for OpenReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("OpenReply").finish_non_exhaustive()
+    }
 }
 impl TryParseFd for OpenReply {
     fn try_parse_fd<'a>(initial_value: &'a [u8], fds: &mut Vec<RawFdContainer>) -> Result<(Self, &'a [u8]), ParseError> {
@@ -308,7 +335,7 @@ impl Serialize for OpenReply {
 
 /// Opcode for the PixmapFromBuffer request
 pub const PIXMAP_FROM_BUFFER_REQUEST: u8 = 2;
-#[derive(Debug)]
+#[cfg_attr(feature = "extra-traits", derive(Debug))]
 pub struct PixmapFromBufferRequest {
     pub pixmap: xproto::Pixmap,
     pub drawable: xproto::Drawable,
@@ -319,6 +346,12 @@ pub struct PixmapFromBufferRequest {
     pub depth: u8,
     pub bpp: u8,
     pub pixmap_fd: RawFdContainer,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for PixmapFromBufferRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("PixmapFromBufferRequest").finish_non_exhaustive()
+    }
 }
 impl PixmapFromBufferRequest {
     /// Serialize this request into bytes for the provided connection
@@ -408,10 +441,17 @@ impl crate::x11_utils::VoidRequest for PixmapFromBufferRequest {
 
 /// Opcode for the BufferFromPixmap request
 pub const BUFFER_FROM_PIXMAP_REQUEST: u8 = 3;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct BufferFromPixmapRequest {
     pub pixmap: xproto::Pixmap,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for BufferFromPixmapRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("BufferFromPixmapRequest").finish_non_exhaustive()
+    }
 }
 impl BufferFromPixmapRequest {
     /// Serialize this request into bytes for the provided connection
@@ -460,7 +500,7 @@ impl crate::x11_utils::ReplyFDsRequest for BufferFromPixmapRequest {
     type Reply = BufferFromPixmapReply;
 }
 
-#[derive(Debug)]
+#[cfg_attr(feature = "extra-traits", derive(Debug))]
 pub struct BufferFromPixmapReply {
     pub nfd: u8,
     pub sequence: u16,
@@ -472,6 +512,12 @@ pub struct BufferFromPixmapReply {
     pub depth: u8,
     pub bpp: u8,
     pub pixmap_fd: RawFdContainer,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for BufferFromPixmapReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("BufferFromPixmapReply").finish_non_exhaustive()
+    }
 }
 impl TryParseFd for BufferFromPixmapReply {
     fn try_parse_fd<'a>(initial_value: &'a [u8], fds: &mut Vec<RawFdContainer>) -> Result<(Self, &'a [u8]), ParseError> {
@@ -566,12 +612,18 @@ impl Serialize for BufferFromPixmapReply {
 
 /// Opcode for the FenceFromFD request
 pub const FENCE_FROM_FD_REQUEST: u8 = 4;
-#[derive(Debug)]
+#[cfg_attr(feature = "extra-traits", derive(Debug))]
 pub struct FenceFromFDRequest {
     pub drawable: xproto::Drawable,
     pub fence: u32,
     pub initially_triggered: bool,
     pub fence_fd: RawFdContainer,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for FenceFromFDRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("FenceFromFDRequest").finish_non_exhaustive()
+    }
 }
 impl FenceFromFDRequest {
     /// Serialize this request into bytes for the provided connection
@@ -639,11 +691,18 @@ impl crate::x11_utils::VoidRequest for FenceFromFDRequest {
 
 /// Opcode for the FDFromFence request
 pub const FD_FROM_FENCE_REQUEST: u8 = 5;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct FDFromFenceRequest {
     pub drawable: xproto::Drawable,
     pub fence: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for FDFromFenceRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("FDFromFenceRequest").finish_non_exhaustive()
+    }
 }
 impl FDFromFenceRequest {
     /// Serialize this request into bytes for the provided connection
@@ -699,12 +758,18 @@ impl crate::x11_utils::ReplyFDsRequest for FDFromFenceRequest {
     type Reply = FDFromFenceReply;
 }
 
-#[derive(Debug)]
+#[cfg_attr(feature = "extra-traits", derive(Debug))]
 pub struct FDFromFenceReply {
     pub nfd: u8,
     pub sequence: u16,
     pub length: u32,
     pub fence_fd: RawFdContainer,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for FDFromFenceReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("FDFromFenceReply").finish_non_exhaustive()
+    }
 }
 impl TryParseFd for FDFromFenceReply {
     fn try_parse_fd<'a>(initial_value: &'a [u8], fds: &mut Vec<RawFdContainer>) -> Result<(Self, &'a [u8]), ParseError> {
@@ -781,12 +846,19 @@ impl Serialize for FDFromFenceReply {
 
 /// Opcode for the GetSupportedModifiers request
 pub const GET_SUPPORTED_MODIFIERS_REQUEST: u8 = 6;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetSupportedModifiersRequest {
     pub window: u32,
     pub depth: u8,
     pub bpp: u8,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetSupportedModifiersRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetSupportedModifiersRequest").finish_non_exhaustive()
+    }
 }
 impl GetSupportedModifiersRequest {
     /// Serialize this request into bytes for the provided connection
@@ -846,13 +918,20 @@ impl crate::x11_utils::ReplyRequest for GetSupportedModifiersRequest {
     type Reply = GetSupportedModifiersReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetSupportedModifiersReply {
     pub sequence: u16,
     pub length: u32,
     pub window_modifiers: Vec<u64>,
     pub screen_modifiers: Vec<u64>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetSupportedModifiersReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetSupportedModifiersReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetSupportedModifiersReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -930,7 +1009,7 @@ impl GetSupportedModifiersReply {
 
 /// Opcode for the PixmapFromBuffers request
 pub const PIXMAP_FROM_BUFFERS_REQUEST: u8 = 7;
-#[derive(Debug)]
+#[cfg_attr(feature = "extra-traits", derive(Debug))]
 pub struct PixmapFromBuffersRequest {
     pub pixmap: xproto::Pixmap,
     pub window: xproto::Window,
@@ -948,6 +1027,12 @@ pub struct PixmapFromBuffersRequest {
     pub bpp: u8,
     pub modifier: u64,
     pub buffers: Vec<RawFdContainer>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for PixmapFromBuffersRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("PixmapFromBuffersRequest").finish_non_exhaustive()
+    }
 }
 impl PixmapFromBuffersRequest {
     /// Serialize this request into bytes for the provided connection
@@ -1105,10 +1190,17 @@ impl crate::x11_utils::VoidRequest for PixmapFromBuffersRequest {
 
 /// Opcode for the BuffersFromPixmap request
 pub const BUFFERS_FROM_PIXMAP_REQUEST: u8 = 8;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct BuffersFromPixmapRequest {
     pub pixmap: xproto::Pixmap,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for BuffersFromPixmapRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("BuffersFromPixmapRequest").finish_non_exhaustive()
+    }
 }
 impl BuffersFromPixmapRequest {
     /// Serialize this request into bytes for the provided connection
@@ -1157,7 +1249,7 @@ impl crate::x11_utils::ReplyFDsRequest for BuffersFromPixmapRequest {
     type Reply = BuffersFromPixmapReply;
 }
 
-#[derive(Debug)]
+#[cfg_attr(feature = "extra-traits", derive(Debug))]
 pub struct BuffersFromPixmapReply {
     pub sequence: u16,
     pub length: u32,
@@ -1169,6 +1261,12 @@ pub struct BuffersFromPixmapReply {
     pub strides: Vec<u32>,
     pub offsets: Vec<u32>,
     pub buffers: Vec<RawFdContainer>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for BuffersFromPixmapReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("BuffersFromPixmapReply").finish_non_exhaustive()
+    }
 }
 impl TryParseFd for BuffersFromPixmapReply {
     fn try_parse_fd<'a>(initial_value: &'a [u8], fds: &mut Vec<RawFdContainer>) -> Result<(Self, &'a [u8]), ParseError> {
@@ -1246,12 +1344,19 @@ impl BuffersFromPixmapReply {
 
 /// Opcode for the SetDRMDeviceInUse request
 pub const SET_DRM_DEVICE_IN_USE_REQUEST: u8 = 9;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetDRMDeviceInUseRequest {
     pub window: xproto::Window,
     pub drm_major: u32,
     pub drm_minor: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for SetDRMDeviceInUseRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SetDRMDeviceInUseRequest").finish_non_exhaustive()
+    }
 }
 impl SetDRMDeviceInUseRequest {
     /// Serialize this request into bytes for the provided connection

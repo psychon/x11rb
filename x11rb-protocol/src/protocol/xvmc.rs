@@ -42,7 +42,8 @@ pub type Surface = u32;
 
 pub type Subpicture = u32;
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SurfaceInfo {
     pub id: Surface,
@@ -54,6 +55,12 @@ pub struct SurfaceInfo {
     pub subpicture_max_height: u16,
     pub mc_type: u32,
     pub flags: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for SurfaceInfo {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SurfaceInfo").finish_non_exhaustive()
+    }
 }
 impl TryParse for SurfaceInfo {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -125,9 +132,16 @@ impl Serialize for SurfaceInfo {
 
 /// Opcode for the QueryVersion request
 pub const QUERY_VERSION_REQUEST: u8 = 0;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryVersionRequest;
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for QueryVersionRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("QueryVersionRequest").finish_non_exhaustive()
+    }
+}
 impl QueryVersionRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -168,13 +182,20 @@ impl crate::x11_utils::ReplyRequest for QueryVersionRequest {
     type Reply = QueryVersionReply;
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryVersionReply {
     pub sequence: u16,
     pub length: u32,
     pub major: u32,
     pub minor: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for QueryVersionReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("QueryVersionReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for QueryVersionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -236,10 +257,17 @@ impl Serialize for QueryVersionReply {
 
 /// Opcode for the ListSurfaceTypes request
 pub const LIST_SURFACE_TYPES_REQUEST: u8 = 1;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ListSurfaceTypesRequest {
     pub port_id: xv::Port,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for ListSurfaceTypesRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("ListSurfaceTypesRequest").finish_non_exhaustive()
+    }
 }
 impl ListSurfaceTypesRequest {
     /// Serialize this request into bytes for the provided connection
@@ -288,12 +316,19 @@ impl crate::x11_utils::ReplyRequest for ListSurfaceTypesRequest {
     type Reply = ListSurfaceTypesReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ListSurfaceTypesReply {
     pub sequence: u16,
     pub length: u32,
     pub surfaces: Vec<SurfaceInfo>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for ListSurfaceTypesReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("ListSurfaceTypesReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for ListSurfaceTypesReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -353,7 +388,8 @@ impl ListSurfaceTypesReply {
 
 /// Opcode for the CreateContext request
 pub const CREATE_CONTEXT_REQUEST: u8 = 2;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CreateContextRequest {
     pub context_id: Context,
@@ -362,6 +398,12 @@ pub struct CreateContextRequest {
     pub width: u16,
     pub height: u16,
     pub flags: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for CreateContextRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("CreateContextRequest").finish_non_exhaustive()
+    }
 }
 impl CreateContextRequest {
     /// Serialize this request into bytes for the provided connection
@@ -441,7 +483,8 @@ impl crate::x11_utils::ReplyRequest for CreateContextRequest {
     type Reply = CreateContextReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CreateContextReply {
     pub sequence: u16,
@@ -449,6 +492,12 @@ pub struct CreateContextReply {
     pub height_actual: u16,
     pub flags_return: u32,
     pub priv_data: Vec<u32>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for CreateContextReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("CreateContextReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for CreateContextReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -512,10 +561,17 @@ impl CreateContextReply {
 
 /// Opcode for the DestroyContext request
 pub const DESTROY_CONTEXT_REQUEST: u8 = 3;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DestroyContextRequest {
     pub context_id: Context,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for DestroyContextRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("DestroyContextRequest").finish_non_exhaustive()
+    }
 }
 impl DestroyContextRequest {
     /// Serialize this request into bytes for the provided connection
@@ -565,11 +621,18 @@ impl crate::x11_utils::VoidRequest for DestroyContextRequest {
 
 /// Opcode for the CreateSurface request
 pub const CREATE_SURFACE_REQUEST: u8 = 4;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CreateSurfaceRequest {
     pub surface_id: Surface,
     pub context_id: Context,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for CreateSurfaceRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("CreateSurfaceRequest").finish_non_exhaustive()
+    }
 }
 impl CreateSurfaceRequest {
     /// Serialize this request into bytes for the provided connection
@@ -625,11 +688,18 @@ impl crate::x11_utils::ReplyRequest for CreateSurfaceRequest {
     type Reply = CreateSurfaceReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CreateSurfaceReply {
     pub sequence: u16,
     pub priv_data: Vec<u32>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for CreateSurfaceReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("CreateSurfaceReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for CreateSurfaceReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -687,10 +757,17 @@ impl CreateSurfaceReply {
 
 /// Opcode for the DestroySurface request
 pub const DESTROY_SURFACE_REQUEST: u8 = 5;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DestroySurfaceRequest {
     pub surface_id: Surface,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for DestroySurfaceRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("DestroySurfaceRequest").finish_non_exhaustive()
+    }
 }
 impl DestroySurfaceRequest {
     /// Serialize this request into bytes for the provided connection
@@ -740,7 +817,8 @@ impl crate::x11_utils::VoidRequest for DestroySurfaceRequest {
 
 /// Opcode for the CreateSubpicture request
 pub const CREATE_SUBPICTURE_REQUEST: u8 = 6;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CreateSubpictureRequest {
     pub subpicture_id: Subpicture,
@@ -748,6 +826,12 @@ pub struct CreateSubpictureRequest {
     pub xvimage_id: u32,
     pub width: u16,
     pub height: u16,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for CreateSubpictureRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("CreateSubpictureRequest").finish_non_exhaustive()
+    }
 }
 impl CreateSubpictureRequest {
     /// Serialize this request into bytes for the provided connection
@@ -820,7 +904,8 @@ impl crate::x11_utils::ReplyRequest for CreateSubpictureRequest {
     type Reply = CreateSubpictureReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CreateSubpictureReply {
     pub sequence: u16,
@@ -830,6 +915,12 @@ pub struct CreateSubpictureReply {
     pub entry_bytes: u16,
     pub component_order: [u8; 4],
     pub priv_data: Vec<u32>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for CreateSubpictureReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("CreateSubpictureReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for CreateSubpictureReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -897,10 +988,17 @@ impl CreateSubpictureReply {
 
 /// Opcode for the DestroySubpicture request
 pub const DESTROY_SUBPICTURE_REQUEST: u8 = 7;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DestroySubpictureRequest {
     pub subpicture_id: Subpicture,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for DestroySubpictureRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("DestroySubpictureRequest").finish_non_exhaustive()
+    }
 }
 impl DestroySubpictureRequest {
     /// Serialize this request into bytes for the provided connection
@@ -950,11 +1048,18 @@ impl crate::x11_utils::VoidRequest for DestroySubpictureRequest {
 
 /// Opcode for the ListSubpictureTypes request
 pub const LIST_SUBPICTURE_TYPES_REQUEST: u8 = 8;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ListSubpictureTypesRequest {
     pub port_id: xv::Port,
     pub surface_id: Surface,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for ListSubpictureTypesRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("ListSubpictureTypesRequest").finish_non_exhaustive()
+    }
 }
 impl ListSubpictureTypesRequest {
     /// Serialize this request into bytes for the provided connection
@@ -1010,12 +1115,19 @@ impl crate::x11_utils::ReplyRequest for ListSubpictureTypesRequest {
     type Reply = ListSubpictureTypesReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ListSubpictureTypesReply {
     pub sequence: u16,
     pub length: u32,
     pub types: Vec<xv::ImageFormatInfo>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for ListSubpictureTypesReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("ListSubpictureTypesReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for ListSubpictureTypesReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {

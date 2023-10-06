@@ -36,11 +36,18 @@ pub const X11_XML_VERSION: (u32, u32) = (1, 13);
 
 pub type Context = u32;
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Range8 {
     pub first: u8,
     pub last: u8,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for Range8 {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("Range8").finish_non_exhaustive()
+    }
 }
 impl TryParse for Range8 {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -67,11 +74,18 @@ impl Serialize for Range8 {
     }
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Range16 {
     pub first: u16,
     pub last: u16,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for Range16 {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("Range16").finish_non_exhaustive()
+    }
 }
 impl TryParse for Range16 {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -100,11 +114,18 @@ impl Serialize for Range16 {
     }
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ExtRange {
     pub major: Range8,
     pub minor: Range16,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for ExtRange {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("ExtRange").finish_non_exhaustive()
+    }
 }
 impl TryParse for ExtRange {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -135,7 +156,8 @@ impl Serialize for ExtRange {
     }
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Range {
     pub core_requests: Range8,
@@ -147,6 +169,12 @@ pub struct Range {
     pub errors: Range8,
     pub client_started: bool,
     pub client_died: bool,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for Range {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("Range").finish_non_exhaustive()
+    }
 }
 impl TryParse for Range {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -343,11 +371,18 @@ impl core::fmt::Debug for CS  {
     }
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ClientInfo {
     pub client_resource: ClientSpec,
     pub ranges: Vec<Range>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for ClientInfo {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("ClientInfo").finish_non_exhaustive()
+    }
 }
 impl TryParse for ClientInfo {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -394,11 +429,18 @@ pub const BAD_CONTEXT_ERROR: u8 = 0;
 
 /// Opcode for the QueryVersion request
 pub const QUERY_VERSION_REQUEST: u8 = 0;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryVersionRequest {
     pub major_version: u16,
     pub minor_version: u16,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for QueryVersionRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("QueryVersionRequest").finish_non_exhaustive()
+    }
 }
 impl QueryVersionRequest {
     /// Serialize this request into bytes for the provided connection
@@ -450,13 +492,20 @@ impl crate::x11_utils::ReplyRequest for QueryVersionRequest {
     type Reply = QueryVersionReply;
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryVersionReply {
     pub sequence: u16,
     pub length: u32,
     pub major_version: u16,
     pub minor_version: u16,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for QueryVersionReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("QueryVersionReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for QueryVersionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -514,13 +563,20 @@ impl Serialize for QueryVersionReply {
 
 /// Opcode for the CreateContext request
 pub const CREATE_CONTEXT_REQUEST: u8 = 1;
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CreateContextRequest<'input> {
     pub context: Context,
     pub element_header: ElementHeader,
     pub client_specs: Cow<'input, [ClientSpec]>,
     pub ranges: Cow<'input, [Range]>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl<'input> core::fmt::Debug for CreateContextRequest<'input> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("CreateContextRequest").finish_non_exhaustive()
+    }
 }
 impl<'input> CreateContextRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -611,13 +667,20 @@ impl<'input> crate::x11_utils::VoidRequest for CreateContextRequest<'input> {
 
 /// Opcode for the RegisterClients request
 pub const REGISTER_CLIENTS_REQUEST: u8 = 2;
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct RegisterClientsRequest<'input> {
     pub context: Context,
     pub element_header: ElementHeader,
     pub client_specs: Cow<'input, [ClientSpec]>,
     pub ranges: Cow<'input, [Range]>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl<'input> core::fmt::Debug for RegisterClientsRequest<'input> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("RegisterClientsRequest").finish_non_exhaustive()
+    }
 }
 impl<'input> RegisterClientsRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -708,11 +771,18 @@ impl<'input> crate::x11_utils::VoidRequest for RegisterClientsRequest<'input> {
 
 /// Opcode for the UnregisterClients request
 pub const UNREGISTER_CLIENTS_REQUEST: u8 = 3;
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct UnregisterClientsRequest<'input> {
     pub context: Context,
     pub client_specs: Cow<'input, [ClientSpec]>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl<'input> core::fmt::Debug for UnregisterClientsRequest<'input> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("UnregisterClientsRequest").finish_non_exhaustive()
+    }
 }
 impl<'input> UnregisterClientsRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -782,10 +852,17 @@ impl<'input> crate::x11_utils::VoidRequest for UnregisterClientsRequest<'input> 
 
 /// Opcode for the GetContext request
 pub const GET_CONTEXT_REQUEST: u8 = 4;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetContextRequest {
     pub context: Context,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetContextRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetContextRequest").finish_non_exhaustive()
+    }
 }
 impl GetContextRequest {
     /// Serialize this request into bytes for the provided connection
@@ -834,7 +911,8 @@ impl crate::x11_utils::ReplyRequest for GetContextRequest {
     type Reply = GetContextReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetContextReply {
     pub enabled: bool,
@@ -842,6 +920,12 @@ pub struct GetContextReply {
     pub length: u32,
     pub element_header: ElementHeader,
     pub intercepted_clients: Vec<ClientInfo>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetContextReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetContextReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetContextReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -905,10 +989,17 @@ impl GetContextReply {
 
 /// Opcode for the EnableContext request
 pub const ENABLE_CONTEXT_REQUEST: u8 = 5;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct EnableContextRequest {
     pub context: Context,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for EnableContextRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("EnableContextRequest").finish_non_exhaustive()
+    }
 }
 impl EnableContextRequest {
     /// Serialize this request into bytes for the provided connection
@@ -957,7 +1048,8 @@ impl crate::x11_utils::ReplyRequest for EnableContextRequest {
     type Reply = EnableContextReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct EnableContextReply {
     pub category: u8,
@@ -968,6 +1060,12 @@ pub struct EnableContextReply {
     pub server_time: u32,
     pub rec_sequence_num: u32,
     pub data: Vec<u8>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for EnableContextReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("EnableContextReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for EnableContextReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -1040,10 +1138,17 @@ impl EnableContextReply {
 
 /// Opcode for the DisableContext request
 pub const DISABLE_CONTEXT_REQUEST: u8 = 6;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DisableContextRequest {
     pub context: Context,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for DisableContextRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("DisableContextRequest").finish_non_exhaustive()
+    }
 }
 impl DisableContextRequest {
     /// Serialize this request into bytes for the provided connection
@@ -1093,10 +1198,17 @@ impl crate::x11_utils::VoidRequest for DisableContextRequest {
 
 /// Opcode for the FreeContext request
 pub const FREE_CONTEXT_REQUEST: u8 = 7;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct FreeContextRequest {
     pub context: Context,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for FreeContextRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("FreeContextRequest").finish_non_exhaustive()
+    }
 }
 impl FreeContextRequest {
     /// Serialize this request into bytes for the provided connection

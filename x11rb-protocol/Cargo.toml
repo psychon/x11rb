@@ -21,8 +21,11 @@ serde = { version = "1", features = ["derive"], optional = true }
 criterion = "0.5"
 
 [features]
-default = ["std"]
+default = ["extra-traits", "std"]
 std = []
+
+# Enable extra traits for the X11 types
+extra-traits = []
 
 # Enable utility functions in `x11rb::resource_manager` for querying the
 # resource databases.

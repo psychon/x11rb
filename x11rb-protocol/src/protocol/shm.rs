@@ -53,7 +53,8 @@ pub const COMPLETION_EVENT: u8 = 0;
 /// extension.
 /// * `shmseg` - The shared memory segment used in the request.
 /// * `offset` - The offset in the shared memory segment used in the request.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CompletionEvent {
     pub response_type: u8,
@@ -63,6 +64,12 @@ pub struct CompletionEvent {
     pub major_event: u8,
     pub shmseg: Seg,
     pub offset: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for CompletionEvent {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("CompletionEvent").finish_non_exhaustive()
+    }
 }
 impl TryParse for CompletionEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -191,9 +198,16 @@ pub const QUERY_VERSION_REQUEST: u8 = 0;
 /// This is used to determine the version of the MIT-SHM extension supported by the
 /// X server.  Clients MUST NOT make other requests in this extension until a reply
 /// to this requests indicates the X server supports them.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryVersionRequest;
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for QueryVersionRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("QueryVersionRequest").finish_non_exhaustive()
+    }
+}
 impl QueryVersionRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -252,7 +266,8 @@ impl crate::x11_utils::ReplyRequest for QueryVersionRequest {
 /// * `minor_version` - The minor version of the extension supported.
 /// * `uid` - The UID of the server.
 /// * `gid` - The GID of the server.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryVersionReply {
     pub shared_pixmaps: bool,
@@ -263,6 +278,12 @@ pub struct QueryVersionReply {
     pub uid: u16,
     pub gid: u16,
     pub pixmap_format: u8,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for QueryVersionReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("QueryVersionReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for QueryVersionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -364,12 +385,19 @@ pub const ATTACH_REQUEST: u8 = 1;
 /// * `shmseg` - A shared memory segment ID created with xcb_generate_id().
 /// * `shmid` - The System V shared memory segment the server should map.
 /// * `read_only` - True if the segment shall be mapped read only by the X11 server, otherwise false.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct AttachRequest {
     pub shmseg: Seg,
     pub shmid: u32,
     pub read_only: bool,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for AttachRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("AttachRequest").finish_non_exhaustive()
+    }
 }
 impl AttachRequest {
     /// Serialize this request into bytes for the provided connection
@@ -442,10 +470,17 @@ pub const DETACH_REQUEST: u8 = 2;
 /// # Fields
 ///
 /// * `shmseg` - The segment to be destroyed.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DetachRequest {
     pub shmseg: Seg,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for DetachRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("DetachRequest").finish_non_exhaustive()
+    }
 }
 impl DetachRequest {
     /// Serialize this request into bytes for the provided connection
@@ -526,7 +561,8 @@ pub const PUT_IMAGE_REQUEST: u8 = 3;
 /// * `send_event` - True if the server should send an XCB_SHM_COMPLETION event when the blit
 /// completes.
 /// * `offset` - The offset that the source image starts at.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PutImageRequest {
     pub drawable: xproto::Drawable,
@@ -544,6 +580,12 @@ pub struct PutImageRequest {
     pub send_event: bool,
     pub shmseg: Seg,
     pub offset: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for PutImageRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("PutImageRequest").finish_non_exhaustive()
+    }
 }
 impl PutImageRequest {
     /// Serialize this request into bytes for the provided connection
@@ -685,7 +727,8 @@ pub const GET_IMAGE_REQUEST: u8 = 4;
 /// * `format` - The format to use for the copy (???).
 /// * `shmseg` - The destination shared memory segment.
 /// * `offset` - The offset in the shared memory segment to copy data to.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetImageRequest {
     pub drawable: xproto::Drawable,
@@ -697,6 +740,12 @@ pub struct GetImageRequest {
     pub format: u8,
     pub shmseg: Seg,
     pub offset: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetImageRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetImageRequest").finish_non_exhaustive()
+    }
 }
 impl GetImageRequest {
     /// Serialize this request into bytes for the provided connection
@@ -803,7 +852,8 @@ impl crate::x11_utils::ReplyRequest for GetImageRequest {
 /// * `depth` - The depth of the source drawable.
 /// * `visual` - The visual ID of the source drawable.
 /// * `size` - The number of bytes copied.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetImageReply {
     pub depth: u8,
@@ -811,6 +861,12 @@ pub struct GetImageReply {
     pub length: u32,
     pub visual: xproto::Visualid,
     pub size: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetImageReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetImageReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetImageReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -888,7 +944,8 @@ pub const CREATE_PIXMAP_REQUEST: u8 = 5;
 /// * `depth` - The depth of the pixmap to create.  Must be nonzero, or a Value error results.
 /// * `shmseg` - The shared memory segment to use to create the pixmap.
 /// * `offset` - The offset in the segment to create the pixmap at.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CreatePixmapRequest {
     pub pid: xproto::Pixmap,
@@ -898,6 +955,12 @@ pub struct CreatePixmapRequest {
     pub depth: u8,
     pub shmseg: Seg,
     pub offset: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for CreatePixmapRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("CreatePixmapRequest").finish_non_exhaustive()
+    }
 }
 impl CreatePixmapRequest {
     /// Serialize this request into bytes for the provided connection
@@ -997,11 +1060,17 @@ pub const ATTACH_FD_REQUEST: u8 = 6;
 /// * `shmseg` - A shared memory segment ID created with xcb_generate_id().
 /// * `shm_fd` - The file descriptor the server should mmap().
 /// * `read_only` - True if the segment shall be mapped read only by the X11 server, otherwise false.
-#[derive(Debug)]
+#[cfg_attr(feature = "extra-traits", derive(Debug))]
 pub struct AttachFdRequest {
     pub shmseg: Seg,
     pub shm_fd: RawFdContainer,
     pub read_only: bool,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for AttachFdRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("AttachFdRequest").finish_non_exhaustive()
+    }
 }
 impl AttachFdRequest {
     /// Serialize this request into bytes for the provided connection
@@ -1072,12 +1141,19 @@ pub const CREATE_SEGMENT_REQUEST: u8 = 7;
 /// * `shmseg` - A shared memory segment ID created with xcb_generate_id().
 /// * `size` - The size of the segment to create.
 /// * `read_only` - True if the server should map the segment read-only; otherwise false.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CreateSegmentRequest {
     pub shmseg: Seg,
     pub size: u32,
     pub read_only: bool,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for CreateSegmentRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("CreateSegmentRequest").finish_non_exhaustive()
+    }
 }
 impl CreateSegmentRequest {
     /// Serialize this request into bytes for the provided connection
@@ -1149,12 +1225,18 @@ impl crate::x11_utils::ReplyFDsRequest for CreateSegmentRequest {
 /// # Fields
 ///
 /// * `nfd` - The number of file descriptors sent by the server.  Will always be 1.
-#[derive(Debug)]
+#[cfg_attr(feature = "extra-traits", derive(Debug))]
 pub struct CreateSegmentReply {
     pub nfd: u8,
     pub sequence: u16,
     pub length: u32,
     pub shm_fd: RawFdContainer,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for CreateSegmentReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("CreateSegmentReply").finish_non_exhaustive()
+    }
 }
 impl TryParseFd for CreateSegmentReply {
     fn try_parse_fd<'a>(initial_value: &'a [u8], fds: &mut Vec<RawFdContainer>) -> Result<(Self, &'a [u8]), ParseError> {

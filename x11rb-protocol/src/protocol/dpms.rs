@@ -38,11 +38,18 @@ pub const X11_XML_VERSION: (u32, u32) = (1, 2);
 
 /// Opcode for the GetVersion request
 pub const GET_VERSION_REQUEST: u8 = 0;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetVersionRequest {
     pub client_major_version: u16,
     pub client_minor_version: u16,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetVersionRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetVersionRequest").finish_non_exhaustive()
+    }
 }
 impl GetVersionRequest {
     /// Serialize this request into bytes for the provided connection
@@ -94,13 +101,20 @@ impl crate::x11_utils::ReplyRequest for GetVersionRequest {
     type Reply = GetVersionReply;
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetVersionReply {
     pub sequence: u16,
     pub length: u32,
     pub server_major_version: u16,
     pub server_minor_version: u16,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetVersionReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetVersionReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetVersionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -158,9 +172,16 @@ impl Serialize for GetVersionReply {
 
 /// Opcode for the Capable request
 pub const CAPABLE_REQUEST: u8 = 1;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CapableRequest;
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for CapableRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("CapableRequest").finish_non_exhaustive()
+    }
+}
 impl CapableRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -201,12 +222,19 @@ impl crate::x11_utils::ReplyRequest for CapableRequest {
     type Reply = CapableReply;
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CapableReply {
     pub sequence: u16,
     pub length: u32,
     pub capable: bool,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for CapableReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("CapableReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for CapableReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -283,9 +311,16 @@ impl Serialize for CapableReply {
 
 /// Opcode for the GetTimeouts request
 pub const GET_TIMEOUTS_REQUEST: u8 = 2;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetTimeoutsRequest;
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetTimeoutsRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetTimeoutsRequest").finish_non_exhaustive()
+    }
+}
 impl GetTimeoutsRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -326,7 +361,8 @@ impl crate::x11_utils::ReplyRequest for GetTimeoutsRequest {
     type Reply = GetTimeoutsReply;
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetTimeoutsReply {
     pub sequence: u16,
@@ -334,6 +370,12 @@ pub struct GetTimeoutsReply {
     pub standby_timeout: u16,
     pub suspend_timeout: u16,
     pub off_timeout: u16,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetTimeoutsReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetTimeoutsReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetTimeoutsReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -416,12 +458,19 @@ impl Serialize for GetTimeoutsReply {
 
 /// Opcode for the SetTimeouts request
 pub const SET_TIMEOUTS_REQUEST: u8 = 3;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetTimeoutsRequest {
     pub standby_timeout: u16,
     pub suspend_timeout: u16,
     pub off_timeout: u16,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for SetTimeoutsRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SetTimeoutsRequest").finish_non_exhaustive()
+    }
 }
 impl SetTimeoutsRequest {
     /// Serialize this request into bytes for the provided connection
@@ -481,9 +530,16 @@ impl crate::x11_utils::VoidRequest for SetTimeoutsRequest {
 
 /// Opcode for the Enable request
 pub const ENABLE_REQUEST: u8 = 4;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct EnableRequest;
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for EnableRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("EnableRequest").finish_non_exhaustive()
+    }
+}
 impl EnableRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -525,9 +581,16 @@ impl crate::x11_utils::VoidRequest for EnableRequest {
 
 /// Opcode for the Disable request
 pub const DISABLE_REQUEST: u8 = 5;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DisableRequest;
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for DisableRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("DisableRequest").finish_non_exhaustive()
+    }
+}
 impl DisableRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -626,10 +689,17 @@ impl core::fmt::Debug for DPMSMode  {
 
 /// Opcode for the ForceLevel request
 pub const FORCE_LEVEL_REQUEST: u8 = 6;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ForceLevelRequest {
     pub power_level: DPMSMode,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for ForceLevelRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("ForceLevelRequest").finish_non_exhaustive()
+    }
 }
 impl ForceLevelRequest {
     /// Serialize this request into bytes for the provided connection
@@ -680,9 +750,16 @@ impl crate::x11_utils::VoidRequest for ForceLevelRequest {
 
 /// Opcode for the Info request
 pub const INFO_REQUEST: u8 = 7;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct InfoRequest;
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for InfoRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("InfoRequest").finish_non_exhaustive()
+    }
+}
 impl InfoRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -723,13 +800,20 @@ impl crate::x11_utils::ReplyRequest for InfoRequest {
     type Reply = InfoReply;
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct InfoReply {
     pub sequence: u16,
     pub length: u32,
     pub power_level: DPMSMode,
     pub state: bool,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for InfoReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("InfoReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for InfoReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -856,10 +940,17 @@ bitmask_binop!(EventMask, u32);
 
 /// Opcode for the SelectInput request
 pub const SELECT_INPUT_REQUEST: u8 = 8;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SelectInputRequest {
     pub event_mask: EventMask,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for SelectInputRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SelectInputRequest").finish_non_exhaustive()
+    }
 }
 impl SelectInputRequest {
     /// Serialize this request into bytes for the provided connection
@@ -910,7 +1001,8 @@ impl crate::x11_utils::VoidRequest for SelectInputRequest {
 
 /// Opcode for the InfoNotify event
 pub const INFO_NOTIFY_EVENT: u16 = 0;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct InfoNotifyEvent {
     pub response_type: u8,
@@ -921,6 +1013,12 @@ pub struct InfoNotifyEvent {
     pub timestamp: xproto::Timestamp,
     pub power_level: DPMSMode,
     pub state: bool,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for InfoNotifyEvent {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("InfoNotifyEvent").finish_non_exhaustive()
+    }
 }
 impl TryParse for InfoNotifyEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {

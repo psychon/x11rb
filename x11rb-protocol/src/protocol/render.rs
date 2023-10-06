@@ -608,7 +608,8 @@ pub const GLYPH_SET_ERROR: u8 = 3;
 /// Opcode for the Glyph error
 pub const GLYPH_ERROR: u8 = 4;
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Directformat {
     pub red_shift: u16,
@@ -619,6 +620,12 @@ pub struct Directformat {
     pub blue_mask: u16,
     pub alpha_shift: u16,
     pub alpha_mask: u16,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for Directformat {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("Directformat").finish_non_exhaustive()
+    }
 }
 impl TryParse for Directformat {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -677,7 +684,8 @@ impl Serialize for Directformat {
     }
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Pictforminfo {
     pub id: Pictformat,
@@ -685,6 +693,12 @@ pub struct Pictforminfo {
     pub depth: u8,
     pub direct: Directformat,
     pub colormap: xproto::Colormap,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for Pictforminfo {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("Pictforminfo").finish_non_exhaustive()
+    }
 }
 impl TryParse for Pictforminfo {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -749,11 +763,18 @@ impl Serialize for Pictforminfo {
     }
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Pictvisual {
     pub visual: xproto::Visualid,
     pub format: Pictformat,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for Pictvisual {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("Pictvisual").finish_non_exhaustive()
+    }
 }
 impl TryParse for Pictvisual {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -786,11 +807,18 @@ impl Serialize for Pictvisual {
     }
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Pictdepth {
     pub depth: u8,
     pub visuals: Vec<Pictvisual>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for Pictdepth {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("Pictdepth").finish_non_exhaustive()
+    }
 }
 impl TryParse for Pictdepth {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -836,11 +864,18 @@ impl Pictdepth {
     }
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Pictscreen {
     pub fallback: Pictformat,
     pub depths: Vec<Pictdepth>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for Pictscreen {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("Pictscreen").finish_non_exhaustive()
+    }
 }
 impl TryParse for Pictscreen {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -882,7 +917,8 @@ impl Pictscreen {
     }
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Indexvalue {
     pub pixel: u32,
@@ -890,6 +926,12 @@ pub struct Indexvalue {
     pub green: u16,
     pub blue: u16,
     pub alpha: u16,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for Indexvalue {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("Indexvalue").finish_non_exhaustive()
+    }
 }
 impl TryParse for Indexvalue {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -935,13 +977,20 @@ impl Serialize for Indexvalue {
     }
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Color {
     pub red: u16,
     pub green: u16,
     pub blue: u16,
     pub alpha: u16,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for Color {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("Color").finish_non_exhaustive()
+    }
 }
 impl TryParse for Color {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -980,11 +1029,18 @@ impl Serialize for Color {
     }
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Pointfix {
     pub x: Fixed,
     pub y: Fixed,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for Pointfix {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("Pointfix").finish_non_exhaustive()
+    }
 }
 impl TryParse for Pointfix {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -1017,11 +1073,18 @@ impl Serialize for Pointfix {
     }
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Linefix {
     pub p1: Pointfix,
     pub p2: Pointfix,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for Linefix {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("Linefix").finish_non_exhaustive()
+    }
 }
 impl TryParse for Linefix {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -1062,12 +1125,19 @@ impl Serialize for Linefix {
     }
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Triangle {
     pub p1: Pointfix,
     pub p2: Pointfix,
     pub p3: Pointfix,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for Triangle {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("Triangle").finish_non_exhaustive()
+    }
 }
 impl TryParse for Triangle {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -1119,13 +1189,20 @@ impl Serialize for Triangle {
     }
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Trapezoid {
     pub top: Fixed,
     pub bottom: Fixed,
     pub left: Linefix,
     pub right: Linefix,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for Trapezoid {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("Trapezoid").finish_non_exhaustive()
+    }
 }
 impl TryParse for Trapezoid {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -1196,7 +1273,8 @@ impl Serialize for Trapezoid {
     }
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Glyphinfo {
     pub width: u16,
@@ -1205,6 +1283,12 @@ pub struct Glyphinfo {
     pub y: i16,
     pub x_off: i16,
     pub y_off: i16,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for Glyphinfo {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("Glyphinfo").finish_non_exhaustive()
+    }
 }
 impl TryParse for Glyphinfo {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -1255,11 +1339,18 @@ impl Serialize for Glyphinfo {
 
 /// Opcode for the QueryVersion request
 pub const QUERY_VERSION_REQUEST: u8 = 0;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryVersionRequest {
     pub client_major_version: u32,
     pub client_minor_version: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for QueryVersionRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("QueryVersionRequest").finish_non_exhaustive()
+    }
 }
 impl QueryVersionRequest {
     /// Serialize this request into bytes for the provided connection
@@ -1315,13 +1406,20 @@ impl crate::x11_utils::ReplyRequest for QueryVersionRequest {
     type Reply = QueryVersionReply;
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryVersionReply {
     pub sequence: u16,
     pub length: u32,
     pub major_version: u32,
     pub minor_version: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for QueryVersionReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("QueryVersionReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for QueryVersionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -1401,9 +1499,16 @@ impl Serialize for QueryVersionReply {
 
 /// Opcode for the QueryPictFormats request
 pub const QUERY_PICT_FORMATS_REQUEST: u8 = 1;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryPictFormatsRequest;
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for QueryPictFormatsRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("QueryPictFormatsRequest").finish_non_exhaustive()
+    }
+}
 impl QueryPictFormatsRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -1444,7 +1549,8 @@ impl crate::x11_utils::ReplyRequest for QueryPictFormatsRequest {
     type Reply = QueryPictFormatsReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryPictFormatsReply {
     pub sequence: u16,
@@ -1454,6 +1560,12 @@ pub struct QueryPictFormatsReply {
     pub formats: Vec<Pictforminfo>,
     pub screens: Vec<Pictscreen>,
     pub subpixels: Vec<SubPixel>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for QueryPictFormatsReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("QueryPictFormatsReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for QueryPictFormatsReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -1563,10 +1675,17 @@ impl QueryPictFormatsReply {
 
 /// Opcode for the QueryPictIndexValues request
 pub const QUERY_PICT_INDEX_VALUES_REQUEST: u8 = 2;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryPictIndexValuesRequest {
     pub format: Pictformat,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for QueryPictIndexValuesRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("QueryPictIndexValuesRequest").finish_non_exhaustive()
+    }
 }
 impl QueryPictIndexValuesRequest {
     /// Serialize this request into bytes for the provided connection
@@ -1615,12 +1734,19 @@ impl crate::x11_utils::ReplyRequest for QueryPictIndexValuesRequest {
     type Reply = QueryPictIndexValuesReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryPictIndexValuesReply {
     pub sequence: u16,
     pub length: u32,
     pub values: Vec<Indexvalue>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for QueryPictIndexValuesReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("QueryPictIndexValuesReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for QueryPictIndexValuesReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -1679,7 +1805,8 @@ impl QueryPictIndexValuesReply {
 }
 
 /// Auxiliary and optional information for the `create_picture` function
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CreatePictureAux {
     pub repeat: Option<Repeat>,
@@ -1695,6 +1822,12 @@ pub struct CreatePictureAux {
     pub polymode: Option<PolyMode>,
     pub dither: Option<xproto::Atom>,
     pub componentalpha: Option<u32>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for CreatePictureAux {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("CreatePictureAux").finish_non_exhaustive()
+    }
 }
 impl CreatePictureAux {
     fn try_parse(value: &[u8], value_mask: u32) -> Result<(Self, &[u8]), ParseError> {
@@ -1994,13 +2127,20 @@ impl CreatePictureAux {
 
 /// Opcode for the CreatePicture request
 pub const CREATE_PICTURE_REQUEST: u8 = 4;
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CreatePictureRequest<'input> {
     pub pid: Picture,
     pub drawable: xproto::Drawable,
     pub format: Pictformat,
     pub value_list: Cow<'input, CreatePictureAux>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl<'input> core::fmt::Debug for CreatePictureRequest<'input> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("CreatePictureRequest").finish_non_exhaustive()
+    }
 }
 impl<'input> CreatePictureRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -2085,7 +2225,8 @@ impl<'input> crate::x11_utils::VoidRequest for CreatePictureRequest<'input> {
 }
 
 /// Auxiliary and optional information for the `change_picture` function
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ChangePictureAux {
     pub repeat: Option<Repeat>,
@@ -2101,6 +2242,12 @@ pub struct ChangePictureAux {
     pub polymode: Option<PolyMode>,
     pub dither: Option<xproto::Atom>,
     pub componentalpha: Option<u32>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for ChangePictureAux {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("ChangePictureAux").finish_non_exhaustive()
+    }
 }
 impl ChangePictureAux {
     fn try_parse(value: &[u8], value_mask: u32) -> Result<(Self, &[u8]), ParseError> {
@@ -2400,11 +2547,18 @@ impl ChangePictureAux {
 
 /// Opcode for the ChangePicture request
 pub const CHANGE_PICTURE_REQUEST: u8 = 5;
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ChangePictureRequest<'input> {
     pub picture: Picture,
     pub value_list: Cow<'input, ChangePictureAux>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl<'input> core::fmt::Debug for ChangePictureRequest<'input> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("ChangePictureRequest").finish_non_exhaustive()
+    }
 }
 impl<'input> ChangePictureRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -2474,13 +2628,20 @@ impl<'input> crate::x11_utils::VoidRequest for ChangePictureRequest<'input> {
 
 /// Opcode for the SetPictureClipRectangles request
 pub const SET_PICTURE_CLIP_RECTANGLES_REQUEST: u8 = 6;
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetPictureClipRectanglesRequest<'input> {
     pub picture: Picture,
     pub clip_x_origin: i16,
     pub clip_y_origin: i16,
     pub rectangles: Cow<'input, [xproto::Rectangle]>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl<'input> core::fmt::Debug for SetPictureClipRectanglesRequest<'input> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SetPictureClipRectanglesRequest").finish_non_exhaustive()
+    }
 }
 impl<'input> SetPictureClipRectanglesRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -2562,10 +2723,17 @@ impl<'input> crate::x11_utils::VoidRequest for SetPictureClipRectanglesRequest<'
 
 /// Opcode for the FreePicture request
 pub const FREE_PICTURE_REQUEST: u8 = 7;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct FreePictureRequest {
     pub picture: Picture,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for FreePictureRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("FreePictureRequest").finish_non_exhaustive()
+    }
 }
 impl FreePictureRequest {
     /// Serialize this request into bytes for the provided connection
@@ -2615,7 +2783,8 @@ impl crate::x11_utils::VoidRequest for FreePictureRequest {
 
 /// Opcode for the Composite request
 pub const COMPOSITE_REQUEST: u8 = 8;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CompositeRequest {
     pub op: PictOp,
@@ -2630,6 +2799,12 @@ pub struct CompositeRequest {
     pub dst_y: i16,
     pub width: u16,
     pub height: u16,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for CompositeRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("CompositeRequest").finish_non_exhaustive()
+    }
 }
 impl CompositeRequest {
     /// Serialize this request into bytes for the provided connection
@@ -2742,7 +2917,8 @@ impl crate::x11_utils::VoidRequest for CompositeRequest {
 
 /// Opcode for the Trapezoids request
 pub const TRAPEZOIDS_REQUEST: u8 = 10;
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct TrapezoidsRequest<'input> {
     pub op: PictOp,
@@ -2752,6 +2928,12 @@ pub struct TrapezoidsRequest<'input> {
     pub src_x: i16,
     pub src_y: i16,
     pub traps: Cow<'input, [Trapezoid]>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl<'input> core::fmt::Debug for TrapezoidsRequest<'input> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("TrapezoidsRequest").finish_non_exhaustive()
+    }
 }
 impl<'input> TrapezoidsRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -2859,7 +3041,8 @@ impl<'input> crate::x11_utils::VoidRequest for TrapezoidsRequest<'input> {
 
 /// Opcode for the Triangles request
 pub const TRIANGLES_REQUEST: u8 = 11;
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct TrianglesRequest<'input> {
     pub op: PictOp,
@@ -2869,6 +3052,12 @@ pub struct TrianglesRequest<'input> {
     pub src_x: i16,
     pub src_y: i16,
     pub triangles: Cow<'input, [Triangle]>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl<'input> core::fmt::Debug for TrianglesRequest<'input> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("TrianglesRequest").finish_non_exhaustive()
+    }
 }
 impl<'input> TrianglesRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -2976,7 +3165,8 @@ impl<'input> crate::x11_utils::VoidRequest for TrianglesRequest<'input> {
 
 /// Opcode for the TriStrip request
 pub const TRI_STRIP_REQUEST: u8 = 12;
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct TriStripRequest<'input> {
     pub op: PictOp,
@@ -2986,6 +3176,12 @@ pub struct TriStripRequest<'input> {
     pub src_x: i16,
     pub src_y: i16,
     pub points: Cow<'input, [Pointfix]>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl<'input> core::fmt::Debug for TriStripRequest<'input> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("TriStripRequest").finish_non_exhaustive()
+    }
 }
 impl<'input> TriStripRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -3093,7 +3289,8 @@ impl<'input> crate::x11_utils::VoidRequest for TriStripRequest<'input> {
 
 /// Opcode for the TriFan request
 pub const TRI_FAN_REQUEST: u8 = 13;
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct TriFanRequest<'input> {
     pub op: PictOp,
@@ -3103,6 +3300,12 @@ pub struct TriFanRequest<'input> {
     pub src_x: i16,
     pub src_y: i16,
     pub points: Cow<'input, [Pointfix]>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl<'input> core::fmt::Debug for TriFanRequest<'input> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("TriFanRequest").finish_non_exhaustive()
+    }
 }
 impl<'input> TriFanRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -3210,11 +3413,18 @@ impl<'input> crate::x11_utils::VoidRequest for TriFanRequest<'input> {
 
 /// Opcode for the CreateGlyphSet request
 pub const CREATE_GLYPH_SET_REQUEST: u8 = 17;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CreateGlyphSetRequest {
     pub gsid: Glyphset,
     pub format: Pictformat,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for CreateGlyphSetRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("CreateGlyphSetRequest").finish_non_exhaustive()
+    }
 }
 impl CreateGlyphSetRequest {
     /// Serialize this request into bytes for the provided connection
@@ -3271,11 +3481,18 @@ impl crate::x11_utils::VoidRequest for CreateGlyphSetRequest {
 
 /// Opcode for the ReferenceGlyphSet request
 pub const REFERENCE_GLYPH_SET_REQUEST: u8 = 18;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ReferenceGlyphSetRequest {
     pub gsid: Glyphset,
     pub existing: Glyphset,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for ReferenceGlyphSetRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("ReferenceGlyphSetRequest").finish_non_exhaustive()
+    }
 }
 impl ReferenceGlyphSetRequest {
     /// Serialize this request into bytes for the provided connection
@@ -3332,10 +3549,17 @@ impl crate::x11_utils::VoidRequest for ReferenceGlyphSetRequest {
 
 /// Opcode for the FreeGlyphSet request
 pub const FREE_GLYPH_SET_REQUEST: u8 = 19;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct FreeGlyphSetRequest {
     pub glyphset: Glyphset,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for FreeGlyphSetRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("FreeGlyphSetRequest").finish_non_exhaustive()
+    }
 }
 impl FreeGlyphSetRequest {
     /// Serialize this request into bytes for the provided connection
@@ -3385,13 +3609,20 @@ impl crate::x11_utils::VoidRequest for FreeGlyphSetRequest {
 
 /// Opcode for the AddGlyphs request
 pub const ADD_GLYPHS_REQUEST: u8 = 20;
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct AddGlyphsRequest<'input> {
     pub glyphset: Glyphset,
     pub glyphids: Cow<'input, [u32]>,
     pub glyphs: Cow<'input, [Glyphinfo]>,
     pub data: Cow<'input, [u8]>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl<'input> core::fmt::Debug for AddGlyphsRequest<'input> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("AddGlyphsRequest").finish_non_exhaustive()
+    }
 }
 impl<'input> AddGlyphsRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -3471,11 +3702,18 @@ impl<'input> crate::x11_utils::VoidRequest for AddGlyphsRequest<'input> {
 
 /// Opcode for the FreeGlyphs request
 pub const FREE_GLYPHS_REQUEST: u8 = 22;
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct FreeGlyphsRequest<'input> {
     pub glyphset: Glyphset,
     pub glyphs: Cow<'input, [Glyph]>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl<'input> core::fmt::Debug for FreeGlyphsRequest<'input> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("FreeGlyphsRequest").finish_non_exhaustive()
+    }
 }
 impl<'input> FreeGlyphsRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -3545,7 +3783,8 @@ impl<'input> crate::x11_utils::VoidRequest for FreeGlyphsRequest<'input> {
 
 /// Opcode for the CompositeGlyphs8 request
 pub const COMPOSITE_GLYPHS8_REQUEST: u8 = 23;
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CompositeGlyphs8Request<'input> {
     pub op: PictOp,
@@ -3556,6 +3795,12 @@ pub struct CompositeGlyphs8Request<'input> {
     pub src_x: i16,
     pub src_y: i16,
     pub glyphcmds: Cow<'input, [u8]>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl<'input> core::fmt::Debug for CompositeGlyphs8Request<'input> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("CompositeGlyphs8Request").finish_non_exhaustive()
+    }
 }
 impl<'input> CompositeGlyphs8Request<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -3663,7 +3908,8 @@ impl<'input> crate::x11_utils::VoidRequest for CompositeGlyphs8Request<'input> {
 
 /// Opcode for the CompositeGlyphs16 request
 pub const COMPOSITE_GLYPHS16_REQUEST: u8 = 24;
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CompositeGlyphs16Request<'input> {
     pub op: PictOp,
@@ -3674,6 +3920,12 @@ pub struct CompositeGlyphs16Request<'input> {
     pub src_x: i16,
     pub src_y: i16,
     pub glyphcmds: Cow<'input, [u8]>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl<'input> core::fmt::Debug for CompositeGlyphs16Request<'input> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("CompositeGlyphs16Request").finish_non_exhaustive()
+    }
 }
 impl<'input> CompositeGlyphs16Request<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -3781,7 +4033,8 @@ impl<'input> crate::x11_utils::VoidRequest for CompositeGlyphs16Request<'input> 
 
 /// Opcode for the CompositeGlyphs32 request
 pub const COMPOSITE_GLYPHS32_REQUEST: u8 = 25;
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CompositeGlyphs32Request<'input> {
     pub op: PictOp,
@@ -3792,6 +4045,12 @@ pub struct CompositeGlyphs32Request<'input> {
     pub src_x: i16,
     pub src_y: i16,
     pub glyphcmds: Cow<'input, [u8]>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl<'input> core::fmt::Debug for CompositeGlyphs32Request<'input> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("CompositeGlyphs32Request").finish_non_exhaustive()
+    }
 }
 impl<'input> CompositeGlyphs32Request<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -3899,13 +4158,20 @@ impl<'input> crate::x11_utils::VoidRequest for CompositeGlyphs32Request<'input> 
 
 /// Opcode for the FillRectangles request
 pub const FILL_RECTANGLES_REQUEST: u8 = 26;
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct FillRectanglesRequest<'input> {
     pub op: PictOp,
     pub dst: Picture,
     pub color: Color,
     pub rects: Cow<'input, [xproto::Rectangle]>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl<'input> core::fmt::Debug for FillRectanglesRequest<'input> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("FillRectanglesRequest").finish_non_exhaustive()
+    }
 }
 impl<'input> FillRectanglesRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -3997,13 +4263,20 @@ impl<'input> crate::x11_utils::VoidRequest for FillRectanglesRequest<'input> {
 
 /// Opcode for the CreateCursor request
 pub const CREATE_CURSOR_REQUEST: u8 = 27;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CreateCursorRequest {
     pub cid: xproto::Cursor,
     pub source: Picture,
     pub x: u16,
     pub y: u16,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for CreateCursorRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("CreateCursorRequest").finish_non_exhaustive()
+    }
 }
 impl CreateCursorRequest {
     /// Serialize this request into bytes for the provided connection
@@ -4068,7 +4341,8 @@ impl Request for CreateCursorRequest {
 impl crate::x11_utils::VoidRequest for CreateCursorRequest {
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Transform {
     pub matrix11: Fixed,
@@ -4080,6 +4354,12 @@ pub struct Transform {
     pub matrix31: Fixed,
     pub matrix32: Fixed,
     pub matrix33: Fixed,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for Transform {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("Transform").finish_non_exhaustive()
+    }
 }
 impl TryParse for Transform {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -4163,11 +4443,18 @@ impl Serialize for Transform {
 
 /// Opcode for the SetPictureTransform request
 pub const SET_PICTURE_TRANSFORM_REQUEST: u8 = 28;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetPictureTransformRequest {
     pub picture: Picture,
     pub transform: Transform,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for SetPictureTransformRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SetPictureTransformRequest").finish_non_exhaustive()
+    }
 }
 impl SetPictureTransformRequest {
     /// Serialize this request into bytes for the provided connection
@@ -4256,10 +4543,17 @@ impl crate::x11_utils::VoidRequest for SetPictureTransformRequest {
 
 /// Opcode for the QueryFilters request
 pub const QUERY_FILTERS_REQUEST: u8 = 29;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryFiltersRequest {
     pub drawable: xproto::Drawable,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for QueryFiltersRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("QueryFiltersRequest").finish_non_exhaustive()
+    }
 }
 impl QueryFiltersRequest {
     /// Serialize this request into bytes for the provided connection
@@ -4308,13 +4602,20 @@ impl crate::x11_utils::ReplyRequest for QueryFiltersRequest {
     type Reply = QueryFiltersReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryFiltersReply {
     pub sequence: u16,
     pub length: u32,
     pub aliases: Vec<u16>,
     pub filters: Vec<xproto::Str>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for QueryFiltersReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("QueryFiltersReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for QueryFiltersReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -4392,12 +4693,19 @@ impl QueryFiltersReply {
 
 /// Opcode for the SetPictureFilter request
 pub const SET_PICTURE_FILTER_REQUEST: u8 = 30;
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetPictureFilterRequest<'input> {
     pub picture: Picture,
     pub filter: Cow<'input, [u8]>,
     pub values: Cow<'input, [Fixed]>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl<'input> core::fmt::Debug for SetPictureFilterRequest<'input> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SetPictureFilterRequest").finish_non_exhaustive()
+    }
 }
 impl<'input> SetPictureFilterRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -4483,11 +4791,18 @@ impl<'input> Request for SetPictureFilterRequest<'input> {
 impl<'input> crate::x11_utils::VoidRequest for SetPictureFilterRequest<'input> {
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Animcursorelt {
     pub cursor: xproto::Cursor,
     pub delay: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for Animcursorelt {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("Animcursorelt").finish_non_exhaustive()
+    }
 }
 impl TryParse for Animcursorelt {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -4522,11 +4837,18 @@ impl Serialize for Animcursorelt {
 
 /// Opcode for the CreateAnimCursor request
 pub const CREATE_ANIM_CURSOR_REQUEST: u8 = 31;
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CreateAnimCursorRequest<'input> {
     pub cid: xproto::Cursor,
     pub cursors: Cow<'input, [Animcursorelt]>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl<'input> core::fmt::Debug for CreateAnimCursorRequest<'input> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("CreateAnimCursorRequest").finish_non_exhaustive()
+    }
 }
 impl<'input> CreateAnimCursorRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -4594,12 +4916,19 @@ impl<'input> Request for CreateAnimCursorRequest<'input> {
 impl<'input> crate::x11_utils::VoidRequest for CreateAnimCursorRequest<'input> {
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Spanfix {
     pub l: Fixed,
     pub r: Fixed,
     pub y: Fixed,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for Spanfix {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("Spanfix").finish_non_exhaustive()
+    }
 }
 impl TryParse for Spanfix {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -4639,11 +4968,18 @@ impl Serialize for Spanfix {
     }
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Trap {
     pub top: Spanfix,
     pub bot: Spanfix,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for Trap {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("Trap").finish_non_exhaustive()
+    }
 }
 impl TryParse for Trap {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -4694,13 +5030,20 @@ impl Serialize for Trap {
 
 /// Opcode for the AddTraps request
 pub const ADD_TRAPS_REQUEST: u8 = 32;
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct AddTrapsRequest<'input> {
     pub picture: Picture,
     pub x_off: i16,
     pub y_off: i16,
     pub traps: Cow<'input, [Trap]>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl<'input> core::fmt::Debug for AddTrapsRequest<'input> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("AddTrapsRequest").finish_non_exhaustive()
+    }
 }
 impl<'input> AddTrapsRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -4782,11 +5125,18 @@ impl<'input> crate::x11_utils::VoidRequest for AddTrapsRequest<'input> {
 
 /// Opcode for the CreateSolidFill request
 pub const CREATE_SOLID_FILL_REQUEST: u8 = 33;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CreateSolidFillRequest {
     pub picture: Picture,
     pub color: Color,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for CreateSolidFillRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("CreateSolidFillRequest").finish_non_exhaustive()
+    }
 }
 impl CreateSolidFillRequest {
     /// Serialize this request into bytes for the provided connection
@@ -4847,7 +5197,8 @@ impl crate::x11_utils::VoidRequest for CreateSolidFillRequest {
 
 /// Opcode for the CreateLinearGradient request
 pub const CREATE_LINEAR_GRADIENT_REQUEST: u8 = 34;
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CreateLinearGradientRequest<'input> {
     pub picture: Picture,
@@ -4855,6 +5206,12 @@ pub struct CreateLinearGradientRequest<'input> {
     pub p2: Pointfix,
     pub stops: Cow<'input, [Fixed]>,
     pub colors: Cow<'input, [Color]>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl<'input> core::fmt::Debug for CreateLinearGradientRequest<'input> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("CreateLinearGradientRequest").finish_non_exhaustive()
+    }
 }
 impl<'input> CreateLinearGradientRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -4954,7 +5311,8 @@ impl<'input> crate::x11_utils::VoidRequest for CreateLinearGradientRequest<'inpu
 
 /// Opcode for the CreateRadialGradient request
 pub const CREATE_RADIAL_GRADIENT_REQUEST: u8 = 35;
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CreateRadialGradientRequest<'input> {
     pub picture: Picture,
@@ -4964,6 +5322,12 @@ pub struct CreateRadialGradientRequest<'input> {
     pub outer_radius: Fixed,
     pub stops: Cow<'input, [Fixed]>,
     pub colors: Cow<'input, [Color]>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl<'input> core::fmt::Debug for CreateRadialGradientRequest<'input> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("CreateRadialGradientRequest").finish_non_exhaustive()
+    }
 }
 impl<'input> CreateRadialGradientRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -5079,7 +5443,8 @@ impl<'input> crate::x11_utils::VoidRequest for CreateRadialGradientRequest<'inpu
 
 /// Opcode for the CreateConicalGradient request
 pub const CREATE_CONICAL_GRADIENT_REQUEST: u8 = 36;
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CreateConicalGradientRequest<'input> {
     pub picture: Picture,
@@ -5087,6 +5452,12 @@ pub struct CreateConicalGradientRequest<'input> {
     pub angle: Fixed,
     pub stops: Cow<'input, [Fixed]>,
     pub colors: Cow<'input, [Color]>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl<'input> core::fmt::Debug for CreateConicalGradientRequest<'input> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("CreateConicalGradientRequest").finish_non_exhaustive()
+    }
 }
 impl<'input> CreateConicalGradientRequest<'input> {
     /// Serialize this request into bytes for the provided connection

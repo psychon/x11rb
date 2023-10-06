@@ -123,12 +123,20 @@ pub(super) fn emit_switch_type(
     for case in switch.cases.iter() {
         generator.filter_derives_for_fields(&mut derives, &case.fields.borrow(), false);
     }
+    let extras = derives.extra_traits_list();
     let mut derives = derives.to_list();
     if switch.kind == xcbdefs::SwitchKind::BitCase {
         derives.push("Default");
     }
     if !derives.is_empty() {
         outln!(out, "#[derive({})]", derives.join(", "));
+    }
+    if !extras.is_empty() {
+        outln!(
+            out,
+            "#[cfg_attr(feature = \"extra-traits\", derive({}))]",
+            extras.join(", ")
+        );
     }
     outln!(
         out,
@@ -214,6 +222,8 @@ pub(super) fn emit_switch_type(
         outln!(out.indent(), "InvalidValue({}),", switch_expr_type);
         outln!(out, "}}");
     }
+
+    super::helpers::default_debug_impl(name, out);
 
     if generate_try_parse {
         emit_switch_try_parse(generator, switch, name, &case_infos, switch_expr_type, out);

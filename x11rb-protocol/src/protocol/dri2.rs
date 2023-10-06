@@ -203,7 +203,8 @@ impl core::fmt::Debug for EventType  {
     }
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DRI2Buffer {
     pub attachment: Attachment,
@@ -211,6 +212,12 @@ pub struct DRI2Buffer {
     pub pitch: u32,
     pub cpp: u32,
     pub flags: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for DRI2Buffer {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("DRI2Buffer").finish_non_exhaustive()
+    }
 }
 impl TryParse for DRI2Buffer {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -265,11 +272,18 @@ impl Serialize for DRI2Buffer {
     }
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct AttachFormat {
     pub attachment: Attachment,
     pub format: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for AttachFormat {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("AttachFormat").finish_non_exhaustive()
+    }
 }
 impl TryParse for AttachFormat {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -305,11 +319,18 @@ impl Serialize for AttachFormat {
 
 /// Opcode for the QueryVersion request
 pub const QUERY_VERSION_REQUEST: u8 = 0;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryVersionRequest {
     pub major_version: u32,
     pub minor_version: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for QueryVersionRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("QueryVersionRequest").finish_non_exhaustive()
+    }
 }
 impl QueryVersionRequest {
     /// Serialize this request into bytes for the provided connection
@@ -365,13 +386,20 @@ impl crate::x11_utils::ReplyRequest for QueryVersionRequest {
     type Reply = QueryVersionReply;
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryVersionReply {
     pub sequence: u16,
     pub length: u32,
     pub major_version: u32,
     pub minor_version: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for QueryVersionReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("QueryVersionReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for QueryVersionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -433,11 +461,18 @@ impl Serialize for QueryVersionReply {
 
 /// Opcode for the Connect request
 pub const CONNECT_REQUEST: u8 = 1;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ConnectRequest {
     pub window: xproto::Window,
     pub driver_type: DriverType,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for ConnectRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("ConnectRequest").finish_non_exhaustive()
+    }
 }
 impl ConnectRequest {
     /// Serialize this request into bytes for the provided connection
@@ -494,7 +529,8 @@ impl crate::x11_utils::ReplyRequest for ConnectRequest {
     type Reply = ConnectReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ConnectReply {
     pub sequence: u16,
@@ -502,6 +538,12 @@ pub struct ConnectReply {
     pub driver_name: Vec<u8>,
     pub alignment_pad: Vec<u8>,
     pub device_name: Vec<u8>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for ConnectReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("ConnectReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for ConnectReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -585,11 +627,18 @@ impl ConnectReply {
 
 /// Opcode for the Authenticate request
 pub const AUTHENTICATE_REQUEST: u8 = 2;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct AuthenticateRequest {
     pub window: xproto::Window,
     pub magic: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for AuthenticateRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("AuthenticateRequest").finish_non_exhaustive()
+    }
 }
 impl AuthenticateRequest {
     /// Serialize this request into bytes for the provided connection
@@ -645,12 +694,19 @@ impl crate::x11_utils::ReplyRequest for AuthenticateRequest {
     type Reply = AuthenticateReply;
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct AuthenticateReply {
     pub sequence: u16,
     pub length: u32,
     pub authenticated: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for AuthenticateReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("AuthenticateReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for AuthenticateReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -705,10 +761,17 @@ impl Serialize for AuthenticateReply {
 
 /// Opcode for the CreateDrawable request
 pub const CREATE_DRAWABLE_REQUEST: u8 = 3;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CreateDrawableRequest {
     pub drawable: xproto::Drawable,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for CreateDrawableRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("CreateDrawableRequest").finish_non_exhaustive()
+    }
 }
 impl CreateDrawableRequest {
     /// Serialize this request into bytes for the provided connection
@@ -758,10 +821,17 @@ impl crate::x11_utils::VoidRequest for CreateDrawableRequest {
 
 /// Opcode for the DestroyDrawable request
 pub const DESTROY_DRAWABLE_REQUEST: u8 = 4;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DestroyDrawableRequest {
     pub drawable: xproto::Drawable,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for DestroyDrawableRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("DestroyDrawableRequest").finish_non_exhaustive()
+    }
 }
 impl DestroyDrawableRequest {
     /// Serialize this request into bytes for the provided connection
@@ -811,12 +881,19 @@ impl crate::x11_utils::VoidRequest for DestroyDrawableRequest {
 
 /// Opcode for the GetBuffers request
 pub const GET_BUFFERS_REQUEST: u8 = 5;
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetBuffersRequest<'input> {
     pub drawable: xproto::Drawable,
     pub count: u32,
     pub attachments: Cow<'input, [u32]>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl<'input> core::fmt::Debug for GetBuffersRequest<'input> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetBuffersRequest").finish_non_exhaustive()
+    }
 }
 impl<'input> GetBuffersRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -893,7 +970,8 @@ impl<'input> crate::x11_utils::ReplyRequest for GetBuffersRequest<'input> {
     type Reply = GetBuffersReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetBuffersReply {
     pub sequence: u16,
@@ -901,6 +979,12 @@ pub struct GetBuffersReply {
     pub width: u32,
     pub height: u32,
     pub buffers: Vec<DRI2Buffer>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetBuffersReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetBuffersReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetBuffersReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -964,13 +1048,20 @@ impl GetBuffersReply {
 
 /// Opcode for the CopyRegion request
 pub const COPY_REGION_REQUEST: u8 = 6;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CopyRegionRequest {
     pub drawable: xproto::Drawable,
     pub region: u32,
     pub dest: u32,
     pub src: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for CopyRegionRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("CopyRegionRequest").finish_non_exhaustive()
+    }
 }
 impl CopyRegionRequest {
     /// Serialize this request into bytes for the provided connection
@@ -1040,11 +1131,18 @@ impl crate::x11_utils::ReplyRequest for CopyRegionRequest {
     type Reply = CopyRegionReply;
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CopyRegionReply {
     pub sequence: u16,
     pub length: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for CopyRegionReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("CopyRegionReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for CopyRegionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -1092,12 +1190,19 @@ impl Serialize for CopyRegionReply {
 
 /// Opcode for the GetBuffersWithFormat request
 pub const GET_BUFFERS_WITH_FORMAT_REQUEST: u8 = 7;
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetBuffersWithFormatRequest<'input> {
     pub drawable: xproto::Drawable,
     pub count: u32,
     pub attachments: Cow<'input, [AttachFormat]>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl<'input> core::fmt::Debug for GetBuffersWithFormatRequest<'input> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetBuffersWithFormatRequest").finish_non_exhaustive()
+    }
 }
 impl<'input> GetBuffersWithFormatRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -1174,7 +1279,8 @@ impl<'input> crate::x11_utils::ReplyRequest for GetBuffersWithFormatRequest<'inp
     type Reply = GetBuffersWithFormatReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetBuffersWithFormatReply {
     pub sequence: u16,
@@ -1182,6 +1288,12 @@ pub struct GetBuffersWithFormatReply {
     pub width: u32,
     pub height: u32,
     pub buffers: Vec<DRI2Buffer>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetBuffersWithFormatReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetBuffersWithFormatReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetBuffersWithFormatReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -1245,7 +1357,8 @@ impl GetBuffersWithFormatReply {
 
 /// Opcode for the SwapBuffers request
 pub const SWAP_BUFFERS_REQUEST: u8 = 8;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SwapBuffersRequest {
     pub drawable: xproto::Drawable,
@@ -1255,6 +1368,12 @@ pub struct SwapBuffersRequest {
     pub divisor_lo: u32,
     pub remainder_hi: u32,
     pub remainder_lo: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for SwapBuffersRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SwapBuffersRequest").finish_non_exhaustive()
+    }
 }
 impl SwapBuffersRequest {
     /// Serialize this request into bytes for the provided connection
@@ -1345,13 +1464,20 @@ impl crate::x11_utils::ReplyRequest for SwapBuffersRequest {
     type Reply = SwapBuffersReply;
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SwapBuffersReply {
     pub sequence: u16,
     pub length: u32,
     pub swap_hi: u32,
     pub swap_lo: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for SwapBuffersReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SwapBuffersReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for SwapBuffersReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -1413,10 +1539,17 @@ impl Serialize for SwapBuffersReply {
 
 /// Opcode for the GetMSC request
 pub const GET_MSC_REQUEST: u8 = 9;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetMSCRequest {
     pub drawable: xproto::Drawable,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetMSCRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetMSCRequest").finish_non_exhaustive()
+    }
 }
 impl GetMSCRequest {
     /// Serialize this request into bytes for the provided connection
@@ -1465,7 +1598,8 @@ impl crate::x11_utils::ReplyRequest for GetMSCRequest {
     type Reply = GetMSCReply;
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetMSCReply {
     pub sequence: u16,
@@ -1476,6 +1610,12 @@ pub struct GetMSCReply {
     pub msc_lo: u32,
     pub sbc_hi: u32,
     pub sbc_lo: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetMSCReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetMSCReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetMSCReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -1565,7 +1705,8 @@ impl Serialize for GetMSCReply {
 
 /// Opcode for the WaitMSC request
 pub const WAIT_MSC_REQUEST: u8 = 10;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct WaitMSCRequest {
     pub drawable: xproto::Drawable,
@@ -1575,6 +1716,12 @@ pub struct WaitMSCRequest {
     pub divisor_lo: u32,
     pub remainder_hi: u32,
     pub remainder_lo: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for WaitMSCRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("WaitMSCRequest").finish_non_exhaustive()
+    }
 }
 impl WaitMSCRequest {
     /// Serialize this request into bytes for the provided connection
@@ -1665,7 +1812,8 @@ impl crate::x11_utils::ReplyRequest for WaitMSCRequest {
     type Reply = WaitMSCReply;
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct WaitMSCReply {
     pub sequence: u16,
@@ -1676,6 +1824,12 @@ pub struct WaitMSCReply {
     pub msc_lo: u32,
     pub sbc_hi: u32,
     pub sbc_lo: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for WaitMSCReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("WaitMSCReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for WaitMSCReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -1765,12 +1919,19 @@ impl Serialize for WaitMSCReply {
 
 /// Opcode for the WaitSBC request
 pub const WAIT_SBC_REQUEST: u8 = 11;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct WaitSBCRequest {
     pub drawable: xproto::Drawable,
     pub target_sbc_hi: u32,
     pub target_sbc_lo: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for WaitSBCRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("WaitSBCRequest").finish_non_exhaustive()
+    }
 }
 impl WaitSBCRequest {
     /// Serialize this request into bytes for the provided connection
@@ -1833,7 +1994,8 @@ impl crate::x11_utils::ReplyRequest for WaitSBCRequest {
     type Reply = WaitSBCReply;
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct WaitSBCReply {
     pub sequence: u16,
@@ -1844,6 +2006,12 @@ pub struct WaitSBCReply {
     pub msc_lo: u32,
     pub sbc_hi: u32,
     pub sbc_lo: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for WaitSBCReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("WaitSBCReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for WaitSBCReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -1933,11 +2101,18 @@ impl Serialize for WaitSBCReply {
 
 /// Opcode for the SwapInterval request
 pub const SWAP_INTERVAL_REQUEST: u8 = 12;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SwapIntervalRequest {
     pub drawable: xproto::Drawable,
     pub interval: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for SwapIntervalRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SwapIntervalRequest").finish_non_exhaustive()
+    }
 }
 impl SwapIntervalRequest {
     /// Serialize this request into bytes for the provided connection
@@ -1994,11 +2169,18 @@ impl crate::x11_utils::VoidRequest for SwapIntervalRequest {
 
 /// Opcode for the GetParam request
 pub const GET_PARAM_REQUEST: u8 = 13;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetParamRequest {
     pub drawable: xproto::Drawable,
     pub param: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetParamRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetParamRequest").finish_non_exhaustive()
+    }
 }
 impl GetParamRequest {
     /// Serialize this request into bytes for the provided connection
@@ -2054,7 +2236,8 @@ impl crate::x11_utils::ReplyRequest for GetParamRequest {
     type Reply = GetParamReply;
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetParamReply {
     pub is_param_recognized: bool,
@@ -2062,6 +2245,12 @@ pub struct GetParamReply {
     pub length: u32,
     pub value_hi: u32,
     pub value_lo: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetParamReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetParamReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetParamReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -2124,7 +2313,8 @@ impl Serialize for GetParamReply {
 
 /// Opcode for the BufferSwapComplete event
 pub const BUFFER_SWAP_COMPLETE_EVENT: u8 = 0;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct BufferSwapCompleteEvent {
     pub response_type: u8,
@@ -2136,6 +2326,12 @@ pub struct BufferSwapCompleteEvent {
     pub msc_hi: u32,
     pub msc_lo: u32,
     pub sbc: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for BufferSwapCompleteEvent {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("BufferSwapCompleteEvent").finish_non_exhaustive()
+    }
 }
 impl TryParse for BufferSwapCompleteEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -2276,12 +2472,19 @@ impl From<BufferSwapCompleteEvent> for [u8; 32] {
 
 /// Opcode for the InvalidateBuffers event
 pub const INVALIDATE_BUFFERS_EVENT: u8 = 1;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct InvalidateBuffersEvent {
     pub response_type: u8,
     pub sequence: u16,
     pub drawable: xproto::Drawable,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for InvalidateBuffersEvent {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("InvalidateBuffersEvent").finish_non_exhaustive()
+    }
 }
 impl TryParse for InvalidateBuffersEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {

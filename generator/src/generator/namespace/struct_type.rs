@@ -48,9 +48,17 @@ pub(super) fn emit_struct_type(
     if let Some(doc) = doc {
         generator.emit_doc(doc, out, Some(&deducible_fields));
     }
+    let extras = derives.extra_traits_list();
     let derives = derives.to_list();
     if !derives.is_empty() {
         outln!(out, "#[derive({})]", derives.join(", "));
+    }
+    if !extras.is_empty() {
+        outln!(
+            out,
+            "#[cfg_attr(feature = \"extra-traits\", derive({}))]",
+            extras.join(", ")
+        );
     }
     if !has_fds {
         outln!(
@@ -74,6 +82,8 @@ pub(super) fn emit_struct_type(
         }
     }
     outln!(out, "}}");
+
+    super::helpers::default_debug_impl(name, out);
 
     if generate_try_parse {
         let input_name = if !matches!(parse_size_constraint, StructSizeConstraint::None) {
