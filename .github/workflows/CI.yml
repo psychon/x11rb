@@ -9,7 +9,7 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
-  MOST_FEATURES: all-extensions cursor extra-traits image tracing tracing-subscriber/env-filter
+  MOST_FEATURES: all-extensions cursor extra-traits image request-parsing tracing tracing-subscriber/env-filter
   # According to code coverage changes, sometimes $XENVIRONMENT is set and
   # sometimes not. Try to make this consistent to stabilise coverage reports.
   # Example: https://app.codecov.io/gh/psychon/x11rb/compare/726/changes
