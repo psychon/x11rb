@@ -2217,7 +2217,7 @@ pub enum Request<'input> {
 impl<'input> Request<'input> {
     // Parse a X11 request into a concrete type
     #[allow(clippy::cognitive_complexity, clippy::single_match)]
-    #[cfg(feature = "extra-traits")]
+    #[cfg(feature = "request-parsing")]
     pub fn parse(
         header: RequestHeader,
         body: &'input [u8],

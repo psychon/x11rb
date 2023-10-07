@@ -246,7 +246,7 @@ impl QueryVersionRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    #[cfg(feature = "extra-traits")]
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != QUERY_VERSION_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -402,7 +402,7 @@ impl QueryInfoRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    #[cfg(feature = "extra-traits")]
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != QUERY_INFO_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -576,7 +576,7 @@ impl SelectInputRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    #[cfg(feature = "extra-traits")]
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SELECT_INPUT_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -632,6 +632,7 @@ impl core::fmt::Debug for SetAttributesAux {
     }
 }
 impl SetAttributesAux {
+    #[cfg_attr(not(feature = "request-parsing"), allow(dead_code))]
     fn try_parse(value: &[u8], value_mask: u32) -> Result<(Self, &[u8]), ParseError> {
         let switch_expr = u32::from(value_mask);
         let mut outer_remaining = value;
@@ -1047,7 +1048,7 @@ impl<'input> SetAttributesRequest<'input> {
         ([request0.into(), value_list_bytes.into(), padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    #[cfg(feature = "extra-traits")]
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_ATTRIBUTES_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1143,7 +1144,7 @@ impl UnsetAttributesRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    #[cfg(feature = "extra-traits")]
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != UNSET_ATTRIBUTES_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1204,7 +1205,7 @@ impl SuspendRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    #[cfg(feature = "extra-traits")]
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SUSPEND_REQUEST {
             return Err(ParseError::InvalidValue);

@@ -951,7 +951,7 @@ fn emit_request_struct(
         );
         outln!(
             out,
-            "#[cfg(feature = \"extra-traits\")]"
+            "#[cfg(feature = \"request-parsing\")]"
         );
         if gathered.has_fds() {
             outln!(

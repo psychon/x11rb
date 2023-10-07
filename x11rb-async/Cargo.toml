@@ -58,6 +58,7 @@ all-extensions = [
     "xvmc"
 ]
 
+# Enable extra traits on protocol types.
 extra-traits = ["x11rb-protocol/extra-traits"]
 
 composite = ["x11rb-protocol/composite", "xfixes"]

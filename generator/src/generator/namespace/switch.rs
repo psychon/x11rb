@@ -398,6 +398,10 @@ fn emit_switch_try_parse(
             .collect::<Vec<_>>();
         outln!(
             out.indent(),
+            "#[cfg_attr(not(feature = \"request-parsing\"), allow(dead_code))]"
+        );
+        outln!(
+            out.indent(),
             "fn try_parse(value: &[u8], {}) -> Result<(Self, &[u8]), ParseError> {{",
             p.join(", "),
         );

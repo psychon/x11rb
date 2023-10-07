@@ -78,7 +78,7 @@ impl QueryVersionRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    #[cfg(feature = "extra-traits")]
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != QUERY_VERSION_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -221,7 +221,7 @@ impl OpenRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    #[cfg(feature = "extra-traits")]
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != OPEN_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -400,7 +400,7 @@ impl PixmapFromBufferRequest {
         ([request0.into()], vec![self.pixmap_fd])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    #[cfg(feature = "extra-traits")]
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request_fd(header: RequestHeader, value: &[u8], fds: &mut Vec<RawFdContainer>) -> Result<Self, ParseError> {
         if header.minor_opcode != PIXMAP_FROM_BUFFER_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -478,7 +478,7 @@ impl BufferFromPixmapRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    #[cfg(feature = "extra-traits")]
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != BUFFER_FROM_PIXMAP_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -661,7 +661,7 @@ impl FenceFromFDRequest {
         ([request0.into()], vec![self.fence_fd])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    #[cfg(feature = "extra-traits")]
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request_fd(header: RequestHeader, value: &[u8], fds: &mut Vec<RawFdContainer>) -> Result<Self, ParseError> {
         if header.minor_opcode != FENCE_FROM_FD_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -736,7 +736,7 @@ impl FDFromFenceRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    #[cfg(feature = "extra-traits")]
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != FD_FROM_FENCE_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -894,7 +894,7 @@ impl GetSupportedModifiersRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    #[cfg(feature = "extra-traits")]
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_SUPPORTED_MODIFIERS_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1135,7 +1135,7 @@ impl PixmapFromBuffersRequest {
         ([request0.into()], self.buffers)
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    #[cfg(feature = "extra-traits")]
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request_fd(header: RequestHeader, value: &[u8], fds: &mut Vec<RawFdContainer>) -> Result<Self, ParseError> {
         if header.minor_opcode != PIXMAP_FROM_BUFFERS_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1232,7 +1232,7 @@ impl BuffersFromPixmapRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    #[cfg(feature = "extra-traits")]
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != BUFFERS_FROM_PIXMAP_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1399,7 +1399,7 @@ impl SetDRMDeviceInUseRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
-    #[cfg(feature = "extra-traits")]
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_DRM_DEVICE_IN_USE_REQUEST {
             return Err(ParseError::InvalidValue);
