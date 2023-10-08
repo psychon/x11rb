@@ -84,9 +84,9 @@
 //!
 //! ### Feature flags for specific X11 extensions
 //!
-//! By default, only the core X11 protocol and X11 extensions that are
-//! needed internally are enabled. Further extensions need to be explicitly enabled via their
-//! feature flag:
+//! By default, only the core X11 protocol and X11 extensions that are needed internally are
+//! enabled. These are the `bigreq`, `ge` and `xc_misc` extensions. Further extensions need to be
+//! explicitly enabled via their feature flag:
 //!
 //! `composite`, `damage`, `dpms`, `dri2`, `dri3`, `glx`, `present`, `randr`, `record`, `render`,
 //! `res`, `screensaver`, `shape`, `shm`, `sync`, `xevie`, `xf86dri`, `xf86vidmode`, `xfixes`,
@@ -99,14 +99,14 @@
 //!
 //! Additionally, the following flags exist:
 //! * `allow-unsafe-code`: Enable features that require `unsafe`. Without this flag,
-//!   `x11rb::xcb_ffi::XCBConnection` and some support code for it are unavailable.
-//! * `cursor`: Enable the code in [crate::cursor] for loading cursor files.
-//! * `resource_manager`: Enable the code in [crate::resource_manager] for loading and querying the
+//!   [`xcb_ffi::XCBConnection`] and some support code for it are unavailable.
+//! * `cursor`: Enable the code in [cursor] for loading cursor files.
+//! * `resource_manager`: Enable the code in [resource_manager] for loading and querying the
 //!   X11 resource database.
-//! * `image`: Enable the code in [crate::image] for working with pixel image data.
+//! * `image`: Enable the code in [image] for working with pixel image data.
 //! * `dl-libxcb`: Enabling this feature will prevent from libxcb being linked to the
 //!   resulting executable. Instead libxcb will be dynamically loaded at runtime.
-//!   This feature adds the [`crate::xcb_ffi::load_libxcb`] function, that allows to load
+//!   This feature adds the [`xcb_ffi::load_libxcb`] function, that allows to load
 //!   libxcb and check for success or failure.
 //!
 //! # Integrating x11rb with an Event Loop
