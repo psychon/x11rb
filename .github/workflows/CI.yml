@@ -61,10 +61,10 @@ jobs:
          run: cargo clippy -p x11rb --all-targets -- -D warnings ${{ matrix.clippy_args }}
 
        - name: clippy x11rb without default features
-         run: cargo clippy -p x11rb --all-targets -- -D warnings ${{ matrix.clippy_args }} --no-default-features 
+         run: cargo clippy -p x11rb --no-default-features --all-targets -- -D warnings ${{ matrix.clippy_args }}
 
        - name: clippy x11rb-protocol with request parsing
-         run: cargo clippy -p x11rb-protocol --all-targets -- -D warnings ${{ matrix.clippy_args }} --features request-parsing
+         run: cargo clippy -p x11rb-protocol --all-targets --features request-parsing -- -D warnings ${{ matrix.clippy_args }}
 
        - name: clippy x11rb with allow-unsafe-code but without dl-libxcb
          run: cargo clippy -p x11rb --all-targets --features "allow-unsafe-code" -- -D warnings ${{ matrix.clippy_args }}

@@ -111,6 +111,7 @@
 //! * `extra-traits`: Enable some additional traits for generated code, like `Eq`, `Ord` and
 //!   `Hash`. This is not needed by default and adds a large amount of code that bloats codegen
 //!   time
+//! * `request-parsing`: Add the ability to parse X11 requests. Not normally needed.
 //!
 //! # Integrating x11rb with an Event Loop
 //!

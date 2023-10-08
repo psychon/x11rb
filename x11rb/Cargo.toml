@@ -51,6 +51,9 @@ dl-libxcb = ["allow-unsafe-code", "libloading", "once_cell"]
 # Enable extra traits on protocol types.
 extra-traits = ["x11rb-protocol/extra-traits"]
 
+# Add the ability to parse X11 requests (not normally needed).
+request-parsing = ["x11rb-protocol/request-parsing"]
+
 # Enable this feature to enable all the X11 extensions
 all-extensions = [
     "x11rb-protocol/all-extensions",
