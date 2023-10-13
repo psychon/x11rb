@@ -101,7 +101,8 @@ pub const GLX_BAD_PROFILE_ARB_ERROR: u8 = 13;
 
 /// Opcode for the PbufferClobber event
 pub const PBUFFER_CLOBBER_EVENT: u8 = 0;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PbufferClobberEvent {
     pub response_type: u8,
@@ -116,6 +117,12 @@ pub struct PbufferClobberEvent {
     pub width: u16,
     pub height: u16,
     pub count: u16,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for PbufferClobberEvent {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("PbufferClobberEvent").finish_non_exhaustive()
+    }
 }
 impl TryParse for PbufferClobberEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -267,7 +274,8 @@ impl From<PbufferClobberEvent> for [u8; 32] {
 
 /// Opcode for the BufferSwapComplete event
 pub const BUFFER_SWAP_COMPLETE_EVENT: u8 = 1;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct BufferSwapCompleteEvent {
     pub response_type: u8,
@@ -279,6 +287,12 @@ pub struct BufferSwapCompleteEvent {
     pub msc_hi: u32,
     pub msc_lo: u32,
     pub sbc: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for BufferSwapCompleteEvent {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("BufferSwapCompleteEvent").finish_non_exhaustive()
+    }
 }
 impl TryParse for BufferSwapCompleteEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -524,11 +538,18 @@ impl core::fmt::Debug for PBCDT  {
 
 /// Opcode for the Render request
 pub const RENDER_REQUEST: u8 = 1;
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct RenderRequest<'input> {
     pub context_tag: ContextTag,
     pub data: Cow<'input, [u8]>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl<'input> core::fmt::Debug for RenderRequest<'input> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("RenderRequest").finish_non_exhaustive()
+    }
 }
 impl<'input> RenderRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -555,6 +576,7 @@ impl<'input> RenderRequest<'input> {
         ([request0.into(), self.data, padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != RENDER_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -590,13 +612,20 @@ impl<'input> crate::x11_utils::VoidRequest for RenderRequest<'input> {
 
 /// Opcode for the RenderLarge request
 pub const RENDER_LARGE_REQUEST: u8 = 2;
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct RenderLargeRequest<'input> {
     pub context_tag: ContextTag,
     pub request_num: u16,
     pub request_total: u16,
     pub data: Cow<'input, [u8]>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl<'input> core::fmt::Debug for RenderLargeRequest<'input> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("RenderLargeRequest").finish_non_exhaustive()
+    }
 }
 impl<'input> RenderLargeRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -635,6 +664,7 @@ impl<'input> RenderLargeRequest<'input> {
         ([request0.into(), self.data, padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != RENDER_LARGE_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -677,7 +707,8 @@ impl<'input> crate::x11_utils::VoidRequest for RenderLargeRequest<'input> {
 
 /// Opcode for the CreateContext request
 pub const CREATE_CONTEXT_REQUEST: u8 = 3;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CreateContextRequest {
     pub context: Context,
@@ -685,6 +716,12 @@ pub struct CreateContextRequest {
     pub screen: u32,
     pub share_list: Context,
     pub is_direct: bool,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for CreateContextRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("CreateContextRequest").finish_non_exhaustive()
+    }
 }
 impl CreateContextRequest {
     /// Serialize this request into bytes for the provided connection
@@ -728,6 +765,7 @@ impl CreateContextRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CREATE_CONTEXT_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -763,10 +801,17 @@ impl crate::x11_utils::VoidRequest for CreateContextRequest {
 
 /// Opcode for the DestroyContext request
 pub const DESTROY_CONTEXT_REQUEST: u8 = 4;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DestroyContextRequest {
     pub context: Context,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for DestroyContextRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("DestroyContextRequest").finish_non_exhaustive()
+    }
 }
 impl DestroyContextRequest {
     /// Serialize this request into bytes for the provided connection
@@ -790,6 +835,7 @@ impl DestroyContextRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != DESTROY_CONTEXT_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -816,12 +862,19 @@ impl crate::x11_utils::VoidRequest for DestroyContextRequest {
 
 /// Opcode for the MakeCurrent request
 pub const MAKE_CURRENT_REQUEST: u8 = 5;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct MakeCurrentRequest {
     pub drawable: Drawable,
     pub context: Context,
     pub old_context_tag: ContextTag,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for MakeCurrentRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("MakeCurrentRequest").finish_non_exhaustive()
+    }
 }
 impl MakeCurrentRequest {
     /// Serialize this request into bytes for the provided connection
@@ -855,6 +908,7 @@ impl MakeCurrentRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != MAKE_CURRENT_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -884,12 +938,19 @@ impl crate::x11_utils::ReplyRequest for MakeCurrentRequest {
     type Reply = MakeCurrentReply;
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct MakeCurrentReply {
     pub sequence: u16,
     pub length: u32,
     pub context_tag: ContextTag,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for MakeCurrentReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("MakeCurrentReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for MakeCurrentReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -966,10 +1027,17 @@ impl Serialize for MakeCurrentReply {
 
 /// Opcode for the IsDirect request
 pub const IS_DIRECT_REQUEST: u8 = 6;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct IsDirectRequest {
     pub context: Context,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for IsDirectRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("IsDirectRequest").finish_non_exhaustive()
+    }
 }
 impl IsDirectRequest {
     /// Serialize this request into bytes for the provided connection
@@ -993,6 +1061,7 @@ impl IsDirectRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != IS_DIRECT_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1018,12 +1087,19 @@ impl crate::x11_utils::ReplyRequest for IsDirectRequest {
     type Reply = IsDirectReply;
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct IsDirectReply {
     pub sequence: u16,
     pub length: u32,
     pub is_direct: bool,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for IsDirectReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("IsDirectReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for IsDirectReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -1100,11 +1176,18 @@ impl Serialize for IsDirectReply {
 
 /// Opcode for the QueryVersion request
 pub const QUERY_VERSION_REQUEST: u8 = 7;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryVersionRequest {
     pub major_version: u32,
     pub minor_version: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for QueryVersionRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("QueryVersionRequest").finish_non_exhaustive()
+    }
 }
 impl QueryVersionRequest {
     /// Serialize this request into bytes for the provided connection
@@ -1133,6 +1216,7 @@ impl QueryVersionRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != QUERY_VERSION_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1160,13 +1244,20 @@ impl crate::x11_utils::ReplyRequest for QueryVersionRequest {
     type Reply = QueryVersionReply;
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryVersionReply {
     pub sequence: u16,
     pub length: u32,
     pub major_version: u32,
     pub minor_version: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for QueryVersionReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("QueryVersionReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for QueryVersionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -1246,10 +1337,17 @@ impl Serialize for QueryVersionReply {
 
 /// Opcode for the WaitGL request
 pub const WAIT_GL_REQUEST: u8 = 8;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct WaitGLRequest {
     pub context_tag: ContextTag,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for WaitGLRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("WaitGLRequest").finish_non_exhaustive()
+    }
 }
 impl WaitGLRequest {
     /// Serialize this request into bytes for the provided connection
@@ -1273,6 +1371,7 @@ impl WaitGLRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != WAIT_GL_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1299,10 +1398,17 @@ impl crate::x11_utils::VoidRequest for WaitGLRequest {
 
 /// Opcode for the WaitX request
 pub const WAIT_X_REQUEST: u8 = 9;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct WaitXRequest {
     pub context_tag: ContextTag,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for WaitXRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("WaitXRequest").finish_non_exhaustive()
+    }
 }
 impl WaitXRequest {
     /// Serialize this request into bytes for the provided connection
@@ -1326,6 +1432,7 @@ impl WaitXRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != WAIT_X_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1352,13 +1459,20 @@ impl crate::x11_utils::VoidRequest for WaitXRequest {
 
 /// Opcode for the CopyContext request
 pub const COPY_CONTEXT_REQUEST: u8 = 10;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CopyContextRequest {
     pub src: Context,
     pub dest: Context,
     pub mask: u32,
     pub src_context_tag: ContextTag,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for CopyContextRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("CopyContextRequest").finish_non_exhaustive()
+    }
 }
 impl CopyContextRequest {
     /// Serialize this request into bytes for the provided connection
@@ -1397,6 +1511,7 @@ impl CopyContextRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != COPY_CONTEXT_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1514,11 +1629,18 @@ impl core::fmt::Debug for GC  {
 
 /// Opcode for the SwapBuffers request
 pub const SWAP_BUFFERS_REQUEST: u8 = 11;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SwapBuffersRequest {
     pub context_tag: ContextTag,
     pub drawable: Drawable,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for SwapBuffersRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SwapBuffersRequest").finish_non_exhaustive()
+    }
 }
 impl SwapBuffersRequest {
     /// Serialize this request into bytes for the provided connection
@@ -1547,6 +1669,7 @@ impl SwapBuffersRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SWAP_BUFFERS_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1575,7 +1698,8 @@ impl crate::x11_utils::VoidRequest for SwapBuffersRequest {
 
 /// Opcode for the UseXFont request
 pub const USE_X_FONT_REQUEST: u8 = 12;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct UseXFontRequest {
     pub context_tag: ContextTag,
@@ -1583,6 +1707,12 @@ pub struct UseXFontRequest {
     pub first: u32,
     pub count: u32,
     pub list_base: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for UseXFontRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("UseXFontRequest").finish_non_exhaustive()
+    }
 }
 impl UseXFontRequest {
     /// Serialize this request into bytes for the provided connection
@@ -1626,6 +1756,7 @@ impl UseXFontRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != USE_X_FONT_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1660,13 +1791,20 @@ impl crate::x11_utils::VoidRequest for UseXFontRequest {
 
 /// Opcode for the CreateGLXPixmap request
 pub const CREATE_GLX_PIXMAP_REQUEST: u8 = 13;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CreateGLXPixmapRequest {
     pub screen: u32,
     pub visual: xproto::Visualid,
     pub pixmap: xproto::Pixmap,
     pub glx_pixmap: Pixmap,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for CreateGLXPixmapRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("CreateGLXPixmapRequest").finish_non_exhaustive()
+    }
 }
 impl CreateGLXPixmapRequest {
     /// Serialize this request into bytes for the provided connection
@@ -1705,6 +1843,7 @@ impl CreateGLXPixmapRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CREATE_GLX_PIXMAP_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1737,10 +1876,17 @@ impl crate::x11_utils::VoidRequest for CreateGLXPixmapRequest {
 
 /// Opcode for the GetVisualConfigs request
 pub const GET_VISUAL_CONFIGS_REQUEST: u8 = 14;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetVisualConfigsRequest {
     pub screen: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetVisualConfigsRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetVisualConfigsRequest").finish_non_exhaustive()
+    }
 }
 impl GetVisualConfigsRequest {
     /// Serialize this request into bytes for the provided connection
@@ -1764,6 +1910,7 @@ impl GetVisualConfigsRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_VISUAL_CONFIGS_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1789,13 +1936,20 @@ impl crate::x11_utils::ReplyRequest for GetVisualConfigsRequest {
     type Reply = GetVisualConfigsReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetVisualConfigsReply {
     pub sequence: u16,
     pub num_visuals: u32,
     pub num_properties: u32,
     pub property_list: Vec<u32>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetVisualConfigsReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetVisualConfigsReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetVisualConfigsReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -1857,10 +2011,17 @@ impl GetVisualConfigsReply {
 
 /// Opcode for the DestroyGLXPixmap request
 pub const DESTROY_GLX_PIXMAP_REQUEST: u8 = 15;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DestroyGLXPixmapRequest {
     pub glx_pixmap: Pixmap,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for DestroyGLXPixmapRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("DestroyGLXPixmapRequest").finish_non_exhaustive()
+    }
 }
 impl DestroyGLXPixmapRequest {
     /// Serialize this request into bytes for the provided connection
@@ -1884,6 +2045,7 @@ impl DestroyGLXPixmapRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != DESTROY_GLX_PIXMAP_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1910,12 +2072,19 @@ impl crate::x11_utils::VoidRequest for DestroyGLXPixmapRequest {
 
 /// Opcode for the VendorPrivate request
 pub const VENDOR_PRIVATE_REQUEST: u8 = 16;
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct VendorPrivateRequest<'input> {
     pub vendor_code: u32,
     pub context_tag: ContextTag,
     pub data: Cow<'input, [u8]>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl<'input> core::fmt::Debug for VendorPrivateRequest<'input> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("VendorPrivateRequest").finish_non_exhaustive()
+    }
 }
 impl<'input> VendorPrivateRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -1947,6 +2116,7 @@ impl<'input> VendorPrivateRequest<'input> {
         ([request0.into(), self.data, padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != VENDOR_PRIVATE_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1985,12 +2155,19 @@ impl<'input> crate::x11_utils::VoidRequest for VendorPrivateRequest<'input> {
 
 /// Opcode for the VendorPrivateWithReply request
 pub const VENDOR_PRIVATE_WITH_REPLY_REQUEST: u8 = 17;
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct VendorPrivateWithReplyRequest<'input> {
     pub vendor_code: u32,
     pub context_tag: ContextTag,
     pub data: Cow<'input, [u8]>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl<'input> core::fmt::Debug for VendorPrivateWithReplyRequest<'input> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("VendorPrivateWithReplyRequest").finish_non_exhaustive()
+    }
 }
 impl<'input> VendorPrivateWithReplyRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -2022,6 +2199,7 @@ impl<'input> VendorPrivateWithReplyRequest<'input> {
         ([request0.into(), self.data, padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != VENDOR_PRIVATE_WITH_REPLY_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -2059,13 +2237,20 @@ impl<'input> crate::x11_utils::ReplyRequest for VendorPrivateWithReplyRequest<'i
     type Reply = VendorPrivateWithReplyReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct VendorPrivateWithReplyReply {
     pub sequence: u16,
     pub retval: u32,
     pub data1: [u8; 24],
     pub data2: Vec<u8>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for VendorPrivateWithReplyReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("VendorPrivateWithReplyReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for VendorPrivateWithReplyReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -2128,10 +2313,17 @@ impl VendorPrivateWithReplyReply {
 
 /// Opcode for the QueryExtensionsString request
 pub const QUERY_EXTENSIONS_STRING_REQUEST: u8 = 18;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryExtensionsStringRequest {
     pub screen: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for QueryExtensionsStringRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("QueryExtensionsStringRequest").finish_non_exhaustive()
+    }
 }
 impl QueryExtensionsStringRequest {
     /// Serialize this request into bytes for the provided connection
@@ -2155,6 +2347,7 @@ impl QueryExtensionsStringRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != QUERY_EXTENSIONS_STRING_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -2180,12 +2373,19 @@ impl crate::x11_utils::ReplyRequest for QueryExtensionsStringRequest {
     type Reply = QueryExtensionsStringReply;
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryExtensionsStringReply {
     pub sequence: u16,
     pub length: u32,
     pub n: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for QueryExtensionsStringReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("QueryExtensionsStringReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for QueryExtensionsStringReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -2264,11 +2464,18 @@ impl Serialize for QueryExtensionsStringReply {
 
 /// Opcode for the QueryServerString request
 pub const QUERY_SERVER_STRING_REQUEST: u8 = 19;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryServerStringRequest {
     pub screen: u32,
     pub name: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for QueryServerStringRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("QueryServerStringRequest").finish_non_exhaustive()
+    }
 }
 impl QueryServerStringRequest {
     /// Serialize this request into bytes for the provided connection
@@ -2297,6 +2504,7 @@ impl QueryServerStringRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != QUERY_SERVER_STRING_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -2324,12 +2532,19 @@ impl crate::x11_utils::ReplyRequest for QueryServerStringRequest {
     type Reply = QueryServerStringReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryServerStringReply {
     pub sequence: u16,
     pub length: u32,
     pub string: Vec<u8>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for QueryServerStringReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("QueryServerStringReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for QueryServerStringReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -2392,12 +2607,19 @@ impl QueryServerStringReply {
 
 /// Opcode for the ClientInfo request
 pub const CLIENT_INFO_REQUEST: u8 = 20;
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ClientInfoRequest<'input> {
     pub major_version: u32,
     pub minor_version: u32,
     pub string: Cow<'input, [u8]>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl<'input> core::fmt::Debug for ClientInfoRequest<'input> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("ClientInfoRequest").finish_non_exhaustive()
+    }
 }
 impl<'input> ClientInfoRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -2435,6 +2657,7 @@ impl<'input> ClientInfoRequest<'input> {
         ([request0.into(), self.string, padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CLIENT_INFO_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -2474,10 +2697,17 @@ impl<'input> crate::x11_utils::VoidRequest for ClientInfoRequest<'input> {
 
 /// Opcode for the GetFBConfigs request
 pub const GET_FB_CONFIGS_REQUEST: u8 = 21;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetFBConfigsRequest {
     pub screen: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetFBConfigsRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetFBConfigsRequest").finish_non_exhaustive()
+    }
 }
 impl GetFBConfigsRequest {
     /// Serialize this request into bytes for the provided connection
@@ -2501,6 +2731,7 @@ impl GetFBConfigsRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_FB_CONFIGS_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -2526,13 +2757,20 @@ impl crate::x11_utils::ReplyRequest for GetFBConfigsRequest {
     type Reply = GetFBConfigsReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetFBConfigsReply {
     pub sequence: u16,
     pub num_fb_configs: u32,
     pub num_properties: u32,
     pub property_list: Vec<u32>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetFBConfigsReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetFBConfigsReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetFBConfigsReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -2594,7 +2832,8 @@ impl GetFBConfigsReply {
 
 /// Opcode for the CreatePixmap request
 pub const CREATE_PIXMAP_REQUEST: u8 = 22;
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CreatePixmapRequest<'input> {
     pub screen: u32,
@@ -2602,6 +2841,12 @@ pub struct CreatePixmapRequest<'input> {
     pub pixmap: xproto::Pixmap,
     pub glx_pixmap: Pixmap,
     pub attribs: Cow<'input, [u32]>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl<'input> core::fmt::Debug for CreatePixmapRequest<'input> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("CreatePixmapRequest").finish_non_exhaustive()
+    }
 }
 impl<'input> CreatePixmapRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -2651,6 +2896,7 @@ impl<'input> CreatePixmapRequest<'input> {
         ([request0.into(), attribs_bytes.into(), padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CREATE_PIXMAP_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -2696,10 +2942,17 @@ impl<'input> crate::x11_utils::VoidRequest for CreatePixmapRequest<'input> {
 
 /// Opcode for the DestroyPixmap request
 pub const DESTROY_PIXMAP_REQUEST: u8 = 23;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DestroyPixmapRequest {
     pub glx_pixmap: Pixmap,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for DestroyPixmapRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("DestroyPixmapRequest").finish_non_exhaustive()
+    }
 }
 impl DestroyPixmapRequest {
     /// Serialize this request into bytes for the provided connection
@@ -2723,6 +2976,7 @@ impl DestroyPixmapRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != DESTROY_PIXMAP_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -2749,7 +3003,8 @@ impl crate::x11_utils::VoidRequest for DestroyPixmapRequest {
 
 /// Opcode for the CreateNewContext request
 pub const CREATE_NEW_CONTEXT_REQUEST: u8 = 24;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CreateNewContextRequest {
     pub context: Context,
@@ -2758,6 +3013,12 @@ pub struct CreateNewContextRequest {
     pub render_type: u32,
     pub share_list: Context,
     pub is_direct: bool,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for CreateNewContextRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("CreateNewContextRequest").finish_non_exhaustive()
+    }
 }
 impl CreateNewContextRequest {
     /// Serialize this request into bytes for the provided connection
@@ -2806,6 +3067,7 @@ impl CreateNewContextRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CREATE_NEW_CONTEXT_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -2843,10 +3105,17 @@ impl crate::x11_utils::VoidRequest for CreateNewContextRequest {
 
 /// Opcode for the QueryContext request
 pub const QUERY_CONTEXT_REQUEST: u8 = 25;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryContextRequest {
     pub context: Context,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for QueryContextRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("QueryContextRequest").finish_non_exhaustive()
+    }
 }
 impl QueryContextRequest {
     /// Serialize this request into bytes for the provided connection
@@ -2870,6 +3139,7 @@ impl QueryContextRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != QUERY_CONTEXT_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -2895,12 +3165,19 @@ impl crate::x11_utils::ReplyRequest for QueryContextRequest {
     type Reply = QueryContextReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryContextReply {
     pub sequence: u16,
     pub length: u32,
     pub attribs: Vec<u32>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for QueryContextReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("QueryContextReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for QueryContextReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -2962,13 +3239,20 @@ impl QueryContextReply {
 
 /// Opcode for the MakeContextCurrent request
 pub const MAKE_CONTEXT_CURRENT_REQUEST: u8 = 26;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct MakeContextCurrentRequest {
     pub old_context_tag: ContextTag,
     pub drawable: Drawable,
     pub read_drawable: Drawable,
     pub context: Context,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for MakeContextCurrentRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("MakeContextCurrentRequest").finish_non_exhaustive()
+    }
 }
 impl MakeContextCurrentRequest {
     /// Serialize this request into bytes for the provided connection
@@ -3007,6 +3291,7 @@ impl MakeContextCurrentRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != MAKE_CONTEXT_CURRENT_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -3038,12 +3323,19 @@ impl crate::x11_utils::ReplyRequest for MakeContextCurrentRequest {
     type Reply = MakeContextCurrentReply;
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct MakeContextCurrentReply {
     pub sequence: u16,
     pub length: u32,
     pub context_tag: ContextTag,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for MakeContextCurrentReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("MakeContextCurrentReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for MakeContextCurrentReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -3120,13 +3412,20 @@ impl Serialize for MakeContextCurrentReply {
 
 /// Opcode for the CreatePbuffer request
 pub const CREATE_PBUFFER_REQUEST: u8 = 27;
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CreatePbufferRequest<'input> {
     pub screen: u32,
     pub fbconfig: Fbconfig,
     pub pbuffer: Pbuffer,
     pub attribs: Cow<'input, [u32]>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl<'input> core::fmt::Debug for CreatePbufferRequest<'input> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("CreatePbufferRequest").finish_non_exhaustive()
+    }
 }
 impl<'input> CreatePbufferRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -3171,6 +3470,7 @@ impl<'input> CreatePbufferRequest<'input> {
         ([request0.into(), attribs_bytes.into(), padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CREATE_PBUFFER_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -3213,10 +3513,17 @@ impl<'input> crate::x11_utils::VoidRequest for CreatePbufferRequest<'input> {
 
 /// Opcode for the DestroyPbuffer request
 pub const DESTROY_PBUFFER_REQUEST: u8 = 28;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DestroyPbufferRequest {
     pub pbuffer: Pbuffer,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for DestroyPbufferRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("DestroyPbufferRequest").finish_non_exhaustive()
+    }
 }
 impl DestroyPbufferRequest {
     /// Serialize this request into bytes for the provided connection
@@ -3240,6 +3547,7 @@ impl DestroyPbufferRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != DESTROY_PBUFFER_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -3266,10 +3574,17 @@ impl crate::x11_utils::VoidRequest for DestroyPbufferRequest {
 
 /// Opcode for the GetDrawableAttributes request
 pub const GET_DRAWABLE_ATTRIBUTES_REQUEST: u8 = 29;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetDrawableAttributesRequest {
     pub drawable: Drawable,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetDrawableAttributesRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetDrawableAttributesRequest").finish_non_exhaustive()
+    }
 }
 impl GetDrawableAttributesRequest {
     /// Serialize this request into bytes for the provided connection
@@ -3293,6 +3608,7 @@ impl GetDrawableAttributesRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_DRAWABLE_ATTRIBUTES_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -3318,12 +3634,19 @@ impl crate::x11_utils::ReplyRequest for GetDrawableAttributesRequest {
     type Reply = GetDrawableAttributesReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetDrawableAttributesReply {
     pub sequence: u16,
     pub length: u32,
     pub attribs: Vec<u32>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetDrawableAttributesReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetDrawableAttributesReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetDrawableAttributesReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -3385,11 +3708,18 @@ impl GetDrawableAttributesReply {
 
 /// Opcode for the ChangeDrawableAttributes request
 pub const CHANGE_DRAWABLE_ATTRIBUTES_REQUEST: u8 = 30;
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ChangeDrawableAttributesRequest<'input> {
     pub drawable: Drawable,
     pub attribs: Cow<'input, [u32]>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl<'input> core::fmt::Debug for ChangeDrawableAttributesRequest<'input> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("ChangeDrawableAttributesRequest").finish_non_exhaustive()
+    }
 }
 impl<'input> ChangeDrawableAttributesRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -3424,6 +3754,7 @@ impl<'input> ChangeDrawableAttributesRequest<'input> {
         ([request0.into(), attribs_bytes.into(), padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CHANGE_DRAWABLE_ATTRIBUTES_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -3460,7 +3791,8 @@ impl<'input> crate::x11_utils::VoidRequest for ChangeDrawableAttributesRequest<'
 
 /// Opcode for the CreateWindow request
 pub const CREATE_WINDOW_REQUEST: u8 = 31;
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CreateWindowRequest<'input> {
     pub screen: u32,
@@ -3468,6 +3800,12 @@ pub struct CreateWindowRequest<'input> {
     pub window: xproto::Window,
     pub glx_window: Window,
     pub attribs: Cow<'input, [u32]>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl<'input> core::fmt::Debug for CreateWindowRequest<'input> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("CreateWindowRequest").finish_non_exhaustive()
+    }
 }
 impl<'input> CreateWindowRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -3517,6 +3855,7 @@ impl<'input> CreateWindowRequest<'input> {
         ([request0.into(), attribs_bytes.into(), padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CREATE_WINDOW_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -3562,10 +3901,17 @@ impl<'input> crate::x11_utils::VoidRequest for CreateWindowRequest<'input> {
 
 /// Opcode for the DeleteWindow request
 pub const DELETE_WINDOW_REQUEST: u8 = 32;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DeleteWindowRequest {
     pub glxwindow: Window,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for DeleteWindowRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("DeleteWindowRequest").finish_non_exhaustive()
+    }
 }
 impl DeleteWindowRequest {
     /// Serialize this request into bytes for the provided connection
@@ -3589,6 +3935,7 @@ impl DeleteWindowRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != DELETE_WINDOW_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -3615,7 +3962,8 @@ impl crate::x11_utils::VoidRequest for DeleteWindowRequest {
 
 /// Opcode for the SetClientInfoARB request
 pub const SET_CLIENT_INFO_ARB_REQUEST: u8 = 33;
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetClientInfoARBRequest<'input> {
     pub major_version: u32,
@@ -3623,6 +3971,12 @@ pub struct SetClientInfoARBRequest<'input> {
     pub gl_versions: Cow<'input, [u32]>,
     pub gl_extension_string: Cow<'input, [u8]>,
     pub glx_extension_string: Cow<'input, [u8]>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl<'input> core::fmt::Debug for SetClientInfoARBRequest<'input> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SetClientInfoARBRequest").finish_non_exhaustive()
+    }
 }
 impl<'input> SetClientInfoARBRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -3678,6 +4032,7 @@ impl<'input> SetClientInfoARBRequest<'input> {
         ([request0.into(), gl_versions_bytes.into(), self.gl_extension_string, padding0.into(), self.glx_extension_string, padding1.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_CLIENT_INFO_ARB_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -3729,7 +4084,8 @@ impl<'input> crate::x11_utils::VoidRequest for SetClientInfoARBRequest<'input> {
 
 /// Opcode for the CreateContextAttribsARB request
 pub const CREATE_CONTEXT_ATTRIBS_ARB_REQUEST: u8 = 34;
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CreateContextAttribsARBRequest<'input> {
     pub context: Context,
@@ -3738,6 +4094,12 @@ pub struct CreateContextAttribsARBRequest<'input> {
     pub share_list: Context,
     pub is_direct: bool,
     pub attribs: Cow<'input, [u32]>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl<'input> core::fmt::Debug for CreateContextAttribsARBRequest<'input> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("CreateContextAttribsARBRequest").finish_non_exhaustive()
+    }
 }
 impl<'input> CreateContextAttribsARBRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -3792,6 +4154,7 @@ impl<'input> CreateContextAttribsARBRequest<'input> {
         ([request0.into(), attribs_bytes.into(), padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CREATE_CONTEXT_ATTRIBS_ARB_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -3841,7 +4204,8 @@ impl<'input> crate::x11_utils::VoidRequest for CreateContextAttribsARBRequest<'i
 
 /// Opcode for the SetClientInfo2ARB request
 pub const SET_CLIENT_INFO2_ARB_REQUEST: u8 = 35;
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetClientInfo2ARBRequest<'input> {
     pub major_version: u32,
@@ -3849,6 +4213,12 @@ pub struct SetClientInfo2ARBRequest<'input> {
     pub gl_versions: Cow<'input, [u32]>,
     pub gl_extension_string: Cow<'input, [u8]>,
     pub glx_extension_string: Cow<'input, [u8]>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl<'input> core::fmt::Debug for SetClientInfo2ARBRequest<'input> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SetClientInfo2ARBRequest").finish_non_exhaustive()
+    }
 }
 impl<'input> SetClientInfo2ARBRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -3904,6 +4274,7 @@ impl<'input> SetClientInfo2ARBRequest<'input> {
         ([request0.into(), gl_versions_bytes.into(), self.gl_extension_string, padding0.into(), self.glx_extension_string, padding1.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_CLIENT_INFO2_ARB_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -3955,12 +4326,19 @@ impl<'input> crate::x11_utils::VoidRequest for SetClientInfo2ARBRequest<'input> 
 
 /// Opcode for the NewList request
 pub const NEW_LIST_REQUEST: u8 = 101;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct NewListRequest {
     pub context_tag: ContextTag,
     pub list: u32,
     pub mode: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for NewListRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("NewListRequest").finish_non_exhaustive()
+    }
 }
 impl NewListRequest {
     /// Serialize this request into bytes for the provided connection
@@ -3994,6 +4372,7 @@ impl NewListRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != NEW_LIST_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -4024,10 +4403,17 @@ impl crate::x11_utils::VoidRequest for NewListRequest {
 
 /// Opcode for the EndList request
 pub const END_LIST_REQUEST: u8 = 102;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct EndListRequest {
     pub context_tag: ContextTag,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for EndListRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("EndListRequest").finish_non_exhaustive()
+    }
 }
 impl EndListRequest {
     /// Serialize this request into bytes for the provided connection
@@ -4051,6 +4437,7 @@ impl EndListRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != END_LIST_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -4077,12 +4464,19 @@ impl crate::x11_utils::VoidRequest for EndListRequest {
 
 /// Opcode for the DeleteLists request
 pub const DELETE_LISTS_REQUEST: u8 = 103;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DeleteListsRequest {
     pub context_tag: ContextTag,
     pub list: u32,
     pub range: i32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for DeleteListsRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("DeleteListsRequest").finish_non_exhaustive()
+    }
 }
 impl DeleteListsRequest {
     /// Serialize this request into bytes for the provided connection
@@ -4116,6 +4510,7 @@ impl DeleteListsRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != DELETE_LISTS_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -4146,11 +4541,18 @@ impl crate::x11_utils::VoidRequest for DeleteListsRequest {
 
 /// Opcode for the GenLists request
 pub const GEN_LISTS_REQUEST: u8 = 104;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GenListsRequest {
     pub context_tag: ContextTag,
     pub range: i32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GenListsRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GenListsRequest").finish_non_exhaustive()
+    }
 }
 impl GenListsRequest {
     /// Serialize this request into bytes for the provided connection
@@ -4179,6 +4581,7 @@ impl GenListsRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GEN_LISTS_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -4206,12 +4609,19 @@ impl crate::x11_utils::ReplyRequest for GenListsRequest {
     type Reply = GenListsReply;
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GenListsReply {
     pub sequence: u16,
     pub length: u32,
     pub ret_val: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GenListsReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GenListsReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GenListsReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -4266,12 +4676,19 @@ impl Serialize for GenListsReply {
 
 /// Opcode for the FeedbackBuffer request
 pub const FEEDBACK_BUFFER_REQUEST: u8 = 105;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct FeedbackBufferRequest {
     pub context_tag: ContextTag,
     pub size: i32,
     pub type_: i32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for FeedbackBufferRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("FeedbackBufferRequest").finish_non_exhaustive()
+    }
 }
 impl FeedbackBufferRequest {
     /// Serialize this request into bytes for the provided connection
@@ -4305,6 +4722,7 @@ impl FeedbackBufferRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != FEEDBACK_BUFFER_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -4335,11 +4753,18 @@ impl crate::x11_utils::VoidRequest for FeedbackBufferRequest {
 
 /// Opcode for the SelectBuffer request
 pub const SELECT_BUFFER_REQUEST: u8 = 106;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SelectBufferRequest {
     pub context_tag: ContextTag,
     pub size: i32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for SelectBufferRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SelectBufferRequest").finish_non_exhaustive()
+    }
 }
 impl SelectBufferRequest {
     /// Serialize this request into bytes for the provided connection
@@ -4368,6 +4793,7 @@ impl SelectBufferRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SELECT_BUFFER_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -4396,11 +4822,18 @@ impl crate::x11_utils::VoidRequest for SelectBufferRequest {
 
 /// Opcode for the RenderMode request
 pub const RENDER_MODE_REQUEST: u8 = 107;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct RenderModeRequest {
     pub context_tag: ContextTag,
     pub mode: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for RenderModeRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("RenderModeRequest").finish_non_exhaustive()
+    }
 }
 impl RenderModeRequest {
     /// Serialize this request into bytes for the provided connection
@@ -4429,6 +4862,7 @@ impl RenderModeRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != RENDER_MODE_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -4456,7 +4890,8 @@ impl crate::x11_utils::ReplyRequest for RenderModeRequest {
     type Reply = RenderModeReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct RenderModeReply {
     pub sequence: u16,
@@ -4464,6 +4899,12 @@ pub struct RenderModeReply {
     pub ret_val: u32,
     pub new_mode: u32,
     pub data: Vec<u32>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for RenderModeReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("RenderModeReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for RenderModeReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -4582,10 +5023,17 @@ impl core::fmt::Debug for RM  {
 
 /// Opcode for the Finish request
 pub const FINISH_REQUEST: u8 = 108;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct FinishRequest {
     pub context_tag: ContextTag,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for FinishRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("FinishRequest").finish_non_exhaustive()
+    }
 }
 impl FinishRequest {
     /// Serialize this request into bytes for the provided connection
@@ -4609,6 +5057,7 @@ impl FinishRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != FINISH_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -4634,11 +5083,18 @@ impl crate::x11_utils::ReplyRequest for FinishRequest {
     type Reply = FinishReply;
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct FinishReply {
     pub sequence: u16,
     pub length: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for FinishReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("FinishReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for FinishReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -4686,12 +5142,19 @@ impl Serialize for FinishReply {
 
 /// Opcode for the PixelStoref request
 pub const PIXEL_STOREF_REQUEST: u8 = 109;
-#[derive(Debug, Clone, Copy, Default, PartialEq, PartialOrd)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, PartialOrd))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PixelStorefRequest {
     pub context_tag: ContextTag,
     pub pname: u32,
     pub datum: Float32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for PixelStorefRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("PixelStorefRequest").finish_non_exhaustive()
+    }
 }
 impl PixelStorefRequest {
     /// Serialize this request into bytes for the provided connection
@@ -4725,6 +5188,7 @@ impl PixelStorefRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != PIXEL_STOREF_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -4755,12 +5219,19 @@ impl crate::x11_utils::VoidRequest for PixelStorefRequest {
 
 /// Opcode for the PixelStorei request
 pub const PIXEL_STOREI_REQUEST: u8 = 110;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PixelStoreiRequest {
     pub context_tag: ContextTag,
     pub pname: u32,
     pub datum: i32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for PixelStoreiRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("PixelStoreiRequest").finish_non_exhaustive()
+    }
 }
 impl PixelStoreiRequest {
     /// Serialize this request into bytes for the provided connection
@@ -4794,6 +5265,7 @@ impl PixelStoreiRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != PIXEL_STOREI_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -4824,7 +5296,8 @@ impl crate::x11_utils::VoidRequest for PixelStoreiRequest {
 
 /// Opcode for the ReadPixels request
 pub const READ_PIXELS_REQUEST: u8 = 111;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ReadPixelsRequest {
     pub context_tag: ContextTag,
@@ -4836,6 +5309,12 @@ pub struct ReadPixelsRequest {
     pub type_: u32,
     pub swap_bytes: bool,
     pub lsb_first: bool,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for ReadPixelsRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("ReadPixelsRequest").finish_non_exhaustive()
+    }
 }
 impl ReadPixelsRequest {
     /// Serialize this request into bytes for the provided connection
@@ -4895,6 +5374,7 @@ impl ReadPixelsRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != READ_PIXELS_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -4936,11 +5416,18 @@ impl crate::x11_utils::ReplyRequest for ReadPixelsRequest {
     type Reply = ReadPixelsReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ReadPixelsReply {
     pub sequence: u16,
     pub data: Vec<u8>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for ReadPixelsReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("ReadPixelsReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for ReadPixelsReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -5001,11 +5488,18 @@ impl ReadPixelsReply {
 
 /// Opcode for the GetBooleanv request
 pub const GET_BOOLEANV_REQUEST: u8 = 112;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetBooleanvRequest {
     pub context_tag: ContextTag,
     pub pname: i32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetBooleanvRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetBooleanvRequest").finish_non_exhaustive()
+    }
 }
 impl GetBooleanvRequest {
     /// Serialize this request into bytes for the provided connection
@@ -5034,6 +5528,7 @@ impl GetBooleanvRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_BOOLEANV_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -5061,13 +5556,20 @@ impl crate::x11_utils::ReplyRequest for GetBooleanvRequest {
     type Reply = GetBooleanvReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetBooleanvReply {
     pub sequence: u16,
     pub length: u32,
     pub datum: bool,
     pub data: Vec<bool>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetBooleanvReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetBooleanvReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetBooleanvReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -5131,11 +5633,18 @@ impl GetBooleanvReply {
 
 /// Opcode for the GetClipPlane request
 pub const GET_CLIP_PLANE_REQUEST: u8 = 113;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetClipPlaneRequest {
     pub context_tag: ContextTag,
     pub plane: i32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetClipPlaneRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetClipPlaneRequest").finish_non_exhaustive()
+    }
 }
 impl GetClipPlaneRequest {
     /// Serialize this request into bytes for the provided connection
@@ -5164,6 +5673,7 @@ impl GetClipPlaneRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_CLIP_PLANE_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -5191,11 +5701,18 @@ impl crate::x11_utils::ReplyRequest for GetClipPlaneRequest {
     type Reply = GetClipPlaneReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, PartialOrd)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, PartialOrd))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetClipPlaneReply {
     pub sequence: u16,
     pub data: Vec<Float64>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetClipPlaneReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetClipPlaneReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetClipPlaneReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -5254,11 +5771,18 @@ impl GetClipPlaneReply {
 
 /// Opcode for the GetDoublev request
 pub const GET_DOUBLEV_REQUEST: u8 = 114;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetDoublevRequest {
     pub context_tag: ContextTag,
     pub pname: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetDoublevRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetDoublevRequest").finish_non_exhaustive()
+    }
 }
 impl GetDoublevRequest {
     /// Serialize this request into bytes for the provided connection
@@ -5287,6 +5811,7 @@ impl GetDoublevRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_DOUBLEV_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -5314,13 +5839,20 @@ impl crate::x11_utils::ReplyRequest for GetDoublevRequest {
     type Reply = GetDoublevReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, PartialOrd)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, PartialOrd))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetDoublevReply {
     pub sequence: u16,
     pub length: u32,
     pub datum: Float64,
     pub data: Vec<Float64>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetDoublevReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetDoublevReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetDoublevReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -5384,10 +5916,17 @@ impl GetDoublevReply {
 
 /// Opcode for the GetError request
 pub const GET_ERROR_REQUEST: u8 = 115;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetErrorRequest {
     pub context_tag: ContextTag,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetErrorRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetErrorRequest").finish_non_exhaustive()
+    }
 }
 impl GetErrorRequest {
     /// Serialize this request into bytes for the provided connection
@@ -5411,6 +5950,7 @@ impl GetErrorRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_ERROR_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -5436,12 +5976,19 @@ impl crate::x11_utils::ReplyRequest for GetErrorRequest {
     type Reply = GetErrorReply;
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetErrorReply {
     pub sequence: u16,
     pub length: u32,
     pub error: i32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetErrorReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetErrorReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetErrorReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -5496,11 +6043,18 @@ impl Serialize for GetErrorReply {
 
 /// Opcode for the GetFloatv request
 pub const GET_FLOATV_REQUEST: u8 = 116;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetFloatvRequest {
     pub context_tag: ContextTag,
     pub pname: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetFloatvRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetFloatvRequest").finish_non_exhaustive()
+    }
 }
 impl GetFloatvRequest {
     /// Serialize this request into bytes for the provided connection
@@ -5529,6 +6083,7 @@ impl GetFloatvRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_FLOATV_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -5556,13 +6111,20 @@ impl crate::x11_utils::ReplyRequest for GetFloatvRequest {
     type Reply = GetFloatvReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, PartialOrd)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, PartialOrd))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetFloatvReply {
     pub sequence: u16,
     pub length: u32,
     pub datum: Float32,
     pub data: Vec<Float32>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetFloatvReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetFloatvReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetFloatvReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -5626,11 +6188,18 @@ impl GetFloatvReply {
 
 /// Opcode for the GetIntegerv request
 pub const GET_INTEGERV_REQUEST: u8 = 117;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetIntegervRequest {
     pub context_tag: ContextTag,
     pub pname: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetIntegervRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetIntegervRequest").finish_non_exhaustive()
+    }
 }
 impl GetIntegervRequest {
     /// Serialize this request into bytes for the provided connection
@@ -5659,6 +6228,7 @@ impl GetIntegervRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_INTEGERV_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -5686,13 +6256,20 @@ impl crate::x11_utils::ReplyRequest for GetIntegervRequest {
     type Reply = GetIntegervReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetIntegervReply {
     pub sequence: u16,
     pub length: u32,
     pub datum: i32,
     pub data: Vec<i32>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetIntegervReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetIntegervReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetIntegervReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -5756,12 +6333,19 @@ impl GetIntegervReply {
 
 /// Opcode for the GetLightfv request
 pub const GET_LIGHTFV_REQUEST: u8 = 118;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetLightfvRequest {
     pub context_tag: ContextTag,
     pub light: u32,
     pub pname: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetLightfvRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetLightfvRequest").finish_non_exhaustive()
+    }
 }
 impl GetLightfvRequest {
     /// Serialize this request into bytes for the provided connection
@@ -5795,6 +6379,7 @@ impl GetLightfvRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_LIGHTFV_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -5824,13 +6409,20 @@ impl crate::x11_utils::ReplyRequest for GetLightfvRequest {
     type Reply = GetLightfvReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, PartialOrd)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, PartialOrd))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetLightfvReply {
     pub sequence: u16,
     pub length: u32,
     pub datum: Float32,
     pub data: Vec<Float32>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetLightfvReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetLightfvReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetLightfvReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -5894,12 +6486,19 @@ impl GetLightfvReply {
 
 /// Opcode for the GetLightiv request
 pub const GET_LIGHTIV_REQUEST: u8 = 119;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetLightivRequest {
     pub context_tag: ContextTag,
     pub light: u32,
     pub pname: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetLightivRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetLightivRequest").finish_non_exhaustive()
+    }
 }
 impl GetLightivRequest {
     /// Serialize this request into bytes for the provided connection
@@ -5933,6 +6532,7 @@ impl GetLightivRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_LIGHTIV_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -5962,13 +6562,20 @@ impl crate::x11_utils::ReplyRequest for GetLightivRequest {
     type Reply = GetLightivReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetLightivReply {
     pub sequence: u16,
     pub length: u32,
     pub datum: i32,
     pub data: Vec<i32>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetLightivReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetLightivReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetLightivReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -6032,12 +6639,19 @@ impl GetLightivReply {
 
 /// Opcode for the GetMapdv request
 pub const GET_MAPDV_REQUEST: u8 = 120;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetMapdvRequest {
     pub context_tag: ContextTag,
     pub target: u32,
     pub query: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetMapdvRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetMapdvRequest").finish_non_exhaustive()
+    }
 }
 impl GetMapdvRequest {
     /// Serialize this request into bytes for the provided connection
@@ -6071,6 +6685,7 @@ impl GetMapdvRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_MAPDV_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -6100,13 +6715,20 @@ impl crate::x11_utils::ReplyRequest for GetMapdvRequest {
     type Reply = GetMapdvReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, PartialOrd)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, PartialOrd))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetMapdvReply {
     pub sequence: u16,
     pub length: u32,
     pub datum: Float64,
     pub data: Vec<Float64>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetMapdvReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetMapdvReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetMapdvReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -6170,12 +6792,19 @@ impl GetMapdvReply {
 
 /// Opcode for the GetMapfv request
 pub const GET_MAPFV_REQUEST: u8 = 121;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetMapfvRequest {
     pub context_tag: ContextTag,
     pub target: u32,
     pub query: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetMapfvRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetMapfvRequest").finish_non_exhaustive()
+    }
 }
 impl GetMapfvRequest {
     /// Serialize this request into bytes for the provided connection
@@ -6209,6 +6838,7 @@ impl GetMapfvRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_MAPFV_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -6238,13 +6868,20 @@ impl crate::x11_utils::ReplyRequest for GetMapfvRequest {
     type Reply = GetMapfvReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, PartialOrd)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, PartialOrd))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetMapfvReply {
     pub sequence: u16,
     pub length: u32,
     pub datum: Float32,
     pub data: Vec<Float32>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetMapfvReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetMapfvReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetMapfvReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -6308,12 +6945,19 @@ impl GetMapfvReply {
 
 /// Opcode for the GetMapiv request
 pub const GET_MAPIV_REQUEST: u8 = 122;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetMapivRequest {
     pub context_tag: ContextTag,
     pub target: u32,
     pub query: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetMapivRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetMapivRequest").finish_non_exhaustive()
+    }
 }
 impl GetMapivRequest {
     /// Serialize this request into bytes for the provided connection
@@ -6347,6 +6991,7 @@ impl GetMapivRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_MAPIV_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -6376,13 +7021,20 @@ impl crate::x11_utils::ReplyRequest for GetMapivRequest {
     type Reply = GetMapivReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetMapivReply {
     pub sequence: u16,
     pub length: u32,
     pub datum: i32,
     pub data: Vec<i32>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetMapivReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetMapivReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetMapivReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -6446,12 +7098,19 @@ impl GetMapivReply {
 
 /// Opcode for the GetMaterialfv request
 pub const GET_MATERIALFV_REQUEST: u8 = 123;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetMaterialfvRequest {
     pub context_tag: ContextTag,
     pub face: u32,
     pub pname: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetMaterialfvRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetMaterialfvRequest").finish_non_exhaustive()
+    }
 }
 impl GetMaterialfvRequest {
     /// Serialize this request into bytes for the provided connection
@@ -6485,6 +7144,7 @@ impl GetMaterialfvRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_MATERIALFV_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -6514,13 +7174,20 @@ impl crate::x11_utils::ReplyRequest for GetMaterialfvRequest {
     type Reply = GetMaterialfvReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, PartialOrd)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, PartialOrd))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetMaterialfvReply {
     pub sequence: u16,
     pub length: u32,
     pub datum: Float32,
     pub data: Vec<Float32>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetMaterialfvReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetMaterialfvReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetMaterialfvReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -6584,12 +7251,19 @@ impl GetMaterialfvReply {
 
 /// Opcode for the GetMaterialiv request
 pub const GET_MATERIALIV_REQUEST: u8 = 124;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetMaterialivRequest {
     pub context_tag: ContextTag,
     pub face: u32,
     pub pname: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetMaterialivRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetMaterialivRequest").finish_non_exhaustive()
+    }
 }
 impl GetMaterialivRequest {
     /// Serialize this request into bytes for the provided connection
@@ -6623,6 +7297,7 @@ impl GetMaterialivRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_MATERIALIV_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -6652,13 +7327,20 @@ impl crate::x11_utils::ReplyRequest for GetMaterialivRequest {
     type Reply = GetMaterialivReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetMaterialivReply {
     pub sequence: u16,
     pub length: u32,
     pub datum: i32,
     pub data: Vec<i32>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetMaterialivReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetMaterialivReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetMaterialivReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -6722,11 +7404,18 @@ impl GetMaterialivReply {
 
 /// Opcode for the GetPixelMapfv request
 pub const GET_PIXEL_MAPFV_REQUEST: u8 = 125;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetPixelMapfvRequest {
     pub context_tag: ContextTag,
     pub map: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetPixelMapfvRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetPixelMapfvRequest").finish_non_exhaustive()
+    }
 }
 impl GetPixelMapfvRequest {
     /// Serialize this request into bytes for the provided connection
@@ -6755,6 +7444,7 @@ impl GetPixelMapfvRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_PIXEL_MAPFV_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -6782,13 +7472,20 @@ impl crate::x11_utils::ReplyRequest for GetPixelMapfvRequest {
     type Reply = GetPixelMapfvReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, PartialOrd)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, PartialOrd))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetPixelMapfvReply {
     pub sequence: u16,
     pub length: u32,
     pub datum: Float32,
     pub data: Vec<Float32>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetPixelMapfvReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetPixelMapfvReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetPixelMapfvReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -6852,11 +7549,18 @@ impl GetPixelMapfvReply {
 
 /// Opcode for the GetPixelMapuiv request
 pub const GET_PIXEL_MAPUIV_REQUEST: u8 = 126;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetPixelMapuivRequest {
     pub context_tag: ContextTag,
     pub map: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetPixelMapuivRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetPixelMapuivRequest").finish_non_exhaustive()
+    }
 }
 impl GetPixelMapuivRequest {
     /// Serialize this request into bytes for the provided connection
@@ -6885,6 +7589,7 @@ impl GetPixelMapuivRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_PIXEL_MAPUIV_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -6912,13 +7617,20 @@ impl crate::x11_utils::ReplyRequest for GetPixelMapuivRequest {
     type Reply = GetPixelMapuivReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetPixelMapuivReply {
     pub sequence: u16,
     pub length: u32,
     pub datum: u32,
     pub data: Vec<u32>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetPixelMapuivReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetPixelMapuivReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetPixelMapuivReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -6982,11 +7694,18 @@ impl GetPixelMapuivReply {
 
 /// Opcode for the GetPixelMapusv request
 pub const GET_PIXEL_MAPUSV_REQUEST: u8 = 127;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetPixelMapusvRequest {
     pub context_tag: ContextTag,
     pub map: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetPixelMapusvRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetPixelMapusvRequest").finish_non_exhaustive()
+    }
 }
 impl GetPixelMapusvRequest {
     /// Serialize this request into bytes for the provided connection
@@ -7015,6 +7734,7 @@ impl GetPixelMapusvRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_PIXEL_MAPUSV_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -7042,13 +7762,20 @@ impl crate::x11_utils::ReplyRequest for GetPixelMapusvRequest {
     type Reply = GetPixelMapusvReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetPixelMapusvReply {
     pub sequence: u16,
     pub length: u32,
     pub datum: u16,
     pub data: Vec<u16>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetPixelMapusvReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetPixelMapusvReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetPixelMapusvReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -7112,11 +7839,18 @@ impl GetPixelMapusvReply {
 
 /// Opcode for the GetPolygonStipple request
 pub const GET_POLYGON_STIPPLE_REQUEST: u8 = 128;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetPolygonStippleRequest {
     pub context_tag: ContextTag,
     pub lsb_first: bool,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetPolygonStippleRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetPolygonStippleRequest").finish_non_exhaustive()
+    }
 }
 impl GetPolygonStippleRequest {
     /// Serialize this request into bytes for the provided connection
@@ -7145,6 +7879,7 @@ impl GetPolygonStippleRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_POLYGON_STIPPLE_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -7172,11 +7907,18 @@ impl crate::x11_utils::ReplyRequest for GetPolygonStippleRequest {
     type Reply = GetPolygonStippleReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetPolygonStippleReply {
     pub sequence: u16,
     pub data: Vec<u8>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetPolygonStippleReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetPolygonStippleReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetPolygonStippleReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -7237,11 +7979,18 @@ impl GetPolygonStippleReply {
 
 /// Opcode for the GetString request
 pub const GET_STRING_REQUEST: u8 = 129;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetStringRequest {
     pub context_tag: ContextTag,
     pub name: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetStringRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetStringRequest").finish_non_exhaustive()
+    }
 }
 impl GetStringRequest {
     /// Serialize this request into bytes for the provided connection
@@ -7270,6 +8019,7 @@ impl GetStringRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_STRING_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -7297,12 +8047,19 @@ impl crate::x11_utils::ReplyRequest for GetStringRequest {
     type Reply = GetStringReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetStringReply {
     pub sequence: u16,
     pub length: u32,
     pub string: Vec<u8>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetStringReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetStringReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetStringReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -7365,12 +8122,19 @@ impl GetStringReply {
 
 /// Opcode for the GetTexEnvfv request
 pub const GET_TEX_ENVFV_REQUEST: u8 = 130;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetTexEnvfvRequest {
     pub context_tag: ContextTag,
     pub target: u32,
     pub pname: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetTexEnvfvRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetTexEnvfvRequest").finish_non_exhaustive()
+    }
 }
 impl GetTexEnvfvRequest {
     /// Serialize this request into bytes for the provided connection
@@ -7404,6 +8168,7 @@ impl GetTexEnvfvRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_TEX_ENVFV_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -7433,13 +8198,20 @@ impl crate::x11_utils::ReplyRequest for GetTexEnvfvRequest {
     type Reply = GetTexEnvfvReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, PartialOrd)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, PartialOrd))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetTexEnvfvReply {
     pub sequence: u16,
     pub length: u32,
     pub datum: Float32,
     pub data: Vec<Float32>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetTexEnvfvReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetTexEnvfvReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetTexEnvfvReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -7503,12 +8275,19 @@ impl GetTexEnvfvReply {
 
 /// Opcode for the GetTexEnviv request
 pub const GET_TEX_ENVIV_REQUEST: u8 = 131;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetTexEnvivRequest {
     pub context_tag: ContextTag,
     pub target: u32,
     pub pname: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetTexEnvivRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetTexEnvivRequest").finish_non_exhaustive()
+    }
 }
 impl GetTexEnvivRequest {
     /// Serialize this request into bytes for the provided connection
@@ -7542,6 +8321,7 @@ impl GetTexEnvivRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_TEX_ENVIV_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -7571,13 +8351,20 @@ impl crate::x11_utils::ReplyRequest for GetTexEnvivRequest {
     type Reply = GetTexEnvivReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetTexEnvivReply {
     pub sequence: u16,
     pub length: u32,
     pub datum: i32,
     pub data: Vec<i32>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetTexEnvivReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetTexEnvivReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetTexEnvivReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -7641,12 +8428,19 @@ impl GetTexEnvivReply {
 
 /// Opcode for the GetTexGendv request
 pub const GET_TEX_GENDV_REQUEST: u8 = 132;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetTexGendvRequest {
     pub context_tag: ContextTag,
     pub coord: u32,
     pub pname: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetTexGendvRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetTexGendvRequest").finish_non_exhaustive()
+    }
 }
 impl GetTexGendvRequest {
     /// Serialize this request into bytes for the provided connection
@@ -7680,6 +8474,7 @@ impl GetTexGendvRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_TEX_GENDV_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -7709,13 +8504,20 @@ impl crate::x11_utils::ReplyRequest for GetTexGendvRequest {
     type Reply = GetTexGendvReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, PartialOrd)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, PartialOrd))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetTexGendvReply {
     pub sequence: u16,
     pub length: u32,
     pub datum: Float64,
     pub data: Vec<Float64>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetTexGendvReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetTexGendvReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetTexGendvReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -7779,12 +8581,19 @@ impl GetTexGendvReply {
 
 /// Opcode for the GetTexGenfv request
 pub const GET_TEX_GENFV_REQUEST: u8 = 133;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetTexGenfvRequest {
     pub context_tag: ContextTag,
     pub coord: u32,
     pub pname: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetTexGenfvRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetTexGenfvRequest").finish_non_exhaustive()
+    }
 }
 impl GetTexGenfvRequest {
     /// Serialize this request into bytes for the provided connection
@@ -7818,6 +8627,7 @@ impl GetTexGenfvRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_TEX_GENFV_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -7847,13 +8657,20 @@ impl crate::x11_utils::ReplyRequest for GetTexGenfvRequest {
     type Reply = GetTexGenfvReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, PartialOrd)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, PartialOrd))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetTexGenfvReply {
     pub sequence: u16,
     pub length: u32,
     pub datum: Float32,
     pub data: Vec<Float32>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetTexGenfvReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetTexGenfvReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetTexGenfvReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -7917,12 +8734,19 @@ impl GetTexGenfvReply {
 
 /// Opcode for the GetTexGeniv request
 pub const GET_TEX_GENIV_REQUEST: u8 = 134;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetTexGenivRequest {
     pub context_tag: ContextTag,
     pub coord: u32,
     pub pname: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetTexGenivRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetTexGenivRequest").finish_non_exhaustive()
+    }
 }
 impl GetTexGenivRequest {
     /// Serialize this request into bytes for the provided connection
@@ -7956,6 +8780,7 @@ impl GetTexGenivRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_TEX_GENIV_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -7985,13 +8810,20 @@ impl crate::x11_utils::ReplyRequest for GetTexGenivRequest {
     type Reply = GetTexGenivReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetTexGenivReply {
     pub sequence: u16,
     pub length: u32,
     pub datum: i32,
     pub data: Vec<i32>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetTexGenivReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetTexGenivReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetTexGenivReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -8055,7 +8887,8 @@ impl GetTexGenivReply {
 
 /// Opcode for the GetTexImage request
 pub const GET_TEX_IMAGE_REQUEST: u8 = 135;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetTexImageRequest {
     pub context_tag: ContextTag,
@@ -8064,6 +8897,12 @@ pub struct GetTexImageRequest {
     pub format: u32,
     pub type_: u32,
     pub swap_bytes: bool,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetTexImageRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetTexImageRequest").finish_non_exhaustive()
+    }
 }
 impl GetTexImageRequest {
     /// Serialize this request into bytes for the provided connection
@@ -8112,6 +8951,7 @@ impl GetTexImageRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_TEX_IMAGE_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -8147,7 +8987,8 @@ impl crate::x11_utils::ReplyRequest for GetTexImageRequest {
     type Reply = GetTexImageReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetTexImageReply {
     pub sequence: u16,
@@ -8155,6 +8996,12 @@ pub struct GetTexImageReply {
     pub height: i32,
     pub depth: i32,
     pub data: Vec<u8>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetTexImageReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetTexImageReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetTexImageReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -8223,12 +9070,19 @@ impl GetTexImageReply {
 
 /// Opcode for the GetTexParameterfv request
 pub const GET_TEX_PARAMETERFV_REQUEST: u8 = 136;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetTexParameterfvRequest {
     pub context_tag: ContextTag,
     pub target: u32,
     pub pname: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetTexParameterfvRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetTexParameterfvRequest").finish_non_exhaustive()
+    }
 }
 impl GetTexParameterfvRequest {
     /// Serialize this request into bytes for the provided connection
@@ -8262,6 +9116,7 @@ impl GetTexParameterfvRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_TEX_PARAMETERFV_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -8291,13 +9146,20 @@ impl crate::x11_utils::ReplyRequest for GetTexParameterfvRequest {
     type Reply = GetTexParameterfvReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, PartialOrd)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, PartialOrd))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetTexParameterfvReply {
     pub sequence: u16,
     pub length: u32,
     pub datum: Float32,
     pub data: Vec<Float32>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetTexParameterfvReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetTexParameterfvReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetTexParameterfvReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -8361,12 +9223,19 @@ impl GetTexParameterfvReply {
 
 /// Opcode for the GetTexParameteriv request
 pub const GET_TEX_PARAMETERIV_REQUEST: u8 = 137;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetTexParameterivRequest {
     pub context_tag: ContextTag,
     pub target: u32,
     pub pname: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetTexParameterivRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetTexParameterivRequest").finish_non_exhaustive()
+    }
 }
 impl GetTexParameterivRequest {
     /// Serialize this request into bytes for the provided connection
@@ -8400,6 +9269,7 @@ impl GetTexParameterivRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_TEX_PARAMETERIV_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -8429,13 +9299,20 @@ impl crate::x11_utils::ReplyRequest for GetTexParameterivRequest {
     type Reply = GetTexParameterivReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetTexParameterivReply {
     pub sequence: u16,
     pub length: u32,
     pub datum: i32,
     pub data: Vec<i32>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetTexParameterivReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetTexParameterivReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetTexParameterivReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -8499,13 +9376,20 @@ impl GetTexParameterivReply {
 
 /// Opcode for the GetTexLevelParameterfv request
 pub const GET_TEX_LEVEL_PARAMETERFV_REQUEST: u8 = 138;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetTexLevelParameterfvRequest {
     pub context_tag: ContextTag,
     pub target: u32,
     pub level: i32,
     pub pname: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetTexLevelParameterfvRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetTexLevelParameterfvRequest").finish_non_exhaustive()
+    }
 }
 impl GetTexLevelParameterfvRequest {
     /// Serialize this request into bytes for the provided connection
@@ -8544,6 +9428,7 @@ impl GetTexLevelParameterfvRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_TEX_LEVEL_PARAMETERFV_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -8575,13 +9460,20 @@ impl crate::x11_utils::ReplyRequest for GetTexLevelParameterfvRequest {
     type Reply = GetTexLevelParameterfvReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, PartialOrd)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, PartialOrd))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetTexLevelParameterfvReply {
     pub sequence: u16,
     pub length: u32,
     pub datum: Float32,
     pub data: Vec<Float32>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetTexLevelParameterfvReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetTexLevelParameterfvReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetTexLevelParameterfvReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -8645,13 +9537,20 @@ impl GetTexLevelParameterfvReply {
 
 /// Opcode for the GetTexLevelParameteriv request
 pub const GET_TEX_LEVEL_PARAMETERIV_REQUEST: u8 = 139;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetTexLevelParameterivRequest {
     pub context_tag: ContextTag,
     pub target: u32,
     pub level: i32,
     pub pname: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetTexLevelParameterivRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetTexLevelParameterivRequest").finish_non_exhaustive()
+    }
 }
 impl GetTexLevelParameterivRequest {
     /// Serialize this request into bytes for the provided connection
@@ -8690,6 +9589,7 @@ impl GetTexLevelParameterivRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_TEX_LEVEL_PARAMETERIV_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -8721,13 +9621,20 @@ impl crate::x11_utils::ReplyRequest for GetTexLevelParameterivRequest {
     type Reply = GetTexLevelParameterivReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetTexLevelParameterivReply {
     pub sequence: u16,
     pub length: u32,
     pub datum: i32,
     pub data: Vec<i32>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetTexLevelParameterivReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetTexLevelParameterivReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetTexLevelParameterivReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -8791,11 +9698,18 @@ impl GetTexLevelParameterivReply {
 
 /// Opcode for the IsEnabled request
 pub const IS_ENABLED_REQUEST: u8 = 140;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct IsEnabledRequest {
     pub context_tag: ContextTag,
     pub capability: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for IsEnabledRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("IsEnabledRequest").finish_non_exhaustive()
+    }
 }
 impl IsEnabledRequest {
     /// Serialize this request into bytes for the provided connection
@@ -8824,6 +9738,7 @@ impl IsEnabledRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != IS_ENABLED_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -8851,12 +9766,19 @@ impl crate::x11_utils::ReplyRequest for IsEnabledRequest {
     type Reply = IsEnabledReply;
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct IsEnabledReply {
     pub sequence: u16,
     pub length: u32,
     pub ret_val: Bool32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for IsEnabledReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("IsEnabledReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for IsEnabledReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -8911,11 +9833,18 @@ impl Serialize for IsEnabledReply {
 
 /// Opcode for the IsList request
 pub const IS_LIST_REQUEST: u8 = 141;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct IsListRequest {
     pub context_tag: ContextTag,
     pub list: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for IsListRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("IsListRequest").finish_non_exhaustive()
+    }
 }
 impl IsListRequest {
     /// Serialize this request into bytes for the provided connection
@@ -8944,6 +9873,7 @@ impl IsListRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != IS_LIST_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -8971,12 +9901,19 @@ impl crate::x11_utils::ReplyRequest for IsListRequest {
     type Reply = IsListReply;
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct IsListReply {
     pub sequence: u16,
     pub length: u32,
     pub ret_val: Bool32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for IsListReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("IsListReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for IsListReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -9031,10 +9968,17 @@ impl Serialize for IsListReply {
 
 /// Opcode for the Flush request
 pub const FLUSH_REQUEST: u8 = 142;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct FlushRequest {
     pub context_tag: ContextTag,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for FlushRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("FlushRequest").finish_non_exhaustive()
+    }
 }
 impl FlushRequest {
     /// Serialize this request into bytes for the provided connection
@@ -9058,6 +10002,7 @@ impl FlushRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != FLUSH_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -9084,11 +10029,18 @@ impl crate::x11_utils::VoidRequest for FlushRequest {
 
 /// Opcode for the AreTexturesResident request
 pub const ARE_TEXTURES_RESIDENT_REQUEST: u8 = 143;
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct AreTexturesResidentRequest<'input> {
     pub context_tag: ContextTag,
     pub textures: Cow<'input, [u32]>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl<'input> core::fmt::Debug for AreTexturesResidentRequest<'input> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("AreTexturesResidentRequest").finish_non_exhaustive()
+    }
 }
 impl<'input> AreTexturesResidentRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -9122,6 +10074,7 @@ impl<'input> AreTexturesResidentRequest<'input> {
         ([request0.into(), textures_bytes.into(), padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != ARE_TEXTURES_RESIDENT_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -9157,12 +10110,19 @@ impl<'input> crate::x11_utils::ReplyRequest for AreTexturesResidentRequest<'inpu
     type Reply = AreTexturesResidentReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct AreTexturesResidentReply {
     pub sequence: u16,
     pub ret_val: Bool32,
     pub data: Vec<bool>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for AreTexturesResidentReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("AreTexturesResidentReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for AreTexturesResidentReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -9224,11 +10184,18 @@ impl AreTexturesResidentReply {
 
 /// Opcode for the DeleteTextures request
 pub const DELETE_TEXTURES_REQUEST: u8 = 144;
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DeleteTexturesRequest<'input> {
     pub context_tag: ContextTag,
     pub textures: Cow<'input, [u32]>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl<'input> core::fmt::Debug for DeleteTexturesRequest<'input> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("DeleteTexturesRequest").finish_non_exhaustive()
+    }
 }
 impl<'input> DeleteTexturesRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -9262,6 +10229,7 @@ impl<'input> DeleteTexturesRequest<'input> {
         ([request0.into(), textures_bytes.into(), padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != DELETE_TEXTURES_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -9298,11 +10266,18 @@ impl<'input> crate::x11_utils::VoidRequest for DeleteTexturesRequest<'input> {
 
 /// Opcode for the GenTextures request
 pub const GEN_TEXTURES_REQUEST: u8 = 145;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GenTexturesRequest {
     pub context_tag: ContextTag,
     pub n: i32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GenTexturesRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GenTexturesRequest").finish_non_exhaustive()
+    }
 }
 impl GenTexturesRequest {
     /// Serialize this request into bytes for the provided connection
@@ -9331,6 +10306,7 @@ impl GenTexturesRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GEN_TEXTURES_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -9358,11 +10334,18 @@ impl crate::x11_utils::ReplyRequest for GenTexturesRequest {
     type Reply = GenTexturesReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GenTexturesReply {
     pub sequence: u16,
     pub data: Vec<u32>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GenTexturesReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GenTexturesReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GenTexturesReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -9420,11 +10403,18 @@ impl GenTexturesReply {
 
 /// Opcode for the IsTexture request
 pub const IS_TEXTURE_REQUEST: u8 = 146;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct IsTextureRequest {
     pub context_tag: ContextTag,
     pub texture: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for IsTextureRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("IsTextureRequest").finish_non_exhaustive()
+    }
 }
 impl IsTextureRequest {
     /// Serialize this request into bytes for the provided connection
@@ -9453,6 +10443,7 @@ impl IsTextureRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != IS_TEXTURE_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -9480,12 +10471,19 @@ impl crate::x11_utils::ReplyRequest for IsTextureRequest {
     type Reply = IsTextureReply;
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct IsTextureReply {
     pub sequence: u16,
     pub length: u32,
     pub ret_val: Bool32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for IsTextureReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("IsTextureReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for IsTextureReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -9540,7 +10538,8 @@ impl Serialize for IsTextureReply {
 
 /// Opcode for the GetColorTable request
 pub const GET_COLOR_TABLE_REQUEST: u8 = 147;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetColorTableRequest {
     pub context_tag: ContextTag,
@@ -9548,6 +10547,12 @@ pub struct GetColorTableRequest {
     pub format: u32,
     pub type_: u32,
     pub swap_bytes: bool,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetColorTableRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetColorTableRequest").finish_non_exhaustive()
+    }
 }
 impl GetColorTableRequest {
     /// Serialize this request into bytes for the provided connection
@@ -9591,6 +10596,7 @@ impl GetColorTableRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_COLOR_TABLE_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -9624,12 +10630,19 @@ impl crate::x11_utils::ReplyRequest for GetColorTableRequest {
     type Reply = GetColorTableReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetColorTableReply {
     pub sequence: u16,
     pub width: i32,
     pub data: Vec<u8>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetColorTableReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetColorTableReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetColorTableReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -9694,12 +10707,19 @@ impl GetColorTableReply {
 
 /// Opcode for the GetColorTableParameterfv request
 pub const GET_COLOR_TABLE_PARAMETERFV_REQUEST: u8 = 148;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetColorTableParameterfvRequest {
     pub context_tag: ContextTag,
     pub target: u32,
     pub pname: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetColorTableParameterfvRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetColorTableParameterfvRequest").finish_non_exhaustive()
+    }
 }
 impl GetColorTableParameterfvRequest {
     /// Serialize this request into bytes for the provided connection
@@ -9733,6 +10753,7 @@ impl GetColorTableParameterfvRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_COLOR_TABLE_PARAMETERFV_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -9762,13 +10783,20 @@ impl crate::x11_utils::ReplyRequest for GetColorTableParameterfvRequest {
     type Reply = GetColorTableParameterfvReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, PartialOrd)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, PartialOrd))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetColorTableParameterfvReply {
     pub sequence: u16,
     pub length: u32,
     pub datum: Float32,
     pub data: Vec<Float32>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetColorTableParameterfvReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetColorTableParameterfvReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetColorTableParameterfvReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -9832,12 +10860,19 @@ impl GetColorTableParameterfvReply {
 
 /// Opcode for the GetColorTableParameteriv request
 pub const GET_COLOR_TABLE_PARAMETERIV_REQUEST: u8 = 149;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetColorTableParameterivRequest {
     pub context_tag: ContextTag,
     pub target: u32,
     pub pname: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetColorTableParameterivRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetColorTableParameterivRequest").finish_non_exhaustive()
+    }
 }
 impl GetColorTableParameterivRequest {
     /// Serialize this request into bytes for the provided connection
@@ -9871,6 +10906,7 @@ impl GetColorTableParameterivRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_COLOR_TABLE_PARAMETERIV_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -9900,13 +10936,20 @@ impl crate::x11_utils::ReplyRequest for GetColorTableParameterivRequest {
     type Reply = GetColorTableParameterivReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetColorTableParameterivReply {
     pub sequence: u16,
     pub length: u32,
     pub datum: i32,
     pub data: Vec<i32>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetColorTableParameterivReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetColorTableParameterivReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetColorTableParameterivReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -9970,7 +11013,8 @@ impl GetColorTableParameterivReply {
 
 /// Opcode for the GetConvolutionFilter request
 pub const GET_CONVOLUTION_FILTER_REQUEST: u8 = 150;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetConvolutionFilterRequest {
     pub context_tag: ContextTag,
@@ -9978,6 +11022,12 @@ pub struct GetConvolutionFilterRequest {
     pub format: u32,
     pub type_: u32,
     pub swap_bytes: bool,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetConvolutionFilterRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetConvolutionFilterRequest").finish_non_exhaustive()
+    }
 }
 impl GetConvolutionFilterRequest {
     /// Serialize this request into bytes for the provided connection
@@ -10021,6 +11071,7 @@ impl GetConvolutionFilterRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_CONVOLUTION_FILTER_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -10054,13 +11105,20 @@ impl crate::x11_utils::ReplyRequest for GetConvolutionFilterRequest {
     type Reply = GetConvolutionFilterReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetConvolutionFilterReply {
     pub sequence: u16,
     pub width: i32,
     pub height: i32,
     pub data: Vec<u8>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetConvolutionFilterReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetConvolutionFilterReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetConvolutionFilterReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -10127,12 +11185,19 @@ impl GetConvolutionFilterReply {
 
 /// Opcode for the GetConvolutionParameterfv request
 pub const GET_CONVOLUTION_PARAMETERFV_REQUEST: u8 = 151;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetConvolutionParameterfvRequest {
     pub context_tag: ContextTag,
     pub target: u32,
     pub pname: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetConvolutionParameterfvRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetConvolutionParameterfvRequest").finish_non_exhaustive()
+    }
 }
 impl GetConvolutionParameterfvRequest {
     /// Serialize this request into bytes for the provided connection
@@ -10166,6 +11231,7 @@ impl GetConvolutionParameterfvRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_CONVOLUTION_PARAMETERFV_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -10195,13 +11261,20 @@ impl crate::x11_utils::ReplyRequest for GetConvolutionParameterfvRequest {
     type Reply = GetConvolutionParameterfvReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, PartialOrd)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, PartialOrd))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetConvolutionParameterfvReply {
     pub sequence: u16,
     pub length: u32,
     pub datum: Float32,
     pub data: Vec<Float32>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetConvolutionParameterfvReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetConvolutionParameterfvReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetConvolutionParameterfvReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -10265,12 +11338,19 @@ impl GetConvolutionParameterfvReply {
 
 /// Opcode for the GetConvolutionParameteriv request
 pub const GET_CONVOLUTION_PARAMETERIV_REQUEST: u8 = 152;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetConvolutionParameterivRequest {
     pub context_tag: ContextTag,
     pub target: u32,
     pub pname: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetConvolutionParameterivRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetConvolutionParameterivRequest").finish_non_exhaustive()
+    }
 }
 impl GetConvolutionParameterivRequest {
     /// Serialize this request into bytes for the provided connection
@@ -10304,6 +11384,7 @@ impl GetConvolutionParameterivRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_CONVOLUTION_PARAMETERIV_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -10333,13 +11414,20 @@ impl crate::x11_utils::ReplyRequest for GetConvolutionParameterivRequest {
     type Reply = GetConvolutionParameterivReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetConvolutionParameterivReply {
     pub sequence: u16,
     pub length: u32,
     pub datum: i32,
     pub data: Vec<i32>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetConvolutionParameterivReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetConvolutionParameterivReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetConvolutionParameterivReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -10403,7 +11491,8 @@ impl GetConvolutionParameterivReply {
 
 /// Opcode for the GetSeparableFilter request
 pub const GET_SEPARABLE_FILTER_REQUEST: u8 = 153;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetSeparableFilterRequest {
     pub context_tag: ContextTag,
@@ -10411,6 +11500,12 @@ pub struct GetSeparableFilterRequest {
     pub format: u32,
     pub type_: u32,
     pub swap_bytes: bool,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetSeparableFilterRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetSeparableFilterRequest").finish_non_exhaustive()
+    }
 }
 impl GetSeparableFilterRequest {
     /// Serialize this request into bytes for the provided connection
@@ -10454,6 +11549,7 @@ impl GetSeparableFilterRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_SEPARABLE_FILTER_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -10487,13 +11583,20 @@ impl crate::x11_utils::ReplyRequest for GetSeparableFilterRequest {
     type Reply = GetSeparableFilterReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetSeparableFilterReply {
     pub sequence: u16,
     pub row_w: i32,
     pub col_h: i32,
     pub rows_and_cols: Vec<u8>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetSeparableFilterReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetSeparableFilterReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetSeparableFilterReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -10560,7 +11663,8 @@ impl GetSeparableFilterReply {
 
 /// Opcode for the GetHistogram request
 pub const GET_HISTOGRAM_REQUEST: u8 = 154;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetHistogramRequest {
     pub context_tag: ContextTag,
@@ -10569,6 +11673,12 @@ pub struct GetHistogramRequest {
     pub type_: u32,
     pub swap_bytes: bool,
     pub reset: bool,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetHistogramRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetHistogramRequest").finish_non_exhaustive()
+    }
 }
 impl GetHistogramRequest {
     /// Serialize this request into bytes for the provided connection
@@ -10613,6 +11723,7 @@ impl GetHistogramRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_HISTOGRAM_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -10648,12 +11759,19 @@ impl crate::x11_utils::ReplyRequest for GetHistogramRequest {
     type Reply = GetHistogramReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetHistogramReply {
     pub sequence: u16,
     pub width: i32,
     pub data: Vec<u8>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetHistogramReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetHistogramReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetHistogramReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -10718,12 +11836,19 @@ impl GetHistogramReply {
 
 /// Opcode for the GetHistogramParameterfv request
 pub const GET_HISTOGRAM_PARAMETERFV_REQUEST: u8 = 155;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetHistogramParameterfvRequest {
     pub context_tag: ContextTag,
     pub target: u32,
     pub pname: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetHistogramParameterfvRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetHistogramParameterfvRequest").finish_non_exhaustive()
+    }
 }
 impl GetHistogramParameterfvRequest {
     /// Serialize this request into bytes for the provided connection
@@ -10757,6 +11882,7 @@ impl GetHistogramParameterfvRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_HISTOGRAM_PARAMETERFV_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -10786,13 +11912,20 @@ impl crate::x11_utils::ReplyRequest for GetHistogramParameterfvRequest {
     type Reply = GetHistogramParameterfvReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, PartialOrd)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, PartialOrd))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetHistogramParameterfvReply {
     pub sequence: u16,
     pub length: u32,
     pub datum: Float32,
     pub data: Vec<Float32>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetHistogramParameterfvReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetHistogramParameterfvReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetHistogramParameterfvReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -10856,12 +11989,19 @@ impl GetHistogramParameterfvReply {
 
 /// Opcode for the GetHistogramParameteriv request
 pub const GET_HISTOGRAM_PARAMETERIV_REQUEST: u8 = 156;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetHistogramParameterivRequest {
     pub context_tag: ContextTag,
     pub target: u32,
     pub pname: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetHistogramParameterivRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetHistogramParameterivRequest").finish_non_exhaustive()
+    }
 }
 impl GetHistogramParameterivRequest {
     /// Serialize this request into bytes for the provided connection
@@ -10895,6 +12035,7 @@ impl GetHistogramParameterivRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_HISTOGRAM_PARAMETERIV_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -10924,13 +12065,20 @@ impl crate::x11_utils::ReplyRequest for GetHistogramParameterivRequest {
     type Reply = GetHistogramParameterivReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetHistogramParameterivReply {
     pub sequence: u16,
     pub length: u32,
     pub datum: i32,
     pub data: Vec<i32>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetHistogramParameterivReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetHistogramParameterivReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetHistogramParameterivReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -10994,7 +12142,8 @@ impl GetHistogramParameterivReply {
 
 /// Opcode for the GetMinmax request
 pub const GET_MINMAX_REQUEST: u8 = 157;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetMinmaxRequest {
     pub context_tag: ContextTag,
@@ -11003,6 +12152,12 @@ pub struct GetMinmaxRequest {
     pub type_: u32,
     pub swap_bytes: bool,
     pub reset: bool,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetMinmaxRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetMinmaxRequest").finish_non_exhaustive()
+    }
 }
 impl GetMinmaxRequest {
     /// Serialize this request into bytes for the provided connection
@@ -11047,6 +12202,7 @@ impl GetMinmaxRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_MINMAX_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -11082,11 +12238,18 @@ impl crate::x11_utils::ReplyRequest for GetMinmaxRequest {
     type Reply = GetMinmaxReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetMinmaxReply {
     pub sequence: u16,
     pub data: Vec<u8>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetMinmaxReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetMinmaxReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetMinmaxReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -11147,12 +12310,19 @@ impl GetMinmaxReply {
 
 /// Opcode for the GetMinmaxParameterfv request
 pub const GET_MINMAX_PARAMETERFV_REQUEST: u8 = 158;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetMinmaxParameterfvRequest {
     pub context_tag: ContextTag,
     pub target: u32,
     pub pname: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetMinmaxParameterfvRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetMinmaxParameterfvRequest").finish_non_exhaustive()
+    }
 }
 impl GetMinmaxParameterfvRequest {
     /// Serialize this request into bytes for the provided connection
@@ -11186,6 +12356,7 @@ impl GetMinmaxParameterfvRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_MINMAX_PARAMETERFV_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -11215,13 +12386,20 @@ impl crate::x11_utils::ReplyRequest for GetMinmaxParameterfvRequest {
     type Reply = GetMinmaxParameterfvReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, PartialOrd)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, PartialOrd))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetMinmaxParameterfvReply {
     pub sequence: u16,
     pub length: u32,
     pub datum: Float32,
     pub data: Vec<Float32>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetMinmaxParameterfvReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetMinmaxParameterfvReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetMinmaxParameterfvReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -11285,12 +12463,19 @@ impl GetMinmaxParameterfvReply {
 
 /// Opcode for the GetMinmaxParameteriv request
 pub const GET_MINMAX_PARAMETERIV_REQUEST: u8 = 159;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetMinmaxParameterivRequest {
     pub context_tag: ContextTag,
     pub target: u32,
     pub pname: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetMinmaxParameterivRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetMinmaxParameterivRequest").finish_non_exhaustive()
+    }
 }
 impl GetMinmaxParameterivRequest {
     /// Serialize this request into bytes for the provided connection
@@ -11324,6 +12509,7 @@ impl GetMinmaxParameterivRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_MINMAX_PARAMETERIV_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -11353,13 +12539,20 @@ impl crate::x11_utils::ReplyRequest for GetMinmaxParameterivRequest {
     type Reply = GetMinmaxParameterivReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetMinmaxParameterivReply {
     pub sequence: u16,
     pub length: u32,
     pub datum: i32,
     pub data: Vec<i32>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetMinmaxParameterivReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetMinmaxParameterivReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetMinmaxParameterivReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -11423,12 +12616,19 @@ impl GetMinmaxParameterivReply {
 
 /// Opcode for the GetCompressedTexImageARB request
 pub const GET_COMPRESSED_TEX_IMAGE_ARB_REQUEST: u8 = 160;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetCompressedTexImageARBRequest {
     pub context_tag: ContextTag,
     pub target: u32,
     pub level: i32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetCompressedTexImageARBRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetCompressedTexImageARBRequest").finish_non_exhaustive()
+    }
 }
 impl GetCompressedTexImageARBRequest {
     /// Serialize this request into bytes for the provided connection
@@ -11462,6 +12662,7 @@ impl GetCompressedTexImageARBRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_COMPRESSED_TEX_IMAGE_ARB_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -11491,12 +12692,19 @@ impl crate::x11_utils::ReplyRequest for GetCompressedTexImageARBRequest {
     type Reply = GetCompressedTexImageARBReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetCompressedTexImageARBReply {
     pub sequence: u16,
     pub size: i32,
     pub data: Vec<u8>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetCompressedTexImageARBReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetCompressedTexImageARBReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetCompressedTexImageARBReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -11561,11 +12769,18 @@ impl GetCompressedTexImageARBReply {
 
 /// Opcode for the DeleteQueriesARB request
 pub const DELETE_QUERIES_ARB_REQUEST: u8 = 161;
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DeleteQueriesARBRequest<'input> {
     pub context_tag: ContextTag,
     pub ids: Cow<'input, [u32]>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl<'input> core::fmt::Debug for DeleteQueriesARBRequest<'input> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("DeleteQueriesARBRequest").finish_non_exhaustive()
+    }
 }
 impl<'input> DeleteQueriesARBRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -11599,6 +12814,7 @@ impl<'input> DeleteQueriesARBRequest<'input> {
         ([request0.into(), ids_bytes.into(), padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != DELETE_QUERIES_ARB_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -11635,11 +12851,18 @@ impl<'input> crate::x11_utils::VoidRequest for DeleteQueriesARBRequest<'input> {
 
 /// Opcode for the GenQueriesARB request
 pub const GEN_QUERIES_ARB_REQUEST: u8 = 162;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GenQueriesARBRequest {
     pub context_tag: ContextTag,
     pub n: i32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GenQueriesARBRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GenQueriesARBRequest").finish_non_exhaustive()
+    }
 }
 impl GenQueriesARBRequest {
     /// Serialize this request into bytes for the provided connection
@@ -11668,6 +12891,7 @@ impl GenQueriesARBRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GEN_QUERIES_ARB_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -11695,11 +12919,18 @@ impl crate::x11_utils::ReplyRequest for GenQueriesARBRequest {
     type Reply = GenQueriesARBReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GenQueriesARBReply {
     pub sequence: u16,
     pub data: Vec<u32>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GenQueriesARBReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GenQueriesARBReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GenQueriesARBReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -11757,11 +12988,18 @@ impl GenQueriesARBReply {
 
 /// Opcode for the IsQueryARB request
 pub const IS_QUERY_ARB_REQUEST: u8 = 163;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct IsQueryARBRequest {
     pub context_tag: ContextTag,
     pub id: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for IsQueryARBRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("IsQueryARBRequest").finish_non_exhaustive()
+    }
 }
 impl IsQueryARBRequest {
     /// Serialize this request into bytes for the provided connection
@@ -11790,6 +13028,7 @@ impl IsQueryARBRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != IS_QUERY_ARB_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -11817,12 +13056,19 @@ impl crate::x11_utils::ReplyRequest for IsQueryARBRequest {
     type Reply = IsQueryARBReply;
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct IsQueryARBReply {
     pub sequence: u16,
     pub length: u32,
     pub ret_val: Bool32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for IsQueryARBReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("IsQueryARBReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for IsQueryARBReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -11877,12 +13123,19 @@ impl Serialize for IsQueryARBReply {
 
 /// Opcode for the GetQueryivARB request
 pub const GET_QUERYIV_ARB_REQUEST: u8 = 164;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetQueryivARBRequest {
     pub context_tag: ContextTag,
     pub target: u32,
     pub pname: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetQueryivARBRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetQueryivARBRequest").finish_non_exhaustive()
+    }
 }
 impl GetQueryivARBRequest {
     /// Serialize this request into bytes for the provided connection
@@ -11916,6 +13169,7 @@ impl GetQueryivARBRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_QUERYIV_ARB_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -11945,13 +13199,20 @@ impl crate::x11_utils::ReplyRequest for GetQueryivARBRequest {
     type Reply = GetQueryivARBReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetQueryivARBReply {
     pub sequence: u16,
     pub length: u32,
     pub datum: i32,
     pub data: Vec<i32>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetQueryivARBReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetQueryivARBReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetQueryivARBReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -12015,12 +13276,19 @@ impl GetQueryivARBReply {
 
 /// Opcode for the GetQueryObjectivARB request
 pub const GET_QUERY_OBJECTIV_ARB_REQUEST: u8 = 165;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetQueryObjectivARBRequest {
     pub context_tag: ContextTag,
     pub id: u32,
     pub pname: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetQueryObjectivARBRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetQueryObjectivARBRequest").finish_non_exhaustive()
+    }
 }
 impl GetQueryObjectivARBRequest {
     /// Serialize this request into bytes for the provided connection
@@ -12054,6 +13322,7 @@ impl GetQueryObjectivARBRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_QUERY_OBJECTIV_ARB_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -12083,13 +13352,20 @@ impl crate::x11_utils::ReplyRequest for GetQueryObjectivARBRequest {
     type Reply = GetQueryObjectivARBReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetQueryObjectivARBReply {
     pub sequence: u16,
     pub length: u32,
     pub datum: i32,
     pub data: Vec<i32>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetQueryObjectivARBReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetQueryObjectivARBReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetQueryObjectivARBReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -12153,12 +13429,19 @@ impl GetQueryObjectivARBReply {
 
 /// Opcode for the GetQueryObjectuivARB request
 pub const GET_QUERY_OBJECTUIV_ARB_REQUEST: u8 = 166;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetQueryObjectuivARBRequest {
     pub context_tag: ContextTag,
     pub id: u32,
     pub pname: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetQueryObjectuivARBRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetQueryObjectuivARBRequest").finish_non_exhaustive()
+    }
 }
 impl GetQueryObjectuivARBRequest {
     /// Serialize this request into bytes for the provided connection
@@ -12192,6 +13475,7 @@ impl GetQueryObjectuivARBRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_QUERY_OBJECTUIV_ARB_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -12221,13 +13505,20 @@ impl crate::x11_utils::ReplyRequest for GetQueryObjectuivARBRequest {
     type Reply = GetQueryObjectuivARBReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetQueryObjectuivARBReply {
     pub sequence: u16,
     pub length: u32,
     pub datum: u32,
     pub data: Vec<u32>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetQueryObjectuivARBReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetQueryObjectuivARBReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetQueryObjectuivARBReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {

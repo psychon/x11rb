@@ -12,6 +12,22 @@ pub(crate) struct EnumInfo {
     pub(super) wire_size: Option<(u8, u8)>,
 }
 
+pub(super) fn default_debug_impl(name: &str, out: &mut crate::generator::Output) {
+    outln!(out, "#[cfg(not(feature = \"extra-traits\"))]");
+    outln!(out, "impl core::fmt::Debug for {} {{", name);
+    out.indented(|out| {
+        outln!(
+            out,
+            "fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {{"
+        );
+        out.indented(|out| {
+            outln!(out, "f.debug_struct(\"{}\").finish_non_exhaustive()", name);
+        });
+        outln!(out, "}}");
+    });
+    outln!(out, "}}");
+}
+
 /// Caches to avoid repeating some operations.
 #[derive(Default)]
 pub(crate) struct Caches {
@@ -248,9 +264,6 @@ impl Derives {
 
     pub(super) fn to_list(self) -> Vec<&'static str> {
         let mut list = Vec::new();
-        if self.debug {
-            list.push("Debug");
-        }
         if self.clone {
             list.push("Clone");
         }
@@ -259,6 +272,14 @@ impl Derives {
         }
         if self.default_ {
             list.push("Default");
+        }
+        list
+    }
+
+    pub(super) fn extra_traits_list(self) -> Vec<&'static str> {
+        let mut list = Vec::new();
+        if self.debug {
+            list.push("Debug");
         }
         if self.partial_eq {
             list.push("PartialEq");

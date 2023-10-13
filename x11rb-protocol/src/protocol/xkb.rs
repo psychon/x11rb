@@ -1904,7 +1904,8 @@ impl core::fmt::Debug for IMGroupsWhich  {
 }
 bitmask_binop!(IMGroupsWhich, u8);
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct IndicatorMap {
     pub flags: IMFlag,
@@ -1915,6 +1916,12 @@ pub struct IndicatorMap {
     pub real_mods: xproto::ModMask,
     pub vmods: VMod,
     pub ctrls: BoolCtrl,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for IndicatorMap {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("IndicatorMap").finish_non_exhaustive()
+    }
 }
 impl TryParse for IndicatorMap {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -2289,12 +2296,19 @@ impl core::fmt::Debug for PerClientFlag  {
 }
 bitmask_binop!(PerClientFlag, u32);
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ModDef {
     pub mask: xproto::ModMask,
     pub real_mods: xproto::ModMask,
     pub vmods: VMod,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for ModDef {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("ModDef").finish_non_exhaustive()
+    }
 }
 impl TryParse for ModDef {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -2329,10 +2343,17 @@ impl Serialize for ModDef {
     }
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct KeyName {
     pub name: [u8; 4],
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for KeyName {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("KeyName").finish_non_exhaustive()
+    }
 }
 impl TryParse for KeyName {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -2357,11 +2378,18 @@ impl Serialize for KeyName {
     }
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct KeyAlias {
     pub real: [u8; 4],
     pub alias: [u8; 4],
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for KeyAlias {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("KeyAlias").finish_non_exhaustive()
+    }
 }
 impl TryParse for KeyAlias {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -2392,11 +2420,18 @@ impl Serialize for KeyAlias {
     }
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CountedString16 {
     pub string: Vec<u8>,
     pub alignment_pad: Vec<u8>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for CountedString16 {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("CountedString16").finish_non_exhaustive()
+    }
 }
 impl TryParse for CountedString16 {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -2440,7 +2475,8 @@ impl CountedString16 {
     }
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct KTMapEntry {
     pub active: bool,
@@ -2448,6 +2484,12 @@ pub struct KTMapEntry {
     pub level: u8,
     pub mods_mods: xproto::ModMask,
     pub mods_vmods: VMod,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for KTMapEntry {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("KTMapEntry").finish_non_exhaustive()
+    }
 }
 impl TryParse for KTMapEntry {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -2494,7 +2536,8 @@ impl Serialize for KTMapEntry {
     }
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct KeyType {
     pub mods_mask: xproto::ModMask,
@@ -2504,6 +2547,12 @@ pub struct KeyType {
     pub has_preserve: bool,
     pub map: Vec<KTMapEntry>,
     pub preserve: Vec<ModDef>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for KeyType {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("KeyType").finish_non_exhaustive()
+    }
 }
 impl TryParse for KeyType {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -2561,13 +2610,20 @@ impl KeyType {
     }
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct KeySymMap {
     pub kt_index: [u8; 4],
     pub group_info: u8,
     pub width: u8,
     pub syms: Vec<xproto::Keysym>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for KeySymMap {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("KeySymMap").finish_non_exhaustive()
+    }
 }
 impl TryParse for KeySymMap {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -2613,11 +2669,18 @@ impl KeySymMap {
     }
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CommonBehavior {
     pub type_: u8,
     pub data: u8,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for CommonBehavior {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("CommonBehavior").finish_non_exhaustive()
+    }
 }
 impl TryParse for CommonBehavior {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -2644,10 +2707,17 @@ impl Serialize for CommonBehavior {
     }
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DefaultBehavior {
     pub type_: u8,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for DefaultBehavior {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("DefaultBehavior").finish_non_exhaustive()
+    }
 }
 impl TryParse for DefaultBehavior {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -2675,11 +2745,18 @@ impl Serialize for DefaultBehavior {
 
 pub type LockBehavior = DefaultBehavior;
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct RadioGroupBehavior {
     pub type_: u8,
     pub group: u8,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for RadioGroupBehavior {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("RadioGroupBehavior").finish_non_exhaustive()
+    }
 }
 impl TryParse for RadioGroupBehavior {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -2706,11 +2783,18 @@ impl Serialize for RadioGroupBehavior {
     }
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct OverlayBehavior {
     pub type_: u8,
     pub key: xproto::Keycode,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for OverlayBehavior {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("OverlayBehavior").finish_non_exhaustive()
+    }
 }
 impl TryParse for OverlayBehavior {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -2963,11 +3047,18 @@ impl core::fmt::Debug for BehaviorType  {
     }
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Clone, Copy)]
+#[cfg_attr(feature = "extra-traits", derive(Debug))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetBehavior {
     pub keycode: xproto::Keycode,
     pub behavior: Behavior,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for SetBehavior {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SetBehavior").finish_non_exhaustive()
+    }
 }
 impl TryParse for SetBehavior {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -2998,11 +3089,18 @@ impl Serialize for SetBehavior {
     }
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetExplicit {
     pub keycode: xproto::Keycode,
     pub explicit: Explicit,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for SetExplicit {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SetExplicit").finish_non_exhaustive()
+    }
 }
 impl TryParse for SetExplicit {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -3030,11 +3128,18 @@ impl Serialize for SetExplicit {
     }
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct KeyModMap {
     pub keycode: xproto::Keycode,
     pub mods: xproto::ModMask,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for KeyModMap {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("KeyModMap").finish_non_exhaustive()
+    }
 }
 impl TryParse for KeyModMap {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -3062,11 +3167,18 @@ impl Serialize for KeyModMap {
     }
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct KeyVModMap {
     pub keycode: xproto::Keycode,
     pub vmods: VMod,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for KeyVModMap {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("KeyVModMap").finish_non_exhaustive()
+    }
 }
 impl TryParse for KeyVModMap {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -3098,12 +3210,19 @@ impl Serialize for KeyVModMap {
     }
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct KTSetMapEntry {
     pub level: u8,
     pub real_mods: xproto::ModMask,
     pub virtual_mods: VMod,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for KTSetMapEntry {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("KTSetMapEntry").finish_non_exhaustive()
+    }
 }
 impl TryParse for KTSetMapEntry {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -3137,7 +3256,8 @@ impl Serialize for KTSetMapEntry {
     }
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetKeyType {
     pub mask: xproto::ModMask,
@@ -3147,6 +3267,12 @@ pub struct SetKeyType {
     pub preserve: bool,
     pub entries: Vec<KTSetMapEntry>,
     pub preserve_entries: Vec<KTSetMapEntry>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for SetKeyType {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SetKeyType").finish_non_exhaustive()
+    }
 }
 impl TryParse for SetKeyType {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -3206,11 +3332,18 @@ impl SetKeyType {
 
 pub type String8 = u8;
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Outline {
     pub corner_radius: u8,
     pub points: Vec<xproto::Point>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for Outline {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("Outline").finish_non_exhaustive()
+    }
 }
 impl TryParse for Outline {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -3254,13 +3387,20 @@ impl Outline {
     }
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Shape {
     pub name: xproto::Atom,
     pub primary_ndx: u8,
     pub approx_ndx: u8,
     pub outlines: Vec<Outline>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for Shape {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("Shape").finish_non_exhaustive()
+    }
 }
 impl TryParse for Shape {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -3308,13 +3448,20 @@ impl Shape {
     }
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Key {
     pub name: [String8; 4],
     pub gap: i16,
     pub shape_ndx: u8,
     pub color_ndx: u8,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for Key {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("Key").finish_non_exhaustive()
+    }
 }
 impl TryParse for Key {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -3352,11 +3499,18 @@ impl Serialize for Key {
     }
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct OverlayKey {
     pub over: [String8; 4],
     pub under: [String8; 4],
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for OverlayKey {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("OverlayKey").finish_non_exhaustive()
+    }
 }
 impl TryParse for OverlayKey {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -3387,11 +3541,18 @@ impl Serialize for OverlayKey {
     }
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct OverlayRow {
     pub row_under: u8,
     pub keys: Vec<OverlayKey>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for OverlayRow {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("OverlayRow").finish_non_exhaustive()
+    }
 }
 impl TryParse for OverlayRow {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -3435,11 +3596,18 @@ impl OverlayRow {
     }
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Overlay {
     pub name: xproto::Atom,
     pub rows: Vec<OverlayRow>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for Overlay {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("Overlay").finish_non_exhaustive()
+    }
 }
 impl TryParse for Overlay {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -3483,13 +3651,20 @@ impl Overlay {
     }
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Row {
     pub top: i16,
     pub left: i16,
     pub vertical: bool,
     pub keys: Vec<Key>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for Row {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("Row").finish_non_exhaustive()
+    }
 }
 impl TryParse for Row {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -3602,11 +3777,18 @@ impl core::fmt::Debug for DoodadType  {
     }
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Listing {
     pub flags: u16,
     pub string: Vec<String8>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for Listing {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("Listing").finish_non_exhaustive()
+    }
 }
 impl TryParse for Listing {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -3655,7 +3837,8 @@ impl Listing {
     }
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DeviceLedInfo {
     pub led_class: LedClass,
@@ -3666,6 +3849,12 @@ pub struct DeviceLedInfo {
     pub state: u32,
     pub names: Vec<xproto::Atom>,
     pub maps: Vec<IndicatorMap>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for DeviceLedInfo {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("DeviceLedInfo").finish_non_exhaustive()
+    }
 }
 impl TryParse for DeviceLedInfo {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -3929,10 +4118,17 @@ impl core::fmt::Debug for SAType  {
     }
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SANoAction {
     pub type_: SAType,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for SANoAction {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SANoAction").finish_non_exhaustive()
+    }
 }
 impl TryParse for SANoAction {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -3965,7 +4161,8 @@ impl Serialize for SANoAction {
     }
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SASetMods {
     pub type_: SAType,
@@ -3974,6 +4171,12 @@ pub struct SASetMods {
     pub real_mods: xproto::ModMask,
     pub vmods_high: VModsHigh,
     pub vmods_low: VModsLow,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for SASetMods {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SASetMods").finish_non_exhaustive()
+    }
 }
 impl TryParse for SASetMods {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -4030,12 +4233,19 @@ pub type SALatchMods = SASetMods;
 
 pub type SALockMods = SASetMods;
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SASetGroup {
     pub type_: SAType,
     pub flags: SA,
     pub group: i8,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for SASetGroup {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SASetGroup").finish_non_exhaustive()
+    }
 }
 impl TryParse for SASetGroup {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -4141,7 +4351,8 @@ impl core::fmt::Debug for SAMovePtrFlag  {
 }
 bitmask_binop!(SAMovePtrFlag, u8);
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SAMovePtr {
     pub type_: SAType,
@@ -4150,6 +4361,12 @@ pub struct SAMovePtr {
     pub x_low: u8,
     pub y_high: i8,
     pub y_low: u8,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for SAMovePtr {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SAMovePtr").finish_non_exhaustive()
+    }
 }
 impl TryParse for SAMovePtr {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -4198,13 +4415,20 @@ impl Serialize for SAMovePtr {
     }
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SAPtrBtn {
     pub type_: SAType,
     pub flags: u8,
     pub count: u8,
     pub button: u8,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for SAPtrBtn {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SAPtrBtn").finish_non_exhaustive()
+    }
 }
 impl TryParse for SAPtrBtn {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -4246,12 +4470,19 @@ impl Serialize for SAPtrBtn {
     }
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SALockPtrBtn {
     pub type_: SAType,
     pub flags: u8,
     pub button: u8,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for SALockPtrBtn {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SALockPtrBtn").finish_non_exhaustive()
+    }
 }
 impl TryParse for SALockPtrBtn {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -4352,13 +4583,20 @@ impl core::fmt::Debug for SASetPtrDfltFlag  {
 }
 bitmask_binop!(SASetPtrDfltFlag, u8);
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SASetPtrDflt {
     pub type_: SAType,
     pub flags: SASetPtrDfltFlag,
     pub affect: SASetPtrDfltFlag,
     pub value: i8,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for SASetPtrDflt {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SASetPtrDflt").finish_non_exhaustive()
+    }
 }
 impl TryParse for SASetPtrDflt {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -4532,7 +4770,8 @@ impl core::fmt::Debug for SAIsoLockNoAffect  {
 }
 bitmask_binop!(SAIsoLockNoAffect, u8);
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SAIsoLock {
     pub type_: SAType,
@@ -4543,6 +4782,12 @@ pub struct SAIsoLock {
     pub affect: SAIsoLockNoAffect,
     pub vmods_high: VModsHigh,
     pub vmods_low: VModsLow,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for SAIsoLock {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SAIsoLock").finish_non_exhaustive()
+    }
 }
 impl TryParse for SAIsoLock {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -4600,10 +4845,17 @@ impl Serialize for SAIsoLock {
     }
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SATerminate {
     pub type_: SAType,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for SATerminate {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SATerminate").finish_non_exhaustive()
+    }
 }
 impl TryParse for SATerminate {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -4696,12 +4948,19 @@ impl core::fmt::Debug for SwitchScreenFlag  {
 }
 bitmask_binop!(SwitchScreenFlag, u8);
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SASwitchScreen {
     pub type_: SAType,
     pub flags: u8,
     pub new_screen: i8,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for SASwitchScreen {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SASwitchScreen").finish_non_exhaustive()
+    }
 }
 impl TryParse for SASwitchScreen {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -4878,12 +5137,19 @@ impl core::fmt::Debug for BoolCtrlsLow  {
 }
 bitmask_binop!(BoolCtrlsLow, u8);
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SASetControls {
     pub type_: SAType,
     pub bool_ctrls_high: BoolCtrlsHigh,
     pub bool_ctrls_low: BoolCtrlsLow,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for SASetControls {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SASetControls").finish_non_exhaustive()
+    }
 }
 impl TryParse for SASetControls {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -4990,12 +5256,19 @@ impl core::fmt::Debug for ActionMessageFlag  {
 }
 bitmask_binop!(ActionMessageFlag, u8);
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SAActionMessage {
     pub type_: SAType,
     pub flags: ActionMessageFlag,
     pub message: [u8; 6],
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for SAActionMessage {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SAActionMessage").finish_non_exhaustive()
+    }
 }
 impl TryParse for SAActionMessage {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -5032,7 +5305,8 @@ impl Serialize for SAActionMessage {
     }
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SARedirectKey {
     pub type_: SAType,
@@ -5043,6 +5317,12 @@ pub struct SARedirectKey {
     pub vmods_mask_low: VModsLow,
     pub vmods_high: VModsHigh,
     pub vmods_low: VModsLow,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for SARedirectKey {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SARedirectKey").finish_non_exhaustive()
+    }
 }
 impl TryParse for SARedirectKey {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -5100,7 +5380,8 @@ impl Serialize for SARedirectKey {
     }
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SADeviceBtn {
     pub type_: SAType,
@@ -5108,6 +5389,12 @@ pub struct SADeviceBtn {
     pub count: u8,
     pub button: u8,
     pub device: u8,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for SADeviceBtn {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SADeviceBtn").finish_non_exhaustive()
+    }
 }
 impl TryParse for SADeviceBtn {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -5212,13 +5499,20 @@ impl core::fmt::Debug for LockDeviceFlags  {
 }
 bitmask_binop!(LockDeviceFlags, u8);
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SALockDeviceBtn {
     pub type_: SAType,
     pub flags: LockDeviceFlags,
     pub button: u8,
     pub device: u8,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for SALockDeviceBtn {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SALockDeviceBtn").finish_non_exhaustive()
+    }
 }
 impl TryParse for SALockDeviceBtn {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -5330,7 +5624,8 @@ impl core::fmt::Debug for SAValWhat  {
     }
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SADeviceValuator {
     pub type_: SAType,
@@ -5341,6 +5636,12 @@ pub struct SADeviceValuator {
     pub val2what: SAValWhat,
     pub val2index: u8,
     pub val2value: u8,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for SADeviceValuator {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SADeviceValuator").finish_non_exhaustive()
+    }
 }
 impl TryParse for SADeviceValuator {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -5394,11 +5695,18 @@ impl Serialize for SADeviceValuator {
     }
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SIAction {
     pub type_: SAType,
     pub data: [u8; 7],
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for SIAction {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SIAction").finish_non_exhaustive()
+    }
 }
 impl TryParse for SIAction {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -5431,7 +5739,8 @@ impl Serialize for SIAction {
     }
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SymInterpret {
     pub sym: xproto::Keysym,
@@ -5440,6 +5749,12 @@ pub struct SymInterpret {
     pub virtual_mod: VModsLow,
     pub flags: u8,
     pub action: SIAction,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for SymInterpret {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SymInterpret").finish_non_exhaustive()
+    }
 }
 impl TryParse for SymInterpret {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -5810,11 +6125,18 @@ impl From<SAType> for Action {
 
 /// Opcode for the UseExtension request
 pub const USE_EXTENSION_REQUEST: u8 = 0;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct UseExtensionRequest {
     pub wanted_major: u16,
     pub wanted_minor: u16,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for UseExtensionRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("UseExtensionRequest").finish_non_exhaustive()
+    }
 }
 impl UseExtensionRequest {
     /// Serialize this request into bytes for the provided connection
@@ -5839,6 +6161,7 @@ impl UseExtensionRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != USE_EXTENSION_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -5866,7 +6189,8 @@ impl crate::x11_utils::ReplyRequest for UseExtensionRequest {
     type Reply = UseExtensionReply;
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct UseExtensionReply {
     pub supported: bool,
@@ -5874,6 +6198,12 @@ pub struct UseExtensionReply {
     pub length: u32,
     pub server_major: u16,
     pub server_minor: u16,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for UseExtensionReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("UseExtensionReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for UseExtensionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -5952,11 +6282,18 @@ impl Serialize for UseExtensionReply {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SelectEventsAuxNewKeyboardNotify {
     pub affect_new_keyboard: NKNDetail,
     pub new_keyboard_details: NKNDetail,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for SelectEventsAuxNewKeyboardNotify {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SelectEventsAuxNewKeyboardNotify").finish_non_exhaustive()
+    }
 }
 impl TryParse for SelectEventsAuxNewKeyboardNotify {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -5986,11 +6323,18 @@ impl Serialize for SelectEventsAuxNewKeyboardNotify {
         u16::from(self.new_keyboard_details).serialize_into(bytes);
     }
 }
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SelectEventsAuxStateNotify {
     pub affect_state: StatePart,
     pub state_details: StatePart,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for SelectEventsAuxStateNotify {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SelectEventsAuxStateNotify").finish_non_exhaustive()
+    }
 }
 impl TryParse for SelectEventsAuxStateNotify {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -6020,11 +6364,18 @@ impl Serialize for SelectEventsAuxStateNotify {
         u16::from(self.state_details).serialize_into(bytes);
     }
 }
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SelectEventsAuxControlsNotify {
     pub affect_ctrls: Control,
     pub ctrl_details: Control,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for SelectEventsAuxControlsNotify {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SelectEventsAuxControlsNotify").finish_non_exhaustive()
+    }
 }
 impl TryParse for SelectEventsAuxControlsNotify {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -6058,11 +6409,18 @@ impl Serialize for SelectEventsAuxControlsNotify {
         u32::from(self.ctrl_details).serialize_into(bytes);
     }
 }
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SelectEventsAuxIndicatorStateNotify {
     pub affect_indicator_state: u32,
     pub indicator_state_details: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for SelectEventsAuxIndicatorStateNotify {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SelectEventsAuxIndicatorStateNotify").finish_non_exhaustive()
+    }
 }
 impl TryParse for SelectEventsAuxIndicatorStateNotify {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -6094,11 +6452,18 @@ impl Serialize for SelectEventsAuxIndicatorStateNotify {
         self.indicator_state_details.serialize_into(bytes);
     }
 }
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SelectEventsAuxIndicatorMapNotify {
     pub affect_indicator_map: u32,
     pub indicator_map_details: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for SelectEventsAuxIndicatorMapNotify {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SelectEventsAuxIndicatorMapNotify").finish_non_exhaustive()
+    }
 }
 impl TryParse for SelectEventsAuxIndicatorMapNotify {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -6130,11 +6495,18 @@ impl Serialize for SelectEventsAuxIndicatorMapNotify {
         self.indicator_map_details.serialize_into(bytes);
     }
 }
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SelectEventsAuxNamesNotify {
     pub affect_names: NameDetail,
     pub names_details: NameDetail,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for SelectEventsAuxNamesNotify {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SelectEventsAuxNamesNotify").finish_non_exhaustive()
+    }
 }
 impl TryParse for SelectEventsAuxNamesNotify {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -6164,11 +6536,18 @@ impl Serialize for SelectEventsAuxNamesNotify {
         (u32::from(self.names_details) as u16).serialize_into(bytes);
     }
 }
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SelectEventsAuxCompatMapNotify {
     pub affect_compat: CMDetail,
     pub compat_details: CMDetail,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for SelectEventsAuxCompatMapNotify {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SelectEventsAuxCompatMapNotify").finish_non_exhaustive()
+    }
 }
 impl TryParse for SelectEventsAuxCompatMapNotify {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -6196,11 +6575,18 @@ impl Serialize for SelectEventsAuxCompatMapNotify {
         u8::from(self.compat_details).serialize_into(bytes);
     }
 }
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SelectEventsAuxBellNotify {
     pub affect_bell: u8,
     pub bell_details: u8,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for SelectEventsAuxBellNotify {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SelectEventsAuxBellNotify").finish_non_exhaustive()
+    }
 }
 impl TryParse for SelectEventsAuxBellNotify {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -6226,11 +6612,18 @@ impl Serialize for SelectEventsAuxBellNotify {
         self.bell_details.serialize_into(bytes);
     }
 }
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SelectEventsAuxActionMessage {
     pub affect_msg_details: u8,
     pub msg_details: u8,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for SelectEventsAuxActionMessage {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SelectEventsAuxActionMessage").finish_non_exhaustive()
+    }
 }
 impl TryParse for SelectEventsAuxActionMessage {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -6256,11 +6649,18 @@ impl Serialize for SelectEventsAuxActionMessage {
         self.msg_details.serialize_into(bytes);
     }
 }
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SelectEventsAuxAccessXNotify {
     pub affect_access_x: AXNDetail,
     pub access_x_details: AXNDetail,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for SelectEventsAuxAccessXNotify {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SelectEventsAuxAccessXNotify").finish_non_exhaustive()
+    }
 }
 impl TryParse for SelectEventsAuxAccessXNotify {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -6290,11 +6690,18 @@ impl Serialize for SelectEventsAuxAccessXNotify {
         u16::from(self.access_x_details).serialize_into(bytes);
     }
 }
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SelectEventsAuxExtensionDeviceNotify {
     pub affect_ext_dev: XIFeature,
     pub extdev_details: XIFeature,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for SelectEventsAuxExtensionDeviceNotify {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SelectEventsAuxExtensionDeviceNotify").finish_non_exhaustive()
+    }
 }
 impl TryParse for SelectEventsAuxExtensionDeviceNotify {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -6325,7 +6732,8 @@ impl Serialize for SelectEventsAuxExtensionDeviceNotify {
     }
 }
 /// Auxiliary and optional information for the `select_events` function
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SelectEventsAux {
     pub new_keyboard_notify: Option<SelectEventsAuxNewKeyboardNotify>,
@@ -6340,7 +6748,14 @@ pub struct SelectEventsAux {
     pub access_x_notify: Option<SelectEventsAuxAccessXNotify>,
     pub extension_device_notify: Option<SelectEventsAuxExtensionDeviceNotify>,
 }
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for SelectEventsAux {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SelectEventsAux").finish_non_exhaustive()
+    }
+}
 impl SelectEventsAux {
+    #[cfg_attr(not(feature = "request-parsing"), allow(dead_code))]
     fn try_parse(value: &[u8], affect_which: u16, clear: u16, select_all: u16) -> Result<(Self, &[u8]), ParseError> {
         let switch_expr = u16::from(affect_which) & ((!u16::from(clear)) & (!u16::from(select_all)));
         let mut outer_remaining = value;
@@ -6583,7 +6998,8 @@ impl SelectEventsAux {
 
 /// Opcode for the SelectEvents request
 pub const SELECT_EVENTS_REQUEST: u8 = 1;
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SelectEventsRequest<'input> {
     pub device_spec: DeviceSpec,
@@ -6592,6 +7008,12 @@ pub struct SelectEventsRequest<'input> {
     pub affect_map: MapPart,
     pub map: MapPart,
     pub details: Cow<'input, SelectEventsAux>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl<'input> core::fmt::Debug for SelectEventsRequest<'input> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SelectEventsRequest").finish_non_exhaustive()
+    }
 }
 impl<'input> SelectEventsRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -6633,6 +7055,7 @@ impl<'input> SelectEventsRequest<'input> {
         ([request0.into(), details_bytes.into(), padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SELECT_EVENTS_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -6685,7 +7108,8 @@ impl<'input> crate::x11_utils::VoidRequest for SelectEventsRequest<'input> {
 
 /// Opcode for the Bell request
 pub const BELL_REQUEST: u8 = 3;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct BellRequest {
     pub device_spec: DeviceSpec,
@@ -6698,6 +7122,12 @@ pub struct BellRequest {
     pub duration: i16,
     pub name: xproto::Atom,
     pub window: xproto::Window,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for BellRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("BellRequest").finish_non_exhaustive()
+    }
 }
 impl BellRequest {
     /// Serialize this request into bytes for the provided connection
@@ -6750,6 +7180,7 @@ impl BellRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != BELL_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -6796,10 +7227,17 @@ impl crate::x11_utils::VoidRequest for BellRequest {
 
 /// Opcode for the GetState request
 pub const GET_STATE_REQUEST: u8 = 4;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetStateRequest {
     pub device_spec: DeviceSpec,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetStateRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetStateRequest").finish_non_exhaustive()
+    }
 }
 impl GetStateRequest {
     /// Serialize this request into bytes for the provided connection
@@ -6823,6 +7261,7 @@ impl GetStateRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_STATE_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -6849,7 +7288,8 @@ impl crate::x11_utils::ReplyRequest for GetStateRequest {
     type Reply = GetStateReply;
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetStateReply {
     pub device_id: u8,
@@ -6869,6 +7309,12 @@ pub struct GetStateReply {
     pub lookup_mods: xproto::ModMask,
     pub compat_lookup_mods: xproto::ModMask,
     pub ptr_btn_state: xproto::KeyButMask,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetStateReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetStateReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetStateReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -6999,7 +7445,8 @@ impl Serialize for GetStateReply {
 
 /// Opcode for the LatchLockState request
 pub const LATCH_LOCK_STATE_REQUEST: u8 = 5;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct LatchLockStateRequest {
     pub device_spec: DeviceSpec,
@@ -7010,6 +7457,12 @@ pub struct LatchLockStateRequest {
     pub affect_mod_latches: xproto::ModMask,
     pub latch_group: bool,
     pub group_latch: u16,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for LatchLockStateRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("LatchLockStateRequest").finish_non_exhaustive()
+    }
 }
 impl LatchLockStateRequest {
     /// Serialize this request into bytes for the provided connection
@@ -7048,6 +7501,7 @@ impl LatchLockStateRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != LATCH_LOCK_STATE_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -7094,10 +7548,17 @@ impl crate::x11_utils::VoidRequest for LatchLockStateRequest {
 
 /// Opcode for the GetControls request
 pub const GET_CONTROLS_REQUEST: u8 = 6;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetControlsRequest {
     pub device_spec: DeviceSpec,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetControlsRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetControlsRequest").finish_non_exhaustive()
+    }
 }
 impl GetControlsRequest {
     /// Serialize this request into bytes for the provided connection
@@ -7121,6 +7582,7 @@ impl GetControlsRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_CONTROLS_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -7147,7 +7609,8 @@ impl crate::x11_utils::ReplyRequest for GetControlsRequest {
     type Reply = GetControlsReply;
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetControlsReply {
     pub device_id: u8,
@@ -7179,6 +7642,12 @@ pub struct GetControlsReply {
     pub access_x_timeout_values: BoolCtrl,
     pub enabled_controls: BoolCtrl,
     pub per_key_repeat: [u8; 32],
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetControlsReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetControlsReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetControlsReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -7404,7 +7873,8 @@ impl Serialize for GetControlsReply {
 
 /// Opcode for the SetControls request
 pub const SET_CONTROLS_REQUEST: u8 = 7;
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetControlsRequest<'input> {
     pub device_spec: DeviceSpec,
@@ -7437,6 +7907,12 @@ pub struct SetControlsRequest<'input> {
     pub access_x_timeout_options_mask: AXOption,
     pub access_x_timeout_options_values: AXOption,
     pub per_key_repeat: Cow<'input, [u8; 32]>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl<'input> core::fmt::Debug for SetControlsRequest<'input> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SetControlsRequest").finish_non_exhaustive()
+    }
 }
 impl<'input> SetControlsRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -7549,6 +8025,7 @@ impl<'input> SetControlsRequest<'input> {
         ([request0.into(), Cow::Owned(self.per_key_repeat.to_vec())], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_CONTROLS_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -7685,7 +8162,8 @@ impl<'input> crate::x11_utils::VoidRequest for SetControlsRequest<'input> {
 
 /// Opcode for the GetMap request
 pub const GET_MAP_REQUEST: u8 = 8;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetMapRequest {
     pub device_spec: DeviceSpec,
@@ -7706,6 +8184,12 @@ pub struct GetMapRequest {
     pub n_mod_map_keys: u8,
     pub first_v_mod_map_key: xproto::Keycode,
     pub n_v_mod_map_keys: u8,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetMapRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetMapRequest").finish_non_exhaustive()
+    }
 }
 impl GetMapRequest {
     /// Serialize this request into bytes for the provided connection
@@ -7766,6 +8250,7 @@ impl GetMapRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_MAP_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -7829,11 +8314,18 @@ impl crate::x11_utils::ReplyRequest for GetMapRequest {
     type Reply = GetMapReply;
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
+#[cfg_attr(feature = "extra-traits", derive(Debug))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetMapMapKeyActions {
     pub acts_rtrn_count: Vec<u8>,
     pub acts_rtrn_acts: Vec<Action>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetMapMapKeyActions {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetMapMapKeyActions").finish_non_exhaustive()
+    }
 }
 impl GetMapMapKeyActions {
     pub fn try_parse(remaining: &[u8], n_key_actions: u8, total_actions: u16) -> Result<(Self, &[u8]), ParseError> {
@@ -7864,7 +8356,8 @@ impl GetMapMapKeyActions {
         self.acts_rtrn_acts.serialize_into(bytes);
     }
 }
-#[derive(Debug, Clone, Default)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetMapMap {
     pub types_rtrn: Option<Vec<KeyType>>,
@@ -7876,7 +8369,14 @@ pub struct GetMapMap {
     pub modmap_rtrn: Option<Vec<KeyModMap>>,
     pub vmodmap_rtrn: Option<Vec<KeyVModMap>>,
 }
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetMapMap {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetMapMap").finish_non_exhaustive()
+    }
+}
 impl GetMapMap {
+    #[cfg_attr(not(feature = "request-parsing"), allow(dead_code))]
     fn try_parse(value: &[u8], present: u16, n_types: u8, n_key_syms: u8, n_key_actions: u8, total_actions: u16, total_key_behaviors: u8, virtual_mods: u16, total_key_explicit: u8, total_mod_map_keys: u8, total_v_mod_map_keys: u8) -> Result<(Self, &[u8]), ParseError> {
         let switch_expr = u16::from(present);
         let mut outer_remaining = value;
@@ -8048,7 +8548,8 @@ impl GetMapMap {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
+#[cfg_attr(feature = "extra-traits", derive(Debug))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetMapReply {
     pub device_id: u8,
@@ -8079,6 +8580,12 @@ pub struct GetMapReply {
     pub total_v_mod_map_keys: u8,
     pub virtual_mods: VMod,
     pub map: GetMapMap,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetMapReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetMapReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetMapReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -8172,11 +8679,18 @@ impl Serialize for GetMapReply {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
+#[cfg_attr(feature = "extra-traits", derive(Debug))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetMapAuxKeyActions {
     pub actions_count: Vec<u8>,
     pub actions: Vec<Action>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for SetMapAuxKeyActions {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SetMapAuxKeyActions").finish_non_exhaustive()
+    }
 }
 impl SetMapAuxKeyActions {
     pub fn try_parse(remaining: &[u8], n_key_actions: u8, total_actions: u16) -> Result<(Self, &[u8]), ParseError> {
@@ -8208,7 +8722,8 @@ impl SetMapAuxKeyActions {
     }
 }
 /// Auxiliary and optional information for the `set_map` function
-#[derive(Debug, Clone, Default)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetMapAux {
     pub types: Option<Vec<SetKeyType>>,
@@ -8220,7 +8735,14 @@ pub struct SetMapAux {
     pub modmap: Option<Vec<KeyModMap>>,
     pub vmodmap: Option<Vec<KeyVModMap>>,
 }
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for SetMapAux {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SetMapAux").finish_non_exhaustive()
+    }
+}
 impl SetMapAux {
+    #[cfg_attr(not(feature = "request-parsing"), allow(dead_code))]
     fn try_parse(value: &[u8], present: u16, n_types: u8, n_key_syms: u8, n_key_actions: u8, total_actions: u16, total_key_behaviors: u8, virtual_mods: u16, total_key_explicit: u8, total_mod_map_keys: u8, total_v_mod_map_keys: u8) -> Result<(Self, &[u8]), ParseError> {
         let switch_expr = u16::from(present);
         let mut outer_remaining = value;
@@ -8427,7 +8949,8 @@ impl SetMapAux {
 
 /// Opcode for the SetMap request
 pub const SET_MAP_REQUEST: u8 = 9;
-#[derive(Debug, Clone)]
+#[derive(Clone)]
+#[cfg_attr(feature = "extra-traits", derive(Debug))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetMapRequest<'input> {
     pub device_spec: DeviceSpec,
@@ -8456,6 +8979,12 @@ pub struct SetMapRequest<'input> {
     pub total_v_mod_map_keys: u8,
     pub virtual_mods: VMod,
     pub values: Cow<'input, SetMapAux>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl<'input> core::fmt::Debug for SetMapRequest<'input> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SetMapRequest").finish_non_exhaustive()
+    }
 }
 impl<'input> SetMapRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -8537,6 +9066,7 @@ impl<'input> SetMapRequest<'input> {
         ([request0.into(), values_bytes.into(), padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_MAP_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -8647,7 +9177,8 @@ impl<'input> crate::x11_utils::VoidRequest for SetMapRequest<'input> {
 
 /// Opcode for the GetCompatMap request
 pub const GET_COMPAT_MAP_REQUEST: u8 = 10;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetCompatMapRequest {
     pub device_spec: DeviceSpec,
@@ -8655,6 +9186,12 @@ pub struct GetCompatMapRequest {
     pub get_all_si: bool,
     pub first_si: u16,
     pub n_si: u16,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetCompatMapRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetCompatMapRequest").finish_non_exhaustive()
+    }
 }
 impl GetCompatMapRequest {
     /// Serialize this request into bytes for the provided connection
@@ -8686,6 +9223,7 @@ impl GetCompatMapRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_COMPAT_MAP_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -8720,7 +9258,8 @@ impl crate::x11_utils::ReplyRequest for GetCompatMapRequest {
     type Reply = GetCompatMapReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetCompatMapReply {
     pub device_id: u8,
@@ -8731,6 +9270,12 @@ pub struct GetCompatMapReply {
     pub n_total_si: u16,
     pub si_rtrn: Vec<SymInterpret>,
     pub group_rtrn: Vec<ModDef>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetCompatMapReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetCompatMapReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetCompatMapReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -8802,7 +9347,8 @@ impl GetCompatMapReply {
 
 /// Opcode for the SetCompatMap request
 pub const SET_COMPAT_MAP_REQUEST: u8 = 11;
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetCompatMapRequest<'input> {
     pub device_spec: DeviceSpec,
@@ -8812,6 +9358,12 @@ pub struct SetCompatMapRequest<'input> {
     pub first_si: u16,
     pub si: Cow<'input, [SymInterpret]>,
     pub group_maps: Cow<'input, [ModDef]>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl<'input> core::fmt::Debug for SetCompatMapRequest<'input> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SetCompatMapRequest").finish_non_exhaustive()
+    }
 }
 impl<'input> SetCompatMapRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -8856,6 +9408,7 @@ impl<'input> SetCompatMapRequest<'input> {
         ([request0.into(), si_bytes.into(), group_maps_bytes.into(), padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_COMPAT_MAP_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -8910,10 +9463,17 @@ impl<'input> crate::x11_utils::VoidRequest for SetCompatMapRequest<'input> {
 
 /// Opcode for the GetIndicatorState request
 pub const GET_INDICATOR_STATE_REQUEST: u8 = 12;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetIndicatorStateRequest {
     pub device_spec: DeviceSpec,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetIndicatorStateRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetIndicatorStateRequest").finish_non_exhaustive()
+    }
 }
 impl GetIndicatorStateRequest {
     /// Serialize this request into bytes for the provided connection
@@ -8937,6 +9497,7 @@ impl GetIndicatorStateRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_INDICATOR_STATE_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -8963,13 +9524,20 @@ impl crate::x11_utils::ReplyRequest for GetIndicatorStateRequest {
     type Reply = GetIndicatorStateReply;
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetIndicatorStateReply {
     pub device_id: u8,
     pub sequence: u16,
     pub length: u32,
     pub state: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetIndicatorStateReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetIndicatorStateReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetIndicatorStateReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -9047,11 +9615,18 @@ impl Serialize for GetIndicatorStateReply {
 
 /// Opcode for the GetIndicatorMap request
 pub const GET_INDICATOR_MAP_REQUEST: u8 = 13;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetIndicatorMapRequest {
     pub device_spec: DeviceSpec,
     pub which: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetIndicatorMapRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetIndicatorMapRequest").finish_non_exhaustive()
+    }
 }
 impl GetIndicatorMapRequest {
     /// Serialize this request into bytes for the provided connection
@@ -9080,6 +9655,7 @@ impl GetIndicatorMapRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_INDICATOR_MAP_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -9108,7 +9684,8 @@ impl crate::x11_utils::ReplyRequest for GetIndicatorMapRequest {
     type Reply = GetIndicatorMapReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetIndicatorMapReply {
     pub device_id: u8,
@@ -9118,6 +9695,12 @@ pub struct GetIndicatorMapReply {
     pub real_indicators: u32,
     pub n_indicators: u8,
     pub maps: Vec<IndicatorMap>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetIndicatorMapReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetIndicatorMapReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetIndicatorMapReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -9166,12 +9749,19 @@ impl Serialize for GetIndicatorMapReply {
 
 /// Opcode for the SetIndicatorMap request
 pub const SET_INDICATOR_MAP_REQUEST: u8 = 14;
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetIndicatorMapRequest<'input> {
     pub device_spec: DeviceSpec,
     pub which: u32,
     pub maps: Cow<'input, [IndicatorMap]>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl<'input> core::fmt::Debug for SetIndicatorMapRequest<'input> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SetIndicatorMapRequest").finish_non_exhaustive()
+    }
 }
 impl<'input> SetIndicatorMapRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -9205,6 +9795,7 @@ impl<'input> SetIndicatorMapRequest<'input> {
         ([request0.into(), maps_bytes.into(), padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_INDICATOR_MAP_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -9244,13 +9835,20 @@ impl<'input> crate::x11_utils::VoidRequest for SetIndicatorMapRequest<'input> {
 
 /// Opcode for the GetNamedIndicator request
 pub const GET_NAMED_INDICATOR_REQUEST: u8 = 15;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetNamedIndicatorRequest {
     pub device_spec: DeviceSpec,
     pub led_class: LedClass,
     pub led_id: IDSpec,
     pub indicator: xproto::Atom,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetNamedIndicatorRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetNamedIndicatorRequest").finish_non_exhaustive()
+    }
 }
 impl GetNamedIndicatorRequest {
     /// Serialize this request into bytes for the provided connection
@@ -9285,6 +9883,7 @@ impl GetNamedIndicatorRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_NAMED_INDICATOR_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -9318,7 +9917,8 @@ impl crate::x11_utils::ReplyRequest for GetNamedIndicatorRequest {
     type Reply = GetNamedIndicatorReply;
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetNamedIndicatorReply {
     pub device_id: u8,
@@ -9338,6 +9938,12 @@ pub struct GetNamedIndicatorReply {
     pub map_vmod: VMod,
     pub map_ctrls: BoolCtrl,
     pub supported: bool,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetNamedIndicatorReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetNamedIndicatorReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetNamedIndicatorReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -9462,7 +10068,8 @@ impl Serialize for GetNamedIndicatorReply {
 
 /// Opcode for the SetNamedIndicator request
 pub const SET_NAMED_INDICATOR_REQUEST: u8 = 16;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetNamedIndicatorRequest {
     pub device_spec: DeviceSpec,
@@ -9480,6 +10087,12 @@ pub struct SetNamedIndicatorRequest {
     pub map_real_mods: xproto::ModMask,
     pub map_vmods: VMod,
     pub map_ctrls: BoolCtrl,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for SetNamedIndicatorRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SetNamedIndicatorRequest").finish_non_exhaustive()
+    }
 }
 impl SetNamedIndicatorRequest {
     /// Serialize this request into bytes for the provided connection
@@ -9541,6 +10154,7 @@ impl SetNamedIndicatorRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_NAMED_INDICATOR_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -9605,11 +10219,18 @@ impl crate::x11_utils::VoidRequest for SetNamedIndicatorRequest {
 
 /// Opcode for the GetNames request
 pub const GET_NAMES_REQUEST: u8 = 17;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetNamesRequest {
     pub device_spec: DeviceSpec,
     pub which: NameDetail,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetNamesRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetNamesRequest").finish_non_exhaustive()
+    }
 }
 impl GetNamesRequest {
     /// Serialize this request into bytes for the provided connection
@@ -9638,6 +10259,7 @@ impl GetNamesRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_NAMES_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -9667,11 +10289,18 @@ impl crate::x11_utils::ReplyRequest for GetNamesRequest {
     type Reply = GetNamesReply;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetNamesValueListKTLevelNames {
     pub n_levels_per_type: Vec<u8>,
     pub kt_level_names: Vec<xproto::Atom>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetNamesValueListKTLevelNames {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetNamesValueListKTLevelNames").finish_non_exhaustive()
+    }
 }
 impl GetNamesValueListKTLevelNames {
     pub fn try_parse(remaining: &[u8], n_types: u8) -> Result<(Self, &[u8]), ParseError> {
@@ -9702,7 +10331,8 @@ impl GetNamesValueListKTLevelNames {
         self.kt_level_names.serialize_into(bytes);
     }
 }
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetNamesValueList {
     pub keycodes_name: Option<xproto::Atom>,
@@ -9720,7 +10350,14 @@ pub struct GetNamesValueList {
     pub key_aliases: Option<Vec<KeyAlias>>,
     pub radio_group_names: Option<Vec<xproto::Atom>>,
 }
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetNamesValueList {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetNamesValueList").finish_non_exhaustive()
+    }
+}
 impl GetNamesValueList {
+    #[cfg_attr(not(feature = "request-parsing"), allow(dead_code))]
     fn try_parse(value: &[u8], which: u32, n_types: u8, indicators: u32, virtual_mods: u16, group_names: u8, n_keys: u8, n_key_aliases: u8, n_radio_groups: u8) -> Result<(Self, &[u8]), ParseError> {
         let switch_expr = u32::from(which);
         let mut outer_remaining = value;
@@ -9948,7 +10585,8 @@ impl GetNamesValueList {
     }
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetNamesReply {
     pub device_id: u8,
@@ -9966,6 +10604,12 @@ pub struct GetNamesReply {
     pub n_key_aliases: u8,
     pub n_kt_levels: u16,
     pub value_list: GetNamesValueList,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetNamesReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetNamesReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetNamesReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -10032,11 +10676,18 @@ impl Serialize for GetNamesReply {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetNamesAuxKTLevelNames {
     pub n_levels_per_type: Vec<u8>,
     pub kt_level_names: Vec<xproto::Atom>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for SetNamesAuxKTLevelNames {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SetNamesAuxKTLevelNames").finish_non_exhaustive()
+    }
 }
 impl SetNamesAuxKTLevelNames {
     pub fn try_parse(remaining: &[u8], n_types: u8) -> Result<(Self, &[u8]), ParseError> {
@@ -10068,7 +10719,8 @@ impl SetNamesAuxKTLevelNames {
     }
 }
 /// Auxiliary and optional information for the `set_names` function
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetNamesAux {
     pub keycodes_name: Option<xproto::Atom>,
@@ -10086,7 +10738,14 @@ pub struct SetNamesAux {
     pub key_aliases: Option<Vec<KeyAlias>>,
     pub radio_group_names: Option<Vec<xproto::Atom>>,
 }
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for SetNamesAux {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SetNamesAux").finish_non_exhaustive()
+    }
+}
 impl SetNamesAux {
+    #[cfg_attr(not(feature = "request-parsing"), allow(dead_code))]
     fn try_parse(value: &[u8], which: u32, n_types: u8, indicators: u32, virtual_mods: u16, group_names: u8, n_keys: u8, n_key_aliases: u8, n_radio_groups: u8) -> Result<(Self, &[u8]), ParseError> {
         let switch_expr = u32::from(which);
         let mut outer_remaining = value;
@@ -10406,7 +11065,8 @@ impl SetNamesAux {
 
 /// Opcode for the SetNames request
 pub const SET_NAMES_REQUEST: u8 = 18;
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetNamesRequest<'input> {
     pub device_spec: DeviceSpec,
@@ -10423,6 +11083,12 @@ pub struct SetNamesRequest<'input> {
     pub n_key_aliases: u8,
     pub total_kt_level_names: u16,
     pub values: Cow<'input, SetNamesAux>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl<'input> core::fmt::Debug for SetNamesRequest<'input> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SetNamesRequest").finish_non_exhaustive()
+    }
 }
 impl<'input> SetNamesRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -10484,6 +11150,7 @@ impl<'input> SetNamesRequest<'input> {
         ([request0.into(), values_bytes.into(), padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_NAMES_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -10559,7 +11226,8 @@ impl<'input> crate::x11_utils::VoidRequest for SetNamesRequest<'input> {
 
 /// Opcode for the PerClientFlags request
 pub const PER_CLIENT_FLAGS_REQUEST: u8 = 21;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PerClientFlagsRequest {
     pub device_spec: DeviceSpec,
@@ -10568,6 +11236,12 @@ pub struct PerClientFlagsRequest {
     pub ctrls_to_change: BoolCtrl,
     pub auto_ctrls: BoolCtrl,
     pub auto_ctrls_values: BoolCtrl,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for PerClientFlagsRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("PerClientFlagsRequest").finish_non_exhaustive()
+    }
 }
 impl PerClientFlagsRequest {
     /// Serialize this request into bytes for the provided connection
@@ -10616,6 +11290,7 @@ impl PerClientFlagsRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != PER_CLIENT_FLAGS_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -10657,7 +11332,8 @@ impl crate::x11_utils::ReplyRequest for PerClientFlagsRequest {
     type Reply = PerClientFlagsReply;
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PerClientFlagsReply {
     pub device_id: u8,
@@ -10667,6 +11343,12 @@ pub struct PerClientFlagsReply {
     pub value: PerClientFlag,
     pub auto_ctrls: BoolCtrl,
     pub auto_ctrls_values: BoolCtrl,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for PerClientFlagsReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("PerClientFlagsReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for PerClientFlagsReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -10757,11 +11439,18 @@ impl Serialize for PerClientFlagsReply {
 
 /// Opcode for the ListComponents request
 pub const LIST_COMPONENTS_REQUEST: u8 = 22;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ListComponentsRequest {
     pub device_spec: DeviceSpec,
     pub max_names: u16,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for ListComponentsRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("ListComponentsRequest").finish_non_exhaustive()
+    }
 }
 impl ListComponentsRequest {
     /// Serialize this request into bytes for the provided connection
@@ -10786,6 +11475,7 @@ impl ListComponentsRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != LIST_COMPONENTS_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -10813,7 +11503,8 @@ impl crate::x11_utils::ReplyRequest for ListComponentsRequest {
     type Reply = ListComponentsReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ListComponentsReply {
     pub device_id: u8,
@@ -10826,6 +11517,12 @@ pub struct ListComponentsReply {
     pub compat_maps: Vec<Listing>,
     pub symbols: Vec<Listing>,
     pub geometries: Vec<Listing>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for ListComponentsReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("ListComponentsReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for ListComponentsReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -10977,13 +11674,20 @@ impl ListComponentsReply {
 
 /// Opcode for the GetKbdByName request
 pub const GET_KBD_BY_NAME_REQUEST: u8 = 23;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetKbdByNameRequest {
     pub device_spec: DeviceSpec,
     pub need: GBNDetail,
     pub want: GBNDetail,
     pub load: bool,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetKbdByNameRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetKbdByNameRequest").finish_non_exhaustive()
+    }
 }
 impl GetKbdByNameRequest {
     /// Serialize this request into bytes for the provided connection
@@ -11014,6 +11718,7 @@ impl GetKbdByNameRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_KBD_BY_NAME_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -11048,11 +11753,18 @@ impl crate::x11_utils::ReplyRequest for GetKbdByNameRequest {
     type Reply = GetKbdByNameReply;
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
+#[cfg_attr(feature = "extra-traits", derive(Debug))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetKbdByNameRepliesTypesMapKeyActions {
     pub acts_rtrn_count: Vec<u8>,
     pub acts_rtrn_acts: Vec<Action>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetKbdByNameRepliesTypesMapKeyActions {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetKbdByNameRepliesTypesMapKeyActions").finish_non_exhaustive()
+    }
 }
 impl GetKbdByNameRepliesTypesMapKeyActions {
     pub fn try_parse(remaining: &[u8], n_key_actions: u8, total_actions: u16) -> Result<(Self, &[u8]), ParseError> {
@@ -11083,7 +11795,8 @@ impl GetKbdByNameRepliesTypesMapKeyActions {
         self.acts_rtrn_acts.serialize_into(bytes);
     }
 }
-#[derive(Debug, Clone, Default)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetKbdByNameRepliesTypesMap {
     pub types_rtrn: Option<Vec<KeyType>>,
@@ -11095,7 +11808,14 @@ pub struct GetKbdByNameRepliesTypesMap {
     pub modmap_rtrn: Option<Vec<KeyModMap>>,
     pub vmodmap_rtrn: Option<Vec<KeyVModMap>>,
 }
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetKbdByNameRepliesTypesMap {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetKbdByNameRepliesTypesMap").finish_non_exhaustive()
+    }
+}
 impl GetKbdByNameRepliesTypesMap {
+    #[cfg_attr(not(feature = "request-parsing"), allow(dead_code))]
     fn try_parse(value: &[u8], present: u16, n_types: u8, n_key_syms: u8, n_key_actions: u8, total_actions: u16, total_key_behaviors: u8, virtual_mods: u16, total_key_explicit: u8, total_mod_map_keys: u8, total_v_mod_map_keys: u8) -> Result<(Self, &[u8]), ParseError> {
         let switch_expr = u16::from(present);
         let mut outer_remaining = value;
@@ -11267,7 +11987,8 @@ impl GetKbdByNameRepliesTypesMap {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
+#[cfg_attr(feature = "extra-traits", derive(Debug))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetKbdByNameRepliesTypes {
     pub getmap_type: u8,
@@ -11299,6 +12020,12 @@ pub struct GetKbdByNameRepliesTypes {
     pub total_v_mod_map_keys: u8,
     pub virtual_mods: VMod,
     pub map: GetKbdByNameRepliesTypesMap,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetKbdByNameRepliesTypes {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetKbdByNameRepliesTypes").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetKbdByNameRepliesTypes {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -11383,7 +12110,8 @@ impl Serialize for GetKbdByNameRepliesTypes {
         self.map.serialize_into(bytes, u16::from(present), u8::from(self.n_types), u8::from(self.n_key_syms), u8::from(self.n_key_actions), u16::from(self.total_actions), u8::from(self.total_key_behaviors), u16::from(self.virtual_mods), u8::from(self.total_key_explicit), u8::from(self.total_mod_map_keys), u8::from(self.total_v_mod_map_keys));
     }
 }
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetKbdByNameRepliesCompatMap {
     pub compatmap_type: u8,
@@ -11395,6 +12123,12 @@ pub struct GetKbdByNameRepliesCompatMap {
     pub n_total_si: u16,
     pub si_rtrn: Vec<SymInterpret>,
     pub group_rtrn: Vec<ModDef>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetKbdByNameRepliesCompatMap {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetKbdByNameRepliesCompatMap").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetKbdByNameRepliesCompatMap {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -11455,7 +12189,8 @@ impl GetKbdByNameRepliesCompatMap {
             .try_into().unwrap()
     }
 }
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetKbdByNameRepliesIndicatorMaps {
     pub indicatormap_type: u8,
@@ -11465,6 +12200,12 @@ pub struct GetKbdByNameRepliesIndicatorMaps {
     pub which: u32,
     pub real_indicators: u32,
     pub maps: Vec<IndicatorMap>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetKbdByNameRepliesIndicatorMaps {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetKbdByNameRepliesIndicatorMaps").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetKbdByNameRepliesIndicatorMaps {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -11517,11 +12258,18 @@ impl GetKbdByNameRepliesIndicatorMaps {
             .try_into().unwrap()
     }
 }
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetKbdByNameRepliesKeyNamesValueListKTLevelNames {
     pub n_levels_per_type: Vec<u8>,
     pub kt_level_names: Vec<xproto::Atom>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetKbdByNameRepliesKeyNamesValueListKTLevelNames {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetKbdByNameRepliesKeyNamesValueListKTLevelNames").finish_non_exhaustive()
+    }
 }
 impl GetKbdByNameRepliesKeyNamesValueListKTLevelNames {
     pub fn try_parse(remaining: &[u8], n_types: u8) -> Result<(Self, &[u8]), ParseError> {
@@ -11552,7 +12300,8 @@ impl GetKbdByNameRepliesKeyNamesValueListKTLevelNames {
         self.kt_level_names.serialize_into(bytes);
     }
 }
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetKbdByNameRepliesKeyNamesValueList {
     pub keycodes_name: Option<xproto::Atom>,
@@ -11570,7 +12319,14 @@ pub struct GetKbdByNameRepliesKeyNamesValueList {
     pub key_aliases: Option<Vec<KeyAlias>>,
     pub radio_group_names: Option<Vec<xproto::Atom>>,
 }
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetKbdByNameRepliesKeyNamesValueList {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetKbdByNameRepliesKeyNamesValueList").finish_non_exhaustive()
+    }
+}
 impl GetKbdByNameRepliesKeyNamesValueList {
+    #[cfg_attr(not(feature = "request-parsing"), allow(dead_code))]
     fn try_parse(value: &[u8], which: u32, n_types: u8, indicators: u32, virtual_mods: u16, group_names: u8, n_keys: u8, n_key_aliases: u8, n_radio_groups: u8) -> Result<(Self, &[u8]), ParseError> {
         let switch_expr = u32::from(which);
         let mut outer_remaining = value;
@@ -11798,7 +12554,8 @@ impl GetKbdByNameRepliesKeyNamesValueList {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetKbdByNameRepliesKeyNames {
     pub keyname_type: u8,
@@ -11817,6 +12574,12 @@ pub struct GetKbdByNameRepliesKeyNames {
     pub n_key_aliases: u8,
     pub n_kt_levels: u16,
     pub value_list: GetKbdByNameRepliesKeyNamesValueList,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetKbdByNameRepliesKeyNames {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetKbdByNameRepliesKeyNames").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetKbdByNameRepliesKeyNames {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -11874,7 +12637,8 @@ impl Serialize for GetKbdByNameRepliesKeyNames {
         self.value_list.serialize_into(bytes, u32::from(which), u8::from(self.n_types), u32::from(self.indicators), u16::from(self.virtual_mods), u8::from(self.group_names), u8::from(self.n_keys), u8::from(self.n_key_aliases), u8::from(self.n_radio_groups));
     }
 }
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetKbdByNameRepliesGeometry {
     pub geometry_type: u8,
@@ -11894,6 +12658,12 @@ pub struct GetKbdByNameRepliesGeometry {
     pub base_color_ndx: u8,
     pub label_color_ndx: u8,
     pub label_font: CountedString16,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetKbdByNameRepliesGeometry {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetKbdByNameRepliesGeometry").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetKbdByNameRepliesGeometry {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -11948,7 +12718,8 @@ impl Serialize for GetKbdByNameRepliesGeometry {
         self.label_font.serialize_into(bytes);
     }
 }
-#[derive(Debug, Clone, Default)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetKbdByNameReplies {
     pub types: Option<GetKbdByNameRepliesTypes>,
@@ -11957,7 +12728,14 @@ pub struct GetKbdByNameReplies {
     pub key_names: Option<GetKbdByNameRepliesKeyNames>,
     pub geometry: Option<GetKbdByNameRepliesGeometry>,
 }
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetKbdByNameReplies {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetKbdByNameReplies").finish_non_exhaustive()
+    }
+}
 impl GetKbdByNameReplies {
+    #[cfg_attr(not(feature = "request-parsing"), allow(dead_code))]
     fn try_parse(value: &[u8], reported: u16) -> Result<(Self, &[u8]), ParseError> {
         let switch_expr = u16::from(reported);
         let mut outer_remaining = value;
@@ -12027,7 +12805,8 @@ impl GetKbdByNameReplies {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
+#[cfg_attr(feature = "extra-traits", derive(Debug))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetKbdByNameReply {
     pub device_id: u8,
@@ -12040,6 +12819,12 @@ pub struct GetKbdByNameReply {
     pub found: GBNDetail,
     pub reported: GBNDetail,
     pub replies: GetKbdByNameReplies,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetKbdByNameReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetKbdByNameReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetKbdByNameReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -12095,7 +12880,8 @@ impl Serialize for GetKbdByNameReply {
 
 /// Opcode for the GetDeviceInfo request
 pub const GET_DEVICE_INFO_REQUEST: u8 = 24;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetDeviceInfoRequest {
     pub device_spec: DeviceSpec,
@@ -12105,6 +12891,12 @@ pub struct GetDeviceInfoRequest {
     pub n_buttons: u8,
     pub led_class: LedClass,
     pub led_id: IDSpec,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetDeviceInfoRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetDeviceInfoRequest").finish_non_exhaustive()
+    }
 }
 impl GetDeviceInfoRequest {
     /// Serialize this request into bytes for the provided connection
@@ -12142,6 +12934,7 @@ impl GetDeviceInfoRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_DEVICE_INFO_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -12182,7 +12975,8 @@ impl crate::x11_utils::ReplyRequest for GetDeviceInfoRequest {
     type Reply = GetDeviceInfoReply;
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
+#[cfg_attr(feature = "extra-traits", derive(Debug))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetDeviceInfoReply {
     pub device_id: u8,
@@ -12202,6 +12996,12 @@ pub struct GetDeviceInfoReply {
     pub name: Vec<String8>,
     pub btn_actions: Vec<Action>,
     pub leds: Vec<DeviceLedInfo>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetDeviceInfoReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetDeviceInfoReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetDeviceInfoReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -12329,7 +13129,8 @@ impl GetDeviceInfoReply {
 
 /// Opcode for the SetDeviceInfo request
 pub const SET_DEVICE_INFO_REQUEST: u8 = 25;
-#[derive(Debug, Clone)]
+#[derive(Clone)]
+#[cfg_attr(feature = "extra-traits", derive(Debug))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetDeviceInfoRequest<'input> {
     pub device_spec: DeviceSpec,
@@ -12337,6 +13138,12 @@ pub struct SetDeviceInfoRequest<'input> {
     pub change: XIFeature,
     pub btn_actions: Cow<'input, [Action]>,
     pub leds: Cow<'input, [DeviceLedInfo]>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl<'input> core::fmt::Debug for SetDeviceInfoRequest<'input> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SetDeviceInfoRequest").finish_non_exhaustive()
+    }
 }
 impl<'input> SetDeviceInfoRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -12376,6 +13183,7 @@ impl<'input> SetDeviceInfoRequest<'input> {
         ([request0.into(), btn_actions_bytes.into(), leds_bytes.into(), padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_DEVICE_INFO_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -12423,7 +13231,8 @@ impl<'input> crate::x11_utils::VoidRequest for SetDeviceInfoRequest<'input> {
 
 /// Opcode for the SetDebuggingFlags request
 pub const SET_DEBUGGING_FLAGS_REQUEST: u8 = 101;
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetDebuggingFlagsRequest<'input> {
     pub affect_flags: u32,
@@ -12431,6 +13240,12 @@ pub struct SetDebuggingFlagsRequest<'input> {
     pub affect_ctrls: u32,
     pub ctrls: u32,
     pub message: Cow<'input, [String8]>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl<'input> core::fmt::Debug for SetDebuggingFlagsRequest<'input> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SetDebuggingFlagsRequest").finish_non_exhaustive()
+    }
 }
 impl<'input> SetDebuggingFlagsRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -12478,6 +13293,7 @@ impl<'input> SetDebuggingFlagsRequest<'input> {
         ([request0.into(), self.message, padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_DEBUGGING_FLAGS_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -12523,7 +13339,8 @@ impl<'input> crate::x11_utils::ReplyRequest for SetDebuggingFlagsRequest<'input>
     type Reply = SetDebuggingFlagsReply;
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetDebuggingFlagsReply {
     pub sequence: u16,
@@ -12532,6 +13349,12 @@ pub struct SetDebuggingFlagsReply {
     pub current_ctrls: u32,
     pub supported_flags: u32,
     pub supported_ctrls: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for SetDebuggingFlagsReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SetDebuggingFlagsReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for SetDebuggingFlagsReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -12617,7 +13440,8 @@ impl Serialize for SetDebuggingFlagsReply {
 
 /// Opcode for the NewKeyboardNotify event
 pub const NEW_KEYBOARD_NOTIFY_EVENT: u8 = 0;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct NewKeyboardNotifyEvent {
     pub response_type: u8,
@@ -12633,6 +13457,12 @@ pub struct NewKeyboardNotifyEvent {
     pub request_major: u8,
     pub request_minor: u8,
     pub changed: NKNDetail,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for NewKeyboardNotifyEvent {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("NewKeyboardNotifyEvent").finish_non_exhaustive()
+    }
 }
 impl TryParse for NewKeyboardNotifyEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -12787,7 +13617,8 @@ impl From<NewKeyboardNotifyEvent> for [u8; 32] {
 
 /// Opcode for the MapNotify event
 pub const MAP_NOTIFY_EVENT: u8 = 1;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct MapNotifyEvent {
     pub response_type: u8,
@@ -12814,6 +13645,12 @@ pub struct MapNotifyEvent {
     pub first_v_mod_map_key: xproto::Keycode,
     pub n_v_mod_map_keys: u8,
     pub virtual_mods: VMod,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for MapNotifyEvent {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("MapNotifyEvent").finish_non_exhaustive()
+    }
 }
 impl TryParse for MapNotifyEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -13013,7 +13850,8 @@ impl From<MapNotifyEvent> for [u8; 32] {
 
 /// Opcode for the StateNotify event
 pub const STATE_NOTIFY_EVENT: u8 = 2;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct StateNotifyEvent {
     pub response_type: u8,
@@ -13040,6 +13878,12 @@ pub struct StateNotifyEvent {
     pub event_type: u8,
     pub request_major: u8,
     pub request_minor: u8,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for StateNotifyEvent {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("StateNotifyEvent").finish_non_exhaustive()
+    }
 }
 impl TryParse for StateNotifyEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -13248,7 +14092,8 @@ impl From<StateNotifyEvent> for [u8; 32] {
 
 /// Opcode for the ControlsNotify event
 pub const CONTROLS_NOTIFY_EVENT: u8 = 3;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ControlsNotifyEvent {
     pub response_type: u8,
@@ -13264,6 +14109,12 @@ pub struct ControlsNotifyEvent {
     pub event_type: u8,
     pub request_major: u8,
     pub request_minor: u8,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for ControlsNotifyEvent {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("ControlsNotifyEvent").finish_non_exhaustive()
+    }
 }
 impl TryParse for ControlsNotifyEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -13422,7 +14273,8 @@ impl From<ControlsNotifyEvent> for [u8; 32] {
 
 /// Opcode for the IndicatorStateNotify event
 pub const INDICATOR_STATE_NOTIFY_EVENT: u8 = 4;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct IndicatorStateNotifyEvent {
     pub response_type: u8,
@@ -13432,6 +14284,12 @@ pub struct IndicatorStateNotifyEvent {
     pub device_id: u8,
     pub state: u32,
     pub state_changed: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for IndicatorStateNotifyEvent {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("IndicatorStateNotifyEvent").finish_non_exhaustive()
+    }
 }
 impl TryParse for IndicatorStateNotifyEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -13563,7 +14421,8 @@ impl From<IndicatorStateNotifyEvent> for [u8; 32] {
 
 /// Opcode for the IndicatorMapNotify event
 pub const INDICATOR_MAP_NOTIFY_EVENT: u8 = 5;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct IndicatorMapNotifyEvent {
     pub response_type: u8,
@@ -13573,6 +14432,12 @@ pub struct IndicatorMapNotifyEvent {
     pub device_id: u8,
     pub state: u32,
     pub map_changed: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for IndicatorMapNotifyEvent {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("IndicatorMapNotifyEvent").finish_non_exhaustive()
+    }
 }
 impl TryParse for IndicatorMapNotifyEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -13704,7 +14569,8 @@ impl From<IndicatorMapNotifyEvent> for [u8; 32] {
 
 /// Opcode for the NamesNotify event
 pub const NAMES_NOTIFY_EVENT: u8 = 6;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct NamesNotifyEvent {
     pub response_type: u8,
@@ -13724,6 +14590,12 @@ pub struct NamesNotifyEvent {
     pub first_key: xproto::Keycode,
     pub n_keys: u8,
     pub changed_indicators: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for NamesNotifyEvent {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("NamesNotifyEvent").finish_non_exhaustive()
+    }
 }
 impl TryParse for NamesNotifyEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -13900,7 +14772,8 @@ impl From<NamesNotifyEvent> for [u8; 32] {
 
 /// Opcode for the CompatMapNotify event
 pub const COMPAT_MAP_NOTIFY_EVENT: u8 = 7;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CompatMapNotifyEvent {
     pub response_type: u8,
@@ -13912,6 +14785,12 @@ pub struct CompatMapNotifyEvent {
     pub first_si: u16,
     pub n_si: u16,
     pub n_total_si: u16,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for CompatMapNotifyEvent {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("CompatMapNotifyEvent").finish_non_exhaustive()
+    }
 }
 impl TryParse for CompatMapNotifyEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -14050,7 +14929,8 @@ impl From<CompatMapNotifyEvent> for [u8; 32] {
 
 /// Opcode for the BellNotify event
 pub const BELL_NOTIFY_EVENT: u8 = 8;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct BellNotifyEvent {
     pub response_type: u8,
@@ -14066,6 +14946,12 @@ pub struct BellNotifyEvent {
     pub name: xproto::Atom,
     pub window: xproto::Window,
     pub event_only: bool,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for BellNotifyEvent {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("BellNotifyEvent").finish_non_exhaustive()
+    }
 }
 impl TryParse for BellNotifyEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -14220,7 +15106,8 @@ impl From<BellNotifyEvent> for [u8; 32] {
 
 /// Opcode for the ActionMessage event
 pub const ACTION_MESSAGE_EVENT: u8 = 9;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ActionMessageEvent {
     pub response_type: u8,
@@ -14234,6 +15121,12 @@ pub struct ActionMessageEvent {
     pub mods: xproto::ModMask,
     pub group: Group,
     pub message: [String8; 8],
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for ActionMessageEvent {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("ActionMessageEvent").finish_non_exhaustive()
+    }
 }
 impl TryParse for ActionMessageEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -14379,7 +15272,8 @@ impl From<ActionMessageEvent> for [u8; 32] {
 
 /// Opcode for the AccessXNotify event
 pub const ACCESS_X_NOTIFY_EVENT: u8 = 10;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct AccessXNotifyEvent {
     pub response_type: u8,
@@ -14391,6 +15285,12 @@ pub struct AccessXNotifyEvent {
     pub detailt: AXNDetail,
     pub slow_keys_delay: u16,
     pub debounce_delay: u16,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for AccessXNotifyEvent {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("AccessXNotifyEvent").finish_non_exhaustive()
+    }
 }
 impl TryParse for AccessXNotifyEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -14529,7 +15429,8 @@ impl From<AccessXNotifyEvent> for [u8; 32] {
 
 /// Opcode for the ExtensionDeviceNotify event
 pub const EXTENSION_DEVICE_NOTIFY_EVENT: u8 = 11;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ExtensionDeviceNotifyEvent {
     pub response_type: u8,
@@ -14546,6 +15447,12 @@ pub struct ExtensionDeviceNotifyEvent {
     pub n_buttons: u8,
     pub supported: XIFeature,
     pub unsupported: XIFeature,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for ExtensionDeviceNotifyEvent {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("ExtensionDeviceNotifyEvent").finish_non_exhaustive()
+    }
 }
 impl TryParse for ExtensionDeviceNotifyEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {

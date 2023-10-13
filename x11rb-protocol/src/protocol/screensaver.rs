@@ -210,11 +210,18 @@ impl core::fmt::Debug for State  {
 
 /// Opcode for the QueryVersion request
 pub const QUERY_VERSION_REQUEST: u8 = 0;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryVersionRequest {
     pub client_major_version: u8,
     pub client_minor_version: u8,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for QueryVersionRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("QueryVersionRequest").finish_non_exhaustive()
+    }
 }
 impl QueryVersionRequest {
     /// Serialize this request into bytes for the provided connection
@@ -239,6 +246,7 @@ impl QueryVersionRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != QUERY_VERSION_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -267,13 +275,20 @@ impl crate::x11_utils::ReplyRequest for QueryVersionRequest {
     type Reply = QueryVersionReply;
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryVersionReply {
     pub sequence: u16,
     pub length: u32,
     pub server_major_version: u16,
     pub server_minor_version: u16,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for QueryVersionReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("QueryVersionReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for QueryVersionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -353,10 +368,17 @@ impl Serialize for QueryVersionReply {
 
 /// Opcode for the QueryInfo request
 pub const QUERY_INFO_REQUEST: u8 = 1;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryInfoRequest {
     pub drawable: xproto::Drawable,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for QueryInfoRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("QueryInfoRequest").finish_non_exhaustive()
+    }
 }
 impl QueryInfoRequest {
     /// Serialize this request into bytes for the provided connection
@@ -380,6 +402,7 @@ impl QueryInfoRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != QUERY_INFO_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -405,7 +428,8 @@ impl crate::x11_utils::ReplyRequest for QueryInfoRequest {
     type Reply = QueryInfoReply;
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryInfoReply {
     pub state: u8,
@@ -416,6 +440,12 @@ pub struct QueryInfoReply {
     pub ms_since_user_input: u32,
     pub event_mask: u32,
     pub kind: Kind,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for QueryInfoReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("QueryInfoReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for QueryInfoReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -506,11 +536,18 @@ impl Serialize for QueryInfoReply {
 
 /// Opcode for the SelectInput request
 pub const SELECT_INPUT_REQUEST: u8 = 2;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SelectInputRequest {
     pub drawable: xproto::Drawable,
     pub event_mask: Event,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for SelectInputRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SelectInputRequest").finish_non_exhaustive()
+    }
 }
 impl SelectInputRequest {
     /// Serialize this request into bytes for the provided connection
@@ -539,6 +576,7 @@ impl SelectInputRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SELECT_INPUT_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -567,7 +605,8 @@ impl crate::x11_utils::VoidRequest for SelectInputRequest {
 }
 
 /// Auxiliary and optional information for the `set_attributes` function
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetAttributesAux {
     pub background_pixmap: Option<xproto::Pixmap>,
@@ -586,7 +625,14 @@ pub struct SetAttributesAux {
     pub colormap: Option<xproto::Colormap>,
     pub cursor: Option<xproto::Cursor>,
 }
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for SetAttributesAux {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SetAttributesAux").finish_non_exhaustive()
+    }
+}
 impl SetAttributesAux {
+    #[cfg_attr(not(feature = "request-parsing"), allow(dead_code))]
     fn try_parse(value: &[u8], value_mask: u32) -> Result<(Self, &[u8]), ParseError> {
         let switch_expr = u32::from(value_mask);
         let mut outer_remaining = value;
@@ -925,7 +971,8 @@ impl SetAttributesAux {
 
 /// Opcode for the SetAttributes request
 pub const SET_ATTRIBUTES_REQUEST: u8 = 3;
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetAttributesRequest<'input> {
     pub drawable: xproto::Drawable,
@@ -938,6 +985,12 @@ pub struct SetAttributesRequest<'input> {
     pub depth: u8,
     pub visual: xproto::Visualid,
     pub value_list: Cow<'input, SetAttributesAux>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl<'input> core::fmt::Debug for SetAttributesRequest<'input> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SetAttributesRequest").finish_non_exhaustive()
+    }
 }
 impl<'input> SetAttributesRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -995,6 +1048,7 @@ impl<'input> SetAttributesRequest<'input> {
         ([request0.into(), value_list_bytes.into(), padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_ATTRIBUTES_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1056,10 +1110,17 @@ impl<'input> crate::x11_utils::VoidRequest for SetAttributesRequest<'input> {
 
 /// Opcode for the UnsetAttributes request
 pub const UNSET_ATTRIBUTES_REQUEST: u8 = 4;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct UnsetAttributesRequest {
     pub drawable: xproto::Drawable,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for UnsetAttributesRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("UnsetAttributesRequest").finish_non_exhaustive()
+    }
 }
 impl UnsetAttributesRequest {
     /// Serialize this request into bytes for the provided connection
@@ -1083,6 +1144,7 @@ impl UnsetAttributesRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != UNSET_ATTRIBUTES_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1109,10 +1171,17 @@ impl crate::x11_utils::VoidRequest for UnsetAttributesRequest {
 
 /// Opcode for the Suspend request
 pub const SUSPEND_REQUEST: u8 = 5;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SuspendRequest {
     pub suspend: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for SuspendRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SuspendRequest").finish_non_exhaustive()
+    }
 }
 impl SuspendRequest {
     /// Serialize this request into bytes for the provided connection
@@ -1136,6 +1205,7 @@ impl SuspendRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SUSPEND_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1162,7 +1232,8 @@ impl crate::x11_utils::VoidRequest for SuspendRequest {
 
 /// Opcode for the Notify event
 pub const NOTIFY_EVENT: u8 = 0;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct NotifyEvent {
     pub response_type: u8,
@@ -1173,6 +1244,12 @@ pub struct NotifyEvent {
     pub window: xproto::Window,
     pub kind: Kind,
     pub forced: bool,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for NotifyEvent {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("NotifyEvent").finish_non_exhaustive()
+    }
 }
 impl TryParse for NotifyEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {

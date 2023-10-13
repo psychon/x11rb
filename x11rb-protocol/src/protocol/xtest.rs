@@ -38,11 +38,18 @@ pub const X11_XML_VERSION: (u32, u32) = (2, 2);
 
 /// Opcode for the GetVersion request
 pub const GET_VERSION_REQUEST: u8 = 0;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetVersionRequest {
     pub major_version: u8,
     pub minor_version: u16,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetVersionRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetVersionRequest").finish_non_exhaustive()
+    }
 }
 impl GetVersionRequest {
     /// Serialize this request into bytes for the provided connection
@@ -67,6 +74,7 @@ impl GetVersionRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_VERSION_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -95,13 +103,20 @@ impl crate::x11_utils::ReplyRequest for GetVersionRequest {
     type Reply = GetVersionReply;
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetVersionReply {
     pub major_version: u8,
     pub sequence: u16,
     pub length: u32,
     pub minor_version: u16,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetVersionReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetVersionReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetVersionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -226,11 +241,18 @@ impl core::fmt::Debug for Cursor  {
 
 /// Opcode for the CompareCursor request
 pub const COMPARE_CURSOR_REQUEST: u8 = 1;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CompareCursorRequest {
     pub window: xproto::Window,
     pub cursor: xproto::Cursor,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for CompareCursorRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("CompareCursorRequest").finish_non_exhaustive()
+    }
 }
 impl CompareCursorRequest {
     /// Serialize this request into bytes for the provided connection
@@ -259,6 +281,7 @@ impl CompareCursorRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != COMPARE_CURSOR_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -286,12 +309,19 @@ impl crate::x11_utils::ReplyRequest for CompareCursorRequest {
     type Reply = CompareCursorReply;
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CompareCursorReply {
     pub same: bool,
     pub sequence: u16,
     pub length: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for CompareCursorReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("CompareCursorReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for CompareCursorReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -340,7 +370,8 @@ impl Serialize for CompareCursorReply {
 
 /// Opcode for the FakeInput request
 pub const FAKE_INPUT_REQUEST: u8 = 2;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct FakeInputRequest {
     pub type_: u8,
@@ -350,6 +381,12 @@ pub struct FakeInputRequest {
     pub root_x: i16,
     pub root_y: i16,
     pub deviceid: u8,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for FakeInputRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("FakeInputRequest").finish_non_exhaustive()
+    }
 }
 impl FakeInputRequest {
     /// Serialize this request into bytes for the provided connection
@@ -407,6 +444,7 @@ impl FakeInputRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != FAKE_INPUT_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -448,10 +486,17 @@ impl crate::x11_utils::VoidRequest for FakeInputRequest {
 
 /// Opcode for the GrabControl request
 pub const GRAB_CONTROL_REQUEST: u8 = 3;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GrabControlRequest {
     pub impervious: bool,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GrabControlRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GrabControlRequest").finish_non_exhaustive()
+    }
 }
 impl GrabControlRequest {
     /// Serialize this request into bytes for the provided connection
@@ -475,6 +520,7 @@ impl GrabControlRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GRAB_CONTROL_REQUEST {
             return Err(ParseError::InvalidValue);

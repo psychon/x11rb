@@ -38,11 +38,18 @@ pub const X11_XML_VERSION: (u32, u32) = (1, 0);
 
 /// Opcode for the QueryVersion request
 pub const QUERY_VERSION_REQUEST: u8 = 0;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryVersionRequest {
     pub client_major: u8,
     pub client_minor: u8,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for QueryVersionRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("QueryVersionRequest").finish_non_exhaustive()
+    }
 }
 impl QueryVersionRequest {
     /// Serialize this request into bytes for the provided connection
@@ -67,6 +74,7 @@ impl QueryVersionRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != QUERY_VERSION_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -94,13 +102,20 @@ impl crate::x11_utils::ReplyRequest for QueryVersionRequest {
     type Reply = QueryVersionReply;
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryVersionReply {
     pub sequence: u16,
     pub length: u32,
     pub server_major: u16,
     pub server_minor: u16,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for QueryVersionReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("QueryVersionReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for QueryVersionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -158,10 +173,17 @@ impl Serialize for QueryVersionReply {
 
 /// Opcode for the SetDeviceCreateContext request
 pub const SET_DEVICE_CREATE_CONTEXT_REQUEST: u8 = 1;
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetDeviceCreateContextRequest<'input> {
     pub context: Cow<'input, [u8]>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl<'input> core::fmt::Debug for SetDeviceCreateContextRequest<'input> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SetDeviceCreateContextRequest").finish_non_exhaustive()
+    }
 }
 impl<'input> SetDeviceCreateContextRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -189,6 +211,7 @@ impl<'input> SetDeviceCreateContextRequest<'input> {
         ([request0.into(), self.context, padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_DEVICE_CREATE_CONTEXT_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -222,9 +245,16 @@ impl<'input> crate::x11_utils::VoidRequest for SetDeviceCreateContextRequest<'in
 
 /// Opcode for the GetDeviceCreateContext request
 pub const GET_DEVICE_CREATE_CONTEXT_REQUEST: u8 = 2;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetDeviceCreateContextRequest;
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetDeviceCreateContextRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetDeviceCreateContextRequest").finish_non_exhaustive()
+    }
+}
 impl GetDeviceCreateContextRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -242,6 +272,7 @@ impl GetDeviceCreateContextRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_DEVICE_CREATE_CONTEXT_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -265,12 +296,19 @@ impl crate::x11_utils::ReplyRequest for GetDeviceCreateContextRequest {
     type Reply = GetDeviceCreateContextReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetDeviceCreateContextReply {
     pub sequence: u16,
     pub length: u32,
     pub context: Vec<u8>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetDeviceCreateContextReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetDeviceCreateContextReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetDeviceCreateContextReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -331,11 +369,18 @@ impl GetDeviceCreateContextReply {
 
 /// Opcode for the SetDeviceContext request
 pub const SET_DEVICE_CONTEXT_REQUEST: u8 = 3;
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetDeviceContextRequest<'input> {
     pub device: u32,
     pub context: Cow<'input, [u8]>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl<'input> core::fmt::Debug for SetDeviceContextRequest<'input> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SetDeviceContextRequest").finish_non_exhaustive()
+    }
 }
 impl<'input> SetDeviceContextRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -368,6 +413,7 @@ impl<'input> SetDeviceContextRequest<'input> {
         ([request0.into(), self.context, padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_DEVICE_CONTEXT_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -404,10 +450,17 @@ impl<'input> crate::x11_utils::VoidRequest for SetDeviceContextRequest<'input> {
 
 /// Opcode for the GetDeviceContext request
 pub const GET_DEVICE_CONTEXT_REQUEST: u8 = 4;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetDeviceContextRequest {
     pub device: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetDeviceContextRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetDeviceContextRequest").finish_non_exhaustive()
+    }
 }
 impl GetDeviceContextRequest {
     /// Serialize this request into bytes for the provided connection
@@ -431,6 +484,7 @@ impl GetDeviceContextRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_DEVICE_CONTEXT_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -456,12 +510,19 @@ impl crate::x11_utils::ReplyRequest for GetDeviceContextRequest {
     type Reply = GetDeviceContextReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetDeviceContextReply {
     pub sequence: u16,
     pub length: u32,
     pub context: Vec<u8>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetDeviceContextReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetDeviceContextReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetDeviceContextReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -522,10 +583,17 @@ impl GetDeviceContextReply {
 
 /// Opcode for the SetWindowCreateContext request
 pub const SET_WINDOW_CREATE_CONTEXT_REQUEST: u8 = 5;
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetWindowCreateContextRequest<'input> {
     pub context: Cow<'input, [u8]>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl<'input> core::fmt::Debug for SetWindowCreateContextRequest<'input> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SetWindowCreateContextRequest").finish_non_exhaustive()
+    }
 }
 impl<'input> SetWindowCreateContextRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -553,6 +621,7 @@ impl<'input> SetWindowCreateContextRequest<'input> {
         ([request0.into(), self.context, padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_WINDOW_CREATE_CONTEXT_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -586,9 +655,16 @@ impl<'input> crate::x11_utils::VoidRequest for SetWindowCreateContextRequest<'in
 
 /// Opcode for the GetWindowCreateContext request
 pub const GET_WINDOW_CREATE_CONTEXT_REQUEST: u8 = 6;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetWindowCreateContextRequest;
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetWindowCreateContextRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetWindowCreateContextRequest").finish_non_exhaustive()
+    }
+}
 impl GetWindowCreateContextRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -606,6 +682,7 @@ impl GetWindowCreateContextRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_WINDOW_CREATE_CONTEXT_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -629,12 +706,19 @@ impl crate::x11_utils::ReplyRequest for GetWindowCreateContextRequest {
     type Reply = GetWindowCreateContextReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetWindowCreateContextReply {
     pub sequence: u16,
     pub length: u32,
     pub context: Vec<u8>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetWindowCreateContextReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetWindowCreateContextReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetWindowCreateContextReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -695,10 +779,17 @@ impl GetWindowCreateContextReply {
 
 /// Opcode for the GetWindowContext request
 pub const GET_WINDOW_CONTEXT_REQUEST: u8 = 7;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetWindowContextRequest {
     pub window: xproto::Window,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetWindowContextRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetWindowContextRequest").finish_non_exhaustive()
+    }
 }
 impl GetWindowContextRequest {
     /// Serialize this request into bytes for the provided connection
@@ -722,6 +813,7 @@ impl GetWindowContextRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_WINDOW_CONTEXT_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -747,12 +839,19 @@ impl crate::x11_utils::ReplyRequest for GetWindowContextRequest {
     type Reply = GetWindowContextReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetWindowContextReply {
     pub sequence: u16,
     pub length: u32,
     pub context: Vec<u8>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetWindowContextReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetWindowContextReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetWindowContextReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -811,12 +910,19 @@ impl GetWindowContextReply {
     }
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ListItem {
     pub name: xproto::Atom,
     pub object_context: Vec<u8>,
     pub data_context: Vec<u8>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for ListItem {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("ListItem").finish_non_exhaustive()
+    }
 }
 impl TryParse for ListItem {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -891,10 +997,17 @@ impl ListItem {
 
 /// Opcode for the SetPropertyCreateContext request
 pub const SET_PROPERTY_CREATE_CONTEXT_REQUEST: u8 = 8;
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetPropertyCreateContextRequest<'input> {
     pub context: Cow<'input, [u8]>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl<'input> core::fmt::Debug for SetPropertyCreateContextRequest<'input> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SetPropertyCreateContextRequest").finish_non_exhaustive()
+    }
 }
 impl<'input> SetPropertyCreateContextRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -922,6 +1035,7 @@ impl<'input> SetPropertyCreateContextRequest<'input> {
         ([request0.into(), self.context, padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_PROPERTY_CREATE_CONTEXT_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -955,9 +1069,16 @@ impl<'input> crate::x11_utils::VoidRequest for SetPropertyCreateContextRequest<'
 
 /// Opcode for the GetPropertyCreateContext request
 pub const GET_PROPERTY_CREATE_CONTEXT_REQUEST: u8 = 9;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetPropertyCreateContextRequest;
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetPropertyCreateContextRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetPropertyCreateContextRequest").finish_non_exhaustive()
+    }
+}
 impl GetPropertyCreateContextRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -975,6 +1096,7 @@ impl GetPropertyCreateContextRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_PROPERTY_CREATE_CONTEXT_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -998,12 +1120,19 @@ impl crate::x11_utils::ReplyRequest for GetPropertyCreateContextRequest {
     type Reply = GetPropertyCreateContextReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetPropertyCreateContextReply {
     pub sequence: u16,
     pub length: u32,
     pub context: Vec<u8>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetPropertyCreateContextReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetPropertyCreateContextReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetPropertyCreateContextReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -1064,10 +1193,17 @@ impl GetPropertyCreateContextReply {
 
 /// Opcode for the SetPropertyUseContext request
 pub const SET_PROPERTY_USE_CONTEXT_REQUEST: u8 = 10;
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetPropertyUseContextRequest<'input> {
     pub context: Cow<'input, [u8]>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl<'input> core::fmt::Debug for SetPropertyUseContextRequest<'input> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SetPropertyUseContextRequest").finish_non_exhaustive()
+    }
 }
 impl<'input> SetPropertyUseContextRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -1095,6 +1231,7 @@ impl<'input> SetPropertyUseContextRequest<'input> {
         ([request0.into(), self.context, padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_PROPERTY_USE_CONTEXT_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1128,9 +1265,16 @@ impl<'input> crate::x11_utils::VoidRequest for SetPropertyUseContextRequest<'inp
 
 /// Opcode for the GetPropertyUseContext request
 pub const GET_PROPERTY_USE_CONTEXT_REQUEST: u8 = 11;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetPropertyUseContextRequest;
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetPropertyUseContextRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetPropertyUseContextRequest").finish_non_exhaustive()
+    }
+}
 impl GetPropertyUseContextRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -1148,6 +1292,7 @@ impl GetPropertyUseContextRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_PROPERTY_USE_CONTEXT_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1171,12 +1316,19 @@ impl crate::x11_utils::ReplyRequest for GetPropertyUseContextRequest {
     type Reply = GetPropertyUseContextReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetPropertyUseContextReply {
     pub sequence: u16,
     pub length: u32,
     pub context: Vec<u8>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetPropertyUseContextReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetPropertyUseContextReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetPropertyUseContextReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -1237,11 +1389,18 @@ impl GetPropertyUseContextReply {
 
 /// Opcode for the GetPropertyContext request
 pub const GET_PROPERTY_CONTEXT_REQUEST: u8 = 12;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetPropertyContextRequest {
     pub window: xproto::Window,
     pub property: xproto::Atom,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetPropertyContextRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetPropertyContextRequest").finish_non_exhaustive()
+    }
 }
 impl GetPropertyContextRequest {
     /// Serialize this request into bytes for the provided connection
@@ -1270,6 +1429,7 @@ impl GetPropertyContextRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_PROPERTY_CONTEXT_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1297,12 +1457,19 @@ impl crate::x11_utils::ReplyRequest for GetPropertyContextRequest {
     type Reply = GetPropertyContextReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetPropertyContextReply {
     pub sequence: u16,
     pub length: u32,
     pub context: Vec<u8>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetPropertyContextReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetPropertyContextReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetPropertyContextReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -1363,11 +1530,18 @@ impl GetPropertyContextReply {
 
 /// Opcode for the GetPropertyDataContext request
 pub const GET_PROPERTY_DATA_CONTEXT_REQUEST: u8 = 13;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetPropertyDataContextRequest {
     pub window: xproto::Window,
     pub property: xproto::Atom,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetPropertyDataContextRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetPropertyDataContextRequest").finish_non_exhaustive()
+    }
 }
 impl GetPropertyDataContextRequest {
     /// Serialize this request into bytes for the provided connection
@@ -1396,6 +1570,7 @@ impl GetPropertyDataContextRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_PROPERTY_DATA_CONTEXT_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1423,12 +1598,19 @@ impl crate::x11_utils::ReplyRequest for GetPropertyDataContextRequest {
     type Reply = GetPropertyDataContextReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetPropertyDataContextReply {
     pub sequence: u16,
     pub length: u32,
     pub context: Vec<u8>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetPropertyDataContextReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetPropertyDataContextReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetPropertyDataContextReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -1489,10 +1671,17 @@ impl GetPropertyDataContextReply {
 
 /// Opcode for the ListProperties request
 pub const LIST_PROPERTIES_REQUEST: u8 = 14;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ListPropertiesRequest {
     pub window: xproto::Window,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for ListPropertiesRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("ListPropertiesRequest").finish_non_exhaustive()
+    }
 }
 impl ListPropertiesRequest {
     /// Serialize this request into bytes for the provided connection
@@ -1516,6 +1705,7 @@ impl ListPropertiesRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != LIST_PROPERTIES_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1541,12 +1731,19 @@ impl crate::x11_utils::ReplyRequest for ListPropertiesRequest {
     type Reply = ListPropertiesReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ListPropertiesReply {
     pub sequence: u16,
     pub length: u32,
     pub properties: Vec<ListItem>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for ListPropertiesReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("ListPropertiesReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for ListPropertiesReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -1606,10 +1803,17 @@ impl ListPropertiesReply {
 
 /// Opcode for the SetSelectionCreateContext request
 pub const SET_SELECTION_CREATE_CONTEXT_REQUEST: u8 = 15;
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetSelectionCreateContextRequest<'input> {
     pub context: Cow<'input, [u8]>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl<'input> core::fmt::Debug for SetSelectionCreateContextRequest<'input> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SetSelectionCreateContextRequest").finish_non_exhaustive()
+    }
 }
 impl<'input> SetSelectionCreateContextRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -1637,6 +1841,7 @@ impl<'input> SetSelectionCreateContextRequest<'input> {
         ([request0.into(), self.context, padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_SELECTION_CREATE_CONTEXT_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1670,9 +1875,16 @@ impl<'input> crate::x11_utils::VoidRequest for SetSelectionCreateContextRequest<
 
 /// Opcode for the GetSelectionCreateContext request
 pub const GET_SELECTION_CREATE_CONTEXT_REQUEST: u8 = 16;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetSelectionCreateContextRequest;
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetSelectionCreateContextRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetSelectionCreateContextRequest").finish_non_exhaustive()
+    }
+}
 impl GetSelectionCreateContextRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -1690,6 +1902,7 @@ impl GetSelectionCreateContextRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_SELECTION_CREATE_CONTEXT_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1713,12 +1926,19 @@ impl crate::x11_utils::ReplyRequest for GetSelectionCreateContextRequest {
     type Reply = GetSelectionCreateContextReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetSelectionCreateContextReply {
     pub sequence: u16,
     pub length: u32,
     pub context: Vec<u8>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetSelectionCreateContextReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetSelectionCreateContextReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetSelectionCreateContextReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -1779,10 +1999,17 @@ impl GetSelectionCreateContextReply {
 
 /// Opcode for the SetSelectionUseContext request
 pub const SET_SELECTION_USE_CONTEXT_REQUEST: u8 = 17;
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetSelectionUseContextRequest<'input> {
     pub context: Cow<'input, [u8]>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl<'input> core::fmt::Debug for SetSelectionUseContextRequest<'input> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SetSelectionUseContextRequest").finish_non_exhaustive()
+    }
 }
 impl<'input> SetSelectionUseContextRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -1810,6 +2037,7 @@ impl<'input> SetSelectionUseContextRequest<'input> {
         ([request0.into(), self.context, padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_SELECTION_USE_CONTEXT_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1843,9 +2071,16 @@ impl<'input> crate::x11_utils::VoidRequest for SetSelectionUseContextRequest<'in
 
 /// Opcode for the GetSelectionUseContext request
 pub const GET_SELECTION_USE_CONTEXT_REQUEST: u8 = 18;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetSelectionUseContextRequest;
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetSelectionUseContextRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetSelectionUseContextRequest").finish_non_exhaustive()
+    }
+}
 impl GetSelectionUseContextRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -1863,6 +2098,7 @@ impl GetSelectionUseContextRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_SELECTION_USE_CONTEXT_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1886,12 +2122,19 @@ impl crate::x11_utils::ReplyRequest for GetSelectionUseContextRequest {
     type Reply = GetSelectionUseContextReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetSelectionUseContextReply {
     pub sequence: u16,
     pub length: u32,
     pub context: Vec<u8>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetSelectionUseContextReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetSelectionUseContextReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetSelectionUseContextReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -1952,10 +2195,17 @@ impl GetSelectionUseContextReply {
 
 /// Opcode for the GetSelectionContext request
 pub const GET_SELECTION_CONTEXT_REQUEST: u8 = 19;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetSelectionContextRequest {
     pub selection: xproto::Atom,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetSelectionContextRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetSelectionContextRequest").finish_non_exhaustive()
+    }
 }
 impl GetSelectionContextRequest {
     /// Serialize this request into bytes for the provided connection
@@ -1979,6 +2229,7 @@ impl GetSelectionContextRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_SELECTION_CONTEXT_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -2004,12 +2255,19 @@ impl crate::x11_utils::ReplyRequest for GetSelectionContextRequest {
     type Reply = GetSelectionContextReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetSelectionContextReply {
     pub sequence: u16,
     pub length: u32,
     pub context: Vec<u8>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetSelectionContextReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetSelectionContextReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetSelectionContextReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -2070,10 +2328,17 @@ impl GetSelectionContextReply {
 
 /// Opcode for the GetSelectionDataContext request
 pub const GET_SELECTION_DATA_CONTEXT_REQUEST: u8 = 20;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetSelectionDataContextRequest {
     pub selection: xproto::Atom,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetSelectionDataContextRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetSelectionDataContextRequest").finish_non_exhaustive()
+    }
 }
 impl GetSelectionDataContextRequest {
     /// Serialize this request into bytes for the provided connection
@@ -2097,6 +2362,7 @@ impl GetSelectionDataContextRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_SELECTION_DATA_CONTEXT_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -2122,12 +2388,19 @@ impl crate::x11_utils::ReplyRequest for GetSelectionDataContextRequest {
     type Reply = GetSelectionDataContextReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetSelectionDataContextReply {
     pub sequence: u16,
     pub length: u32,
     pub context: Vec<u8>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetSelectionDataContextReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetSelectionDataContextReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetSelectionDataContextReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -2188,9 +2461,16 @@ impl GetSelectionDataContextReply {
 
 /// Opcode for the ListSelections request
 pub const LIST_SELECTIONS_REQUEST: u8 = 21;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ListSelectionsRequest;
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for ListSelectionsRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("ListSelectionsRequest").finish_non_exhaustive()
+    }
+}
 impl ListSelectionsRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -2208,6 +2488,7 @@ impl ListSelectionsRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != LIST_SELECTIONS_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -2231,12 +2512,19 @@ impl crate::x11_utils::ReplyRequest for ListSelectionsRequest {
     type Reply = ListSelectionsReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ListSelectionsReply {
     pub sequence: u16,
     pub length: u32,
     pub selections: Vec<ListItem>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for ListSelectionsReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("ListSelectionsReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for ListSelectionsReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -2296,10 +2584,17 @@ impl ListSelectionsReply {
 
 /// Opcode for the GetClientContext request
 pub const GET_CLIENT_CONTEXT_REQUEST: u8 = 22;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetClientContextRequest {
     pub resource: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetClientContextRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetClientContextRequest").finish_non_exhaustive()
+    }
 }
 impl GetClientContextRequest {
     /// Serialize this request into bytes for the provided connection
@@ -2323,6 +2618,7 @@ impl GetClientContextRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_CLIENT_CONTEXT_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -2348,12 +2644,19 @@ impl crate::x11_utils::ReplyRequest for GetClientContextRequest {
     type Reply = GetClientContextReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetClientContextReply {
     pub sequence: u16,
     pub length: u32,
     pub context: Vec<u8>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetClientContextReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetClientContextReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetClientContextReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {

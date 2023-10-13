@@ -36,11 +36,18 @@ pub const X11_XML_VERSION: (u32, u32) = (1, 1);
 
 /// Opcode for the GetVersion request
 pub const GET_VERSION_REQUEST: u8 = 0;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetVersionRequest {
     pub client_major_version: u16,
     pub client_minor_version: u16,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetVersionRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetVersionRequest").finish_non_exhaustive()
+    }
 }
 impl GetVersionRequest {
     /// Serialize this request into bytes for the provided connection
@@ -65,6 +72,7 @@ impl GetVersionRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_VERSION_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -92,13 +100,20 @@ impl crate::x11_utils::ReplyRequest for GetVersionRequest {
     type Reply = GetVersionReply;
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetVersionReply {
     pub sequence: u16,
     pub length: u32,
     pub server_major_version: u16,
     pub server_minor_version: u16,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetVersionReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetVersionReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetVersionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -156,9 +171,16 @@ impl Serialize for GetVersionReply {
 
 /// Opcode for the GetXIDRange request
 pub const GET_XID_RANGE_REQUEST: u8 = 1;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetXIDRangeRequest;
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetXIDRangeRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetXIDRangeRequest").finish_non_exhaustive()
+    }
+}
 impl GetXIDRangeRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -176,6 +198,7 @@ impl GetXIDRangeRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_XID_RANGE_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -199,13 +222,20 @@ impl crate::x11_utils::ReplyRequest for GetXIDRangeRequest {
     type Reply = GetXIDRangeReply;
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetXIDRangeReply {
     pub sequence: u16,
     pub length: u32,
     pub start_id: u32,
     pub count: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetXIDRangeReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetXIDRangeReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetXIDRangeReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -267,10 +297,17 @@ impl Serialize for GetXIDRangeReply {
 
 /// Opcode for the GetXIDList request
 pub const GET_XID_LIST_REQUEST: u8 = 2;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetXIDListRequest {
     pub count: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetXIDListRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetXIDListRequest").finish_non_exhaustive()
+    }
 }
 impl GetXIDListRequest {
     /// Serialize this request into bytes for the provided connection
@@ -294,6 +331,7 @@ impl GetXIDListRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_XID_LIST_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -319,12 +357,19 @@ impl crate::x11_utils::ReplyRequest for GetXIDListRequest {
     type Reply = GetXIDListReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetXIDListReply {
     pub sequence: u16,
     pub length: u32,
     pub ids: Vec<u32>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetXIDListReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetXIDListReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetXIDListReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {

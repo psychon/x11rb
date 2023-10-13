@@ -168,7 +168,8 @@ impl core::fmt::Debug for SK  {
 
 /// Opcode for the Notify event
 pub const NOTIFY_EVENT: u8 = 0;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct NotifyEvent {
     pub response_type: u8,
@@ -181,6 +182,12 @@ pub struct NotifyEvent {
     pub extents_height: u16,
     pub server_time: xproto::Timestamp,
     pub shaped: bool,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for NotifyEvent {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("NotifyEvent").finish_non_exhaustive()
+    }
 }
 impl TryParse for NotifyEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -323,9 +330,16 @@ impl From<NotifyEvent> for [u8; 32] {
 
 /// Opcode for the QueryVersion request
 pub const QUERY_VERSION_REQUEST: u8 = 0;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryVersionRequest;
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for QueryVersionRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("QueryVersionRequest").finish_non_exhaustive()
+    }
+}
 impl QueryVersionRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -343,6 +357,7 @@ impl QueryVersionRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != QUERY_VERSION_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -366,13 +381,20 @@ impl crate::x11_utils::ReplyRequest for QueryVersionRequest {
     type Reply = QueryVersionReply;
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryVersionReply {
     pub sequence: u16,
     pub length: u32,
     pub major_version: u16,
     pub minor_version: u16,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for QueryVersionReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("QueryVersionReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for QueryVersionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -430,7 +452,8 @@ impl Serialize for QueryVersionReply {
 
 /// Opcode for the Rectangles request
 pub const RECTANGLES_REQUEST: u8 = 1;
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct RectanglesRequest<'input> {
     pub operation: SO,
@@ -440,6 +463,12 @@ pub struct RectanglesRequest<'input> {
     pub x_offset: i16,
     pub y_offset: i16,
     pub rectangles: Cow<'input, [xproto::Rectangle]>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl<'input> core::fmt::Debug for RectanglesRequest<'input> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("RectanglesRequest").finish_non_exhaustive()
+    }
 }
 impl<'input> RectanglesRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -480,6 +509,7 @@ impl<'input> RectanglesRequest<'input> {
         ([request0.into(), rectangles_bytes.into(), padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != RECTANGLES_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -541,7 +571,8 @@ impl<'input> crate::x11_utils::VoidRequest for RectanglesRequest<'input> {
 
 /// Opcode for the Mask request
 pub const MASK_REQUEST: u8 = 2;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct MaskRequest {
     pub operation: SO,
@@ -550,6 +581,12 @@ pub struct MaskRequest {
     pub x_offset: i16,
     pub y_offset: i16,
     pub source_bitmap: xproto::Pixmap,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for MaskRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("MaskRequest").finish_non_exhaustive()
+    }
 }
 impl MaskRequest {
     /// Serialize this request into bytes for the provided connection
@@ -590,6 +627,7 @@ impl MaskRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != MASK_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -629,7 +667,8 @@ impl crate::x11_utils::VoidRequest for MaskRequest {
 
 /// Opcode for the Combine request
 pub const COMBINE_REQUEST: u8 = 3;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CombineRequest {
     pub operation: SO,
@@ -639,6 +678,12 @@ pub struct CombineRequest {
     pub x_offset: i16,
     pub y_offset: i16,
     pub source_window: xproto::Window,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for CombineRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("CombineRequest").finish_non_exhaustive()
+    }
 }
 impl CombineRequest {
     /// Serialize this request into bytes for the provided connection
@@ -680,6 +725,7 @@ impl CombineRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != COMBINE_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -722,13 +768,20 @@ impl crate::x11_utils::VoidRequest for CombineRequest {
 
 /// Opcode for the Offset request
 pub const OFFSET_REQUEST: u8 = 4;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct OffsetRequest {
     pub destination_kind: SK,
     pub destination_window: xproto::Window,
     pub x_offset: i16,
     pub y_offset: i16,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for OffsetRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("OffsetRequest").finish_non_exhaustive()
+    }
 }
 impl OffsetRequest {
     /// Serialize this request into bytes for the provided connection
@@ -763,6 +816,7 @@ impl OffsetRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != OFFSET_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -797,10 +851,17 @@ impl crate::x11_utils::VoidRequest for OffsetRequest {
 
 /// Opcode for the QueryExtents request
 pub const QUERY_EXTENTS_REQUEST: u8 = 5;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryExtentsRequest {
     pub destination_window: xproto::Window,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for QueryExtentsRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("QueryExtentsRequest").finish_non_exhaustive()
+    }
 }
 impl QueryExtentsRequest {
     /// Serialize this request into bytes for the provided connection
@@ -824,6 +885,7 @@ impl QueryExtentsRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != QUERY_EXTENTS_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -849,7 +911,8 @@ impl crate::x11_utils::ReplyRequest for QueryExtentsRequest {
     type Reply = QueryExtentsReply;
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryExtentsReply {
     pub sequence: u16,
@@ -864,6 +927,12 @@ pub struct QueryExtentsReply {
     pub clip_shape_extents_y: i16,
     pub clip_shape_extents_width: u16,
     pub clip_shape_extents_height: u16,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for QueryExtentsReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("QueryExtentsReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for QueryExtentsReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -963,11 +1032,18 @@ impl Serialize for QueryExtentsReply {
 
 /// Opcode for the SelectInput request
 pub const SELECT_INPUT_REQUEST: u8 = 6;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SelectInputRequest {
     pub destination_window: xproto::Window,
     pub enable: bool,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for SelectInputRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SelectInputRequest").finish_non_exhaustive()
+    }
 }
 impl SelectInputRequest {
     /// Serialize this request into bytes for the provided connection
@@ -996,6 +1072,7 @@ impl SelectInputRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SELECT_INPUT_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1025,10 +1102,17 @@ impl crate::x11_utils::VoidRequest for SelectInputRequest {
 
 /// Opcode for the InputSelected request
 pub const INPUT_SELECTED_REQUEST: u8 = 7;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct InputSelectedRequest {
     pub destination_window: xproto::Window,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for InputSelectedRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("InputSelectedRequest").finish_non_exhaustive()
+    }
 }
 impl InputSelectedRequest {
     /// Serialize this request into bytes for the provided connection
@@ -1052,6 +1136,7 @@ impl InputSelectedRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != INPUT_SELECTED_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1077,12 +1162,19 @@ impl crate::x11_utils::ReplyRequest for InputSelectedRequest {
     type Reply = InputSelectedReply;
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct InputSelectedReply {
     pub enabled: bool,
     pub sequence: u16,
     pub length: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for InputSelectedReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("InputSelectedReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for InputSelectedReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -1131,11 +1223,18 @@ impl Serialize for InputSelectedReply {
 
 /// Opcode for the GetRectangles request
 pub const GET_RECTANGLES_REQUEST: u8 = 8;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetRectanglesRequest {
     pub window: xproto::Window,
     pub source_kind: SK,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetRectanglesRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetRectanglesRequest").finish_non_exhaustive()
+    }
 }
 impl GetRectanglesRequest {
     /// Serialize this request into bytes for the provided connection
@@ -1164,6 +1263,7 @@ impl GetRectanglesRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_RECTANGLES_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1193,13 +1293,20 @@ impl crate::x11_utils::ReplyRequest for GetRectanglesRequest {
     type Reply = GetRectanglesReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetRectanglesReply {
     pub ordering: xproto::ClipOrdering,
     pub sequence: u16,
     pub length: u32,
     pub rectangles: Vec<xproto::Rectangle>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetRectanglesReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetRectanglesReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetRectanglesReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {

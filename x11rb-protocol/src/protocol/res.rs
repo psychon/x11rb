@@ -36,11 +36,18 @@ pub const X11_EXTENSION_NAME: &str = "X-Resource";
 /// send the maximum version of the extension that you need.
 pub const X11_XML_VERSION: (u32, u32) = (1, 2);
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Client {
     pub resource_base: u32,
     pub resource_mask: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for Client {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("Client").finish_non_exhaustive()
+    }
 }
 impl TryParse for Client {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -73,11 +80,18 @@ impl Serialize for Client {
     }
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Type {
     pub resource_type: xproto::Atom,
     pub count: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for Type {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("Type").finish_non_exhaustive()
+    }
 }
 impl TryParse for Type {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -158,11 +172,18 @@ impl core::fmt::Debug for ClientIdMask  {
 }
 bitmask_binop!(ClientIdMask, u32);
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ClientIdSpec {
     pub client: u32,
     pub mask: ClientIdMask,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for ClientIdSpec {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("ClientIdSpec").finish_non_exhaustive()
+    }
 }
 impl TryParse for ClientIdSpec {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -196,11 +217,18 @@ impl Serialize for ClientIdSpec {
     }
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ClientIdValue {
     pub spec: ClientIdSpec,
     pub value: Vec<u32>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for ClientIdValue {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("ClientIdValue").finish_non_exhaustive()
+    }
 }
 impl TryParse for ClientIdValue {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -243,11 +271,18 @@ impl ClientIdValue {
     }
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ResourceIdSpec {
     pub resource: u32,
     pub type_: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for ResourceIdSpec {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("ResourceIdSpec").finish_non_exhaustive()
+    }
 }
 impl TryParse for ResourceIdSpec {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -280,13 +315,20 @@ impl Serialize for ResourceIdSpec {
     }
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ResourceSizeSpec {
     pub spec: ResourceIdSpec,
     pub bytes: u32,
     pub ref_count: u32,
     pub use_count: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for ResourceSizeSpec {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("ResourceSizeSpec").finish_non_exhaustive()
+    }
 }
 impl TryParse for ResourceSizeSpec {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -337,11 +379,18 @@ impl Serialize for ResourceSizeSpec {
     }
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ResourceSizeValue {
     pub size: ResourceSizeSpec,
     pub cross_references: Vec<ResourceSizeSpec>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for ResourceSizeValue {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("ResourceSizeValue").finish_non_exhaustive()
+    }
 }
 impl TryParse for ResourceSizeValue {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -385,11 +434,18 @@ impl ResourceSizeValue {
 
 /// Opcode for the QueryVersion request
 pub const QUERY_VERSION_REQUEST: u8 = 0;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryVersionRequest {
     pub client_major: u8,
     pub client_minor: u8,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for QueryVersionRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("QueryVersionRequest").finish_non_exhaustive()
+    }
 }
 impl QueryVersionRequest {
     /// Serialize this request into bytes for the provided connection
@@ -414,6 +470,7 @@ impl QueryVersionRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != QUERY_VERSION_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -441,13 +498,20 @@ impl crate::x11_utils::ReplyRequest for QueryVersionRequest {
     type Reply = QueryVersionReply;
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryVersionReply {
     pub sequence: u16,
     pub length: u32,
     pub server_major: u16,
     pub server_minor: u16,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for QueryVersionReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("QueryVersionReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for QueryVersionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -505,9 +569,16 @@ impl Serialize for QueryVersionReply {
 
 /// Opcode for the QueryClients request
 pub const QUERY_CLIENTS_REQUEST: u8 = 1;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryClientsRequest;
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for QueryClientsRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("QueryClientsRequest").finish_non_exhaustive()
+    }
+}
 impl QueryClientsRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -525,6 +596,7 @@ impl QueryClientsRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != QUERY_CLIENTS_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -548,12 +620,19 @@ impl crate::x11_utils::ReplyRequest for QueryClientsRequest {
     type Reply = QueryClientsReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryClientsReply {
     pub sequence: u16,
     pub length: u32,
     pub clients: Vec<Client>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for QueryClientsReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("QueryClientsReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for QueryClientsReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -613,10 +692,17 @@ impl QueryClientsReply {
 
 /// Opcode for the QueryClientResources request
 pub const QUERY_CLIENT_RESOURCES_REQUEST: u8 = 2;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryClientResourcesRequest {
     pub xid: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for QueryClientResourcesRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("QueryClientResourcesRequest").finish_non_exhaustive()
+    }
 }
 impl QueryClientResourcesRequest {
     /// Serialize this request into bytes for the provided connection
@@ -640,6 +726,7 @@ impl QueryClientResourcesRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != QUERY_CLIENT_RESOURCES_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -665,12 +752,19 @@ impl crate::x11_utils::ReplyRequest for QueryClientResourcesRequest {
     type Reply = QueryClientResourcesReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryClientResourcesReply {
     pub sequence: u16,
     pub length: u32,
     pub types: Vec<Type>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for QueryClientResourcesReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("QueryClientResourcesReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for QueryClientResourcesReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -730,10 +824,17 @@ impl QueryClientResourcesReply {
 
 /// Opcode for the QueryClientPixmapBytes request
 pub const QUERY_CLIENT_PIXMAP_BYTES_REQUEST: u8 = 3;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryClientPixmapBytesRequest {
     pub xid: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for QueryClientPixmapBytesRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("QueryClientPixmapBytesRequest").finish_non_exhaustive()
+    }
 }
 impl QueryClientPixmapBytesRequest {
     /// Serialize this request into bytes for the provided connection
@@ -757,6 +858,7 @@ impl QueryClientPixmapBytesRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != QUERY_CLIENT_PIXMAP_BYTES_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -782,13 +884,20 @@ impl crate::x11_utils::ReplyRequest for QueryClientPixmapBytesRequest {
     type Reply = QueryClientPixmapBytesReply;
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryClientPixmapBytesReply {
     pub sequence: u16,
     pub length: u32,
     pub bytes: u32,
     pub bytes_overflow: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for QueryClientPixmapBytesReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("QueryClientPixmapBytesReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for QueryClientPixmapBytesReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -850,10 +959,17 @@ impl Serialize for QueryClientPixmapBytesReply {
 
 /// Opcode for the QueryClientIds request
 pub const QUERY_CLIENT_IDS_REQUEST: u8 = 4;
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryClientIdsRequest<'input> {
     pub specs: Cow<'input, [ClientIdSpec]>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl<'input> core::fmt::Debug for QueryClientIdsRequest<'input> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("QueryClientIdsRequest").finish_non_exhaustive()
+    }
 }
 impl<'input> QueryClientIdsRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -882,6 +998,7 @@ impl<'input> QueryClientIdsRequest<'input> {
         ([request0.into(), specs_bytes.into(), padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != QUERY_CLIENT_IDS_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -914,12 +1031,19 @@ impl<'input> crate::x11_utils::ReplyRequest for QueryClientIdsRequest<'input> {
     type Reply = QueryClientIdsReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryClientIdsReply {
     pub sequence: u16,
     pub length: u32,
     pub ids: Vec<ClientIdValue>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for QueryClientIdsReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("QueryClientIdsReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for QueryClientIdsReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -979,11 +1103,18 @@ impl QueryClientIdsReply {
 
 /// Opcode for the QueryResourceBytes request
 pub const QUERY_RESOURCE_BYTES_REQUEST: u8 = 5;
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryResourceBytesRequest<'input> {
     pub client: u32,
     pub specs: Cow<'input, [ResourceIdSpec]>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl<'input> core::fmt::Debug for QueryResourceBytesRequest<'input> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("QueryResourceBytesRequest").finish_non_exhaustive()
+    }
 }
 impl<'input> QueryResourceBytesRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -1017,6 +1148,7 @@ impl<'input> QueryResourceBytesRequest<'input> {
         ([request0.into(), specs_bytes.into(), padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != QUERY_RESOURCE_BYTES_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1052,12 +1184,19 @@ impl<'input> crate::x11_utils::ReplyRequest for QueryResourceBytesRequest<'input
     type Reply = QueryResourceBytesReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryResourceBytesReply {
     pub sequence: u16,
     pub length: u32,
     pub sizes: Vec<ResourceSizeValue>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for QueryResourceBytesReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("QueryResourceBytesReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for QueryResourceBytesReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {

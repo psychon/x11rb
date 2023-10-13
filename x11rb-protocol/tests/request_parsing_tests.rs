@@ -1,7 +1,9 @@
+#![cfg(feature = "request-parsing")]
+
 use std::borrow::Cow;
 
-use x11rb::errors::ParseError;
-use x11rb::x11_utils::RequestHeader;
+use x11rb_protocol::errors::ParseError;
+use x11rb_protocol::x11_utils::RequestHeader;
 
 macro_rules! add_ne {
     ($data:expr, $add:expr) => {
@@ -11,7 +13,7 @@ macro_rules! add_ne {
 
 #[test]
 fn test_bad_request_header_opcode() {
-    use x11rb::protocol::xproto::GetInputFocusRequest;
+    use x11rb_protocol::protocol::xproto::GetInputFocusRequest;
     let header = RequestHeader {
         major_opcode: 1,
         minor_opcode: 0,
@@ -26,7 +28,7 @@ fn test_bad_request_header_opcode() {
 
 #[test]
 fn test_bad_request_header_length() {
-    use x11rb::protocol::xproto::CreateWindowRequest;
+    use x11rb_protocol::protocol::xproto::CreateWindowRequest;
     let header = RequestHeader {
         major_opcode: 1,
         minor_opcode: 0,
@@ -41,7 +43,9 @@ fn test_bad_request_header_length() {
 
 #[test]
 fn test_create_window1() {
-    use x11rb::protocol::xproto::{CreateWindowAux, CreateWindowRequest, Gravity, WindowClass};
+    use x11rb_protocol::protocol::xproto::{
+        CreateWindowAux, CreateWindowRequest, Gravity, WindowClass,
+    };
     let header = RequestHeader {
         major_opcode: 1,
         minor_opcode: 0x18,
@@ -87,7 +91,9 @@ fn test_create_window1() {
 
 #[test]
 fn test_create_window2() {
-    use x11rb::protocol::xproto::{CreateWindowAux, CreateWindowRequest, Gravity, WindowClass};
+    use x11rb_protocol::protocol::xproto::{
+        CreateWindowAux, CreateWindowRequest, Gravity, WindowClass,
+    };
     let header = RequestHeader {
         major_opcode: 1,
         minor_opcode: 0x18,
@@ -134,7 +140,7 @@ fn test_create_window2() {
 
 #[test]
 fn test_change_window_attributes() {
-    use x11rb::protocol::xproto::{
+    use x11rb_protocol::protocol::xproto::{
         ChangeWindowAttributesAux, ChangeWindowAttributesRequest, EventMask,
     };
     let header = RequestHeader {
@@ -161,7 +167,7 @@ fn test_change_window_attributes() {
 
 #[test]
 fn test_get_window_attributes() {
-    use x11rb::protocol::xproto::GetWindowAttributesRequest;
+    use x11rb_protocol::protocol::xproto::GetWindowAttributesRequest;
     let header = RequestHeader {
         major_opcode: 3,
         minor_opcode: 0,
@@ -180,7 +186,7 @@ fn test_get_window_attributes() {
 
 #[test]
 fn test_get_input_focus() {
-    use x11rb::protocol::xproto::GetInputFocusRequest;
+    use x11rb_protocol::protocol::xproto::GetInputFocusRequest;
     let header = RequestHeader {
         major_opcode: 43,
         minor_opcode: 0,
@@ -193,7 +199,7 @@ fn test_get_input_focus() {
 
 #[test]
 fn test_query_text_extents() {
-    use x11rb::protocol::xproto::{Char2b, QueryTextExtentsRequest};
+    use x11rb_protocol::protocol::xproto::{Char2b, QueryTextExtentsRequest};
     let header = RequestHeader {
         major_opcode: 48,
         minor_opcode: 0,
@@ -223,7 +229,7 @@ fn test_query_text_extents() {
 
 #[test]
 fn test_query_text_extents_odd_length() {
-    use x11rb::protocol::xproto::{Char2b, QueryTextExtentsRequest};
+    use x11rb_protocol::protocol::xproto::{Char2b, QueryTextExtentsRequest};
     let header = RequestHeader {
         major_opcode: 48,
         minor_opcode: 1,
@@ -248,7 +254,7 @@ fn test_query_text_extents_odd_length() {
 #[cfg(feature = "randr")]
 #[test]
 fn test_randr_get_output_property() {
-    use x11rb::protocol::randr::GetOutputPropertyRequest;
+    use x11rb_protocol::protocol::randr::GetOutputPropertyRequest;
     let header = RequestHeader {
         major_opcode: 140,
         minor_opcode: 15,

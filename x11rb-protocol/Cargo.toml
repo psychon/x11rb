@@ -21,8 +21,16 @@ serde = { version = "1", features = ["derive"], optional = true }
 criterion = "0.5"
 
 [features]
-default = ["std"]
+default = ["extra-traits", "std"]
 std = []
+
+# Enable extra traits for the X11 types
+extra-traits = []
+
+# Enable parsing for requests.
+# 
+# This adds a lot of extra code that isn't used in the common case.
+request-parsing = []
 
 # Enable utility functions in `x11rb::resource_manager` for querying the
 # resource databases.

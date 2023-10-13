@@ -42,11 +42,18 @@ pub const X11_XML_VERSION: (u32, u32) = (6, 0);
 
 /// Opcode for the QueryVersion request
 pub const QUERY_VERSION_REQUEST: u8 = 0;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryVersionRequest {
     pub client_major_version: u32,
     pub client_minor_version: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for QueryVersionRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("QueryVersionRequest").finish_non_exhaustive()
+    }
 }
 impl QueryVersionRequest {
     /// Serialize this request into bytes for the provided connection
@@ -75,6 +82,7 @@ impl QueryVersionRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != QUERY_VERSION_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -102,13 +110,20 @@ impl crate::x11_utils::ReplyRequest for QueryVersionRequest {
     type Reply = QueryVersionReply;
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryVersionReply {
     pub sequence: u16,
     pub length: u32,
     pub major_version: u32,
     pub minor_version: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for QueryVersionReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("QueryVersionReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for QueryVersionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -365,13 +380,20 @@ impl core::fmt::Debug for SaveSetMapping  {
 
 /// Opcode for the ChangeSaveSet request
 pub const CHANGE_SAVE_SET_REQUEST: u8 = 1;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ChangeSaveSetRequest {
     pub mode: SaveSetMode,
     pub target: SaveSetTarget,
     pub map: SaveSetMapping,
     pub window: xproto::Window,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for ChangeSaveSetRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("ChangeSaveSetRequest").finish_non_exhaustive()
+    }
 }
 impl ChangeSaveSetRequest {
     /// Serialize this request into bytes for the provided connection
@@ -402,6 +424,7 @@ impl ChangeSaveSetRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CHANGE_SAVE_SET_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -549,7 +572,8 @@ bitmask_binop!(SelectionEventMask, u32);
 
 /// Opcode for the SelectionNotify event
 pub const SELECTION_NOTIFY_EVENT: u8 = 0;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SelectionNotifyEvent {
     pub response_type: u8,
@@ -560,6 +584,12 @@ pub struct SelectionNotifyEvent {
     pub selection: xproto::Atom,
     pub timestamp: xproto::Timestamp,
     pub selection_timestamp: xproto::Timestamp,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for SelectionNotifyEvent {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SelectionNotifyEvent").finish_non_exhaustive()
+    }
 }
 impl TryParse for SelectionNotifyEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -694,12 +724,19 @@ impl From<SelectionNotifyEvent> for [u8; 32] {
 
 /// Opcode for the SelectSelectionInput request
 pub const SELECT_SELECTION_INPUT_REQUEST: u8 = 2;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SelectSelectionInputRequest {
     pub window: xproto::Window,
     pub selection: xproto::Atom,
     pub event_mask: SelectionEventMask,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for SelectSelectionInputRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SelectSelectionInputRequest").finish_non_exhaustive()
+    }
 }
 impl SelectSelectionInputRequest {
     /// Serialize this request into bytes for the provided connection
@@ -733,6 +770,7 @@ impl SelectSelectionInputRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SELECT_SELECTION_INPUT_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -867,7 +905,8 @@ bitmask_binop!(CursorNotifyMask, u32);
 
 /// Opcode for the CursorNotify event
 pub const CURSOR_NOTIFY_EVENT: u8 = 1;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CursorNotifyEvent {
     pub response_type: u8,
@@ -877,6 +916,12 @@ pub struct CursorNotifyEvent {
     pub cursor_serial: u32,
     pub timestamp: xproto::Timestamp,
     pub name: xproto::Atom,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for CursorNotifyEvent {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("CursorNotifyEvent").finish_non_exhaustive()
+    }
 }
 impl TryParse for CursorNotifyEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -1007,11 +1052,18 @@ impl From<CursorNotifyEvent> for [u8; 32] {
 
 /// Opcode for the SelectCursorInput request
 pub const SELECT_CURSOR_INPUT_REQUEST: u8 = 3;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SelectCursorInputRequest {
     pub window: xproto::Window,
     pub event_mask: CursorNotifyMask,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for SelectCursorInputRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SelectCursorInputRequest").finish_non_exhaustive()
+    }
 }
 impl SelectCursorInputRequest {
     /// Serialize this request into bytes for the provided connection
@@ -1040,6 +1092,7 @@ impl SelectCursorInputRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SELECT_CURSOR_INPUT_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1069,9 +1122,16 @@ impl crate::x11_utils::VoidRequest for SelectCursorInputRequest {
 
 /// Opcode for the GetCursorImage request
 pub const GET_CURSOR_IMAGE_REQUEST: u8 = 4;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetCursorImageRequest;
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetCursorImageRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetCursorImageRequest").finish_non_exhaustive()
+    }
+}
 impl GetCursorImageRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -1089,6 +1149,7 @@ impl GetCursorImageRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_CURSOR_IMAGE_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1112,7 +1173,8 @@ impl crate::x11_utils::ReplyRequest for GetCursorImageRequest {
     type Reply = GetCursorImageReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetCursorImageReply {
     pub sequence: u16,
@@ -1125,6 +1187,12 @@ pub struct GetCursorImageReply {
     pub yhot: u16,
     pub cursor_serial: u32,
     pub cursor_image: Vec<u32>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetCursorImageReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetCursorImageReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetCursorImageReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -1243,11 +1311,18 @@ impl core::fmt::Debug for RegionEnum  {
 
 /// Opcode for the CreateRegion request
 pub const CREATE_REGION_REQUEST: u8 = 5;
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CreateRegionRequest<'input> {
     pub region: Region,
     pub rectangles: Cow<'input, [xproto::Rectangle]>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl<'input> core::fmt::Debug for CreateRegionRequest<'input> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("CreateRegionRequest").finish_non_exhaustive()
+    }
 }
 impl<'input> CreateRegionRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -1275,6 +1350,7 @@ impl<'input> CreateRegionRequest<'input> {
         ([request0.into(), rectangles_bytes.into(), padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CREATE_REGION_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1317,11 +1393,18 @@ impl<'input> crate::x11_utils::VoidRequest for CreateRegionRequest<'input> {
 
 /// Opcode for the CreateRegionFromBitmap request
 pub const CREATE_REGION_FROM_BITMAP_REQUEST: u8 = 6;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CreateRegionFromBitmapRequest {
     pub region: Region,
     pub bitmap: xproto::Pixmap,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for CreateRegionFromBitmapRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("CreateRegionFromBitmapRequest").finish_non_exhaustive()
+    }
 }
 impl CreateRegionFromBitmapRequest {
     /// Serialize this request into bytes for the provided connection
@@ -1350,6 +1433,7 @@ impl CreateRegionFromBitmapRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CREATE_REGION_FROM_BITMAP_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1378,12 +1462,19 @@ impl crate::x11_utils::VoidRequest for CreateRegionFromBitmapRequest {
 
 /// Opcode for the CreateRegionFromWindow request
 pub const CREATE_REGION_FROM_WINDOW_REQUEST: u8 = 7;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CreateRegionFromWindowRequest {
     pub region: Region,
     pub window: xproto::Window,
     pub kind: shape::SK,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for CreateRegionFromWindowRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("CreateRegionFromWindowRequest").finish_non_exhaustive()
+    }
 }
 impl CreateRegionFromWindowRequest {
     /// Serialize this request into bytes for the provided connection
@@ -1417,6 +1508,7 @@ impl CreateRegionFromWindowRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CREATE_REGION_FROM_WINDOW_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1449,11 +1541,18 @@ impl crate::x11_utils::VoidRequest for CreateRegionFromWindowRequest {
 
 /// Opcode for the CreateRegionFromGC request
 pub const CREATE_REGION_FROM_GC_REQUEST: u8 = 8;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CreateRegionFromGCRequest {
     pub region: Region,
     pub gc: xproto::Gcontext,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for CreateRegionFromGCRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("CreateRegionFromGCRequest").finish_non_exhaustive()
+    }
 }
 impl CreateRegionFromGCRequest {
     /// Serialize this request into bytes for the provided connection
@@ -1482,6 +1581,7 @@ impl CreateRegionFromGCRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CREATE_REGION_FROM_GC_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1510,11 +1610,18 @@ impl crate::x11_utils::VoidRequest for CreateRegionFromGCRequest {
 
 /// Opcode for the CreateRegionFromPicture request
 pub const CREATE_REGION_FROM_PICTURE_REQUEST: u8 = 9;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CreateRegionFromPictureRequest {
     pub region: Region,
     pub picture: render::Picture,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for CreateRegionFromPictureRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("CreateRegionFromPictureRequest").finish_non_exhaustive()
+    }
 }
 impl CreateRegionFromPictureRequest {
     /// Serialize this request into bytes for the provided connection
@@ -1543,6 +1650,7 @@ impl CreateRegionFromPictureRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CREATE_REGION_FROM_PICTURE_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1571,10 +1679,17 @@ impl crate::x11_utils::VoidRequest for CreateRegionFromPictureRequest {
 
 /// Opcode for the DestroyRegion request
 pub const DESTROY_REGION_REQUEST: u8 = 10;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DestroyRegionRequest {
     pub region: Region,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for DestroyRegionRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("DestroyRegionRequest").finish_non_exhaustive()
+    }
 }
 impl DestroyRegionRequest {
     /// Serialize this request into bytes for the provided connection
@@ -1598,6 +1713,7 @@ impl DestroyRegionRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != DESTROY_REGION_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1624,11 +1740,18 @@ impl crate::x11_utils::VoidRequest for DestroyRegionRequest {
 
 /// Opcode for the SetRegion request
 pub const SET_REGION_REQUEST: u8 = 11;
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetRegionRequest<'input> {
     pub region: Region,
     pub rectangles: Cow<'input, [xproto::Rectangle]>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl<'input> core::fmt::Debug for SetRegionRequest<'input> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SetRegionRequest").finish_non_exhaustive()
+    }
 }
 impl<'input> SetRegionRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -1656,6 +1779,7 @@ impl<'input> SetRegionRequest<'input> {
         ([request0.into(), rectangles_bytes.into(), padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_REGION_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1698,11 +1822,18 @@ impl<'input> crate::x11_utils::VoidRequest for SetRegionRequest<'input> {
 
 /// Opcode for the CopyRegion request
 pub const COPY_REGION_REQUEST: u8 = 12;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CopyRegionRequest {
     pub source: Region,
     pub destination: Region,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for CopyRegionRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("CopyRegionRequest").finish_non_exhaustive()
+    }
 }
 impl CopyRegionRequest {
     /// Serialize this request into bytes for the provided connection
@@ -1731,6 +1862,7 @@ impl CopyRegionRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != COPY_REGION_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1759,12 +1891,19 @@ impl crate::x11_utils::VoidRequest for CopyRegionRequest {
 
 /// Opcode for the UnionRegion request
 pub const UNION_REGION_REQUEST: u8 = 13;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct UnionRegionRequest {
     pub source1: Region,
     pub source2: Region,
     pub destination: Region,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for UnionRegionRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("UnionRegionRequest").finish_non_exhaustive()
+    }
 }
 impl UnionRegionRequest {
     /// Serialize this request into bytes for the provided connection
@@ -1798,6 +1937,7 @@ impl UnionRegionRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != UNION_REGION_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1828,12 +1968,19 @@ impl crate::x11_utils::VoidRequest for UnionRegionRequest {
 
 /// Opcode for the IntersectRegion request
 pub const INTERSECT_REGION_REQUEST: u8 = 14;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct IntersectRegionRequest {
     pub source1: Region,
     pub source2: Region,
     pub destination: Region,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for IntersectRegionRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("IntersectRegionRequest").finish_non_exhaustive()
+    }
 }
 impl IntersectRegionRequest {
     /// Serialize this request into bytes for the provided connection
@@ -1867,6 +2014,7 @@ impl IntersectRegionRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != INTERSECT_REGION_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1897,12 +2045,19 @@ impl crate::x11_utils::VoidRequest for IntersectRegionRequest {
 
 /// Opcode for the SubtractRegion request
 pub const SUBTRACT_REGION_REQUEST: u8 = 15;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SubtractRegionRequest {
     pub source1: Region,
     pub source2: Region,
     pub destination: Region,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for SubtractRegionRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SubtractRegionRequest").finish_non_exhaustive()
+    }
 }
 impl SubtractRegionRequest {
     /// Serialize this request into bytes for the provided connection
@@ -1936,6 +2091,7 @@ impl SubtractRegionRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SUBTRACT_REGION_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1966,12 +2122,19 @@ impl crate::x11_utils::VoidRequest for SubtractRegionRequest {
 
 /// Opcode for the InvertRegion request
 pub const INVERT_REGION_REQUEST: u8 = 16;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct InvertRegionRequest {
     pub source: Region,
     pub bounds: xproto::Rectangle,
     pub destination: Region,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for InvertRegionRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("InvertRegionRequest").finish_non_exhaustive()
+    }
 }
 impl InvertRegionRequest {
     /// Serialize this request into bytes for the provided connection
@@ -2009,6 +2172,7 @@ impl InvertRegionRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != INVERT_REGION_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -2039,12 +2203,19 @@ impl crate::x11_utils::VoidRequest for InvertRegionRequest {
 
 /// Opcode for the TranslateRegion request
 pub const TRANSLATE_REGION_REQUEST: u8 = 17;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct TranslateRegionRequest {
     pub region: Region,
     pub dx: i16,
     pub dy: i16,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for TranslateRegionRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("TranslateRegionRequest").finish_non_exhaustive()
+    }
 }
 impl TranslateRegionRequest {
     /// Serialize this request into bytes for the provided connection
@@ -2074,6 +2245,7 @@ impl TranslateRegionRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != TRANSLATE_REGION_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -2104,11 +2276,18 @@ impl crate::x11_utils::VoidRequest for TranslateRegionRequest {
 
 /// Opcode for the RegionExtents request
 pub const REGION_EXTENTS_REQUEST: u8 = 18;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct RegionExtentsRequest {
     pub source: Region,
     pub destination: Region,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for RegionExtentsRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("RegionExtentsRequest").finish_non_exhaustive()
+    }
 }
 impl RegionExtentsRequest {
     /// Serialize this request into bytes for the provided connection
@@ -2137,6 +2316,7 @@ impl RegionExtentsRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != REGION_EXTENTS_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -2165,10 +2345,17 @@ impl crate::x11_utils::VoidRequest for RegionExtentsRequest {
 
 /// Opcode for the FetchRegion request
 pub const FETCH_REGION_REQUEST: u8 = 19;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct FetchRegionRequest {
     pub region: Region,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for FetchRegionRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("FetchRegionRequest").finish_non_exhaustive()
+    }
 }
 impl FetchRegionRequest {
     /// Serialize this request into bytes for the provided connection
@@ -2192,6 +2379,7 @@ impl FetchRegionRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != FETCH_REGION_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -2217,12 +2405,19 @@ impl crate::x11_utils::ReplyRequest for FetchRegionRequest {
     type Reply = FetchRegionReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct FetchRegionReply {
     pub sequence: u16,
     pub extents: xproto::Rectangle,
     pub rectangles: Vec<xproto::Rectangle>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for FetchRegionReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("FetchRegionReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for FetchRegionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -2283,13 +2478,20 @@ impl FetchRegionReply {
 
 /// Opcode for the SetGCClipRegion request
 pub const SET_GC_CLIP_REGION_REQUEST: u8 = 20;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetGCClipRegionRequest {
     pub gc: xproto::Gcontext,
     pub region: Region,
     pub x_origin: i16,
     pub y_origin: i16,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for SetGCClipRegionRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SetGCClipRegionRequest").finish_non_exhaustive()
+    }
 }
 impl SetGCClipRegionRequest {
     /// Serialize this request into bytes for the provided connection
@@ -2324,6 +2526,7 @@ impl SetGCClipRegionRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_GC_CLIP_REGION_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -2356,7 +2559,8 @@ impl crate::x11_utils::VoidRequest for SetGCClipRegionRequest {
 
 /// Opcode for the SetWindowShapeRegion request
 pub const SET_WINDOW_SHAPE_REGION_REQUEST: u8 = 21;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetWindowShapeRegionRequest {
     pub dest: xproto::Window,
@@ -2364,6 +2568,12 @@ pub struct SetWindowShapeRegionRequest {
     pub x_offset: i16,
     pub y_offset: i16,
     pub region: Region,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for SetWindowShapeRegionRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SetWindowShapeRegionRequest").finish_non_exhaustive()
+    }
 }
 impl SetWindowShapeRegionRequest {
     /// Serialize this request into bytes for the provided connection
@@ -2403,6 +2613,7 @@ impl SetWindowShapeRegionRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_WINDOW_SHAPE_REGION_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -2439,13 +2650,20 @@ impl crate::x11_utils::VoidRequest for SetWindowShapeRegionRequest {
 
 /// Opcode for the SetPictureClipRegion request
 pub const SET_PICTURE_CLIP_REGION_REQUEST: u8 = 22;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetPictureClipRegionRequest {
     pub picture: render::Picture,
     pub region: Region,
     pub x_origin: i16,
     pub y_origin: i16,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for SetPictureClipRegionRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SetPictureClipRegionRequest").finish_non_exhaustive()
+    }
 }
 impl SetPictureClipRegionRequest {
     /// Serialize this request into bytes for the provided connection
@@ -2480,6 +2698,7 @@ impl SetPictureClipRegionRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_PICTURE_CLIP_REGION_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -2512,11 +2731,18 @@ impl crate::x11_utils::VoidRequest for SetPictureClipRegionRequest {
 
 /// Opcode for the SetCursorName request
 pub const SET_CURSOR_NAME_REQUEST: u8 = 23;
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetCursorNameRequest<'input> {
     pub cursor: xproto::Cursor,
     pub name: Cow<'input, [u8]>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl<'input> core::fmt::Debug for SetCursorNameRequest<'input> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SetCursorNameRequest").finish_non_exhaustive()
+    }
 }
 impl<'input> SetCursorNameRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -2549,6 +2775,7 @@ impl<'input> SetCursorNameRequest<'input> {
         ([request0.into(), self.name, padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_CURSOR_NAME_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -2586,10 +2813,17 @@ impl<'input> crate::x11_utils::VoidRequest for SetCursorNameRequest<'input> {
 
 /// Opcode for the GetCursorName request
 pub const GET_CURSOR_NAME_REQUEST: u8 = 24;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetCursorNameRequest {
     pub cursor: xproto::Cursor,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetCursorNameRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetCursorNameRequest").finish_non_exhaustive()
+    }
 }
 impl GetCursorNameRequest {
     /// Serialize this request into bytes for the provided connection
@@ -2613,6 +2847,7 @@ impl GetCursorNameRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_CURSOR_NAME_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -2638,13 +2873,20 @@ impl crate::x11_utils::ReplyRequest for GetCursorNameRequest {
     type Reply = GetCursorNameReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetCursorNameReply {
     pub sequence: u16,
     pub length: u32,
     pub atom: xproto::Atom,
     pub name: Vec<u8>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetCursorNameReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetCursorNameReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetCursorNameReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -2707,9 +2949,16 @@ impl GetCursorNameReply {
 
 /// Opcode for the GetCursorImageAndName request
 pub const GET_CURSOR_IMAGE_AND_NAME_REQUEST: u8 = 25;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetCursorImageAndNameRequest;
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetCursorImageAndNameRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetCursorImageAndNameRequest").finish_non_exhaustive()
+    }
+}
 impl GetCursorImageAndNameRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -2727,6 +2976,7 @@ impl GetCursorImageAndNameRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_CURSOR_IMAGE_AND_NAME_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -2750,7 +3000,8 @@ impl crate::x11_utils::ReplyRequest for GetCursorImageAndNameRequest {
     type Reply = GetCursorImageAndNameReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetCursorImageAndNameReply {
     pub sequence: u16,
@@ -2765,6 +3016,12 @@ pub struct GetCursorImageAndNameReply {
     pub cursor_atom: xproto::Atom,
     pub cursor_image: Vec<u32>,
     pub name: Vec<u8>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetCursorImageAndNameReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetCursorImageAndNameReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetCursorImageAndNameReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -2844,11 +3101,18 @@ impl GetCursorImageAndNameReply {
 
 /// Opcode for the ChangeCursor request
 pub const CHANGE_CURSOR_REQUEST: u8 = 26;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ChangeCursorRequest {
     pub source: xproto::Cursor,
     pub destination: xproto::Cursor,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for ChangeCursorRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("ChangeCursorRequest").finish_non_exhaustive()
+    }
 }
 impl ChangeCursorRequest {
     /// Serialize this request into bytes for the provided connection
@@ -2877,6 +3141,7 @@ impl ChangeCursorRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CHANGE_CURSOR_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -2905,11 +3170,18 @@ impl crate::x11_utils::VoidRequest for ChangeCursorRequest {
 
 /// Opcode for the ChangeCursorByName request
 pub const CHANGE_CURSOR_BY_NAME_REQUEST: u8 = 27;
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ChangeCursorByNameRequest<'input> {
     pub src: xproto::Cursor,
     pub name: Cow<'input, [u8]>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl<'input> core::fmt::Debug for ChangeCursorByNameRequest<'input> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("ChangeCursorByNameRequest").finish_non_exhaustive()
+    }
 }
 impl<'input> ChangeCursorByNameRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -2942,6 +3214,7 @@ impl<'input> ChangeCursorByNameRequest<'input> {
         ([request0.into(), self.name, padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CHANGE_CURSOR_BY_NAME_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -2979,7 +3252,8 @@ impl<'input> crate::x11_utils::VoidRequest for ChangeCursorByNameRequest<'input>
 
 /// Opcode for the ExpandRegion request
 pub const EXPAND_REGION_REQUEST: u8 = 28;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ExpandRegionRequest {
     pub source: Region,
@@ -2988,6 +3262,12 @@ pub struct ExpandRegionRequest {
     pub right: u16,
     pub top: u16,
     pub bottom: u16,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for ExpandRegionRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("ExpandRegionRequest").finish_non_exhaustive()
+    }
 }
 impl ExpandRegionRequest {
     /// Serialize this request into bytes for the provided connection
@@ -3028,6 +3308,7 @@ impl ExpandRegionRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != EXPAND_REGION_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -3064,10 +3345,17 @@ impl crate::x11_utils::VoidRequest for ExpandRegionRequest {
 
 /// Opcode for the HideCursor request
 pub const HIDE_CURSOR_REQUEST: u8 = 29;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct HideCursorRequest {
     pub window: xproto::Window,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for HideCursorRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("HideCursorRequest").finish_non_exhaustive()
+    }
 }
 impl HideCursorRequest {
     /// Serialize this request into bytes for the provided connection
@@ -3091,6 +3379,7 @@ impl HideCursorRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != HIDE_CURSOR_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -3117,10 +3406,17 @@ impl crate::x11_utils::VoidRequest for HideCursorRequest {
 
 /// Opcode for the ShowCursor request
 pub const SHOW_CURSOR_REQUEST: u8 = 30;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ShowCursorRequest {
     pub window: xproto::Window,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for ShowCursorRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("ShowCursorRequest").finish_non_exhaustive()
+    }
 }
 impl ShowCursorRequest {
     /// Serialize this request into bytes for the provided connection
@@ -3144,6 +3440,7 @@ impl ShowCursorRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SHOW_CURSOR_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -3224,7 +3521,8 @@ bitmask_binop!(BarrierDirections, u32);
 
 /// Opcode for the CreatePointerBarrier request
 pub const CREATE_POINTER_BARRIER_REQUEST: u8 = 31;
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CreatePointerBarrierRequest<'input> {
     pub barrier: Barrier,
@@ -3235,6 +3533,12 @@ pub struct CreatePointerBarrierRequest<'input> {
     pub y2: u16,
     pub directions: BarrierDirections,
     pub devices: Cow<'input, [u16]>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl<'input> core::fmt::Debug for CreatePointerBarrierRequest<'input> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("CreatePointerBarrierRequest").finish_non_exhaustive()
+    }
 }
 impl<'input> CreatePointerBarrierRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -3290,6 +3594,7 @@ impl<'input> CreatePointerBarrierRequest<'input> {
         ([request0.into(), devices_bytes.into(), padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CREATE_POINTER_BARRIER_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -3346,10 +3651,17 @@ impl<'input> crate::x11_utils::VoidRequest for CreatePointerBarrierRequest<'inpu
 
 /// Opcode for the DeletePointerBarrier request
 pub const DELETE_POINTER_BARRIER_REQUEST: u8 = 32;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DeletePointerBarrierRequest {
     pub barrier: Barrier,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for DeletePointerBarrierRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("DeletePointerBarrierRequest").finish_non_exhaustive()
+    }
 }
 impl DeletePointerBarrierRequest {
     /// Serialize this request into bytes for the provided connection
@@ -3373,6 +3685,7 @@ impl DeletePointerBarrierRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != DELETE_POINTER_BARRIER_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -3460,10 +3773,17 @@ pub const SET_CLIENT_DISCONNECT_MODE_REQUEST: u8 = 33;
 /// # Fields
 ///
 /// * `disconnect_mode` - The new disconnect mode.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetClientDisconnectModeRequest {
     pub disconnect_mode: ClientDisconnectFlags,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for SetClientDisconnectModeRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SetClientDisconnectModeRequest").finish_non_exhaustive()
+    }
 }
 impl SetClientDisconnectModeRequest {
     /// Serialize this request into bytes for the provided connection
@@ -3487,6 +3807,7 @@ impl SetClientDisconnectModeRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_CLIENT_DISCONNECT_MODE_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -3514,9 +3835,16 @@ impl crate::x11_utils::VoidRequest for SetClientDisconnectModeRequest {
 
 /// Opcode for the GetClientDisconnectMode request
 pub const GET_CLIENT_DISCONNECT_MODE_REQUEST: u8 = 34;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetClientDisconnectModeRequest;
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetClientDisconnectModeRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetClientDisconnectModeRequest").finish_non_exhaustive()
+    }
+}
 impl GetClientDisconnectModeRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -3534,6 +3862,7 @@ impl GetClientDisconnectModeRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_CLIENT_DISCONNECT_MODE_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -3562,12 +3891,19 @@ impl crate::x11_utils::ReplyRequest for GetClientDisconnectModeRequest {
 /// # Fields
 ///
 /// * `disconnect_mode` - The current disconnect mode.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetClientDisconnectModeReply {
     pub sequence: u16,
     pub length: u32,
     pub disconnect_mode: ClientDisconnectFlags,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetClientDisconnectModeReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetClientDisconnectModeReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetClientDisconnectModeReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {

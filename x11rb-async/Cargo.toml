@@ -22,7 +22,7 @@ event-listener = "2.5.3"
 futures-lite = "1"
 tracing = { version = "0.1", default-features = false }
 x11rb = { version = "0.12.0", path = "../x11rb", default-features = false }
-x11rb-protocol = { version = "0.12.0", path = "../x11rb-protocol" }
+x11rb-protocol = { version = "0.12.0", default-features = false, features = ["std"], path = "../x11rb-protocol" }
 
 [features]
 # Enable this feature to enable all the X11 extensions
@@ -57,6 +57,9 @@ all-extensions = [
     "xv",
     "xvmc"
 ]
+
+# Enable extra traits on protocol types.
+extra-traits = ["x11rb-protocol/extra-traits"]
 
 composite = ["x11rb-protocol/composite", "xfixes"]
 damage = ["x11rb-protocol/damage", "xfixes"]

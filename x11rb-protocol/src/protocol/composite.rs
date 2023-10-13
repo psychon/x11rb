@@ -108,11 +108,18 @@ pub const QUERY_VERSION_REQUEST: u8 = 0;
 ///
 /// * `client_major_version` - The major version supported by the client.
 /// * `client_minor_version` - The minor version supported by the client.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryVersionRequest {
     pub client_major_version: u32,
     pub client_minor_version: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for QueryVersionRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("QueryVersionRequest").finish_non_exhaustive()
+    }
 }
 impl QueryVersionRequest {
     /// Serialize this request into bytes for the provided connection
@@ -141,6 +148,7 @@ impl QueryVersionRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != QUERY_VERSION_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -177,13 +185,20 @@ impl crate::x11_utils::ReplyRequest for QueryVersionRequest {
 ///
 /// * `major_version` - The major version chosen by the server.
 /// * `minor_version` - The minor version chosen by the server.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryVersionReply {
     pub sequence: u16,
     pub length: u32,
     pub major_version: u32,
     pub minor_version: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for QueryVersionReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("QueryVersionReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for QueryVersionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -278,11 +293,18 @@ pub const REDIRECT_WINDOW_REQUEST: u8 = 1;
 /// * `update` - Whether contents are automatically mirrored to the parent window.  If one client
 /// already specifies an update type of Manual, any attempt by another to specify a
 /// mode of Manual so will result in an Access error.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct RedirectWindowRequest {
     pub window: xproto::Window,
     pub update: Redirect,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for RedirectWindowRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("RedirectWindowRequest").finish_non_exhaustive()
+    }
 }
 impl RedirectWindowRequest {
     /// Serialize this request into bytes for the provided connection
@@ -311,6 +333,7 @@ impl RedirectWindowRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != REDIRECT_WINDOW_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -354,11 +377,18 @@ pub const REDIRECT_SUBWINDOWS_REQUEST: u8 = 2;
 /// * `update` - Whether contents are automatically mirrored to the parent window.  If one client
 /// already specifies an update type of Manual, any attempt by another to specify a
 /// mode of Manual so will result in an Access error.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct RedirectSubwindowsRequest {
     pub window: xproto::Window,
     pub update: Redirect,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for RedirectSubwindowsRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("RedirectSubwindowsRequest").finish_non_exhaustive()
+    }
 }
 impl RedirectSubwindowsRequest {
     /// Serialize this request into bytes for the provided connection
@@ -387,6 +417,7 @@ impl RedirectSubwindowsRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != REDIRECT_SUBWINDOWS_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -428,11 +459,18 @@ pub const UNREDIRECT_WINDOW_REQUEST: u8 = 3;
 /// current client, or a Value error results.
 /// * `update` - The update type passed to RedirectWindows.  If this does not match the
 /// previously requested update type, a Value error results.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct UnredirectWindowRequest {
     pub window: xproto::Window,
     pub update: Redirect,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for UnredirectWindowRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("UnredirectWindowRequest").finish_non_exhaustive()
+    }
 }
 impl UnredirectWindowRequest {
     /// Serialize this request into bytes for the provided connection
@@ -461,6 +499,7 @@ impl UnredirectWindowRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != UNREDIRECT_WINDOW_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -502,11 +541,18 @@ pub const UNREDIRECT_SUBWINDOWS_REQUEST: u8 = 4;
 /// results.
 /// * `update` - The update type passed to RedirectSubWindows.  If this does not match
 /// the previously requested update type, a Value error results.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct UnredirectSubwindowsRequest {
     pub window: xproto::Window,
     pub update: Redirect,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for UnredirectSubwindowsRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("UnredirectSubwindowsRequest").finish_non_exhaustive()
+    }
 }
 impl UnredirectSubwindowsRequest {
     /// Serialize this request into bytes for the provided connection
@@ -535,6 +581,7 @@ impl UnredirectSubwindowsRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != UNREDIRECT_SUBWINDOWS_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -565,11 +612,18 @@ impl crate::x11_utils::VoidRequest for UnredirectSubwindowsRequest {
 
 /// Opcode for the CreateRegionFromBorderClip request
 pub const CREATE_REGION_FROM_BORDER_CLIP_REQUEST: u8 = 5;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CreateRegionFromBorderClipRequest {
     pub region: xfixes::Region,
     pub window: xproto::Window,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for CreateRegionFromBorderClipRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("CreateRegionFromBorderClipRequest").finish_non_exhaustive()
+    }
 }
 impl CreateRegionFromBorderClipRequest {
     /// Serialize this request into bytes for the provided connection
@@ -598,6 +652,7 @@ impl CreateRegionFromBorderClipRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CREATE_REGION_FROM_BORDER_CLIP_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -626,11 +681,18 @@ impl crate::x11_utils::VoidRequest for CreateRegionFromBorderClipRequest {
 
 /// Opcode for the NameWindowPixmap request
 pub const NAME_WINDOW_PIXMAP_REQUEST: u8 = 6;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct NameWindowPixmapRequest {
     pub window: xproto::Window,
     pub pixmap: xproto::Pixmap,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for NameWindowPixmapRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("NameWindowPixmapRequest").finish_non_exhaustive()
+    }
 }
 impl NameWindowPixmapRequest {
     /// Serialize this request into bytes for the provided connection
@@ -659,6 +721,7 @@ impl NameWindowPixmapRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != NAME_WINDOW_PIXMAP_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -687,10 +750,17 @@ impl crate::x11_utils::VoidRequest for NameWindowPixmapRequest {
 
 /// Opcode for the GetOverlayWindow request
 pub const GET_OVERLAY_WINDOW_REQUEST: u8 = 7;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetOverlayWindowRequest {
     pub window: xproto::Window,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetOverlayWindowRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetOverlayWindowRequest").finish_non_exhaustive()
+    }
 }
 impl GetOverlayWindowRequest {
     /// Serialize this request into bytes for the provided connection
@@ -714,6 +784,7 @@ impl GetOverlayWindowRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_OVERLAY_WINDOW_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -739,12 +810,19 @@ impl crate::x11_utils::ReplyRequest for GetOverlayWindowRequest {
     type Reply = GetOverlayWindowReply;
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetOverlayWindowReply {
     pub sequence: u16,
     pub length: u32,
     pub overlay_win: xproto::Window,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetOverlayWindowReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetOverlayWindowReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetOverlayWindowReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -821,10 +899,17 @@ impl Serialize for GetOverlayWindowReply {
 
 /// Opcode for the ReleaseOverlayWindow request
 pub const RELEASE_OVERLAY_WINDOW_REQUEST: u8 = 8;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ReleaseOverlayWindowRequest {
     pub window: xproto::Window,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for ReleaseOverlayWindowRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("ReleaseOverlayWindowRequest").finish_non_exhaustive()
+    }
 }
 impl ReleaseOverlayWindowRequest {
     /// Serialize this request into bytes for the provided connection
@@ -848,6 +933,7 @@ impl ReleaseOverlayWindowRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != RELEASE_OVERLAY_WINDOW_REQUEST {
             return Err(ParseError::InvalidValue);

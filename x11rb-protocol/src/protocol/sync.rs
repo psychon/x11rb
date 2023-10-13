@@ -257,11 +257,18 @@ impl core::fmt::Debug for CA  {
 }
 bitmask_binop!(CA, u32);
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Int64 {
     pub hi: i32,
     pub lo: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for Int64 {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("Int64").finish_non_exhaustive()
+    }
 }
 impl TryParse for Int64 {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -294,12 +301,19 @@ impl Serialize for Int64 {
     }
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Systemcounter {
     pub counter: Counter,
     pub resolution: Int64,
     pub name: Vec<u8>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for Systemcounter {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("Systemcounter").finish_non_exhaustive()
+    }
 }
 impl TryParse for Systemcounter {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -350,13 +364,20 @@ impl Systemcounter {
     }
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Trigger {
     pub counter: Counter,
     pub wait_type: VALUETYPE,
     pub wait_value: Int64,
     pub test_type: TESTTYPE,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for Trigger {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("Trigger").finish_non_exhaustive()
+    }
 }
 impl TryParse for Trigger {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -409,11 +430,18 @@ impl Serialize for Trigger {
     }
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Waitcondition {
     pub trigger: Trigger,
     pub event_threshold: Int64,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for Waitcondition {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("Waitcondition").finish_non_exhaustive()
+    }
 }
 impl TryParse for Waitcondition {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -474,11 +502,18 @@ pub const ALARM_ERROR: u8 = 1;
 
 /// Opcode for the Initialize request
 pub const INITIALIZE_REQUEST: u8 = 0;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct InitializeRequest {
     pub desired_major_version: u8,
     pub desired_minor_version: u8,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for InitializeRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("InitializeRequest").finish_non_exhaustive()
+    }
 }
 impl InitializeRequest {
     /// Serialize this request into bytes for the provided connection
@@ -503,6 +538,7 @@ impl InitializeRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != INITIALIZE_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -530,13 +566,20 @@ impl crate::x11_utils::ReplyRequest for InitializeRequest {
     type Reply = InitializeReply;
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct InitializeReply {
     pub sequence: u16,
     pub length: u32,
     pub major_version: u8,
     pub minor_version: u8,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for InitializeReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("InitializeReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for InitializeReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -616,9 +659,16 @@ impl Serialize for InitializeReply {
 
 /// Opcode for the ListSystemCounters request
 pub const LIST_SYSTEM_COUNTERS_REQUEST: u8 = 1;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ListSystemCountersRequest;
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for ListSystemCountersRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("ListSystemCountersRequest").finish_non_exhaustive()
+    }
+}
 impl ListSystemCountersRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -636,6 +686,7 @@ impl ListSystemCountersRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != LIST_SYSTEM_COUNTERS_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -659,12 +710,19 @@ impl crate::x11_utils::ReplyRequest for ListSystemCountersRequest {
     type Reply = ListSystemCountersReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ListSystemCountersReply {
     pub sequence: u16,
     pub length: u32,
     pub counters: Vec<Systemcounter>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for ListSystemCountersReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("ListSystemCountersReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for ListSystemCountersReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -724,11 +782,18 @@ impl ListSystemCountersReply {
 
 /// Opcode for the CreateCounter request
 pub const CREATE_COUNTER_REQUEST: u8 = 2;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CreateCounterRequest {
     pub id: Counter,
     pub initial_value: Int64,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for CreateCounterRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("CreateCounterRequest").finish_non_exhaustive()
+    }
 }
 impl CreateCounterRequest {
     /// Serialize this request into bytes for the provided connection
@@ -761,6 +826,7 @@ impl CreateCounterRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CREATE_COUNTER_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -789,10 +855,17 @@ impl crate::x11_utils::VoidRequest for CreateCounterRequest {
 
 /// Opcode for the DestroyCounter request
 pub const DESTROY_COUNTER_REQUEST: u8 = 6;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DestroyCounterRequest {
     pub counter: Counter,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for DestroyCounterRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("DestroyCounterRequest").finish_non_exhaustive()
+    }
 }
 impl DestroyCounterRequest {
     /// Serialize this request into bytes for the provided connection
@@ -816,6 +889,7 @@ impl DestroyCounterRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != DESTROY_COUNTER_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -842,10 +916,17 @@ impl crate::x11_utils::VoidRequest for DestroyCounterRequest {
 
 /// Opcode for the QueryCounter request
 pub const QUERY_COUNTER_REQUEST: u8 = 5;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryCounterRequest {
     pub counter: Counter,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for QueryCounterRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("QueryCounterRequest").finish_non_exhaustive()
+    }
 }
 impl QueryCounterRequest {
     /// Serialize this request into bytes for the provided connection
@@ -869,6 +950,7 @@ impl QueryCounterRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != QUERY_COUNTER_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -894,12 +976,19 @@ impl crate::x11_utils::ReplyRequest for QueryCounterRequest {
     type Reply = QueryCounterReply;
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryCounterReply {
     pub sequence: u16,
     pub length: u32,
     pub counter_value: Int64,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for QueryCounterReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("QueryCounterReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for QueryCounterReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -958,10 +1047,17 @@ impl Serialize for QueryCounterReply {
 
 /// Opcode for the Await request
 pub const AWAIT_REQUEST: u8 = 7;
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct AwaitRequest<'input> {
     pub wait_list: Cow<'input, [Waitcondition]>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl<'input> core::fmt::Debug for AwaitRequest<'input> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("AwaitRequest").finish_non_exhaustive()
+    }
 }
 impl<'input> AwaitRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -984,6 +1080,7 @@ impl<'input> AwaitRequest<'input> {
         ([request0.into(), wait_list_bytes.into(), padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != AWAIT_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1023,11 +1120,18 @@ impl<'input> crate::x11_utils::VoidRequest for AwaitRequest<'input> {
 
 /// Opcode for the ChangeCounter request
 pub const CHANGE_COUNTER_REQUEST: u8 = 4;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ChangeCounterRequest {
     pub counter: Counter,
     pub amount: Int64,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for ChangeCounterRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("ChangeCounterRequest").finish_non_exhaustive()
+    }
 }
 impl ChangeCounterRequest {
     /// Serialize this request into bytes for the provided connection
@@ -1060,6 +1164,7 @@ impl ChangeCounterRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CHANGE_COUNTER_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1088,11 +1193,18 @@ impl crate::x11_utils::VoidRequest for ChangeCounterRequest {
 
 /// Opcode for the SetCounter request
 pub const SET_COUNTER_REQUEST: u8 = 3;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetCounterRequest {
     pub counter: Counter,
     pub value: Int64,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for SetCounterRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SetCounterRequest").finish_non_exhaustive()
+    }
 }
 impl SetCounterRequest {
     /// Serialize this request into bytes for the provided connection
@@ -1125,6 +1237,7 @@ impl SetCounterRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_COUNTER_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1152,7 +1265,8 @@ impl crate::x11_utils::VoidRequest for SetCounterRequest {
 }
 
 /// Auxiliary and optional information for the `create_alarm` function
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CreateAlarmAux {
     pub counter: Option<Counter>,
@@ -1162,7 +1276,14 @@ pub struct CreateAlarmAux {
     pub delta: Option<Int64>,
     pub events: Option<u32>,
 }
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for CreateAlarmAux {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("CreateAlarmAux").finish_non_exhaustive()
+    }
+}
 impl CreateAlarmAux {
+    #[cfg_attr(not(feature = "request-parsing"), allow(dead_code))]
     fn try_parse(value: &[u8], value_mask: u32) -> Result<(Self, &[u8]), ParseError> {
         let switch_expr = u32::from(value_mask);
         let mut outer_remaining = value;
@@ -1318,11 +1439,18 @@ impl CreateAlarmAux {
 
 /// Opcode for the CreateAlarm request
 pub const CREATE_ALARM_REQUEST: u8 = 8;
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CreateAlarmRequest<'input> {
     pub id: Alarm,
     pub value_list: Cow<'input, CreateAlarmAux>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl<'input> core::fmt::Debug for CreateAlarmRequest<'input> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("CreateAlarmRequest").finish_non_exhaustive()
+    }
 }
 impl<'input> CreateAlarmRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -1356,6 +1484,7 @@ impl<'input> CreateAlarmRequest<'input> {
         ([request0.into(), value_list_bytes.into(), padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CREATE_ALARM_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1391,7 +1520,8 @@ impl<'input> crate::x11_utils::VoidRequest for CreateAlarmRequest<'input> {
 }
 
 /// Auxiliary and optional information for the `change_alarm` function
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ChangeAlarmAux {
     pub counter: Option<Counter>,
@@ -1401,7 +1531,14 @@ pub struct ChangeAlarmAux {
     pub delta: Option<Int64>,
     pub events: Option<u32>,
 }
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for ChangeAlarmAux {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("ChangeAlarmAux").finish_non_exhaustive()
+    }
+}
 impl ChangeAlarmAux {
+    #[cfg_attr(not(feature = "request-parsing"), allow(dead_code))]
     fn try_parse(value: &[u8], value_mask: u32) -> Result<(Self, &[u8]), ParseError> {
         let switch_expr = u32::from(value_mask);
         let mut outer_remaining = value;
@@ -1557,11 +1694,18 @@ impl ChangeAlarmAux {
 
 /// Opcode for the ChangeAlarm request
 pub const CHANGE_ALARM_REQUEST: u8 = 9;
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ChangeAlarmRequest<'input> {
     pub id: Alarm,
     pub value_list: Cow<'input, ChangeAlarmAux>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl<'input> core::fmt::Debug for ChangeAlarmRequest<'input> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("ChangeAlarmRequest").finish_non_exhaustive()
+    }
 }
 impl<'input> ChangeAlarmRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -1595,6 +1739,7 @@ impl<'input> ChangeAlarmRequest<'input> {
         ([request0.into(), value_list_bytes.into(), padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CHANGE_ALARM_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1631,10 +1776,17 @@ impl<'input> crate::x11_utils::VoidRequest for ChangeAlarmRequest<'input> {
 
 /// Opcode for the DestroyAlarm request
 pub const DESTROY_ALARM_REQUEST: u8 = 11;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DestroyAlarmRequest {
     pub alarm: Alarm,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for DestroyAlarmRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("DestroyAlarmRequest").finish_non_exhaustive()
+    }
 }
 impl DestroyAlarmRequest {
     /// Serialize this request into bytes for the provided connection
@@ -1658,6 +1810,7 @@ impl DestroyAlarmRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != DESTROY_ALARM_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1684,10 +1837,17 @@ impl crate::x11_utils::VoidRequest for DestroyAlarmRequest {
 
 /// Opcode for the QueryAlarm request
 pub const QUERY_ALARM_REQUEST: u8 = 10;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryAlarmRequest {
     pub alarm: Alarm,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for QueryAlarmRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("QueryAlarmRequest").finish_non_exhaustive()
+    }
 }
 impl QueryAlarmRequest {
     /// Serialize this request into bytes for the provided connection
@@ -1711,6 +1871,7 @@ impl QueryAlarmRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != QUERY_ALARM_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1736,7 +1897,8 @@ impl crate::x11_utils::ReplyRequest for QueryAlarmRequest {
     type Reply = QueryAlarmReply;
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryAlarmReply {
     pub sequence: u16,
@@ -1745,6 +1907,12 @@ pub struct QueryAlarmReply {
     pub delta: Int64,
     pub events: bool,
     pub state: ALARMSTATE,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for QueryAlarmReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("QueryAlarmReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for QueryAlarmReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -1839,11 +2007,18 @@ impl Serialize for QueryAlarmReply {
 
 /// Opcode for the SetPriority request
 pub const SET_PRIORITY_REQUEST: u8 = 12;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SetPriorityRequest {
     pub id: u32,
     pub priority: i32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for SetPriorityRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SetPriorityRequest").finish_non_exhaustive()
+    }
 }
 impl SetPriorityRequest {
     /// Serialize this request into bytes for the provided connection
@@ -1872,6 +2047,7 @@ impl SetPriorityRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SET_PRIORITY_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1900,10 +2076,17 @@ impl crate::x11_utils::VoidRequest for SetPriorityRequest {
 
 /// Opcode for the GetPriority request
 pub const GET_PRIORITY_REQUEST: u8 = 13;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetPriorityRequest {
     pub id: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetPriorityRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetPriorityRequest").finish_non_exhaustive()
+    }
 }
 impl GetPriorityRequest {
     /// Serialize this request into bytes for the provided connection
@@ -1927,6 +2110,7 @@ impl GetPriorityRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_PRIORITY_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1952,12 +2136,19 @@ impl crate::x11_utils::ReplyRequest for GetPriorityRequest {
     type Reply = GetPriorityReply;
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetPriorityReply {
     pub sequence: u16,
     pub length: u32,
     pub priority: i32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetPriorityReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetPriorityReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetPriorityReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -2012,12 +2203,19 @@ impl Serialize for GetPriorityReply {
 
 /// Opcode for the CreateFence request
 pub const CREATE_FENCE_REQUEST: u8 = 14;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CreateFenceRequest {
     pub drawable: xproto::Drawable,
     pub fence: Fence,
     pub initially_triggered: bool,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for CreateFenceRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("CreateFenceRequest").finish_non_exhaustive()
+    }
 }
 impl CreateFenceRequest {
     /// Serialize this request into bytes for the provided connection
@@ -2051,6 +2249,7 @@ impl CreateFenceRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CREATE_FENCE_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -2081,10 +2280,17 @@ impl crate::x11_utils::VoidRequest for CreateFenceRequest {
 
 /// Opcode for the TriggerFence request
 pub const TRIGGER_FENCE_REQUEST: u8 = 15;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct TriggerFenceRequest {
     pub fence: Fence,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for TriggerFenceRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("TriggerFenceRequest").finish_non_exhaustive()
+    }
 }
 impl TriggerFenceRequest {
     /// Serialize this request into bytes for the provided connection
@@ -2108,6 +2314,7 @@ impl TriggerFenceRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != TRIGGER_FENCE_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -2134,10 +2341,17 @@ impl crate::x11_utils::VoidRequest for TriggerFenceRequest {
 
 /// Opcode for the ResetFence request
 pub const RESET_FENCE_REQUEST: u8 = 16;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ResetFenceRequest {
     pub fence: Fence,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for ResetFenceRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("ResetFenceRequest").finish_non_exhaustive()
+    }
 }
 impl ResetFenceRequest {
     /// Serialize this request into bytes for the provided connection
@@ -2161,6 +2375,7 @@ impl ResetFenceRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != RESET_FENCE_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -2187,10 +2402,17 @@ impl crate::x11_utils::VoidRequest for ResetFenceRequest {
 
 /// Opcode for the DestroyFence request
 pub const DESTROY_FENCE_REQUEST: u8 = 17;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DestroyFenceRequest {
     pub fence: Fence,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for DestroyFenceRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("DestroyFenceRequest").finish_non_exhaustive()
+    }
 }
 impl DestroyFenceRequest {
     /// Serialize this request into bytes for the provided connection
@@ -2214,6 +2436,7 @@ impl DestroyFenceRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != DESTROY_FENCE_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -2240,10 +2463,17 @@ impl crate::x11_utils::VoidRequest for DestroyFenceRequest {
 
 /// Opcode for the QueryFence request
 pub const QUERY_FENCE_REQUEST: u8 = 18;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryFenceRequest {
     pub fence: Fence,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for QueryFenceRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("QueryFenceRequest").finish_non_exhaustive()
+    }
 }
 impl QueryFenceRequest {
     /// Serialize this request into bytes for the provided connection
@@ -2267,6 +2497,7 @@ impl QueryFenceRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != QUERY_FENCE_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -2292,12 +2523,19 @@ impl crate::x11_utils::ReplyRequest for QueryFenceRequest {
     type Reply = QueryFenceReply;
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryFenceReply {
     pub sequence: u16,
     pub length: u32,
     pub triggered: bool,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for QueryFenceReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("QueryFenceReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for QueryFenceReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -2374,10 +2612,17 @@ impl Serialize for QueryFenceReply {
 
 /// Opcode for the AwaitFence request
 pub const AWAIT_FENCE_REQUEST: u8 = 19;
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct AwaitFenceRequest<'input> {
     pub fence_list: Cow<'input, [Fence]>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl<'input> core::fmt::Debug for AwaitFenceRequest<'input> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("AwaitFenceRequest").finish_non_exhaustive()
+    }
 }
 impl<'input> AwaitFenceRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -2400,6 +2645,7 @@ impl<'input> AwaitFenceRequest<'input> {
         ([request0.into(), fence_list_bytes.into(), padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != AWAIT_FENCE_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -2439,7 +2685,8 @@ impl<'input> crate::x11_utils::VoidRequest for AwaitFenceRequest<'input> {
 
 /// Opcode for the CounterNotify event
 pub const COUNTER_NOTIFY_EVENT: u8 = 0;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CounterNotifyEvent {
     pub response_type: u8,
@@ -2451,6 +2698,12 @@ pub struct CounterNotifyEvent {
     pub timestamp: xproto::Timestamp,
     pub count: u16,
     pub destroyed: bool,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for CounterNotifyEvent {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("CounterNotifyEvent").finish_non_exhaustive()
+    }
 }
 impl TryParse for CounterNotifyEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -2588,7 +2841,8 @@ impl From<CounterNotifyEvent> for [u8; 32] {
 
 /// Opcode for the AlarmNotify event
 pub const ALARM_NOTIFY_EVENT: u8 = 1;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct AlarmNotifyEvent {
     pub response_type: u8,
@@ -2599,6 +2853,12 @@ pub struct AlarmNotifyEvent {
     pub alarm_value: Int64,
     pub timestamp: xproto::Timestamp,
     pub state: ALARMSTATE,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for AlarmNotifyEvent {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("AlarmNotifyEvent").finish_non_exhaustive()
+    }
 }
 impl TryParse for AlarmNotifyEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {

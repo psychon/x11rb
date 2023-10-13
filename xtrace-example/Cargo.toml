@@ -11,7 +11,7 @@ smol = "1.3"
 
 [dependencies.x11rb-protocol]
 path = "../x11rb-protocol"
-features = ["all-extensions"]
+features = ["all-extensions", "request-parsing"]
 
 [dependencies.futures-util]
 version = "0.3"

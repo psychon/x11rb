@@ -42,9 +42,16 @@ pub const ENABLE_REQUEST: u8 = 0;
 /// 262140 bytes in length.  When enabled, if the 16-bit length field is zero, it
 /// is immediately followed by a 32-bit length field specifying the length of the
 /// request in 4-byte units.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct EnableRequest;
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for EnableRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("EnableRequest").finish_non_exhaustive()
+    }
+}
 impl EnableRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -62,6 +69,7 @@ impl EnableRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != ENABLE_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -88,12 +96,19 @@ impl crate::x11_utils::ReplyRequest for EnableRequest {
 /// # Fields
 ///
 /// * `maximum_request_length` - The maximum length of requests supported by the server, in 4-byte units.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct EnableReply {
     pub sequence: u16,
     pub length: u32,
     pub maximum_request_length: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for EnableReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("EnableReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for EnableReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {

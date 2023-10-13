@@ -38,11 +38,18 @@ pub const X11_XML_VERSION: (u32, u32) = (1, 0);
 
 pub type String8 = u8;
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Printer {
     pub name: Vec<String8>,
     pub description: Vec<String8>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for Printer {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("Printer").finish_non_exhaustive()
+    }
 }
 impl TryParse for Printer {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -385,9 +392,16 @@ impl core::fmt::Debug for Attr  {
 
 /// Opcode for the PrintQueryVersion request
 pub const PRINT_QUERY_VERSION_REQUEST: u8 = 0;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PrintQueryVersionRequest;
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for PrintQueryVersionRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("PrintQueryVersionRequest").finish_non_exhaustive()
+    }
+}
 impl PrintQueryVersionRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -405,6 +419,7 @@ impl PrintQueryVersionRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != PRINT_QUERY_VERSION_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -428,13 +443,20 @@ impl crate::x11_utils::ReplyRequest for PrintQueryVersionRequest {
     type Reply = PrintQueryVersionReply;
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PrintQueryVersionReply {
     pub sequence: u16,
     pub length: u32,
     pub major_version: u16,
     pub minor_version: u16,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for PrintQueryVersionReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("PrintQueryVersionReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for PrintQueryVersionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -492,11 +514,18 @@ impl Serialize for PrintQueryVersionReply {
 
 /// Opcode for the PrintGetPrinterList request
 pub const PRINT_GET_PRINTER_LIST_REQUEST: u8 = 1;
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PrintGetPrinterListRequest<'input> {
     pub printer_name: Cow<'input, [String8]>,
     pub locale: Cow<'input, [String8]>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl<'input> core::fmt::Debug for PrintGetPrinterListRequest<'input> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("PrintGetPrinterListRequest").finish_non_exhaustive()
+    }
 }
 impl<'input> PrintGetPrinterListRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -533,6 +562,7 @@ impl<'input> PrintGetPrinterListRequest<'input> {
         ([request0.into(), self.printer_name, padding0.into(), self.locale, padding1.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != PRINT_GET_PRINTER_LIST_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -573,12 +603,19 @@ impl<'input> crate::x11_utils::ReplyRequest for PrintGetPrinterListRequest<'inpu
     type Reply = PrintGetPrinterListReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PrintGetPrinterListReply {
     pub sequence: u16,
     pub length: u32,
     pub printers: Vec<Printer>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for PrintGetPrinterListReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("PrintGetPrinterListReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for PrintGetPrinterListReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -638,9 +675,16 @@ impl PrintGetPrinterListReply {
 
 /// Opcode for the PrintRehashPrinterList request
 pub const PRINT_REHASH_PRINTER_LIST_REQUEST: u8 = 20;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PrintRehashPrinterListRequest;
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for PrintRehashPrinterListRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("PrintRehashPrinterListRequest").finish_non_exhaustive()
+    }
+}
 impl PrintRehashPrinterListRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -658,6 +702,7 @@ impl PrintRehashPrinterListRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != PRINT_REHASH_PRINTER_LIST_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -682,12 +727,19 @@ impl crate::x11_utils::VoidRequest for PrintRehashPrinterListRequest {
 
 /// Opcode for the CreateContext request
 pub const CREATE_CONTEXT_REQUEST: u8 = 2;
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CreateContextRequest<'input> {
     pub context_id: u32,
     pub printer_name: Cow<'input, [String8]>,
     pub locale: Cow<'input, [String8]>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl<'input> core::fmt::Debug for CreateContextRequest<'input> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("CreateContextRequest").finish_non_exhaustive()
+    }
 }
 impl<'input> CreateContextRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -729,6 +781,7 @@ impl<'input> CreateContextRequest<'input> {
         ([request0.into(), self.printer_name, padding0.into(), self.locale, padding1.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CREATE_CONTEXT_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -773,10 +826,17 @@ impl<'input> crate::x11_utils::VoidRequest for CreateContextRequest<'input> {
 
 /// Opcode for the PrintSetContext request
 pub const PRINT_SET_CONTEXT_REQUEST: u8 = 3;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PrintSetContextRequest {
     pub context: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for PrintSetContextRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("PrintSetContextRequest").finish_non_exhaustive()
+    }
 }
 impl PrintSetContextRequest {
     /// Serialize this request into bytes for the provided connection
@@ -800,6 +860,7 @@ impl PrintSetContextRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != PRINT_SET_CONTEXT_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -826,9 +887,16 @@ impl crate::x11_utils::VoidRequest for PrintSetContextRequest {
 
 /// Opcode for the PrintGetContext request
 pub const PRINT_GET_CONTEXT_REQUEST: u8 = 4;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PrintGetContextRequest;
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for PrintGetContextRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("PrintGetContextRequest").finish_non_exhaustive()
+    }
+}
 impl PrintGetContextRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -846,6 +914,7 @@ impl PrintGetContextRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != PRINT_GET_CONTEXT_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -869,12 +938,19 @@ impl crate::x11_utils::ReplyRequest for PrintGetContextRequest {
     type Reply = PrintGetContextReply;
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PrintGetContextReply {
     pub sequence: u16,
     pub length: u32,
     pub context: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for PrintGetContextReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("PrintGetContextReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for PrintGetContextReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -929,10 +1005,17 @@ impl Serialize for PrintGetContextReply {
 
 /// Opcode for the PrintDestroyContext request
 pub const PRINT_DESTROY_CONTEXT_REQUEST: u8 = 5;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PrintDestroyContextRequest {
     pub context: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for PrintDestroyContextRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("PrintDestroyContextRequest").finish_non_exhaustive()
+    }
 }
 impl PrintDestroyContextRequest {
     /// Serialize this request into bytes for the provided connection
@@ -956,6 +1039,7 @@ impl PrintDestroyContextRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != PRINT_DESTROY_CONTEXT_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -982,9 +1066,16 @@ impl crate::x11_utils::VoidRequest for PrintDestroyContextRequest {
 
 /// Opcode for the PrintGetScreenOfContext request
 pub const PRINT_GET_SCREEN_OF_CONTEXT_REQUEST: u8 = 6;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PrintGetScreenOfContextRequest;
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for PrintGetScreenOfContextRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("PrintGetScreenOfContextRequest").finish_non_exhaustive()
+    }
+}
 impl PrintGetScreenOfContextRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -1002,6 +1093,7 @@ impl PrintGetScreenOfContextRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != PRINT_GET_SCREEN_OF_CONTEXT_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1025,12 +1117,19 @@ impl crate::x11_utils::ReplyRequest for PrintGetScreenOfContextRequest {
     type Reply = PrintGetScreenOfContextReply;
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PrintGetScreenOfContextReply {
     pub sequence: u16,
     pub length: u32,
     pub root: xproto::Window,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for PrintGetScreenOfContextReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("PrintGetScreenOfContextReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for PrintGetScreenOfContextReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -1085,10 +1184,17 @@ impl Serialize for PrintGetScreenOfContextReply {
 
 /// Opcode for the PrintStartJob request
 pub const PRINT_START_JOB_REQUEST: u8 = 7;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PrintStartJobRequest {
     pub output_mode: u8,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for PrintStartJobRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("PrintStartJobRequest").finish_non_exhaustive()
+    }
 }
 impl PrintStartJobRequest {
     /// Serialize this request into bytes for the provided connection
@@ -1112,6 +1218,7 @@ impl PrintStartJobRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != PRINT_START_JOB_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1138,10 +1245,17 @@ impl crate::x11_utils::VoidRequest for PrintStartJobRequest {
 
 /// Opcode for the PrintEndJob request
 pub const PRINT_END_JOB_REQUEST: u8 = 8;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PrintEndJobRequest {
     pub cancel: bool,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for PrintEndJobRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("PrintEndJobRequest").finish_non_exhaustive()
+    }
 }
 impl PrintEndJobRequest {
     /// Serialize this request into bytes for the provided connection
@@ -1165,6 +1279,7 @@ impl PrintEndJobRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != PRINT_END_JOB_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1191,10 +1306,17 @@ impl crate::x11_utils::VoidRequest for PrintEndJobRequest {
 
 /// Opcode for the PrintStartDoc request
 pub const PRINT_START_DOC_REQUEST: u8 = 9;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PrintStartDocRequest {
     pub driver_mode: u8,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for PrintStartDocRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("PrintStartDocRequest").finish_non_exhaustive()
+    }
 }
 impl PrintStartDocRequest {
     /// Serialize this request into bytes for the provided connection
@@ -1218,6 +1340,7 @@ impl PrintStartDocRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != PRINT_START_DOC_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1244,10 +1367,17 @@ impl crate::x11_utils::VoidRequest for PrintStartDocRequest {
 
 /// Opcode for the PrintEndDoc request
 pub const PRINT_END_DOC_REQUEST: u8 = 10;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PrintEndDocRequest {
     pub cancel: bool,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for PrintEndDocRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("PrintEndDocRequest").finish_non_exhaustive()
+    }
 }
 impl PrintEndDocRequest {
     /// Serialize this request into bytes for the provided connection
@@ -1271,6 +1401,7 @@ impl PrintEndDocRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != PRINT_END_DOC_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1297,13 +1428,20 @@ impl crate::x11_utils::VoidRequest for PrintEndDocRequest {
 
 /// Opcode for the PrintPutDocumentData request
 pub const PRINT_PUT_DOCUMENT_DATA_REQUEST: u8 = 11;
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PrintPutDocumentDataRequest<'input> {
     pub drawable: xproto::Drawable,
     pub data: Cow<'input, [u8]>,
     pub doc_format: Cow<'input, [String8]>,
     pub options: Cow<'input, [String8]>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl<'input> core::fmt::Debug for PrintPutDocumentDataRequest<'input> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("PrintPutDocumentDataRequest").finish_non_exhaustive()
+    }
 }
 impl<'input> PrintPutDocumentDataRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -1350,6 +1488,7 @@ impl<'input> PrintPutDocumentDataRequest<'input> {
         ([request0.into(), self.data, padding0.into(), self.doc_format, padding1.into(), self.options, padding2.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != PRINT_PUT_DOCUMENT_DATA_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1402,11 +1541,18 @@ impl<'input> crate::x11_utils::VoidRequest for PrintPutDocumentDataRequest<'inpu
 
 /// Opcode for the PrintGetDocumentData request
 pub const PRINT_GET_DOCUMENT_DATA_REQUEST: u8 = 12;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PrintGetDocumentDataRequest {
     pub context: Pcontext,
     pub max_bytes: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for PrintGetDocumentDataRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("PrintGetDocumentDataRequest").finish_non_exhaustive()
+    }
 }
 impl PrintGetDocumentDataRequest {
     /// Serialize this request into bytes for the provided connection
@@ -1435,6 +1581,7 @@ impl PrintGetDocumentDataRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != PRINT_GET_DOCUMENT_DATA_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1462,7 +1609,8 @@ impl crate::x11_utils::ReplyRequest for PrintGetDocumentDataRequest {
     type Reply = PrintGetDocumentDataReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PrintGetDocumentDataReply {
     pub sequence: u16,
@@ -1470,6 +1618,12 @@ pub struct PrintGetDocumentDataReply {
     pub status_code: u32,
     pub finished_flag: u32,
     pub data: Vec<u8>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for PrintGetDocumentDataReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("PrintGetDocumentDataReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for PrintGetDocumentDataReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -1534,10 +1688,17 @@ impl PrintGetDocumentDataReply {
 
 /// Opcode for the PrintStartPage request
 pub const PRINT_START_PAGE_REQUEST: u8 = 13;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PrintStartPageRequest {
     pub window: xproto::Window,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for PrintStartPageRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("PrintStartPageRequest").finish_non_exhaustive()
+    }
 }
 impl PrintStartPageRequest {
     /// Serialize this request into bytes for the provided connection
@@ -1561,6 +1722,7 @@ impl PrintStartPageRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != PRINT_START_PAGE_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1587,10 +1749,17 @@ impl crate::x11_utils::VoidRequest for PrintStartPageRequest {
 
 /// Opcode for the PrintEndPage request
 pub const PRINT_END_PAGE_REQUEST: u8 = 14;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PrintEndPageRequest {
     pub cancel: bool,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for PrintEndPageRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("PrintEndPageRequest").finish_non_exhaustive()
+    }
 }
 impl PrintEndPageRequest {
     /// Serialize this request into bytes for the provided connection
@@ -1614,6 +1783,7 @@ impl PrintEndPageRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != PRINT_END_PAGE_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1641,11 +1811,18 @@ impl crate::x11_utils::VoidRequest for PrintEndPageRequest {
 
 /// Opcode for the PrintSelectInput request
 pub const PRINT_SELECT_INPUT_REQUEST: u8 = 15;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PrintSelectInputRequest {
     pub context: Pcontext,
     pub event_mask: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for PrintSelectInputRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("PrintSelectInputRequest").finish_non_exhaustive()
+    }
 }
 impl PrintSelectInputRequest {
     /// Serialize this request into bytes for the provided connection
@@ -1674,6 +1851,7 @@ impl PrintSelectInputRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != PRINT_SELECT_INPUT_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1702,10 +1880,17 @@ impl crate::x11_utils::VoidRequest for PrintSelectInputRequest {
 
 /// Opcode for the PrintInputSelected request
 pub const PRINT_INPUT_SELECTED_REQUEST: u8 = 16;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PrintInputSelectedRequest {
     pub context: Pcontext,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for PrintInputSelectedRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("PrintInputSelectedRequest").finish_non_exhaustive()
+    }
 }
 impl PrintInputSelectedRequest {
     /// Serialize this request into bytes for the provided connection
@@ -1729,6 +1914,7 @@ impl PrintInputSelectedRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != PRINT_INPUT_SELECTED_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1754,13 +1940,20 @@ impl crate::x11_utils::ReplyRequest for PrintInputSelectedRequest {
     type Reply = PrintInputSelectedReply;
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PrintInputSelectedReply {
     pub sequence: u16,
     pub length: u32,
     pub event_mask: u32,
     pub all_events_mask: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for PrintInputSelectedReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("PrintInputSelectedReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for PrintInputSelectedReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -1822,11 +2015,18 @@ impl Serialize for PrintInputSelectedReply {
 
 /// Opcode for the PrintGetAttributes request
 pub const PRINT_GET_ATTRIBUTES_REQUEST: u8 = 17;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PrintGetAttributesRequest {
     pub context: Pcontext,
     pub pool: u8,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for PrintGetAttributesRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("PrintGetAttributesRequest").finish_non_exhaustive()
+    }
 }
 impl PrintGetAttributesRequest {
     /// Serialize this request into bytes for the provided connection
@@ -1855,6 +2055,7 @@ impl PrintGetAttributesRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != PRINT_GET_ATTRIBUTES_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1883,12 +2084,19 @@ impl crate::x11_utils::ReplyRequest for PrintGetAttributesRequest {
     type Reply = PrintGetAttributesReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PrintGetAttributesReply {
     pub sequence: u16,
     pub length: u32,
     pub attributes: Vec<String8>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for PrintGetAttributesReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("PrintGetAttributesReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for PrintGetAttributesReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -1949,12 +2157,19 @@ impl PrintGetAttributesReply {
 
 /// Opcode for the PrintGetOneAttributes request
 pub const PRINT_GET_ONE_ATTRIBUTES_REQUEST: u8 = 19;
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PrintGetOneAttributesRequest<'input> {
     pub context: Pcontext,
     pub pool: u8,
     pub name: Cow<'input, [String8]>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl<'input> core::fmt::Debug for PrintGetOneAttributesRequest<'input> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("PrintGetOneAttributesRequest").finish_non_exhaustive()
+    }
 }
 impl<'input> PrintGetOneAttributesRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -1992,6 +2207,7 @@ impl<'input> PrintGetOneAttributesRequest<'input> {
         ([request0.into(), self.name, padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != PRINT_GET_ONE_ATTRIBUTES_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -2031,12 +2247,19 @@ impl<'input> crate::x11_utils::ReplyRequest for PrintGetOneAttributesRequest<'in
     type Reply = PrintGetOneAttributesReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PrintGetOneAttributesReply {
     pub sequence: u16,
     pub length: u32,
     pub value: Vec<String8>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for PrintGetOneAttributesReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("PrintGetOneAttributesReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for PrintGetOneAttributesReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -2097,7 +2320,8 @@ impl PrintGetOneAttributesReply {
 
 /// Opcode for the PrintSetAttributes request
 pub const PRINT_SET_ATTRIBUTES_REQUEST: u8 = 18;
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PrintSetAttributesRequest<'input> {
     pub context: Pcontext,
@@ -2105,6 +2329,12 @@ pub struct PrintSetAttributesRequest<'input> {
     pub pool: u8,
     pub rule: u8,
     pub attributes: Cow<'input, [String8]>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl<'input> core::fmt::Debug for PrintSetAttributesRequest<'input> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("PrintSetAttributesRequest").finish_non_exhaustive()
+    }
 }
 impl<'input> PrintSetAttributesRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -2142,6 +2372,7 @@ impl<'input> PrintSetAttributesRequest<'input> {
         ([request0.into(), self.attributes, padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != PRINT_SET_ATTRIBUTES_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -2187,10 +2418,17 @@ impl<'input> crate::x11_utils::VoidRequest for PrintSetAttributesRequest<'input>
 
 /// Opcode for the PrintGetPageDimensions request
 pub const PRINT_GET_PAGE_DIMENSIONS_REQUEST: u8 = 21;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PrintGetPageDimensionsRequest {
     pub context: Pcontext,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for PrintGetPageDimensionsRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("PrintGetPageDimensionsRequest").finish_non_exhaustive()
+    }
 }
 impl PrintGetPageDimensionsRequest {
     /// Serialize this request into bytes for the provided connection
@@ -2214,6 +2452,7 @@ impl PrintGetPageDimensionsRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != PRINT_GET_PAGE_DIMENSIONS_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -2239,7 +2478,8 @@ impl crate::x11_utils::ReplyRequest for PrintGetPageDimensionsRequest {
     type Reply = PrintGetPageDimensionsReply;
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PrintGetPageDimensionsReply {
     pub sequence: u16,
@@ -2250,6 +2490,12 @@ pub struct PrintGetPageDimensionsReply {
     pub offset_y: u16,
     pub reproducible_width: u16,
     pub reproducible_height: u16,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for PrintGetPageDimensionsReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("PrintGetPageDimensionsReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for PrintGetPageDimensionsReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -2327,9 +2573,16 @@ impl Serialize for PrintGetPageDimensionsReply {
 
 /// Opcode for the PrintQueryScreens request
 pub const PRINT_QUERY_SCREENS_REQUEST: u8 = 22;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PrintQueryScreensRequest;
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for PrintQueryScreensRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("PrintQueryScreensRequest").finish_non_exhaustive()
+    }
+}
 impl PrintQueryScreensRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -2347,6 +2600,7 @@ impl PrintQueryScreensRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != PRINT_QUERY_SCREENS_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -2370,12 +2624,19 @@ impl crate::x11_utils::ReplyRequest for PrintQueryScreensRequest {
     type Reply = PrintQueryScreensReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PrintQueryScreensReply {
     pub sequence: u16,
     pub length: u32,
     pub roots: Vec<xproto::Window>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for PrintQueryScreensReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("PrintQueryScreensReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for PrintQueryScreensReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -2435,11 +2696,18 @@ impl PrintQueryScreensReply {
 
 /// Opcode for the PrintSetImageResolution request
 pub const PRINT_SET_IMAGE_RESOLUTION_REQUEST: u8 = 23;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PrintSetImageResolutionRequest {
     pub context: Pcontext,
     pub image_resolution: u16,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for PrintSetImageResolutionRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("PrintSetImageResolutionRequest").finish_non_exhaustive()
+    }
 }
 impl PrintSetImageResolutionRequest {
     /// Serialize this request into bytes for the provided connection
@@ -2468,6 +2736,7 @@ impl PrintSetImageResolutionRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != PRINT_SET_IMAGE_RESOLUTION_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -2495,13 +2764,20 @@ impl crate::x11_utils::ReplyRequest for PrintSetImageResolutionRequest {
     type Reply = PrintSetImageResolutionReply;
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PrintSetImageResolutionReply {
     pub status: bool,
     pub sequence: u16,
     pub length: u32,
     pub previous_resolutions: u16,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for PrintSetImageResolutionReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("PrintSetImageResolutionReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for PrintSetImageResolutionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -2555,10 +2831,17 @@ impl Serialize for PrintSetImageResolutionReply {
 
 /// Opcode for the PrintGetImageResolution request
 pub const PRINT_GET_IMAGE_RESOLUTION_REQUEST: u8 = 24;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PrintGetImageResolutionRequest {
     pub context: Pcontext,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for PrintGetImageResolutionRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("PrintGetImageResolutionRequest").finish_non_exhaustive()
+    }
 }
 impl PrintGetImageResolutionRequest {
     /// Serialize this request into bytes for the provided connection
@@ -2582,6 +2865,7 @@ impl PrintGetImageResolutionRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != PRINT_GET_IMAGE_RESOLUTION_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -2607,12 +2891,19 @@ impl crate::x11_utils::ReplyRequest for PrintGetImageResolutionRequest {
     type Reply = PrintGetImageResolutionReply;
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PrintGetImageResolutionReply {
     pub sequence: u16,
     pub length: u32,
     pub image_resolution: u16,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for PrintGetImageResolutionReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("PrintGetImageResolutionReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for PrintGetImageResolutionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -2665,7 +2956,8 @@ impl Serialize for PrintGetImageResolutionReply {
 
 /// Opcode for the Notify event
 pub const NOTIFY_EVENT: u8 = 0;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct NotifyEvent {
     pub response_type: u8,
@@ -2673,6 +2965,12 @@ pub struct NotifyEvent {
     pub sequence: u16,
     pub context: Pcontext,
     pub cancel: bool,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for NotifyEvent {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("NotifyEvent").finish_non_exhaustive()
+    }
 }
 impl TryParse for NotifyEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -2770,13 +3068,20 @@ impl From<NotifyEvent> for [u8; 32] {
 
 /// Opcode for the AttributNotify event
 pub const ATTRIBUT_NOTIFY_EVENT: u8 = 1;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct AttributNotifyEvent {
     pub response_type: u8,
     pub detail: u8,
     pub sequence: u16,
     pub context: Pcontext,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for AttributNotifyEvent {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("AttributNotifyEvent").finish_non_exhaustive()
+    }
 }
 impl TryParse for AttributNotifyEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {

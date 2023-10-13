@@ -118,11 +118,18 @@ pub const QUERY_VERSION_REQUEST: u8 = 0;
 ///
 /// * `client_major_version` - The major version supported by the client.
 /// * `client_minor_version` - The minor version supported by the client.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryVersionRequest {
     pub client_major_version: u32,
     pub client_minor_version: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for QueryVersionRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("QueryVersionRequest").finish_non_exhaustive()
+    }
 }
 impl QueryVersionRequest {
     /// Serialize this request into bytes for the provided connection
@@ -151,6 +158,7 @@ impl QueryVersionRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != QUERY_VERSION_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -187,13 +195,20 @@ impl crate::x11_utils::ReplyRequest for QueryVersionRequest {
 ///
 /// * `major_version` - The major version chosen by the server.
 /// * `minor_version` - The minor version chosen by the server.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryVersionReply {
     pub sequence: u16,
     pub length: u32,
     pub major_version: u32,
     pub minor_version: u32,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for QueryVersionReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("QueryVersionReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for QueryVersionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -306,12 +321,19 @@ pub const CREATE_REQUEST: u8 = 1;
 /// `xcb_generate_id`.
 /// * `drawable` - The ID of the drawable to be monitored.
 /// * `level` - The level of detail to be provided in Damage events.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CreateRequest {
     pub damage: Damage,
     pub drawable: xproto::Drawable,
     pub level: ReportLevel,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for CreateRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("CreateRequest").finish_non_exhaustive()
+    }
 }
 impl CreateRequest {
     /// Serialize this request into bytes for the provided connection
@@ -345,6 +367,7 @@ impl CreateRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != CREATE_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -385,10 +408,17 @@ pub const DESTROY_REQUEST: u8 = 2;
 /// # Fields
 ///
 /// * `damage` - The ID you provided to `xcb_create_damage`.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DestroyRequest {
     pub damage: Damage,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for DestroyRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("DestroyRequest").finish_non_exhaustive()
+    }
 }
 impl DestroyRequest {
     /// Serialize this request into bytes for the provided connection
@@ -412,6 +442,7 @@ impl DestroyRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != DESTROY_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -447,12 +478,19 @@ pub const SUBTRACT_REQUEST: u8 = 3;
 /// # Fields
 ///
 /// * `damage` - The ID you provided to `xcb_create_damage`.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SubtractRequest {
     pub damage: Damage,
     pub repair: xfixes::Region,
     pub parts: xfixes::Region,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for SubtractRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SubtractRequest").finish_non_exhaustive()
+    }
 }
 impl SubtractRequest {
     /// Serialize this request into bytes for the provided connection
@@ -486,6 +524,7 @@ impl SubtractRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SUBTRACT_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -525,11 +564,18 @@ pub const ADD_REQUEST: u8 = 4;
 /// # Fields
 ///
 /// * `damage` - The ID you provided to `xcb_create_damage`.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct AddRequest {
     pub drawable: xproto::Drawable,
     pub region: xfixes::Region,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for AddRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("AddRequest").finish_non_exhaustive()
+    }
 }
 impl AddRequest {
     /// Serialize this request into bytes for the provided connection
@@ -558,6 +604,7 @@ impl AddRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != ADD_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -602,7 +649,8 @@ pub const NOTIFY_EVENT: u8 = 0;
 /// # See
 ///
 /// * `Create`: request
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct NotifyEvent {
     pub response_type: u8,
@@ -613,6 +661,12 @@ pub struct NotifyEvent {
     pub timestamp: xproto::Timestamp,
     pub area: xproto::Rectangle,
     pub geometry: xproto::Rectangle,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for NotifyEvent {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("NotifyEvent").finish_non_exhaustive()
+    }
 }
 impl TryParse for NotifyEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {

@@ -108,6 +108,10 @@
 //!   resulting executable. Instead libxcb will be dynamically loaded at runtime.
 //!   This feature adds the [`crate::xcb_ffi::load_libxcb`] function, that allows to load
 //!   libxcb and check for success or failure.
+//! * `extra-traits`: Enable some additional traits for generated code, like `Eq`, `Ord` and
+//!   `Hash`. This is not needed by default and adds a large amount of code that bloats codegen
+//!   time
+//! * `request-parsing`: Add the ability to parse X11 requests. Not normally needed.
 //!
 //! # Integrating x11rb with an Event Loop
 //!

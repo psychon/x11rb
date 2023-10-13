@@ -1,6 +1,8 @@
-use x11rb::errors::ParseError;
-use x11rb::protocol::xproto::{Setup, VisualClass};
-use x11rb::x11_utils::TryParse;
+#![cfg(feature = "extra-traits")]
+
+use x11rb_protocol::errors::ParseError;
+use x11rb_protocol::protocol::xproto::{Setup, VisualClass};
+use x11rb_protocol::x11_utils::TryParse;
 
 fn get_setup_data() -> Vec<u8> {
     let mut s = Vec::new();
@@ -149,7 +151,7 @@ fn parse_xi_get_property_reply_format_0() {
     s.push(0); // format
     s.extend([0; 11]); // pad
 
-    use x11rb::protocol::xinput::{XIGetPropertyItems, XIGetPropertyReply};
+    use x11rb_protocol::protocol::xinput::{XIGetPropertyItems, XIGetPropertyReply};
     let empty: &[u8] = &[];
     assert_eq!(
         XIGetPropertyReply::try_parse(&s),

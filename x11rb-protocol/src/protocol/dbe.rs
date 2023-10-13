@@ -109,11 +109,18 @@ impl core::fmt::Debug for SwapAction  {
     }
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SwapInfo {
     pub window: xproto::Window,
     pub swap_action: SwapAction,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for SwapInfo {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SwapInfo").finish_non_exhaustive()
+    }
 }
 impl TryParse for SwapInfo {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -149,10 +156,17 @@ impl Serialize for SwapInfo {
     }
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct BufferAttributes {
     pub window: xproto::Window,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for BufferAttributes {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("BufferAttributes").finish_non_exhaustive()
+    }
 }
 impl TryParse for BufferAttributes {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -178,12 +192,19 @@ impl Serialize for BufferAttributes {
     }
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct VisualInfo {
     pub visual_id: xproto::Visualid,
     pub depth: u8,
     pub perf_level: u8,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for VisualInfo {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("VisualInfo").finish_non_exhaustive()
+    }
 }
 impl TryParse for VisualInfo {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -221,10 +242,17 @@ impl Serialize for VisualInfo {
     }
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct VisualInfos {
     pub infos: Vec<VisualInfo>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for VisualInfos {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("VisualInfos").finish_non_exhaustive()
+    }
 }
 impl TryParse for VisualInfos {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -276,11 +304,18 @@ pub const QUERY_VERSION_REQUEST: u8 = 0;
 ///
 /// * `major_version` - The major version of the extension. Check that it is compatible with the XCB_DBE_MAJOR_VERSION that your code is compiled with.
 /// * `minor_version` - The minor version of the extension. Check that it is compatible with the XCB_DBE_MINOR_VERSION that your code is compiled with.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryVersionRequest {
     pub major_version: u8,
     pub minor_version: u8,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for QueryVersionRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("QueryVersionRequest").finish_non_exhaustive()
+    }
 }
 impl QueryVersionRequest {
     /// Serialize this request into bytes for the provided connection
@@ -305,6 +340,7 @@ impl QueryVersionRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != QUERY_VERSION_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -333,13 +369,20 @@ impl crate::x11_utils::ReplyRequest for QueryVersionRequest {
     type Reply = QueryVersionReply;
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryVersionReply {
     pub sequence: u16,
     pub length: u32,
     pub major_version: u8,
     pub minor_version: u8,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for QueryVersionReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("QueryVersionReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for QueryVersionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -428,12 +471,19 @@ pub const ALLOCATE_BACK_BUFFER_REQUEST: u8 = 1;
 /// * `window` - The window to which to add the back buffer.
 /// * `buffer` - The buffer id to associate with the back buffer.
 /// * `swap_action` - The swap action most likely to be used to present this back buffer. This is only a hint, and does not preclude the use of other swap actions.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct AllocateBackBufferRequest {
     pub window: xproto::Window,
     pub buffer: BackBuffer,
     pub swap_action: u8,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for AllocateBackBufferRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("AllocateBackBufferRequest").finish_non_exhaustive()
+    }
 }
 impl AllocateBackBufferRequest {
     /// Serialize this request into bytes for the provided connection
@@ -467,6 +517,7 @@ impl AllocateBackBufferRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != ALLOCATE_BACK_BUFFER_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -505,10 +556,17 @@ pub const DEALLOCATE_BACK_BUFFER_REQUEST: u8 = 2;
 /// # Fields
 ///
 /// * `buffer` - The back buffer to deallocate.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DeallocateBackBufferRequest {
     pub buffer: BackBuffer,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for DeallocateBackBufferRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("DeallocateBackBufferRequest").finish_non_exhaustive()
+    }
 }
 impl DeallocateBackBufferRequest {
     /// Serialize this request into bytes for the provided connection
@@ -532,6 +590,7 @@ impl DeallocateBackBufferRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != DEALLOCATE_BACK_BUFFER_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -565,10 +624,17 @@ pub const SWAP_BUFFERS_REQUEST: u8 = 3;
 /// # Fields
 ///
 /// * `actions` - List of windows on which to swap buffers.
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SwapBuffersRequest<'input> {
     pub actions: Cow<'input, [SwapInfo]>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl<'input> core::fmt::Debug for SwapBuffersRequest<'input> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("SwapBuffersRequest").finish_non_exhaustive()
+    }
 }
 impl<'input> SwapBuffersRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -597,6 +663,7 @@ impl<'input> SwapBuffersRequest<'input> {
         ([request0.into(), actions_bytes.into(), padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != SWAP_BUFFERS_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -633,9 +700,16 @@ pub const BEGIN_IDIOM_REQUEST: u8 = 4;
 /// Begins a logical swap block.
 ///
 /// Creates a block of operations intended to occur together. This may be needed if window presentation requires changing buffers unknown to this extension, such as depth or stencil buffers.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct BeginIdiomRequest;
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for BeginIdiomRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("BeginIdiomRequest").finish_non_exhaustive()
+    }
+}
 impl BeginIdiomRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -653,6 +727,7 @@ impl BeginIdiomRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != BEGIN_IDIOM_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -678,9 +753,16 @@ impl crate::x11_utils::VoidRequest for BeginIdiomRequest {
 /// Opcode for the EndIdiom request
 pub const END_IDIOM_REQUEST: u8 = 5;
 /// Ends a logical swap block.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct EndIdiomRequest;
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for EndIdiomRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("EndIdiomRequest").finish_non_exhaustive()
+    }
+}
 impl EndIdiomRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -698,6 +780,7 @@ impl EndIdiomRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != END_IDIOM_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -723,10 +806,17 @@ impl crate::x11_utils::VoidRequest for EndIdiomRequest {
 /// Opcode for the GetVisualInfo request
 pub const GET_VISUAL_INFO_REQUEST: u8 = 6;
 /// Requests visuals that support double buffering.
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetVisualInfoRequest<'input> {
     pub drawables: Cow<'input, [xproto::Drawable]>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl<'input> core::fmt::Debug for GetVisualInfoRequest<'input> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetVisualInfoRequest").finish_non_exhaustive()
+    }
 }
 impl<'input> GetVisualInfoRequest<'input> {
     /// Serialize this request into bytes for the provided connection
@@ -755,6 +845,7 @@ impl<'input> GetVisualInfoRequest<'input> {
         ([request0.into(), drawables_bytes.into(), padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_VISUAL_INFO_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -787,12 +878,19 @@ impl<'input> crate::x11_utils::ReplyRequest for GetVisualInfoRequest<'input> {
     type Reply = GetVisualInfoReply;
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetVisualInfoReply {
     pub sequence: u16,
     pub length: u32,
     pub supported_visuals: Vec<VisualInfos>,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetVisualInfoReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetVisualInfoReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetVisualInfoReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -860,10 +958,17 @@ pub const GET_BACK_BUFFER_ATTRIBUTES_REQUEST: u8 = 7;
 ///
 /// * `buffer` - The back buffer to query.
 /// * `attributes` - The attributes of `buffer`.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetBackBufferAttributesRequest {
     pub buffer: BackBuffer,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetBackBufferAttributesRequest {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetBackBufferAttributesRequest").finish_non_exhaustive()
+    }
 }
 impl GetBackBufferAttributesRequest {
     /// Serialize this request into bytes for the provided connection
@@ -887,6 +992,7 @@ impl GetBackBufferAttributesRequest {
         ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.minor_opcode != GET_BACK_BUFFER_ATTRIBUTES_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -912,12 +1018,19 @@ impl crate::x11_utils::ReplyRequest for GetBackBufferAttributesRequest {
     type Reply = GetBackBufferAttributesReply;
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetBackBufferAttributesReply {
     pub sequence: u16,
     pub length: u32,
     pub attributes: BufferAttributes,
+}
+#[cfg(not(feature = "extra-traits"))]
+impl core::fmt::Debug for GetBackBufferAttributesReply {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("GetBackBufferAttributesReply").finish_non_exhaustive()
+    }
 }
 impl TryParse for GetBackBufferAttributesReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
