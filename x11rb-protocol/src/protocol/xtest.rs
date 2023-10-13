@@ -112,12 +112,7 @@ pub struct GetVersionReply {
     pub length: u32,
     pub minor_version: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetVersionReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetVersionReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetVersionReply, "GetVersionReply");
 impl TryParse for GetVersionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -317,12 +312,7 @@ pub struct CompareCursorReply {
     pub sequence: u16,
     pub length: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for CompareCursorReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("CompareCursorReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(CompareCursorReply, "CompareCursorReply");
 impl TryParse for CompareCursorReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;

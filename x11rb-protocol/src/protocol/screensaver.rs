@@ -284,12 +284,7 @@ pub struct QueryVersionReply {
     pub server_major_version: u16,
     pub server_minor_version: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryVersionReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryVersionReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryVersionReply, "QueryVersionReply");
 impl TryParse for QueryVersionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -441,12 +436,7 @@ pub struct QueryInfoReply {
     pub event_mask: u32,
     pub kind: Kind,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryInfoReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryInfoReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryInfoReply, "QueryInfoReply");
 impl TryParse for QueryInfoReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -625,12 +615,7 @@ pub struct SetAttributesAux {
     pub colormap: Option<xproto::Colormap>,
     pub cursor: Option<xproto::Cursor>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for SetAttributesAux {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SetAttributesAux").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SetAttributesAux, "SetAttributesAux");
 impl SetAttributesAux {
     #[cfg_attr(not(feature = "request-parsing"), allow(dead_code))]
     fn try_parse(value: &[u8], value_mask: u32) -> Result<(Self, &[u8]), ParseError> {
@@ -1245,12 +1230,7 @@ pub struct NotifyEvent {
     pub kind: Kind,
     pub forced: bool,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for NotifyEvent {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("NotifyEvent").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(NotifyEvent, "NotifyEvent");
 impl TryParse for NotifyEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;

@@ -116,12 +116,7 @@ pub struct SwapInfo {
     pub window: xproto::Window,
     pub swap_action: SwapAction,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for SwapInfo {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SwapInfo").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SwapInfo, "SwapInfo");
 impl TryParse for SwapInfo {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (window, remaining) = xproto::Window::try_parse(remaining)?;
@@ -162,12 +157,7 @@ impl Serialize for SwapInfo {
 pub struct BufferAttributes {
     pub window: xproto::Window,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for BufferAttributes {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("BufferAttributes").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(BufferAttributes, "BufferAttributes");
 impl TryParse for BufferAttributes {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (window, remaining) = xproto::Window::try_parse(remaining)?;
@@ -200,12 +190,7 @@ pub struct VisualInfo {
     pub depth: u8,
     pub perf_level: u8,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for VisualInfo {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("VisualInfo").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(VisualInfo, "VisualInfo");
 impl TryParse for VisualInfo {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (visual_id, remaining) = xproto::Visualid::try_parse(remaining)?;
@@ -248,12 +233,7 @@ impl Serialize for VisualInfo {
 pub struct VisualInfos {
     pub infos: Vec<VisualInfo>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for VisualInfos {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("VisualInfos").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(VisualInfos, "VisualInfos");
 impl TryParse for VisualInfos {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (n_infos, remaining) = u32::try_parse(remaining)?;
@@ -378,12 +358,7 @@ pub struct QueryVersionReply {
     pub major_version: u8,
     pub minor_version: u8,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryVersionReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryVersionReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryVersionReply, "QueryVersionReply");
 impl TryParse for QueryVersionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -886,12 +861,7 @@ pub struct GetVisualInfoReply {
     pub length: u32,
     pub supported_visuals: Vec<VisualInfos>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetVisualInfoReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetVisualInfoReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetVisualInfoReply, "GetVisualInfoReply");
 impl TryParse for GetVisualInfoReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -1026,12 +996,7 @@ pub struct GetBackBufferAttributesReply {
     pub length: u32,
     pub attributes: BufferAttributes,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetBackBufferAttributesReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetBackBufferAttributesReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetBackBufferAttributesReply, "GetBackBufferAttributesReply");
 impl TryParse for GetBackBufferAttributesReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;

@@ -119,12 +119,7 @@ pub struct QueryVersionReply {
     pub major_version: u32,
     pub minor_version: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryVersionReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryVersionReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryVersionReply, "QueryVersionReply");
 impl TryParse for QueryVersionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -585,12 +580,7 @@ pub struct SelectionNotifyEvent {
     pub timestamp: xproto::Timestamp,
     pub selection_timestamp: xproto::Timestamp,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for SelectionNotifyEvent {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SelectionNotifyEvent").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SelectionNotifyEvent, "SelectionNotifyEvent");
 impl TryParse for SelectionNotifyEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -917,12 +907,7 @@ pub struct CursorNotifyEvent {
     pub timestamp: xproto::Timestamp,
     pub name: xproto::Atom,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for CursorNotifyEvent {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("CursorNotifyEvent").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(CursorNotifyEvent, "CursorNotifyEvent");
 impl TryParse for CursorNotifyEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -1188,12 +1173,7 @@ pub struct GetCursorImageReply {
     pub cursor_serial: u32,
     pub cursor_image: Vec<u32>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetCursorImageReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetCursorImageReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetCursorImageReply, "GetCursorImageReply");
 impl TryParse for GetCursorImageReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -2413,12 +2393,7 @@ pub struct FetchRegionReply {
     pub extents: xproto::Rectangle,
     pub rectangles: Vec<xproto::Rectangle>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for FetchRegionReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("FetchRegionReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(FetchRegionReply, "FetchRegionReply");
 impl TryParse for FetchRegionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -2882,12 +2857,7 @@ pub struct GetCursorNameReply {
     pub atom: xproto::Atom,
     pub name: Vec<u8>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetCursorNameReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetCursorNameReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetCursorNameReply, "GetCursorNameReply");
 impl TryParse for GetCursorNameReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -3017,12 +2987,7 @@ pub struct GetCursorImageAndNameReply {
     pub cursor_image: Vec<u32>,
     pub name: Vec<u8>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetCursorImageAndNameReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetCursorImageAndNameReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetCursorImageAndNameReply, "GetCursorImageAndNameReply");
 impl TryParse for GetCursorImageAndNameReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -3899,12 +3864,7 @@ pub struct GetClientDisconnectModeReply {
     pub length: u32,
     pub disconnect_mode: ClientDisconnectFlags,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetClientDisconnectModeReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetClientDisconnectModeReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetClientDisconnectModeReply, "GetClientDisconnectModeReply");
 impl TryParse for GetClientDisconnectModeReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;

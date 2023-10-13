@@ -219,12 +219,7 @@ pub struct ModeInfo {
     pub flags: ModeFlag,
     pub privsize: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for ModeInfo {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ModeInfo").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ModeInfo, "ModeInfo");
 impl TryParse for ModeInfo {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (dotclock, remaining) = Dotclock::try_parse(remaining)?;
@@ -393,12 +388,7 @@ pub struct QueryVersionReply {
     pub major_version: u16,
     pub minor_version: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryVersionReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryVersionReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryVersionReply, "QueryVersionReply");
 impl TryParse for QueryVersionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -535,12 +525,7 @@ pub struct GetModeLineReply {
     pub flags: ModeFlag,
     pub private: Vec<u8>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetModeLineReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetModeLineReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetModeLineReply, "GetModeLineReply");
 impl TryParse for GetModeLineReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -933,12 +918,7 @@ pub struct GetMonitorReply {
     pub alignment_pad: Vec<u8>,
     pub model: Vec<u8>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetMonitorReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetMonitorReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetMonitorReply, "GetMonitorReply");
 impl TryParse for GetMonitorReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -1191,12 +1171,7 @@ pub struct GetAllModeLinesReply {
     pub length: u32,
     pub modeinfo: Vec<ModeInfo>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetAllModeLinesReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetAllModeLinesReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetAllModeLinesReply, "GetAllModeLinesReply");
 impl TryParse for GetAllModeLinesReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -1897,12 +1872,7 @@ pub struct ValidateModeLineReply {
     pub length: u32,
     pub status: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for ValidateModeLineReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ValidateModeLineReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ValidateModeLineReply, "ValidateModeLineReply");
 impl TryParse for ValidateModeLineReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -2227,12 +2197,7 @@ pub struct GetViewPortReply {
     pub x: u32,
     pub y: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetViewPortReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetViewPortReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetViewPortReply, "GetViewPortReply");
 impl TryParse for GetViewPortReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -2461,12 +2426,7 @@ pub struct GetDotClocksReply {
     pub maxclocks: u32,
     pub clock: Vec<u32>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetDotClocksReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetDotClocksReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetDotClocksReply, "GetDotClocksReply");
 impl TryParse for GetDotClocksReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -2774,12 +2734,7 @@ pub struct GetGammaReply {
     pub green: u32,
     pub blue: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetGammaReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetGammaReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetGammaReply, "GetGammaReply");
 impl TryParse for GetGammaReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -2936,12 +2891,7 @@ pub struct GetGammaRampReply {
     pub green: Vec<u16>,
     pub blue: Vec<u16>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetGammaRampReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetGammaRampReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetGammaRampReply, "GetGammaRampReply");
 impl TryParse for GetGammaRampReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -3155,12 +3105,7 @@ pub struct GetGammaRampSizeReply {
     pub length: u32,
     pub size: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetGammaRampSizeReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetGammaRampSizeReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetGammaRampSizeReply, "GetGammaRampSizeReply");
 impl TryParse for GetGammaRampSizeReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -3305,12 +3250,7 @@ pub struct GetPermissionsReply {
     pub length: u32,
     pub permissions: Permission,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetPermissionsReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetPermissionsReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetPermissionsReply, "GetPermissionsReply");
 impl TryParse for GetPermissionsReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;

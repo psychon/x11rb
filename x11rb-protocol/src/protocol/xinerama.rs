@@ -45,12 +45,7 @@ pub struct ScreenInfo {
     pub width: u16,
     pub height: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for ScreenInfo {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ScreenInfo").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ScreenInfo, "ScreenInfo");
 impl TryParse for ScreenInfo {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (x_org, remaining) = i16::try_parse(remaining)?;
@@ -163,12 +158,7 @@ pub struct QueryVersionReply {
     pub major: u16,
     pub minor: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryVersionReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryVersionReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryVersionReply, "QueryVersionReply");
 impl TryParse for QueryVersionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -294,12 +284,7 @@ pub struct GetStateReply {
     pub length: u32,
     pub window: xproto::Window,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetStateReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetStateReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetStateReply, "GetStateReply");
 impl TryParse for GetStateReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -423,12 +408,7 @@ pub struct GetScreenCountReply {
     pub length: u32,
     pub window: xproto::Window,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetScreenCountReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetScreenCountReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetScreenCountReply, "GetScreenCountReply");
 impl TryParse for GetScreenCountReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -562,12 +542,7 @@ pub struct GetScreenSizeReply {
     pub window: xproto::Window,
     pub screen: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetScreenSizeReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetScreenSizeReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetScreenSizeReply, "GetScreenSizeReply");
 impl TryParse for GetScreenSizeReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -701,12 +676,7 @@ pub struct IsActiveReply {
     pub length: u32,
     pub state: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for IsActiveReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("IsActiveReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(IsActiveReply, "IsActiveReply");
 impl TryParse for IsActiveReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -819,12 +789,7 @@ pub struct QueryScreensReply {
     pub length: u32,
     pub screen_info: Vec<ScreenInfo>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryScreensReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryScreensReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryScreensReply, "QueryScreensReply");
 impl TryParse for QueryScreensReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;

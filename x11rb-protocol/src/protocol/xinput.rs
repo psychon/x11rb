@@ -53,12 +53,7 @@ pub struct Fp3232 {
     pub integral: i32,
     pub frac: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for Fp3232 {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("Fp3232").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(Fp3232, "Fp3232");
 impl TryParse for Fp3232 {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (integral, remaining) = i32::try_parse(remaining)?;
@@ -175,12 +170,7 @@ pub struct GetExtensionVersionReply {
     pub server_minor: u16,
     pub present: bool,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetExtensionVersionReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetExtensionVersionReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetExtensionVersionReply, "GetExtensionVersionReply");
 impl TryParse for GetExtensionVersionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -463,12 +453,7 @@ pub struct DeviceInfo {
     pub num_class_info: u8,
     pub device_use: DeviceUse,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for DeviceInfo {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("DeviceInfo").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(DeviceInfo, "DeviceInfo");
 impl TryParse for DeviceInfo {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (device_type, remaining) = xproto::Atom::try_parse(remaining)?;
@@ -519,12 +504,7 @@ pub struct KeyInfo {
     pub max_keycode: KeyCode,
     pub num_keys: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for KeyInfo {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("KeyInfo").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(KeyInfo, "KeyInfo");
 impl TryParse for KeyInfo {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (class_id, remaining) = u8::try_parse(remaining)?;
@@ -576,12 +556,7 @@ pub struct ButtonInfo {
     pub len: u8,
     pub num_buttons: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for ButtonInfo {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ButtonInfo").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ButtonInfo, "ButtonInfo");
 impl TryParse for ButtonInfo {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (class_id, remaining) = u8::try_parse(remaining)?;
@@ -621,12 +596,7 @@ pub struct AxisInfo {
     pub minimum: i32,
     pub maximum: i32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for AxisInfo {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("AxisInfo").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(AxisInfo, "AxisInfo");
 impl TryParse for AxisInfo {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (resolution, remaining) = u32::try_parse(remaining)?;
@@ -675,12 +645,7 @@ pub struct ValuatorInfo {
     pub motion_size: u32,
     pub axes: Vec<AxisInfo>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for ValuatorInfo {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ValuatorInfo").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ValuatorInfo, "ValuatorInfo");
 impl TryParse for ValuatorInfo {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (class_id, remaining) = u8::try_parse(remaining)?;
@@ -737,12 +702,7 @@ pub struct InputInfoInfoKey {
     pub max_keycode: KeyCode,
     pub num_keys: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for InputInfoInfoKey {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("InputInfoInfoKey").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(InputInfoInfoKey, "InputInfoInfoKey");
 impl TryParse for InputInfoInfoKey {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (min_keycode, remaining) = KeyCode::try_parse(remaining)?;
@@ -782,12 +742,7 @@ impl Serialize for InputInfoInfoKey {
 pub struct InputInfoInfoButton {
     pub num_buttons: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for InputInfoInfoButton {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("InputInfoInfoButton").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(InputInfoInfoButton, "InputInfoInfoButton");
 impl TryParse for InputInfoInfoButton {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (num_buttons, remaining) = u16::try_parse(remaining)?;
@@ -817,12 +772,7 @@ pub struct InputInfoInfoValuator {
     pub motion_size: u32,
     pub axes: Vec<AxisInfo>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for InputInfoInfoValuator {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("InputInfoInfoValuator").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(InputInfoInfoValuator, "InputInfoInfoValuator");
 impl TryParse for InputInfoInfoValuator {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (axes_len, remaining) = u8::try_parse(remaining)?;
@@ -882,12 +832,7 @@ pub enum InputInfoInfo {
     /// will raise a panic.
     InvalidValue(u8),
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for InputInfoInfo {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("InputInfoInfo").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(InputInfoInfo, "InputInfoInfo");
 impl InputInfoInfo {
     #[cfg_attr(not(feature = "request-parsing"), allow(dead_code))]
     fn try_parse(value: &[u8], class_id: u8) -> Result<(Self, &[u8]), ParseError> {
@@ -973,12 +918,7 @@ pub struct InputInfo {
     pub len: u8,
     pub info: InputInfoInfo,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for InputInfo {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("InputInfo").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(InputInfo, "InputInfo");
 impl TryParse for InputInfo {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (class_id, remaining) = u8::try_parse(remaining)?;
@@ -1010,12 +950,7 @@ impl Serialize for InputInfo {
 pub struct DeviceName {
     pub string: Vec<u8>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for DeviceName {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("DeviceName").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(DeviceName, "DeviceName");
 impl TryParse for DeviceName {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (len, remaining) = u8::try_parse(remaining)?;
@@ -1119,12 +1054,7 @@ pub struct ListInputDevicesReply {
     pub infos: Vec<InputInfo>,
     pub names: Vec<xproto::Str>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for ListInputDevicesReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ListInputDevicesReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ListInputDevicesReply, "ListInputDevicesReply");
 impl TryParse for ListInputDevicesReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -1202,12 +1132,7 @@ pub struct InputClassInfo {
     pub class_id: InputClass,
     pub event_type_base: EventTypeBase,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for InputClassInfo {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("InputClassInfo").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(InputClassInfo, "InputClassInfo");
 impl TryParse for InputClassInfo {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (class_id, remaining) = u8::try_parse(remaining)?;
@@ -1306,12 +1231,7 @@ pub struct OpenDeviceReply {
     pub length: u32,
     pub class_info: Vec<InputClassInfo>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for OpenDeviceReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("OpenDeviceReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(OpenDeviceReply, "OpenDeviceReply");
 impl TryParse for OpenDeviceReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -1513,12 +1433,7 @@ pub struct SetDeviceModeReply {
     pub length: u32,
     pub status: xproto::GrabStatus,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for SetDeviceModeReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SetDeviceModeReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SetDeviceModeReply, "SetDeviceModeReply");
 impl TryParse for SetDeviceModeReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -1749,12 +1664,7 @@ pub struct GetSelectedExtensionEventsReply {
     pub this_classes: Vec<EventClass>,
     pub all_classes: Vec<EventClass>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetSelectedExtensionEventsReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetSelectedExtensionEventsReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetSelectedExtensionEventsReply, "GetSelectedExtensionEventsReply");
 impl TryParse for GetSelectedExtensionEventsReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -2048,12 +1958,7 @@ pub struct GetDeviceDontPropagateListReply {
     pub length: u32,
     pub classes: Vec<EventClass>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetDeviceDontPropagateListReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetDeviceDontPropagateListReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetDeviceDontPropagateListReply, "GetDeviceDontPropagateListReply");
 impl TryParse for GetDeviceDontPropagateListReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -2117,12 +2022,7 @@ pub struct DeviceTimeCoord {
     pub time: xproto::Timestamp,
     pub axisvalues: Vec<i32>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for DeviceTimeCoord {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("DeviceTimeCoord").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(DeviceTimeCoord, "DeviceTimeCoord");
 impl DeviceTimeCoord {
     pub fn try_parse(remaining: &[u8], num_axes: u8) -> Result<(Self, &[u8]), ParseError> {
         let (time, remaining) = xproto::Timestamp::try_parse(remaining)?;
@@ -2235,12 +2135,7 @@ pub struct GetDeviceMotionEventsReply {
     pub device_mode: ValuatorMode,
     pub events: Vec<DeviceTimeCoord>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetDeviceMotionEventsReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetDeviceMotionEventsReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetDeviceMotionEventsReply, "GetDeviceMotionEventsReply");
 impl TryParse for GetDeviceMotionEventsReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -2383,12 +2278,7 @@ pub struct ChangeKeyboardDeviceReply {
     pub length: u32,
     pub status: xproto::GrabStatus,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for ChangeKeyboardDeviceReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ChangeKeyboardDeviceReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ChangeKeyboardDeviceReply, "ChangeKeyboardDeviceReply");
 impl TryParse for ChangeKeyboardDeviceReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -2544,12 +2434,7 @@ pub struct ChangePointerDeviceReply {
     pub length: u32,
     pub status: xproto::GrabStatus,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for ChangePointerDeviceReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ChangePointerDeviceReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ChangePointerDeviceReply, "ChangePointerDeviceReply");
 impl TryParse for ChangePointerDeviceReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -2753,12 +2638,7 @@ pub struct GrabDeviceReply {
     pub length: u32,
     pub status: xproto::GrabStatus,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GrabDeviceReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GrabDeviceReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GrabDeviceReply, "GrabDeviceReply");
 impl TryParse for GrabDeviceReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -3608,12 +3488,7 @@ pub struct GetDeviceFocusReply {
     pub time: xproto::Timestamp,
     pub revert_to: xproto::InputFocus,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetDeviceFocusReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetDeviceFocusReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetDeviceFocusReply, "GetDeviceFocusReply");
 impl TryParse for GetDeviceFocusReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -3861,12 +3736,7 @@ pub struct KbdFeedbackState {
     pub percent: u8,
     pub auto_repeats: [u8; 32],
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for KbdFeedbackState {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("KbdFeedbackState").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(KbdFeedbackState, "KbdFeedbackState");
 impl TryParse for KbdFeedbackState {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (class_id, remaining) = u8::try_parse(remaining)?;
@@ -3982,12 +3852,7 @@ pub struct PtrFeedbackState {
     pub accel_denom: u16,
     pub threshold: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for PtrFeedbackState {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PtrFeedbackState").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PtrFeedbackState, "PtrFeedbackState");
 impl TryParse for PtrFeedbackState {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (class_id, remaining) = u8::try_parse(remaining)?;
@@ -4049,12 +3914,7 @@ pub struct IntegerFeedbackState {
     pub min_value: i32,
     pub max_value: i32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for IntegerFeedbackState {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("IntegerFeedbackState").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(IntegerFeedbackState, "IntegerFeedbackState");
 impl TryParse for IntegerFeedbackState {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (class_id, remaining) = u8::try_parse(remaining)?;
@@ -4117,12 +3977,7 @@ pub struct StringFeedbackState {
     pub max_symbols: u16,
     pub keysyms: Vec<xproto::Keysym>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for StringFeedbackState {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("StringFeedbackState").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(StringFeedbackState, "StringFeedbackState");
 impl TryParse for StringFeedbackState {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (class_id, remaining) = u8::try_parse(remaining)?;
@@ -4181,12 +4036,7 @@ pub struct BellFeedbackState {
     pub pitch: u16,
     pub duration: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for BellFeedbackState {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("BellFeedbackState").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(BellFeedbackState, "BellFeedbackState");
 impl TryParse for BellFeedbackState {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (class_id, remaining) = u8::try_parse(remaining)?;
@@ -4247,12 +4097,7 @@ pub struct LedFeedbackState {
     pub led_mask: u32,
     pub led_values: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for LedFeedbackState {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("LedFeedbackState").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(LedFeedbackState, "LedFeedbackState");
 impl TryParse for LedFeedbackState {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (class_id, remaining) = u8::try_parse(remaining)?;
@@ -4311,12 +4156,7 @@ pub struct FeedbackStateDataKeyboard {
     pub percent: u8,
     pub auto_repeats: [u8; 32],
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for FeedbackStateDataKeyboard {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("FeedbackStateDataKeyboard").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(FeedbackStateDataKeyboard, "FeedbackStateDataKeyboard");
 impl TryParse for FeedbackStateDataKeyboard {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (pitch, remaining) = u16::try_parse(remaining)?;
@@ -4414,12 +4254,7 @@ pub struct FeedbackStateDataPointer {
     pub accel_denom: u16,
     pub threshold: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for FeedbackStateDataPointer {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("FeedbackStateDataPointer").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(FeedbackStateDataPointer, "FeedbackStateDataPointer");
 impl TryParse for FeedbackStateDataPointer {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
@@ -4462,12 +4297,7 @@ pub struct FeedbackStateDataString {
     pub max_symbols: u16,
     pub keysyms: Vec<xproto::Keysym>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for FeedbackStateDataString {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("FeedbackStateDataString").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(FeedbackStateDataString, "FeedbackStateDataString");
 impl TryParse for FeedbackStateDataString {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (max_symbols, remaining) = u16::try_parse(remaining)?;
@@ -4515,12 +4345,7 @@ pub struct FeedbackStateDataInteger {
     pub min_value: i32,
     pub max_value: i32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for FeedbackStateDataInteger {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("FeedbackStateDataInteger").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(FeedbackStateDataInteger, "FeedbackStateDataInteger");
 impl TryParse for FeedbackStateDataInteger {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (resolution, remaining) = u32::try_parse(remaining)?;
@@ -4565,12 +4390,7 @@ pub struct FeedbackStateDataLed {
     pub led_mask: u32,
     pub led_values: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for FeedbackStateDataLed {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("FeedbackStateDataLed").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(FeedbackStateDataLed, "FeedbackStateDataLed");
 impl TryParse for FeedbackStateDataLed {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (led_mask, remaining) = u32::try_parse(remaining)?;
@@ -4609,12 +4429,7 @@ pub struct FeedbackStateDataBell {
     pub pitch: u16,
     pub duration: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for FeedbackStateDataBell {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("FeedbackStateDataBell").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(FeedbackStateDataBell, "FeedbackStateDataBell");
 impl TryParse for FeedbackStateDataBell {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (percent, remaining) = u8::try_parse(remaining)?;
@@ -4670,12 +4485,7 @@ pub enum FeedbackStateData {
     /// will raise a panic.
     InvalidValue(u8),
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for FeedbackStateData {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("FeedbackStateData").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(FeedbackStateData, "FeedbackStateData");
 impl FeedbackStateData {
     #[cfg_attr(not(feature = "request-parsing"), allow(dead_code))]
     fn try_parse(value: &[u8], class_id: u8) -> Result<(Self, &[u8]), ParseError> {
@@ -4804,12 +4614,7 @@ pub struct FeedbackState {
     pub len: u16,
     pub data: FeedbackStateData,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for FeedbackState {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("FeedbackState").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(FeedbackState, "FeedbackState");
 impl TryParse for FeedbackState {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (class_id, remaining) = u8::try_parse(remaining)?;
@@ -4909,12 +4714,7 @@ pub struct GetFeedbackControlReply {
     pub length: u32,
     pub feedbacks: Vec<FeedbackState>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetFeedbackControlReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetFeedbackControlReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetFeedbackControlReply, "GetFeedbackControlReply");
 impl TryParse for GetFeedbackControlReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -4987,12 +4787,7 @@ pub struct KbdFeedbackCtl {
     pub led_mask: u32,
     pub led_values: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for KbdFeedbackCtl {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("KbdFeedbackCtl").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(KbdFeedbackCtl, "KbdFeedbackCtl");
 impl TryParse for KbdFeedbackCtl {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (class_id, remaining) = u8::try_parse(remaining)?;
@@ -5075,12 +4870,7 @@ pub struct PtrFeedbackCtl {
     pub denom: i16,
     pub threshold: i16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for PtrFeedbackCtl {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PtrFeedbackCtl").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PtrFeedbackCtl, "PtrFeedbackCtl");
 impl TryParse for PtrFeedbackCtl {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (class_id, remaining) = u8::try_parse(remaining)?;
@@ -5140,12 +4930,7 @@ pub struct IntegerFeedbackCtl {
     pub len: u16,
     pub int_to_display: i32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for IntegerFeedbackCtl {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("IntegerFeedbackCtl").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(IntegerFeedbackCtl, "IntegerFeedbackCtl");
 impl TryParse for IntegerFeedbackCtl {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (class_id, remaining) = u8::try_parse(remaining)?;
@@ -5193,12 +4978,7 @@ pub struct StringFeedbackCtl {
     pub len: u16,
     pub keysyms: Vec<xproto::Keysym>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for StringFeedbackCtl {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("StringFeedbackCtl").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(StringFeedbackCtl, "StringFeedbackCtl");
 impl TryParse for StringFeedbackCtl {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (class_id, remaining) = u8::try_parse(remaining)?;
@@ -5257,12 +5037,7 @@ pub struct BellFeedbackCtl {
     pub pitch: i16,
     pub duration: i16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for BellFeedbackCtl {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("BellFeedbackCtl").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(BellFeedbackCtl, "BellFeedbackCtl");
 impl TryParse for BellFeedbackCtl {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (class_id, remaining) = u8::try_parse(remaining)?;
@@ -5323,12 +5098,7 @@ pub struct LedFeedbackCtl {
     pub led_mask: u32,
     pub led_values: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for LedFeedbackCtl {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("LedFeedbackCtl").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(LedFeedbackCtl, "LedFeedbackCtl");
 impl TryParse for LedFeedbackCtl {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (class_id, remaining) = u8::try_parse(remaining)?;
@@ -5387,12 +5157,7 @@ pub struct FeedbackCtlDataKeyboard {
     pub led_mask: u32,
     pub led_values: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for FeedbackCtlDataKeyboard {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("FeedbackCtlDataKeyboard").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(FeedbackCtlDataKeyboard, "FeedbackCtlDataKeyboard");
 impl TryParse for FeedbackCtlDataKeyboard {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (key, remaining) = KeyCode::try_parse(remaining)?;
@@ -5457,12 +5222,7 @@ pub struct FeedbackCtlDataPointer {
     pub denom: i16,
     pub threshold: i16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for FeedbackCtlDataPointer {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("FeedbackCtlDataPointer").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(FeedbackCtlDataPointer, "FeedbackCtlDataPointer");
 impl TryParse for FeedbackCtlDataPointer {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
@@ -5504,12 +5264,7 @@ impl Serialize for FeedbackCtlDataPointer {
 pub struct FeedbackCtlDataString {
     pub keysyms: Vec<xproto::Keysym>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for FeedbackCtlDataString {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("FeedbackCtlDataString").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(FeedbackCtlDataString, "FeedbackCtlDataString");
 impl TryParse for FeedbackCtlDataString {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
@@ -5555,12 +5310,7 @@ impl FeedbackCtlDataString {
 pub struct FeedbackCtlDataInteger {
     pub int_to_display: i32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for FeedbackCtlDataInteger {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("FeedbackCtlDataInteger").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(FeedbackCtlDataInteger, "FeedbackCtlDataInteger");
 impl TryParse for FeedbackCtlDataInteger {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (int_to_display, remaining) = i32::try_parse(remaining)?;
@@ -5591,12 +5341,7 @@ pub struct FeedbackCtlDataLed {
     pub led_mask: u32,
     pub led_values: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for FeedbackCtlDataLed {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("FeedbackCtlDataLed").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(FeedbackCtlDataLed, "FeedbackCtlDataLed");
 impl TryParse for FeedbackCtlDataLed {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (led_mask, remaining) = u32::try_parse(remaining)?;
@@ -5635,12 +5380,7 @@ pub struct FeedbackCtlDataBell {
     pub pitch: i16,
     pub duration: i16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for FeedbackCtlDataBell {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("FeedbackCtlDataBell").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(FeedbackCtlDataBell, "FeedbackCtlDataBell");
 impl TryParse for FeedbackCtlDataBell {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (percent, remaining) = i8::try_parse(remaining)?;
@@ -5696,12 +5436,7 @@ pub enum FeedbackCtlData {
     /// will raise a panic.
     InvalidValue(u8),
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for FeedbackCtlData {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("FeedbackCtlData").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(FeedbackCtlData, "FeedbackCtlData");
 impl FeedbackCtlData {
     #[cfg_attr(not(feature = "request-parsing"), allow(dead_code))]
     fn try_parse(value: &[u8], class_id: u8) -> Result<(Self, &[u8]), ParseError> {
@@ -5830,12 +5565,7 @@ pub struct FeedbackCtl {
     pub len: u16,
     pub data: FeedbackCtlData,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for FeedbackCtl {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("FeedbackCtl").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(FeedbackCtl, "FeedbackCtl");
 impl TryParse for FeedbackCtl {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (class_id, remaining) = u8::try_parse(remaining)?;
@@ -6095,12 +5825,7 @@ pub struct GetDeviceKeyMappingReply {
     pub keysyms_per_keycode: u8,
     pub keysyms: Vec<xproto::Keysym>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetDeviceKeyMappingReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetDeviceKeyMappingReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetDeviceKeyMappingReply, "GetDeviceKeyMappingReply");
 impl TryParse for GetDeviceKeyMappingReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -6320,12 +6045,7 @@ pub struct GetDeviceModifierMappingReply {
     pub length: u32,
     pub keymaps: Vec<u8>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetDeviceModifierMappingReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetDeviceModifierMappingReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetDeviceModifierMappingReply, "GetDeviceModifierMappingReply");
 impl TryParse for GetDeviceModifierMappingReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -6474,12 +6194,7 @@ pub struct SetDeviceModifierMappingReply {
     pub length: u32,
     pub status: xproto::MappingStatus,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for SetDeviceModifierMappingReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SetDeviceModifierMappingReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SetDeviceModifierMappingReply, "SetDeviceModifierMappingReply");
 impl TryParse for SetDeviceModifierMappingReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -6627,12 +6342,7 @@ pub struct GetDeviceButtonMappingReply {
     pub length: u32,
     pub map: Vec<u8>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetDeviceButtonMappingReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetDeviceButtonMappingReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetDeviceButtonMappingReply, "GetDeviceButtonMappingReply");
 impl TryParse for GetDeviceButtonMappingReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -6784,12 +6494,7 @@ pub struct SetDeviceButtonMappingReply {
     pub length: u32,
     pub status: xproto::MappingStatus,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for SetDeviceButtonMappingReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SetDeviceButtonMappingReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SetDeviceButtonMappingReply, "SetDeviceButtonMappingReply");
 impl TryParse for SetDeviceButtonMappingReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -6874,12 +6579,7 @@ pub struct KeyState {
     pub num_keys: u8,
     pub keys: [u8; 32],
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for KeyState {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("KeyState").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(KeyState, "KeyState");
 impl TryParse for KeyState {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (class_id, remaining) = u8::try_parse(remaining)?;
@@ -6956,12 +6656,7 @@ pub struct ButtonState {
     pub num_buttons: u8,
     pub buttons: [u8; 32],
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for ButtonState {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ButtonState").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ButtonState, "ButtonState");
 impl TryParse for ButtonState {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (class_id, remaining) = u8::try_parse(remaining)?;
@@ -7098,12 +6793,7 @@ pub struct ValuatorState {
     pub mode: ValuatorStateModeMask,
     pub valuators: Vec<i32>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for ValuatorState {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ValuatorState").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ValuatorState, "ValuatorState");
 impl TryParse for ValuatorState {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (class_id, remaining) = u8::try_parse(remaining)?;
@@ -7157,12 +6847,7 @@ pub struct InputStateDataKey {
     pub num_keys: u8,
     pub keys: [u8; 32],
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for InputStateDataKey {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("InputStateDataKey").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(InputStateDataKey, "InputStateDataKey");
 impl TryParse for InputStateDataKey {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (num_keys, remaining) = u8::try_parse(remaining)?;
@@ -7227,12 +6912,7 @@ pub struct InputStateDataButton {
     pub num_buttons: u8,
     pub buttons: [u8; 32],
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for InputStateDataButton {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("InputStateDataButton").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(InputStateDataButton, "InputStateDataButton");
 impl TryParse for InputStateDataButton {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (num_buttons, remaining) = u8::try_parse(remaining)?;
@@ -7297,12 +6977,7 @@ pub struct InputStateDataValuator {
     pub mode: ValuatorStateModeMask,
     pub valuators: Vec<i32>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for InputStateDataValuator {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("InputStateDataValuator").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(InputStateDataValuator, "InputStateDataValuator");
 impl TryParse for InputStateDataValuator {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (num_valuators, remaining) = u8::try_parse(remaining)?;
@@ -7360,12 +7035,7 @@ pub enum InputStateData {
     /// will raise a panic.
     InvalidValue(u8),
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for InputStateData {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("InputStateData").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(InputStateData, "InputStateData");
 impl InputStateData {
     #[cfg_attr(not(feature = "request-parsing"), allow(dead_code))]
     fn try_parse(value: &[u8], class_id: u8) -> Result<(Self, &[u8]), ParseError> {
@@ -7451,12 +7121,7 @@ pub struct InputState {
     pub len: u8,
     pub data: InputStateData,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for InputState {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("InputState").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(InputState, "InputState");
 impl TryParse for InputState {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (class_id, remaining) = u8::try_parse(remaining)?;
@@ -7554,12 +7219,7 @@ pub struct QueryDeviceStateReply {
     pub length: u32,
     pub classes: Vec<InputState>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryDeviceStateReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryDeviceStateReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryDeviceStateReply, "QueryDeviceStateReply");
 impl TryParse for QueryDeviceStateReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -7783,12 +7443,7 @@ pub struct SetDeviceValuatorsReply {
     pub length: u32,
     pub status: xproto::GrabStatus,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for SetDeviceValuatorsReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SetDeviceValuatorsReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SetDeviceValuatorsReply, "SetDeviceValuatorsReply");
 impl TryParse for SetDeviceValuatorsReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -7933,12 +7588,7 @@ pub struct DeviceResolutionState {
     pub resolution_min: Vec<u32>,
     pub resolution_max: Vec<u32>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for DeviceResolutionState {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("DeviceResolutionState").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(DeviceResolutionState, "DeviceResolutionState");
 impl TryParse for DeviceResolutionState {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (control_id, remaining) = u16::try_parse(remaining)?;
@@ -8003,12 +7653,7 @@ pub struct DeviceAbsCalibState {
     pub rotation: u32,
     pub button_threshold: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for DeviceAbsCalibState {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("DeviceAbsCalibState").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(DeviceAbsCalibState, "DeviceAbsCalibState");
 impl TryParse for DeviceAbsCalibState {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (control_id, remaining) = u16::try_parse(remaining)?;
@@ -8106,12 +7751,7 @@ pub struct DeviceAbsAreaState {
     pub screen: u32,
     pub following: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for DeviceAbsAreaState {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("DeviceAbsAreaState").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(DeviceAbsAreaState, "DeviceAbsAreaState");
 impl TryParse for DeviceAbsAreaState {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (control_id, remaining) = u16::try_parse(remaining)?;
@@ -8191,12 +7831,7 @@ pub struct DeviceCoreState {
     pub status: u8,
     pub iscore: u8,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for DeviceCoreState {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("DeviceCoreState").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(DeviceCoreState, "DeviceCoreState");
 impl TryParse for DeviceCoreState {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (control_id, remaining) = u16::try_parse(remaining)?;
@@ -8245,12 +7880,7 @@ pub struct DeviceEnableState {
     pub len: u16,
     pub enable: u8,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for DeviceEnableState {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("DeviceEnableState").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(DeviceEnableState, "DeviceEnableState");
 impl TryParse for DeviceEnableState {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (control_id, remaining) = u16::try_parse(remaining)?;
@@ -8296,12 +7926,7 @@ pub struct DeviceStateDataResolution {
     pub resolution_min: Vec<u32>,
     pub resolution_max: Vec<u32>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for DeviceStateDataResolution {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("DeviceStateDataResolution").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(DeviceStateDataResolution, "DeviceStateDataResolution");
 impl TryParse for DeviceStateDataResolution {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (num_valuators, remaining) = u32::try_parse(remaining)?;
@@ -8357,12 +7982,7 @@ pub struct DeviceStateDataAbsCalib {
     pub rotation: u32,
     pub button_threshold: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for DeviceStateDataAbsCalib {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("DeviceStateDataAbsCalib").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(DeviceStateDataAbsCalib, "DeviceStateDataAbsCalib");
 impl TryParse for DeviceStateDataAbsCalib {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (min_x, remaining) = i32::try_parse(remaining)?;
@@ -8442,12 +8062,7 @@ pub struct DeviceStateDataCore {
     pub status: u8,
     pub iscore: u8,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for DeviceStateDataCore {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("DeviceStateDataCore").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(DeviceStateDataCore, "DeviceStateDataCore");
 impl TryParse for DeviceStateDataCore {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (status, remaining) = u8::try_parse(remaining)?;
@@ -8487,12 +8102,7 @@ pub struct DeviceStateDataAbsArea {
     pub screen: u32,
     pub following: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for DeviceStateDataAbsArea {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("DeviceStateDataAbsArea").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(DeviceStateDataAbsArea, "DeviceStateDataAbsArea");
 impl TryParse for DeviceStateDataAbsArea {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (offset_x, remaining) = u32::try_parse(remaining)?;
@@ -8570,12 +8180,7 @@ pub enum DeviceStateData {
     /// will raise a panic.
     InvalidValue(u16),
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for DeviceStateData {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("DeviceStateData").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(DeviceStateData, "DeviceStateData");
 impl DeviceStateData {
     #[cfg_attr(not(feature = "request-parsing"), allow(dead_code))]
     fn try_parse(value: &[u8], control_id: u16) -> Result<(Self, &[u8]), ParseError> {
@@ -8695,12 +8300,7 @@ pub struct DeviceState {
     pub len: u16,
     pub data: DeviceStateData,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for DeviceState {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("DeviceState").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(DeviceState, "DeviceState");
 impl TryParse for DeviceState {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (control_id, remaining) = u16::try_parse(remaining)?;
@@ -8804,12 +8404,7 @@ pub struct GetDeviceControlReply {
     pub status: u8,
     pub control: DeviceState,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetDeviceControlReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetDeviceControlReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetDeviceControlReply, "GetDeviceControlReply");
 impl TryParse for GetDeviceControlReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -8859,12 +8454,7 @@ pub struct DeviceResolutionCtl {
     pub first_valuator: u8,
     pub resolution_values: Vec<u32>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for DeviceResolutionCtl {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("DeviceResolutionCtl").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(DeviceResolutionCtl, "DeviceResolutionCtl");
 impl TryParse for DeviceResolutionCtl {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (control_id, remaining) = u16::try_parse(remaining)?;
@@ -8927,12 +8517,7 @@ pub struct DeviceAbsCalibCtl {
     pub rotation: u32,
     pub button_threshold: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for DeviceAbsCalibCtl {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("DeviceAbsCalibCtl").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(DeviceAbsCalibCtl, "DeviceAbsCalibCtl");
 impl TryParse for DeviceAbsCalibCtl {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (control_id, remaining) = u16::try_parse(remaining)?;
@@ -9030,12 +8615,7 @@ pub struct DeviceAbsAreaCtrl {
     pub screen: i32,
     pub following: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for DeviceAbsAreaCtrl {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("DeviceAbsAreaCtrl").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(DeviceAbsAreaCtrl, "DeviceAbsAreaCtrl");
 impl TryParse for DeviceAbsAreaCtrl {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (control_id, remaining) = u16::try_parse(remaining)?;
@@ -9114,12 +8694,7 @@ pub struct DeviceCoreCtrl {
     pub len: u16,
     pub status: u8,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for DeviceCoreCtrl {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("DeviceCoreCtrl").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(DeviceCoreCtrl, "DeviceCoreCtrl");
 impl TryParse for DeviceCoreCtrl {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (control_id, remaining) = u16::try_parse(remaining)?;
@@ -9165,12 +8740,7 @@ pub struct DeviceEnableCtrl {
     pub len: u16,
     pub enable: u8,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for DeviceEnableCtrl {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("DeviceEnableCtrl").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(DeviceEnableCtrl, "DeviceEnableCtrl");
 impl TryParse for DeviceEnableCtrl {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (control_id, remaining) = u16::try_parse(remaining)?;
@@ -9215,12 +8785,7 @@ pub struct DeviceCtlDataResolution {
     pub first_valuator: u8,
     pub resolution_values: Vec<u32>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for DeviceCtlDataResolution {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("DeviceCtlDataResolution").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(DeviceCtlDataResolution, "DeviceCtlDataResolution");
 impl TryParse for DeviceCtlDataResolution {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (first_valuator, remaining) = u8::try_parse(remaining)?;
@@ -9275,12 +8840,7 @@ pub struct DeviceCtlDataAbsCalib {
     pub rotation: u32,
     pub button_threshold: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for DeviceCtlDataAbsCalib {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("DeviceCtlDataAbsCalib").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(DeviceCtlDataAbsCalib, "DeviceCtlDataAbsCalib");
 impl TryParse for DeviceCtlDataAbsCalib {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (min_x, remaining) = i32::try_parse(remaining)?;
@@ -9359,12 +8919,7 @@ impl Serialize for DeviceCtlDataAbsCalib {
 pub struct DeviceCtlDataCore {
     pub status: u8,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for DeviceCtlDataCore {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("DeviceCtlDataCore").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(DeviceCtlDataCore, "DeviceCtlDataCore");
 impl TryParse for DeviceCtlDataCore {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (status, remaining) = u8::try_parse(remaining)?;
@@ -9401,12 +8956,7 @@ pub struct DeviceCtlDataAbsArea {
     pub screen: i32,
     pub following: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for DeviceCtlDataAbsArea {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("DeviceCtlDataAbsArea").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(DeviceCtlDataAbsArea, "DeviceCtlDataAbsArea");
 impl TryParse for DeviceCtlDataAbsArea {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (offset_x, remaining) = u32::try_parse(remaining)?;
@@ -9484,12 +9034,7 @@ pub enum DeviceCtlData {
     /// will raise a panic.
     InvalidValue(u16),
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for DeviceCtlData {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("DeviceCtlData").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(DeviceCtlData, "DeviceCtlData");
 impl DeviceCtlData {
     #[cfg_attr(not(feature = "request-parsing"), allow(dead_code))]
     fn try_parse(value: &[u8], control_id: u16) -> Result<(Self, &[u8]), ParseError> {
@@ -9609,12 +9154,7 @@ pub struct DeviceCtl {
     pub len: u16,
     pub data: DeviceCtlData,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for DeviceCtl {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("DeviceCtl").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(DeviceCtl, "DeviceCtl");
 impl TryParse for DeviceCtl {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (control_id, remaining) = u16::try_parse(remaining)?;
@@ -9724,12 +9264,7 @@ pub struct ChangeDeviceControlReply {
     pub length: u32,
     pub status: u8,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for ChangeDeviceControlReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ChangeDeviceControlReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ChangeDeviceControlReply, "ChangeDeviceControlReply");
 impl TryParse for ChangeDeviceControlReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -9876,12 +9411,7 @@ pub struct ListDevicePropertiesReply {
     pub length: u32,
     pub atoms: Vec<xproto::Atom>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for ListDevicePropertiesReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ListDevicePropertiesReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ListDevicePropertiesReply, "ListDevicePropertiesReply");
 impl TryParse for ListDevicePropertiesReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -10016,12 +9546,7 @@ pub enum ChangeDevicePropertyAux {
     /// will raise a panic.
     InvalidValue(u8),
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for ChangeDevicePropertyAux {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ChangeDevicePropertyAux").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ChangeDevicePropertyAux, "ChangeDevicePropertyAux");
 impl ChangeDevicePropertyAux {
     #[cfg_attr(not(feature = "request-parsing"), allow(dead_code))]
     fn try_parse(value: &[u8], format: u8, num_items: u32) -> Result<(Self, &[u8]), ParseError> {
@@ -10423,12 +9948,7 @@ pub enum GetDevicePropertyItems {
     /// will raise a panic.
     InvalidValue(u8),
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetDevicePropertyItems {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetDevicePropertyItems").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetDevicePropertyItems, "GetDevicePropertyItems");
 impl GetDevicePropertyItems {
     #[cfg_attr(not(feature = "request-parsing"), allow(dead_code))]
     fn try_parse(value: &[u8], format: u8, num_items: u32) -> Result<(Self, &[u8]), ParseError> {
@@ -10545,12 +10065,7 @@ pub struct GetDevicePropertyReply {
     pub device_id: u8,
     pub items: GetDevicePropertyItems,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetDevicePropertyReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetDevicePropertyReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetDevicePropertyReply, "GetDevicePropertyReply");
 impl TryParse for GetDevicePropertyReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -10680,12 +10195,7 @@ pub struct GroupInfo {
     pub locked: u8,
     pub effective: u8,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GroupInfo {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GroupInfo").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GroupInfo, "GroupInfo");
 impl TryParse for GroupInfo {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (base, remaining) = u8::try_parse(remaining)?;
@@ -10728,12 +10238,7 @@ pub struct ModifierInfo {
     pub locked: u32,
     pub effective: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for ModifierInfo {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ModifierInfo").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ModifierInfo, "ModifierInfo");
 impl TryParse for ModifierInfo {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (base, remaining) = u32::try_parse(remaining)?;
@@ -10867,12 +10372,7 @@ pub struct XIQueryPointerReply {
     pub group: GroupInfo,
     pub buttons: Vec<u32>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for XIQueryPointerReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("XIQueryPointerReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(XIQueryPointerReply, "XIQueryPointerReply");
 impl TryParse for XIQueryPointerReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -11273,12 +10773,7 @@ pub struct AddMaster {
     pub enable: bool,
     pub name: Vec<u8>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for AddMaster {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("AddMaster").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(AddMaster, "AddMaster");
 impl TryParse for AddMaster {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let value = remaining;
@@ -11344,12 +10839,7 @@ pub struct RemoveMaster {
     pub return_pointer: DeviceId,
     pub return_keyboard: DeviceId,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for RemoveMaster {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("RemoveMaster").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(RemoveMaster, "RemoveMaster");
 impl TryParse for RemoveMaster {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (type_, remaining) = u16::try_parse(remaining)?;
@@ -11410,12 +10900,7 @@ pub struct AttachSlave {
     pub deviceid: DeviceId,
     pub master: DeviceId,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for AttachSlave {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("AttachSlave").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(AttachSlave, "AttachSlave");
 impl TryParse for AttachSlave {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (type_, remaining) = u16::try_parse(remaining)?;
@@ -11462,12 +10947,7 @@ pub struct DetachSlave {
     pub len: u16,
     pub deviceid: DeviceId,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for DetachSlave {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("DetachSlave").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(DetachSlave, "DetachSlave");
 impl TryParse for DetachSlave {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (type_, remaining) = u16::try_parse(remaining)?;
@@ -11513,12 +10993,7 @@ pub struct HierarchyChangeDataAddMaster {
     pub enable: bool,
     pub name: Vec<u8>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for HierarchyChangeDataAddMaster {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("HierarchyChangeDataAddMaster").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(HierarchyChangeDataAddMaster, "HierarchyChangeDataAddMaster");
 impl TryParse for HierarchyChangeDataAddMaster {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let value = remaining;
@@ -11576,12 +11051,7 @@ pub struct HierarchyChangeDataRemoveMaster {
     pub return_pointer: DeviceId,
     pub return_keyboard: DeviceId,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for HierarchyChangeDataRemoveMaster {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("HierarchyChangeDataRemoveMaster").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(HierarchyChangeDataRemoveMaster, "HierarchyChangeDataRemoveMaster");
 impl TryParse for HierarchyChangeDataRemoveMaster {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
@@ -11628,12 +11098,7 @@ pub struct HierarchyChangeDataAttachSlave {
     pub deviceid: DeviceId,
     pub master: DeviceId,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for HierarchyChangeDataAttachSlave {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("HierarchyChangeDataAttachSlave").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(HierarchyChangeDataAttachSlave, "HierarchyChangeDataAttachSlave");
 impl TryParse for HierarchyChangeDataAttachSlave {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
@@ -11666,12 +11131,7 @@ impl Serialize for HierarchyChangeDataAttachSlave {
 pub struct HierarchyChangeDataDetachSlave {
     pub deviceid: DeviceId,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for HierarchyChangeDataDetachSlave {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("HierarchyChangeDataDetachSlave").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(HierarchyChangeDataDetachSlave, "HierarchyChangeDataDetachSlave");
 impl TryParse for HierarchyChangeDataDetachSlave {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
@@ -11715,12 +11175,7 @@ pub enum HierarchyChangeData {
     /// will raise a panic.
     InvalidValue(u16),
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for HierarchyChangeData {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("HierarchyChangeData").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(HierarchyChangeData, "HierarchyChangeData");
 impl HierarchyChangeData {
     #[cfg_attr(not(feature = "request-parsing"), allow(dead_code))]
     fn try_parse(value: &[u8], type_: u16) -> Result<(Self, &[u8]), ParseError> {
@@ -11820,12 +11275,7 @@ pub struct HierarchyChange {
     pub len: u16,
     pub data: HierarchyChangeData,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for HierarchyChange {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("HierarchyChange").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(HierarchyChange, "HierarchyChange");
 impl TryParse for HierarchyChange {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (type_, remaining) = u16::try_parse(remaining)?;
@@ -12066,12 +11516,7 @@ pub struct XIGetClientPointerReply {
     pub set: bool,
     pub deviceid: DeviceId,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for XIGetClientPointerReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("XIGetClientPointerReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(XIGetClientPointerReply, "XIGetClientPointerReply");
 impl TryParse for XIGetClientPointerReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -12253,12 +11698,7 @@ pub struct EventMask {
     pub deviceid: DeviceId,
     pub mask: Vec<XIEventMask>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for EventMask {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("EventMask").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(EventMask, "EventMask");
 impl TryParse for EventMask {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
@@ -12467,12 +11907,7 @@ pub struct XIQueryVersionReply {
     pub major_version: u16,
     pub minor_version: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for XIQueryVersionReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("XIQueryVersionReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(XIQueryVersionReply, "XIQueryVersionReply");
 impl TryParse for XIQueryVersionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -12839,12 +12274,7 @@ pub struct ButtonClass {
     pub state: Vec<u32>,
     pub labels: Vec<xproto::Atom>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for ButtonClass {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ButtonClass").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ButtonClass, "ButtonClass");
 impl TryParse for ButtonClass {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (type_, remaining) = u16::try_parse(remaining)?;
@@ -12902,12 +12332,7 @@ pub struct KeyClass {
     pub sourceid: DeviceId,
     pub keys: Vec<u32>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for KeyClass {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("KeyClass").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(KeyClass, "KeyClass");
 impl TryParse for KeyClass {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (type_, remaining) = u16::try_parse(remaining)?;
@@ -12965,12 +12390,7 @@ pub struct ScrollClass {
     pub flags: ScrollFlags,
     pub increment: Fp3232,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for ScrollClass {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ScrollClass").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ScrollClass, "ScrollClass");
 impl TryParse for ScrollClass {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (type_, remaining) = u16::try_parse(remaining)?;
@@ -13048,12 +12468,7 @@ pub struct TouchClass {
     pub mode: TouchMode,
     pub num_touches: u8,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for TouchClass {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("TouchClass").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(TouchClass, "TouchClass");
 impl TryParse for TouchClass {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (type_, remaining) = u16::try_parse(remaining)?;
@@ -13105,12 +12520,7 @@ pub struct GestureClass {
     pub sourceid: DeviceId,
     pub num_touches: u8,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GestureClass {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GestureClass").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GestureClass, "GestureClass");
 impl TryParse for GestureClass {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (type_, remaining) = u16::try_parse(remaining)?;
@@ -13166,12 +12576,7 @@ pub struct ValuatorClass {
     pub resolution: u32,
     pub mode: ValuatorMode,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for ValuatorClass {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ValuatorClass").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ValuatorClass, "ValuatorClass");
 impl TryParse for ValuatorClass {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (type_, remaining) = u16::try_parse(remaining)?;
@@ -13273,12 +12678,7 @@ impl Serialize for ValuatorClass {
 pub struct DeviceClassDataKey {
     pub keys: Vec<u32>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for DeviceClassDataKey {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("DeviceClassDataKey").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(DeviceClassDataKey, "DeviceClassDataKey");
 impl TryParse for DeviceClassDataKey {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (num_keys, remaining) = u16::try_parse(remaining)?;
@@ -13322,12 +12722,7 @@ pub struct DeviceClassDataButton {
     pub state: Vec<u32>,
     pub labels: Vec<xproto::Atom>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for DeviceClassDataButton {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("DeviceClassDataButton").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(DeviceClassDataButton, "DeviceClassDataButton");
 impl TryParse for DeviceClassDataButton {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (num_buttons, remaining) = u16::try_parse(remaining)?;
@@ -13379,12 +12774,7 @@ pub struct DeviceClassDataValuator {
     pub resolution: u32,
     pub mode: ValuatorMode,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for DeviceClassDataValuator {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("DeviceClassDataValuator").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(DeviceClassDataValuator, "DeviceClassDataValuator");
 impl TryParse for DeviceClassDataValuator {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (number, remaining) = u16::try_parse(remaining)?;
@@ -13472,12 +12862,7 @@ pub struct DeviceClassDataScroll {
     pub flags: ScrollFlags,
     pub increment: Fp3232,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for DeviceClassDataScroll {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("DeviceClassDataScroll").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(DeviceClassDataScroll, "DeviceClassDataScroll");
 impl TryParse for DeviceClassDataScroll {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (number, remaining) = u16::try_parse(remaining)?;
@@ -13535,12 +12920,7 @@ pub struct DeviceClassDataTouch {
     pub mode: TouchMode,
     pub num_touches: u8,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for DeviceClassDataTouch {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("DeviceClassDataTouch").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(DeviceClassDataTouch, "DeviceClassDataTouch");
 impl TryParse for DeviceClassDataTouch {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (mode, remaining) = u8::try_parse(remaining)?;
@@ -13572,12 +12952,7 @@ impl Serialize for DeviceClassDataTouch {
 pub struct DeviceClassDataGesture {
     pub num_touches: u8,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for DeviceClassDataGesture {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("DeviceClassDataGesture").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(DeviceClassDataGesture, "DeviceClassDataGesture");
 impl TryParse for DeviceClassDataGesture {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (num_touches, remaining) = u8::try_parse(remaining)?;
@@ -13621,12 +12996,7 @@ pub enum DeviceClassData {
     /// will raise a panic.
     InvalidValue(u16),
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for DeviceClassData {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("DeviceClassData").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(DeviceClassData, "DeviceClassData");
 impl DeviceClassData {
     #[cfg_attr(not(feature = "request-parsing"), allow(dead_code))]
     fn try_parse(value: &[u8], type_: u16) -> Result<(Self, &[u8]), ParseError> {
@@ -13755,12 +13125,7 @@ pub struct DeviceClass {
     pub sourceid: DeviceId,
     pub data: DeviceClassData,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for DeviceClass {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("DeviceClass").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(DeviceClass, "DeviceClass");
 impl TryParse for DeviceClass {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -13804,12 +13169,7 @@ pub struct XIDeviceInfo {
     pub name: Vec<u8>,
     pub classes: Vec<DeviceClass>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for XIDeviceInfo {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("XIDeviceInfo").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(XIDeviceInfo, "XIDeviceInfo");
 impl TryParse for XIDeviceInfo {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let value = remaining;
@@ -13955,12 +13315,7 @@ pub struct XIQueryDeviceReply {
     pub length: u32,
     pub infos: Vec<XIDeviceInfo>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for XIQueryDeviceReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("XIQueryDeviceReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(XIQueryDeviceReply, "XIQueryDeviceReply");
 impl TryParse for XIQueryDeviceReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -14166,12 +13521,7 @@ pub struct XIGetFocusReply {
     pub length: u32,
     pub focus: xproto::Window,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for XIGetFocusReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("XIGetFocusReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(XIGetFocusReply, "XIGetFocusReply");
 impl TryParse for XIGetFocusReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -14453,12 +13803,7 @@ pub struct XIGrabDeviceReply {
     pub length: u32,
     pub status: xproto::GrabStatus,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for XIGrabDeviceReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("XIGrabDeviceReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(XIGrabDeviceReply, "XIGrabDeviceReply");
 impl TryParse for XIGrabDeviceReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -14948,12 +14293,7 @@ pub struct GrabModifierInfo {
     pub modifiers: u32,
     pub status: xproto::GrabStatus,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GrabModifierInfo {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GrabModifierInfo").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GrabModifierInfo, "GrabModifierInfo");
 impl TryParse for GrabModifierInfo {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (modifiers, remaining) = u32::try_parse(remaining)?;
@@ -15153,12 +14493,7 @@ pub struct XIPassiveGrabDeviceReply {
     pub length: u32,
     pub modifiers: Vec<GrabModifierInfo>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for XIPassiveGrabDeviceReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("XIPassiveGrabDeviceReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(XIPassiveGrabDeviceReply, "XIPassiveGrabDeviceReply");
 impl TryParse for XIPassiveGrabDeviceReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -15393,12 +14728,7 @@ pub struct XIListPropertiesReply {
     pub length: u32,
     pub properties: Vec<xproto::Atom>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for XIListPropertiesReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("XIListPropertiesReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(XIListPropertiesReply, "XIListPropertiesReply");
 impl TryParse for XIListPropertiesReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -15472,12 +14802,7 @@ pub enum XIChangePropertyAux {
     /// will raise a panic.
     InvalidValue(u8),
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for XIChangePropertyAux {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("XIChangePropertyAux").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(XIChangePropertyAux, "XIChangePropertyAux");
 impl XIChangePropertyAux {
     #[cfg_attr(not(feature = "request-parsing"), allow(dead_code))]
     fn try_parse(value: &[u8], format: u8, num_items: u32) -> Result<(Self, &[u8]), ParseError> {
@@ -15878,12 +15203,7 @@ pub enum XIGetPropertyItems {
     /// will raise a panic.
     InvalidValue(u8),
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for XIGetPropertyItems {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("XIGetPropertyItems").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(XIGetPropertyItems, "XIGetPropertyItems");
 impl XIGetPropertyItems {
     #[cfg_attr(not(feature = "request-parsing"), allow(dead_code))]
     fn try_parse(value: &[u8], format: u8, num_items: u32) -> Result<(Self, &[u8]), ParseError> {
@@ -15998,12 +15318,7 @@ pub struct XIGetPropertyReply {
     pub num_items: u32,
     pub items: XIGetPropertyItems,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for XIGetPropertyReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("XIGetPropertyReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(XIGetPropertyReply, "XIGetPropertyReply");
 impl TryParse for XIGetPropertyReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -16121,12 +15436,7 @@ pub struct XIGetSelectedEventsReply {
     pub length: u32,
     pub masks: Vec<EventMask>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for XIGetSelectedEventsReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("XIGetSelectedEventsReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(XIGetSelectedEventsReply, "XIGetSelectedEventsReply");
 impl TryParse for XIGetSelectedEventsReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -16191,12 +15501,7 @@ pub struct BarrierReleasePointerInfo {
     pub barrier: xfixes::Barrier,
     pub eventid: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for BarrierReleasePointerInfo {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("BarrierReleasePointerInfo").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(BarrierReleasePointerInfo, "BarrierReleasePointerInfo");
 impl TryParse for BarrierReleasePointerInfo {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
@@ -16324,12 +15629,7 @@ pub struct DeviceValuatorEvent {
     pub first_valuator: u8,
     pub valuators: [i32; 6],
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for DeviceValuatorEvent {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("DeviceValuatorEvent").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(DeviceValuatorEvent, "DeviceValuatorEvent");
 impl TryParse for DeviceValuatorEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -16556,12 +15856,7 @@ pub struct DeviceKeyPressEvent {
     pub same_screen: bool,
     pub device_id: u8,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for DeviceKeyPressEvent {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("DeviceKeyPressEvent").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(DeviceKeyPressEvent, "DeviceKeyPressEvent");
 impl TryParse for DeviceKeyPressEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -16745,12 +16040,7 @@ pub struct DeviceFocusInEvent {
     pub mode: xproto::NotifyMode,
     pub device_id: u8,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for DeviceFocusInEvent {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("DeviceFocusInEvent").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(DeviceFocusInEvent, "DeviceFocusInEvent");
 impl TryParse for DeviceFocusInEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -16975,12 +16265,7 @@ pub struct DeviceStateNotifyEvent {
     pub keys: [u8; 4],
     pub valuators: [u32; 3],
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for DeviceStateNotifyEvent {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("DeviceStateNotifyEvent").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(DeviceStateNotifyEvent, "DeviceStateNotifyEvent");
 impl TryParse for DeviceStateNotifyEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -17143,12 +16428,7 @@ pub struct DeviceMappingNotifyEvent {
     pub count: u8,
     pub time: xproto::Timestamp,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for DeviceMappingNotifyEvent {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("DeviceMappingNotifyEvent").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(DeviceMappingNotifyEvent, "DeviceMappingNotifyEvent");
 impl TryParse for DeviceMappingNotifyEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -17349,12 +16629,7 @@ pub struct ChangeDeviceNotifyEvent {
     pub time: xproto::Timestamp,
     pub request: ChangeDevice,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for ChangeDeviceNotifyEvent {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ChangeDeviceNotifyEvent").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ChangeDeviceNotifyEvent, "ChangeDeviceNotifyEvent");
 impl TryParse for ChangeDeviceNotifyEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -17485,12 +16760,7 @@ pub struct DeviceKeyStateNotifyEvent {
     pub sequence: u16,
     pub keys: [u8; 28],
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for DeviceKeyStateNotifyEvent {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("DeviceKeyStateNotifyEvent").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(DeviceKeyStateNotifyEvent, "DeviceKeyStateNotifyEvent");
 impl TryParse for DeviceKeyStateNotifyEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -17612,12 +16882,7 @@ pub struct DeviceButtonStateNotifyEvent {
     pub sequence: u16,
     pub buttons: [u8; 28],
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for DeviceButtonStateNotifyEvent {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("DeviceButtonStateNotifyEvent").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(DeviceButtonStateNotifyEvent, "DeviceButtonStateNotifyEvent");
 impl TryParse for DeviceButtonStateNotifyEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -17808,12 +17073,7 @@ pub struct DevicePresenceNotifyEvent {
     pub device_id: u8,
     pub control: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for DevicePresenceNotifyEvent {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("DevicePresenceNotifyEvent").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(DevicePresenceNotifyEvent, "DevicePresenceNotifyEvent");
 impl TryParse for DevicePresenceNotifyEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -17952,12 +17212,7 @@ pub struct DevicePropertyNotifyEvent {
     pub property: xproto::Atom,
     pub device_id: u8,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for DevicePropertyNotifyEvent {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("DevicePropertyNotifyEvent").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(DevicePropertyNotifyEvent, "DevicePropertyNotifyEvent");
 impl TryParse for DevicePropertyNotifyEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -18157,12 +17412,7 @@ pub struct DeviceChangedEvent {
     pub reason: ChangeReason,
     pub classes: Vec<DeviceClass>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for DeviceChangedEvent {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("DeviceChangedEvent").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(DeviceChangedEvent, "DeviceChangedEvent");
 impl TryParse for DeviceChangedEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -18301,12 +17551,7 @@ pub struct KeyPressEvent {
     pub valuator_mask: Vec<u32>,
     pub axisvalues: Vec<Fp3232>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for KeyPressEvent {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("KeyPressEvent").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(KeyPressEvent, "KeyPressEvent");
 impl TryParse for KeyPressEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -18490,12 +17735,7 @@ pub struct ButtonPressEvent {
     pub valuator_mask: Vec<u32>,
     pub axisvalues: Vec<Fp3232>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for ButtonPressEvent {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ButtonPressEvent").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ButtonPressEvent, "ButtonPressEvent");
 impl TryParse for ButtonPressEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -18775,12 +18015,7 @@ pub struct EnterEvent {
     pub group: GroupInfo,
     pub buttons: Vec<u32>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for EnterEvent {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("EnterEvent").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(EnterEvent, "EnterEvent");
 impl TryParse for EnterEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -18949,12 +18184,7 @@ pub struct HierarchyInfo {
     pub enabled: bool,
     pub flags: HierarchyMask,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for HierarchyInfo {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("HierarchyInfo").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(HierarchyInfo, "HierarchyInfo");
 impl TryParse for HierarchyInfo {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
@@ -19019,12 +18249,7 @@ pub struct HierarchyEvent {
     pub flags: HierarchyMask,
     pub infos: Vec<HierarchyInfo>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for HierarchyEvent {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("HierarchyEvent").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(HierarchyEvent, "HierarchyEvent");
 impl TryParse for HierarchyEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -19163,12 +18388,7 @@ pub struct PropertyEvent {
     pub property: xproto::Atom,
     pub what: PropertyFlag,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for PropertyEvent {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PropertyEvent").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PropertyEvent, "PropertyEvent");
 impl TryParse for PropertyEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -19272,12 +18492,7 @@ pub struct RawKeyPressEvent {
     pub axisvalues: Vec<Fp3232>,
     pub axisvalues_raw: Vec<Fp3232>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for RawKeyPressEvent {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("RawKeyPressEvent").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(RawKeyPressEvent, "RawKeyPressEvent");
 impl TryParse for RawKeyPressEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -19373,12 +18588,7 @@ pub struct RawButtonPressEvent {
     pub axisvalues: Vec<Fp3232>,
     pub axisvalues_raw: Vec<Fp3232>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for RawButtonPressEvent {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("RawButtonPressEvent").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(RawButtonPressEvent, "RawButtonPressEvent");
 impl TryParse for RawButtonPressEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -19535,12 +18745,7 @@ pub struct TouchBeginEvent {
     pub valuator_mask: Vec<u32>,
     pub axisvalues: Vec<Fp3232>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for TouchBeginEvent {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("TouchBeginEvent").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(TouchBeginEvent, "TouchBeginEvent");
 impl TryParse for TouchBeginEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -19718,12 +18923,7 @@ pub struct TouchOwnershipEvent {
     pub sourceid: DeviceId,
     pub flags: TouchOwnershipFlags,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for TouchOwnershipEvent {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("TouchOwnershipEvent").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(TouchOwnershipEvent, "TouchOwnershipEvent");
 impl TryParse for TouchOwnershipEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -19857,12 +19057,7 @@ pub struct RawTouchBeginEvent {
     pub axisvalues: Vec<Fp3232>,
     pub axisvalues_raw: Vec<Fp3232>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for RawTouchBeginEvent {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("RawTouchBeginEvent").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(RawTouchBeginEvent, "RawTouchBeginEvent");
 impl TryParse for RawTouchBeginEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -20015,12 +19210,7 @@ pub struct BarrierHitEvent {
     pub dx: Fp3232,
     pub dy: Fp3232,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for BarrierHitEvent {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("BarrierHitEvent").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(BarrierHitEvent, "BarrierHitEvent");
 impl TryParse for BarrierHitEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -20249,12 +19439,7 @@ pub struct GesturePinchBeginEvent {
     pub group: GroupInfo,
     pub flags: GesturePinchEventFlags,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GesturePinchBeginEvent {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GesturePinchBeginEvent").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GesturePinchBeginEvent, "GesturePinchBeginEvent");
 impl TryParse for GesturePinchBeginEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -20538,12 +19723,7 @@ pub struct GestureSwipeBeginEvent {
     pub group: GroupInfo,
     pub flags: GestureSwipeEventFlags,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GestureSwipeBeginEvent {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GestureSwipeBeginEvent").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GestureSwipeBeginEvent, "GestureSwipeBeginEvent");
 impl TryParse for GestureSwipeBeginEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;

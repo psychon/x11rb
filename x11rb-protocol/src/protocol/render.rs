@@ -621,12 +621,7 @@ pub struct Directformat {
     pub alpha_shift: u16,
     pub alpha_mask: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for Directformat {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("Directformat").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(Directformat, "Directformat");
 impl TryParse for Directformat {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (red_shift, remaining) = u16::try_parse(remaining)?;
@@ -694,12 +689,7 @@ pub struct Pictforminfo {
     pub direct: Directformat,
     pub colormap: xproto::Colormap,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for Pictforminfo {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("Pictforminfo").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(Pictforminfo, "Pictforminfo");
 impl TryParse for Pictforminfo {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (id, remaining) = Pictformat::try_parse(remaining)?;
@@ -770,12 +760,7 @@ pub struct Pictvisual {
     pub visual: xproto::Visualid,
     pub format: Pictformat,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for Pictvisual {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("Pictvisual").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(Pictvisual, "Pictvisual");
 impl TryParse for Pictvisual {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (visual, remaining) = xproto::Visualid::try_parse(remaining)?;
@@ -814,12 +799,7 @@ pub struct Pictdepth {
     pub depth: u8,
     pub visuals: Vec<Pictvisual>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for Pictdepth {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("Pictdepth").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(Pictdepth, "Pictdepth");
 impl TryParse for Pictdepth {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (depth, remaining) = u8::try_parse(remaining)?;
@@ -871,12 +851,7 @@ pub struct Pictscreen {
     pub fallback: Pictformat,
     pub depths: Vec<Pictdepth>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for Pictscreen {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("Pictscreen").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(Pictscreen, "Pictscreen");
 impl TryParse for Pictscreen {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (num_depths, remaining) = u32::try_parse(remaining)?;
@@ -927,12 +902,7 @@ pub struct Indexvalue {
     pub blue: u16,
     pub alpha: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for Indexvalue {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("Indexvalue").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(Indexvalue, "Indexvalue");
 impl TryParse for Indexvalue {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (pixel, remaining) = u32::try_parse(remaining)?;
@@ -986,12 +956,7 @@ pub struct Color {
     pub blue: u16,
     pub alpha: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for Color {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("Color").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(Color, "Color");
 impl TryParse for Color {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (red, remaining) = u16::try_parse(remaining)?;
@@ -1036,12 +1001,7 @@ pub struct Pointfix {
     pub x: Fixed,
     pub y: Fixed,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for Pointfix {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("Pointfix").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(Pointfix, "Pointfix");
 impl TryParse for Pointfix {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (x, remaining) = Fixed::try_parse(remaining)?;
@@ -1080,12 +1040,7 @@ pub struct Linefix {
     pub p1: Pointfix,
     pub p2: Pointfix,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for Linefix {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("Linefix").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(Linefix, "Linefix");
 impl TryParse for Linefix {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (p1, remaining) = Pointfix::try_parse(remaining)?;
@@ -1133,12 +1088,7 @@ pub struct Triangle {
     pub p2: Pointfix,
     pub p3: Pointfix,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for Triangle {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("Triangle").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(Triangle, "Triangle");
 impl TryParse for Triangle {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (p1, remaining) = Pointfix::try_parse(remaining)?;
@@ -1198,12 +1148,7 @@ pub struct Trapezoid {
     pub left: Linefix,
     pub right: Linefix,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for Trapezoid {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("Trapezoid").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(Trapezoid, "Trapezoid");
 impl TryParse for Trapezoid {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (top, remaining) = Fixed::try_parse(remaining)?;
@@ -1284,12 +1229,7 @@ pub struct Glyphinfo {
     pub x_off: i16,
     pub y_off: i16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for Glyphinfo {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("Glyphinfo").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(Glyphinfo, "Glyphinfo");
 impl TryParse for Glyphinfo {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (width, remaining) = u16::try_parse(remaining)?;
@@ -1416,12 +1356,7 @@ pub struct QueryVersionReply {
     pub major_version: u32,
     pub minor_version: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryVersionReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryVersionReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryVersionReply, "QueryVersionReply");
 impl TryParse for QueryVersionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -1563,12 +1498,7 @@ pub struct QueryPictFormatsReply {
     pub screens: Vec<Pictscreen>,
     pub subpixels: Vec<SubPixel>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryPictFormatsReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryPictFormatsReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryPictFormatsReply, "QueryPictFormatsReply");
 impl TryParse for QueryPictFormatsReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -1745,12 +1675,7 @@ pub struct QueryPictIndexValuesReply {
     pub length: u32,
     pub values: Vec<Indexvalue>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryPictIndexValuesReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryPictIndexValuesReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryPictIndexValuesReply, "QueryPictIndexValuesReply");
 impl TryParse for QueryPictIndexValuesReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -1826,12 +1751,7 @@ pub struct CreatePictureAux {
     pub dither: Option<xproto::Atom>,
     pub componentalpha: Option<u32>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for CreatePictureAux {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("CreatePictureAux").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(CreatePictureAux, "CreatePictureAux");
 impl CreatePictureAux {
     #[cfg_attr(not(feature = "request-parsing"), allow(dead_code))]
     fn try_parse(value: &[u8], value_mask: u32) -> Result<(Self, &[u8]), ParseError> {
@@ -2248,12 +2168,7 @@ pub struct ChangePictureAux {
     pub dither: Option<xproto::Atom>,
     pub componentalpha: Option<u32>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for ChangePictureAux {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ChangePictureAux").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ChangePictureAux, "ChangePictureAux");
 impl ChangePictureAux {
     #[cfg_attr(not(feature = "request-parsing"), allow(dead_code))]
     fn try_parse(value: &[u8], value_mask: u32) -> Result<(Self, &[u8]), ParseError> {
@@ -4379,12 +4294,7 @@ pub struct Transform {
     pub matrix32: Fixed,
     pub matrix33: Fixed,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for Transform {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("Transform").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(Transform, "Transform");
 impl TryParse for Transform {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (matrix11, remaining) = Fixed::try_parse(remaining)?;
@@ -4637,12 +4547,7 @@ pub struct QueryFiltersReply {
     pub aliases: Vec<u16>,
     pub filters: Vec<xproto::Str>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryFiltersReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryFiltersReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryFiltersReply, "QueryFiltersReply");
 impl TryParse for QueryFiltersReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -4825,12 +4730,7 @@ pub struct Animcursorelt {
     pub cursor: xproto::Cursor,
     pub delay: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for Animcursorelt {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("Animcursorelt").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(Animcursorelt, "Animcursorelt");
 impl TryParse for Animcursorelt {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (cursor, remaining) = xproto::Cursor::try_parse(remaining)?;
@@ -4952,12 +4852,7 @@ pub struct Spanfix {
     pub r: Fixed,
     pub y: Fixed,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for Spanfix {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("Spanfix").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(Spanfix, "Spanfix");
 impl TryParse for Spanfix {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (l, remaining) = Fixed::try_parse(remaining)?;
@@ -5003,12 +4898,7 @@ pub struct Trap {
     pub top: Spanfix,
     pub bot: Spanfix,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for Trap {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("Trap").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(Trap, "Trap");
 impl TryParse for Trap {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (top, remaining) = Spanfix::try_parse(remaining)?;

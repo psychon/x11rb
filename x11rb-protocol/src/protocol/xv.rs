@@ -472,12 +472,7 @@ pub struct Rational {
     pub numerator: i32,
     pub denominator: i32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for Rational {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("Rational").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(Rational, "Rational");
 impl TryParse for Rational {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (numerator, remaining) = i32::try_parse(remaining)?;
@@ -516,12 +511,7 @@ pub struct Format {
     pub visual: xproto::Visualid,
     pub depth: u8,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for Format {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("Format").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(Format, "Format");
 impl TryParse for Format {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (visual, remaining) = xproto::Visualid::try_parse(remaining)?;
@@ -565,12 +555,7 @@ pub struct AdaptorInfo {
     pub name: Vec<u8>,
     pub formats: Vec<Format>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for AdaptorInfo {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("AdaptorInfo").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(AdaptorInfo, "AdaptorInfo");
 impl TryParse for AdaptorInfo {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let value = remaining;
@@ -653,12 +638,7 @@ pub struct EncodingInfo {
     pub rate: Rational,
     pub name: Vec<u8>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for EncodingInfo {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("EncodingInfo").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(EncodingInfo, "EncodingInfo");
 impl TryParse for EncodingInfo {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let value = remaining;
@@ -725,12 +705,7 @@ pub struct Image {
     pub offsets: Vec<u32>,
     pub data: Vec<u8>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for Image {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("Image").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(Image, "Image");
 impl TryParse for Image {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (id, remaining) = u32::try_parse(remaining)?;
@@ -806,12 +781,7 @@ pub struct AttributeInfo {
     pub max: i32,
     pub name: Vec<u8>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for AttributeInfo {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("AttributeInfo").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(AttributeInfo, "AttributeInfo");
 impl TryParse for AttributeInfo {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let value = remaining;
@@ -891,12 +861,7 @@ pub struct ImageFormatInfo {
     pub vcomp_order: [u8; 32],
     pub vscanline_order: ScanlineOrder,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for ImageFormatInfo {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ImageFormatInfo").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ImageFormatInfo, "ImageFormatInfo");
 impl TryParse for ImageFormatInfo {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (id, remaining) = u32::try_parse(remaining)?;
@@ -1142,12 +1107,7 @@ pub struct VideoNotifyEvent {
     pub drawable: xproto::Drawable,
     pub port: Port,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for VideoNotifyEvent {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("VideoNotifyEvent").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(VideoNotifyEvent, "VideoNotifyEvent");
 impl TryParse for VideoNotifyEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -1267,12 +1227,7 @@ pub struct PortNotifyEvent {
     pub attribute: xproto::Atom,
     pub value: i32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for PortNotifyEvent {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PortNotifyEvent").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PortNotifyEvent, "PortNotifyEvent");
 impl TryParse for PortNotifyEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -1446,12 +1401,7 @@ pub struct QueryExtensionReply {
     pub major: u16,
     pub minor: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryExtensionReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryExtensionReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryExtensionReply, "QueryExtensionReply");
 impl TryParse for QueryExtensionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -1576,12 +1526,7 @@ pub struct QueryAdaptorsReply {
     pub length: u32,
     pub info: Vec<AdaptorInfo>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryAdaptorsReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryAdaptorsReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryAdaptorsReply, "QueryAdaptorsReply");
 impl TryParse for QueryAdaptorsReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -1708,12 +1653,7 @@ pub struct QueryEncodingsReply {
     pub length: u32,
     pub info: Vec<EncodingInfo>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryEncodingsReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryEncodingsReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryEncodingsReply, "QueryEncodingsReply");
 impl TryParse for QueryEncodingsReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -1848,12 +1788,7 @@ pub struct GrabPortReply {
     pub sequence: u16,
     pub length: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GrabPortReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GrabPortReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GrabPortReply, "GrabPortReply");
 impl TryParse for GrabPortReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -2782,12 +2717,7 @@ pub struct QueryBestSizeReply {
     pub actual_width: u16,
     pub actual_height: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryBestSizeReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryBestSizeReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryBestSizeReply, "QueryBestSizeReply");
 impl TryParse for QueryBestSizeReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -2997,12 +2927,7 @@ pub struct GetPortAttributeReply {
     pub length: u32,
     pub value: i32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetPortAttributeReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetPortAttributeReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetPortAttributeReply, "GetPortAttributeReply");
 impl TryParse for GetPortAttributeReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -3125,12 +3050,7 @@ pub struct QueryPortAttributesReply {
     pub text_size: u32,
     pub attributes: Vec<AttributeInfo>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryPortAttributesReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryPortAttributesReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryPortAttributesReply, "QueryPortAttributesReply");
 impl TryParse for QueryPortAttributesReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -3259,12 +3179,7 @@ pub struct ListImageFormatsReply {
     pub length: u32,
     pub format: Vec<ImageFormatInfo>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for ListImageFormatsReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ListImageFormatsReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ListImageFormatsReply, "ListImageFormatsReply");
 impl TryParse for ListImageFormatsReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -3415,12 +3330,7 @@ pub struct QueryImageAttributesReply {
     pub pitches: Vec<u32>,
     pub offsets: Vec<u32>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryImageAttributesReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryImageAttributesReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryImageAttributesReply, "QueryImageAttributesReply");
 impl TryParse for QueryImageAttributesReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;

@@ -65,12 +65,7 @@ pub struct CompletionEvent {
     pub shmseg: Seg,
     pub offset: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for CompletionEvent {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("CompletionEvent").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(CompletionEvent, "CompletionEvent");
 impl TryParse for CompletionEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -280,12 +275,7 @@ pub struct QueryVersionReply {
     pub gid: u16,
     pub pixmap_format: u8,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryVersionReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryVersionReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryVersionReply, "QueryVersionReply");
 impl TryParse for QueryVersionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -867,12 +857,7 @@ pub struct GetImageReply {
     pub visual: xproto::Visualid,
     pub size: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetImageReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetImageReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetImageReply, "GetImageReply");
 impl TryParse for GetImageReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -1240,12 +1225,7 @@ pub struct CreateSegmentReply {
     pub length: u32,
     pub shm_fd: RawFdContainer,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for CreateSegmentReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("CreateSegmentReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(CreateSegmentReply, "CreateSegmentReply");
 impl TryParseFd for CreateSegmentReply {
     fn try_parse_fd<'a>(initial_value: &'a [u8], fds: &mut Vec<RawFdContainer>) -> Result<(Self, &'a [u8]), ParseError> {
         let remaining = initial_value;

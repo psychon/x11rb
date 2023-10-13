@@ -111,12 +111,7 @@ pub struct QueryVersionReply {
     pub server_major: u16,
     pub server_minor: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryVersionReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryVersionReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryVersionReply, "QueryVersionReply");
 impl TryParse for QueryVersionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -304,12 +299,7 @@ pub struct GetDeviceCreateContextReply {
     pub length: u32,
     pub context: Vec<u8>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetDeviceCreateContextReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetDeviceCreateContextReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetDeviceCreateContextReply, "GetDeviceCreateContextReply");
 impl TryParse for GetDeviceCreateContextReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -518,12 +508,7 @@ pub struct GetDeviceContextReply {
     pub length: u32,
     pub context: Vec<u8>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetDeviceContextReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetDeviceContextReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetDeviceContextReply, "GetDeviceContextReply");
 impl TryParse for GetDeviceContextReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -714,12 +699,7 @@ pub struct GetWindowCreateContextReply {
     pub length: u32,
     pub context: Vec<u8>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetWindowCreateContextReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetWindowCreateContextReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetWindowCreateContextReply, "GetWindowCreateContextReply");
 impl TryParse for GetWindowCreateContextReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -847,12 +827,7 @@ pub struct GetWindowContextReply {
     pub length: u32,
     pub context: Vec<u8>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetWindowContextReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetWindowContextReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetWindowContextReply, "GetWindowContextReply");
 impl TryParse for GetWindowContextReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -918,12 +893,7 @@ pub struct ListItem {
     pub object_context: Vec<u8>,
     pub data_context: Vec<u8>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for ListItem {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ListItem").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ListItem, "ListItem");
 impl TryParse for ListItem {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let value = remaining;
@@ -1128,12 +1098,7 @@ pub struct GetPropertyCreateContextReply {
     pub length: u32,
     pub context: Vec<u8>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetPropertyCreateContextReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetPropertyCreateContextReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetPropertyCreateContextReply, "GetPropertyCreateContextReply");
 impl TryParse for GetPropertyCreateContextReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -1324,12 +1289,7 @@ pub struct GetPropertyUseContextReply {
     pub length: u32,
     pub context: Vec<u8>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetPropertyUseContextReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetPropertyUseContextReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetPropertyUseContextReply, "GetPropertyUseContextReply");
 impl TryParse for GetPropertyUseContextReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -1465,12 +1425,7 @@ pub struct GetPropertyContextReply {
     pub length: u32,
     pub context: Vec<u8>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetPropertyContextReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetPropertyContextReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetPropertyContextReply, "GetPropertyContextReply");
 impl TryParse for GetPropertyContextReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -1606,12 +1561,7 @@ pub struct GetPropertyDataContextReply {
     pub length: u32,
     pub context: Vec<u8>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetPropertyDataContextReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetPropertyDataContextReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetPropertyDataContextReply, "GetPropertyDataContextReply");
 impl TryParse for GetPropertyDataContextReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -1739,12 +1689,7 @@ pub struct ListPropertiesReply {
     pub length: u32,
     pub properties: Vec<ListItem>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for ListPropertiesReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ListPropertiesReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ListPropertiesReply, "ListPropertiesReply");
 impl TryParse for ListPropertiesReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -1934,12 +1879,7 @@ pub struct GetSelectionCreateContextReply {
     pub length: u32,
     pub context: Vec<u8>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetSelectionCreateContextReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetSelectionCreateContextReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetSelectionCreateContextReply, "GetSelectionCreateContextReply");
 impl TryParse for GetSelectionCreateContextReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -2130,12 +2070,7 @@ pub struct GetSelectionUseContextReply {
     pub length: u32,
     pub context: Vec<u8>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetSelectionUseContextReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetSelectionUseContextReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetSelectionUseContextReply, "GetSelectionUseContextReply");
 impl TryParse for GetSelectionUseContextReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -2263,12 +2198,7 @@ pub struct GetSelectionContextReply {
     pub length: u32,
     pub context: Vec<u8>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetSelectionContextReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetSelectionContextReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetSelectionContextReply, "GetSelectionContextReply");
 impl TryParse for GetSelectionContextReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -2396,12 +2326,7 @@ pub struct GetSelectionDataContextReply {
     pub length: u32,
     pub context: Vec<u8>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetSelectionDataContextReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetSelectionDataContextReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetSelectionDataContextReply, "GetSelectionDataContextReply");
 impl TryParse for GetSelectionDataContextReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -2520,12 +2445,7 @@ pub struct ListSelectionsReply {
     pub length: u32,
     pub selections: Vec<ListItem>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for ListSelectionsReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ListSelectionsReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ListSelectionsReply, "ListSelectionsReply");
 impl TryParse for ListSelectionsReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -2652,12 +2572,7 @@ pub struct GetClientContextReply {
     pub length: u32,
     pub context: Vec<u8>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetClientContextReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetClientContextReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetClientContextReply, "GetClientContextReply");
 impl TryParse for GetClientContextReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;

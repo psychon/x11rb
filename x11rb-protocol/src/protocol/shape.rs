@@ -183,12 +183,7 @@ pub struct NotifyEvent {
     pub server_time: xproto::Timestamp,
     pub shaped: bool,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for NotifyEvent {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("NotifyEvent").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(NotifyEvent, "NotifyEvent");
 impl TryParse for NotifyEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -390,12 +385,7 @@ pub struct QueryVersionReply {
     pub major_version: u16,
     pub minor_version: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryVersionReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryVersionReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryVersionReply, "QueryVersionReply");
 impl TryParse for QueryVersionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -928,12 +918,7 @@ pub struct QueryExtentsReply {
     pub clip_shape_extents_width: u16,
     pub clip_shape_extents_height: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryExtentsReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryExtentsReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryExtentsReply, "QueryExtentsReply");
 impl TryParse for QueryExtentsReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -1170,12 +1155,7 @@ pub struct InputSelectedReply {
     pub sequence: u16,
     pub length: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for InputSelectedReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("InputSelectedReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(InputSelectedReply, "InputSelectedReply");
 impl TryParse for InputSelectedReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -1302,12 +1282,7 @@ pub struct GetRectanglesReply {
     pub length: u32,
     pub rectangles: Vec<xproto::Rectangle>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetRectanglesReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetRectanglesReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetRectanglesReply, "GetRectanglesReply");
 impl TryParse for GetRectanglesReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;

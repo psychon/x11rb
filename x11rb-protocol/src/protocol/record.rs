@@ -43,12 +43,7 @@ pub struct Range8 {
     pub first: u8,
     pub last: u8,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for Range8 {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("Range8").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(Range8, "Range8");
 impl TryParse for Range8 {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (first, remaining) = u8::try_parse(remaining)?;
@@ -81,12 +76,7 @@ pub struct Range16 {
     pub first: u16,
     pub last: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for Range16 {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("Range16").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(Range16, "Range16");
 impl TryParse for Range16 {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (first, remaining) = u16::try_parse(remaining)?;
@@ -121,12 +111,7 @@ pub struct ExtRange {
     pub major: Range8,
     pub minor: Range16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for ExtRange {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ExtRange").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ExtRange, "ExtRange");
 impl TryParse for ExtRange {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (major, remaining) = Range8::try_parse(remaining)?;
@@ -170,12 +155,7 @@ pub struct Range {
     pub client_started: bool,
     pub client_died: bool,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for Range {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("Range").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(Range, "Range");
 impl TryParse for Range {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (core_requests, remaining) = Range8::try_parse(remaining)?;
@@ -378,12 +358,7 @@ pub struct ClientInfo {
     pub client_resource: ClientSpec,
     pub ranges: Vec<Range>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for ClientInfo {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ClientInfo").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ClientInfo, "ClientInfo");
 impl TryParse for ClientInfo {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (client_resource, remaining) = ClientSpec::try_parse(remaining)?;
@@ -502,12 +477,7 @@ pub struct QueryVersionReply {
     pub major_version: u16,
     pub minor_version: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryVersionReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryVersionReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryVersionReply, "QueryVersionReply");
 impl TryParse for QueryVersionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -926,12 +896,7 @@ pub struct GetContextReply {
     pub element_header: ElementHeader,
     pub intercepted_clients: Vec<ClientInfo>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetContextReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetContextReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetContextReply, "GetContextReply");
 impl TryParse for GetContextReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -1067,12 +1032,7 @@ pub struct EnableContextReply {
     pub rec_sequence_num: u32,
     pub data: Vec<u8>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for EnableContextReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("EnableContextReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(EnableContextReply, "EnableContextReply");
 impl TryParse for EnableContextReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;

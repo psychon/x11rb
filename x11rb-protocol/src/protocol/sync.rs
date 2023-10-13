@@ -264,12 +264,7 @@ pub struct Int64 {
     pub hi: i32,
     pub lo: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for Int64 {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("Int64").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(Int64, "Int64");
 impl TryParse for Int64 {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (hi, remaining) = i32::try_parse(remaining)?;
@@ -309,12 +304,7 @@ pub struct Systemcounter {
     pub resolution: Int64,
     pub name: Vec<u8>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for Systemcounter {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("Systemcounter").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(Systemcounter, "Systemcounter");
 impl TryParse for Systemcounter {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let value = remaining;
@@ -373,12 +363,7 @@ pub struct Trigger {
     pub wait_value: Int64,
     pub test_type: TESTTYPE,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for Trigger {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("Trigger").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(Trigger, "Trigger");
 impl TryParse for Trigger {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (counter, remaining) = Counter::try_parse(remaining)?;
@@ -437,12 +422,7 @@ pub struct Waitcondition {
     pub trigger: Trigger,
     pub event_threshold: Int64,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for Waitcondition {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("Waitcondition").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(Waitcondition, "Waitcondition");
 impl TryParse for Waitcondition {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (trigger, remaining) = Trigger::try_parse(remaining)?;
@@ -575,12 +555,7 @@ pub struct InitializeReply {
     pub major_version: u8,
     pub minor_version: u8,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for InitializeReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("InitializeReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(InitializeReply, "InitializeReply");
 impl TryParse for InitializeReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -718,12 +693,7 @@ pub struct ListSystemCountersReply {
     pub length: u32,
     pub counters: Vec<Systemcounter>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for ListSystemCountersReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ListSystemCountersReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ListSystemCountersReply, "ListSystemCountersReply");
 impl TryParse for ListSystemCountersReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -984,12 +954,7 @@ pub struct QueryCounterReply {
     pub length: u32,
     pub counter_value: Int64,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryCounterReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryCounterReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryCounterReply, "QueryCounterReply");
 impl TryParse for QueryCounterReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -1276,12 +1241,7 @@ pub struct CreateAlarmAux {
     pub delta: Option<Int64>,
     pub events: Option<u32>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for CreateAlarmAux {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("CreateAlarmAux").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(CreateAlarmAux, "CreateAlarmAux");
 impl CreateAlarmAux {
     #[cfg_attr(not(feature = "request-parsing"), allow(dead_code))]
     fn try_parse(value: &[u8], value_mask: u32) -> Result<(Self, &[u8]), ParseError> {
@@ -1531,12 +1491,7 @@ pub struct ChangeAlarmAux {
     pub delta: Option<Int64>,
     pub events: Option<u32>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for ChangeAlarmAux {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ChangeAlarmAux").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ChangeAlarmAux, "ChangeAlarmAux");
 impl ChangeAlarmAux {
     #[cfg_attr(not(feature = "request-parsing"), allow(dead_code))]
     fn try_parse(value: &[u8], value_mask: u32) -> Result<(Self, &[u8]), ParseError> {
@@ -1908,12 +1863,7 @@ pub struct QueryAlarmReply {
     pub events: bool,
     pub state: ALARMSTATE,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryAlarmReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryAlarmReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryAlarmReply, "QueryAlarmReply");
 impl TryParse for QueryAlarmReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -2144,12 +2094,7 @@ pub struct GetPriorityReply {
     pub length: u32,
     pub priority: i32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetPriorityReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetPriorityReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetPriorityReply, "GetPriorityReply");
 impl TryParse for GetPriorityReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -2531,12 +2476,7 @@ pub struct QueryFenceReply {
     pub length: u32,
     pub triggered: bool,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryFenceReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryFenceReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryFenceReply, "QueryFenceReply");
 impl TryParse for QueryFenceReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -2699,12 +2639,7 @@ pub struct CounterNotifyEvent {
     pub count: u16,
     pub destroyed: bool,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for CounterNotifyEvent {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("CounterNotifyEvent").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(CounterNotifyEvent, "CounterNotifyEvent");
 impl TryParse for CounterNotifyEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -2854,12 +2789,7 @@ pub struct AlarmNotifyEvent {
     pub timestamp: xproto::Timestamp,
     pub state: ALARMSTATE,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for AlarmNotifyEvent {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("AlarmNotifyEvent").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(AlarmNotifyEvent, "AlarmNotifyEvent");
 impl TryParse for AlarmNotifyEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;

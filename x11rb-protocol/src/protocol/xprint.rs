@@ -45,12 +45,7 @@ pub struct Printer {
     pub name: Vec<String8>,
     pub description: Vec<String8>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for Printer {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("Printer").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(Printer, "Printer");
 impl TryParse for Printer {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let value = remaining;
@@ -452,12 +447,7 @@ pub struct PrintQueryVersionReply {
     pub major_version: u16,
     pub minor_version: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for PrintQueryVersionReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PrintQueryVersionReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PrintQueryVersionReply, "PrintQueryVersionReply");
 impl TryParse for PrintQueryVersionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -611,12 +601,7 @@ pub struct PrintGetPrinterListReply {
     pub length: u32,
     pub printers: Vec<Printer>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for PrintGetPrinterListReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PrintGetPrinterListReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PrintGetPrinterListReply, "PrintGetPrinterListReply");
 impl TryParse for PrintGetPrinterListReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -946,12 +931,7 @@ pub struct PrintGetContextReply {
     pub length: u32,
     pub context: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for PrintGetContextReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PrintGetContextReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PrintGetContextReply, "PrintGetContextReply");
 impl TryParse for PrintGetContextReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -1125,12 +1105,7 @@ pub struct PrintGetScreenOfContextReply {
     pub length: u32,
     pub root: xproto::Window,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for PrintGetScreenOfContextReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PrintGetScreenOfContextReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PrintGetScreenOfContextReply, "PrintGetScreenOfContextReply");
 impl TryParse for PrintGetScreenOfContextReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -1619,12 +1594,7 @@ pub struct PrintGetDocumentDataReply {
     pub finished_flag: u32,
     pub data: Vec<u8>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for PrintGetDocumentDataReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PrintGetDocumentDataReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PrintGetDocumentDataReply, "PrintGetDocumentDataReply");
 impl TryParse for PrintGetDocumentDataReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -1949,12 +1919,7 @@ pub struct PrintInputSelectedReply {
     pub event_mask: u32,
     pub all_events_mask: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for PrintInputSelectedReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PrintInputSelectedReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PrintInputSelectedReply, "PrintInputSelectedReply");
 impl TryParse for PrintInputSelectedReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -2092,12 +2057,7 @@ pub struct PrintGetAttributesReply {
     pub length: u32,
     pub attributes: Vec<String8>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for PrintGetAttributesReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PrintGetAttributesReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PrintGetAttributesReply, "PrintGetAttributesReply");
 impl TryParse for PrintGetAttributesReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -2255,12 +2215,7 @@ pub struct PrintGetOneAttributesReply {
     pub length: u32,
     pub value: Vec<String8>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for PrintGetOneAttributesReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PrintGetOneAttributesReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PrintGetOneAttributesReply, "PrintGetOneAttributesReply");
 impl TryParse for PrintGetOneAttributesReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -2491,12 +2446,7 @@ pub struct PrintGetPageDimensionsReply {
     pub reproducible_width: u16,
     pub reproducible_height: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for PrintGetPageDimensionsReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PrintGetPageDimensionsReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PrintGetPageDimensionsReply, "PrintGetPageDimensionsReply");
 impl TryParse for PrintGetPageDimensionsReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -2632,12 +2582,7 @@ pub struct PrintQueryScreensReply {
     pub length: u32,
     pub roots: Vec<xproto::Window>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for PrintQueryScreensReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PrintQueryScreensReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PrintQueryScreensReply, "PrintQueryScreensReply");
 impl TryParse for PrintQueryScreensReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -2773,12 +2718,7 @@ pub struct PrintSetImageResolutionReply {
     pub length: u32,
     pub previous_resolutions: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for PrintSetImageResolutionReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PrintSetImageResolutionReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PrintSetImageResolutionReply, "PrintSetImageResolutionReply");
 impl TryParse for PrintSetImageResolutionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -2899,12 +2839,7 @@ pub struct PrintGetImageResolutionReply {
     pub length: u32,
     pub image_resolution: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for PrintGetImageResolutionReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PrintGetImageResolutionReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PrintGetImageResolutionReply, "PrintGetImageResolutionReply");
 impl TryParse for PrintGetImageResolutionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -2966,12 +2901,7 @@ pub struct NotifyEvent {
     pub context: Pcontext,
     pub cancel: bool,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for NotifyEvent {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("NotifyEvent").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(NotifyEvent, "NotifyEvent");
 impl TryParse for NotifyEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -3077,12 +3007,7 @@ pub struct AttributNotifyEvent {
     pub sequence: u16,
     pub context: Pcontext,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for AttributNotifyEvent {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("AttributNotifyEvent").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(AttributNotifyEvent, "AttributNotifyEvent");
 impl TryParse for AttributNotifyEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;

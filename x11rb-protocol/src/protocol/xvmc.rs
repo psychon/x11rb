@@ -56,12 +56,7 @@ pub struct SurfaceInfo {
     pub mc_type: u32,
     pub flags: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for SurfaceInfo {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SurfaceInfo").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SurfaceInfo, "SurfaceInfo");
 impl TryParse for SurfaceInfo {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (id, remaining) = Surface::try_parse(remaining)?;
@@ -192,12 +187,7 @@ pub struct QueryVersionReply {
     pub major: u32,
     pub minor: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryVersionReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryVersionReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryVersionReply, "QueryVersionReply");
 impl TryParse for QueryVersionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -326,12 +316,7 @@ pub struct ListSurfaceTypesReply {
     pub length: u32,
     pub surfaces: Vec<SurfaceInfo>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for ListSurfaceTypesReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ListSurfaceTypesReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ListSurfaceTypesReply, "ListSurfaceTypesReply");
 impl TryParse for ListSurfaceTypesReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -496,12 +481,7 @@ pub struct CreateContextReply {
     pub flags_return: u32,
     pub priv_data: Vec<u32>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for CreateContextReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("CreateContextReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(CreateContextReply, "CreateContextReply");
 impl TryParse for CreateContextReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -700,12 +680,7 @@ pub struct CreateSurfaceReply {
     pub sequence: u16,
     pub priv_data: Vec<u32>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for CreateSurfaceReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("CreateSurfaceReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(CreateSurfaceReply, "CreateSurfaceReply");
 impl TryParse for CreateSurfaceReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -923,12 +898,7 @@ pub struct CreateSubpictureReply {
     pub component_order: [u8; 4],
     pub priv_data: Vec<u32>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for CreateSubpictureReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("CreateSubpictureReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(CreateSubpictureReply, "CreateSubpictureReply");
 impl TryParse for CreateSubpictureReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -1132,12 +1102,7 @@ pub struct ListSubpictureTypesReply {
     pub length: u32,
     pub types: Vec<xv::ImageFormatInfo>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for ListSubpictureTypesReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ListSubpictureTypesReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ListSubpictureTypesReply, "ListSubpictureTypesReply");
 impl TryParse for ListSubpictureTypesReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;

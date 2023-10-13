@@ -1917,12 +1917,7 @@ pub struct IndicatorMap {
     pub vmods: VMod,
     pub ctrls: BoolCtrl,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for IndicatorMap {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("IndicatorMap").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(IndicatorMap, "IndicatorMap");
 impl TryParse for IndicatorMap {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (flags, remaining) = u8::try_parse(remaining)?;
@@ -2304,12 +2299,7 @@ pub struct ModDef {
     pub real_mods: xproto::ModMask,
     pub vmods: VMod,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for ModDef {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ModDef").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ModDef, "ModDef");
 impl TryParse for ModDef {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (mask, remaining) = u8::try_parse(remaining)?;
@@ -2349,12 +2339,7 @@ impl Serialize for ModDef {
 pub struct KeyName {
     pub name: [u8; 4],
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for KeyName {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("KeyName").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(KeyName, "KeyName");
 impl TryParse for KeyName {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (name, remaining) = crate::x11_utils::parse_u8_array::<4>(remaining)?;
@@ -2385,12 +2370,7 @@ pub struct KeyAlias {
     pub real: [u8; 4],
     pub alias: [u8; 4],
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for KeyAlias {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("KeyAlias").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(KeyAlias, "KeyAlias");
 impl TryParse for KeyAlias {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (real, remaining) = crate::x11_utils::parse_u8_array::<4>(remaining)?;
@@ -2427,12 +2407,7 @@ pub struct CountedString16 {
     pub string: Vec<u8>,
     pub alignment_pad: Vec<u8>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for CountedString16 {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("CountedString16").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(CountedString16, "CountedString16");
 impl TryParse for CountedString16 {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (length, remaining) = u16::try_parse(remaining)?;
@@ -2485,12 +2460,7 @@ pub struct KTMapEntry {
     pub mods_mods: xproto::ModMask,
     pub mods_vmods: VMod,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for KTMapEntry {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("KTMapEntry").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(KTMapEntry, "KTMapEntry");
 impl TryParse for KTMapEntry {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (active, remaining) = bool::try_parse(remaining)?;
@@ -2548,12 +2518,7 @@ pub struct KeyType {
     pub map: Vec<KTMapEntry>,
     pub preserve: Vec<ModDef>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for KeyType {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("KeyType").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(KeyType, "KeyType");
 impl TryParse for KeyType {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (mods_mask, remaining) = u8::try_parse(remaining)?;
@@ -2619,12 +2584,7 @@ pub struct KeySymMap {
     pub width: u8,
     pub syms: Vec<xproto::Keysym>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for KeySymMap {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("KeySymMap").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(KeySymMap, "KeySymMap");
 impl TryParse for KeySymMap {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (kt_index, remaining) = crate::x11_utils::parse_u8_array::<4>(remaining)?;
@@ -2676,12 +2636,7 @@ pub struct CommonBehavior {
     pub type_: u8,
     pub data: u8,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for CommonBehavior {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("CommonBehavior").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(CommonBehavior, "CommonBehavior");
 impl TryParse for CommonBehavior {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (type_, remaining) = u8::try_parse(remaining)?;
@@ -2713,12 +2668,7 @@ impl Serialize for CommonBehavior {
 pub struct DefaultBehavior {
     pub type_: u8,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for DefaultBehavior {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("DefaultBehavior").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(DefaultBehavior, "DefaultBehavior");
 impl TryParse for DefaultBehavior {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (type_, remaining) = u8::try_parse(remaining)?;
@@ -2752,12 +2702,7 @@ pub struct RadioGroupBehavior {
     pub type_: u8,
     pub group: u8,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for RadioGroupBehavior {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("RadioGroupBehavior").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(RadioGroupBehavior, "RadioGroupBehavior");
 impl TryParse for RadioGroupBehavior {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (type_, remaining) = u8::try_parse(remaining)?;
@@ -2790,12 +2735,7 @@ pub struct OverlayBehavior {
     pub type_: u8,
     pub key: xproto::Keycode,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for OverlayBehavior {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("OverlayBehavior").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(OverlayBehavior, "OverlayBehavior");
 impl TryParse for OverlayBehavior {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (type_, remaining) = u8::try_parse(remaining)?;
@@ -3054,12 +2994,7 @@ pub struct SetBehavior {
     pub keycode: xproto::Keycode,
     pub behavior: Behavior,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for SetBehavior {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SetBehavior").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SetBehavior, "SetBehavior");
 impl TryParse for SetBehavior {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (keycode, remaining) = xproto::Keycode::try_parse(remaining)?;
@@ -3096,12 +3031,7 @@ pub struct SetExplicit {
     pub keycode: xproto::Keycode,
     pub explicit: Explicit,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for SetExplicit {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SetExplicit").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SetExplicit, "SetExplicit");
 impl TryParse for SetExplicit {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (keycode, remaining) = xproto::Keycode::try_parse(remaining)?;
@@ -3135,12 +3065,7 @@ pub struct KeyModMap {
     pub keycode: xproto::Keycode,
     pub mods: xproto::ModMask,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for KeyModMap {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("KeyModMap").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(KeyModMap, "KeyModMap");
 impl TryParse for KeyModMap {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (keycode, remaining) = xproto::Keycode::try_parse(remaining)?;
@@ -3174,12 +3099,7 @@ pub struct KeyVModMap {
     pub keycode: xproto::Keycode,
     pub vmods: VMod,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for KeyVModMap {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("KeyVModMap").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(KeyVModMap, "KeyVModMap");
 impl TryParse for KeyVModMap {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (keycode, remaining) = xproto::Keycode::try_parse(remaining)?;
@@ -3218,12 +3138,7 @@ pub struct KTSetMapEntry {
     pub real_mods: xproto::ModMask,
     pub virtual_mods: VMod,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for KTSetMapEntry {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("KTSetMapEntry").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(KTSetMapEntry, "KTSetMapEntry");
 impl TryParse for KTSetMapEntry {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (level, remaining) = u8::try_parse(remaining)?;
@@ -3268,12 +3183,7 @@ pub struct SetKeyType {
     pub entries: Vec<KTSetMapEntry>,
     pub preserve_entries: Vec<KTSetMapEntry>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for SetKeyType {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SetKeyType").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SetKeyType, "SetKeyType");
 impl TryParse for SetKeyType {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (mask, remaining) = u8::try_parse(remaining)?;
@@ -3339,12 +3249,7 @@ pub struct Outline {
     pub corner_radius: u8,
     pub points: Vec<xproto::Point>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for Outline {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("Outline").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(Outline, "Outline");
 impl TryParse for Outline {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (n_points, remaining) = u8::try_parse(remaining)?;
@@ -3396,12 +3301,7 @@ pub struct Shape {
     pub approx_ndx: u8,
     pub outlines: Vec<Outline>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for Shape {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("Shape").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(Shape, "Shape");
 impl TryParse for Shape {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (name, remaining) = xproto::Atom::try_parse(remaining)?;
@@ -3457,12 +3357,7 @@ pub struct Key {
     pub shape_ndx: u8,
     pub color_ndx: u8,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for Key {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("Key").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(Key, "Key");
 impl TryParse for Key {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (name, remaining) = crate::x11_utils::parse_u8_array::<4>(remaining)?;
@@ -3506,12 +3401,7 @@ pub struct OverlayKey {
     pub over: [String8; 4],
     pub under: [String8; 4],
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for OverlayKey {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("OverlayKey").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(OverlayKey, "OverlayKey");
 impl TryParse for OverlayKey {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (over, remaining) = crate::x11_utils::parse_u8_array::<4>(remaining)?;
@@ -3548,12 +3438,7 @@ pub struct OverlayRow {
     pub row_under: u8,
     pub keys: Vec<OverlayKey>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for OverlayRow {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("OverlayRow").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(OverlayRow, "OverlayRow");
 impl TryParse for OverlayRow {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (row_under, remaining) = u8::try_parse(remaining)?;
@@ -3603,12 +3488,7 @@ pub struct Overlay {
     pub name: xproto::Atom,
     pub rows: Vec<OverlayRow>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for Overlay {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("Overlay").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(Overlay, "Overlay");
 impl TryParse for Overlay {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (name, remaining) = xproto::Atom::try_parse(remaining)?;
@@ -3660,12 +3540,7 @@ pub struct Row {
     pub vertical: bool,
     pub keys: Vec<Key>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for Row {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("Row").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(Row, "Row");
 impl TryParse for Row {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (top, remaining) = i16::try_parse(remaining)?;
@@ -3784,12 +3659,7 @@ pub struct Listing {
     pub flags: u16,
     pub string: Vec<String8>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for Listing {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("Listing").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(Listing, "Listing");
 impl TryParse for Listing {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let value = remaining;
@@ -3850,12 +3720,7 @@ pub struct DeviceLedInfo {
     pub names: Vec<xproto::Atom>,
     pub maps: Vec<IndicatorMap>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for DeviceLedInfo {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("DeviceLedInfo").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(DeviceLedInfo, "DeviceLedInfo");
 impl TryParse for DeviceLedInfo {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (led_class, remaining) = LedClassSpec::try_parse(remaining)?;
@@ -4124,12 +3989,7 @@ impl core::fmt::Debug for SAType  {
 pub struct SANoAction {
     pub type_: SAType,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for SANoAction {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SANoAction").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SANoAction, "SANoAction");
 impl TryParse for SANoAction {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (type_, remaining) = u8::try_parse(remaining)?;
@@ -4172,12 +4032,7 @@ pub struct SASetMods {
     pub vmods_high: VModsHigh,
     pub vmods_low: VModsLow,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for SASetMods {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SASetMods").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SASetMods, "SASetMods");
 impl TryParse for SASetMods {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (type_, remaining) = u8::try_parse(remaining)?;
@@ -4241,12 +4096,7 @@ pub struct SASetGroup {
     pub flags: SA,
     pub group: i8,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for SASetGroup {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SASetGroup").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SASetGroup, "SASetGroup");
 impl TryParse for SASetGroup {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (type_, remaining) = u8::try_parse(remaining)?;
@@ -4362,12 +4212,7 @@ pub struct SAMovePtr {
     pub y_high: i8,
     pub y_low: u8,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for SAMovePtr {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SAMovePtr").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SAMovePtr, "SAMovePtr");
 impl TryParse for SAMovePtr {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (type_, remaining) = u8::try_parse(remaining)?;
@@ -4424,12 +4269,7 @@ pub struct SAPtrBtn {
     pub count: u8,
     pub button: u8,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for SAPtrBtn {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SAPtrBtn").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SAPtrBtn, "SAPtrBtn");
 impl TryParse for SAPtrBtn {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (type_, remaining) = u8::try_parse(remaining)?;
@@ -4478,12 +4318,7 @@ pub struct SALockPtrBtn {
     pub flags: u8,
     pub button: u8,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for SALockPtrBtn {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SALockPtrBtn").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SALockPtrBtn, "SALockPtrBtn");
 impl TryParse for SALockPtrBtn {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (type_, remaining) = u8::try_parse(remaining)?;
@@ -4592,12 +4427,7 @@ pub struct SASetPtrDflt {
     pub affect: SASetPtrDfltFlag,
     pub value: i8,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for SASetPtrDflt {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SASetPtrDflt").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SASetPtrDflt, "SASetPtrDflt");
 impl TryParse for SASetPtrDflt {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (type_, remaining) = u8::try_parse(remaining)?;
@@ -4783,12 +4613,7 @@ pub struct SAIsoLock {
     pub vmods_high: VModsHigh,
     pub vmods_low: VModsLow,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for SAIsoLock {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SAIsoLock").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SAIsoLock, "SAIsoLock");
 impl TryParse for SAIsoLock {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (type_, remaining) = u8::try_parse(remaining)?;
@@ -4851,12 +4676,7 @@ impl Serialize for SAIsoLock {
 pub struct SATerminate {
     pub type_: SAType,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for SATerminate {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SATerminate").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SATerminate, "SATerminate");
 impl TryParse for SATerminate {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (type_, remaining) = u8::try_parse(remaining)?;
@@ -4956,12 +4776,7 @@ pub struct SASwitchScreen {
     pub flags: u8,
     pub new_screen: i8,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for SASwitchScreen {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SASwitchScreen").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SASwitchScreen, "SASwitchScreen");
 impl TryParse for SASwitchScreen {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (type_, remaining) = u8::try_parse(remaining)?;
@@ -5145,12 +4960,7 @@ pub struct SASetControls {
     pub bool_ctrls_high: BoolCtrlsHigh,
     pub bool_ctrls_low: BoolCtrlsLow,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for SASetControls {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SASetControls").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SASetControls, "SASetControls");
 impl TryParse for SASetControls {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (type_, remaining) = u8::try_parse(remaining)?;
@@ -5264,12 +5074,7 @@ pub struct SAActionMessage {
     pub flags: ActionMessageFlag,
     pub message: [u8; 6],
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for SAActionMessage {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SAActionMessage").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SAActionMessage, "SAActionMessage");
 impl TryParse for SAActionMessage {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (type_, remaining) = u8::try_parse(remaining)?;
@@ -5318,12 +5123,7 @@ pub struct SARedirectKey {
     pub vmods_high: VModsHigh,
     pub vmods_low: VModsLow,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for SARedirectKey {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SARedirectKey").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SARedirectKey, "SARedirectKey");
 impl TryParse for SARedirectKey {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (type_, remaining) = u8::try_parse(remaining)?;
@@ -5390,12 +5190,7 @@ pub struct SADeviceBtn {
     pub button: u8,
     pub device: u8,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for SADeviceBtn {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SADeviceBtn").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SADeviceBtn, "SADeviceBtn");
 impl TryParse for SADeviceBtn {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (type_, remaining) = u8::try_parse(remaining)?;
@@ -5508,12 +5303,7 @@ pub struct SALockDeviceBtn {
     pub button: u8,
     pub device: u8,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for SALockDeviceBtn {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SALockDeviceBtn").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SALockDeviceBtn, "SALockDeviceBtn");
 impl TryParse for SALockDeviceBtn {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (type_, remaining) = u8::try_parse(remaining)?;
@@ -5637,12 +5427,7 @@ pub struct SADeviceValuator {
     pub val2index: u8,
     pub val2value: u8,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for SADeviceValuator {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SADeviceValuator").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SADeviceValuator, "SADeviceValuator");
 impl TryParse for SADeviceValuator {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (type_, remaining) = u8::try_parse(remaining)?;
@@ -5702,12 +5487,7 @@ pub struct SIAction {
     pub type_: SAType,
     pub data: [u8; 7],
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for SIAction {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SIAction").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SIAction, "SIAction");
 impl TryParse for SIAction {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (type_, remaining) = u8::try_parse(remaining)?;
@@ -5750,12 +5530,7 @@ pub struct SymInterpret {
     pub flags: u8,
     pub action: SIAction,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for SymInterpret {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SymInterpret").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SymInterpret, "SymInterpret");
 impl TryParse for SymInterpret {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (sym, remaining) = xproto::Keysym::try_parse(remaining)?;
@@ -6199,12 +5974,7 @@ pub struct UseExtensionReply {
     pub server_major: u16,
     pub server_minor: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for UseExtensionReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("UseExtensionReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(UseExtensionReply, "UseExtensionReply");
 impl TryParse for UseExtensionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -6289,12 +6059,7 @@ pub struct SelectEventsAuxNewKeyboardNotify {
     pub affect_new_keyboard: NKNDetail,
     pub new_keyboard_details: NKNDetail,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for SelectEventsAuxNewKeyboardNotify {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SelectEventsAuxNewKeyboardNotify").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SelectEventsAuxNewKeyboardNotify, "SelectEventsAuxNewKeyboardNotify");
 impl TryParse for SelectEventsAuxNewKeyboardNotify {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (affect_new_keyboard, remaining) = u16::try_parse(remaining)?;
@@ -6330,12 +6095,7 @@ pub struct SelectEventsAuxStateNotify {
     pub affect_state: StatePart,
     pub state_details: StatePart,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for SelectEventsAuxStateNotify {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SelectEventsAuxStateNotify").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SelectEventsAuxStateNotify, "SelectEventsAuxStateNotify");
 impl TryParse for SelectEventsAuxStateNotify {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (affect_state, remaining) = u16::try_parse(remaining)?;
@@ -6371,12 +6131,7 @@ pub struct SelectEventsAuxControlsNotify {
     pub affect_ctrls: Control,
     pub ctrl_details: Control,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for SelectEventsAuxControlsNotify {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SelectEventsAuxControlsNotify").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SelectEventsAuxControlsNotify, "SelectEventsAuxControlsNotify");
 impl TryParse for SelectEventsAuxControlsNotify {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (affect_ctrls, remaining) = u32::try_parse(remaining)?;
@@ -6416,12 +6171,7 @@ pub struct SelectEventsAuxIndicatorStateNotify {
     pub affect_indicator_state: u32,
     pub indicator_state_details: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for SelectEventsAuxIndicatorStateNotify {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SelectEventsAuxIndicatorStateNotify").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SelectEventsAuxIndicatorStateNotify, "SelectEventsAuxIndicatorStateNotify");
 impl TryParse for SelectEventsAuxIndicatorStateNotify {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (affect_indicator_state, remaining) = u32::try_parse(remaining)?;
@@ -6459,12 +6209,7 @@ pub struct SelectEventsAuxIndicatorMapNotify {
     pub affect_indicator_map: u32,
     pub indicator_map_details: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for SelectEventsAuxIndicatorMapNotify {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SelectEventsAuxIndicatorMapNotify").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SelectEventsAuxIndicatorMapNotify, "SelectEventsAuxIndicatorMapNotify");
 impl TryParse for SelectEventsAuxIndicatorMapNotify {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (affect_indicator_map, remaining) = u32::try_parse(remaining)?;
@@ -6502,12 +6247,7 @@ pub struct SelectEventsAuxNamesNotify {
     pub affect_names: NameDetail,
     pub names_details: NameDetail,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for SelectEventsAuxNamesNotify {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SelectEventsAuxNamesNotify").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SelectEventsAuxNamesNotify, "SelectEventsAuxNamesNotify");
 impl TryParse for SelectEventsAuxNamesNotify {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (affect_names, remaining) = u16::try_parse(remaining)?;
@@ -6543,12 +6283,7 @@ pub struct SelectEventsAuxCompatMapNotify {
     pub affect_compat: CMDetail,
     pub compat_details: CMDetail,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for SelectEventsAuxCompatMapNotify {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SelectEventsAuxCompatMapNotify").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SelectEventsAuxCompatMapNotify, "SelectEventsAuxCompatMapNotify");
 impl TryParse for SelectEventsAuxCompatMapNotify {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (affect_compat, remaining) = u8::try_parse(remaining)?;
@@ -6582,12 +6317,7 @@ pub struct SelectEventsAuxBellNotify {
     pub affect_bell: u8,
     pub bell_details: u8,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for SelectEventsAuxBellNotify {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SelectEventsAuxBellNotify").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SelectEventsAuxBellNotify, "SelectEventsAuxBellNotify");
 impl TryParse for SelectEventsAuxBellNotify {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (affect_bell, remaining) = u8::try_parse(remaining)?;
@@ -6619,12 +6349,7 @@ pub struct SelectEventsAuxActionMessage {
     pub affect_msg_details: u8,
     pub msg_details: u8,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for SelectEventsAuxActionMessage {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SelectEventsAuxActionMessage").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SelectEventsAuxActionMessage, "SelectEventsAuxActionMessage");
 impl TryParse for SelectEventsAuxActionMessage {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (affect_msg_details, remaining) = u8::try_parse(remaining)?;
@@ -6656,12 +6381,7 @@ pub struct SelectEventsAuxAccessXNotify {
     pub affect_access_x: AXNDetail,
     pub access_x_details: AXNDetail,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for SelectEventsAuxAccessXNotify {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SelectEventsAuxAccessXNotify").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SelectEventsAuxAccessXNotify, "SelectEventsAuxAccessXNotify");
 impl TryParse for SelectEventsAuxAccessXNotify {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (affect_access_x, remaining) = u16::try_parse(remaining)?;
@@ -6697,12 +6417,7 @@ pub struct SelectEventsAuxExtensionDeviceNotify {
     pub affect_ext_dev: XIFeature,
     pub extdev_details: XIFeature,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for SelectEventsAuxExtensionDeviceNotify {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SelectEventsAuxExtensionDeviceNotify").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SelectEventsAuxExtensionDeviceNotify, "SelectEventsAuxExtensionDeviceNotify");
 impl TryParse for SelectEventsAuxExtensionDeviceNotify {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (affect_ext_dev, remaining) = u16::try_parse(remaining)?;
@@ -6748,12 +6463,7 @@ pub struct SelectEventsAux {
     pub access_x_notify: Option<SelectEventsAuxAccessXNotify>,
     pub extension_device_notify: Option<SelectEventsAuxExtensionDeviceNotify>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for SelectEventsAux {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SelectEventsAux").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SelectEventsAux, "SelectEventsAux");
 impl SelectEventsAux {
     #[cfg_attr(not(feature = "request-parsing"), allow(dead_code))]
     fn try_parse(value: &[u8], affect_which: u16, clear: u16, select_all: u16) -> Result<(Self, &[u8]), ParseError> {
@@ -7310,12 +7020,7 @@ pub struct GetStateReply {
     pub compat_lookup_mods: xproto::ModMask,
     pub ptr_btn_state: xproto::KeyButMask,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetStateReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetStateReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetStateReply, "GetStateReply");
 impl TryParse for GetStateReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -7643,12 +7348,7 @@ pub struct GetControlsReply {
     pub enabled_controls: BoolCtrl,
     pub per_key_repeat: [u8; 32],
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetControlsReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetControlsReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetControlsReply, "GetControlsReply");
 impl TryParse for GetControlsReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -8321,12 +8021,7 @@ pub struct GetMapMapKeyActions {
     pub acts_rtrn_count: Vec<u8>,
     pub acts_rtrn_acts: Vec<Action>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetMapMapKeyActions {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetMapMapKeyActions").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetMapMapKeyActions, "GetMapMapKeyActions");
 impl GetMapMapKeyActions {
     pub fn try_parse(remaining: &[u8], n_key_actions: u8, total_actions: u16) -> Result<(Self, &[u8]), ParseError> {
         let value = remaining;
@@ -8369,12 +8064,7 @@ pub struct GetMapMap {
     pub modmap_rtrn: Option<Vec<KeyModMap>>,
     pub vmodmap_rtrn: Option<Vec<KeyVModMap>>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetMapMap {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetMapMap").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetMapMap, "GetMapMap");
 impl GetMapMap {
     #[cfg_attr(not(feature = "request-parsing"), allow(dead_code))]
     fn try_parse(value: &[u8], present: u16, n_types: u8, n_key_syms: u8, n_key_actions: u8, total_actions: u16, total_key_behaviors: u8, virtual_mods: u16, total_key_explicit: u8, total_mod_map_keys: u8, total_v_mod_map_keys: u8) -> Result<(Self, &[u8]), ParseError> {
@@ -8581,12 +8271,7 @@ pub struct GetMapReply {
     pub virtual_mods: VMod,
     pub map: GetMapMap,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetMapReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetMapReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetMapReply, "GetMapReply");
 impl TryParse for GetMapReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -8686,12 +8371,7 @@ pub struct SetMapAuxKeyActions {
     pub actions_count: Vec<u8>,
     pub actions: Vec<Action>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for SetMapAuxKeyActions {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SetMapAuxKeyActions").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SetMapAuxKeyActions, "SetMapAuxKeyActions");
 impl SetMapAuxKeyActions {
     pub fn try_parse(remaining: &[u8], n_key_actions: u8, total_actions: u16) -> Result<(Self, &[u8]), ParseError> {
         let value = remaining;
@@ -8735,12 +8415,7 @@ pub struct SetMapAux {
     pub modmap: Option<Vec<KeyModMap>>,
     pub vmodmap: Option<Vec<KeyVModMap>>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for SetMapAux {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SetMapAux").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SetMapAux, "SetMapAux");
 impl SetMapAux {
     #[cfg_attr(not(feature = "request-parsing"), allow(dead_code))]
     fn try_parse(value: &[u8], present: u16, n_types: u8, n_key_syms: u8, n_key_actions: u8, total_actions: u16, total_key_behaviors: u8, virtual_mods: u16, total_key_explicit: u8, total_mod_map_keys: u8, total_v_mod_map_keys: u8) -> Result<(Self, &[u8]), ParseError> {
@@ -9271,12 +8946,7 @@ pub struct GetCompatMapReply {
     pub si_rtrn: Vec<SymInterpret>,
     pub group_rtrn: Vec<ModDef>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetCompatMapReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetCompatMapReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetCompatMapReply, "GetCompatMapReply");
 impl TryParse for GetCompatMapReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -9533,12 +9203,7 @@ pub struct GetIndicatorStateReply {
     pub length: u32,
     pub state: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetIndicatorStateReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetIndicatorStateReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetIndicatorStateReply, "GetIndicatorStateReply");
 impl TryParse for GetIndicatorStateReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -9696,12 +9361,7 @@ pub struct GetIndicatorMapReply {
     pub n_indicators: u8,
     pub maps: Vec<IndicatorMap>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetIndicatorMapReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetIndicatorMapReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetIndicatorMapReply, "GetIndicatorMapReply");
 impl TryParse for GetIndicatorMapReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -9939,12 +9599,7 @@ pub struct GetNamedIndicatorReply {
     pub map_ctrls: BoolCtrl,
     pub supported: bool,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetNamedIndicatorReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetNamedIndicatorReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetNamedIndicatorReply, "GetNamedIndicatorReply");
 impl TryParse for GetNamedIndicatorReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -10296,12 +9951,7 @@ pub struct GetNamesValueListKTLevelNames {
     pub n_levels_per_type: Vec<u8>,
     pub kt_level_names: Vec<xproto::Atom>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetNamesValueListKTLevelNames {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetNamesValueListKTLevelNames").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetNamesValueListKTLevelNames, "GetNamesValueListKTLevelNames");
 impl GetNamesValueListKTLevelNames {
     pub fn try_parse(remaining: &[u8], n_types: u8) -> Result<(Self, &[u8]), ParseError> {
         let value = remaining;
@@ -10350,12 +10000,7 @@ pub struct GetNamesValueList {
     pub key_aliases: Option<Vec<KeyAlias>>,
     pub radio_group_names: Option<Vec<xproto::Atom>>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetNamesValueList {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetNamesValueList").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetNamesValueList, "GetNamesValueList");
 impl GetNamesValueList {
     #[cfg_attr(not(feature = "request-parsing"), allow(dead_code))]
     fn try_parse(value: &[u8], which: u32, n_types: u8, indicators: u32, virtual_mods: u16, group_names: u8, n_keys: u8, n_key_aliases: u8, n_radio_groups: u8) -> Result<(Self, &[u8]), ParseError> {
@@ -10605,12 +10250,7 @@ pub struct GetNamesReply {
     pub n_kt_levels: u16,
     pub value_list: GetNamesValueList,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetNamesReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetNamesReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetNamesReply, "GetNamesReply");
 impl TryParse for GetNamesReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -10683,12 +10323,7 @@ pub struct SetNamesAuxKTLevelNames {
     pub n_levels_per_type: Vec<u8>,
     pub kt_level_names: Vec<xproto::Atom>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for SetNamesAuxKTLevelNames {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SetNamesAuxKTLevelNames").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SetNamesAuxKTLevelNames, "SetNamesAuxKTLevelNames");
 impl SetNamesAuxKTLevelNames {
     pub fn try_parse(remaining: &[u8], n_types: u8) -> Result<(Self, &[u8]), ParseError> {
         let value = remaining;
@@ -10738,12 +10373,7 @@ pub struct SetNamesAux {
     pub key_aliases: Option<Vec<KeyAlias>>,
     pub radio_group_names: Option<Vec<xproto::Atom>>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for SetNamesAux {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SetNamesAux").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SetNamesAux, "SetNamesAux");
 impl SetNamesAux {
     #[cfg_attr(not(feature = "request-parsing"), allow(dead_code))]
     fn try_parse(value: &[u8], which: u32, n_types: u8, indicators: u32, virtual_mods: u16, group_names: u8, n_keys: u8, n_key_aliases: u8, n_radio_groups: u8) -> Result<(Self, &[u8]), ParseError> {
@@ -11344,12 +10974,7 @@ pub struct PerClientFlagsReply {
     pub auto_ctrls: BoolCtrl,
     pub auto_ctrls_values: BoolCtrl,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for PerClientFlagsReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PerClientFlagsReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PerClientFlagsReply, "PerClientFlagsReply");
 impl TryParse for PerClientFlagsReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -11518,12 +11143,7 @@ pub struct ListComponentsReply {
     pub symbols: Vec<Listing>,
     pub geometries: Vec<Listing>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for ListComponentsReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ListComponentsReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ListComponentsReply, "ListComponentsReply");
 impl TryParse for ListComponentsReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -11760,12 +11380,7 @@ pub struct GetKbdByNameRepliesTypesMapKeyActions {
     pub acts_rtrn_count: Vec<u8>,
     pub acts_rtrn_acts: Vec<Action>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetKbdByNameRepliesTypesMapKeyActions {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetKbdByNameRepliesTypesMapKeyActions").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetKbdByNameRepliesTypesMapKeyActions, "GetKbdByNameRepliesTypesMapKeyActions");
 impl GetKbdByNameRepliesTypesMapKeyActions {
     pub fn try_parse(remaining: &[u8], n_key_actions: u8, total_actions: u16) -> Result<(Self, &[u8]), ParseError> {
         let value = remaining;
@@ -11808,12 +11423,7 @@ pub struct GetKbdByNameRepliesTypesMap {
     pub modmap_rtrn: Option<Vec<KeyModMap>>,
     pub vmodmap_rtrn: Option<Vec<KeyVModMap>>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetKbdByNameRepliesTypesMap {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetKbdByNameRepliesTypesMap").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetKbdByNameRepliesTypesMap, "GetKbdByNameRepliesTypesMap");
 impl GetKbdByNameRepliesTypesMap {
     #[cfg_attr(not(feature = "request-parsing"), allow(dead_code))]
     fn try_parse(value: &[u8], present: u16, n_types: u8, n_key_syms: u8, n_key_actions: u8, total_actions: u16, total_key_behaviors: u8, virtual_mods: u16, total_key_explicit: u8, total_mod_map_keys: u8, total_v_mod_map_keys: u8) -> Result<(Self, &[u8]), ParseError> {
@@ -12021,12 +11631,7 @@ pub struct GetKbdByNameRepliesTypes {
     pub virtual_mods: VMod,
     pub map: GetKbdByNameRepliesTypesMap,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetKbdByNameRepliesTypes {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetKbdByNameRepliesTypes").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetKbdByNameRepliesTypes, "GetKbdByNameRepliesTypes");
 impl TryParse for GetKbdByNameRepliesTypes {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (getmap_type, remaining) = u8::try_parse(remaining)?;
@@ -12124,12 +11729,7 @@ pub struct GetKbdByNameRepliesCompatMap {
     pub si_rtrn: Vec<SymInterpret>,
     pub group_rtrn: Vec<ModDef>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetKbdByNameRepliesCompatMap {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetKbdByNameRepliesCompatMap").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetKbdByNameRepliesCompatMap, "GetKbdByNameRepliesCompatMap");
 impl TryParse for GetKbdByNameRepliesCompatMap {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (compatmap_type, remaining) = u8::try_parse(remaining)?;
@@ -12201,12 +11801,7 @@ pub struct GetKbdByNameRepliesIndicatorMaps {
     pub real_indicators: u32,
     pub maps: Vec<IndicatorMap>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetKbdByNameRepliesIndicatorMaps {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetKbdByNameRepliesIndicatorMaps").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetKbdByNameRepliesIndicatorMaps, "GetKbdByNameRepliesIndicatorMaps");
 impl TryParse for GetKbdByNameRepliesIndicatorMaps {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (indicatormap_type, remaining) = u8::try_parse(remaining)?;
@@ -12265,12 +11860,7 @@ pub struct GetKbdByNameRepliesKeyNamesValueListKTLevelNames {
     pub n_levels_per_type: Vec<u8>,
     pub kt_level_names: Vec<xproto::Atom>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetKbdByNameRepliesKeyNamesValueListKTLevelNames {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetKbdByNameRepliesKeyNamesValueListKTLevelNames").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetKbdByNameRepliesKeyNamesValueListKTLevelNames, "GetKbdByNameRepliesKeyNamesValueListKTLevelNames");
 impl GetKbdByNameRepliesKeyNamesValueListKTLevelNames {
     pub fn try_parse(remaining: &[u8], n_types: u8) -> Result<(Self, &[u8]), ParseError> {
         let value = remaining;
@@ -12319,12 +11909,7 @@ pub struct GetKbdByNameRepliesKeyNamesValueList {
     pub key_aliases: Option<Vec<KeyAlias>>,
     pub radio_group_names: Option<Vec<xproto::Atom>>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetKbdByNameRepliesKeyNamesValueList {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetKbdByNameRepliesKeyNamesValueList").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetKbdByNameRepliesKeyNamesValueList, "GetKbdByNameRepliesKeyNamesValueList");
 impl GetKbdByNameRepliesKeyNamesValueList {
     #[cfg_attr(not(feature = "request-parsing"), allow(dead_code))]
     fn try_parse(value: &[u8], which: u32, n_types: u8, indicators: u32, virtual_mods: u16, group_names: u8, n_keys: u8, n_key_aliases: u8, n_radio_groups: u8) -> Result<(Self, &[u8]), ParseError> {
@@ -12575,12 +12160,7 @@ pub struct GetKbdByNameRepliesKeyNames {
     pub n_kt_levels: u16,
     pub value_list: GetKbdByNameRepliesKeyNamesValueList,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetKbdByNameRepliesKeyNames {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetKbdByNameRepliesKeyNames").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetKbdByNameRepliesKeyNames, "GetKbdByNameRepliesKeyNames");
 impl TryParse for GetKbdByNameRepliesKeyNames {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (keyname_type, remaining) = u8::try_parse(remaining)?;
@@ -12659,12 +12239,7 @@ pub struct GetKbdByNameRepliesGeometry {
     pub label_color_ndx: u8,
     pub label_font: CountedString16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetKbdByNameRepliesGeometry {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetKbdByNameRepliesGeometry").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetKbdByNameRepliesGeometry, "GetKbdByNameRepliesGeometry");
 impl TryParse for GetKbdByNameRepliesGeometry {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (geometry_type, remaining) = u8::try_parse(remaining)?;
@@ -12728,12 +12303,7 @@ pub struct GetKbdByNameReplies {
     pub key_names: Option<GetKbdByNameRepliesKeyNames>,
     pub geometry: Option<GetKbdByNameRepliesGeometry>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetKbdByNameReplies {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetKbdByNameReplies").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetKbdByNameReplies, "GetKbdByNameReplies");
 impl GetKbdByNameReplies {
     #[cfg_attr(not(feature = "request-parsing"), allow(dead_code))]
     fn try_parse(value: &[u8], reported: u16) -> Result<(Self, &[u8]), ParseError> {
@@ -12820,12 +12390,7 @@ pub struct GetKbdByNameReply {
     pub reported: GBNDetail,
     pub replies: GetKbdByNameReplies,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetKbdByNameReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetKbdByNameReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetKbdByNameReply, "GetKbdByNameReply");
 impl TryParse for GetKbdByNameReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -12997,12 +12562,7 @@ pub struct GetDeviceInfoReply {
     pub btn_actions: Vec<Action>,
     pub leds: Vec<DeviceLedInfo>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetDeviceInfoReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetDeviceInfoReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetDeviceInfoReply, "GetDeviceInfoReply");
 impl TryParse for GetDeviceInfoReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -13350,12 +12910,7 @@ pub struct SetDebuggingFlagsReply {
     pub supported_flags: u32,
     pub supported_ctrls: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for SetDebuggingFlagsReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SetDebuggingFlagsReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SetDebuggingFlagsReply, "SetDebuggingFlagsReply");
 impl TryParse for SetDebuggingFlagsReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -13458,12 +13013,7 @@ pub struct NewKeyboardNotifyEvent {
     pub request_minor: u8,
     pub changed: NKNDetail,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for NewKeyboardNotifyEvent {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("NewKeyboardNotifyEvent").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(NewKeyboardNotifyEvent, "NewKeyboardNotifyEvent");
 impl TryParse for NewKeyboardNotifyEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -13646,12 +13196,7 @@ pub struct MapNotifyEvent {
     pub n_v_mod_map_keys: u8,
     pub virtual_mods: VMod,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for MapNotifyEvent {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("MapNotifyEvent").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(MapNotifyEvent, "MapNotifyEvent");
 impl TryParse for MapNotifyEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -13879,12 +13424,7 @@ pub struct StateNotifyEvent {
     pub request_major: u8,
     pub request_minor: u8,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for StateNotifyEvent {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("StateNotifyEvent").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(StateNotifyEvent, "StateNotifyEvent");
 impl TryParse for StateNotifyEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -14110,12 +13650,7 @@ pub struct ControlsNotifyEvent {
     pub request_major: u8,
     pub request_minor: u8,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for ControlsNotifyEvent {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ControlsNotifyEvent").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ControlsNotifyEvent, "ControlsNotifyEvent");
 impl TryParse for ControlsNotifyEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -14285,12 +13820,7 @@ pub struct IndicatorStateNotifyEvent {
     pub state: u32,
     pub state_changed: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for IndicatorStateNotifyEvent {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("IndicatorStateNotifyEvent").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(IndicatorStateNotifyEvent, "IndicatorStateNotifyEvent");
 impl TryParse for IndicatorStateNotifyEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -14433,12 +13963,7 @@ pub struct IndicatorMapNotifyEvent {
     pub state: u32,
     pub map_changed: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for IndicatorMapNotifyEvent {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("IndicatorMapNotifyEvent").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(IndicatorMapNotifyEvent, "IndicatorMapNotifyEvent");
 impl TryParse for IndicatorMapNotifyEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -14591,12 +14116,7 @@ pub struct NamesNotifyEvent {
     pub n_keys: u8,
     pub changed_indicators: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for NamesNotifyEvent {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("NamesNotifyEvent").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(NamesNotifyEvent, "NamesNotifyEvent");
 impl TryParse for NamesNotifyEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -14786,12 +14306,7 @@ pub struct CompatMapNotifyEvent {
     pub n_si: u16,
     pub n_total_si: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for CompatMapNotifyEvent {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("CompatMapNotifyEvent").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(CompatMapNotifyEvent, "CompatMapNotifyEvent");
 impl TryParse for CompatMapNotifyEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -14947,12 +14462,7 @@ pub struct BellNotifyEvent {
     pub window: xproto::Window,
     pub event_only: bool,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for BellNotifyEvent {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("BellNotifyEvent").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(BellNotifyEvent, "BellNotifyEvent");
 impl TryParse for BellNotifyEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -15122,12 +14632,7 @@ pub struct ActionMessageEvent {
     pub group: Group,
     pub message: [String8; 8],
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for ActionMessageEvent {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ActionMessageEvent").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ActionMessageEvent, "ActionMessageEvent");
 impl TryParse for ActionMessageEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -15286,12 +14791,7 @@ pub struct AccessXNotifyEvent {
     pub slow_keys_delay: u16,
     pub debounce_delay: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for AccessXNotifyEvent {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("AccessXNotifyEvent").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(AccessXNotifyEvent, "AccessXNotifyEvent");
 impl TryParse for AccessXNotifyEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -15448,12 +14948,7 @@ pub struct ExtensionDeviceNotifyEvent {
     pub supported: XIFeature,
     pub unsupported: XIFeature,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for ExtensionDeviceNotifyEvent {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ExtensionDeviceNotifyEvent").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ExtensionDeviceNotifyEvent, "ExtensionDeviceNotifyEvent");
 impl TryParse for ExtensionDeviceNotifyEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;

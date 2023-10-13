@@ -104,12 +104,7 @@ pub struct EnableReply {
     pub length: u32,
     pub maximum_request_length: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for EnableReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("EnableReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(EnableReply, "EnableReply");
 impl TryParse for EnableReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;

@@ -118,12 +118,7 @@ pub struct PbufferClobberEvent {
     pub height: u16,
     pub count: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for PbufferClobberEvent {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PbufferClobberEvent").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PbufferClobberEvent, "PbufferClobberEvent");
 impl TryParse for PbufferClobberEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -288,12 +283,7 @@ pub struct BufferSwapCompleteEvent {
     pub msc_lo: u32,
     pub sbc: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for BufferSwapCompleteEvent {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("BufferSwapCompleteEvent").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(BufferSwapCompleteEvent, "BufferSwapCompleteEvent");
 impl TryParse for BufferSwapCompleteEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -946,12 +936,7 @@ pub struct MakeCurrentReply {
     pub length: u32,
     pub context_tag: ContextTag,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for MakeCurrentReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("MakeCurrentReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(MakeCurrentReply, "MakeCurrentReply");
 impl TryParse for MakeCurrentReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -1095,12 +1080,7 @@ pub struct IsDirectReply {
     pub length: u32,
     pub is_direct: bool,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for IsDirectReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("IsDirectReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(IsDirectReply, "IsDirectReply");
 impl TryParse for IsDirectReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -1253,12 +1233,7 @@ pub struct QueryVersionReply {
     pub major_version: u32,
     pub minor_version: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryVersionReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryVersionReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryVersionReply, "QueryVersionReply");
 impl TryParse for QueryVersionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -1945,12 +1920,7 @@ pub struct GetVisualConfigsReply {
     pub num_properties: u32,
     pub property_list: Vec<u32>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetVisualConfigsReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetVisualConfigsReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetVisualConfigsReply, "GetVisualConfigsReply");
 impl TryParse for GetVisualConfigsReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -2246,12 +2216,7 @@ pub struct VendorPrivateWithReplyReply {
     pub data1: [u8; 24],
     pub data2: Vec<u8>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for VendorPrivateWithReplyReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("VendorPrivateWithReplyReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(VendorPrivateWithReplyReply, "VendorPrivateWithReplyReply");
 impl TryParse for VendorPrivateWithReplyReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -2381,12 +2346,7 @@ pub struct QueryExtensionsStringReply {
     pub length: u32,
     pub n: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryExtensionsStringReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryExtensionsStringReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryExtensionsStringReply, "QueryExtensionsStringReply");
 impl TryParse for QueryExtensionsStringReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -2540,12 +2500,7 @@ pub struct QueryServerStringReply {
     pub length: u32,
     pub string: Vec<u8>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryServerStringReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryServerStringReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryServerStringReply, "QueryServerStringReply");
 impl TryParse for QueryServerStringReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -2766,12 +2721,7 @@ pub struct GetFBConfigsReply {
     pub num_properties: u32,
     pub property_list: Vec<u32>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetFBConfigsReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetFBConfigsReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetFBConfigsReply, "GetFBConfigsReply");
 impl TryParse for GetFBConfigsReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -3173,12 +3123,7 @@ pub struct QueryContextReply {
     pub length: u32,
     pub attribs: Vec<u32>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryContextReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryContextReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryContextReply, "QueryContextReply");
 impl TryParse for QueryContextReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -3331,12 +3276,7 @@ pub struct MakeContextCurrentReply {
     pub length: u32,
     pub context_tag: ContextTag,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for MakeContextCurrentReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("MakeContextCurrentReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(MakeContextCurrentReply, "MakeContextCurrentReply");
 impl TryParse for MakeContextCurrentReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -3642,12 +3582,7 @@ pub struct GetDrawableAttributesReply {
     pub length: u32,
     pub attribs: Vec<u32>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetDrawableAttributesReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetDrawableAttributesReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetDrawableAttributesReply, "GetDrawableAttributesReply");
 impl TryParse for GetDrawableAttributesReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -4617,12 +4552,7 @@ pub struct GenListsReply {
     pub length: u32,
     pub ret_val: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GenListsReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GenListsReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GenListsReply, "GenListsReply");
 impl TryParse for GenListsReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -4900,12 +4830,7 @@ pub struct RenderModeReply {
     pub new_mode: u32,
     pub data: Vec<u32>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for RenderModeReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("RenderModeReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(RenderModeReply, "RenderModeReply");
 impl TryParse for RenderModeReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -5090,12 +5015,7 @@ pub struct FinishReply {
     pub sequence: u16,
     pub length: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for FinishReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("FinishReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(FinishReply, "FinishReply");
 impl TryParse for FinishReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -5423,12 +5343,7 @@ pub struct ReadPixelsReply {
     pub sequence: u16,
     pub data: Vec<u8>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for ReadPixelsReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ReadPixelsReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ReadPixelsReply, "ReadPixelsReply");
 impl TryParse for ReadPixelsReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -5565,12 +5480,7 @@ pub struct GetBooleanvReply {
     pub datum: bool,
     pub data: Vec<bool>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetBooleanvReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetBooleanvReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetBooleanvReply, "GetBooleanvReply");
 impl TryParse for GetBooleanvReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -5708,12 +5618,7 @@ pub struct GetClipPlaneReply {
     pub sequence: u16,
     pub data: Vec<Float64>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetClipPlaneReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetClipPlaneReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetClipPlaneReply, "GetClipPlaneReply");
 impl TryParse for GetClipPlaneReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -5848,12 +5753,7 @@ pub struct GetDoublevReply {
     pub datum: Float64,
     pub data: Vec<Float64>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetDoublevReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetDoublevReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetDoublevReply, "GetDoublevReply");
 impl TryParse for GetDoublevReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -5984,12 +5884,7 @@ pub struct GetErrorReply {
     pub length: u32,
     pub error: i32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetErrorReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetErrorReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetErrorReply, "GetErrorReply");
 impl TryParse for GetErrorReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -6120,12 +6015,7 @@ pub struct GetFloatvReply {
     pub datum: Float32,
     pub data: Vec<Float32>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetFloatvReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetFloatvReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetFloatvReply, "GetFloatvReply");
 impl TryParse for GetFloatvReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -6265,12 +6155,7 @@ pub struct GetIntegervReply {
     pub datum: i32,
     pub data: Vec<i32>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetIntegervReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetIntegervReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetIntegervReply, "GetIntegervReply");
 impl TryParse for GetIntegervReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -6418,12 +6303,7 @@ pub struct GetLightfvReply {
     pub datum: Float32,
     pub data: Vec<Float32>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetLightfvReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetLightfvReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetLightfvReply, "GetLightfvReply");
 impl TryParse for GetLightfvReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -6571,12 +6451,7 @@ pub struct GetLightivReply {
     pub datum: i32,
     pub data: Vec<i32>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetLightivReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetLightivReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetLightivReply, "GetLightivReply");
 impl TryParse for GetLightivReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -6724,12 +6599,7 @@ pub struct GetMapdvReply {
     pub datum: Float64,
     pub data: Vec<Float64>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetMapdvReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetMapdvReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetMapdvReply, "GetMapdvReply");
 impl TryParse for GetMapdvReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -6877,12 +6747,7 @@ pub struct GetMapfvReply {
     pub datum: Float32,
     pub data: Vec<Float32>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetMapfvReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetMapfvReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetMapfvReply, "GetMapfvReply");
 impl TryParse for GetMapfvReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -7030,12 +6895,7 @@ pub struct GetMapivReply {
     pub datum: i32,
     pub data: Vec<i32>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetMapivReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetMapivReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetMapivReply, "GetMapivReply");
 impl TryParse for GetMapivReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -7183,12 +7043,7 @@ pub struct GetMaterialfvReply {
     pub datum: Float32,
     pub data: Vec<Float32>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetMaterialfvReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetMaterialfvReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetMaterialfvReply, "GetMaterialfvReply");
 impl TryParse for GetMaterialfvReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -7336,12 +7191,7 @@ pub struct GetMaterialivReply {
     pub datum: i32,
     pub data: Vec<i32>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetMaterialivReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetMaterialivReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetMaterialivReply, "GetMaterialivReply");
 impl TryParse for GetMaterialivReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -7481,12 +7331,7 @@ pub struct GetPixelMapfvReply {
     pub datum: Float32,
     pub data: Vec<Float32>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetPixelMapfvReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetPixelMapfvReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetPixelMapfvReply, "GetPixelMapfvReply");
 impl TryParse for GetPixelMapfvReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -7626,12 +7471,7 @@ pub struct GetPixelMapuivReply {
     pub datum: u32,
     pub data: Vec<u32>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetPixelMapuivReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetPixelMapuivReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetPixelMapuivReply, "GetPixelMapuivReply");
 impl TryParse for GetPixelMapuivReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -7771,12 +7611,7 @@ pub struct GetPixelMapusvReply {
     pub datum: u16,
     pub data: Vec<u16>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetPixelMapusvReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetPixelMapusvReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetPixelMapusvReply, "GetPixelMapusvReply");
 impl TryParse for GetPixelMapusvReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -7914,12 +7749,7 @@ pub struct GetPolygonStippleReply {
     pub sequence: u16,
     pub data: Vec<u8>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetPolygonStippleReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetPolygonStippleReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetPolygonStippleReply, "GetPolygonStippleReply");
 impl TryParse for GetPolygonStippleReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -8055,12 +7885,7 @@ pub struct GetStringReply {
     pub length: u32,
     pub string: Vec<u8>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetStringReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetStringReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetStringReply, "GetStringReply");
 impl TryParse for GetStringReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -8207,12 +8032,7 @@ pub struct GetTexEnvfvReply {
     pub datum: Float32,
     pub data: Vec<Float32>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetTexEnvfvReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetTexEnvfvReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetTexEnvfvReply, "GetTexEnvfvReply");
 impl TryParse for GetTexEnvfvReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -8360,12 +8180,7 @@ pub struct GetTexEnvivReply {
     pub datum: i32,
     pub data: Vec<i32>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetTexEnvivReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetTexEnvivReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetTexEnvivReply, "GetTexEnvivReply");
 impl TryParse for GetTexEnvivReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -8513,12 +8328,7 @@ pub struct GetTexGendvReply {
     pub datum: Float64,
     pub data: Vec<Float64>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetTexGendvReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetTexGendvReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetTexGendvReply, "GetTexGendvReply");
 impl TryParse for GetTexGendvReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -8666,12 +8476,7 @@ pub struct GetTexGenfvReply {
     pub datum: Float32,
     pub data: Vec<Float32>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetTexGenfvReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetTexGenfvReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetTexGenfvReply, "GetTexGenfvReply");
 impl TryParse for GetTexGenfvReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -8819,12 +8624,7 @@ pub struct GetTexGenivReply {
     pub datum: i32,
     pub data: Vec<i32>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetTexGenivReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetTexGenivReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetTexGenivReply, "GetTexGenivReply");
 impl TryParse for GetTexGenivReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -8997,12 +8797,7 @@ pub struct GetTexImageReply {
     pub depth: i32,
     pub data: Vec<u8>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetTexImageReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetTexImageReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetTexImageReply, "GetTexImageReply");
 impl TryParse for GetTexImageReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -9155,12 +8950,7 @@ pub struct GetTexParameterfvReply {
     pub datum: Float32,
     pub data: Vec<Float32>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetTexParameterfvReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetTexParameterfvReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetTexParameterfvReply, "GetTexParameterfvReply");
 impl TryParse for GetTexParameterfvReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -9308,12 +9098,7 @@ pub struct GetTexParameterivReply {
     pub datum: i32,
     pub data: Vec<i32>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetTexParameterivReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetTexParameterivReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetTexParameterivReply, "GetTexParameterivReply");
 impl TryParse for GetTexParameterivReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -9469,12 +9254,7 @@ pub struct GetTexLevelParameterfvReply {
     pub datum: Float32,
     pub data: Vec<Float32>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetTexLevelParameterfvReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetTexLevelParameterfvReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetTexLevelParameterfvReply, "GetTexLevelParameterfvReply");
 impl TryParse for GetTexLevelParameterfvReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -9630,12 +9410,7 @@ pub struct GetTexLevelParameterivReply {
     pub datum: i32,
     pub data: Vec<i32>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetTexLevelParameterivReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetTexLevelParameterivReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetTexLevelParameterivReply, "GetTexLevelParameterivReply");
 impl TryParse for GetTexLevelParameterivReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -9774,12 +9549,7 @@ pub struct IsEnabledReply {
     pub length: u32,
     pub ret_val: Bool32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for IsEnabledReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("IsEnabledReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(IsEnabledReply, "IsEnabledReply");
 impl TryParse for IsEnabledReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -9909,12 +9679,7 @@ pub struct IsListReply {
     pub length: u32,
     pub ret_val: Bool32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for IsListReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("IsListReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(IsListReply, "IsListReply");
 impl TryParse for IsListReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -10118,12 +9883,7 @@ pub struct AreTexturesResidentReply {
     pub ret_val: Bool32,
     pub data: Vec<bool>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for AreTexturesResidentReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("AreTexturesResidentReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(AreTexturesResidentReply, "AreTexturesResidentReply");
 impl TryParse for AreTexturesResidentReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -10341,12 +10101,7 @@ pub struct GenTexturesReply {
     pub sequence: u16,
     pub data: Vec<u32>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GenTexturesReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GenTexturesReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GenTexturesReply, "GenTexturesReply");
 impl TryParse for GenTexturesReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -10479,12 +10234,7 @@ pub struct IsTextureReply {
     pub length: u32,
     pub ret_val: Bool32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for IsTextureReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("IsTextureReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(IsTextureReply, "IsTextureReply");
 impl TryParse for IsTextureReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -10638,12 +10388,7 @@ pub struct GetColorTableReply {
     pub width: i32,
     pub data: Vec<u8>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetColorTableReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetColorTableReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetColorTableReply, "GetColorTableReply");
 impl TryParse for GetColorTableReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -10792,12 +10537,7 @@ pub struct GetColorTableParameterfvReply {
     pub datum: Float32,
     pub data: Vec<Float32>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetColorTableParameterfvReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetColorTableParameterfvReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetColorTableParameterfvReply, "GetColorTableParameterfvReply");
 impl TryParse for GetColorTableParameterfvReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -10945,12 +10685,7 @@ pub struct GetColorTableParameterivReply {
     pub datum: i32,
     pub data: Vec<i32>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetColorTableParameterivReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetColorTableParameterivReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetColorTableParameterivReply, "GetColorTableParameterivReply");
 impl TryParse for GetColorTableParameterivReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -11114,12 +10849,7 @@ pub struct GetConvolutionFilterReply {
     pub height: i32,
     pub data: Vec<u8>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetConvolutionFilterReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetConvolutionFilterReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetConvolutionFilterReply, "GetConvolutionFilterReply");
 impl TryParse for GetConvolutionFilterReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -11270,12 +11000,7 @@ pub struct GetConvolutionParameterfvReply {
     pub datum: Float32,
     pub data: Vec<Float32>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetConvolutionParameterfvReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetConvolutionParameterfvReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetConvolutionParameterfvReply, "GetConvolutionParameterfvReply");
 impl TryParse for GetConvolutionParameterfvReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -11423,12 +11148,7 @@ pub struct GetConvolutionParameterivReply {
     pub datum: i32,
     pub data: Vec<i32>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetConvolutionParameterivReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetConvolutionParameterivReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetConvolutionParameterivReply, "GetConvolutionParameterivReply");
 impl TryParse for GetConvolutionParameterivReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -11592,12 +11312,7 @@ pub struct GetSeparableFilterReply {
     pub col_h: i32,
     pub rows_and_cols: Vec<u8>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetSeparableFilterReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetSeparableFilterReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetSeparableFilterReply, "GetSeparableFilterReply");
 impl TryParse for GetSeparableFilterReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -11767,12 +11482,7 @@ pub struct GetHistogramReply {
     pub width: i32,
     pub data: Vec<u8>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetHistogramReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetHistogramReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetHistogramReply, "GetHistogramReply");
 impl TryParse for GetHistogramReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -11921,12 +11631,7 @@ pub struct GetHistogramParameterfvReply {
     pub datum: Float32,
     pub data: Vec<Float32>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetHistogramParameterfvReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetHistogramParameterfvReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetHistogramParameterfvReply, "GetHistogramParameterfvReply");
 impl TryParse for GetHistogramParameterfvReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -12074,12 +11779,7 @@ pub struct GetHistogramParameterivReply {
     pub datum: i32,
     pub data: Vec<i32>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetHistogramParameterivReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetHistogramParameterivReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetHistogramParameterivReply, "GetHistogramParameterivReply");
 impl TryParse for GetHistogramParameterivReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -12245,12 +11945,7 @@ pub struct GetMinmaxReply {
     pub sequence: u16,
     pub data: Vec<u8>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetMinmaxReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetMinmaxReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetMinmaxReply, "GetMinmaxReply");
 impl TryParse for GetMinmaxReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -12395,12 +12090,7 @@ pub struct GetMinmaxParameterfvReply {
     pub datum: Float32,
     pub data: Vec<Float32>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetMinmaxParameterfvReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetMinmaxParameterfvReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetMinmaxParameterfvReply, "GetMinmaxParameterfvReply");
 impl TryParse for GetMinmaxParameterfvReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -12548,12 +12238,7 @@ pub struct GetMinmaxParameterivReply {
     pub datum: i32,
     pub data: Vec<i32>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetMinmaxParameterivReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetMinmaxParameterivReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetMinmaxParameterivReply, "GetMinmaxParameterivReply");
 impl TryParse for GetMinmaxParameterivReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -12700,12 +12385,7 @@ pub struct GetCompressedTexImageARBReply {
     pub size: i32,
     pub data: Vec<u8>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetCompressedTexImageARBReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetCompressedTexImageARBReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetCompressedTexImageARBReply, "GetCompressedTexImageARBReply");
 impl TryParse for GetCompressedTexImageARBReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -12926,12 +12606,7 @@ pub struct GenQueriesARBReply {
     pub sequence: u16,
     pub data: Vec<u32>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GenQueriesARBReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GenQueriesARBReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GenQueriesARBReply, "GenQueriesARBReply");
 impl TryParse for GenQueriesARBReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -13064,12 +12739,7 @@ pub struct IsQueryARBReply {
     pub length: u32,
     pub ret_val: Bool32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for IsQueryARBReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("IsQueryARBReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(IsQueryARBReply, "IsQueryARBReply");
 impl TryParse for IsQueryARBReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -13208,12 +12878,7 @@ pub struct GetQueryivARBReply {
     pub datum: i32,
     pub data: Vec<i32>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetQueryivARBReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetQueryivARBReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetQueryivARBReply, "GetQueryivARBReply");
 impl TryParse for GetQueryivARBReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -13361,12 +13026,7 @@ pub struct GetQueryObjectivARBReply {
     pub datum: i32,
     pub data: Vec<i32>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetQueryObjectivARBReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetQueryObjectivARBReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetQueryObjectivARBReply, "GetQueryObjectivARBReply");
 impl TryParse for GetQueryObjectivARBReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -13514,12 +13174,7 @@ pub struct GetQueryObjectuivARBReply {
     pub datum: u32,
     pub data: Vec<u32>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetQueryObjectuivARBReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetQueryObjectuivARBReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetQueryObjectuivARBReply, "GetQueryObjectuivARBReply");
 impl TryParse for GetQueryObjectuivARBReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;

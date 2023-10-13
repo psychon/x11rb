@@ -43,12 +43,7 @@ pub struct DrmClipRect {
     pub x2: i16,
     pub x3: i16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for DrmClipRect {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("DrmClipRect").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(DrmClipRect, "DrmClipRect");
 impl TryParse for DrmClipRect {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (x1, remaining) = i16::try_parse(remaining)?;
@@ -149,12 +144,7 @@ pub struct QueryVersionReply {
     pub dri_minor_version: u16,
     pub dri_minor_patch: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryVersionReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryVersionReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryVersionReply, "QueryVersionReply");
 impl TryParse for QueryVersionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -286,12 +276,7 @@ pub struct QueryDirectRenderingCapableReply {
     pub length: u32,
     pub is_capable: bool,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryDirectRenderingCapableReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryDirectRenderingCapableReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryDirectRenderingCapableReply, "QueryDirectRenderingCapableReply");
 impl TryParse for QueryDirectRenderingCapableReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -412,12 +397,7 @@ pub struct OpenConnectionReply {
     pub sarea_handle_high: u32,
     pub bus_id: Vec<u8>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for OpenConnectionReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("OpenConnectionReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(OpenConnectionReply, "OpenConnectionReply");
 impl TryParse for OpenConnectionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -613,12 +593,7 @@ pub struct GetClientDriverNameReply {
     pub client_driver_patch_version: u32,
     pub client_driver_name: Vec<u8>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetClientDriverNameReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetClientDriverNameReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetClientDriverNameReply, "GetClientDriverNameReply");
 impl TryParse for GetClientDriverNameReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -768,12 +743,7 @@ pub struct CreateContextReply {
     pub length: u32,
     pub hw_context: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for CreateContextReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("CreateContextReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(CreateContextReply, "CreateContextReply");
 impl TryParse for CreateContextReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -972,12 +942,7 @@ pub struct CreateDrawableReply {
     pub length: u32,
     pub hw_drawable_handle: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for CreateDrawableReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("CreateDrawableReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(CreateDrawableReply, "CreateDrawableReply");
 impl TryParse for CreateDrawableReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -1185,12 +1150,7 @@ pub struct GetDrawableInfoReply {
     pub clip_rects: Vec<DrmClipRect>,
     pub back_clip_rects: Vec<DrmClipRect>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetDrawableInfoReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetDrawableInfoReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetDrawableInfoReply, "GetDrawableInfoReply");
 impl TryParse for GetDrawableInfoReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -1354,12 +1314,7 @@ pub struct GetDeviceInfoReply {
     pub framebuffer_stride: u32,
     pub device_private: Vec<u32>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetDeviceInfoReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetDeviceInfoReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetDeviceInfoReply, "GetDeviceInfoReply");
 impl TryParse for GetDeviceInfoReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -1502,12 +1457,7 @@ pub struct AuthConnectionReply {
     pub length: u32,
     pub authenticated: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for AuthConnectionReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("AuthConnectionReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(AuthConnectionReply, "AuthConnectionReply");
 impl TryParse for AuthConnectionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;

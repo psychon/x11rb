@@ -213,12 +213,7 @@ pub struct DRI2Buffer {
     pub cpp: u32,
     pub flags: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for DRI2Buffer {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("DRI2Buffer").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(DRI2Buffer, "DRI2Buffer");
 impl TryParse for DRI2Buffer {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (attachment, remaining) = u32::try_parse(remaining)?;
@@ -279,12 +274,7 @@ pub struct AttachFormat {
     pub attachment: Attachment,
     pub format: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for AttachFormat {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("AttachFormat").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(AttachFormat, "AttachFormat");
 impl TryParse for AttachFormat {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (attachment, remaining) = u32::try_parse(remaining)?;
@@ -396,12 +386,7 @@ pub struct QueryVersionReply {
     pub major_version: u32,
     pub minor_version: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryVersionReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryVersionReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryVersionReply, "QueryVersionReply");
 impl TryParse for QueryVersionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -541,12 +526,7 @@ pub struct ConnectReply {
     pub alignment_pad: Vec<u8>,
     pub device_name: Vec<u8>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for ConnectReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ConnectReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ConnectReply, "ConnectReply");
 impl TryParse for ConnectReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -705,12 +685,7 @@ pub struct AuthenticateReply {
     pub length: u32,
     pub authenticated: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for AuthenticateReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("AuthenticateReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(AuthenticateReply, "AuthenticateReply");
 impl TryParse for AuthenticateReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -986,12 +961,7 @@ pub struct GetBuffersReply {
     pub height: u32,
     pub buffers: Vec<DRI2Buffer>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetBuffersReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetBuffersReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetBuffersReply, "GetBuffersReply");
 impl TryParse for GetBuffersReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -1145,12 +1115,7 @@ pub struct CopyRegionReply {
     pub sequence: u16,
     pub length: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for CopyRegionReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("CopyRegionReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(CopyRegionReply, "CopyRegionReply");
 impl TryParse for CopyRegionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -1297,12 +1262,7 @@ pub struct GetBuffersWithFormatReply {
     pub height: u32,
     pub buffers: Vec<DRI2Buffer>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetBuffersWithFormatReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetBuffersWithFormatReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetBuffersWithFormatReply, "GetBuffersWithFormatReply");
 impl TryParse for GetBuffersWithFormatReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -1482,12 +1442,7 @@ pub struct SwapBuffersReply {
     pub swap_hi: u32,
     pub swap_lo: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for SwapBuffersReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SwapBuffersReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SwapBuffersReply, "SwapBuffersReply");
 impl TryParse for SwapBuffersReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -1621,12 +1576,7 @@ pub struct GetMSCReply {
     pub sbc_hi: u32,
     pub sbc_lo: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetMSCReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetMSCReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetMSCReply, "GetMSCReply");
 impl TryParse for GetMSCReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -1836,12 +1786,7 @@ pub struct WaitMSCReply {
     pub sbc_hi: u32,
     pub sbc_lo: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for WaitMSCReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("WaitMSCReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(WaitMSCReply, "WaitMSCReply");
 impl TryParse for WaitMSCReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -2019,12 +1964,7 @@ pub struct WaitSBCReply {
     pub sbc_hi: u32,
     pub sbc_lo: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for WaitSBCReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("WaitSBCReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(WaitSBCReply, "WaitSBCReply");
 impl TryParse for WaitSBCReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -2260,12 +2200,7 @@ pub struct GetParamReply {
     pub value_hi: u32,
     pub value_lo: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetParamReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetParamReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetParamReply, "GetParamReply");
 impl TryParse for GetParamReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -2341,12 +2276,7 @@ pub struct BufferSwapCompleteEvent {
     pub msc_lo: u32,
     pub sbc: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for BufferSwapCompleteEvent {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("BufferSwapCompleteEvent").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(BufferSwapCompleteEvent, "BufferSwapCompleteEvent");
 impl TryParse for BufferSwapCompleteEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -2494,12 +2424,7 @@ pub struct InvalidateBuffersEvent {
     pub sequence: u16,
     pub drawable: xproto::Drawable,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for InvalidateBuffersEvent {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("InvalidateBuffersEvent").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(InvalidateBuffersEvent, "InvalidateBuffersEvent");
 impl TryParse for InvalidateBuffersEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;

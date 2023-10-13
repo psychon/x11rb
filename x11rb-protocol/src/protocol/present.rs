@@ -422,12 +422,7 @@ pub struct Notify {
     pub window: xproto::Window,
     pub serial: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for Notify {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("Notify").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(Notify, "Notify");
 impl TryParse for Notify {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (window, remaining) = xproto::Window::try_parse(remaining)?;
@@ -538,12 +533,7 @@ pub struct QueryVersionReply {
     pub major_version: u32,
     pub minor_version: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryVersionReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryVersionReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryVersionReply, "QueryVersionReply");
 impl TryParse for QueryVersionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -1074,12 +1064,7 @@ pub struct QueryCapabilitiesReply {
     pub length: u32,
     pub capabilities: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryCapabilitiesReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryCapabilitiesReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryCapabilitiesReply, "QueryCapabilitiesReply");
 impl TryParse for QueryCapabilitiesReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -1144,12 +1129,7 @@ pub struct GenericEvent {
     pub evtype: u16,
     pub event: Event,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GenericEvent {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GenericEvent").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GenericEvent, "GenericEvent");
 impl TryParse for GenericEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -1280,12 +1260,7 @@ pub struct ConfigureNotifyEvent {
     pub pixmap_height: u16,
     pub pixmap_flags: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for ConfigureNotifyEvent {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ConfigureNotifyEvent").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ConfigureNotifyEvent, "ConfigureNotifyEvent");
 impl TryParse for ConfigureNotifyEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -1416,12 +1391,7 @@ pub struct CompleteNotifyEvent {
     pub ust: u64,
     pub msc: u64,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for CompleteNotifyEvent {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("CompleteNotifyEvent").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(CompleteNotifyEvent, "CompleteNotifyEvent");
 impl TryParse for CompleteNotifyEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -1538,12 +1508,7 @@ pub struct IdleNotifyEvent {
     pub pixmap: xproto::Pixmap,
     pub idle_fence: sync::Fence,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for IdleNotifyEvent {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("IdleNotifyEvent").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(IdleNotifyEvent, "IdleNotifyEvent");
 impl TryParse for IdleNotifyEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -1661,12 +1626,7 @@ pub struct RedirectNotifyEvent {
     pub remainder: u64,
     pub notifies: Vec<Notify>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for RedirectNotifyEvent {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("RedirectNotifyEvent").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(RedirectNotifyEvent, "RedirectNotifyEvent");
 impl TryParse for RedirectNotifyEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;

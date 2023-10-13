@@ -131,12 +131,7 @@ pub struct ScreenSize {
     pub mwidth: u16,
     pub mheight: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for ScreenSize {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ScreenSize").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ScreenSize, "ScreenSize");
 impl TryParse for ScreenSize {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (width, remaining) = u16::try_parse(remaining)?;
@@ -180,12 +175,7 @@ impl Serialize for ScreenSize {
 pub struct RefreshRates {
     pub rates: Vec<u16>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for RefreshRates {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("RefreshRates").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(RefreshRates, "RefreshRates");
 impl TryParse for RefreshRates {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (n_rates, remaining) = u16::try_parse(remaining)?;
@@ -302,12 +292,7 @@ pub struct QueryVersionReply {
     pub major_version: u32,
     pub minor_version: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryVersionReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryVersionReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryVersionReply, "QueryVersionReply");
 impl TryParse for QueryVersionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -559,12 +544,7 @@ pub struct SetScreenConfigReply {
     pub root: xproto::Window,
     pub subpixel_order: render::SubPixel,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for SetScreenConfigReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SetScreenConfigReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SetScreenConfigReply, "SetScreenConfigReply");
 impl TryParse for SetScreenConfigReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -866,12 +846,7 @@ pub struct GetScreenInfoReply {
     pub sizes: Vec<ScreenSize>,
     pub rates: Vec<RefreshRates>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetScreenInfoReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetScreenInfoReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetScreenInfoReply, "GetScreenInfoReply");
 impl TryParse for GetScreenInfoReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -1020,12 +995,7 @@ pub struct GetScreenSizeRangeReply {
     pub max_width: u16,
     pub max_height: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetScreenSizeRangeReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetScreenSizeRangeReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetScreenSizeRangeReply, "GetScreenSizeRangeReply");
 impl TryParse for GetScreenSizeRangeReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -1287,12 +1257,7 @@ pub struct ModeInfo {
     pub name_len: u16,
     pub mode_flags: ModeFlag,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for ModeInfo {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ModeInfo").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ModeInfo, "ModeInfo");
 impl TryParse for ModeInfo {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (id, remaining) = u32::try_parse(remaining)?;
@@ -1457,12 +1422,7 @@ pub struct GetScreenResourcesReply {
     pub modes: Vec<ModeInfo>,
     pub names: Vec<u8>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetScreenResourcesReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetScreenResourcesReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetScreenResourcesReply, "GetScreenResourcesReply");
 impl TryParse for GetScreenResourcesReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -1728,12 +1688,7 @@ pub struct GetOutputInfoReply {
     pub clones: Vec<Output>,
     pub name: Vec<u8>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetOutputInfoReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetOutputInfoReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetOutputInfoReply, "GetOutputInfoReply");
 impl TryParse for GetOutputInfoReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -1930,12 +1885,7 @@ pub struct ListOutputPropertiesReply {
     pub length: u32,
     pub atoms: Vec<xproto::Atom>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for ListOutputPropertiesReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ListOutputPropertiesReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ListOutputPropertiesReply, "ListOutputPropertiesReply");
 impl TryParse for ListOutputPropertiesReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -2072,12 +2022,7 @@ pub struct QueryOutputPropertyReply {
     pub immutable: bool,
     pub valid_values: Vec<i32>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryOutputPropertyReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryOutputPropertyReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryOutputPropertyReply, "QueryOutputPropertyReply");
 impl TryParse for QueryOutputPropertyReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -2550,12 +2495,7 @@ pub struct GetOutputPropertyReply {
     pub num_items: u32,
     pub data: Vec<u8>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetOutputPropertyReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetOutputPropertyReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetOutputPropertyReply, "GetOutputPropertyReply");
 impl TryParse for GetOutputPropertyReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -2722,12 +2662,7 @@ pub struct CreateModeReply {
     pub length: u32,
     pub mode: Mode,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for CreateModeReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("CreateModeReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(CreateModeReply, "CreateModeReply");
 impl TryParse for CreateModeReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -3088,12 +3023,7 @@ pub struct GetCrtcInfoReply {
     pub outputs: Vec<Output>,
     pub possible: Vec<Output>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetCrtcInfoReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetCrtcInfoReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetCrtcInfoReply, "GetCrtcInfoReply");
 impl TryParse for GetCrtcInfoReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -3329,12 +3259,7 @@ pub struct SetCrtcConfigReply {
     pub length: u32,
     pub timestamp: xproto::Timestamp,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for SetCrtcConfigReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SetCrtcConfigReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SetCrtcConfigReply, "SetCrtcConfigReply");
 impl TryParse for SetCrtcConfigReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -3480,12 +3405,7 @@ pub struct GetCrtcGammaSizeReply {
     pub length: u32,
     pub size: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetCrtcGammaSizeReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetCrtcGammaSizeReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetCrtcGammaSizeReply, "GetCrtcGammaSizeReply");
 impl TryParse for GetCrtcGammaSizeReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -3631,12 +3551,7 @@ pub struct GetCrtcGammaReply {
     pub green: Vec<u16>,
     pub blue: Vec<u16>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetCrtcGammaReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetCrtcGammaReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetCrtcGammaReply, "GetCrtcGammaReply");
 impl TryParse for GetCrtcGammaReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -3871,12 +3786,7 @@ pub struct GetScreenResourcesCurrentReply {
     pub modes: Vec<ModeInfo>,
     pub names: Vec<u8>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetScreenResourcesCurrentReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetScreenResourcesCurrentReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetScreenResourcesCurrentReply, "GetScreenResourcesCurrentReply");
 impl TryParse for GetScreenResourcesCurrentReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -4274,12 +4184,7 @@ pub struct GetCrtcTransformReply {
     pub current_filter_name: Vec<u8>,
     pub current_params: Vec<render::Fixed>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetCrtcTransformReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetCrtcTransformReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetCrtcTransformReply, "GetCrtcTransformReply");
 impl TryParse for GetCrtcTransformReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -4494,12 +4399,7 @@ pub struct GetPanningReply {
     pub border_right: i16,
     pub border_bottom: i16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetPanningReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetPanningReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetPanningReply, "GetPanningReply");
 impl TryParse for GetPanningReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -4764,12 +4664,7 @@ pub struct SetPanningReply {
     pub length: u32,
     pub timestamp: xproto::Timestamp,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for SetPanningReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SetPanningReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SetPanningReply, "SetPanningReply");
 impl TryParse for SetPanningReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -4962,12 +4857,7 @@ pub struct GetOutputPrimaryReply {
     pub length: u32,
     pub output: Output,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetOutputPrimaryReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetOutputPrimaryReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetOutputPrimaryReply, "GetOutputPrimaryReply");
 impl TryParse for GetOutputPrimaryReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -5090,12 +4980,7 @@ pub struct GetProvidersReply {
     pub timestamp: xproto::Timestamp,
     pub providers: Vec<Provider>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetProvidersReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetProvidersReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetProvidersReply, "GetProvidersReply");
 impl TryParse for GetProvidersReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -5291,12 +5176,7 @@ pub struct GetProviderInfoReply {
     pub associated_capability: Vec<u32>,
     pub name: Vec<u8>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetProviderInfoReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetProviderInfoReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetProviderInfoReply, "GetProviderInfoReply");
 impl TryParse for GetProviderInfoReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -5640,12 +5520,7 @@ pub struct ListProviderPropertiesReply {
     pub length: u32,
     pub atoms: Vec<xproto::Atom>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for ListProviderPropertiesReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ListProviderPropertiesReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ListProviderPropertiesReply, "ListProviderPropertiesReply");
 impl TryParse for ListProviderPropertiesReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -5782,12 +5657,7 @@ pub struct QueryProviderPropertyReply {
     pub immutable: bool,
     pub valid_values: Vec<i32>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryProviderPropertyReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryProviderPropertyReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryProviderPropertyReply, "QueryProviderPropertyReply");
 impl TryParse for QueryProviderPropertyReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -6259,12 +6129,7 @@ pub struct GetProviderPropertyReply {
     pub num_items: u32,
     pub data: Vec<u8>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetProviderPropertyReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetProviderPropertyReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetProviderPropertyReply, "GetProviderPropertyReply");
 impl TryParse for GetProviderPropertyReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -6331,12 +6196,7 @@ pub struct ScreenChangeNotifyEvent {
     pub mwidth: u16,
     pub mheight: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for ScreenChangeNotifyEvent {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ScreenChangeNotifyEvent").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ScreenChangeNotifyEvent, "ScreenChangeNotifyEvent");
 impl TryParse for ScreenChangeNotifyEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -6570,12 +6430,7 @@ pub struct CrtcChange {
     pub width: u16,
     pub height: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for CrtcChange {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("CrtcChange").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(CrtcChange, "CrtcChange");
 impl TryParse for CrtcChange {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (timestamp, remaining) = xproto::Timestamp::try_parse(remaining)?;
@@ -6665,12 +6520,7 @@ pub struct OutputChange {
     pub connection: Connection,
     pub subpixel_order: render::SubPixel,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for OutputChange {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("OutputChange").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(OutputChange, "OutputChange");
 impl TryParse for OutputChange {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (timestamp, remaining) = xproto::Timestamp::try_parse(remaining)?;
@@ -6756,12 +6606,7 @@ pub struct OutputProperty {
     pub timestamp: xproto::Timestamp,
     pub status: xproto::Property,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for OutputProperty {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("OutputProperty").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(OutputProperty, "OutputProperty");
 impl TryParse for OutputProperty {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (window, remaining) = xproto::Window::try_parse(remaining)?;
@@ -6833,12 +6678,7 @@ pub struct ProviderChange {
     pub window: xproto::Window,
     pub provider: Provider,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for ProviderChange {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ProviderChange").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ProviderChange, "ProviderChange");
 impl TryParse for ProviderChange {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (timestamp, remaining) = xproto::Timestamp::try_parse(remaining)?;
@@ -6905,12 +6745,7 @@ pub struct ProviderProperty {
     pub timestamp: xproto::Timestamp,
     pub state: u8,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for ProviderProperty {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ProviderProperty").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ProviderProperty, "ProviderProperty");
 impl TryParse for ProviderProperty {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (window, remaining) = xproto::Window::try_parse(remaining)?;
@@ -6980,12 +6815,7 @@ pub struct ResourceChange {
     pub timestamp: xproto::Timestamp,
     pub window: xproto::Window,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for ResourceChange {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ResourceChange").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ResourceChange, "ResourceChange");
 impl TryParse for ResourceChange {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (timestamp, remaining) = xproto::Timestamp::try_parse(remaining)?;
@@ -7054,12 +6884,7 @@ pub struct MonitorInfo {
     pub height_in_millimeters: u32,
     pub outputs: Vec<Output>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for MonitorInfo {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("MonitorInfo").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(MonitorInfo, "MonitorInfo");
 impl TryParse for MonitorInfo {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (name, remaining) = xproto::Atom::try_parse(remaining)?;
@@ -7196,12 +7021,7 @@ pub struct GetMonitorsReply {
     pub n_outputs: u32,
     pub monitors: Vec<MonitorInfo>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetMonitorsReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetMonitorsReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetMonitorsReply, "GetMonitorsReply");
 impl TryParse for GetMonitorsReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -7507,12 +7327,7 @@ pub struct CreateLeaseReply {
     pub length: u32,
     pub master_fd: RawFdContainer,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for CreateLeaseReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("CreateLeaseReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(CreateLeaseReply, "CreateLeaseReply");
 impl TryParseFd for CreateLeaseReply {
     fn try_parse_fd<'a>(initial_value: &'a [u8], fds: &mut Vec<RawFdContainer>) -> Result<(Self, &'a [u8]), ParseError> {
         let remaining = initial_value;
@@ -7664,12 +7479,7 @@ pub struct LeaseNotify {
     pub lease: Lease,
     pub created: u8,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for LeaseNotify {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("LeaseNotify").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(LeaseNotify, "LeaseNotify");
 impl TryParse for LeaseNotify {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (timestamp, remaining) = xproto::Timestamp::try_parse(remaining)?;
@@ -7863,12 +7673,7 @@ pub struct NotifyEvent {
     pub sequence: u16,
     pub u: NotifyData,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for NotifyEvent {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("NotifyEvent").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(NotifyEvent, "NotifyEvent");
 impl TryParse for NotifyEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;

@@ -115,12 +115,7 @@ pub struct QueryVersionReply {
     pub major_version: u32,
     pub minor_version: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryVersionReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryVersionReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryVersionReply, "QueryVersionReply");
 impl TryParse for QueryVersionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -256,12 +251,7 @@ pub struct OpenReply {
     pub length: u32,
     pub device_fd: RawFdContainer,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for OpenReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("OpenReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(OpenReply, "OpenReply");
 impl TryParseFd for OpenReply {
     fn try_parse_fd<'a>(initial_value: &'a [u8], fds: &mut Vec<RawFdContainer>) -> Result<(Self, &'a [u8]), ParseError> {
         let remaining = initial_value;
@@ -517,12 +507,7 @@ pub struct BufferFromPixmapReply {
     pub bpp: u8,
     pub pixmap_fd: RawFdContainer,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for BufferFromPixmapReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("BufferFromPixmapReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(BufferFromPixmapReply, "BufferFromPixmapReply");
 impl TryParseFd for BufferFromPixmapReply {
     fn try_parse_fd<'a>(initial_value: &'a [u8], fds: &mut Vec<RawFdContainer>) -> Result<(Self, &'a [u8]), ParseError> {
         let remaining = initial_value;
@@ -771,12 +756,7 @@ pub struct FDFromFenceReply {
     pub length: u32,
     pub fence_fd: RawFdContainer,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for FDFromFenceReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("FDFromFenceReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(FDFromFenceReply, "FDFromFenceReply");
 impl TryParseFd for FDFromFenceReply {
     fn try_parse_fd<'a>(initial_value: &'a [u8], fds: &mut Vec<RawFdContainer>) -> Result<(Self, &'a [u8]), ParseError> {
         let remaining = initial_value;
@@ -934,12 +914,7 @@ pub struct GetSupportedModifiersReply {
     pub window_modifiers: Vec<u64>,
     pub screen_modifiers: Vec<u64>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetSupportedModifiersReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetSupportedModifiersReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetSupportedModifiersReply, "GetSupportedModifiersReply");
 impl TryParse for GetSupportedModifiersReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -1271,12 +1246,7 @@ pub struct BuffersFromPixmapReply {
     pub offsets: Vec<u32>,
     pub buffers: Vec<RawFdContainer>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for BuffersFromPixmapReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("BuffersFromPixmapReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(BuffersFromPixmapReply, "BuffersFromPixmapReply");
 impl TryParseFd for BuffersFromPixmapReply {
     fn try_parse_fd<'a>(initial_value: &'a [u8], fds: &mut Vec<RawFdContainer>) -> Result<(Self, &'a [u8]), ParseError> {
         let remaining = initial_value;

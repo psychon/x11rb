@@ -43,12 +43,7 @@ pub struct Client {
     pub resource_base: u32,
     pub resource_mask: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for Client {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("Client").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(Client, "Client");
 impl TryParse for Client {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (resource_base, remaining) = u32::try_parse(remaining)?;
@@ -87,12 +82,7 @@ pub struct Type {
     pub resource_type: xproto::Atom,
     pub count: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for Type {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("Type").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(Type, "Type");
 impl TryParse for Type {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (resource_type, remaining) = xproto::Atom::try_parse(remaining)?;
@@ -179,12 +169,7 @@ pub struct ClientIdSpec {
     pub client: u32,
     pub mask: ClientIdMask,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for ClientIdSpec {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ClientIdSpec").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ClientIdSpec, "ClientIdSpec");
 impl TryParse for ClientIdSpec {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (client, remaining) = u32::try_parse(remaining)?;
@@ -224,12 +209,7 @@ pub struct ClientIdValue {
     pub spec: ClientIdSpec,
     pub value: Vec<u32>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for ClientIdValue {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ClientIdValue").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ClientIdValue, "ClientIdValue");
 impl TryParse for ClientIdValue {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (spec, remaining) = ClientIdSpec::try_parse(remaining)?;
@@ -278,12 +258,7 @@ pub struct ResourceIdSpec {
     pub resource: u32,
     pub type_: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for ResourceIdSpec {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ResourceIdSpec").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ResourceIdSpec, "ResourceIdSpec");
 impl TryParse for ResourceIdSpec {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (resource, remaining) = u32::try_parse(remaining)?;
@@ -324,12 +299,7 @@ pub struct ResourceSizeSpec {
     pub ref_count: u32,
     pub use_count: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for ResourceSizeSpec {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ResourceSizeSpec").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ResourceSizeSpec, "ResourceSizeSpec");
 impl TryParse for ResourceSizeSpec {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (spec, remaining) = ResourceIdSpec::try_parse(remaining)?;
@@ -386,12 +356,7 @@ pub struct ResourceSizeValue {
     pub size: ResourceSizeSpec,
     pub cross_references: Vec<ResourceSizeSpec>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for ResourceSizeValue {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ResourceSizeValue").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ResourceSizeValue, "ResourceSizeValue");
 impl TryParse for ResourceSizeValue {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (size, remaining) = ResourceSizeSpec::try_parse(remaining)?;
@@ -507,12 +472,7 @@ pub struct QueryVersionReply {
     pub server_major: u16,
     pub server_minor: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryVersionReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryVersionReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryVersionReply, "QueryVersionReply");
 impl TryParse for QueryVersionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -628,12 +588,7 @@ pub struct QueryClientsReply {
     pub length: u32,
     pub clients: Vec<Client>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryClientsReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryClientsReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryClientsReply, "QueryClientsReply");
 impl TryParse for QueryClientsReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -760,12 +715,7 @@ pub struct QueryClientResourcesReply {
     pub length: u32,
     pub types: Vec<Type>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryClientResourcesReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryClientResourcesReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryClientResourcesReply, "QueryClientResourcesReply");
 impl TryParse for QueryClientResourcesReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -893,12 +843,7 @@ pub struct QueryClientPixmapBytesReply {
     pub bytes: u32,
     pub bytes_overflow: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryClientPixmapBytesReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryClientPixmapBytesReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryClientPixmapBytesReply, "QueryClientPixmapBytesReply");
 impl TryParse for QueryClientPixmapBytesReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -1039,12 +984,7 @@ pub struct QueryClientIdsReply {
     pub length: u32,
     pub ids: Vec<ClientIdValue>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryClientIdsReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryClientIdsReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryClientIdsReply, "QueryClientIdsReply");
 impl TryParse for QueryClientIdsReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -1192,12 +1132,7 @@ pub struct QueryResourceBytesReply {
     pub length: u32,
     pub sizes: Vec<ResourceSizeValue>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryResourceBytesReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryResourceBytesReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryResourceBytesReply, "QueryResourceBytesReply");
 impl TryParse for QueryResourceBytesReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
