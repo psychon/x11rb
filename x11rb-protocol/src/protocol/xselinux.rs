@@ -45,12 +45,7 @@ pub struct QueryVersionRequest {
     pub client_major: u8,
     pub client_minor: u8,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryVersionRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryVersionRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryVersionRequest, "QueryVersionRequest");
 impl QueryVersionRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -174,12 +169,7 @@ pub const SET_DEVICE_CREATE_CONTEXT_REQUEST: u8 = 1;
 pub struct SetDeviceCreateContextRequest<'input> {
     pub context: Cow<'input, [u8]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for SetDeviceCreateContextRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SetDeviceCreateContextRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SetDeviceCreateContextRequest<'_>, "SetDeviceCreateContextRequest");
 impl<'input> SetDeviceCreateContextRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -244,12 +234,7 @@ pub const GET_DEVICE_CREATE_CONTEXT_REQUEST: u8 = 2;
 #[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetDeviceCreateContextRequest;
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetDeviceCreateContextRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetDeviceCreateContextRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetDeviceCreateContextRequest, "GetDeviceCreateContextRequest");
 impl GetDeviceCreateContextRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -366,12 +351,7 @@ pub struct SetDeviceContextRequest<'input> {
     pub device: u32,
     pub context: Cow<'input, [u8]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for SetDeviceContextRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SetDeviceContextRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SetDeviceContextRequest<'_>, "SetDeviceContextRequest");
 impl<'input> SetDeviceContextRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -446,12 +426,7 @@ pub const GET_DEVICE_CONTEXT_REQUEST: u8 = 4;
 pub struct GetDeviceContextRequest {
     pub device: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetDeviceContextRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetDeviceContextRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetDeviceContextRequest, "GetDeviceContextRequest");
 impl GetDeviceContextRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -574,12 +549,7 @@ pub const SET_WINDOW_CREATE_CONTEXT_REQUEST: u8 = 5;
 pub struct SetWindowCreateContextRequest<'input> {
     pub context: Cow<'input, [u8]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for SetWindowCreateContextRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SetWindowCreateContextRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SetWindowCreateContextRequest<'_>, "SetWindowCreateContextRequest");
 impl<'input> SetWindowCreateContextRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -644,12 +614,7 @@ pub const GET_WINDOW_CREATE_CONTEXT_REQUEST: u8 = 6;
 #[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetWindowCreateContextRequest;
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetWindowCreateContextRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetWindowCreateContextRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetWindowCreateContextRequest, "GetWindowCreateContextRequest");
 impl GetWindowCreateContextRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -765,12 +730,7 @@ pub const GET_WINDOW_CONTEXT_REQUEST: u8 = 7;
 pub struct GetWindowContextRequest {
     pub window: xproto::Window,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetWindowContextRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetWindowContextRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetWindowContextRequest, "GetWindowContextRequest");
 impl GetWindowContextRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -973,12 +933,7 @@ pub const SET_PROPERTY_CREATE_CONTEXT_REQUEST: u8 = 8;
 pub struct SetPropertyCreateContextRequest<'input> {
     pub context: Cow<'input, [u8]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for SetPropertyCreateContextRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SetPropertyCreateContextRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SetPropertyCreateContextRequest<'_>, "SetPropertyCreateContextRequest");
 impl<'input> SetPropertyCreateContextRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -1043,12 +998,7 @@ pub const GET_PROPERTY_CREATE_CONTEXT_REQUEST: u8 = 9;
 #[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetPropertyCreateContextRequest;
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetPropertyCreateContextRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetPropertyCreateContextRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetPropertyCreateContextRequest, "GetPropertyCreateContextRequest");
 impl GetPropertyCreateContextRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -1164,12 +1114,7 @@ pub const SET_PROPERTY_USE_CONTEXT_REQUEST: u8 = 10;
 pub struct SetPropertyUseContextRequest<'input> {
     pub context: Cow<'input, [u8]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for SetPropertyUseContextRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SetPropertyUseContextRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SetPropertyUseContextRequest<'_>, "SetPropertyUseContextRequest");
 impl<'input> SetPropertyUseContextRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -1234,12 +1179,7 @@ pub const GET_PROPERTY_USE_CONTEXT_REQUEST: u8 = 11;
 #[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetPropertyUseContextRequest;
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetPropertyUseContextRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetPropertyUseContextRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetPropertyUseContextRequest, "GetPropertyUseContextRequest");
 impl GetPropertyUseContextRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -1356,12 +1296,7 @@ pub struct GetPropertyContextRequest {
     pub window: xproto::Window,
     pub property: xproto::Atom,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetPropertyContextRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetPropertyContextRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetPropertyContextRequest, "GetPropertyContextRequest");
 impl GetPropertyContextRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -1492,12 +1427,7 @@ pub struct GetPropertyDataContextRequest {
     pub window: xproto::Window,
     pub property: xproto::Atom,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetPropertyDataContextRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetPropertyDataContextRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetPropertyDataContextRequest, "GetPropertyDataContextRequest");
 impl GetPropertyDataContextRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -1627,12 +1557,7 @@ pub const LIST_PROPERTIES_REQUEST: u8 = 14;
 pub struct ListPropertiesRequest {
     pub window: xproto::Window,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for ListPropertiesRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ListPropertiesRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ListPropertiesRequest, "ListPropertiesRequest");
 impl ListPropertiesRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -1754,12 +1679,7 @@ pub const SET_SELECTION_CREATE_CONTEXT_REQUEST: u8 = 15;
 pub struct SetSelectionCreateContextRequest<'input> {
     pub context: Cow<'input, [u8]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for SetSelectionCreateContextRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SetSelectionCreateContextRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SetSelectionCreateContextRequest<'_>, "SetSelectionCreateContextRequest");
 impl<'input> SetSelectionCreateContextRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -1824,12 +1744,7 @@ pub const GET_SELECTION_CREATE_CONTEXT_REQUEST: u8 = 16;
 #[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetSelectionCreateContextRequest;
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetSelectionCreateContextRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetSelectionCreateContextRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetSelectionCreateContextRequest, "GetSelectionCreateContextRequest");
 impl GetSelectionCreateContextRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -1945,12 +1860,7 @@ pub const SET_SELECTION_USE_CONTEXT_REQUEST: u8 = 17;
 pub struct SetSelectionUseContextRequest<'input> {
     pub context: Cow<'input, [u8]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for SetSelectionUseContextRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SetSelectionUseContextRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SetSelectionUseContextRequest<'_>, "SetSelectionUseContextRequest");
 impl<'input> SetSelectionUseContextRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -2015,12 +1925,7 @@ pub const GET_SELECTION_USE_CONTEXT_REQUEST: u8 = 18;
 #[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetSelectionUseContextRequest;
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetSelectionUseContextRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetSelectionUseContextRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetSelectionUseContextRequest, "GetSelectionUseContextRequest");
 impl GetSelectionUseContextRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -2136,12 +2041,7 @@ pub const GET_SELECTION_CONTEXT_REQUEST: u8 = 19;
 pub struct GetSelectionContextRequest {
     pub selection: xproto::Atom,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetSelectionContextRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetSelectionContextRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetSelectionContextRequest, "GetSelectionContextRequest");
 impl GetSelectionContextRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -2264,12 +2164,7 @@ pub const GET_SELECTION_DATA_CONTEXT_REQUEST: u8 = 20;
 pub struct GetSelectionDataContextRequest {
     pub selection: xproto::Atom,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetSelectionDataContextRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetSelectionDataContextRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetSelectionDataContextRequest, "GetSelectionDataContextRequest");
 impl GetSelectionDataContextRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -2390,12 +2285,7 @@ pub const LIST_SELECTIONS_REQUEST: u8 = 21;
 #[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ListSelectionsRequest;
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for ListSelectionsRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ListSelectionsRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ListSelectionsRequest, "ListSelectionsRequest");
 impl ListSelectionsRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -2510,12 +2400,7 @@ pub const GET_CLIENT_CONTEXT_REQUEST: u8 = 22;
 pub struct GetClientContextRequest {
     pub resource: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetClientContextRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetClientContextRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetClientContextRequest, "GetClientContextRequest");
 impl GetClientContextRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {

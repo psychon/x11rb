@@ -7275,12 +7275,7 @@ pub struct CreateWindowRequest<'input> {
     pub visual: Visualid,
     pub value_list: Cow<'input, CreateWindowAux>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for CreateWindowRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("CreateWindowRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(CreateWindowRequest<'_>, "CreateWindowRequest");
 impl<'input> CreateWindowRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -7796,12 +7791,7 @@ pub struct ChangeWindowAttributesRequest<'input> {
     pub window: Window,
     pub value_list: Cow<'input, ChangeWindowAttributesAux>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for ChangeWindowAttributesRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ChangeWindowAttributesRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ChangeWindowAttributesRequest<'_>, "ChangeWindowAttributesRequest");
 impl<'input> ChangeWindowAttributesRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -7953,12 +7943,7 @@ pub const GET_WINDOW_ATTRIBUTES_REQUEST: u8 = 3;
 pub struct GetWindowAttributesRequest {
     pub window: Window,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetWindowAttributesRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetWindowAttributesRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetWindowAttributesRequest, "GetWindowAttributesRequest");
 impl GetWindowAttributesRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -8212,12 +8197,7 @@ pub const DESTROY_WINDOW_REQUEST: u8 = 4;
 pub struct DestroyWindowRequest {
     pub window: Window,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for DestroyWindowRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("DestroyWindowRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(DestroyWindowRequest, "DestroyWindowRequest");
 impl DestroyWindowRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -8276,12 +8256,7 @@ pub const DESTROY_SUBWINDOWS_REQUEST: u8 = 5;
 pub struct DestroySubwindowsRequest {
     pub window: Window,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for DestroySubwindowsRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("DestroySubwindowsRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(DestroySubwindowsRequest, "DestroySubwindowsRequest");
 impl DestroySubwindowsRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -8422,12 +8397,7 @@ pub struct ChangeSaveSetRequest {
     pub mode: SetMode,
     pub window: Window,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for ChangeSaveSetRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ChangeSaveSetRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ChangeSaveSetRequest, "ChangeSaveSetRequest");
 impl ChangeSaveSetRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -8524,12 +8494,7 @@ pub struct ReparentWindowRequest {
     pub x: i16,
     pub y: i16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for ReparentWindowRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ReparentWindowRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ReparentWindowRequest, "ReparentWindowRequest");
 impl ReparentWindowRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -8640,12 +8605,7 @@ pub const MAP_WINDOW_REQUEST: u8 = 8;
 pub struct MapWindowRequest {
     pub window: Window,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for MapWindowRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("MapWindowRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(MapWindowRequest, "MapWindowRequest");
 impl MapWindowRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -8704,12 +8664,7 @@ pub const MAP_SUBWINDOWS_REQUEST: u8 = 9;
 pub struct MapSubwindowsRequest {
     pub window: Window,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for MapSubwindowsRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("MapSubwindowsRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(MapSubwindowsRequest, "MapSubwindowsRequest");
 impl MapSubwindowsRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -8789,12 +8744,7 @@ pub const UNMAP_WINDOW_REQUEST: u8 = 10;
 pub struct UnmapWindowRequest {
     pub window: Window,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for UnmapWindowRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("UnmapWindowRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(UnmapWindowRequest, "UnmapWindowRequest");
 impl UnmapWindowRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -8853,12 +8803,7 @@ pub const UNMAP_SUBWINDOWS_REQUEST: u8 = 11;
 pub struct UnmapSubwindowsRequest {
     pub window: Window,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for UnmapSubwindowsRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("UnmapSubwindowsRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(UnmapSubwindowsRequest, "UnmapSubwindowsRequest");
 impl UnmapSubwindowsRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -9305,12 +9250,7 @@ pub struct ConfigureWindowRequest<'input> {
     pub window: Window,
     pub value_list: Cow<'input, ConfigureWindowAux>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for ConfigureWindowRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ConfigureWindowRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ConfigureWindowRequest<'_>, "ConfigureWindowRequest");
 impl<'input> ConfigureWindowRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -9467,12 +9407,7 @@ pub struct CirculateWindowRequest {
     pub direction: Circulate,
     pub window: Window,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for CirculateWindowRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("CirculateWindowRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(CirculateWindowRequest, "CirculateWindowRequest");
 impl CirculateWindowRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -9570,12 +9505,7 @@ pub const GET_GEOMETRY_REQUEST: u8 = 14;
 pub struct GetGeometryRequest {
     pub drawable: Drawable,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetGeometryRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetGeometryRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetGeometryRequest, "GetGeometryRequest");
 impl GetGeometryRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -9781,12 +9711,7 @@ pub const QUERY_TREE_REQUEST: u8 = 15;
 pub struct QueryTreeRequest {
     pub window: Window,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryTreeRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryTreeRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryTreeRequest, "QueryTreeRequest");
 impl QueryTreeRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -9966,12 +9891,7 @@ pub struct InternAtomRequest<'input> {
     pub only_if_exists: bool,
     pub name: Cow<'input, [u8]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for InternAtomRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("InternAtomRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(InternAtomRequest<'_>, "InternAtomRequest");
 impl<'input> InternAtomRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -10106,12 +10026,7 @@ pub const GET_ATOM_NAME_REQUEST: u8 = 17;
 pub struct GetAtomNameRequest {
     pub atom: Atom,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetAtomNameRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetAtomNameRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetAtomNameRequest, "GetAtomNameRequest");
 impl GetAtomNameRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -10364,12 +10279,7 @@ pub struct ChangePropertyRequest<'input> {
     pub data_len: u32,
     pub data: Cow<'input, [u8]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for ChangePropertyRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ChangePropertyRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ChangePropertyRequest<'_>, "ChangePropertyRequest");
 impl<'input> ChangePropertyRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -10479,12 +10389,7 @@ pub struct DeletePropertyRequest {
     pub window: Window,
     pub property: Atom,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for DeletePropertyRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("DeletePropertyRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(DeletePropertyRequest, "DeletePropertyRequest");
 impl DeletePropertyRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -10680,12 +10585,7 @@ pub struct GetPropertyRequest {
     pub long_offset: u32,
     pub long_length: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetPropertyRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetPropertyRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetPropertyRequest, "GetPropertyRequest");
 impl GetPropertyRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -11001,12 +10901,7 @@ pub const LIST_PROPERTIES_REQUEST: u8 = 21;
 pub struct ListPropertiesRequest {
     pub window: Window,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for ListPropertiesRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ListPropertiesRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ListPropertiesRequest, "ListPropertiesRequest");
 impl ListPropertiesRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -11162,12 +11057,7 @@ pub struct SetSelectionOwnerRequest {
     pub selection: Atom,
     pub time: Timestamp,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for SetSelectionOwnerRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SetSelectionOwnerRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SetSelectionOwnerRequest, "SetSelectionOwnerRequest");
 impl SetSelectionOwnerRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -11257,12 +11147,7 @@ pub const GET_SELECTION_OWNER_REQUEST: u8 = 23;
 pub struct GetSelectionOwnerRequest {
     pub selection: Atom,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetSelectionOwnerRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetSelectionOwnerRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetSelectionOwnerRequest, "GetSelectionOwnerRequest");
 impl GetSelectionOwnerRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -11389,12 +11274,7 @@ pub struct ConvertSelectionRequest {
     pub property: Atom,
     pub time: Timestamp,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for ConvertSelectionRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ConvertSelectionRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ConvertSelectionRequest, "ConvertSelectionRequest");
 impl ConvertSelectionRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -11628,12 +11508,7 @@ pub struct SendEventRequest<'input> {
     pub event_mask: EventMask,
     pub event: Cow<'input, [u8; 32]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for SendEventRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SendEventRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SendEventRequest<'_>, "SendEventRequest");
 impl<'input> SendEventRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'input, [u8]>; 2]> {
@@ -11979,12 +11854,7 @@ pub struct GrabPointerRequest {
     pub cursor: Cursor,
     pub time: Timestamp,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GrabPointerRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GrabPointerRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GrabPointerRequest, "GrabPointerRequest");
 impl GrabPointerRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -12161,12 +12031,7 @@ pub const UNGRAB_POINTER_REQUEST: u8 = 27;
 pub struct UngrabPointerRequest {
     pub time: Timestamp,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for UngrabPointerRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("UngrabPointerRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(UngrabPointerRequest, "UngrabPointerRequest");
 impl UngrabPointerRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -12375,12 +12240,7 @@ pub struct GrabButtonRequest {
     pub button: ButtonIndex,
     pub modifiers: ModMask,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GrabButtonRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GrabButtonRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GrabButtonRequest, "GrabButtonRequest");
 impl GrabButtonRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -12486,12 +12346,7 @@ pub struct UngrabButtonRequest {
     pub grab_window: Window,
     pub modifiers: ModMask,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for UngrabButtonRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("UngrabButtonRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(UngrabButtonRequest, "UngrabButtonRequest");
 impl UngrabButtonRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -12564,12 +12419,7 @@ pub struct ChangeActivePointerGrabRequest {
     pub time: Timestamp,
     pub event_mask: EventMask,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for ChangeActivePointerGrabRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ChangeActivePointerGrabRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ChangeActivePointerGrabRequest, "ChangeActivePointerGrabRequest");
 impl ChangeActivePointerGrabRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -12710,12 +12560,7 @@ pub struct GrabKeyboardRequest {
     pub pointer_mode: GrabMode,
     pub keyboard_mode: GrabMode,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GrabKeyboardRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GrabKeyboardRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GrabKeyboardRequest, "GrabKeyboardRequest");
 impl GrabKeyboardRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -12852,12 +12697,7 @@ pub const UNGRAB_KEYBOARD_REQUEST: u8 = 32;
 pub struct UngrabKeyboardRequest {
     pub time: Timestamp,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for UngrabKeyboardRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("UngrabKeyboardRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(UngrabKeyboardRequest, "UngrabKeyboardRequest");
 impl UngrabKeyboardRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -13037,12 +12877,7 @@ pub struct GrabKeyRequest {
     pub pointer_mode: GrabMode,
     pub keyboard_mode: GrabMode,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GrabKeyRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GrabKeyRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GrabKeyRequest, "GrabKeyRequest");
 impl GrabKeyRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -13154,12 +12989,7 @@ pub struct UngrabKeyRequest {
     pub grab_window: Window,
     pub modifiers: ModMask,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for UngrabKeyRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("UngrabKeyRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(UngrabKeyRequest, "UngrabKeyRequest");
 impl UngrabKeyRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -13378,12 +13208,7 @@ pub struct AllowEventsRequest {
     pub mode: Allow,
     pub time: Timestamp,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for AllowEventsRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("AllowEventsRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(AllowEventsRequest, "AllowEventsRequest");
 impl AllowEventsRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -13443,12 +13268,7 @@ pub const GRAB_SERVER_REQUEST: u8 = 36;
 #[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GrabServerRequest;
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GrabServerRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GrabServerRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GrabServerRequest, "GrabServerRequest");
 impl GrabServerRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -13498,12 +13318,7 @@ pub const UNGRAB_SERVER_REQUEST: u8 = 37;
 #[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct UngrabServerRequest;
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for UngrabServerRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("UngrabServerRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(UngrabServerRequest, "UngrabServerRequest");
 impl UngrabServerRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -13568,12 +13383,7 @@ pub const QUERY_POINTER_REQUEST: u8 = 38;
 pub struct QueryPointerRequest {
     pub window: Window,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryPointerRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryPointerRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryPointerRequest, "QueryPointerRequest");
 impl QueryPointerRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -13802,12 +13612,7 @@ pub struct GetMotionEventsRequest {
     pub start: Timestamp,
     pub stop: Timestamp,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetMotionEventsRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetMotionEventsRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetMotionEventsRequest, "GetMotionEventsRequest");
 impl GetMotionEventsRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -13949,12 +13754,7 @@ pub struct TranslateCoordinatesRequest {
     pub src_x: i16,
     pub src_y: i16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for TranslateCoordinatesRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("TranslateCoordinatesRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(TranslateCoordinatesRequest, "TranslateCoordinatesRequest");
 impl TranslateCoordinatesRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -14144,12 +13944,7 @@ pub struct WarpPointerRequest {
     pub dst_x: i16,
     pub dst_y: i16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for WarpPointerRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("WarpPointerRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(WarpPointerRequest, "WarpPointerRequest");
 impl WarpPointerRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -14354,12 +14149,7 @@ pub struct SetInputFocusRequest {
     pub focus: Window,
     pub time: Timestamp,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for SetInputFocusRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SetInputFocusRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SetInputFocusRequest, "SetInputFocusRequest");
 impl SetInputFocusRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -14426,12 +14216,7 @@ pub const GET_INPUT_FOCUS_REQUEST: u8 = 43;
 #[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetInputFocusRequest;
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetInputFocusRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetInputFocusRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetInputFocusRequest, "GetInputFocusRequest");
 impl GetInputFocusRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -14545,12 +14330,7 @@ pub const QUERY_KEYMAP_REQUEST: u8 = 44;
 #[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryKeymapRequest;
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryKeymapRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryKeymapRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryKeymapRequest, "QueryKeymapRequest");
 impl QueryKeymapRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -14710,12 +14490,7 @@ pub struct OpenFontRequest<'input> {
     pub fid: Font,
     pub name: Cow<'input, [u8]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for OpenFontRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("OpenFontRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(OpenFontRequest<'_>, "OpenFontRequest");
 impl<'input> OpenFontRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -14794,12 +14569,7 @@ pub const CLOSE_FONT_REQUEST: u8 = 46;
 pub struct CloseFontRequest {
     pub font: Font,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for CloseFontRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("CloseFontRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(CloseFontRequest, "CloseFontRequest");
 impl CloseFontRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -15022,12 +14792,7 @@ pub const QUERY_FONT_REQUEST: u8 = 47;
 pub struct QueryFontRequest {
     pub font: Fontable,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryFontRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryFontRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryFontRequest, "QueryFontRequest");
 impl QueryFontRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -15253,12 +15018,7 @@ pub struct QueryTextExtentsRequest<'input> {
     pub font: Fontable,
     pub string: Cow<'input, [Char2b]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for QueryTextExtentsRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryTextExtentsRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryTextExtentsRequest<'_>, "QueryTextExtentsRequest");
 impl<'input> QueryTextExtentsRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -15508,12 +15268,7 @@ pub struct ListFontsRequest<'input> {
     pub max_names: u16,
     pub pattern: Cow<'input, [u8]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for ListFontsRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ListFontsRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ListFontsRequest<'_>, "ListFontsRequest");
 impl<'input> ListFontsRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -15668,12 +15423,7 @@ pub struct ListFontsWithInfoRequest<'input> {
     pub max_names: u16,
     pub pattern: Cow<'input, [u8]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for ListFontsWithInfoRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ListFontsWithInfoRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ListFontsWithInfoRequest<'_>, "ListFontsWithInfoRequest");
 impl<'input> ListFontsWithInfoRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -15884,12 +15634,7 @@ pub const SET_FONT_PATH_REQUEST: u8 = 51;
 pub struct SetFontPathRequest<'input> {
     pub font: Cow<'input, [Str]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for SetFontPathRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SetFontPathRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SetFontPathRequest<'_>, "SetFontPathRequest");
 impl<'input> SetFontPathRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -15959,12 +15704,7 @@ pub const GET_FONT_PATH_REQUEST: u8 = 52;
 #[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetFontPathRequest;
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetFontPathRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetFontPathRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetFontPathRequest, "GetFontPathRequest");
 impl GetFontPathRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -16109,12 +15849,7 @@ pub struct CreatePixmapRequest {
     pub width: u16,
     pub height: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for CreatePixmapRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("CreatePixmapRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(CreatePixmapRequest, "CreatePixmapRequest");
 impl CreatePixmapRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -16204,12 +15939,7 @@ pub const FREE_PIXMAP_REQUEST: u8 = 54;
 pub struct FreePixmapRequest {
     pub pixmap: Pixmap,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for FreePixmapRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("FreePixmapRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(FreePixmapRequest, "FreePixmapRequest");
 impl FreePixmapRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -17432,12 +17162,7 @@ pub struct CreateGCRequest<'input> {
     pub drawable: Drawable,
     pub value_list: Cow<'input, CreateGCAux>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for CreateGCRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("CreateGCRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(CreateGCRequest<'_>, "CreateGCRequest");
 impl<'input> CreateGCRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -18100,12 +17825,7 @@ pub struct ChangeGCRequest<'input> {
     pub gc: Gcontext,
     pub value_list: Cow<'input, ChangeGCAux>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for ChangeGCRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ChangeGCRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ChangeGCRequest<'_>, "ChangeGCRequest");
 impl<'input> ChangeGCRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -18186,12 +17906,7 @@ pub struct CopyGCRequest {
     pub dst_gc: Gcontext,
     pub value_mask: GC,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for CopyGCRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("CopyGCRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(CopyGCRequest, "CopyGCRequest");
 impl CopyGCRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -18267,12 +17982,7 @@ pub struct SetDashesRequest<'input> {
     pub dash_offset: u16,
     pub dashes: Cow<'input, [u8]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for SetDashesRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SetDashesRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SetDashesRequest<'_>, "SetDashesRequest");
 impl<'input> SetDashesRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -18421,12 +18131,7 @@ pub struct SetClipRectanglesRequest<'input> {
     pub clip_y_origin: i16,
     pub rectangles: Cow<'input, [Rectangle]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for SetClipRectanglesRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SetClipRectanglesRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SetClipRectanglesRequest<'_>, "SetClipRectanglesRequest");
 impl<'input> SetClipRectanglesRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -18532,12 +18237,7 @@ pub const FREE_GC_REQUEST: u8 = 60;
 pub struct FreeGCRequest {
     pub gc: Gcontext,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for FreeGCRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("FreeGCRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(FreeGCRequest, "FreeGCRequest");
 impl FreeGCRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -18601,12 +18301,7 @@ pub struct ClearAreaRequest {
     pub width: u16,
     pub height: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for ClearAreaRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ClearAreaRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ClearAreaRequest, "ClearAreaRequest");
 impl ClearAreaRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -18716,12 +18411,7 @@ pub struct CopyAreaRequest {
     pub width: u16,
     pub height: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for CopyAreaRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("CopyAreaRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(CopyAreaRequest, "CopyAreaRequest");
 impl CopyAreaRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -18833,12 +18523,7 @@ pub struct CopyPlaneRequest {
     pub height: u16,
     pub bit_plane: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for CopyPlaneRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("CopyPlaneRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(CopyPlaneRequest, "CopyPlaneRequest");
 impl CopyPlaneRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -19014,12 +18699,7 @@ pub struct PolyPointRequest<'input> {
     pub gc: Gcontext,
     pub points: Cow<'input, [Point]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for PolyPointRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PolyPointRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PolyPointRequest<'_>, "PolyPointRequest");
 impl<'input> PolyPointRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -19152,12 +18832,7 @@ pub struct PolyLineRequest<'input> {
     pub gc: Gcontext,
     pub points: Cow<'input, [Point]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for PolyLineRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PolyLineRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PolyLineRequest<'_>, "PolyLineRequest");
 impl<'input> PolyLineRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -19323,12 +18998,7 @@ pub struct PolySegmentRequest<'input> {
     pub gc: Gcontext,
     pub segments: Cow<'input, [Segment]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for PolySegmentRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PolySegmentRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PolySegmentRequest<'_>, "PolySegmentRequest");
 impl<'input> PolySegmentRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -19417,12 +19087,7 @@ pub struct PolyRectangleRequest<'input> {
     pub gc: Gcontext,
     pub rectangles: Cow<'input, [Rectangle]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for PolyRectangleRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PolyRectangleRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PolyRectangleRequest<'_>, "PolyRectangleRequest");
 impl<'input> PolyRectangleRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -19511,12 +19176,7 @@ pub struct PolyArcRequest<'input> {
     pub gc: Gcontext,
     pub arcs: Cow<'input, [Arc]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for PolyArcRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PolyArcRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PolyArcRequest<'_>, "PolyArcRequest");
 impl<'input> PolyArcRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -19668,12 +19328,7 @@ pub struct FillPolyRequest<'input> {
     pub coordinate_mode: CoordMode,
     pub points: Cow<'input, [Point]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for FillPolyRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("FillPolyRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(FillPolyRequest<'_>, "FillPolyRequest");
 impl<'input> FillPolyRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -19802,12 +19457,7 @@ pub struct PolyFillRectangleRequest<'input> {
     pub gc: Gcontext,
     pub rectangles: Cow<'input, [Rectangle]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for PolyFillRectangleRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PolyFillRectangleRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PolyFillRectangleRequest<'_>, "PolyFillRectangleRequest");
 impl<'input> PolyFillRectangleRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -19896,12 +19546,7 @@ pub struct PolyFillArcRequest<'input> {
     pub gc: Gcontext,
     pub arcs: Cow<'input, [Arc]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for PolyFillArcRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PolyFillArcRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PolyFillArcRequest<'_>, "PolyFillArcRequest");
 impl<'input> PolyFillArcRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -20058,12 +19703,7 @@ pub struct PutImageRequest<'input> {
     pub depth: u8,
     pub data: Cow<'input, [u8]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for PutImageRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PutImageRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PutImageRequest<'_>, "PutImageRequest");
 impl<'input> PutImageRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -20189,12 +19829,7 @@ pub struct GetImageRequest {
     pub height: u16,
     pub plane_mask: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetImageRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetImageRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetImageRequest, "GetImageRequest");
 impl GetImageRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -20357,12 +19992,7 @@ pub struct PolyText8Request<'input> {
     pub y: i16,
     pub items: Cow<'input, [u8]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for PolyText8Request<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PolyText8Request").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PolyText8Request<'_>, "PolyText8Request");
 impl<'input> PolyText8Request<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -20457,12 +20087,7 @@ pub struct PolyText16Request<'input> {
     pub y: i16,
     pub items: Cow<'input, [u8]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for PolyText16Request<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PolyText16Request").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PolyText16Request<'_>, "PolyText16Request");
 impl<'input> PolyText16Request<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -20589,12 +20214,7 @@ pub struct ImageText8Request<'input> {
     pub y: i16,
     pub string: Cow<'input, [u8]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for ImageText8Request<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ImageText8Request").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ImageText8Request<'_>, "ImageText8Request");
 impl<'input> ImageText8Request<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -20724,12 +20344,7 @@ pub struct ImageText16Request<'input> {
     pub y: i16,
     pub string: Cow<'input, [Char2b]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for ImageText16Request<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ImageText16Request").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ImageText16Request<'_>, "ImageText16Request");
 impl<'input> ImageText16Request<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -20885,12 +20500,7 @@ pub struct CreateColormapRequest {
     pub window: Window,
     pub visual: Visualid,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for CreateColormapRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("CreateColormapRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(CreateColormapRequest, "CreateColormapRequest");
 impl CreateColormapRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -20966,12 +20576,7 @@ pub const FREE_COLORMAP_REQUEST: u8 = 79;
 pub struct FreeColormapRequest {
     pub cmap: Colormap,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for FreeColormapRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("FreeColormapRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(FreeColormapRequest, "FreeColormapRequest");
 impl FreeColormapRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -21031,12 +20636,7 @@ pub struct CopyColormapAndFreeRequest {
     pub mid: Colormap,
     pub src_cmap: Colormap,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for CopyColormapAndFreeRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("CopyColormapAndFreeRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(CopyColormapAndFreeRequest, "CopyColormapAndFreeRequest");
 impl CopyColormapAndFreeRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -21102,12 +20702,7 @@ pub const INSTALL_COLORMAP_REQUEST: u8 = 81;
 pub struct InstallColormapRequest {
     pub cmap: Colormap,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for InstallColormapRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("InstallColormapRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(InstallColormapRequest, "InstallColormapRequest");
 impl InstallColormapRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -21166,12 +20761,7 @@ pub const UNINSTALL_COLORMAP_REQUEST: u8 = 82;
 pub struct UninstallColormapRequest {
     pub cmap: Colormap,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for UninstallColormapRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("UninstallColormapRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(UninstallColormapRequest, "UninstallColormapRequest");
 impl UninstallColormapRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -21230,12 +20820,7 @@ pub const LIST_INSTALLED_COLORMAPS_REQUEST: u8 = 83;
 pub struct ListInstalledColormapsRequest {
     pub window: Window,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for ListInstalledColormapsRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ListInstalledColormapsRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ListInstalledColormapsRequest, "ListInstalledColormapsRequest");
 impl ListInstalledColormapsRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -21381,12 +20966,7 @@ pub struct AllocColorRequest {
     pub green: u16,
     pub blue: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for AllocColorRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("AllocColorRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(AllocColorRequest, "AllocColorRequest");
 impl AllocColorRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -21547,12 +21127,7 @@ pub struct AllocNamedColorRequest<'input> {
     pub cmap: Colormap,
     pub name: Cow<'input, [u8]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for AllocNamedColorRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("AllocNamedColorRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(AllocNamedColorRequest<'_>, "AllocNamedColorRequest");
 impl<'input> AllocNamedColorRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -21731,12 +21306,7 @@ pub struct AllocColorCellsRequest {
     pub colors: u16,
     pub planes: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for AllocColorCellsRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("AllocColorCellsRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(AllocColorCellsRequest, "AllocColorCellsRequest");
 impl AllocColorCellsRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -21897,12 +21467,7 @@ pub struct AllocColorPlanesRequest {
     pub greens: u16,
     pub blues: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for AllocColorPlanesRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("AllocColorPlanesRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(AllocColorPlanesRequest, "AllocColorPlanesRequest");
 impl AllocColorPlanesRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -22062,12 +21627,7 @@ pub struct FreeColorsRequest<'input> {
     pub plane_mask: u32,
     pub pixels: Cow<'input, [u32]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for FreeColorsRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("FreeColorsRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(FreeColorsRequest<'_>, "FreeColorsRequest");
 impl<'input> FreeColorsRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -22275,12 +21835,7 @@ pub struct StoreColorsRequest<'input> {
     pub cmap: Colormap,
     pub items: Cow<'input, [Coloritem]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for StoreColorsRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("StoreColorsRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(StoreColorsRequest<'_>, "StoreColorsRequest");
 impl<'input> StoreColorsRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -22362,12 +21917,7 @@ pub struct StoreNamedColorRequest<'input> {
     pub pixel: u32,
     pub name: Cow<'input, [u8]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for StoreNamedColorRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("StoreNamedColorRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(StoreNamedColorRequest<'_>, "StoreNamedColorRequest");
 impl<'input> StoreNamedColorRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -22504,12 +22054,7 @@ pub struct QueryColorsRequest<'input> {
     pub cmap: Colormap,
     pub pixels: Cow<'input, [u32]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for QueryColorsRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryColorsRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryColorsRequest<'_>, "QueryColorsRequest");
 impl<'input> QueryColorsRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -22655,12 +22200,7 @@ pub struct LookupColorRequest<'input> {
     pub cmap: Colormap,
     pub name: Cow<'input, [u8]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for LookupColorRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("LookupColorRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(LookupColorRequest<'_>, "LookupColorRequest");
 impl<'input> LookupColorRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -22895,12 +22435,7 @@ pub struct CreateCursorRequest {
     pub x: u16,
     pub y: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for CreateCursorRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("CreateCursorRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(CreateCursorRequest, "CreateCursorRequest");
 impl CreateCursorRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -23113,12 +22648,7 @@ pub struct CreateGlyphCursorRequest {
     pub back_green: u16,
     pub back_blue: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for CreateGlyphCursorRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("CreateGlyphCursorRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(CreateGlyphCursorRequest, "CreateGlyphCursorRequest");
 impl CreateGlyphCursorRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -23243,12 +22773,7 @@ pub const FREE_CURSOR_REQUEST: u8 = 95;
 pub struct FreeCursorRequest {
     pub cursor: Cursor,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for FreeCursorRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("FreeCursorRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(FreeCursorRequest, "FreeCursorRequest");
 impl FreeCursorRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -23313,12 +22838,7 @@ pub struct RecolorCursorRequest {
     pub back_green: u16,
     pub back_blue: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for RecolorCursorRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("RecolorCursorRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(RecolorCursorRequest, "RecolorCursorRequest");
 impl RecolorCursorRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -23471,12 +22991,7 @@ pub struct QueryBestSizeRequest {
     pub width: u16,
     pub height: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryBestSizeRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryBestSizeRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryBestSizeRequest, "QueryBestSizeRequest");
 impl QueryBestSizeRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -23634,12 +23149,7 @@ pub const QUERY_EXTENSION_REQUEST: u8 = 98;
 pub struct QueryExtensionRequest<'input> {
     pub name: Cow<'input, [u8]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for QueryExtensionRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryExtensionRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryExtensionRequest<'_>, "QueryExtensionRequest");
 impl<'input> QueryExtensionRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -23787,12 +23297,7 @@ pub const LIST_EXTENSIONS_REQUEST: u8 = 99;
 #[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ListExtensionsRequest;
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for ListExtensionsRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ListExtensionsRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ListExtensionsRequest, "ListExtensionsRequest");
 impl ListExtensionsRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -23911,12 +23416,7 @@ pub struct ChangeKeyboardMappingRequest<'input> {
     pub keysyms_per_keycode: u8,
     pub keysyms: Cow<'input, [Keysym]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for ChangeKeyboardMappingRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ChangeKeyboardMappingRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ChangeKeyboardMappingRequest<'_>, "ChangeKeyboardMappingRequest");
 impl<'input> ChangeKeyboardMappingRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -23998,12 +23498,7 @@ pub struct GetKeyboardMappingRequest {
     pub first_keycode: Keycode,
     pub count: u8,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetKeyboardMappingRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetKeyboardMappingRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetKeyboardMappingRequest, "GetKeyboardMappingRequest");
 impl GetKeyboardMappingRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -24495,12 +23990,7 @@ pub const CHANGE_KEYBOARD_CONTROL_REQUEST: u8 = 102;
 pub struct ChangeKeyboardControlRequest<'input> {
     pub value_list: Cow<'input, ChangeKeyboardControlAux>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for ChangeKeyboardControlRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ChangeKeyboardControlRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ChangeKeyboardControlRequest<'_>, "ChangeKeyboardControlRequest");
 impl<'input> ChangeKeyboardControlRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -24569,12 +24059,7 @@ pub const GET_KEYBOARD_CONTROL_REQUEST: u8 = 103;
 #[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetKeyboardControlRequest;
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetKeyboardControlRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetKeyboardControlRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetKeyboardControlRequest, "GetKeyboardControlRequest");
 impl GetKeyboardControlRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -24751,12 +24236,7 @@ pub const BELL_REQUEST: u8 = 104;
 pub struct BellRequest {
     pub percent: i8,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for BellRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("BellRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(BellRequest, "BellRequest");
 impl BellRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -24814,12 +24294,7 @@ pub struct ChangePointerControlRequest {
     pub do_acceleration: bool,
     pub do_threshold: bool,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for ChangePointerControlRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ChangePointerControlRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ChangePointerControlRequest, "ChangePointerControlRequest");
 impl ChangePointerControlRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -24892,12 +24367,7 @@ pub const GET_POINTER_CONTROL_REQUEST: u8 = 106;
 #[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetPointerControlRequest;
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetPointerControlRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetPointerControlRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetPointerControlRequest, "GetPointerControlRequest");
 impl GetPointerControlRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -25165,12 +24635,7 @@ pub struct SetScreenSaverRequest {
     pub prefer_blanking: Blanking,
     pub allow_exposures: Exposures,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for SetScreenSaverRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SetScreenSaverRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SetScreenSaverRequest, "SetScreenSaverRequest");
 impl SetScreenSaverRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -25242,12 +24707,7 @@ pub const GET_SCREEN_SAVER_REQUEST: u8 = 108;
 #[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetScreenSaverRequest;
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetScreenSaverRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetScreenSaverRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetScreenSaverRequest, "GetScreenSaverRequest");
 impl GetScreenSaverRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -25522,12 +24982,7 @@ pub struct ChangeHostsRequest<'input> {
     pub family: Family,
     pub address: Cow<'input, [u8]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for ChangeHostsRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ChangeHostsRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ChangeHostsRequest<'_>, "ChangeHostsRequest");
 impl<'input> ChangeHostsRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -25663,12 +25118,7 @@ pub const LIST_HOSTS_REQUEST: u8 = 110;
 #[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ListHostsRequest;
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for ListHostsRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ListHostsRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ListHostsRequest, "ListHostsRequest");
 impl ListHostsRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -25847,12 +25297,7 @@ pub const SET_ACCESS_CONTROL_REQUEST: u8 = 111;
 pub struct SetAccessControlRequest {
     pub mode: AccessControl,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for SetAccessControlRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SetAccessControlRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SetAccessControlRequest, "SetAccessControlRequest");
 impl SetAccessControlRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -25968,12 +25413,7 @@ pub const SET_CLOSE_DOWN_MODE_REQUEST: u8 = 112;
 pub struct SetCloseDownModeRequest {
     pub mode: CloseDown,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for SetCloseDownModeRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SetCloseDownModeRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SetCloseDownModeRequest, "SetCloseDownModeRequest");
 impl SetCloseDownModeRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -26104,12 +25544,7 @@ pub const KILL_CLIENT_REQUEST: u8 = 113;
 pub struct KillClientRequest {
     pub resource: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for KillClientRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("KillClientRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(KillClientRequest, "KillClientRequest");
 impl KillClientRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -26170,12 +25605,7 @@ pub struct RotatePropertiesRequest<'input> {
     pub delta: i16,
     pub atoms: Cow<'input, [Atom]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for RotatePropertiesRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("RotatePropertiesRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(RotatePropertiesRequest<'_>, "RotatePropertiesRequest");
 impl<'input> RotatePropertiesRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -26317,12 +25747,7 @@ pub const FORCE_SCREEN_SAVER_REQUEST: u8 = 115;
 pub struct ForceScreenSaverRequest {
     pub mode: ScreenSaver,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for ForceScreenSaverRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ForceScreenSaverRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ForceScreenSaverRequest, "ForceScreenSaverRequest");
 impl ForceScreenSaverRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -26438,12 +25863,7 @@ pub const SET_POINTER_MAPPING_REQUEST: u8 = 116;
 pub struct SetPointerMappingRequest<'input> {
     pub map: Cow<'input, [u8]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for SetPointerMappingRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SetPointerMappingRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SetPointerMappingRequest<'_>, "SetPointerMappingRequest");
 impl<'input> SetPointerMappingRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -26562,12 +25982,7 @@ pub const GET_POINTER_MAPPING_REQUEST: u8 = 117;
 #[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetPointerMappingRequest;
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetPointerMappingRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetPointerMappingRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetPointerMappingRequest, "GetPointerMappingRequest");
 impl GetPointerMappingRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -26755,12 +26170,7 @@ pub const SET_MODIFIER_MAPPING_REQUEST: u8 = 118;
 pub struct SetModifierMappingRequest<'input> {
     pub keycodes: Cow<'input, [Keycode]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for SetModifierMappingRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SetModifierMappingRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SetModifierMappingRequest<'_>, "SetModifierMappingRequest");
 impl<'input> SetModifierMappingRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -26880,12 +26290,7 @@ pub const GET_MODIFIER_MAPPING_REQUEST: u8 = 119;
 #[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetModifierMappingRequest;
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetModifierMappingRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetModifierMappingRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetModifierMappingRequest, "GetModifierMappingRequest");
 impl GetModifierMappingRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -27002,12 +26407,7 @@ pub const NO_OPERATION_REQUEST: u8 = 127;
 #[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct NoOperationRequest;
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for NoOperationRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("NoOperationRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(NoOperationRequest, "NoOperationRequest");
 impl NoOperationRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self) -> BufWithFds<[Cow<'static, [u8]>; 1]> {

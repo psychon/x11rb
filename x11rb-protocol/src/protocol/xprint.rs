@@ -391,12 +391,7 @@ pub const PRINT_QUERY_VERSION_REQUEST: u8 = 0;
 #[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PrintQueryVersionRequest;
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for PrintQueryVersionRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PrintQueryVersionRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PrintQueryVersionRequest, "PrintQueryVersionRequest");
 impl PrintQueryVersionRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -511,12 +506,7 @@ pub struct PrintGetPrinterListRequest<'input> {
     pub printer_name: Cow<'input, [String8]>,
     pub locale: Cow<'input, [String8]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for PrintGetPrinterListRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PrintGetPrinterListRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PrintGetPrinterListRequest<'_>, "PrintGetPrinterListRequest");
 impl<'input> PrintGetPrinterListRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 5]> {
@@ -664,12 +654,7 @@ pub const PRINT_REHASH_PRINTER_LIST_REQUEST: u8 = 20;
 #[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PrintRehashPrinterListRequest;
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for PrintRehashPrinterListRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PrintRehashPrinterListRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PrintRehashPrinterListRequest, "PrintRehashPrinterListRequest");
 impl PrintRehashPrinterListRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -720,12 +705,7 @@ pub struct CreateContextRequest<'input> {
     pub printer_name: Cow<'input, [String8]>,
     pub locale: Cow<'input, [String8]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for CreateContextRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("CreateContextRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(CreateContextRequest<'_>, "CreateContextRequest");
 impl<'input> CreateContextRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 5]> {
@@ -817,12 +797,7 @@ pub const PRINT_SET_CONTEXT_REQUEST: u8 = 3;
 pub struct PrintSetContextRequest {
     pub context: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for PrintSetContextRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PrintSetContextRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PrintSetContextRequest, "PrintSetContextRequest");
 impl PrintSetContextRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -876,12 +851,7 @@ pub const PRINT_GET_CONTEXT_REQUEST: u8 = 4;
 #[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PrintGetContextRequest;
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for PrintGetContextRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PrintGetContextRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PrintGetContextRequest, "PrintGetContextRequest");
 impl PrintGetContextRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -991,12 +961,7 @@ pub const PRINT_DESTROY_CONTEXT_REQUEST: u8 = 5;
 pub struct PrintDestroyContextRequest {
     pub context: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for PrintDestroyContextRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PrintDestroyContextRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PrintDestroyContextRequest, "PrintDestroyContextRequest");
 impl PrintDestroyContextRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -1050,12 +1015,7 @@ pub const PRINT_GET_SCREEN_OF_CONTEXT_REQUEST: u8 = 6;
 #[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PrintGetScreenOfContextRequest;
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for PrintGetScreenOfContextRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PrintGetScreenOfContextRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PrintGetScreenOfContextRequest, "PrintGetScreenOfContextRequest");
 impl PrintGetScreenOfContextRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -1165,12 +1125,7 @@ pub const PRINT_START_JOB_REQUEST: u8 = 7;
 pub struct PrintStartJobRequest {
     pub output_mode: u8,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for PrintStartJobRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PrintStartJobRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PrintStartJobRequest, "PrintStartJobRequest");
 impl PrintStartJobRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -1226,12 +1181,7 @@ pub const PRINT_END_JOB_REQUEST: u8 = 8;
 pub struct PrintEndJobRequest {
     pub cancel: bool,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for PrintEndJobRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PrintEndJobRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PrintEndJobRequest, "PrintEndJobRequest");
 impl PrintEndJobRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -1287,12 +1237,7 @@ pub const PRINT_START_DOC_REQUEST: u8 = 9;
 pub struct PrintStartDocRequest {
     pub driver_mode: u8,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for PrintStartDocRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PrintStartDocRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PrintStartDocRequest, "PrintStartDocRequest");
 impl PrintStartDocRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -1348,12 +1293,7 @@ pub const PRINT_END_DOC_REQUEST: u8 = 10;
 pub struct PrintEndDocRequest {
     pub cancel: bool,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for PrintEndDocRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PrintEndDocRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PrintEndDocRequest, "PrintEndDocRequest");
 impl PrintEndDocRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -1412,12 +1352,7 @@ pub struct PrintPutDocumentDataRequest<'input> {
     pub doc_format: Cow<'input, [String8]>,
     pub options: Cow<'input, [String8]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for PrintPutDocumentDataRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PrintPutDocumentDataRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PrintPutDocumentDataRequest<'_>, "PrintPutDocumentDataRequest");
 impl<'input> PrintPutDocumentDataRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 7]> {
@@ -1523,12 +1458,7 @@ pub struct PrintGetDocumentDataRequest {
     pub context: Pcontext,
     pub max_bytes: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for PrintGetDocumentDataRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PrintGetDocumentDataRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PrintGetDocumentDataRequest, "PrintGetDocumentDataRequest");
 impl PrintGetDocumentDataRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -1664,12 +1594,7 @@ pub const PRINT_START_PAGE_REQUEST: u8 = 13;
 pub struct PrintStartPageRequest {
     pub window: xproto::Window,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for PrintStartPageRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PrintStartPageRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PrintStartPageRequest, "PrintStartPageRequest");
 impl PrintStartPageRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -1725,12 +1650,7 @@ pub const PRINT_END_PAGE_REQUEST: u8 = 14;
 pub struct PrintEndPageRequest {
     pub cancel: bool,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for PrintEndPageRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PrintEndPageRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PrintEndPageRequest, "PrintEndPageRequest");
 impl PrintEndPageRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -1788,12 +1708,7 @@ pub struct PrintSelectInputRequest {
     pub context: Pcontext,
     pub event_mask: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for PrintSelectInputRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PrintSelectInputRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PrintSelectInputRequest, "PrintSelectInputRequest");
 impl PrintSelectInputRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -1856,12 +1771,7 @@ pub const PRINT_INPUT_SELECTED_REQUEST: u8 = 16;
 pub struct PrintInputSelectedRequest {
     pub context: Pcontext,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for PrintInputSelectedRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PrintInputSelectedRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PrintInputSelectedRequest, "PrintInputSelectedRequest");
 impl PrintInputSelectedRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -1987,12 +1897,7 @@ pub struct PrintGetAttributesRequest {
     pub context: Pcontext,
     pub pool: u8,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for PrintGetAttributesRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PrintGetAttributesRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PrintGetAttributesRequest, "PrintGetAttributesRequest");
 impl PrintGetAttributesRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -2125,12 +2030,7 @@ pub struct PrintGetOneAttributesRequest<'input> {
     pub pool: u8,
     pub name: Cow<'input, [String8]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for PrintGetOneAttributesRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PrintGetOneAttributesRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PrintGetOneAttributesRequest<'_>, "PrintGetOneAttributesRequest");
 impl<'input> PrintGetOneAttributesRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -2285,12 +2185,7 @@ pub struct PrintSetAttributesRequest<'input> {
     pub rule: u8,
     pub attributes: Cow<'input, [String8]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for PrintSetAttributesRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PrintSetAttributesRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PrintSetAttributesRequest<'_>, "PrintSetAttributesRequest");
 impl<'input> PrintSetAttributesRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -2379,12 +2274,7 @@ pub const PRINT_GET_PAGE_DIMENSIONS_REQUEST: u8 = 21;
 pub struct PrintGetPageDimensionsRequest {
     pub context: Pcontext,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for PrintGetPageDimensionsRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PrintGetPageDimensionsRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PrintGetPageDimensionsRequest, "PrintGetPageDimensionsRequest");
 impl PrintGetPageDimensionsRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -2527,12 +2417,7 @@ pub const PRINT_QUERY_SCREENS_REQUEST: u8 = 22;
 #[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PrintQueryScreensRequest;
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for PrintQueryScreensRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PrintQueryScreensRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PrintQueryScreensRequest, "PrintQueryScreensRequest");
 impl PrintQueryScreensRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -2648,12 +2533,7 @@ pub struct PrintSetImageResolutionRequest {
     pub context: Pcontext,
     pub image_resolution: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for PrintSetImageResolutionRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PrintSetImageResolutionRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PrintSetImageResolutionRequest, "PrintSetImageResolutionRequest");
 impl PrintSetImageResolutionRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -2777,12 +2657,7 @@ pub const PRINT_GET_IMAGE_RESOLUTION_REQUEST: u8 = 24;
 pub struct PrintGetImageResolutionRequest {
     pub context: Pcontext,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for PrintGetImageResolutionRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PrintGetImageResolutionRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PrintGetImageResolutionRequest, "PrintGetImageResolutionRequest");
 impl PrintGetImageResolutionRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {

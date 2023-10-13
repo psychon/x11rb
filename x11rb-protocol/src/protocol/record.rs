@@ -411,12 +411,7 @@ pub struct QueryVersionRequest {
     pub major_version: u16,
     pub minor_version: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryVersionRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryVersionRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryVersionRequest, "QueryVersionRequest");
 impl QueryVersionRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -543,12 +538,7 @@ pub struct CreateContextRequest<'input> {
     pub client_specs: Cow<'input, [ClientSpec]>,
     pub ranges: Cow<'input, [Range]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for CreateContextRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("CreateContextRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(CreateContextRequest<'_>, "CreateContextRequest");
 impl<'input> CreateContextRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 4]> {
@@ -648,12 +638,7 @@ pub struct RegisterClientsRequest<'input> {
     pub client_specs: Cow<'input, [ClientSpec]>,
     pub ranges: Cow<'input, [Range]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for RegisterClientsRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("RegisterClientsRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(RegisterClientsRequest<'_>, "RegisterClientsRequest");
 impl<'input> RegisterClientsRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 4]> {
@@ -751,12 +736,7 @@ pub struct UnregisterClientsRequest<'input> {
     pub context: Context,
     pub client_specs: Cow<'input, [ClientSpec]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for UnregisterClientsRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("UnregisterClientsRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(UnregisterClientsRequest<'_>, "UnregisterClientsRequest");
 impl<'input> UnregisterClientsRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -832,12 +812,7 @@ pub const GET_CONTEXT_REQUEST: u8 = 4;
 pub struct GetContextRequest {
     pub context: Context,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetContextRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetContextRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetContextRequest, "GetContextRequest");
 impl GetContextRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -965,12 +940,7 @@ pub const ENABLE_CONTEXT_REQUEST: u8 = 5;
 pub struct EnableContextRequest {
     pub context: Context,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for EnableContextRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("EnableContextRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(EnableContextRequest, "EnableContextRequest");
 impl EnableContextRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -1110,12 +1080,7 @@ pub const DISABLE_CONTEXT_REQUEST: u8 = 6;
 pub struct DisableContextRequest {
     pub context: Context,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for DisableContextRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("DisableContextRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(DisableContextRequest, "DisableContextRequest");
 impl DisableContextRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -1171,12 +1136,7 @@ pub const FREE_CONTEXT_REQUEST: u8 = 7;
 pub struct FreeContextRequest {
     pub context: Context,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for FreeContextRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("FreeContextRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(FreeContextRequest, "FreeContextRequest");
 impl FreeContextRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {

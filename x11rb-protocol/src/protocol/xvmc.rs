@@ -131,12 +131,7 @@ pub const QUERY_VERSION_REQUEST: u8 = 0;
 #[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryVersionRequest;
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryVersionRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryVersionRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryVersionRequest, "QueryVersionRequest");
 impl QueryVersionRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -254,12 +249,7 @@ pub const LIST_SURFACE_TYPES_REQUEST: u8 = 1;
 pub struct ListSurfaceTypesRequest {
     pub port_id: xv::Port,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for ListSurfaceTypesRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ListSurfaceTypesRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ListSurfaceTypesRequest, "ListSurfaceTypesRequest");
 impl ListSurfaceTypesRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -386,12 +376,7 @@ pub struct CreateContextRequest {
     pub height: u16,
     pub flags: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for CreateContextRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("CreateContextRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(CreateContextRequest, "CreateContextRequest");
 impl CreateContextRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -550,12 +535,7 @@ pub const DESTROY_CONTEXT_REQUEST: u8 = 3;
 pub struct DestroyContextRequest {
     pub context_id: Context,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for DestroyContextRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("DestroyContextRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(DestroyContextRequest, "DestroyContextRequest");
 impl DestroyContextRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -612,12 +592,7 @@ pub struct CreateSurfaceRequest {
     pub surface_id: Surface,
     pub context_id: Context,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for CreateSurfaceRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("CreateSurfaceRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(CreateSurfaceRequest, "CreateSurfaceRequest");
 impl CreateSurfaceRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -743,12 +718,7 @@ pub const DESTROY_SURFACE_REQUEST: u8 = 5;
 pub struct DestroySurfaceRequest {
     pub surface_id: Surface,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for DestroySurfaceRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("DestroySurfaceRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(DestroySurfaceRequest, "DestroySurfaceRequest");
 impl DestroySurfaceRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -808,12 +778,7 @@ pub struct CreateSubpictureRequest {
     pub width: u16,
     pub height: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for CreateSubpictureRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("CreateSubpictureRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(CreateSubpictureRequest, "CreateSubpictureRequest");
 impl CreateSubpictureRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -971,12 +936,7 @@ pub const DESTROY_SUBPICTURE_REQUEST: u8 = 7;
 pub struct DestroySubpictureRequest {
     pub subpicture_id: Subpicture,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for DestroySubpictureRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("DestroySubpictureRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(DestroySubpictureRequest, "DestroySubpictureRequest");
 impl DestroySubpictureRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -1033,12 +993,7 @@ pub struct ListSubpictureTypesRequest {
     pub port_id: xv::Port,
     pub surface_id: Surface,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for ListSubpictureTypesRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ListSubpictureTypesRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ListSubpictureTypesRequest, "ListSubpictureTypesRequest");
 impl ListSubpictureTypesRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {

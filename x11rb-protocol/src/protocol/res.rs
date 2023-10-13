@@ -406,12 +406,7 @@ pub struct QueryVersionRequest {
     pub client_major: u8,
     pub client_minor: u8,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryVersionRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryVersionRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryVersionRequest, "QueryVersionRequest");
 impl QueryVersionRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -533,12 +528,7 @@ pub const QUERY_CLIENTS_REQUEST: u8 = 1;
 #[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryClientsRequest;
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryClientsRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryClientsRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryClientsRequest, "QueryClientsRequest");
 impl QueryClientsRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -653,12 +643,7 @@ pub const QUERY_CLIENT_RESOURCES_REQUEST: u8 = 2;
 pub struct QueryClientResourcesRequest {
     pub xid: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryClientResourcesRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryClientResourcesRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryClientResourcesRequest, "QueryClientResourcesRequest");
 impl QueryClientResourcesRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -780,12 +765,7 @@ pub const QUERY_CLIENT_PIXMAP_BYTES_REQUEST: u8 = 3;
 pub struct QueryClientPixmapBytesRequest {
     pub xid: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryClientPixmapBytesRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryClientPixmapBytesRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryClientPixmapBytesRequest, "QueryClientPixmapBytesRequest");
 impl QueryClientPixmapBytesRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -910,12 +890,7 @@ pub const QUERY_CLIENT_IDS_REQUEST: u8 = 4;
 pub struct QueryClientIdsRequest<'input> {
     pub specs: Cow<'input, [ClientIdSpec]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for QueryClientIdsRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryClientIdsRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryClientIdsRequest<'_>, "QueryClientIdsRequest");
 impl<'input> QueryClientIdsRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -1050,12 +1025,7 @@ pub struct QueryResourceBytesRequest<'input> {
     pub client: u32,
     pub specs: Cow<'input, [ResourceIdSpec]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for QueryResourceBytesRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryResourceBytesRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryResourceBytesRequest<'_>, "QueryResourceBytesRequest");
 impl<'input> QueryResourceBytesRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 3]> {

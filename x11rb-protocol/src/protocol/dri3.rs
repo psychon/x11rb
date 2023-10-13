@@ -45,12 +45,7 @@ pub struct QueryVersionRequest {
     pub major_version: u32,
     pub minor_version: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryVersionRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryVersionRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryVersionRequest, "QueryVersionRequest");
 impl QueryVersionRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -183,12 +178,7 @@ pub struct OpenRequest {
     pub drawable: xproto::Drawable,
     pub provider: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for OpenRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("OpenRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(OpenRequest, "OpenRequest");
 impl OpenRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -339,12 +329,7 @@ pub struct PixmapFromBufferRequest {
     pub bpp: u8,
     pub pixmap_fd: RawFdContainer,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for PixmapFromBufferRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PixmapFromBufferRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PixmapFromBufferRequest, "PixmapFromBufferRequest");
 impl PixmapFromBufferRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -440,12 +425,7 @@ pub const BUFFER_FROM_PIXMAP_REQUEST: u8 = 3;
 pub struct BufferFromPixmapRequest {
     pub pixmap: xproto::Pixmap,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for BufferFromPixmapRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("BufferFromPixmapRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(BufferFromPixmapRequest, "BufferFromPixmapRequest");
 impl BufferFromPixmapRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -608,12 +588,7 @@ pub struct FenceFromFDRequest {
     pub initially_triggered: bool,
     pub fence_fd: RawFdContainer,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for FenceFromFDRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("FenceFromFDRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(FenceFromFDRequest, "FenceFromFDRequest");
 impl FenceFromFDRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -688,12 +663,7 @@ pub struct FDFromFenceRequest {
     pub drawable: xproto::Drawable,
     pub fence: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for FDFromFenceRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("FDFromFenceRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(FDFromFenceRequest, "FDFromFenceRequest");
 impl FDFromFenceRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -840,12 +810,7 @@ pub struct GetSupportedModifiersRequest {
     pub depth: u8,
     pub bpp: u8,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetSupportedModifiersRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetSupportedModifiersRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetSupportedModifiersRequest, "GetSupportedModifiersRequest");
 impl GetSupportedModifiersRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -1010,12 +975,7 @@ pub struct PixmapFromBuffersRequest {
     pub modifier: u64,
     pub buffers: Vec<RawFdContainer>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for PixmapFromBuffersRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PixmapFromBuffersRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PixmapFromBuffersRequest, "PixmapFromBuffersRequest");
 impl PixmapFromBuffersRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -1179,12 +1139,7 @@ pub const BUFFERS_FROM_PIXMAP_REQUEST: u8 = 8;
 pub struct BuffersFromPixmapRequest {
     pub pixmap: xproto::Pixmap,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for BuffersFromPixmapRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("BuffersFromPixmapRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(BuffersFromPixmapRequest, "BuffersFromPixmapRequest");
 impl BuffersFromPixmapRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -1331,12 +1286,7 @@ pub struct SetDRMDeviceInUseRequest {
     pub drm_major: u32,
     pub drm_minor: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for SetDRMDeviceInUseRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SetDRMDeviceInUseRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SetDRMDeviceInUseRequest, "SetDRMDeviceInUseRequest");
 impl SetDRMDeviceInUseRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {

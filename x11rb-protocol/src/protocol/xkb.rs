@@ -5907,12 +5907,7 @@ pub struct UseExtensionRequest {
     pub wanted_major: u16,
     pub wanted_minor: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for UseExtensionRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("UseExtensionRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(UseExtensionRequest, "UseExtensionRequest");
 impl UseExtensionRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -6719,12 +6714,7 @@ pub struct SelectEventsRequest<'input> {
     pub map: MapPart,
     pub details: Cow<'input, SelectEventsAux>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for SelectEventsRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SelectEventsRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SelectEventsRequest<'_>, "SelectEventsRequest");
 impl<'input> SelectEventsRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -6833,12 +6823,7 @@ pub struct BellRequest {
     pub name: xproto::Atom,
     pub window: xproto::Window,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for BellRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("BellRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(BellRequest, "BellRequest");
 impl BellRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -6943,12 +6928,7 @@ pub const GET_STATE_REQUEST: u8 = 4;
 pub struct GetStateRequest {
     pub device_spec: DeviceSpec,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetStateRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetStateRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetStateRequest, "GetStateRequest");
 impl GetStateRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -7163,12 +7143,7 @@ pub struct LatchLockStateRequest {
     pub latch_group: bool,
     pub group_latch: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for LatchLockStateRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("LatchLockStateRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(LatchLockStateRequest, "LatchLockStateRequest");
 impl LatchLockStateRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -7259,12 +7234,7 @@ pub const GET_CONTROLS_REQUEST: u8 = 6;
 pub struct GetControlsRequest {
     pub device_spec: DeviceSpec,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetControlsRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetControlsRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetControlsRequest, "GetControlsRequest");
 impl GetControlsRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -7608,12 +7578,7 @@ pub struct SetControlsRequest<'input> {
     pub access_x_timeout_options_values: AXOption,
     pub per_key_repeat: Cow<'input, [u8; 32]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for SetControlsRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SetControlsRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SetControlsRequest<'_>, "SetControlsRequest");
 impl<'input> SetControlsRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 2]> {
@@ -7885,12 +7850,7 @@ pub struct GetMapRequest {
     pub first_v_mod_map_key: xproto::Keycode,
     pub n_v_mod_map_keys: u8,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetMapRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetMapRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetMapRequest, "GetMapRequest");
 impl GetMapRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -8655,12 +8615,7 @@ pub struct SetMapRequest<'input> {
     pub virtual_mods: VMod,
     pub values: Cow<'input, SetMapAux>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for SetMapRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SetMapRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SetMapRequest<'_>, "SetMapRequest");
 impl<'input> SetMapRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -8862,12 +8817,7 @@ pub struct GetCompatMapRequest {
     pub first_si: u16,
     pub n_si: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetCompatMapRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetCompatMapRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetCompatMapRequest, "GetCompatMapRequest");
 impl GetCompatMapRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -9029,12 +8979,7 @@ pub struct SetCompatMapRequest<'input> {
     pub si: Cow<'input, [SymInterpret]>,
     pub group_maps: Cow<'input, [ModDef]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for SetCompatMapRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SetCompatMapRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SetCompatMapRequest<'_>, "SetCompatMapRequest");
 impl<'input> SetCompatMapRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 4]> {
@@ -9139,12 +9084,7 @@ pub const GET_INDICATOR_STATE_REQUEST: u8 = 12;
 pub struct GetIndicatorStateRequest {
     pub device_spec: DeviceSpec,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetIndicatorStateRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetIndicatorStateRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetIndicatorStateRequest, "GetIndicatorStateRequest");
 impl GetIndicatorStateRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -9287,12 +9227,7 @@ pub struct GetIndicatorMapRequest {
     pub device_spec: DeviceSpec,
     pub which: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetIndicatorMapRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetIndicatorMapRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetIndicatorMapRequest, "GetIndicatorMapRequest");
 impl GetIndicatorMapRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -9417,12 +9352,7 @@ pub struct SetIndicatorMapRequest<'input> {
     pub which: u32,
     pub maps: Cow<'input, [IndicatorMap]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for SetIndicatorMapRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SetIndicatorMapRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SetIndicatorMapRequest<'_>, "SetIndicatorMapRequest");
 impl<'input> SetIndicatorMapRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -9504,12 +9434,7 @@ pub struct GetNamedIndicatorRequest {
     pub led_id: IDSpec,
     pub indicator: xproto::Atom,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetNamedIndicatorRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetNamedIndicatorRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetNamedIndicatorRequest, "GetNamedIndicatorRequest");
 impl GetNamedIndicatorRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -9743,12 +9668,7 @@ pub struct SetNamedIndicatorRequest {
     pub map_vmods: VMod,
     pub map_ctrls: BoolCtrl,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for SetNamedIndicatorRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SetNamedIndicatorRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SetNamedIndicatorRequest, "SetNamedIndicatorRequest");
 impl SetNamedIndicatorRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -9881,12 +9801,7 @@ pub struct GetNamesRequest {
     pub device_spec: DeviceSpec,
     pub which: NameDetail,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetNamesRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetNamesRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetNamesRequest, "GetNamesRequest");
 impl GetNamesRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -10714,12 +10629,7 @@ pub struct SetNamesRequest<'input> {
     pub total_kt_level_names: u16,
     pub values: Cow<'input, SetNamesAux>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for SetNamesRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SetNamesRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SetNamesRequest<'_>, "SetNamesRequest");
 impl<'input> SetNamesRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -10867,12 +10777,7 @@ pub struct PerClientFlagsRequest {
     pub auto_ctrls: BoolCtrl,
     pub auto_ctrls_values: BoolCtrl,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for PerClientFlagsRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PerClientFlagsRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PerClientFlagsRequest, "PerClientFlagsRequest");
 impl PerClientFlagsRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -11071,12 +10976,7 @@ pub struct ListComponentsRequest {
     pub device_spec: DeviceSpec,
     pub max_names: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for ListComponentsRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ListComponentsRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ListComponentsRequest, "ListComponentsRequest");
 impl ListComponentsRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -11303,12 +11203,7 @@ pub struct GetKbdByNameRequest {
     pub want: GBNDetail,
     pub load: bool,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetKbdByNameRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetKbdByNameRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetKbdByNameRequest, "GetKbdByNameRequest");
 impl GetKbdByNameRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -12457,12 +12352,7 @@ pub struct GetDeviceInfoRequest {
     pub led_class: LedClass,
     pub led_id: IDSpec,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetDeviceInfoRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetDeviceInfoRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetDeviceInfoRequest, "GetDeviceInfoRequest");
 impl GetDeviceInfoRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -12699,12 +12589,7 @@ pub struct SetDeviceInfoRequest<'input> {
     pub btn_actions: Cow<'input, [Action]>,
     pub leds: Cow<'input, [DeviceLedInfo]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for SetDeviceInfoRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SetDeviceInfoRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SetDeviceInfoRequest<'_>, "SetDeviceInfoRequest");
 impl<'input> SetDeviceInfoRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 4]> {
@@ -12801,12 +12686,7 @@ pub struct SetDebuggingFlagsRequest<'input> {
     pub ctrls: u32,
     pub message: Cow<'input, [String8]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for SetDebuggingFlagsRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SetDebuggingFlagsRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SetDebuggingFlagsRequest<'_>, "SetDebuggingFlagsRequest");
 impl<'input> SetDebuggingFlagsRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 3]> {

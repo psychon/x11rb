@@ -43,12 +43,7 @@ pub struct GetVersionRequest {
     pub client_major_version: u16,
     pub client_minor_version: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetVersionRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetVersionRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetVersionRequest, "GetVersionRequest");
 impl GetVersionRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -170,12 +165,7 @@ pub const GET_XID_RANGE_REQUEST: u8 = 1;
 #[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetXIDRangeRequest;
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetXIDRangeRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetXIDRangeRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetXIDRangeRequest, "GetXIDRangeRequest");
 impl GetXIDRangeRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -293,12 +283,7 @@ pub const GET_XID_LIST_REQUEST: u8 = 2;
 pub struct GetXIDListRequest {
     pub count: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetXIDListRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetXIDListRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetXIDListRequest, "GetXIDListRequest");
 impl GetXIDListRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {

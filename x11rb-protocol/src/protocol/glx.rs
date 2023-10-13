@@ -535,12 +535,7 @@ pub struct RenderRequest<'input> {
     pub context_tag: ContextTag,
     pub data: Cow<'input, [u8]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for RenderRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("RenderRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(RenderRequest<'_>, "RenderRequest");
 impl<'input> RenderRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -611,12 +606,7 @@ pub struct RenderLargeRequest<'input> {
     pub request_total: u16,
     pub data: Cow<'input, [u8]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for RenderLargeRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("RenderLargeRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(RenderLargeRequest<'_>, "RenderLargeRequest");
 impl<'input> RenderLargeRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -707,12 +697,7 @@ pub struct CreateContextRequest {
     pub share_list: Context,
     pub is_direct: bool,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for CreateContextRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("CreateContextRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(CreateContextRequest, "CreateContextRequest");
 impl CreateContextRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -797,12 +782,7 @@ pub const DESTROY_CONTEXT_REQUEST: u8 = 4;
 pub struct DestroyContextRequest {
     pub context: Context,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for DestroyContextRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("DestroyContextRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(DestroyContextRequest, "DestroyContextRequest");
 impl DestroyContextRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -860,12 +840,7 @@ pub struct MakeCurrentRequest {
     pub context: Context,
     pub old_context_tag: ContextTag,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for MakeCurrentRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("MakeCurrentRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(MakeCurrentRequest, "MakeCurrentRequest");
 impl MakeCurrentRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -1018,12 +993,7 @@ pub const IS_DIRECT_REQUEST: u8 = 6;
 pub struct IsDirectRequest {
     pub context: Context,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for IsDirectRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("IsDirectRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(IsDirectRequest, "IsDirectRequest");
 impl IsDirectRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -1163,12 +1133,7 @@ pub struct QueryVersionRequest {
     pub major_version: u32,
     pub minor_version: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryVersionRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryVersionRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryVersionRequest, "QueryVersionRequest");
 impl QueryVersionRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -1318,12 +1283,7 @@ pub const WAIT_GL_REQUEST: u8 = 8;
 pub struct WaitGLRequest {
     pub context_tag: ContextTag,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for WaitGLRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("WaitGLRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(WaitGLRequest, "WaitGLRequest");
 impl WaitGLRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -1379,12 +1339,7 @@ pub const WAIT_X_REQUEST: u8 = 9;
 pub struct WaitXRequest {
     pub context_tag: ContextTag,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for WaitXRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("WaitXRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(WaitXRequest, "WaitXRequest");
 impl WaitXRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -1443,12 +1398,7 @@ pub struct CopyContextRequest {
     pub mask: u32,
     pub src_context_tag: ContextTag,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for CopyContextRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("CopyContextRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(CopyContextRequest, "CopyContextRequest");
 impl CopyContextRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -1611,12 +1561,7 @@ pub struct SwapBuffersRequest {
     pub context_tag: ContextTag,
     pub drawable: Drawable,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for SwapBuffersRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SwapBuffersRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SwapBuffersRequest, "SwapBuffersRequest");
 impl SwapBuffersRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -1683,12 +1628,7 @@ pub struct UseXFontRequest {
     pub count: u32,
     pub list_base: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for UseXFontRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("UseXFontRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(UseXFontRequest, "UseXFontRequest");
 impl UseXFontRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -1775,12 +1715,7 @@ pub struct CreateGLXPixmapRequest {
     pub pixmap: xproto::Pixmap,
     pub glx_pixmap: Pixmap,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for CreateGLXPixmapRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("CreateGLXPixmapRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(CreateGLXPixmapRequest, "CreateGLXPixmapRequest");
 impl CreateGLXPixmapRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -1857,12 +1792,7 @@ pub const GET_VISUAL_CONFIGS_REQUEST: u8 = 14;
 pub struct GetVisualConfigsRequest {
     pub screen: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetVisualConfigsRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetVisualConfigsRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetVisualConfigsRequest, "GetVisualConfigsRequest");
 impl GetVisualConfigsRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -1987,12 +1917,7 @@ pub const DESTROY_GLX_PIXMAP_REQUEST: u8 = 15;
 pub struct DestroyGLXPixmapRequest {
     pub glx_pixmap: Pixmap,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for DestroyGLXPixmapRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("DestroyGLXPixmapRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(DestroyGLXPixmapRequest, "DestroyGLXPixmapRequest");
 impl DestroyGLXPixmapRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -2050,12 +1975,7 @@ pub struct VendorPrivateRequest<'input> {
     pub context_tag: ContextTag,
     pub data: Cow<'input, [u8]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for VendorPrivateRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("VendorPrivateRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(VendorPrivateRequest<'_>, "VendorPrivateRequest");
 impl<'input> VendorPrivateRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -2133,12 +2053,7 @@ pub struct VendorPrivateWithReplyRequest<'input> {
     pub context_tag: ContextTag,
     pub data: Cow<'input, [u8]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for VendorPrivateWithReplyRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("VendorPrivateWithReplyRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(VendorPrivateWithReplyRequest<'_>, "VendorPrivateWithReplyRequest");
 impl<'input> VendorPrivateWithReplyRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -2284,12 +2199,7 @@ pub const QUERY_EXTENSIONS_STRING_REQUEST: u8 = 18;
 pub struct QueryExtensionsStringRequest {
     pub screen: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryExtensionsStringRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryExtensionsStringRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryExtensionsStringRequest, "QueryExtensionsStringRequest");
 impl QueryExtensionsStringRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -2431,12 +2341,7 @@ pub struct QueryServerStringRequest {
     pub screen: u32,
     pub name: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryServerStringRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryServerStringRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryServerStringRequest, "QueryServerStringRequest");
 impl QueryServerStringRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -2570,12 +2475,7 @@ pub struct ClientInfoRequest<'input> {
     pub minor_version: u32,
     pub string: Cow<'input, [u8]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for ClientInfoRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ClientInfoRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ClientInfoRequest<'_>, "ClientInfoRequest");
 impl<'input> ClientInfoRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -2658,12 +2558,7 @@ pub const GET_FB_CONFIGS_REQUEST: u8 = 21;
 pub struct GetFBConfigsRequest {
     pub screen: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetFBConfigsRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetFBConfigsRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetFBConfigsRequest, "GetFBConfigsRequest");
 impl GetFBConfigsRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -2792,12 +2687,7 @@ pub struct CreatePixmapRequest<'input> {
     pub glx_pixmap: Pixmap,
     pub attribs: Cow<'input, [u32]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for CreatePixmapRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("CreatePixmapRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(CreatePixmapRequest<'_>, "CreatePixmapRequest");
 impl<'input> CreatePixmapRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -2898,12 +2788,7 @@ pub const DESTROY_PIXMAP_REQUEST: u8 = 23;
 pub struct DestroyPixmapRequest {
     pub glx_pixmap: Pixmap,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for DestroyPixmapRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("DestroyPixmapRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(DestroyPixmapRequest, "DestroyPixmapRequest");
 impl DestroyPixmapRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -2964,12 +2849,7 @@ pub struct CreateNewContextRequest {
     pub share_list: Context,
     pub is_direct: bool,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for CreateNewContextRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("CreateNewContextRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(CreateNewContextRequest, "CreateNewContextRequest");
 impl CreateNewContextRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -3061,12 +2941,7 @@ pub const QUERY_CONTEXT_REQUEST: u8 = 25;
 pub struct QueryContextRequest {
     pub context: Context,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryContextRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryContextRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryContextRequest, "QueryContextRequest");
 impl QueryContextRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -3193,12 +3068,7 @@ pub struct MakeContextCurrentRequest {
     pub read_drawable: Drawable,
     pub context: Context,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for MakeContextCurrentRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("MakeContextCurrentRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(MakeContextCurrentRequest, "MakeContextCurrentRequest");
 impl MakeContextCurrentRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -3361,12 +3231,7 @@ pub struct CreatePbufferRequest<'input> {
     pub pbuffer: Pbuffer,
     pub attribs: Cow<'input, [u32]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for CreatePbufferRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("CreatePbufferRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(CreatePbufferRequest<'_>, "CreatePbufferRequest");
 impl<'input> CreatePbufferRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -3459,12 +3324,7 @@ pub const DESTROY_PBUFFER_REQUEST: u8 = 28;
 pub struct DestroyPbufferRequest {
     pub pbuffer: Pbuffer,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for DestroyPbufferRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("DestroyPbufferRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(DestroyPbufferRequest, "DestroyPbufferRequest");
 impl DestroyPbufferRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -3520,12 +3380,7 @@ pub const GET_DRAWABLE_ATTRIBUTES_REQUEST: u8 = 29;
 pub struct GetDrawableAttributesRequest {
     pub drawable: Drawable,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetDrawableAttributesRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetDrawableAttributesRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetDrawableAttributesRequest, "GetDrawableAttributesRequest");
 impl GetDrawableAttributesRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -3650,12 +3505,7 @@ pub struct ChangeDrawableAttributesRequest<'input> {
     pub drawable: Drawable,
     pub attribs: Cow<'input, [u32]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for ChangeDrawableAttributesRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ChangeDrawableAttributesRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ChangeDrawableAttributesRequest<'_>, "ChangeDrawableAttributesRequest");
 impl<'input> ChangeDrawableAttributesRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -3736,12 +3586,7 @@ pub struct CreateWindowRequest<'input> {
     pub glx_window: Window,
     pub attribs: Cow<'input, [u32]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for CreateWindowRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("CreateWindowRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(CreateWindowRequest<'_>, "CreateWindowRequest");
 impl<'input> CreateWindowRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -3842,12 +3687,7 @@ pub const DELETE_WINDOW_REQUEST: u8 = 32;
 pub struct DeleteWindowRequest {
     pub glxwindow: Window,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for DeleteWindowRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("DeleteWindowRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(DeleteWindowRequest, "DeleteWindowRequest");
 impl DeleteWindowRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -3907,12 +3747,7 @@ pub struct SetClientInfoARBRequest<'input> {
     pub gl_extension_string: Cow<'input, [u8]>,
     pub glx_extension_string: Cow<'input, [u8]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for SetClientInfoARBRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SetClientInfoARBRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SetClientInfoARBRequest<'_>, "SetClientInfoARBRequest");
 impl<'input> SetClientInfoARBRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 6]> {
@@ -4030,12 +3865,7 @@ pub struct CreateContextAttribsARBRequest<'input> {
     pub is_direct: bool,
     pub attribs: Cow<'input, [u32]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for CreateContextAttribsARBRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("CreateContextAttribsARBRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(CreateContextAttribsARBRequest<'_>, "CreateContextAttribsARBRequest");
 impl<'input> CreateContextAttribsARBRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -4149,12 +3979,7 @@ pub struct SetClientInfo2ARBRequest<'input> {
     pub gl_extension_string: Cow<'input, [u8]>,
     pub glx_extension_string: Cow<'input, [u8]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for SetClientInfo2ARBRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SetClientInfo2ARBRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SetClientInfo2ARBRequest<'_>, "SetClientInfo2ARBRequest");
 impl<'input> SetClientInfo2ARBRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 6]> {
@@ -4269,12 +4094,7 @@ pub struct NewListRequest {
     pub list: u32,
     pub mode: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for NewListRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("NewListRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(NewListRequest, "NewListRequest");
 impl NewListRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -4344,12 +4164,7 @@ pub const END_LIST_REQUEST: u8 = 102;
 pub struct EndListRequest {
     pub context_tag: ContextTag,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for EndListRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("EndListRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(EndListRequest, "EndListRequest");
 impl EndListRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -4407,12 +4222,7 @@ pub struct DeleteListsRequest {
     pub list: u32,
     pub range: i32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for DeleteListsRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("DeleteListsRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(DeleteListsRequest, "DeleteListsRequest");
 impl DeleteListsRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -4483,12 +4293,7 @@ pub struct GenListsRequest {
     pub context_tag: ContextTag,
     pub range: i32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GenListsRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GenListsRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GenListsRequest, "GenListsRequest");
 impl GenListsRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -4614,12 +4419,7 @@ pub struct FeedbackBufferRequest {
     pub size: i32,
     pub type_: i32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for FeedbackBufferRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("FeedbackBufferRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(FeedbackBufferRequest, "FeedbackBufferRequest");
 impl FeedbackBufferRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -4690,12 +4490,7 @@ pub struct SelectBufferRequest {
     pub context_tag: ContextTag,
     pub size: i32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for SelectBufferRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SelectBufferRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SelectBufferRequest, "SelectBufferRequest");
 impl SelectBufferRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -4759,12 +4554,7 @@ pub struct RenderModeRequest {
     pub context_tag: ContextTag,
     pub mode: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for RenderModeRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("RenderModeRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(RenderModeRequest, "RenderModeRequest");
 impl RenderModeRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -4954,12 +4744,7 @@ pub const FINISH_REQUEST: u8 = 108;
 pub struct FinishRequest {
     pub context_tag: ContextTag,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for FinishRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("FinishRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(FinishRequest, "FinishRequest");
 impl FinishRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -5070,12 +4855,7 @@ pub struct PixelStorefRequest {
     pub pname: u32,
     pub datum: Float32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for PixelStorefRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PixelStorefRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PixelStorefRequest, "PixelStorefRequest");
 impl PixelStorefRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -5147,12 +4927,7 @@ pub struct PixelStoreiRequest {
     pub pname: u32,
     pub datum: i32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for PixelStoreiRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PixelStoreiRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PixelStoreiRequest, "PixelStoreiRequest");
 impl PixelStoreiRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -5230,12 +5005,7 @@ pub struct ReadPixelsRequest {
     pub swap_bytes: bool,
     pub lsb_first: bool,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for ReadPixelsRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ReadPixelsRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ReadPixelsRequest, "ReadPixelsRequest");
 impl ReadPixelsRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -5410,12 +5180,7 @@ pub struct GetBooleanvRequest {
     pub context_tag: ContextTag,
     pub pname: i32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetBooleanvRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetBooleanvRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetBooleanvRequest, "GetBooleanvRequest");
 impl GetBooleanvRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -5550,12 +5315,7 @@ pub struct GetClipPlaneRequest {
     pub context_tag: ContextTag,
     pub plane: i32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetClipPlaneRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetClipPlaneRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetClipPlaneRequest, "GetClipPlaneRequest");
 impl GetClipPlaneRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -5683,12 +5443,7 @@ pub struct GetDoublevRequest {
     pub context_tag: ContextTag,
     pub pname: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetDoublevRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetDoublevRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetDoublevRequest, "GetDoublevRequest");
 impl GetDoublevRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -5822,12 +5577,7 @@ pub const GET_ERROR_REQUEST: u8 = 115;
 pub struct GetErrorRequest {
     pub context_tag: ContextTag,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetErrorRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetErrorRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetErrorRequest, "GetErrorRequest");
 impl GetErrorRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -5945,12 +5695,7 @@ pub struct GetFloatvRequest {
     pub context_tag: ContextTag,
     pub pname: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetFloatvRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetFloatvRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetFloatvRequest, "GetFloatvRequest");
 impl GetFloatvRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -6085,12 +5830,7 @@ pub struct GetIntegervRequest {
     pub context_tag: ContextTag,
     pub pname: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetIntegervRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetIntegervRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetIntegervRequest, "GetIntegervRequest");
 impl GetIntegervRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -6226,12 +5966,7 @@ pub struct GetLightfvRequest {
     pub light: u32,
     pub pname: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetLightfvRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetLightfvRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetLightfvRequest, "GetLightfvRequest");
 impl GetLightfvRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -6374,12 +6109,7 @@ pub struct GetLightivRequest {
     pub light: u32,
     pub pname: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetLightivRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetLightivRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetLightivRequest, "GetLightivRequest");
 impl GetLightivRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -6522,12 +6252,7 @@ pub struct GetMapdvRequest {
     pub target: u32,
     pub query: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetMapdvRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetMapdvRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetMapdvRequest, "GetMapdvRequest");
 impl GetMapdvRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -6670,12 +6395,7 @@ pub struct GetMapfvRequest {
     pub target: u32,
     pub query: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetMapfvRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetMapfvRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetMapfvRequest, "GetMapfvRequest");
 impl GetMapfvRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -6818,12 +6538,7 @@ pub struct GetMapivRequest {
     pub target: u32,
     pub query: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetMapivRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetMapivRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetMapivRequest, "GetMapivRequest");
 impl GetMapivRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -6966,12 +6681,7 @@ pub struct GetMaterialfvRequest {
     pub face: u32,
     pub pname: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetMaterialfvRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetMaterialfvRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetMaterialfvRequest, "GetMaterialfvRequest");
 impl GetMaterialfvRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -7114,12 +6824,7 @@ pub struct GetMaterialivRequest {
     pub face: u32,
     pub pname: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetMaterialivRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetMaterialivRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetMaterialivRequest, "GetMaterialivRequest");
 impl GetMaterialivRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -7261,12 +6966,7 @@ pub struct GetPixelMapfvRequest {
     pub context_tag: ContextTag,
     pub map: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetPixelMapfvRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetPixelMapfvRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetPixelMapfvRequest, "GetPixelMapfvRequest");
 impl GetPixelMapfvRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -7401,12 +7101,7 @@ pub struct GetPixelMapuivRequest {
     pub context_tag: ContextTag,
     pub map: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetPixelMapuivRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetPixelMapuivRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetPixelMapuivRequest, "GetPixelMapuivRequest");
 impl GetPixelMapuivRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -7541,12 +7236,7 @@ pub struct GetPixelMapusvRequest {
     pub context_tag: ContextTag,
     pub map: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetPixelMapusvRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetPixelMapusvRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetPixelMapusvRequest, "GetPixelMapusvRequest");
 impl GetPixelMapusvRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -7681,12 +7371,7 @@ pub struct GetPolygonStippleRequest {
     pub context_tag: ContextTag,
     pub lsb_first: bool,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetPolygonStippleRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetPolygonStippleRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetPolygonStippleRequest, "GetPolygonStippleRequest");
 impl GetPolygonStippleRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -7816,12 +7501,7 @@ pub struct GetStringRequest {
     pub context_tag: ContextTag,
     pub name: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetStringRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetStringRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetStringRequest, "GetStringRequest");
 impl GetStringRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -7955,12 +7635,7 @@ pub struct GetTexEnvfvRequest {
     pub target: u32,
     pub pname: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetTexEnvfvRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetTexEnvfvRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetTexEnvfvRequest, "GetTexEnvfvRequest");
 impl GetTexEnvfvRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -8103,12 +7778,7 @@ pub struct GetTexEnvivRequest {
     pub target: u32,
     pub pname: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetTexEnvivRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetTexEnvivRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetTexEnvivRequest, "GetTexEnvivRequest");
 impl GetTexEnvivRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -8251,12 +7921,7 @@ pub struct GetTexGendvRequest {
     pub coord: u32,
     pub pname: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetTexGendvRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetTexGendvRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetTexGendvRequest, "GetTexGendvRequest");
 impl GetTexGendvRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -8399,12 +8064,7 @@ pub struct GetTexGenfvRequest {
     pub coord: u32,
     pub pname: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetTexGenfvRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetTexGenfvRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetTexGenfvRequest, "GetTexGenfvRequest");
 impl GetTexGenfvRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -8547,12 +8207,7 @@ pub struct GetTexGenivRequest {
     pub coord: u32,
     pub pname: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetTexGenivRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetTexGenivRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetTexGenivRequest, "GetTexGenivRequest");
 impl GetTexGenivRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -8698,12 +8353,7 @@ pub struct GetTexImageRequest {
     pub type_: u32,
     pub swap_bytes: bool,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetTexImageRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetTexImageRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetTexImageRequest, "GetTexImageRequest");
 impl GetTexImageRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -8873,12 +8523,7 @@ pub struct GetTexParameterfvRequest {
     pub target: u32,
     pub pname: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetTexParameterfvRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetTexParameterfvRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetTexParameterfvRequest, "GetTexParameterfvRequest");
 impl GetTexParameterfvRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -9021,12 +8666,7 @@ pub struct GetTexParameterivRequest {
     pub target: u32,
     pub pname: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetTexParameterivRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetTexParameterivRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetTexParameterivRequest, "GetTexParameterivRequest");
 impl GetTexParameterivRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -9170,12 +8810,7 @@ pub struct GetTexLevelParameterfvRequest {
     pub level: i32,
     pub pname: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetTexLevelParameterfvRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetTexLevelParameterfvRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetTexLevelParameterfvRequest, "GetTexLevelParameterfvRequest");
 impl GetTexLevelParameterfvRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -9326,12 +8961,7 @@ pub struct GetTexLevelParameterivRequest {
     pub level: i32,
     pub pname: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetTexLevelParameterivRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetTexLevelParameterivRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetTexLevelParameterivRequest, "GetTexLevelParameterivRequest");
 impl GetTexLevelParameterivRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -9480,12 +9110,7 @@ pub struct IsEnabledRequest {
     pub context_tag: ContextTag,
     pub capability: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for IsEnabledRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("IsEnabledRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(IsEnabledRequest, "IsEnabledRequest");
 impl IsEnabledRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -9610,12 +9235,7 @@ pub struct IsListRequest {
     pub context_tag: ContextTag,
     pub list: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for IsListRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("IsListRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(IsListRequest, "IsListRequest");
 impl IsListRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -9739,12 +9359,7 @@ pub const FLUSH_REQUEST: u8 = 142;
 pub struct FlushRequest {
     pub context_tag: ContextTag,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for FlushRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("FlushRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(FlushRequest, "FlushRequest");
 impl FlushRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -9801,12 +9416,7 @@ pub struct AreTexturesResidentRequest<'input> {
     pub context_tag: ContextTag,
     pub textures: Cow<'input, [u32]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for AreTexturesResidentRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("AreTexturesResidentRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(AreTexturesResidentRequest<'_>, "AreTexturesResidentRequest");
 impl<'input> AreTexturesResidentRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -9951,12 +9561,7 @@ pub struct DeleteTexturesRequest<'input> {
     pub context_tag: ContextTag,
     pub textures: Cow<'input, [u32]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for DeleteTexturesRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("DeleteTexturesRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(DeleteTexturesRequest<'_>, "DeleteTexturesRequest");
 impl<'input> DeleteTexturesRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -10033,12 +9638,7 @@ pub struct GenTexturesRequest {
     pub context_tag: ContextTag,
     pub n: i32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GenTexturesRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GenTexturesRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GenTexturesRequest, "GenTexturesRequest");
 impl GenTexturesRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -10165,12 +9765,7 @@ pub struct IsTextureRequest {
     pub context_tag: ContextTag,
     pub texture: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for IsTextureRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("IsTextureRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(IsTextureRequest, "IsTextureRequest");
 impl IsTextureRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -10298,12 +9893,7 @@ pub struct GetColorTableRequest {
     pub type_: u32,
     pub swap_bytes: bool,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetColorTableRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetColorTableRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetColorTableRequest, "GetColorTableRequest");
 impl GetColorTableRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -10460,12 +10050,7 @@ pub struct GetColorTableParameterfvRequest {
     pub target: u32,
     pub pname: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetColorTableParameterfvRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetColorTableParameterfvRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetColorTableParameterfvRequest, "GetColorTableParameterfvRequest");
 impl GetColorTableParameterfvRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -10608,12 +10193,7 @@ pub struct GetColorTableParameterivRequest {
     pub target: u32,
     pub pname: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetColorTableParameterivRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetColorTableParameterivRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetColorTableParameterivRequest, "GetColorTableParameterivRequest");
 impl GetColorTableParameterivRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -10758,12 +10338,7 @@ pub struct GetConvolutionFilterRequest {
     pub type_: u32,
     pub swap_bytes: bool,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetConvolutionFilterRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetConvolutionFilterRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetConvolutionFilterRequest, "GetConvolutionFilterRequest");
 impl GetConvolutionFilterRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -10923,12 +10498,7 @@ pub struct GetConvolutionParameterfvRequest {
     pub target: u32,
     pub pname: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetConvolutionParameterfvRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetConvolutionParameterfvRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetConvolutionParameterfvRequest, "GetConvolutionParameterfvRequest");
 impl GetConvolutionParameterfvRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -11071,12 +10641,7 @@ pub struct GetConvolutionParameterivRequest {
     pub target: u32,
     pub pname: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetConvolutionParameterivRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetConvolutionParameterivRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetConvolutionParameterivRequest, "GetConvolutionParameterivRequest");
 impl GetConvolutionParameterivRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -11221,12 +10786,7 @@ pub struct GetSeparableFilterRequest {
     pub type_: u32,
     pub swap_bytes: bool,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetSeparableFilterRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetSeparableFilterRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetSeparableFilterRequest, "GetSeparableFilterRequest");
 impl GetSeparableFilterRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -11389,12 +10949,7 @@ pub struct GetHistogramRequest {
     pub swap_bytes: bool,
     pub reset: bool,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetHistogramRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetHistogramRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetHistogramRequest, "GetHistogramRequest");
 impl GetHistogramRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -11554,12 +11109,7 @@ pub struct GetHistogramParameterfvRequest {
     pub target: u32,
     pub pname: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetHistogramParameterfvRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetHistogramParameterfvRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetHistogramParameterfvRequest, "GetHistogramParameterfvRequest");
 impl GetHistogramParameterfvRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -11702,12 +11252,7 @@ pub struct GetHistogramParameterivRequest {
     pub target: u32,
     pub pname: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetHistogramParameterivRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetHistogramParameterivRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetHistogramParameterivRequest, "GetHistogramParameterivRequest");
 impl GetHistogramParameterivRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -11853,12 +11398,7 @@ pub struct GetMinmaxRequest {
     pub swap_bytes: bool,
     pub reset: bool,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetMinmaxRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetMinmaxRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetMinmaxRequest, "GetMinmaxRequest");
 impl GetMinmaxRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -12013,12 +11553,7 @@ pub struct GetMinmaxParameterfvRequest {
     pub target: u32,
     pub pname: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetMinmaxParameterfvRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetMinmaxParameterfvRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetMinmaxParameterfvRequest, "GetMinmaxParameterfvRequest");
 impl GetMinmaxParameterfvRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -12161,12 +11696,7 @@ pub struct GetMinmaxParameterivRequest {
     pub target: u32,
     pub pname: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetMinmaxParameterivRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetMinmaxParameterivRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetMinmaxParameterivRequest, "GetMinmaxParameterivRequest");
 impl GetMinmaxParameterivRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -12309,12 +11839,7 @@ pub struct GetCompressedTexImageARBRequest {
     pub target: u32,
     pub level: i32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetCompressedTexImageARBRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetCompressedTexImageARBRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetCompressedTexImageARBRequest, "GetCompressedTexImageARBRequest");
 impl GetCompressedTexImageARBRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -12456,12 +11981,7 @@ pub struct DeleteQueriesARBRequest<'input> {
     pub context_tag: ContextTag,
     pub ids: Cow<'input, [u32]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for DeleteQueriesARBRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("DeleteQueriesARBRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(DeleteQueriesARBRequest<'_>, "DeleteQueriesARBRequest");
 impl<'input> DeleteQueriesARBRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -12538,12 +12058,7 @@ pub struct GenQueriesARBRequest {
     pub context_tag: ContextTag,
     pub n: i32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GenQueriesARBRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GenQueriesARBRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GenQueriesARBRequest, "GenQueriesARBRequest");
 impl GenQueriesARBRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -12670,12 +12185,7 @@ pub struct IsQueryARBRequest {
     pub context_tag: ContextTag,
     pub id: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for IsQueryARBRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("IsQueryARBRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(IsQueryARBRequest, "IsQueryARBRequest");
 impl IsQueryARBRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -12801,12 +12311,7 @@ pub struct GetQueryivARBRequest {
     pub target: u32,
     pub pname: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetQueryivARBRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetQueryivARBRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetQueryivARBRequest, "GetQueryivARBRequest");
 impl GetQueryivARBRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -12949,12 +12454,7 @@ pub struct GetQueryObjectivARBRequest {
     pub id: u32,
     pub pname: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetQueryObjectivARBRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetQueryObjectivARBRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetQueryObjectivARBRequest, "GetQueryObjectivARBRequest");
 impl GetQueryObjectivARBRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -13097,12 +12597,7 @@ pub struct GetQueryObjectuivARBRequest {
     pub id: u32,
     pub pname: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetQueryObjectuivARBRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetQueryObjectuivARBRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetQueryObjectuivARBRequest, "GetQueryObjectuivARBRequest");
 impl GetQueryObjectuivARBRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {

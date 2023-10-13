@@ -46,12 +46,7 @@ pub const ENABLE_REQUEST: u8 = 0;
 #[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct EnableRequest;
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for EnableRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("EnableRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(EnableRequest, "EnableRequest");
 impl EnableRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {

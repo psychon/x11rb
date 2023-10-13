@@ -489,12 +489,7 @@ pub struct InitializeRequest {
     pub desired_major_version: u8,
     pub desired_minor_version: u8,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for InitializeRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("InitializeRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(InitializeRequest, "InitializeRequest");
 impl InitializeRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -638,12 +633,7 @@ pub const LIST_SYSTEM_COUNTERS_REQUEST: u8 = 1;
 #[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ListSystemCountersRequest;
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for ListSystemCountersRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ListSystemCountersRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ListSystemCountersRequest, "ListSystemCountersRequest");
 impl ListSystemCountersRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -759,12 +749,7 @@ pub struct CreateCounterRequest {
     pub id: Counter,
     pub initial_value: Int64,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for CreateCounterRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("CreateCounterRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(CreateCounterRequest, "CreateCounterRequest");
 impl CreateCounterRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -831,12 +816,7 @@ pub const DESTROY_COUNTER_REQUEST: u8 = 6;
 pub struct DestroyCounterRequest {
     pub counter: Counter,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for DestroyCounterRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("DestroyCounterRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(DestroyCounterRequest, "DestroyCounterRequest");
 impl DestroyCounterRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -892,12 +872,7 @@ pub const QUERY_COUNTER_REQUEST: u8 = 5;
 pub struct QueryCounterRequest {
     pub counter: Counter,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryCounterRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryCounterRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryCounterRequest, "QueryCounterRequest");
 impl QueryCounterRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -1018,12 +993,7 @@ pub const AWAIT_REQUEST: u8 = 7;
 pub struct AwaitRequest<'input> {
     pub wait_list: Cow<'input, [Waitcondition]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for AwaitRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("AwaitRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(AwaitRequest<'_>, "AwaitRequest");
 impl<'input> AwaitRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -1092,12 +1062,7 @@ pub struct ChangeCounterRequest {
     pub counter: Counter,
     pub amount: Int64,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for ChangeCounterRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ChangeCounterRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ChangeCounterRequest, "ChangeCounterRequest");
 impl ChangeCounterRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -1165,12 +1130,7 @@ pub struct SetCounterRequest {
     pub counter: Counter,
     pub value: Int64,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for SetCounterRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SetCounterRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SetCounterRequest, "SetCounterRequest");
 impl SetCounterRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -1406,12 +1366,7 @@ pub struct CreateAlarmRequest<'input> {
     pub id: Alarm,
     pub value_list: Cow<'input, CreateAlarmAux>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for CreateAlarmRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("CreateAlarmRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(CreateAlarmRequest<'_>, "CreateAlarmRequest");
 impl<'input> CreateAlarmRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -1656,12 +1611,7 @@ pub struct ChangeAlarmRequest<'input> {
     pub id: Alarm,
     pub value_list: Cow<'input, ChangeAlarmAux>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for ChangeAlarmRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ChangeAlarmRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ChangeAlarmRequest<'_>, "ChangeAlarmRequest");
 impl<'input> ChangeAlarmRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -1737,12 +1687,7 @@ pub const DESTROY_ALARM_REQUEST: u8 = 11;
 pub struct DestroyAlarmRequest {
     pub alarm: Alarm,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for DestroyAlarmRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("DestroyAlarmRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(DestroyAlarmRequest, "DestroyAlarmRequest");
 impl DestroyAlarmRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -1798,12 +1743,7 @@ pub const QUERY_ALARM_REQUEST: u8 = 10;
 pub struct QueryAlarmRequest {
     pub alarm: Alarm,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryAlarmRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryAlarmRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryAlarmRequest, "QueryAlarmRequest");
 impl QueryAlarmRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -1964,12 +1904,7 @@ pub struct SetPriorityRequest {
     pub id: u32,
     pub priority: i32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for SetPriorityRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SetPriorityRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SetPriorityRequest, "SetPriorityRequest");
 impl SetPriorityRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -2032,12 +1967,7 @@ pub const GET_PRIORITY_REQUEST: u8 = 13;
 pub struct GetPriorityRequest {
     pub id: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetPriorityRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetPriorityRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetPriorityRequest, "GetPriorityRequest");
 impl GetPriorityRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -2156,12 +2086,7 @@ pub struct CreateFenceRequest {
     pub fence: Fence,
     pub initially_triggered: bool,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for CreateFenceRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("CreateFenceRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(CreateFenceRequest, "CreateFenceRequest");
 impl CreateFenceRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -2231,12 +2156,7 @@ pub const TRIGGER_FENCE_REQUEST: u8 = 15;
 pub struct TriggerFenceRequest {
     pub fence: Fence,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for TriggerFenceRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("TriggerFenceRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(TriggerFenceRequest, "TriggerFenceRequest");
 impl TriggerFenceRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -2292,12 +2212,7 @@ pub const RESET_FENCE_REQUEST: u8 = 16;
 pub struct ResetFenceRequest {
     pub fence: Fence,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for ResetFenceRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ResetFenceRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ResetFenceRequest, "ResetFenceRequest");
 impl ResetFenceRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -2353,12 +2268,7 @@ pub const DESTROY_FENCE_REQUEST: u8 = 17;
 pub struct DestroyFenceRequest {
     pub fence: Fence,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for DestroyFenceRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("DestroyFenceRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(DestroyFenceRequest, "DestroyFenceRequest");
 impl DestroyFenceRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -2414,12 +2324,7 @@ pub const QUERY_FENCE_REQUEST: u8 = 18;
 pub struct QueryFenceRequest {
     pub fence: Fence,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryFenceRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryFenceRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryFenceRequest, "QueryFenceRequest");
 impl QueryFenceRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -2558,12 +2463,7 @@ pub const AWAIT_FENCE_REQUEST: u8 = 19;
 pub struct AwaitFenceRequest<'input> {
     pub fence_list: Cow<'input, [Fence]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for AwaitFenceRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("AwaitFenceRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(AwaitFenceRequest<'_>, "AwaitFenceRequest");
 impl<'input> AwaitFenceRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 3]> {

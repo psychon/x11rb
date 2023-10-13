@@ -217,12 +217,7 @@ pub struct QueryVersionRequest {
     pub client_major_version: u8,
     pub client_minor_version: u8,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryVersionRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryVersionRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryVersionRequest, "QueryVersionRequest");
 impl QueryVersionRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -369,12 +364,7 @@ pub const QUERY_INFO_REQUEST: u8 = 1;
 pub struct QueryInfoRequest {
     pub drawable: xproto::Drawable,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryInfoRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryInfoRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryInfoRequest, "QueryInfoRequest");
 impl QueryInfoRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -533,12 +523,7 @@ pub struct SelectInputRequest {
     pub drawable: xproto::Drawable,
     pub event_mask: Event,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for SelectInputRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SelectInputRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SelectInputRequest, "SelectInputRequest");
 impl SelectInputRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -971,12 +956,7 @@ pub struct SetAttributesRequest<'input> {
     pub visual: xproto::Visualid,
     pub value_list: Cow<'input, SetAttributesAux>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for SetAttributesRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SetAttributesRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SetAttributesRequest<'_>, "SetAttributesRequest");
 impl<'input> SetAttributesRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -1101,12 +1081,7 @@ pub const UNSET_ATTRIBUTES_REQUEST: u8 = 4;
 pub struct UnsetAttributesRequest {
     pub drawable: xproto::Drawable,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for UnsetAttributesRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("UnsetAttributesRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(UnsetAttributesRequest, "UnsetAttributesRequest");
 impl UnsetAttributesRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -1162,12 +1137,7 @@ pub const SUSPEND_REQUEST: u8 = 5;
 pub struct SuspendRequest {
     pub suspend: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for SuspendRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SuspendRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SuspendRequest, "SuspendRequest");
 impl SuspendRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {

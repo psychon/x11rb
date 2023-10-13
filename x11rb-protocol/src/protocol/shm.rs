@@ -197,12 +197,7 @@ pub const QUERY_VERSION_REQUEST: u8 = 0;
 #[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryVersionRequest;
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryVersionRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryVersionRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryVersionRequest, "QueryVersionRequest");
 impl QueryVersionRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -384,12 +379,7 @@ pub struct AttachRequest {
     pub shmid: u32,
     pub read_only: bool,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for AttachRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("AttachRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(AttachRequest, "AttachRequest");
 impl AttachRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -468,12 +458,7 @@ pub const DETACH_REQUEST: u8 = 2;
 pub struct DetachRequest {
     pub shmseg: Seg,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for DetachRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("DetachRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(DetachRequest, "DetachRequest");
 impl DetachRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -574,12 +559,7 @@ pub struct PutImageRequest {
     pub shmseg: Seg,
     pub offset: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for PutImageRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PutImageRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PutImageRequest, "PutImageRequest");
 impl PutImageRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -735,12 +715,7 @@ pub struct GetImageRequest {
     pub shmseg: Seg,
     pub offset: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetImageRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetImageRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetImageRequest, "GetImageRequest");
 impl GetImageRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -946,12 +921,7 @@ pub struct CreatePixmapRequest {
     pub shmseg: Seg,
     pub offset: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for CreatePixmapRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("CreatePixmapRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(CreatePixmapRequest, "CreatePixmapRequest");
 impl CreatePixmapRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -1057,12 +1027,7 @@ pub struct AttachFdRequest {
     pub shm_fd: RawFdContainer,
     pub read_only: bool,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for AttachFdRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("AttachFdRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(AttachFdRequest, "AttachFdRequest");
 impl AttachFdRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -1141,12 +1106,7 @@ pub struct CreateSegmentRequest {
     pub size: u32,
     pub read_only: bool,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for CreateSegmentRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("CreateSegmentRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(CreateSegmentRequest, "CreateSegmentRequest");
 impl CreateSegmentRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {

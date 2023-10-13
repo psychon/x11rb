@@ -87,12 +87,7 @@ pub const QUERY_VERSION_REQUEST: u8 = 0;
 #[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryVersionRequest;
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryVersionRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryVersionRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryVersionRequest, "QueryVersionRequest");
 impl QueryVersionRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -214,12 +209,7 @@ pub const QUERY_DIRECT_RENDERING_CAPABLE_REQUEST: u8 = 1;
 pub struct QueryDirectRenderingCapableRequest {
     pub screen: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryDirectRenderingCapableRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryDirectRenderingCapableRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryDirectRenderingCapableRequest, "QueryDirectRenderingCapableRequest");
 impl QueryDirectRenderingCapableRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -333,12 +323,7 @@ pub const OPEN_CONNECTION_REQUEST: u8 = 2;
 pub struct OpenConnectionRequest {
     pub screen: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for OpenConnectionRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("OpenConnectionRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(OpenConnectionRequest, "OpenConnectionRequest");
 impl OpenConnectionRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -467,12 +452,7 @@ pub const CLOSE_CONNECTION_REQUEST: u8 = 3;
 pub struct CloseConnectionRequest {
     pub screen: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for CloseConnectionRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("CloseConnectionRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(CloseConnectionRequest, "CloseConnectionRequest");
 impl CloseConnectionRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -528,12 +508,7 @@ pub const GET_CLIENT_DRIVER_NAME_REQUEST: u8 = 4;
 pub struct GetClientDriverNameRequest {
     pub screen: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetClientDriverNameRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetClientDriverNameRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetClientDriverNameRequest, "GetClientDriverNameRequest");
 impl GetClientDriverNameRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -667,12 +642,7 @@ pub struct CreateContextRequest {
     pub visual: u32,
     pub context: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for CreateContextRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("CreateContextRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(CreateContextRequest, "CreateContextRequest");
 impl CreateContextRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -804,12 +774,7 @@ pub struct DestroyContextRequest {
     pub screen: u32,
     pub context: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for DestroyContextRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("DestroyContextRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(DestroyContextRequest, "DestroyContextRequest");
 impl DestroyContextRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -873,12 +838,7 @@ pub struct CreateDrawableRequest {
     pub screen: u32,
     pub drawable: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for CreateDrawableRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("CreateDrawableRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(CreateDrawableRequest, "CreateDrawableRequest");
 impl CreateDrawableRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -1003,12 +963,7 @@ pub struct DestroyDrawableRequest {
     pub screen: u32,
     pub drawable: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for DestroyDrawableRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("DestroyDrawableRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(DestroyDrawableRequest, "DestroyDrawableRequest");
 impl DestroyDrawableRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -1072,12 +1027,7 @@ pub struct GetDrawableInfoRequest {
     pub screen: u32,
     pub drawable: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetDrawableInfoRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetDrawableInfoRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetDrawableInfoRequest, "GetDrawableInfoRequest");
 impl GetDrawableInfoRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -1247,12 +1197,7 @@ pub const GET_DEVICE_INFO_REQUEST: u8 = 10;
 pub struct GetDeviceInfoRequest {
     pub screen: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetDeviceInfoRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetDeviceInfoRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetDeviceInfoRequest, "GetDeviceInfoRequest");
 impl GetDeviceInfoRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -1388,12 +1333,7 @@ pub struct AuthConnectionRequest {
     pub screen: u32,
     pub magic: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for AuthConnectionRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("AuthConnectionRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(AuthConnectionRequest, "AuthConnectionRequest");
 impl AuthConnectionRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {

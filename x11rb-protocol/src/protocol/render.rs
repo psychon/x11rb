@@ -1286,12 +1286,7 @@ pub struct QueryVersionRequest {
     pub client_major_version: u32,
     pub client_minor_version: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryVersionRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryVersionRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryVersionRequest, "QueryVersionRequest");
 impl QueryVersionRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -1439,12 +1434,7 @@ pub const QUERY_PICT_FORMATS_REQUEST: u8 = 1;
 #[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryPictFormatsRequest;
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryPictFormatsRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryPictFormatsRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryPictFormatsRequest, "QueryPictFormatsRequest");
 impl QueryPictFormatsRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -1613,12 +1603,7 @@ pub const QUERY_PICT_INDEX_VALUES_REQUEST: u8 = 2;
 pub struct QueryPictIndexValuesRequest {
     pub format: Pictformat,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryPictIndexValuesRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryPictIndexValuesRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryPictIndexValuesRequest, "QueryPictIndexValuesRequest");
 impl QueryPictIndexValuesRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -2060,12 +2045,7 @@ pub struct CreatePictureRequest<'input> {
     pub format: Pictformat,
     pub value_list: Cow<'input, CreatePictureAux>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for CreatePictureRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("CreatePictureRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(CreatePictureRequest<'_>, "CreatePictureRequest");
 impl<'input> CreatePictureRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -2475,12 +2455,7 @@ pub struct ChangePictureRequest<'input> {
     pub picture: Picture,
     pub value_list: Cow<'input, ChangePictureAux>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for ChangePictureRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ChangePictureRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ChangePictureRequest<'_>, "ChangePictureRequest");
 impl<'input> ChangePictureRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -2559,12 +2534,7 @@ pub struct SetPictureClipRectanglesRequest<'input> {
     pub clip_y_origin: i16,
     pub rectangles: Cow<'input, [xproto::Rectangle]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for SetPictureClipRectanglesRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SetPictureClipRectanglesRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SetPictureClipRectanglesRequest<'_>, "SetPictureClipRectanglesRequest");
 impl<'input> SetPictureClipRectanglesRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -2652,12 +2622,7 @@ pub const FREE_PICTURE_REQUEST: u8 = 7;
 pub struct FreePictureRequest {
     pub picture: Picture,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for FreePictureRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("FreePictureRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(FreePictureRequest, "FreePictureRequest");
 impl FreePictureRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -2724,12 +2689,7 @@ pub struct CompositeRequest {
     pub width: u16,
     pub height: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for CompositeRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("CompositeRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(CompositeRequest, "CompositeRequest");
 impl CompositeRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -2854,12 +2814,7 @@ pub struct TrapezoidsRequest<'input> {
     pub src_y: i16,
     pub traps: Cow<'input, [Trapezoid]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for TrapezoidsRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("TrapezoidsRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(TrapezoidsRequest<'_>, "TrapezoidsRequest");
 impl<'input> TrapezoidsRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -2979,12 +2934,7 @@ pub struct TrianglesRequest<'input> {
     pub src_y: i16,
     pub triangles: Cow<'input, [Triangle]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for TrianglesRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("TrianglesRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(TrianglesRequest<'_>, "TrianglesRequest");
 impl<'input> TrianglesRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -3104,12 +3054,7 @@ pub struct TriStripRequest<'input> {
     pub src_y: i16,
     pub points: Cow<'input, [Pointfix]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for TriStripRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("TriStripRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(TriStripRequest<'_>, "TriStripRequest");
 impl<'input> TriStripRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -3229,12 +3174,7 @@ pub struct TriFanRequest<'input> {
     pub src_y: i16,
     pub points: Cow<'input, [Pointfix]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for TriFanRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("TriFanRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(TriFanRequest<'_>, "TriFanRequest");
 impl<'input> TriFanRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -3349,12 +3289,7 @@ pub struct CreateGlyphSetRequest {
     pub gsid: Glyphset,
     pub format: Pictformat,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for CreateGlyphSetRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("CreateGlyphSetRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(CreateGlyphSetRequest, "CreateGlyphSetRequest");
 impl CreateGlyphSetRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -3418,12 +3353,7 @@ pub struct ReferenceGlyphSetRequest {
     pub gsid: Glyphset,
     pub existing: Glyphset,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for ReferenceGlyphSetRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ReferenceGlyphSetRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ReferenceGlyphSetRequest, "ReferenceGlyphSetRequest");
 impl ReferenceGlyphSetRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -3486,12 +3416,7 @@ pub const FREE_GLYPH_SET_REQUEST: u8 = 19;
 pub struct FreeGlyphSetRequest {
     pub glyphset: Glyphset,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for FreeGlyphSetRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("FreeGlyphSetRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(FreeGlyphSetRequest, "FreeGlyphSetRequest");
 impl FreeGlyphSetRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -3550,12 +3475,7 @@ pub struct AddGlyphsRequest<'input> {
     pub glyphs: Cow<'input, [Glyphinfo]>,
     pub data: Cow<'input, [u8]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for AddGlyphsRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("AddGlyphsRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(AddGlyphsRequest<'_>, "AddGlyphsRequest");
 impl<'input> AddGlyphsRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 5]> {
@@ -3642,12 +3562,7 @@ pub struct FreeGlyphsRequest<'input> {
     pub glyphset: Glyphset,
     pub glyphs: Cow<'input, [Glyph]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for FreeGlyphsRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("FreeGlyphsRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(FreeGlyphsRequest<'_>, "FreeGlyphsRequest");
 impl<'input> FreeGlyphsRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -3730,12 +3645,7 @@ pub struct CompositeGlyphs8Request<'input> {
     pub src_y: i16,
     pub glyphcmds: Cow<'input, [u8]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for CompositeGlyphs8Request<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("CompositeGlyphs8Request").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(CompositeGlyphs8Request<'_>, "CompositeGlyphs8Request");
 impl<'input> CompositeGlyphs8Request<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -3856,12 +3766,7 @@ pub struct CompositeGlyphs16Request<'input> {
     pub src_y: i16,
     pub glyphcmds: Cow<'input, [u8]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for CompositeGlyphs16Request<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("CompositeGlyphs16Request").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(CompositeGlyphs16Request<'_>, "CompositeGlyphs16Request");
 impl<'input> CompositeGlyphs16Request<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -3982,12 +3887,7 @@ pub struct CompositeGlyphs32Request<'input> {
     pub src_y: i16,
     pub glyphcmds: Cow<'input, [u8]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for CompositeGlyphs32Request<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("CompositeGlyphs32Request").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(CompositeGlyphs32Request<'_>, "CompositeGlyphs32Request");
 impl<'input> CompositeGlyphs32Request<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -4104,12 +4004,7 @@ pub struct FillRectanglesRequest<'input> {
     pub color: Color,
     pub rects: Cow<'input, [xproto::Rectangle]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for FillRectanglesRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("FillRectanglesRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(FillRectanglesRequest<'_>, "FillRectanglesRequest");
 impl<'input> FillRectanglesRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -4210,12 +4105,7 @@ pub struct CreateCursorRequest {
     pub x: u16,
     pub y: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for CreateCursorRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("CreateCursorRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(CreateCursorRequest, "CreateCursorRequest");
 impl CreateCursorRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -4384,12 +4274,7 @@ pub struct SetPictureTransformRequest {
     pub picture: Picture,
     pub transform: Transform,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for SetPictureTransformRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SetPictureTransformRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SetPictureTransformRequest, "SetPictureTransformRequest");
 impl SetPictureTransformRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -4484,12 +4369,7 @@ pub const QUERY_FILTERS_REQUEST: u8 = 29;
 pub struct QueryFiltersRequest {
     pub drawable: xproto::Drawable,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryFiltersRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryFiltersRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryFiltersRequest, "QueryFiltersRequest");
 impl QueryFiltersRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -4632,12 +4512,7 @@ pub struct SetPictureFilterRequest<'input> {
     pub filter: Cow<'input, [u8]>,
     pub values: Cow<'input, [Fixed]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for SetPictureFilterRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SetPictureFilterRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SetPictureFilterRequest<'_>, "SetPictureFilterRequest");
 impl<'input> SetPictureFilterRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 5]> {
@@ -4771,12 +4646,7 @@ pub struct CreateAnimCursorRequest<'input> {
     pub cid: xproto::Cursor,
     pub cursors: Cow<'input, [Animcursorelt]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for CreateAnimCursorRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("CreateAnimCursorRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(CreateAnimCursorRequest<'_>, "CreateAnimCursorRequest");
 impl<'input> CreateAnimCursorRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -4957,12 +4827,7 @@ pub struct AddTrapsRequest<'input> {
     pub y_off: i16,
     pub traps: Cow<'input, [Trap]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for AddTrapsRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("AddTrapsRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(AddTrapsRequest<'_>, "AddTrapsRequest");
 impl<'input> AddTrapsRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -5051,12 +4916,7 @@ pub struct CreateSolidFillRequest {
     pub picture: Picture,
     pub color: Color,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for CreateSolidFillRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("CreateSolidFillRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(CreateSolidFillRequest, "CreateSolidFillRequest");
 impl CreateSolidFillRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -5127,12 +4987,7 @@ pub struct CreateLinearGradientRequest<'input> {
     pub stops: Cow<'input, [Fixed]>,
     pub colors: Cow<'input, [Color]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for CreateLinearGradientRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("CreateLinearGradientRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(CreateLinearGradientRequest<'_>, "CreateLinearGradientRequest");
 impl<'input> CreateLinearGradientRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 4]> {
@@ -5244,12 +5099,7 @@ pub struct CreateRadialGradientRequest<'input> {
     pub stops: Cow<'input, [Fixed]>,
     pub colors: Cow<'input, [Color]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for CreateRadialGradientRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("CreateRadialGradientRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(CreateRadialGradientRequest<'_>, "CreateRadialGradientRequest");
 impl<'input> CreateRadialGradientRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 4]> {
@@ -5375,12 +5225,7 @@ pub struct CreateConicalGradientRequest<'input> {
     pub stops: Cow<'input, [Fixed]>,
     pub colors: Cow<'input, [Color]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for CreateConicalGradientRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("CreateConicalGradientRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(CreateConicalGradientRequest<'_>, "CreateConicalGradientRequest");
 impl<'input> CreateConicalGradientRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 4]> {

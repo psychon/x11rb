@@ -125,12 +125,7 @@ pub struct QueryVersionRequest {
     pub client_major_version: u32,
     pub client_minor_version: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryVersionRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryVersionRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryVersionRequest, "QueryVersionRequest");
 impl QueryVersionRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -324,12 +319,7 @@ pub struct CreateRequest {
     pub drawable: xproto::Drawable,
     pub level: ReportLevel,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for CreateRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("CreateRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(CreateRequest, "CreateRequest");
 impl CreateRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -409,12 +399,7 @@ pub const DESTROY_REQUEST: u8 = 2;
 pub struct DestroyRequest {
     pub damage: Damage,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for DestroyRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("DestroyRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(DestroyRequest, "DestroyRequest");
 impl DestroyRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -481,12 +466,7 @@ pub struct SubtractRequest {
     pub repair: xfixes::Region,
     pub parts: xfixes::Region,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for SubtractRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SubtractRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SubtractRequest, "SubtractRequest");
 impl SubtractRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -566,12 +546,7 @@ pub struct AddRequest {
     pub drawable: xproto::Drawable,
     pub region: xfixes::Region,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for AddRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("AddRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(AddRequest, "AddRequest");
 impl AddRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {

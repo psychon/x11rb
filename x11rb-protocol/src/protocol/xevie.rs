@@ -43,12 +43,7 @@ pub struct QueryVersionRequest {
     pub client_major_version: u16,
     pub client_minor_version: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryVersionRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryVersionRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryVersionRequest, "QueryVersionRequest");
 impl QueryVersionRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -194,12 +189,7 @@ pub const START_REQUEST: u8 = 1;
 pub struct StartRequest {
     pub screen: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for StartRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("StartRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(StartRequest, "StartRequest");
 impl StartRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -334,12 +324,7 @@ pub const END_REQUEST: u8 = 2;
 pub struct EndRequest {
     pub cmap: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for EndRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("EndRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(EndRequest, "EndRequest");
 impl EndRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -603,12 +588,7 @@ pub struct SendRequest {
     pub event: Event,
     pub data_type: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for SendRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SendRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SendRequest, "SendRequest");
 impl SendRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -843,12 +823,7 @@ pub const SELECT_INPUT_REQUEST: u8 = 4;
 pub struct SelectInputRequest {
     pub event_mask: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for SelectInputRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SelectInputRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SelectInputRequest, "SelectInputRequest");
 impl SelectInputRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
