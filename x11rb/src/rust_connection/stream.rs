@@ -1,8 +1,8 @@
-use rustix::fd::AsFd;
+use rustix::fd::{AsFd, BorrowedFd};
 use std::io::{IoSlice, Result};
 use std::net::TcpStream;
 #[cfg(unix)]
-use std::os::unix::io::{AsRawFd, BorrowedFd, IntoRawFd, OwnedFd, RawFd};
+use std::os::unix::io::{AsRawFd, IntoRawFd, OwnedFd, RawFd};
 #[cfg(unix)]
 use std::os::unix::net::UnixStream;
 #[cfg(windows)]
@@ -224,8 +224,7 @@ impl DefaultStream {
         Ok((result, peer_addr::local()))
     }
 
-    #[allow(unused_qualifications)]
-    fn as_fd(&self) -> rustix::fd::BorrowedFd<'_> {
+    fn as_fd(&self) -> BorrowedFd<'_> {
         self.inner.as_fd()
     }
 }
