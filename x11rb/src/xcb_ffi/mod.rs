@@ -7,7 +7,7 @@ use std::ffi::CStr;
 use std::io::{Error as IOError, ErrorKind, IoSlice};
 use std::os::raw::c_int;
 #[cfg(unix)]
-use std::os::unix::io::{AsRawFd, FromRawFd, IntoRawFd, OwnedFd, RawFd};
+use std::os::unix::io::{AsFd, AsRawFd, BorrowedFd, FromRawFd, IntoRawFd, OwnedFd, RawFd};
 use std::ptr::{null, null_mut};
 use std::sync::{atomic::Ordering, Mutex};
 
@@ -592,6 +592,13 @@ impl Connection for XCBConnection {
 impl AsRawFd for XCBConnection {
     fn as_raw_fd(&self) -> RawFd {
         unsafe { raw_ffi::xcb_get_file_descriptor(self.conn.as_ptr()) }
+    }
+}
+
+#[cfg(unix)]
+impl AsFd for XCBConnection {
+    fn as_fd(&self) -> BorrowedFd<'_> {
+        unsafe { BorrowedFd::borrow_raw(self.as_raw_fd()) }
     }
 }
 
