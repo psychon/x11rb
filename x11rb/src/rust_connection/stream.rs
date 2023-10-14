@@ -2,11 +2,13 @@ use rustix::fd::AsFd;
 use std::io::{IoSlice, Result};
 use std::net::TcpStream;
 #[cfg(unix)]
-use std::os::unix::io::{AsRawFd, IntoRawFd, RawFd};
+use std::os::unix::io::{AsRawFd, BorrowedFd, IntoRawFd, OwnedFd, RawFd};
 #[cfg(unix)]
 use std::os::unix::net::UnixStream;
 #[cfg(windows)]
-use std::os::windows::io::{AsRawSocket, IntoRawSocket, RawSocket};
+use std::os::windows::io::{
+    AsRawSocket, AsSocket, BorrowedSocket, IntoRawSocket, OwnedSocket, RawSocket,
+};
 
 use crate::utils::RawFdContainer;
 use x11rb_protocol::parse_display::ConnectAddress;
@@ -222,6 +224,7 @@ impl DefaultStream {
         Ok((result, peer_addr::local()))
     }
 
+    #[allow(unused_qualifications)]
     fn as_fd(&self) -> rustix::fd::BorrowedFd<'_> {
         self.inner.as_fd()
     }
@@ -235,9 +238,23 @@ impl AsRawFd for DefaultStream {
 }
 
 #[cfg(unix)]
+impl AsFd for DefaultStream {
+    fn as_fd(&self) -> BorrowedFd<'_> {
+        self.inner.as_fd()
+    }
+}
+
+#[cfg(unix)]
 impl IntoRawFd for DefaultStream {
     fn into_raw_fd(self) -> RawFd {
         self.inner.into_raw_fd()
+    }
+}
+
+#[cfg(unix)]
+impl From<DefaultStream> for OwnedFd {
+    fn from(stream: DefaultStream) -> Self {
+        stream.inner
     }
 }
 
@@ -249,9 +266,23 @@ impl AsRawSocket for DefaultStream {
 }
 
 #[cfg(windows)]
+impl AsSocket for DefaultStream {
+    fn as_socket(&self) -> BorrowedSocket<'_> {
+        self.inner.as_socket()
+    }
+}
+
+#[cfg(windows)]
 impl IntoRawSocket for DefaultStream {
     fn into_raw_socket(self) -> RawSocket {
         self.inner.into_raw_socket()
+    }
+}
+
+#[cfg(windows)]
+impl From<DefaultStream> for OwnedSocket {
+    fn from(stream: DefaultStream) -> Self {
+        stream.inner.into()
     }
 }
 
@@ -261,7 +292,6 @@ fn do_write(
     bufs: &[IoSlice<'_>],
     fds: &mut Vec<RawFdContainer>,
 ) -> Result<usize> {
-    use rustix::fd::BorrowedFd;
     use rustix::io::Errno;
     use rustix::net::{sendmsg, SendAncillaryBuffer, SendAncillaryMessage, SendFlags};
 
