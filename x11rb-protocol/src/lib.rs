@@ -5,6 +5,37 @@
 //!
 //! This protocol does not do any I/O. If you need an X11 client library, look at
 //! <https://docs.rs/x11rb/latest/x11rb/>.
+//!
+//! # Feature flags
+//!
+//! This crate uses [feature
+//! flags](https://doc.rust-lang.org/cargo/reference/manifest.html#the-features-section) to reduce
+//! the amount of compiled code. There are two kinds of feature flags available:
+//!
+//! * Feature flags for specific X11 extensions
+//! * Feature flags for additional functionality
+//!
+//! ## Feature flags for specific X11 extensions
+//!
+//! By default, only the core X11 protocol and some small, commonly needed X11 extensions are
+//! enabled. These are the `bigreq`, `ge` and `xc_misc` extensions. Further extensions need to be
+//! explicitly enabled via their feature flag:
+//!
+//! `composite`, `damage`, `dpms`, `dri2`, `dri3`, `glx`, `present`, `randr`, `record`, `render`,
+//! `res`, `screensaver`, `shape`, `shm`, `sync`, `xevie`, `xf86dri`, `xf86vidmode`, `xfixes`,
+//! `xinerama`, `xinput`, `xkb`, `xprint`, `xselinux`, `xtest`, `xv`, `xvmc`.
+//!
+//! If you want to take the "I do not want to think about this"-approach, you can enable the
+//! `all-extensions` feature to just enable, well, all extensions.
+//!
+//! ## Feature flags for additional functionality
+//!
+//! Additionally, the following flags exist:
+//! * `std` (enabled by default): Enable functionality needing the std library, e.g. environment
+//!   variables or [`std::os::unix::io::OwnedFd`].
+//! * `resource_manager`: Enable the code in [resource_manager] for loading and querying the
+//!   X11 resource database.
+//! * `serde`: Implement [`serde::Serialize`] and [`serde::Deserialize`] for all objects.
 
 #![forbid(
     missing_copy_implementations,
