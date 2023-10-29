@@ -112,6 +112,8 @@
 //!   `Hash`. This is not needed by default and adds a large amount of code that bloats codegen
 //!   time
 //! * `request-parsing`: Add the ability to parse X11 requests. Not normally needed.
+//! * `extra-traits`: Implement extra traits for X11 types. This improves the output of the `Debug`
+//!   impl and adds `PartialEq`, `Eq`, `PartialOrd`, `Ord`, and `Hash` where possible.
 //!
 //! # Integrating x11rb with an Event Loop
 //!
