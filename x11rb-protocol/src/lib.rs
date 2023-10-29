@@ -36,6 +36,9 @@
 //! * `resource_manager`: Enable the code in [resource_manager] for loading and querying the
 //!   X11 resource database.
 //! * `serde`: Implement [`serde::Serialize`] and [`serde::Deserialize`] for all objects.
+//! * `request-parsing`: Add the ability to parse X11 requests. Not normally needed.
+//! * `extra-traits`: Implement extra traits for types. This improves the output of the `Debug`
+//!   impl and adds `PartialEq`, `Eq`, `PartialOrd`, `Ord`, and `Hash` where possible.
 
 #![forbid(
     missing_copy_implementations,
