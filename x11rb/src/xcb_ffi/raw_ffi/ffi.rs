@@ -34,12 +34,20 @@ pub(crate) mod libxcb_library {
             // TODO: Names for non-unix platforms
             #[cfg(not(unix))]
             compile_error!("dl-libxcb feature is not supported on non-unix");
-            #[cfg(all(unix, not(any(target_os = "openbsd", target_os = "netbsd"))))]
+
+            #[cfg(all(unix, target_os = "linux"))]
             const LIB_NAME: &str = "libxcb.so.1";
-            // libtool turns -version-info differently into SONAMES on Open and NetBSD.
+
+            // libtool turns -version-info differently into SONAMES on NetBSD.
             // Also, the library is apparently not in the default search path, hence use a full path.
-            #[cfg(any(target_os = "openbsd", target_os = "netbsd"))]
+            #[cfg(all(unix, target_os = "netbsd"))]
             const LIB_NAME: &str = "/usr/X11R7/lib/libxcb.so.2";
+
+            // If we do not know anything, just assume libxcb.so and hope for the best.
+            // This is actually the right thing to do on OpenBSD since the dynamic linker then does
+            // some magic to find the right SONAME.
+            #[cfg(all(unix, not(any(target_os = "linux", target_os = "netbsd"))))]
+            const LIB_NAME: &str = "libxcb.so";
 
             let library = libloading::Library::new(LIB_NAME)
                 .map_err(|e| LibxcbLoadError::OpenLibError(LIB_NAME.into(), e.to_string()))?;
