@@ -593,8 +593,7 @@ impl<T: Serialize> Serialize for [T] {
     }
 }
 
-// This macro is used by the generated code to implement e.g. `std::ops::BitOr` and
-// `std::ops::BitOrAssign`.
+/// This macro is used by the generated code to implement logical operations on bitmasks.
 macro_rules! bitmask_binop {
     ($t:ty, $u:ty) => {
         impl core::ops::BitOr for $t {
@@ -661,6 +660,12 @@ macro_rules! bitmask_binop {
         impl core::ops::BitAndAssign<$u> for $t {
             fn bitand_assign(&mut self, other: $u) {
                 self.0 &= other
+            }
+        }
+        impl core::ops::Not for $t {
+            type Output = $t;
+            fn not(self) -> Self::Output {
+                Self::from(!<$u>::from(self))
             }
         }
         impl $t {
