@@ -64,18 +64,12 @@ fn test_bit_and() {
 
 #[test]
 fn test_not() {
-    assert_eq!(
-        EventMask::NO_EVENT,
-        !EventMask::from(u32::MAX)
-    );
+    assert_eq!(EventMask::NO_EVENT, !EventMask::from(u32::MAX));
     assert_eq!(
         !EventMask::KEY_PRESS,
         EventMask::from(!EventMask::KEY_PRESS.bits())
     );
-    assert_eq!(
-        EventMask::KEY_PRESS,
-        !(!EventMask::KEY_PRESS)
-    );
+    assert_eq!(EventMask::KEY_PRESS, !(!EventMask::KEY_PRESS));
 }
 
 #[test]
