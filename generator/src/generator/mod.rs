@@ -51,6 +51,13 @@ pub(crate) fn generate(module: &xcbgen::defs::Module) -> Vec<Generated> {
             "#![allow(clippy::needless_borrow, clippy::needless_lifetimes)]"
         );
     }
+    outln!(main_proto_out, "// clippy::unnecessary_fallible_conversion is new in 1.75. TODO: Remove once our MSRV is high enough.");
+    outln!(main_proto_out, "#![allow(unknown_lints)]");
+    outln!(main_proto_out, "// We use TryFrom in places where From could be used, but fixing this would make the code generator more complicated");
+    outln!(
+        main_proto_out,
+        "#![allow(clippy::unnecessary_fallible_conversion)]"
+    );
     outln!(main_proto_out, "");
     outln!(main_proto_out, "use alloc::borrow::Cow;");
     outln!(main_proto_out, "use alloc::string::String;");

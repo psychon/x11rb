@@ -994,7 +994,7 @@ fn emit_request_struct(
             let fields = request_def.fields.borrow();
             let mut seen_complete_header = false;
             let mut is_first_body_field = true;
-            for (_, field) in fields.iter().enumerate() {
+            for field in fields.iter() {
                 match field.name() {
                     // These are all in the header. Ignore them.
                     Some("major_opcode") | Some("minor_opcode") => continue,

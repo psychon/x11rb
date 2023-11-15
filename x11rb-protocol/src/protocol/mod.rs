@@ -10,6 +10,10 @@
 #![allow(clippy::upper_case_acronyms)]
 // This is not easy to fix, so ignore it.
 #![allow(clippy::needless_borrow, clippy::needless_lifetimes)]
+// clippy::unnecessary_fallible_conversion is new in 1.75. TODO: Remove once our MSRV is high enough.
+#![allow(unknown_lints)]
+// We use TryFrom in places where From could be used, but fixing this would make the code generator more complicated
+#![allow(clippy::unnecessary_fallible_conversion)]
 
 use alloc::borrow::Cow;
 use alloc::string::String;
