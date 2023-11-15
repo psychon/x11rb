@@ -617,12 +617,8 @@ impl<S: Stream + Send + Sync> RequestConnection for RustConnection<S> {
                             Some(cookie) => cookie,
                             None => {
                                 // Not available.
-                                return self
-                                    .setup()
-                                    .maximum_request_length
-                                    .try_into()
-                                    .ok()
-                                    .and_then(|x: usize| x.checked_mul(4))
+                                return usize::from(self.setup().maximum_request_length)
+                                    .checked_mul(4)
                                     .unwrap_or(std::usize::MAX);
                             }
                         };
