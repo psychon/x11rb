@@ -618,8 +618,7 @@ impl<S: Stream + Send + Sync> RequestConnection for RustConnection<S> {
                             None => {
                                 // Not available.
                                 return usize::from(self.setup().maximum_request_length)
-                                    .checked_mul(4)
-                                    .unwrap_or(std::usize::MAX);
+                                    .saturating_mul(4);
                             }
                         };
 
