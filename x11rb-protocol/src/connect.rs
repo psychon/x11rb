@@ -263,6 +263,7 @@ impl TryFrom<Connect> for Setup {
 }
 
 #[cfg(test)]
+#[cfg(feature = "extra-traits")]
 mod tests {
     use super::Connect;
     use crate::errors::ConnectError;
