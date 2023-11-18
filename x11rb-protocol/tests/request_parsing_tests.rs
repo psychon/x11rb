@@ -1,4 +1,5 @@
 #![cfg(feature = "request-parsing")]
+#![cfg(feature = "extra-traits")]
 
 use std::borrow::Cow;
 
