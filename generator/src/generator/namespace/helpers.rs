@@ -13,19 +13,12 @@ pub(crate) struct EnumInfo {
 }
 
 pub(super) fn default_debug_impl(name: &str, out: &mut crate::generator::Output) {
-    outln!(out, "#[cfg(not(feature = \"extra-traits\"))]");
-    outln!(out, "impl core::fmt::Debug for {} {{", name);
-    out.indented(|out| {
-        outln!(
-            out,
-            "fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {{"
-        );
-        out.indented(|out| {
-            outln!(out, "f.debug_struct(\"{}\").finish_non_exhaustive()", name);
-        });
-        outln!(out, "}}");
-    });
-    outln!(out, "}}");
+    outln!(
+        out,
+        "impl_debug_if_no_extra_traits!({}, \"{}\");",
+        name,
+        name
+    );
 }
 
 /// Caches to avoid repeating some operations.

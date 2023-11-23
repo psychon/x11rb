@@ -116,12 +116,7 @@ pub struct SwapInfo {
     pub window: xproto::Window,
     pub swap_action: SwapAction,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for SwapInfo {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SwapInfo").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SwapInfo, "SwapInfo");
 impl TryParse for SwapInfo {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (window, remaining) = xproto::Window::try_parse(remaining)?;
@@ -162,12 +157,7 @@ impl Serialize for SwapInfo {
 pub struct BufferAttributes {
     pub window: xproto::Window,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for BufferAttributes {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("BufferAttributes").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(BufferAttributes, "BufferAttributes");
 impl TryParse for BufferAttributes {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (window, remaining) = xproto::Window::try_parse(remaining)?;
@@ -200,12 +190,7 @@ pub struct VisualInfo {
     pub depth: u8,
     pub perf_level: u8,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for VisualInfo {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("VisualInfo").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(VisualInfo, "VisualInfo");
 impl TryParse for VisualInfo {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (visual_id, remaining) = xproto::Visualid::try_parse(remaining)?;
@@ -248,12 +233,7 @@ impl Serialize for VisualInfo {
 pub struct VisualInfos {
     pub infos: Vec<VisualInfo>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for VisualInfos {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("VisualInfos").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(VisualInfos, "VisualInfos");
 impl TryParse for VisualInfos {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (n_infos, remaining) = u32::try_parse(remaining)?;
@@ -311,12 +291,7 @@ pub struct QueryVersionRequest {
     pub major_version: u8,
     pub minor_version: u8,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryVersionRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryVersionRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryVersionRequest, "QueryVersionRequest");
 impl QueryVersionRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -378,12 +353,7 @@ pub struct QueryVersionReply {
     pub major_version: u8,
     pub minor_version: u8,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryVersionReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryVersionReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryVersionReply, "QueryVersionReply");
 impl TryParse for QueryVersionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -479,12 +449,7 @@ pub struct AllocateBackBufferRequest {
     pub buffer: BackBuffer,
     pub swap_action: u8,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for AllocateBackBufferRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("AllocateBackBufferRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(AllocateBackBufferRequest, "AllocateBackBufferRequest");
 impl AllocateBackBufferRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -562,12 +527,7 @@ pub const DEALLOCATE_BACK_BUFFER_REQUEST: u8 = 2;
 pub struct DeallocateBackBufferRequest {
     pub buffer: BackBuffer,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for DeallocateBackBufferRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("DeallocateBackBufferRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(DeallocateBackBufferRequest, "DeallocateBackBufferRequest");
 impl DeallocateBackBufferRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -630,12 +590,7 @@ pub const SWAP_BUFFERS_REQUEST: u8 = 3;
 pub struct SwapBuffersRequest<'input> {
     pub actions: Cow<'input, [SwapInfo]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for SwapBuffersRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SwapBuffersRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SwapBuffersRequest<'_>, "SwapBuffersRequest");
 impl<'input> SwapBuffersRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -704,12 +659,7 @@ pub const BEGIN_IDIOM_REQUEST: u8 = 4;
 #[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct BeginIdiomRequest;
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for BeginIdiomRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("BeginIdiomRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(BeginIdiomRequest, "BeginIdiomRequest");
 impl BeginIdiomRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -757,12 +707,7 @@ pub const END_IDIOM_REQUEST: u8 = 5;
 #[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct EndIdiomRequest;
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for EndIdiomRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("EndIdiomRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(EndIdiomRequest, "EndIdiomRequest");
 impl EndIdiomRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -812,12 +757,7 @@ pub const GET_VISUAL_INFO_REQUEST: u8 = 6;
 pub struct GetVisualInfoRequest<'input> {
     pub drawables: Cow<'input, [xproto::Drawable]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for GetVisualInfoRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetVisualInfoRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetVisualInfoRequest<'_>, "GetVisualInfoRequest");
 impl<'input> GetVisualInfoRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -886,12 +826,7 @@ pub struct GetVisualInfoReply {
     pub length: u32,
     pub supported_visuals: Vec<VisualInfos>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetVisualInfoReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetVisualInfoReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetVisualInfoReply, "GetVisualInfoReply");
 impl TryParse for GetVisualInfoReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -964,12 +899,7 @@ pub const GET_BACK_BUFFER_ATTRIBUTES_REQUEST: u8 = 7;
 pub struct GetBackBufferAttributesRequest {
     pub buffer: BackBuffer,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetBackBufferAttributesRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetBackBufferAttributesRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetBackBufferAttributesRequest, "GetBackBufferAttributesRequest");
 impl GetBackBufferAttributesRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -1026,12 +956,7 @@ pub struct GetBackBufferAttributesReply {
     pub length: u32,
     pub attributes: BufferAttributes,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetBackBufferAttributesReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetBackBufferAttributesReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetBackBufferAttributesReply, "GetBackBufferAttributesReply");
 impl TryParse for GetBackBufferAttributesReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;

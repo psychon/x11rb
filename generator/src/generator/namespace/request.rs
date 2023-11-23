@@ -476,28 +476,17 @@ fn emit_request_struct(
     }
 
     // Implement `Debug` manually if `extra-traits` is not enabled.
-    outln!(out, "#[cfg(not(feature = \"extra-traits\"))]");
     outln!(
         out,
-        "impl{lifetime} core::fmt::Debug for {name}Request{lifetime} {{",
-        lifetime = struct_lifetime_block,
-        name = name
+        "impl_debug_if_no_extra_traits!({}Request{}, \"{}Request\");",
+        name,
+        if struct_lifetime_block.is_empty() {
+            ""
+        } else {
+            "<'_>"
+        },
+        name
     );
-    out.indented(|out| {
-        outln!(
-            out,
-            "fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {{"
-        );
-        out.indented(|out| {
-            outln!(
-                out,
-                "f.debug_struct(\"{name}Request\").finish_non_exhaustive()",
-                name = name
-            );
-        });
-        outln!(out, "}}");
-    });
-    outln!(out, "}}");
 
     // Methods implemented on every request
     outln!(

@@ -219,12 +219,7 @@ pub struct ModeInfo {
     pub flags: ModeFlag,
     pub privsize: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for ModeInfo {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ModeInfo").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ModeInfo, "ModeInfo");
 impl TryParse for ModeInfo {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (dotclock, remaining) = Dotclock::try_parse(remaining)?;
@@ -337,12 +332,7 @@ pub const QUERY_VERSION_REQUEST: u8 = 0;
 #[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryVersionRequest;
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryVersionRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryVersionRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryVersionRequest, "QueryVersionRequest");
 impl QueryVersionRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -393,12 +383,7 @@ pub struct QueryVersionReply {
     pub major_version: u16,
     pub minor_version: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryVersionReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryVersionReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryVersionReply, "QueryVersionReply");
 impl TryParse for QueryVersionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -461,12 +446,7 @@ pub const GET_MODE_LINE_REQUEST: u8 = 1;
 pub struct GetModeLineRequest {
     pub screen: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetModeLineRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetModeLineRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetModeLineRequest, "GetModeLineRequest");
 impl GetModeLineRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -535,12 +515,7 @@ pub struct GetModeLineReply {
     pub flags: ModeFlag,
     pub private: Vec<u8>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetModeLineReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetModeLineReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetModeLineReply, "GetModeLineReply");
 impl TryParse for GetModeLineReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -642,12 +617,7 @@ pub struct ModModeLineRequest<'input> {
     pub flags: ModeFlag,
     pub private: Cow<'input, [u8]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for ModModeLineRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ModModeLineRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ModModeLineRequest<'_>, "ModModeLineRequest");
 impl<'input> ModModeLineRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -802,12 +772,7 @@ pub struct SwitchModeRequest {
     pub screen: u16,
     pub zoom: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for SwitchModeRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SwitchModeRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SwitchModeRequest, "SwitchModeRequest");
 impl SwitchModeRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -866,12 +831,7 @@ pub const GET_MONITOR_REQUEST: u8 = 4;
 pub struct GetMonitorRequest {
     pub screen: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetMonitorRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetMonitorRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetMonitorRequest, "GetMonitorRequest");
 impl GetMonitorRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -933,12 +893,7 @@ pub struct GetMonitorReply {
     pub alignment_pad: Vec<u8>,
     pub model: Vec<u8>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetMonitorReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetMonitorReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetMonitorReply, "GetMonitorReply");
 impl TryParse for GetMonitorReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -1064,12 +1019,7 @@ pub struct LockModeSwitchRequest {
     pub screen: u16,
     pub lock: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for LockModeSwitchRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("LockModeSwitchRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(LockModeSwitchRequest, "LockModeSwitchRequest");
 impl LockModeSwitchRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -1128,12 +1078,7 @@ pub const GET_ALL_MODE_LINES_REQUEST: u8 = 6;
 pub struct GetAllModeLinesRequest {
     pub screen: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetAllModeLinesRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetAllModeLinesRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetAllModeLinesRequest, "GetAllModeLinesRequest");
 impl GetAllModeLinesRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -1191,12 +1136,7 @@ pub struct GetAllModeLinesReply {
     pub length: u32,
     pub modeinfo: Vec<ModeInfo>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetAllModeLinesReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetAllModeLinesReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetAllModeLinesReply, "GetAllModeLinesReply");
 impl TryParse for GetAllModeLinesReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -1284,12 +1224,7 @@ pub struct AddModeLineRequest<'input> {
     pub after_flags: ModeFlag,
     pub private: Cow<'input, [u8]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for AddModeLineRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("AddModeLineRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(AddModeLineRequest<'_>, "AddModeLineRequest");
 impl<'input> AddModeLineRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -1550,12 +1485,7 @@ pub struct DeleteModeLineRequest<'input> {
     pub flags: ModeFlag,
     pub private: Cow<'input, [u8]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for DeleteModeLineRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("DeleteModeLineRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(DeleteModeLineRequest<'_>, "DeleteModeLineRequest");
 impl<'input> DeleteModeLineRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -1729,12 +1659,7 @@ pub struct ValidateModeLineRequest<'input> {
     pub flags: ModeFlag,
     pub private: Cow<'input, [u8]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for ValidateModeLineRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ValidateModeLineRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ValidateModeLineRequest<'_>, "ValidateModeLineRequest");
 impl<'input> ValidateModeLineRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -1897,12 +1822,7 @@ pub struct ValidateModeLineReply {
     pub length: u32,
     pub status: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for ValidateModeLineReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ValidateModeLineReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ValidateModeLineReply, "ValidateModeLineReply");
 impl TryParse for ValidateModeLineReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -1996,12 +1916,7 @@ pub struct SwitchToModeRequest<'input> {
     pub flags: ModeFlag,
     pub private: Cow<'input, [u8]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for SwitchToModeRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SwitchToModeRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SwitchToModeRequest<'_>, "SwitchToModeRequest");
 impl<'input> SwitchToModeRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -2163,12 +2078,7 @@ pub const GET_VIEW_PORT_REQUEST: u8 = 11;
 pub struct GetViewPortRequest {
     pub screen: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetViewPortRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetViewPortRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetViewPortRequest, "GetViewPortRequest");
 impl GetViewPortRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -2227,12 +2137,7 @@ pub struct GetViewPortReply {
     pub x: u32,
     pub y: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetViewPortReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetViewPortReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetViewPortReply, "GetViewPortReply");
 impl TryParse for GetViewPortReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -2319,12 +2224,7 @@ pub struct SetViewPortRequest {
     pub x: u32,
     pub y: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for SetViewPortRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SetViewPortRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SetViewPortRequest, "SetViewPortRequest");
 impl SetViewPortRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -2395,12 +2295,7 @@ pub const GET_DOT_CLOCKS_REQUEST: u8 = 13;
 pub struct GetDotClocksRequest {
     pub screen: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetDotClocksRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetDotClocksRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetDotClocksRequest, "GetDotClocksRequest");
 impl GetDotClocksRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -2461,12 +2356,7 @@ pub struct GetDotClocksReply {
     pub maxclocks: u32,
     pub clock: Vec<u32>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetDotClocksReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetDotClocksReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetDotClocksReply, "GetDotClocksReply");
 impl TryParse for GetDotClocksReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -2522,12 +2412,7 @@ pub struct SetClientVersionRequest {
     pub major: u16,
     pub minor: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for SetClientVersionRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SetClientVersionRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SetClientVersionRequest, "SetClientVersionRequest");
 impl SetClientVersionRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -2589,12 +2474,7 @@ pub struct SetGammaRequest {
     pub green: u32,
     pub blue: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for SetGammaRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SetGammaRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SetGammaRequest, "SetGammaRequest");
 impl SetGammaRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -2685,12 +2565,7 @@ pub const GET_GAMMA_REQUEST: u8 = 16;
 pub struct GetGammaRequest {
     pub screen: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetGammaRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetGammaRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetGammaRequest, "GetGammaRequest");
 impl GetGammaRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -2774,12 +2649,7 @@ pub struct GetGammaReply {
     pub green: u32,
     pub blue: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetGammaReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetGammaReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetGammaReply, "GetGammaReply");
 impl TryParse for GetGammaReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -2868,12 +2738,7 @@ pub struct GetGammaRampRequest {
     pub screen: u16,
     pub size: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetGammaRampRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetGammaRampRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetGammaRampRequest, "GetGammaRampRequest");
 impl GetGammaRampRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -2936,12 +2801,7 @@ pub struct GetGammaRampReply {
     pub green: Vec<u16>,
     pub blue: Vec<u16>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetGammaRampReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetGammaRampReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetGammaRampReply, "GetGammaRampReply");
 impl TryParse for GetGammaRampReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -3001,12 +2861,7 @@ pub struct SetGammaRampRequest<'input> {
     pub green: Cow<'input, [u16]>,
     pub blue: Cow<'input, [u16]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for SetGammaRampRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SetGammaRampRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SetGammaRampRequest<'_>, "SetGammaRampRequest");
 impl<'input> SetGammaRampRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 5]> {
@@ -3092,12 +2947,7 @@ pub const GET_GAMMA_RAMP_SIZE_REQUEST: u8 = 19;
 pub struct GetGammaRampSizeRequest {
     pub screen: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetGammaRampSizeRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetGammaRampSizeRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetGammaRampSizeRequest, "GetGammaRampSizeRequest");
 impl GetGammaRampSizeRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -3155,12 +3005,7 @@ pub struct GetGammaRampSizeReply {
     pub length: u32,
     pub size: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetGammaRampSizeReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetGammaRampSizeReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetGammaRampSizeReply, "GetGammaRampSizeReply");
 impl TryParse for GetGammaRampSizeReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -3242,12 +3087,7 @@ pub const GET_PERMISSIONS_REQUEST: u8 = 20;
 pub struct GetPermissionsRequest {
     pub screen: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetPermissionsRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetPermissionsRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetPermissionsRequest, "GetPermissionsRequest");
 impl GetPermissionsRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -3305,12 +3145,7 @@ pub struct GetPermissionsReply {
     pub length: u32,
     pub permissions: Permission,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetPermissionsReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetPermissionsReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetPermissionsReply, "GetPermissionsReply");
 impl TryParse for GetPermissionsReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;

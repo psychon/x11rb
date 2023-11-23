@@ -217,12 +217,7 @@ pub struct QueryVersionRequest {
     pub client_major_version: u8,
     pub client_minor_version: u8,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryVersionRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryVersionRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryVersionRequest, "QueryVersionRequest");
 impl QueryVersionRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -284,12 +279,7 @@ pub struct QueryVersionReply {
     pub server_major_version: u16,
     pub server_minor_version: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryVersionReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryVersionReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryVersionReply, "QueryVersionReply");
 impl TryParse for QueryVersionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -374,12 +364,7 @@ pub const QUERY_INFO_REQUEST: u8 = 1;
 pub struct QueryInfoRequest {
     pub drawable: xproto::Drawable,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryInfoRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryInfoRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryInfoRequest, "QueryInfoRequest");
 impl QueryInfoRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -441,12 +426,7 @@ pub struct QueryInfoReply {
     pub event_mask: u32,
     pub kind: Kind,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryInfoReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryInfoReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryInfoReply, "QueryInfoReply");
 impl TryParse for QueryInfoReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -543,12 +523,7 @@ pub struct SelectInputRequest {
     pub drawable: xproto::Drawable,
     pub event_mask: Event,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for SelectInputRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SelectInputRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SelectInputRequest, "SelectInputRequest");
 impl SelectInputRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -625,12 +600,7 @@ pub struct SetAttributesAux {
     pub colormap: Option<xproto::Colormap>,
     pub cursor: Option<xproto::Cursor>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for SetAttributesAux {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SetAttributesAux").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SetAttributesAux, "SetAttributesAux");
 impl SetAttributesAux {
     #[cfg_attr(not(feature = "request-parsing"), allow(dead_code))]
     fn try_parse(value: &[u8], value_mask: u32) -> Result<(Self, &[u8]), ParseError> {
@@ -986,12 +956,7 @@ pub struct SetAttributesRequest<'input> {
     pub visual: xproto::Visualid,
     pub value_list: Cow<'input, SetAttributesAux>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for SetAttributesRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SetAttributesRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SetAttributesRequest<'_>, "SetAttributesRequest");
 impl<'input> SetAttributesRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -1116,12 +1081,7 @@ pub const UNSET_ATTRIBUTES_REQUEST: u8 = 4;
 pub struct UnsetAttributesRequest {
     pub drawable: xproto::Drawable,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for UnsetAttributesRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("UnsetAttributesRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(UnsetAttributesRequest, "UnsetAttributesRequest");
 impl UnsetAttributesRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -1177,12 +1137,7 @@ pub const SUSPEND_REQUEST: u8 = 5;
 pub struct SuspendRequest {
     pub suspend: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for SuspendRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SuspendRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SuspendRequest, "SuspendRequest");
 impl SuspendRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -1245,12 +1200,7 @@ pub struct NotifyEvent {
     pub kind: Kind,
     pub forced: bool,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for NotifyEvent {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("NotifyEvent").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(NotifyEvent, "NotifyEvent");
 impl TryParse for NotifyEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;

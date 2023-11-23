@@ -45,12 +45,7 @@ pub struct ScreenInfo {
     pub width: u16,
     pub height: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for ScreenInfo {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ScreenInfo").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ScreenInfo, "ScreenInfo");
 impl TryParse for ScreenInfo {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (x_org, remaining) = i16::try_parse(remaining)?;
@@ -97,12 +92,7 @@ pub struct QueryVersionRequest {
     pub major: u8,
     pub minor: u8,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryVersionRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryVersionRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryVersionRequest, "QueryVersionRequest");
 impl QueryVersionRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -163,12 +153,7 @@ pub struct QueryVersionReply {
     pub major: u16,
     pub minor: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryVersionReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryVersionReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryVersionReply, "QueryVersionReply");
 impl TryParse for QueryVersionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -231,12 +216,7 @@ pub const GET_STATE_REQUEST: u8 = 1;
 pub struct GetStateRequest {
     pub window: xproto::Window,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetStateRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetStateRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetStateRequest, "GetStateRequest");
 impl GetStateRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -294,12 +274,7 @@ pub struct GetStateReply {
     pub length: u32,
     pub window: xproto::Window,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetStateReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetStateReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetStateReply, "GetStateReply");
 impl TryParse for GetStateReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -360,12 +335,7 @@ pub const GET_SCREEN_COUNT_REQUEST: u8 = 2;
 pub struct GetScreenCountRequest {
     pub window: xproto::Window,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetScreenCountRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetScreenCountRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetScreenCountRequest, "GetScreenCountRequest");
 impl GetScreenCountRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -423,12 +393,7 @@ pub struct GetScreenCountReply {
     pub length: u32,
     pub window: xproto::Window,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetScreenCountReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetScreenCountReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetScreenCountReply, "GetScreenCountReply");
 impl TryParse for GetScreenCountReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -490,12 +455,7 @@ pub struct GetScreenSizeRequest {
     pub window: xproto::Window,
     pub screen: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetScreenSizeRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetScreenSizeRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetScreenSizeRequest, "GetScreenSizeRequest");
 impl GetScreenSizeRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -562,12 +522,7 @@ pub struct GetScreenSizeReply {
     pub window: xproto::Window,
     pub screen: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetScreenSizeReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetScreenSizeReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetScreenSizeReply, "GetScreenSizeReply");
 impl TryParse for GetScreenSizeReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -646,12 +601,7 @@ pub const IS_ACTIVE_REQUEST: u8 = 4;
 #[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct IsActiveRequest;
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for IsActiveRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("IsActiveRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(IsActiveRequest, "IsActiveRequest");
 impl IsActiveRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -701,12 +651,7 @@ pub struct IsActiveReply {
     pub length: u32,
     pub state: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for IsActiveReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("IsActiveReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(IsActiveReply, "IsActiveReply");
 impl TryParse for IsActiveReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -764,12 +709,7 @@ pub const QUERY_SCREENS_REQUEST: u8 = 5;
 #[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryScreensRequest;
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryScreensRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryScreensRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryScreensRequest, "QueryScreensRequest");
 impl QueryScreensRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -819,12 +759,7 @@ pub struct QueryScreensReply {
     pub length: u32,
     pub screen_info: Vec<ScreenInfo>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryScreensReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryScreensReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryScreensReply, "QueryScreensReply");
 impl TryParse for QueryScreensReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;

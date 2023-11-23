@@ -43,12 +43,7 @@ pub struct QueryVersionRequest {
     pub client_major_version: u16,
     pub client_minor_version: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryVersionRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryVersionRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryVersionRequest, "QueryVersionRequest");
 impl QueryVersionRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -109,12 +104,7 @@ pub struct QueryVersionReply {
     pub server_major_version: u16,
     pub server_minor_version: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryVersionReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryVersionReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryVersionReply, "QueryVersionReply");
 impl TryParse for QueryVersionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -199,12 +189,7 @@ pub const START_REQUEST: u8 = 1;
 pub struct StartRequest {
     pub screen: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for StartRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("StartRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(StartRequest, "StartRequest");
 impl StartRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -260,12 +245,7 @@ pub struct StartReply {
     pub sequence: u16,
     pub length: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for StartReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("StartReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(StartReply, "StartReply");
 impl TryParse for StartReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -344,12 +324,7 @@ pub const END_REQUEST: u8 = 2;
 pub struct EndRequest {
     pub cmap: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for EndRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("EndRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(EndRequest, "EndRequest");
 impl EndRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -405,12 +380,7 @@ pub struct EndReply {
     pub sequence: u16,
     pub length: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for EndReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("EndReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(EndReply, "EndReply");
 impl TryParse for EndReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -557,12 +527,7 @@ impl core::fmt::Debug for Datatype  {
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Event {
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for Event {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("Event").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(Event, "Event");
 impl TryParse for Event {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = remaining.get(32..).ok_or(ParseError::InsufficientData)?;
@@ -623,12 +588,7 @@ pub struct SendRequest {
     pub event: Event,
     pub data_type: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for SendRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SendRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SendRequest, "SendRequest");
 impl SendRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -784,12 +744,7 @@ pub struct SendReply {
     pub sequence: u16,
     pub length: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for SendReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SendReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SendReply, "SendReply");
 impl TryParse for SendReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -868,12 +823,7 @@ pub const SELECT_INPUT_REQUEST: u8 = 4;
 pub struct SelectInputRequest {
     pub event_mask: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for SelectInputRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SelectInputRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SelectInputRequest, "SelectInputRequest");
 impl SelectInputRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -929,12 +879,7 @@ pub struct SelectInputReply {
     pub sequence: u16,
     pub length: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for SelectInputReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SelectInputReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SelectInputReply, "SelectInputReply");
 impl TryParse for SelectInputReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;

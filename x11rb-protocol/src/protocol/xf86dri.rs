@@ -43,12 +43,7 @@ pub struct DrmClipRect {
     pub x2: i16,
     pub x3: i16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for DrmClipRect {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("DrmClipRect").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(DrmClipRect, "DrmClipRect");
 impl TryParse for DrmClipRect {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (x1, remaining) = i16::try_parse(remaining)?;
@@ -92,12 +87,7 @@ pub const QUERY_VERSION_REQUEST: u8 = 0;
 #[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryVersionRequest;
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryVersionRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryVersionRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryVersionRequest, "QueryVersionRequest");
 impl QueryVersionRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -149,12 +139,7 @@ pub struct QueryVersionReply {
     pub dri_minor_version: u16,
     pub dri_minor_patch: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryVersionReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryVersionReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryVersionReply, "QueryVersionReply");
 impl TryParse for QueryVersionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -224,12 +209,7 @@ pub const QUERY_DIRECT_RENDERING_CAPABLE_REQUEST: u8 = 1;
 pub struct QueryDirectRenderingCapableRequest {
     pub screen: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryDirectRenderingCapableRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryDirectRenderingCapableRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryDirectRenderingCapableRequest, "QueryDirectRenderingCapableRequest");
 impl QueryDirectRenderingCapableRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -286,12 +266,7 @@ pub struct QueryDirectRenderingCapableReply {
     pub length: u32,
     pub is_capable: bool,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryDirectRenderingCapableReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryDirectRenderingCapableReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryDirectRenderingCapableReply, "QueryDirectRenderingCapableReply");
 impl TryParse for QueryDirectRenderingCapableReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -348,12 +323,7 @@ pub const OPEN_CONNECTION_REQUEST: u8 = 2;
 pub struct OpenConnectionRequest {
     pub screen: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for OpenConnectionRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("OpenConnectionRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(OpenConnectionRequest, "OpenConnectionRequest");
 impl OpenConnectionRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -412,12 +382,7 @@ pub struct OpenConnectionReply {
     pub sarea_handle_high: u32,
     pub bus_id: Vec<u8>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for OpenConnectionReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("OpenConnectionReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(OpenConnectionReply, "OpenConnectionReply");
 impl TryParse for OpenConnectionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -487,12 +452,7 @@ pub const CLOSE_CONNECTION_REQUEST: u8 = 3;
 pub struct CloseConnectionRequest {
     pub screen: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for CloseConnectionRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("CloseConnectionRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(CloseConnectionRequest, "CloseConnectionRequest");
 impl CloseConnectionRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -548,12 +508,7 @@ pub const GET_CLIENT_DRIVER_NAME_REQUEST: u8 = 4;
 pub struct GetClientDriverNameRequest {
     pub screen: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetClientDriverNameRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetClientDriverNameRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetClientDriverNameRequest, "GetClientDriverNameRequest");
 impl GetClientDriverNameRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -613,12 +568,7 @@ pub struct GetClientDriverNameReply {
     pub client_driver_patch_version: u32,
     pub client_driver_name: Vec<u8>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetClientDriverNameReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetClientDriverNameReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetClientDriverNameReply, "GetClientDriverNameReply");
 impl TryParse for GetClientDriverNameReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -692,12 +642,7 @@ pub struct CreateContextRequest {
     pub visual: u32,
     pub context: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for CreateContextRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("CreateContextRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(CreateContextRequest, "CreateContextRequest");
 impl CreateContextRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -768,12 +713,7 @@ pub struct CreateContextReply {
     pub length: u32,
     pub hw_context: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for CreateContextReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("CreateContextReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(CreateContextReply, "CreateContextReply");
 impl TryParse for CreateContextReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -834,12 +774,7 @@ pub struct DestroyContextRequest {
     pub screen: u32,
     pub context: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for DestroyContextRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("DestroyContextRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(DestroyContextRequest, "DestroyContextRequest");
 impl DestroyContextRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -903,12 +838,7 @@ pub struct CreateDrawableRequest {
     pub screen: u32,
     pub drawable: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for CreateDrawableRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("CreateDrawableRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(CreateDrawableRequest, "CreateDrawableRequest");
 impl CreateDrawableRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -972,12 +902,7 @@ pub struct CreateDrawableReply {
     pub length: u32,
     pub hw_drawable_handle: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for CreateDrawableReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("CreateDrawableReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(CreateDrawableReply, "CreateDrawableReply");
 impl TryParse for CreateDrawableReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -1038,12 +963,7 @@ pub struct DestroyDrawableRequest {
     pub screen: u32,
     pub drawable: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for DestroyDrawableRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("DestroyDrawableRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(DestroyDrawableRequest, "DestroyDrawableRequest");
 impl DestroyDrawableRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -1107,12 +1027,7 @@ pub struct GetDrawableInfoRequest {
     pub screen: u32,
     pub drawable: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetDrawableInfoRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetDrawableInfoRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetDrawableInfoRequest, "GetDrawableInfoRequest");
 impl GetDrawableInfoRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -1185,12 +1100,7 @@ pub struct GetDrawableInfoReply {
     pub clip_rects: Vec<DrmClipRect>,
     pub back_clip_rects: Vec<DrmClipRect>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetDrawableInfoReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetDrawableInfoReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetDrawableInfoReply, "GetDrawableInfoReply");
 impl TryParse for GetDrawableInfoReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -1287,12 +1197,7 @@ pub const GET_DEVICE_INFO_REQUEST: u8 = 10;
 pub struct GetDeviceInfoRequest {
     pub screen: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetDeviceInfoRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetDeviceInfoRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetDeviceInfoRequest, "GetDeviceInfoRequest");
 impl GetDeviceInfoRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -1354,12 +1259,7 @@ pub struct GetDeviceInfoReply {
     pub framebuffer_stride: u32,
     pub device_private: Vec<u32>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetDeviceInfoReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetDeviceInfoReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetDeviceInfoReply, "GetDeviceInfoReply");
 impl TryParse for GetDeviceInfoReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -1433,12 +1333,7 @@ pub struct AuthConnectionRequest {
     pub screen: u32,
     pub magic: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for AuthConnectionRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("AuthConnectionRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(AuthConnectionRequest, "AuthConnectionRequest");
 impl AuthConnectionRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -1502,12 +1397,7 @@ pub struct AuthConnectionReply {
     pub length: u32,
     pub authenticated: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for AuthConnectionReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("AuthConnectionReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(AuthConnectionReply, "AuthConnectionReply");
 impl TryParse for AuthConnectionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;

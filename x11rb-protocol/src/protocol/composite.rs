@@ -115,12 +115,7 @@ pub struct QueryVersionRequest {
     pub client_major_version: u32,
     pub client_minor_version: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryVersionRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryVersionRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryVersionRequest, "QueryVersionRequest");
 impl QueryVersionRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -194,12 +189,7 @@ pub struct QueryVersionReply {
     pub major_version: u32,
     pub minor_version: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryVersionReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryVersionReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryVersionReply, "QueryVersionReply");
 impl TryParse for QueryVersionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -300,12 +290,7 @@ pub struct RedirectWindowRequest {
     pub window: xproto::Window,
     pub update: Redirect,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for RedirectWindowRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("RedirectWindowRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(RedirectWindowRequest, "RedirectWindowRequest");
 impl RedirectWindowRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -384,12 +369,7 @@ pub struct RedirectSubwindowsRequest {
     pub window: xproto::Window,
     pub update: Redirect,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for RedirectSubwindowsRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("RedirectSubwindowsRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(RedirectSubwindowsRequest, "RedirectSubwindowsRequest");
 impl RedirectSubwindowsRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -466,12 +446,7 @@ pub struct UnredirectWindowRequest {
     pub window: xproto::Window,
     pub update: Redirect,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for UnredirectWindowRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("UnredirectWindowRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(UnredirectWindowRequest, "UnredirectWindowRequest");
 impl UnredirectWindowRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -548,12 +523,7 @@ pub struct UnredirectSubwindowsRequest {
     pub window: xproto::Window,
     pub update: Redirect,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for UnredirectSubwindowsRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("UnredirectSubwindowsRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(UnredirectSubwindowsRequest, "UnredirectSubwindowsRequest");
 impl UnredirectSubwindowsRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -619,12 +589,7 @@ pub struct CreateRegionFromBorderClipRequest {
     pub region: xfixes::Region,
     pub window: xproto::Window,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for CreateRegionFromBorderClipRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("CreateRegionFromBorderClipRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(CreateRegionFromBorderClipRequest, "CreateRegionFromBorderClipRequest");
 impl CreateRegionFromBorderClipRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -688,12 +653,7 @@ pub struct NameWindowPixmapRequest {
     pub window: xproto::Window,
     pub pixmap: xproto::Pixmap,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for NameWindowPixmapRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("NameWindowPixmapRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(NameWindowPixmapRequest, "NameWindowPixmapRequest");
 impl NameWindowPixmapRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -756,12 +716,7 @@ pub const GET_OVERLAY_WINDOW_REQUEST: u8 = 7;
 pub struct GetOverlayWindowRequest {
     pub window: xproto::Window,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetOverlayWindowRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetOverlayWindowRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetOverlayWindowRequest, "GetOverlayWindowRequest");
 impl GetOverlayWindowRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -818,12 +773,7 @@ pub struct GetOverlayWindowReply {
     pub length: u32,
     pub overlay_win: xproto::Window,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetOverlayWindowReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetOverlayWindowReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetOverlayWindowReply, "GetOverlayWindowReply");
 impl TryParse for GetOverlayWindowReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -905,12 +855,7 @@ pub const RELEASE_OVERLAY_WINDOW_REQUEST: u8 = 8;
 pub struct ReleaseOverlayWindowRequest {
     pub window: xproto::Window,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for ReleaseOverlayWindowRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ReleaseOverlayWindowRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ReleaseOverlayWindowRequest, "ReleaseOverlayWindowRequest");
 impl ReleaseOverlayWindowRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {

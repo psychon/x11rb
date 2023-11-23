@@ -45,12 +45,7 @@ pub struct GetVersionRequest {
     pub client_major_version: u16,
     pub client_minor_version: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetVersionRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetVersionRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetVersionRequest, "GetVersionRequest");
 impl GetVersionRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -111,12 +106,7 @@ pub struct GetVersionReply {
     pub server_major_version: u16,
     pub server_minor_version: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetVersionReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetVersionReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetVersionReply, "GetVersionReply");
 impl TryParse for GetVersionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -177,12 +167,7 @@ pub const CAPABLE_REQUEST: u8 = 1;
 #[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CapableRequest;
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for CapableRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("CapableRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(CapableRequest, "CapableRequest");
 impl CapableRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -232,12 +217,7 @@ pub struct CapableReply {
     pub length: u32,
     pub capable: bool,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for CapableReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("CapableReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(CapableReply, "CapableReply");
 impl TryParse for CapableReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -317,12 +297,7 @@ pub const GET_TIMEOUTS_REQUEST: u8 = 2;
 #[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetTimeoutsRequest;
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetTimeoutsRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetTimeoutsRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetTimeoutsRequest, "GetTimeoutsRequest");
 impl GetTimeoutsRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -374,12 +349,7 @@ pub struct GetTimeoutsReply {
     pub suspend_timeout: u16,
     pub off_timeout: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetTimeoutsReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetTimeoutsReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetTimeoutsReply, "GetTimeoutsReply");
 impl TryParse for GetTimeoutsReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -469,12 +439,7 @@ pub struct SetTimeoutsRequest {
     pub suspend_timeout: u16,
     pub off_timeout: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for SetTimeoutsRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SetTimeoutsRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SetTimeoutsRequest, "SetTimeoutsRequest");
 impl SetTimeoutsRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -538,12 +503,7 @@ pub const ENABLE_REQUEST: u8 = 4;
 #[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct EnableRequest;
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for EnableRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("EnableRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(EnableRequest, "EnableRequest");
 impl EnableRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -590,12 +550,7 @@ pub const DISABLE_REQUEST: u8 = 5;
 #[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DisableRequest;
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for DisableRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("DisableRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(DisableRequest, "DisableRequest");
 impl DisableRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -701,12 +656,7 @@ pub const FORCE_LEVEL_REQUEST: u8 = 6;
 pub struct ForceLevelRequest {
     pub power_level: DPMSMode,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for ForceLevelRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ForceLevelRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ForceLevelRequest, "ForceLevelRequest");
 impl ForceLevelRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -761,12 +711,7 @@ pub const INFO_REQUEST: u8 = 7;
 #[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct InfoRequest;
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for InfoRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("InfoRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(InfoRequest, "InfoRequest");
 impl InfoRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -817,12 +762,7 @@ pub struct InfoReply {
     pub power_level: DPMSMode,
     pub state: bool,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for InfoReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("InfoReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(InfoReply, "InfoReply");
 impl TryParse for InfoReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -954,12 +894,7 @@ pub const SELECT_INPUT_REQUEST: u8 = 8;
 pub struct SelectInputRequest {
     pub event_mask: EventMask,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for SelectInputRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SelectInputRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SelectInputRequest, "SelectInputRequest");
 impl SelectInputRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -1023,12 +958,7 @@ pub struct InfoNotifyEvent {
     pub power_level: DPMSMode,
     pub state: bool,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for InfoNotifyEvent {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("InfoNotifyEvent").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(InfoNotifyEvent, "InfoNotifyEvent");
 impl TryParse for InfoNotifyEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;

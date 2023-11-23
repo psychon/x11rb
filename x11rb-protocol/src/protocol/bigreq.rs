@@ -46,12 +46,7 @@ pub const ENABLE_REQUEST: u8 = 0;
 #[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct EnableRequest;
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for EnableRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("EnableRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(EnableRequest, "EnableRequest");
 impl EnableRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -104,12 +99,7 @@ pub struct EnableReply {
     pub length: u32,
     pub maximum_request_length: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for EnableReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("EnableReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(EnableReply, "EnableReply");
 impl TryParse for EnableReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;

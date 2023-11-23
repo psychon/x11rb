@@ -688,6 +688,17 @@ macro_rules! bitmask_binop {
     };
 }
 
+macro_rules! impl_debug_if_no_extra_traits {
+    ($type:ty, $name:literal) => {
+        #[cfg(not(feature = "extra-traits"))]
+        impl core::fmt::Debug for $type {
+            fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+                f.debug_struct($name).finish_non_exhaustive()
+            }
+        }
+    };
+}
+
 /// Wrapper around TryInto that produces a ParseError.
 ///
 /// This trait shortens `x.try_into().or(Err(ParseError::ConversionFailed))` to `x.try_to_usize()`.

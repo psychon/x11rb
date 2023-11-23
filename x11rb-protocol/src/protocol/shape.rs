@@ -183,12 +183,7 @@ pub struct NotifyEvent {
     pub server_time: xproto::Timestamp,
     pub shaped: bool,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for NotifyEvent {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("NotifyEvent").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(NotifyEvent, "NotifyEvent");
 impl TryParse for NotifyEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -334,12 +329,7 @@ pub const QUERY_VERSION_REQUEST: u8 = 0;
 #[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryVersionRequest;
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryVersionRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryVersionRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryVersionRequest, "QueryVersionRequest");
 impl QueryVersionRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -390,12 +380,7 @@ pub struct QueryVersionReply {
     pub major_version: u16,
     pub minor_version: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryVersionReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryVersionReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryVersionReply, "QueryVersionReply");
 impl TryParse for QueryVersionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -464,12 +449,7 @@ pub struct RectanglesRequest<'input> {
     pub y_offset: i16,
     pub rectangles: Cow<'input, [xproto::Rectangle]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for RectanglesRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("RectanglesRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(RectanglesRequest<'_>, "RectanglesRequest");
 impl<'input> RectanglesRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -582,12 +562,7 @@ pub struct MaskRequest {
     pub y_offset: i16,
     pub source_bitmap: xproto::Pixmap,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for MaskRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("MaskRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(MaskRequest, "MaskRequest");
 impl MaskRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -679,12 +654,7 @@ pub struct CombineRequest {
     pub y_offset: i16,
     pub source_window: xproto::Window,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for CombineRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("CombineRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(CombineRequest, "CombineRequest");
 impl CombineRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -777,12 +747,7 @@ pub struct OffsetRequest {
     pub x_offset: i16,
     pub y_offset: i16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for OffsetRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("OffsetRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(OffsetRequest, "OffsetRequest");
 impl OffsetRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -857,12 +822,7 @@ pub const QUERY_EXTENTS_REQUEST: u8 = 5;
 pub struct QueryExtentsRequest {
     pub destination_window: xproto::Window,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryExtentsRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryExtentsRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryExtentsRequest, "QueryExtentsRequest");
 impl QueryExtentsRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -928,12 +888,7 @@ pub struct QueryExtentsReply {
     pub clip_shape_extents_width: u16,
     pub clip_shape_extents_height: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryExtentsReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryExtentsReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryExtentsReply, "QueryExtentsReply");
 impl TryParse for QueryExtentsReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -1039,12 +994,7 @@ pub struct SelectInputRequest {
     pub destination_window: xproto::Window,
     pub enable: bool,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for SelectInputRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SelectInputRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SelectInputRequest, "SelectInputRequest");
 impl SelectInputRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -1108,12 +1058,7 @@ pub const INPUT_SELECTED_REQUEST: u8 = 7;
 pub struct InputSelectedRequest {
     pub destination_window: xproto::Window,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for InputSelectedRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("InputSelectedRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(InputSelectedRequest, "InputSelectedRequest");
 impl InputSelectedRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -1170,12 +1115,7 @@ pub struct InputSelectedReply {
     pub sequence: u16,
     pub length: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for InputSelectedReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("InputSelectedReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(InputSelectedReply, "InputSelectedReply");
 impl TryParse for InputSelectedReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -1230,12 +1170,7 @@ pub struct GetRectanglesRequest {
     pub window: xproto::Window,
     pub source_kind: SK,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetRectanglesRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetRectanglesRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetRectanglesRequest, "GetRectanglesRequest");
 impl GetRectanglesRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -1302,12 +1237,7 @@ pub struct GetRectanglesReply {
     pub length: u32,
     pub rectangles: Vec<xproto::Rectangle>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetRectanglesReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetRectanglesReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetRectanglesReply, "GetRectanglesReply");
 impl TryParse for GetRectanglesReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;

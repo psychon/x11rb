@@ -56,12 +56,7 @@ pub struct SurfaceInfo {
     pub mc_type: u32,
     pub flags: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for SurfaceInfo {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SurfaceInfo").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(SurfaceInfo, "SurfaceInfo");
 impl TryParse for SurfaceInfo {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (id, remaining) = Surface::try_parse(remaining)?;
@@ -136,12 +131,7 @@ pub const QUERY_VERSION_REQUEST: u8 = 0;
 #[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct QueryVersionRequest;
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryVersionRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryVersionRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryVersionRequest, "QueryVersionRequest");
 impl QueryVersionRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -192,12 +182,7 @@ pub struct QueryVersionReply {
     pub major: u32,
     pub minor: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryVersionReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryVersionReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryVersionReply, "QueryVersionReply");
 impl TryParse for QueryVersionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -264,12 +249,7 @@ pub const LIST_SURFACE_TYPES_REQUEST: u8 = 1;
 pub struct ListSurfaceTypesRequest {
     pub port_id: xv::Port,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for ListSurfaceTypesRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ListSurfaceTypesRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ListSurfaceTypesRequest, "ListSurfaceTypesRequest");
 impl ListSurfaceTypesRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -326,12 +306,7 @@ pub struct ListSurfaceTypesReply {
     pub length: u32,
     pub surfaces: Vec<SurfaceInfo>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for ListSurfaceTypesReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ListSurfaceTypesReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ListSurfaceTypesReply, "ListSurfaceTypesReply");
 impl TryParse for ListSurfaceTypesReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -401,12 +376,7 @@ pub struct CreateContextRequest {
     pub height: u16,
     pub flags: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for CreateContextRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("CreateContextRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(CreateContextRequest, "CreateContextRequest");
 impl CreateContextRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -496,12 +466,7 @@ pub struct CreateContextReply {
     pub flags_return: u32,
     pub priv_data: Vec<u32>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for CreateContextReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("CreateContextReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(CreateContextReply, "CreateContextReply");
 impl TryParse for CreateContextReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -570,12 +535,7 @@ pub const DESTROY_CONTEXT_REQUEST: u8 = 3;
 pub struct DestroyContextRequest {
     pub context_id: Context,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for DestroyContextRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("DestroyContextRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(DestroyContextRequest, "DestroyContextRequest");
 impl DestroyContextRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -632,12 +592,7 @@ pub struct CreateSurfaceRequest {
     pub surface_id: Surface,
     pub context_id: Context,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for CreateSurfaceRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("CreateSurfaceRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(CreateSurfaceRequest, "CreateSurfaceRequest");
 impl CreateSurfaceRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -700,12 +655,7 @@ pub struct CreateSurfaceReply {
     pub sequence: u16,
     pub priv_data: Vec<u32>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for CreateSurfaceReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("CreateSurfaceReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(CreateSurfaceReply, "CreateSurfaceReply");
 impl TryParse for CreateSurfaceReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -768,12 +718,7 @@ pub const DESTROY_SURFACE_REQUEST: u8 = 5;
 pub struct DestroySurfaceRequest {
     pub surface_id: Surface,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for DestroySurfaceRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("DestroySurfaceRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(DestroySurfaceRequest, "DestroySurfaceRequest");
 impl DestroySurfaceRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -833,12 +778,7 @@ pub struct CreateSubpictureRequest {
     pub width: u16,
     pub height: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for CreateSubpictureRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("CreateSubpictureRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(CreateSubpictureRequest, "CreateSubpictureRequest");
 impl CreateSubpictureRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -923,12 +863,7 @@ pub struct CreateSubpictureReply {
     pub component_order: [u8; 4],
     pub priv_data: Vec<u32>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for CreateSubpictureReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("CreateSubpictureReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(CreateSubpictureReply, "CreateSubpictureReply");
 impl TryParse for CreateSubpictureReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -1001,12 +936,7 @@ pub const DESTROY_SUBPICTURE_REQUEST: u8 = 7;
 pub struct DestroySubpictureRequest {
     pub subpicture_id: Subpicture,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for DestroySubpictureRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("DestroySubpictureRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(DestroySubpictureRequest, "DestroySubpictureRequest");
 impl DestroySubpictureRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -1063,12 +993,7 @@ pub struct ListSubpictureTypesRequest {
     pub port_id: xv::Port,
     pub surface_id: Surface,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for ListSubpictureTypesRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ListSubpictureTypesRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ListSubpictureTypesRequest, "ListSubpictureTypesRequest");
 impl ListSubpictureTypesRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -1132,12 +1057,7 @@ pub struct ListSubpictureTypesReply {
     pub length: u32,
     pub types: Vec<xv::ImageFormatInfo>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for ListSubpictureTypesReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ListSubpictureTypesReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ListSubpictureTypesReply, "ListSubpictureTypesReply");
 impl TryParse for ListSubpictureTypesReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;

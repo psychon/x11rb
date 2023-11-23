@@ -45,12 +45,7 @@ pub struct GetVersionRequest {
     pub major_version: u8,
     pub minor_version: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetVersionRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetVersionRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetVersionRequest, "GetVersionRequest");
 impl GetVersionRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -112,12 +107,7 @@ pub struct GetVersionReply {
     pub length: u32,
     pub minor_version: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetVersionReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetVersionReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetVersionReply, "GetVersionReply");
 impl TryParse for GetVersionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -248,12 +238,7 @@ pub struct CompareCursorRequest {
     pub window: xproto::Window,
     pub cursor: xproto::Cursor,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for CompareCursorRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("CompareCursorRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(CompareCursorRequest, "CompareCursorRequest");
 impl CompareCursorRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -317,12 +302,7 @@ pub struct CompareCursorReply {
     pub sequence: u16,
     pub length: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for CompareCursorReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("CompareCursorReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(CompareCursorReply, "CompareCursorReply");
 impl TryParse for CompareCursorReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -382,12 +362,7 @@ pub struct FakeInputRequest {
     pub root_y: i16,
     pub deviceid: u8,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for FakeInputRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("FakeInputRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(FakeInputRequest, "FakeInputRequest");
 impl FakeInputRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -492,12 +467,7 @@ pub const GRAB_CONTROL_REQUEST: u8 = 3;
 pub struct GrabControlRequest {
     pub impervious: bool,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GrabControlRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GrabControlRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GrabControlRequest, "GrabControlRequest");
 impl GrabControlRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {

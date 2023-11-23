@@ -43,12 +43,7 @@ pub struct Range8 {
     pub first: u8,
     pub last: u8,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for Range8 {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("Range8").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(Range8, "Range8");
 impl TryParse for Range8 {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (first, remaining) = u8::try_parse(remaining)?;
@@ -81,12 +76,7 @@ pub struct Range16 {
     pub first: u16,
     pub last: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for Range16 {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("Range16").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(Range16, "Range16");
 impl TryParse for Range16 {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (first, remaining) = u16::try_parse(remaining)?;
@@ -121,12 +111,7 @@ pub struct ExtRange {
     pub major: Range8,
     pub minor: Range16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for ExtRange {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ExtRange").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ExtRange, "ExtRange");
 impl TryParse for ExtRange {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (major, remaining) = Range8::try_parse(remaining)?;
@@ -170,12 +155,7 @@ pub struct Range {
     pub client_started: bool,
     pub client_died: bool,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for Range {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("Range").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(Range, "Range");
 impl TryParse for Range {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (core_requests, remaining) = Range8::try_parse(remaining)?;
@@ -378,12 +358,7 @@ pub struct ClientInfo {
     pub client_resource: ClientSpec,
     pub ranges: Vec<Range>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for ClientInfo {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("ClientInfo").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(ClientInfo, "ClientInfo");
 impl TryParse for ClientInfo {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (client_resource, remaining) = ClientSpec::try_parse(remaining)?;
@@ -436,12 +411,7 @@ pub struct QueryVersionRequest {
     pub major_version: u16,
     pub minor_version: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryVersionRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryVersionRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryVersionRequest, "QueryVersionRequest");
 impl QueryVersionRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -502,12 +472,7 @@ pub struct QueryVersionReply {
     pub major_version: u16,
     pub minor_version: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for QueryVersionReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("QueryVersionReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(QueryVersionReply, "QueryVersionReply");
 impl TryParse for QueryVersionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -573,12 +538,7 @@ pub struct CreateContextRequest<'input> {
     pub client_specs: Cow<'input, [ClientSpec]>,
     pub ranges: Cow<'input, [Range]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for CreateContextRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("CreateContextRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(CreateContextRequest<'_>, "CreateContextRequest");
 impl<'input> CreateContextRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 4]> {
@@ -678,12 +638,7 @@ pub struct RegisterClientsRequest<'input> {
     pub client_specs: Cow<'input, [ClientSpec]>,
     pub ranges: Cow<'input, [Range]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for RegisterClientsRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("RegisterClientsRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(RegisterClientsRequest<'_>, "RegisterClientsRequest");
 impl<'input> RegisterClientsRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 4]> {
@@ -781,12 +736,7 @@ pub struct UnregisterClientsRequest<'input> {
     pub context: Context,
     pub client_specs: Cow<'input, [ClientSpec]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for UnregisterClientsRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("UnregisterClientsRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(UnregisterClientsRequest<'_>, "UnregisterClientsRequest");
 impl<'input> UnregisterClientsRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -862,12 +812,7 @@ pub const GET_CONTEXT_REQUEST: u8 = 4;
 pub struct GetContextRequest {
     pub context: Context,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetContextRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetContextRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetContextRequest, "GetContextRequest");
 impl GetContextRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -926,12 +871,7 @@ pub struct GetContextReply {
     pub element_header: ElementHeader,
     pub intercepted_clients: Vec<ClientInfo>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for GetContextReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("GetContextReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(GetContextReply, "GetContextReply");
 impl TryParse for GetContextReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -1000,12 +940,7 @@ pub const ENABLE_CONTEXT_REQUEST: u8 = 5;
 pub struct EnableContextRequest {
     pub context: Context,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for EnableContextRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("EnableContextRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(EnableContextRequest, "EnableContextRequest");
 impl EnableContextRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -1067,12 +1002,7 @@ pub struct EnableContextReply {
     pub rec_sequence_num: u32,
     pub data: Vec<u8>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for EnableContextReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("EnableContextReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(EnableContextReply, "EnableContextReply");
 impl TryParse for EnableContextReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -1150,12 +1080,7 @@ pub const DISABLE_CONTEXT_REQUEST: u8 = 6;
 pub struct DisableContextRequest {
     pub context: Context,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for DisableContextRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("DisableContextRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(DisableContextRequest, "DisableContextRequest");
 impl DisableContextRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -1211,12 +1136,7 @@ pub const FREE_CONTEXT_REQUEST: u8 = 7;
 pub struct FreeContextRequest {
     pub context: Context,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for FreeContextRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("FreeContextRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(FreeContextRequest, "FreeContextRequest");
 impl FreeContextRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {

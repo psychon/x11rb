@@ -45,12 +45,7 @@ pub struct Printer {
     pub name: Vec<String8>,
     pub description: Vec<String8>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for Printer {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("Printer").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(Printer, "Printer");
 impl TryParse for Printer {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let value = remaining;
@@ -396,12 +391,7 @@ pub const PRINT_QUERY_VERSION_REQUEST: u8 = 0;
 #[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PrintQueryVersionRequest;
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for PrintQueryVersionRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PrintQueryVersionRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PrintQueryVersionRequest, "PrintQueryVersionRequest");
 impl PrintQueryVersionRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -452,12 +442,7 @@ pub struct PrintQueryVersionReply {
     pub major_version: u16,
     pub minor_version: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for PrintQueryVersionReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PrintQueryVersionReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PrintQueryVersionReply, "PrintQueryVersionReply");
 impl TryParse for PrintQueryVersionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -521,12 +506,7 @@ pub struct PrintGetPrinterListRequest<'input> {
     pub printer_name: Cow<'input, [String8]>,
     pub locale: Cow<'input, [String8]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for PrintGetPrinterListRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PrintGetPrinterListRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PrintGetPrinterListRequest<'_>, "PrintGetPrinterListRequest");
 impl<'input> PrintGetPrinterListRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 5]> {
@@ -611,12 +591,7 @@ pub struct PrintGetPrinterListReply {
     pub length: u32,
     pub printers: Vec<Printer>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for PrintGetPrinterListReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PrintGetPrinterListReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PrintGetPrinterListReply, "PrintGetPrinterListReply");
 impl TryParse for PrintGetPrinterListReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -679,12 +654,7 @@ pub const PRINT_REHASH_PRINTER_LIST_REQUEST: u8 = 20;
 #[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PrintRehashPrinterListRequest;
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for PrintRehashPrinterListRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PrintRehashPrinterListRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PrintRehashPrinterListRequest, "PrintRehashPrinterListRequest");
 impl PrintRehashPrinterListRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -735,12 +705,7 @@ pub struct CreateContextRequest<'input> {
     pub printer_name: Cow<'input, [String8]>,
     pub locale: Cow<'input, [String8]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for CreateContextRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("CreateContextRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(CreateContextRequest<'_>, "CreateContextRequest");
 impl<'input> CreateContextRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 5]> {
@@ -832,12 +797,7 @@ pub const PRINT_SET_CONTEXT_REQUEST: u8 = 3;
 pub struct PrintSetContextRequest {
     pub context: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for PrintSetContextRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PrintSetContextRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PrintSetContextRequest, "PrintSetContextRequest");
 impl PrintSetContextRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -891,12 +851,7 @@ pub const PRINT_GET_CONTEXT_REQUEST: u8 = 4;
 #[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PrintGetContextRequest;
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for PrintGetContextRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PrintGetContextRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PrintGetContextRequest, "PrintGetContextRequest");
 impl PrintGetContextRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -946,12 +901,7 @@ pub struct PrintGetContextReply {
     pub length: u32,
     pub context: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for PrintGetContextReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PrintGetContextReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PrintGetContextReply, "PrintGetContextReply");
 impl TryParse for PrintGetContextReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -1011,12 +961,7 @@ pub const PRINT_DESTROY_CONTEXT_REQUEST: u8 = 5;
 pub struct PrintDestroyContextRequest {
     pub context: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for PrintDestroyContextRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PrintDestroyContextRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PrintDestroyContextRequest, "PrintDestroyContextRequest");
 impl PrintDestroyContextRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -1070,12 +1015,7 @@ pub const PRINT_GET_SCREEN_OF_CONTEXT_REQUEST: u8 = 6;
 #[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PrintGetScreenOfContextRequest;
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for PrintGetScreenOfContextRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PrintGetScreenOfContextRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PrintGetScreenOfContextRequest, "PrintGetScreenOfContextRequest");
 impl PrintGetScreenOfContextRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -1125,12 +1065,7 @@ pub struct PrintGetScreenOfContextReply {
     pub length: u32,
     pub root: xproto::Window,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for PrintGetScreenOfContextReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PrintGetScreenOfContextReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PrintGetScreenOfContextReply, "PrintGetScreenOfContextReply");
 impl TryParse for PrintGetScreenOfContextReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -1190,12 +1125,7 @@ pub const PRINT_START_JOB_REQUEST: u8 = 7;
 pub struct PrintStartJobRequest {
     pub output_mode: u8,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for PrintStartJobRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PrintStartJobRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PrintStartJobRequest, "PrintStartJobRequest");
 impl PrintStartJobRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -1251,12 +1181,7 @@ pub const PRINT_END_JOB_REQUEST: u8 = 8;
 pub struct PrintEndJobRequest {
     pub cancel: bool,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for PrintEndJobRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PrintEndJobRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PrintEndJobRequest, "PrintEndJobRequest");
 impl PrintEndJobRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -1312,12 +1237,7 @@ pub const PRINT_START_DOC_REQUEST: u8 = 9;
 pub struct PrintStartDocRequest {
     pub driver_mode: u8,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for PrintStartDocRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PrintStartDocRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PrintStartDocRequest, "PrintStartDocRequest");
 impl PrintStartDocRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -1373,12 +1293,7 @@ pub const PRINT_END_DOC_REQUEST: u8 = 10;
 pub struct PrintEndDocRequest {
     pub cancel: bool,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for PrintEndDocRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PrintEndDocRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PrintEndDocRequest, "PrintEndDocRequest");
 impl PrintEndDocRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -1437,12 +1352,7 @@ pub struct PrintPutDocumentDataRequest<'input> {
     pub doc_format: Cow<'input, [String8]>,
     pub options: Cow<'input, [String8]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for PrintPutDocumentDataRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PrintPutDocumentDataRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PrintPutDocumentDataRequest<'_>, "PrintPutDocumentDataRequest");
 impl<'input> PrintPutDocumentDataRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 7]> {
@@ -1548,12 +1458,7 @@ pub struct PrintGetDocumentDataRequest {
     pub context: Pcontext,
     pub max_bytes: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for PrintGetDocumentDataRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PrintGetDocumentDataRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PrintGetDocumentDataRequest, "PrintGetDocumentDataRequest");
 impl PrintGetDocumentDataRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -1619,12 +1524,7 @@ pub struct PrintGetDocumentDataReply {
     pub finished_flag: u32,
     pub data: Vec<u8>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for PrintGetDocumentDataReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PrintGetDocumentDataReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PrintGetDocumentDataReply, "PrintGetDocumentDataReply");
 impl TryParse for PrintGetDocumentDataReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -1694,12 +1594,7 @@ pub const PRINT_START_PAGE_REQUEST: u8 = 13;
 pub struct PrintStartPageRequest {
     pub window: xproto::Window,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for PrintStartPageRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PrintStartPageRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PrintStartPageRequest, "PrintStartPageRequest");
 impl PrintStartPageRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -1755,12 +1650,7 @@ pub const PRINT_END_PAGE_REQUEST: u8 = 14;
 pub struct PrintEndPageRequest {
     pub cancel: bool,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for PrintEndPageRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PrintEndPageRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PrintEndPageRequest, "PrintEndPageRequest");
 impl PrintEndPageRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -1818,12 +1708,7 @@ pub struct PrintSelectInputRequest {
     pub context: Pcontext,
     pub event_mask: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for PrintSelectInputRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PrintSelectInputRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PrintSelectInputRequest, "PrintSelectInputRequest");
 impl PrintSelectInputRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -1886,12 +1771,7 @@ pub const PRINT_INPUT_SELECTED_REQUEST: u8 = 16;
 pub struct PrintInputSelectedRequest {
     pub context: Pcontext,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for PrintInputSelectedRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PrintInputSelectedRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PrintInputSelectedRequest, "PrintInputSelectedRequest");
 impl PrintInputSelectedRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -1949,12 +1829,7 @@ pub struct PrintInputSelectedReply {
     pub event_mask: u32,
     pub all_events_mask: u32,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for PrintInputSelectedReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PrintInputSelectedReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PrintInputSelectedReply, "PrintInputSelectedReply");
 impl TryParse for PrintInputSelectedReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -2022,12 +1897,7 @@ pub struct PrintGetAttributesRequest {
     pub context: Pcontext,
     pub pool: u8,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for PrintGetAttributesRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PrintGetAttributesRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PrintGetAttributesRequest, "PrintGetAttributesRequest");
 impl PrintGetAttributesRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -2092,12 +1962,7 @@ pub struct PrintGetAttributesReply {
     pub length: u32,
     pub attributes: Vec<String8>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for PrintGetAttributesReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PrintGetAttributesReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PrintGetAttributesReply, "PrintGetAttributesReply");
 impl TryParse for PrintGetAttributesReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -2165,12 +2030,7 @@ pub struct PrintGetOneAttributesRequest<'input> {
     pub pool: u8,
     pub name: Cow<'input, [String8]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for PrintGetOneAttributesRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PrintGetOneAttributesRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PrintGetOneAttributesRequest<'_>, "PrintGetOneAttributesRequest");
 impl<'input> PrintGetOneAttributesRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -2255,12 +2115,7 @@ pub struct PrintGetOneAttributesReply {
     pub length: u32,
     pub value: Vec<String8>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for PrintGetOneAttributesReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PrintGetOneAttributesReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PrintGetOneAttributesReply, "PrintGetOneAttributesReply");
 impl TryParse for PrintGetOneAttributesReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -2330,12 +2185,7 @@ pub struct PrintSetAttributesRequest<'input> {
     pub rule: u8,
     pub attributes: Cow<'input, [String8]>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl<'input> core::fmt::Debug for PrintSetAttributesRequest<'input> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PrintSetAttributesRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PrintSetAttributesRequest<'_>, "PrintSetAttributesRequest");
 impl<'input> PrintSetAttributesRequest<'input> {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
@@ -2424,12 +2274,7 @@ pub const PRINT_GET_PAGE_DIMENSIONS_REQUEST: u8 = 21;
 pub struct PrintGetPageDimensionsRequest {
     pub context: Pcontext,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for PrintGetPageDimensionsRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PrintGetPageDimensionsRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PrintGetPageDimensionsRequest, "PrintGetPageDimensionsRequest");
 impl PrintGetPageDimensionsRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -2491,12 +2336,7 @@ pub struct PrintGetPageDimensionsReply {
     pub reproducible_width: u16,
     pub reproducible_height: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for PrintGetPageDimensionsReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PrintGetPageDimensionsReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PrintGetPageDimensionsReply, "PrintGetPageDimensionsReply");
 impl TryParse for PrintGetPageDimensionsReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -2577,12 +2417,7 @@ pub const PRINT_QUERY_SCREENS_REQUEST: u8 = 22;
 #[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PrintQueryScreensRequest;
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for PrintQueryScreensRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PrintQueryScreensRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PrintQueryScreensRequest, "PrintQueryScreensRequest");
 impl PrintQueryScreensRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -2632,12 +2467,7 @@ pub struct PrintQueryScreensReply {
     pub length: u32,
     pub roots: Vec<xproto::Window>,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for PrintQueryScreensReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PrintQueryScreensReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PrintQueryScreensReply, "PrintQueryScreensReply");
 impl TryParse for PrintQueryScreensReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -2703,12 +2533,7 @@ pub struct PrintSetImageResolutionRequest {
     pub context: Pcontext,
     pub image_resolution: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for PrintSetImageResolutionRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PrintSetImageResolutionRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PrintSetImageResolutionRequest, "PrintSetImageResolutionRequest");
 impl PrintSetImageResolutionRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -2773,12 +2598,7 @@ pub struct PrintSetImageResolutionReply {
     pub length: u32,
     pub previous_resolutions: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for PrintSetImageResolutionReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PrintSetImageResolutionReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PrintSetImageResolutionReply, "PrintSetImageResolutionReply");
 impl TryParse for PrintSetImageResolutionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -2837,12 +2657,7 @@ pub const PRINT_GET_IMAGE_RESOLUTION_REQUEST: u8 = 24;
 pub struct PrintGetImageResolutionRequest {
     pub context: Pcontext,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for PrintGetImageResolutionRequest {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PrintGetImageResolutionRequest").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PrintGetImageResolutionRequest, "PrintGetImageResolutionRequest");
 impl PrintGetImageResolutionRequest {
     /// Serialize this request into bytes for the provided connection
     pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
@@ -2899,12 +2714,7 @@ pub struct PrintGetImageResolutionReply {
     pub length: u32,
     pub image_resolution: u16,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for PrintGetImageResolutionReply {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("PrintGetImageResolutionReply").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(PrintGetImageResolutionReply, "PrintGetImageResolutionReply");
 impl TryParse for PrintGetImageResolutionReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -2966,12 +2776,7 @@ pub struct NotifyEvent {
     pub context: Pcontext,
     pub cancel: bool,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for NotifyEvent {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("NotifyEvent").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(NotifyEvent, "NotifyEvent");
 impl TryParse for NotifyEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -3077,12 +2882,7 @@ pub struct AttributNotifyEvent {
     pub sequence: u16,
     pub context: Pcontext,
 }
-#[cfg(not(feature = "extra-traits"))]
-impl core::fmt::Debug for AttributNotifyEvent {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("AttributNotifyEvent").finish_non_exhaustive()
-    }
-}
+impl_debug_if_no_extra_traits!(AttributNotifyEvent, "AttributNotifyEvent");
 impl TryParse for AttributNotifyEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
