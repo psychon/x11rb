@@ -44,7 +44,7 @@ use core::convert::TryFrom;
 use crate::errors::ParseError;
 #[allow(unused_imports)]
 use crate::x11_utils::TryIntoUSize;
-use crate::{BufWithFds, PiecewiseBuf};
+use crate::BufWithFds;
 #[allow(unused_imports)]
 use crate::utils::{RawFdContainer, pretty_print_bitmask, pretty_print_enum};
 #[allow(unused_imports)]
@@ -85,12 +85,14 @@ We must also be able to send structs to the server. This is handled through the
 `Serialize` trait that produces data in the native endian.
 
 ```rust
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Point {
     pub x: i16,
     pub y: i16,
 }
+impl_debug_if_no_extra_traits!(Point, "Point");
 impl TryParse for Point {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (x, remaining) = i16::try_parse(remaining)?;
@@ -138,12 +140,14 @@ The field `visuals_len` is not part of the generated struct since it is
 represented implicitly as the length of the `visuals` `Vec`. To make this less
 confusing, a function `visuals_len` is generated.
 ```rust
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Depth {
     pub depth: u8,
     pub visuals: Vec<Visualtype>,
 }
+impl_debug_if_no_extra_traits!(Depth, "Depth");
 impl TryParse for Depth {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (depth, remaining) = u8::try_parse(remaining)?;
@@ -540,7 +544,8 @@ impl From<[u32; 5]> for ClientMessageData {
 /// Opcode for the KeyPress event
 pub const KEY_PRESS_EVENT: u8 = 2;
 /// [SNIP]
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct KeyPressEvent {
     pub response_type: u8,
@@ -557,6 +562,7 @@ pub struct KeyPressEvent {
     pub state: KeyButMask,
     pub same_screen: bool,
 }
+impl_debug_if_no_extra_traits!(KeyPressEvent, "KeyPressEvent");
 impl TryParse for KeyPressEvent {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -755,12 +761,14 @@ This code is generated in the module in `x11rb-protocol`:
 ```rust
 /// Opcode for the NoOperation request
 pub const NO_OPERATION_REQUEST: u8 = 127;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct NoOperationRequest;
+impl_debug_if_no_extra_traits!(NoOperationRequest, "NoOperationRequest");
 impl NoOperationRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let mut request0 = vec![
             NO_OPERATION_REQUEST,
@@ -772,9 +780,10 @@ impl NoOperationRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.major_opcode != NO_OPERATION_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -809,7 +818,8 @@ where
 {
     let request0 = NoOperationRequest;
     let (bytes, fds) = request0.serialize();
-    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
+    let slices = [IoSlice::new(&bytes[0])];
+    assert_eq!(slices.len(), bytes.len());
     conn.send_request_without_reply(&slices, fds)
 }
 ```
@@ -835,12 +845,14 @@ There is again a structure generated in `x11rb-protocol` that represents the req
 ```rust
 /// Opcode for the GetInputFocus request
 pub const GET_INPUT_FOCUS_REQUEST: u8 = 43;
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetInputFocusRequest;
+impl_debug_if_no_extra_traits!(GetInputFocusRequest, "GetInputFocusRequest");
 impl GetInputFocusRequest {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self) -> BufWithFds<PiecewiseBuf<'static>> {
+    pub fn serialize(self) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
         let length_so_far = 0;
         let mut request0 = vec![
             GET_INPUT_FOCUS_REQUEST,
@@ -852,9 +864,10 @@ impl GetInputFocusRequest {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into()], vec![])
+        ([request0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
         if header.major_opcode != GET_INPUT_FOCUS_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -883,7 +896,8 @@ impl crate::x11_utils::ReplyRequest for GetInputFocusRequest {
 ```
 The reply is handled similar to a `struct`:
 ```rust
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GetInputFocusReply {
     pub revert_to: InputFocus,
@@ -891,6 +905,7 @@ pub struct GetInputFocusReply {
     pub length: u32,
     pub focus: Window,
 }
+impl_debug_if_no_extra_traits!(GetInputFocusReply, "GetInputFocusReply");
 impl TryParse for GetInputFocusReply {
     fn try_parse(initial_value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = initial_value;
@@ -952,7 +967,8 @@ where
 {
     let request0 = GetInputFocusRequest;
     let (bytes, fds) = request0.serialize();
-    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
+    let slices = [IoSlice::new(&bytes[0])];
+    assert_eq!(slices.len(), bytes.len());
     conn.send_request_with_reply(&slices, fds)
 }
 ```
@@ -1000,14 +1016,17 @@ generated.
 The switch is represented via a helper struct:
 ```rust
 /// Auxiliary and optional information for the `create_window` function
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CreateWindowAux {
     pub background_pixmap: Option<Pixmap>,
     pub background_pixel: Option<u32>,
     [SNIP - you get the idea]
 }
+impl_debug_if_no_extra_traits!(CreateWindowAux, "CreateWindowAux");
 impl CreateWindowAux {
+    #[cfg_attr(not(feature = "request-parsing"), allow(dead_code))]
     fn try_parse(value: &[u8], value_mask: u32) -> Result<(Self, &[u8]), ParseError> {
         let switch_expr = u32::from(value_mask);
         let mut outer_remaining = value;
@@ -1088,7 +1107,8 @@ This code is generated for the actual request:
 /// Opcode for the CreateWindow request
 pub const CREATE_WINDOW_REQUEST: u8 = 1;
 /// [SNIP]
-#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CreateWindowRequest<'input> {
     pub depth: u8,
@@ -1103,9 +1123,10 @@ pub struct CreateWindowRequest<'input> {
     pub visual: Visualid,
     pub value_list: Cow<'input, CreateWindowAux>,
 }
+impl_debug_if_no_extra_traits!(CreateWindowRequest<'_>, "CreateWindowRequest");
 impl<'input> CreateWindowRequest<'input> {
     /// Serialize this request into bytes for the provided connection
-    pub fn serialize(self) -> BufWithFds<PiecewiseBuf<'input>> {
+    pub fn serialize(self) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
         let length_so_far = 0;
         let depth_bytes = self.depth.serialize();
         let wid_bytes = self.wid.serialize();
@@ -1161,9 +1182,10 @@ impl<'input> CreateWindowRequest<'input> {
         assert_eq!(length_so_far % 4, 0);
         let length = u16::try_from(length_so_far / 4).unwrap_or(0);
         request0[2..4].copy_from_slice(&length.to_ne_bytes());
-        (vec![request0.into(), value_list_bytes.into(), padding0.into()], vec![])
+        ([request0.into(), value_list_bytes.into(), padding0.into()], vec![])
     }
     /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
     pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
         if header.major_opcode != CREATE_WINDOW_REQUEST {
             return Err(ParseError::InvalidValue);
@@ -1249,7 +1271,8 @@ where
         value_list: Cow::Borrowed(value_list),
     };
     let (bytes, fds) = request0.serialize();
-    let slices = bytes.iter().map(|b| IoSlice::new(b)).collect::<Vec<_>>();
+    let slices = [IoSlice::new(&bytes[0]), IoSlice::new(&bytes[1]), IoSlice::new(&bytes[2])];
+    assert_eq!(slices.len(), bytes.len());
     conn.send_request_without_reply(&slices, fds)
 }
 ```
