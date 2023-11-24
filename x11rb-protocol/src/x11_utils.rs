@@ -680,6 +680,14 @@ macro_rules! bitmask_binop {
                 (<$u>::from(self) & flag) != 0
             }
 
+            /// Remove some flags.
+            ///
+            /// All bits that are set in the given flags are removed from the `self` instance, if
+            /// they are present.
+            pub fn remove(self, flags: impl Into<$u>) -> Self {
+                Self::from(self.bits() & !flags.into())
+            }
+
             /// Returns the internal value of the object.
             pub fn bits(self) -> $u {
                 self.0

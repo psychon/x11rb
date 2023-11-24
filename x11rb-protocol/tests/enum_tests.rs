@@ -105,3 +105,28 @@ fn test_intersects() {
     assert!(!mask.intersects(16u32));
     assert!(mask.intersects(20u32));
 }
+
+#[test]
+fn test_remove() {
+    let no_event = EventMask::NO_EVENT;
+    let key_press = EventMask::KEY_PRESS;
+    let button_press = EventMask::BUTTON_PRESS;
+    let exposure = EventMask::EXPOSURE;
+    let key_and_button_press = key_press | button_press;
+
+    assert_eq!(no_event, key_press.remove(key_press));
+    assert_eq!(key_press, key_press.remove(no_event));
+    assert_eq!(key_press, key_press.remove(button_press));
+    assert_eq!(key_press, key_and_button_press.remove(button_press));
+    assert_eq!(key_press, key_and_button_press.remove(button_press));
+    assert_eq!(key_and_button_press, key_and_button_press.remove(exposure));
+
+    assert_eq!(no_event, key_press.remove(1u32));
+    assert_eq!(key_press, key_press.remove(0u32));
+    assert_eq!(key_press, key_press.remove(4u32));
+    assert_eq!(key_press, key_and_button_press.remove(4u32));
+    assert_eq!(
+        key_and_button_press,
+        key_and_button_press.remove(1u32 << 15)
+    );
+}
