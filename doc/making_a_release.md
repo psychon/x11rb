@@ -1,5 +1,4 @@
 ```
-vim doc/generated_code.md  # Update the generated code
 vim doc/changelog.md  # Update the changelog
 vim {x11rb,x11rb-async,x11rb-protocol}/Cargo.toml  # Update version number in all published crates
 vim x11rb/Cargo.toml  # Update version number in x11rb-protocol dependency
