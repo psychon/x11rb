@@ -10,6 +10,7 @@
 #![forbid(unsafe_code)]
 
 use std::path::{Path, PathBuf};
+use std::process::ExitCode;
 
 mod generator;
 
@@ -112,7 +113,7 @@ fn replace_file_if_different(file_path: &Path, data: &[u8]) -> Result<(), Error>
     Ok(())
 }
 
-fn main2() -> Result<u8, Error> {
+fn main() -> Result<ExitCode, Error> {
     let args: Vec<_> = std::env::args_os().collect();
     if args.len() != 5 {
         eprintln!("USAGE:");
@@ -120,7 +121,7 @@ fn main2() -> Result<u8, Error> {
             "    {} <INPUT_DIR> <PROTO_OUTPUT_DIR> <X11RB_OUTPUT_DIR> <ASYNC_OUTPUT_DIR>",
             args[0].to_string_lossy()
         );
-        return Ok(1);
+        return Ok(ExitCode::FAILURE);
     }
     let input_dir_path = Path::new(&args[1]);
     let proto_output_dir_path = Path::new(&args[2]);
@@ -154,10 +155,5 @@ fn main2() -> Result<u8, Error> {
     }
     println!("Code generated successfully");
 
-    Ok(0)
-}
-
-fn main() {
-    let exit_code = main2().unwrap();
-    std::process::exit(i32::from(exit_code));
+    Ok(ExitCode::SUCCESS)
 }

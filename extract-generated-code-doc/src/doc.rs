@@ -5,12 +5,14 @@ use regex::Regex;
 
 use super::Sections;
 
+/// Shorten multi-line doc comments by replacing them with `[SNIP]`
 fn shorten_docs(input: &str) -> Cow<'_, str> {
     static REGEX: OnceLock<Regex> = OnceLock::new();
     let regex = REGEX.get_or_init(|| Regex::new("///.*(\n *///.*)+").unwrap());
     regex.replace_all(input, "/// [SNIP]")
 }
 
+/// Special helper for shortening the very long code for `CreateWindowAux`
 fn shorten_create_window_aux(input: &str) -> String {
     fn regex<'a>(input: &'a str, regex: &str, replacement: &str) -> Cow<'a, str> {
         Regex::new(regex).unwrap().replace_all(input, replacement)
@@ -43,86 +45,126 @@ fn shorten_create_window_aux(input: &str) -> String {
     result.into_owned()
 }
 
+/// Generate the contents of the output file of this pogram
 pub fn generate(proto_xproto: &Sections, x11rb_xproto: &Sections) -> String {
     let ext_trait = Sections::new_from_trait(x11rb_xproto.get_by_needle("pub trait ConnectionExt"));
-    DOCS.replace("{protocol_header}", &proto_xproto.get_range_by_index(..4))
-        .replace(
-            "{protocol_window}",
-            proto_xproto.get_by_needle("pub type Window"),
-        )
-        .replace(
-            "{protocol_point}",
-            proto_xproto.get_by_needle("pub struct Point"),
-        )
-        .replace(
-            "{protocol_depth}",
-            proto_xproto.get_by_needle("pub struct Depth"),
-        )
-        .replace(
-            "{protocol_backing_store}",
-            proto_xproto.get_by_needle("pub struct BackingStore"),
-        )
-        .replace(
-            "{protocol_config_window}",
-            proto_xproto.get_by_needle("pub struct ConfigWindow"),
-        )
-        .replace(
-            "{protocol_client_message_data}",
-            proto_xproto.get_by_needle("pub struct ClientMessageData"),
-        )
-        .replace(
-            "{protocol_key_press_event}",
-            &shorten_docs(proto_xproto.get_by_needle("pub struct KeyPressEvent")),
-        )
-        .replace(
-            "{protocol_request_error}",
-            proto_xproto.get_by_needle("pub const REQUEST_ERROR"),
-        )
-        .replace(
-            "{protocol_no_operation}",
-            proto_xproto.get_by_needle("pub struct NoOperationRequest"),
-        )
-        .replace(
-            "{x11rb_no_operation}",
-            x11rb_xproto.get_by_needle("pub fn no_operation"),
-        )
-        .replace(
-            "{x11rb_no_operation_trait}",
-            &shorten_docs(ext_trait.get_by_needle("fn no_operation")),
-        )
-        .replace(
-            "{protocol_get_input_focus}",
-            &shorten_docs(proto_xproto.get_by_needle("pub struct GetInputFocusRequest")),
-        )
-        .replace(
-            "{protocol_get_input_focus_reply}",
-            &shorten_docs(proto_xproto.get_by_needle("pub struct GetInputFocusReply")),
-        )
-        .replace(
-            "{x11rb_get_input_focus}",
-            x11rb_xproto.get_by_needle("pub fn get_input_focus"),
-        )
-        .replace(
-            "{x11rb_get_input_focus_trait}",
-            &shorten_docs(ext_trait.get_by_needle("fn get_input_focus")),
-        )
-        .replace(
+    let mut result = DOCS.to_string();
+
+    // List of replacements where a given String is inserted directly
+    let other_replacements = [
+        ("{protocol_header}", proto_xproto.get_range_by_index(..4)),
+        (
             "{protocol_create_window_aux}",
-            &shorten_create_window_aux(proto_xproto.get_by_needle("pub struct CreateWindowAux")),
-        )
-        .replace(
-            "{protocol_create_window_request}",
-            &shorten_docs(proto_xproto.get_by_needle("pub struct CreateWindowRequest")),
-        )
-        .replace(
-            "{x11rb_create_window_request}",
-            &shorten_docs(x11rb_xproto.get_by_needle("pub fn create_window")),
-        )
-        .replace(
-            "{x11rb_create_window_request_trait}",
-            &shorten_docs(ext_trait.get_by_needle("fn create_window")),
-        )
+            shorten_create_window_aux(proto_xproto.get_by_needle("pub struct CreateWindowAux")),
+        ),
+        (
+            "{protocol_depth}",
+            proto_xproto.get_by_needle("pub struct Depth").to_string(),
+        ),
+    ];
+    for (keyword, replacement) in other_replacements {
+        result = result.replace(keyword, &replacement);
+    }
+    for (keyword, sections, needle) in SECTION_REPLACEMENTS {
+        let sections = match sections {
+            SectionKind::Proto => proto_xproto,
+            SectionKind::X11rb => x11rb_xproto,
+            SectionKind::ExtTrait => &ext_trait,
+        };
+        result = result.replace(keyword, &shorten_docs(sections.get_by_needle(needle)));
+    }
+    result
 }
+
+enum SectionKind {
+    /// The sections of x11rb-protocol's xproto.rs
+    Proto,
+    /// The sections of x11rb's xproto.rs
+    X11rb,
+    /// The sections of the ConnectionExt trait of x11rb's xproto.rs
+    ExtTrait,
+}
+
+// List of replacements where something is looked up in a Sections instance
+const SECTION_REPLACEMENTS: &[(&str, SectionKind, &str)] = &[
+    ("{protocol_window}", SectionKind::Proto, "pub type Window"),
+    ("{protocol_point}", SectionKind::Proto, "pub struct Point"),
+    (
+        "{protocol_backing_store}",
+        SectionKind::Proto,
+        "pub struct BackingStore",
+    ),
+    (
+        "{protocol_config_window}",
+        SectionKind::Proto,
+        "pub struct ConfigWindow",
+    ),
+    (
+        "{protocol_client_message_data}",
+        SectionKind::Proto,
+        "pub struct ClientMessageData",
+    ),
+    (
+        "{protocol_key_press_event}",
+        SectionKind::Proto,
+        "pub struct KeyPressEvent",
+    ),
+    (
+        "{protocol_request_error}",
+        SectionKind::Proto,
+        "pub const REQUEST_ERROR",
+    ),
+    (
+        "{protocol_no_operation}",
+        SectionKind::Proto,
+        "pub struct NoOperationRequest",
+    ),
+    (
+        "{x11rb_no_operation}",
+        SectionKind::X11rb,
+        "pub fn no_operation",
+    ),
+    (
+        "{x11rb_no_operation_trait}",
+        SectionKind::ExtTrait,
+        "fn no_operation",
+    ),
+    (
+        "{protocol_get_input_focus}",
+        SectionKind::Proto,
+        "pub struct GetInputFocusRequest",
+    ),
+    (
+        "{protocol_get_input_focus_reply}",
+        SectionKind::Proto,
+        "pub struct GetInputFocusReply",
+    ),
+    (
+        "{x11rb_get_input_focus}",
+        SectionKind::X11rb,
+        "pub fn get_input_focus",
+    ),
+    (
+        "{x11rb_get_input_focus_trait}",
+        SectionKind::ExtTrait,
+        "fn get_input_focus",
+    ),
+    (
+        "{protocol_create_window_request}",
+        SectionKind::Proto,
+        "pub struct CreateWindowRequest",
+    ),
+    (
+        "{x11rb_create_window_request}",
+        SectionKind::X11rb,
+        "pub fn create_window",
+    ),
+    (
+        "{x11rb_create_window_request_trait}",
+        SectionKind::ExtTrait,
+        "fn create_window",
+    ),
+];
 
 static DOCS: &str = r#"# Examples of the generated code
 
