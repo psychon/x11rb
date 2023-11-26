@@ -1,2 +1,11 @@
 [workspace]
-members = ["generator", "xcbgen-rs", "x11rb-protocol", "x11rb", "x11rb-async", "cairo-example", "xtrace-example", "extract-generated-code-doc"]
+members = [
+    "generator",
+    "extract-generated-code-doc",
+    "xcbgen-rs",
+    "x11rb-protocol",
+    "x11rb",
+    "x11rb-async",
+    "cairo-example",
+    "xtrace-example",
+]
