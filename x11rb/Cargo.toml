@@ -28,7 +28,7 @@ gethostname = "0.4"
 
 [dev-dependencies]
 gethostname = "0.4"
-polling = "2.8.0"
+polling = "3.3.1"
 tracing-subscriber = "0.3"
 
 [features]
