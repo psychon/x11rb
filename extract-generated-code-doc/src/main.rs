@@ -11,6 +11,7 @@
 
 use std::io::Error as IoError;
 use std::path::Path;
+use std::process::ExitCode;
 
 pub mod doc;
 
@@ -72,7 +73,7 @@ fn load_sections(path: &Path) -> Result<Sections, IoError> {
     )?))
 }
 
-fn main2() -> Result<u8, IoError> {
+fn main() -> Result<ExitCode, IoError> {
     let args: Vec<_> = std::env::args_os().collect();
     if args.len() != 4 {
         eprintln!("USAGE:");
@@ -80,7 +81,7 @@ fn main2() -> Result<u8, IoError> {
             "    {} <OUTPUT_FILE> <PROTO_XPROTO_FILE> <X11RB_XPROTO_FILE>",
             args[0].to_string_lossy()
         );
-        return Ok(1);
+        return Ok(ExitCode::FAILURE);
     }
     let output_file = Path::new(&args[1]);
     let proto_xproto = load_sections(Path::new(&args[2]))?;
@@ -89,9 +90,5 @@ fn main2() -> Result<u8, IoError> {
     let output = doc::generate(&proto_xproto, &x11rb_xproto);
     std::fs::write(output_file, output)?;
 
-    Ok(0)
-}
-
-fn main() -> Result<(), IoError> {
-    std::process::exit(i32::from(main2()?));
+    Ok(ExitCode::SUCCESS)
 }
