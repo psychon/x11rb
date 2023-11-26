@@ -1,3 +1,4 @@
+use std::num::NonZeroUsize;
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
 use polling::{Event as PollingEvent, Poller};
@@ -173,7 +174,11 @@ fn poll_with_timeout(
     timeout: Duration,
 ) -> Result<(), Box<dyn std::error::Error>> {
     // Add interest in the connection's stream.
-    poller.add(conn.stream(), PollingEvent::readable(1))?;
+    unsafe {
+        // SAFETY: The guard bellow guarantees that the source will be removed
+        // from the poller.
+        poller.add(conn.stream(), PollingEvent::readable(1))?;
+    }
 
     // Remove it if we time out.
     let _guard = CallOnDrop(|| {
@@ -181,14 +186,14 @@ fn poll_with_timeout(
     });
 
     // Wait for events.
-    let mut event = Vec::with_capacity(1);
+    let mut event = polling::Events::with_capacity(NonZeroUsize::new(1).unwrap());
     let target = Instant::now() + timeout;
     loop {
         let remaining = target.saturating_duration_since(Instant::now());
         poller.wait(&mut event, Some(remaining))?;
 
         // If we received an event, we're done.
-        if event.contains(&PollingEvent::readable(1)) {
+        if event.iter().any(|event| event.readable) {
             return Ok(());
         }
 
