@@ -1,3 +1,62 @@
+# Version 0.13.0 (2023-XX-XX)
+
+New features:
+* A bitmask enum in the generates code has new methods `bits()` for conversion
+  to integer and `remove()` for removing certain bits.
+* Update our bundled xcb-proto version. This update brings new documentation and
+  support for newer versions of the DPMS and Present extensions.
+* Update `$DISPLAY` parsing to match new behaviour in libxcb 1.16.
+* Some variant of `x11rb_protocol::parse_display` is now also available in
+  `no_std` mode.
+* Better error message if `$DISPLAY` parsing fails.
+* Add `Image::into_owned()` to get an Image instance with `'static`.
+* Change `Image::put()` to convert the image to the X11 server's native
+  representation before uploading.
+* Implement x11rb's `RequestConnection` for `&C`, `&mut C`, `Box<C>`, `Arc<C>`,
+  `Rc<C>` and `Cow<'_, C>` where `C: RequestConnection`.
+
+Fixes:
+* Fix broken link to x11rb in documentation of x11rb-async.
+* Strip leading whitespace from documentation comments in code generator.
+* Fix the `dl-libxcb` feature on OpenBSD. There is no `libxcb.so.2` on this
+  system and we can simply ask for `libxcb.so` to be loaded.
+* x11rb-async always needed at least tracing 0.1.33, but incorrectly declared
+  compatibility with all 0.1 versions.
+
+Breaking changes:
+* Indicate not present properties in x11rb's `WmClass`, `WmSizeHints`, and
+  `WmHints` helpers by introducing an `Option` in their return value.
+  Previously, missing properties were reported as a parsing error.
+* Avoid a `Vec` in some places in x11rb-protocol by using arrays instead. This
+  affects the return value of a request's `serialize()` function, but also some
+  internal code.
+* Remove unused `read_exact()` method in x11rb's `Stream` trait.
+* Replace use of nix with rustix and implement io-safety. This e.g. means
+  that some types no longer implement `PartialEq` due to rustix's behaviour. FD
+  passing now uses `std::os::unix::io::OwnedFd`.
+* MSRV was bumped from Rust 1.56 to 1.63 for rustix 0.38.
+* Change some functions in `x11rb::rust_connection::stream::DefaultStream` to
+  also return the address that a connection was established to.
+* Change wrapper types like `WindowWrapper` not to require a reference to a
+  connection, but to accept any connection type directly. Due to the new feature
+  mentioned above, this allows to use these wrappers e.g. with `Arc<C>`.
+* Types in x11rb-protocol now implement less commonly used traits like
+  `PartialEq`, `Eq`, `PartialOrd`, `Ord`, and `Hash` only if the new
+  `extra-traits` feature is enabled. The `Debug` impl only produces the name of
+  the type and not its contents in this case. This change improves compile times
+  of the crate.
+* Parsing of requests with the `R::try_parse_request` function is now gated
+  behind the new `request-parsing` feature. This change improves compile times.
+
+Minor changes:
+* Update dependencies.
+* Enable all features when building for docs.rs.
+* Fix some lints in examples.
+* Change some log calls from info to debug.
+* Drop gethostname dependencies on `unix` by using rustix instead.
+* Various changes to please clippy.
+* Improve docs front pages.
+
 # Version 0.12.0 (2023-05-27)
 
 New features:
