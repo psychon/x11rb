@@ -51,7 +51,7 @@ pub type Fp1616 = i32;
 /// component and the lower 16 bits are a fractional part. This function
 /// converts this representation to a f32.
 pub fn fp1616_as_f32(input: Fp1616) -> f32 {
-    (input as f32) / ((1u32 << 16) as f32)
+    (input as f32) / 2f32.powi(16)
 }
 /// Convert a floating point number to a [Fp1616].
 ///
@@ -59,7 +59,7 @@ pub fn fp1616_as_f32(input: Fp1616) -> f32 {
 /// component and the lower 16 bits are a fractional part. This function
 /// converts this representation to a f32.
 pub fn f32_as_fp1616(input: f32) -> Fp1616 {
-    (input * ((1u32 << 16) as f32)) as _
+    (input * 2f32.powi(16)) as _
 }
 
 #[derive(Clone, Copy, Default)]
@@ -106,7 +106,7 @@ impl Fp3232 {
     /// A [Fp3232] contains a 32 bits integer part and another 32 bits for a
     /// fractional component. This function converts this representation to a f64.
     pub fn as_f64(&self) -> f64 {
-        (self.integral as f64) + (self.frac as f64) / ((1u64 << 32) as f64)
+        (self.integral as f64) + (self.frac as f64) / 2f64.powi(32)
     }
     /// Convert from a floating point number.
     ///
@@ -116,7 +116,7 @@ impl Fp3232 {
     /// The behaviour for values greater or equal to `1^31` or less or equal to
     /// `-1^31` is unspecified.
     pub fn from_f64(input: f64) -> Self {
-        let scaled = input * ((1u64 << 32) as f64);
+        let scaled = input * 2f64.powi(32);
         let converted = scaled as i64;
         let integral = converted >> 32;
         let frac = converted - (integral << 32);

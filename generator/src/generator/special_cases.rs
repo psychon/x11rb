@@ -200,7 +200,7 @@ pub(super) fn handle_struct(struct_def: &xcbdefs::StructDef, out: &mut Output) {
             out.indented(|out| {
                 outln!(
                     out,
-                    "(self.integral as f64) + (self.frac as f64) / ((1u64 << 32) as f64)"
+                    "(self.integral as f64) + (self.frac as f64) / 2f64.powi(32)"
                 );
             });
             outln!(out, "}}");
@@ -222,7 +222,7 @@ pub(super) fn handle_struct(struct_def: &xcbdefs::StructDef, out: &mut Output) {
             outln!(out, "/// `-1^31` is unspecified.");
             outln!(out, "pub fn from_f64(input: f64) -> Self {{");
             out.indented(|out| {
-                outln!(out, "let scaled = input * ((1u64 << 32) as f64);");
+                outln!(out, "let scaled = input * 2f64.powi(32);");
                 outln!(out, "let converted = scaled as i64;");
                 outln!(out, "let integral = converted >> 32;");
                 outln!(out, "let frac = converted - (integral << 32);");
@@ -264,7 +264,7 @@ pub(super) fn handle_type_alias(type_alias: &xcbdefs::TypeAliasDef, out: &mut Ou
         outln!(out, "/// converts this representation to a f32.");
         outln!(out, "pub fn fp1616_as_f32(input: Fp1616) -> f32 {{");
         out.indented(|out| {
-            outln!(out, "(input as f32) / ((1u32 << 16) as f32)");
+            outln!(out, "(input as f32) / 2f32.powi(16)");
         });
         outln!(out, "}}");
 
@@ -281,7 +281,7 @@ pub(super) fn handle_type_alias(type_alias: &xcbdefs::TypeAliasDef, out: &mut Ou
         outln!(out, "/// converts this representation to a f32.");
         outln!(out, "pub fn f32_as_fp1616(input: f32) -> Fp1616 {{");
         out.indented(|out| {
-            outln!(out, "(input * ((1u32 << 16) as f32)) as _");
+            outln!(out, "(input * 2f32.powi(16)) as _");
         });
         outln!(out, "}}");
     }
