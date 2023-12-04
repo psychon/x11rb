@@ -45,6 +45,14 @@ pub type KeyCode = u8;
 pub type DeviceId = u16;
 
 pub type Fp1616 = i32;
+/// Convert a [Fp1616] to a floating point number.
+///
+/// A [Fp1616] is a 32 bit integer where the upper 16 bits represent an integer
+/// component and the lower 16 bits are a fractional part. This function
+/// converts this representation to a f32.
+pub fn fp1616_as_f32(input: Fp1616) -> f32 {
+    (input as f32) / ((1u32 << 16) as f32)
+}
 
 #[derive(Clone, Copy, Default)]
 #[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
@@ -82,6 +90,15 @@ impl Serialize for Fp3232 {
         bytes.reserve(8);
         self.integral.serialize_into(bytes);
         self.frac.serialize_into(bytes);
+    }
+}
+impl Fp3232 {
+    /// Convert to a floating point number.
+    ///
+    /// A [Fp3232] contains a 32 bits integer part and another 32 bits for a
+    /// fractional component. This function converts this representation to a f64.
+    pub fn as_f64(&self) -> f64 {
+        (self.integral as f64) + (self.frac as f64) / ((1u64 << 32) as f64)
     }
 }
 

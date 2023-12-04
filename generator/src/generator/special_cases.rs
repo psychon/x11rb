@@ -180,3 +180,54 @@ pub(super) fn handle_event(
         outln!(out, "}}");
     }
 }
+
+pub(super) fn handle_struct(struct_def: &xcbdefs::StructDef, out: &mut Output) {
+    let ns = struct_def.namespace.upgrade().unwrap();
+    if struct_def.name == "FP3232" && ns.header == "xinput" {
+        outln!(out, "impl Fp3232 {{");
+        out.indented(|out| {
+            outln!(out, "/// Convert to a floating point number.");
+            outln!(out, "///");
+            outln!(
+                out,
+                "/// A [Fp3232] contains a 32 bits integer part and another 32 bits for a"
+            );
+            outln!(
+                out,
+                "/// fractional component. This function converts this representation to a f64."
+            );
+            outln!(out, "pub fn as_f64(&self) -> f64 {{");
+            out.indented(|out| {
+                outln!(
+                    out,
+                    "(self.integral as f64) + (self.frac as f64) / ((1u64 << 32) as f64)"
+                );
+            });
+            outln!(out, "}}");
+        });
+        outln!(out, "}}");
+    }
+}
+
+pub(super) fn handle_type_alias(type_alias: &xcbdefs::TypeAliasDef, out: &mut Output) {
+    let ns = type_alias.namespace.upgrade().unwrap();
+    if type_alias.new_name == "FP1616" && ns.header == "xinput" {
+        // This is a free function since Fp1616 is just a type alias for i32.
+        outln!(out, "/// Convert a [Fp1616] to a floating point number.");
+        outln!(out, "///");
+        outln!(
+            out,
+            "/// A [Fp1616] is a 32 bit integer where the upper 16 bits represent an integer"
+        );
+        outln!(
+            out,
+            "/// component and the lower 16 bits are a fractional part. This function"
+        );
+        outln!(out, "/// converts this representation to a f32.");
+        outln!(out, "pub fn fp1616_as_f32(input: Fp1616) -> f32 {{");
+        out.indented(|out| {
+            outln!(out, "(input as f32) / ((1u32 << 16) as f32)");
+        });
+        outln!(out, "}}");
+    }
+}

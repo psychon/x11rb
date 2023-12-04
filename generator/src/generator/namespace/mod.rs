@@ -411,6 +411,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             None,
             out,
         );
+        special_cases::handle_struct(struct_def, out);
 
         outln!(out, "");
     }
@@ -925,6 +926,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             rust_new_name,
             self.type_to_rust_type(type_alias_def.old_name.get_resolved()),
         );
+        special_cases::handle_type_alias(type_alias_def, out);
         outln!(out, "");
     }
 
