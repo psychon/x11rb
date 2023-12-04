@@ -204,6 +204,43 @@ pub(super) fn handle_struct(struct_def: &xcbdefs::StructDef, out: &mut Output) {
                 );
             });
             outln!(out, "}}");
+            outln!(out, "/// Convert from a floating point number.");
+            outln!(out, "///");
+            outln!(
+                out,
+                "/// A [Fp3232] contains a 32 bits integer part and another 32 bits for a"
+            );
+            outln!(
+                out,
+                "/// fractional component. This function converts a f64 to this representation."
+            );
+            outln!(out, "///");
+            outln!(
+                out,
+                "/// The behaviour for values greater or equal to `1^31` or less or equal to"
+            );
+            outln!(out, "/// `-1^31` is unspecified.");
+            outln!(out, "pub fn from_f64(input: f64) -> Self {{");
+            out.indented(|out| {
+                outln!(out, "let scaled = input * ((1u64 << 32) as f64);");
+                outln!(out, "let converted = scaled as i64;");
+                outln!(out, "let integral = converted >> 32;");
+                outln!(out, "let frac = converted - (integral << 32);");
+                outln!(out, "let integral = if frac >= 0 {{");
+                out.indented(|out| {
+                    outln!(out, "integral");
+                });
+                outln!(out, "}} else {{");
+                out.indented(|out| {
+                    outln!(out, "integral - 1");
+                });
+                outln!(out, "}};");
+                outln!(out, "let frac = converted - (integral << 32);");
+                outln!(out, "let integral = i32::try_from(integral).unwrap();");
+                outln!(out, "let frac = u32::try_from(frac).unwrap();");
+                outln!(out, "Self {{ integral, frac }}");
+            });
+            outln!(out, "}}");
         });
         outln!(out, "}}");
     }
@@ -212,7 +249,8 @@ pub(super) fn handle_struct(struct_def: &xcbdefs::StructDef, out: &mut Output) {
 pub(super) fn handle_type_alias(type_alias: &xcbdefs::TypeAliasDef, out: &mut Output) {
     let ns = type_alias.namespace.upgrade().unwrap();
     if type_alias.new_name == "FP1616" && ns.header == "xinput" {
-        // This is a free function since Fp1616 is just a type alias for i32.
+        // These are free function since Fp1616 is just a type alias for i32.
+
         outln!(out, "/// Convert a [Fp1616] to a floating point number.");
         outln!(out, "///");
         outln!(
@@ -227,6 +265,23 @@ pub(super) fn handle_type_alias(type_alias: &xcbdefs::TypeAliasDef, out: &mut Ou
         outln!(out, "pub fn fp1616_as_f32(input: Fp1616) -> f32 {{");
         out.indented(|out| {
             outln!(out, "(input as f32) / ((1u32 << 16) as f32)");
+        });
+        outln!(out, "}}");
+
+        outln!(out, "/// Convert a floating point number to a [Fp1616].");
+        outln!(out, "///");
+        outln!(
+            out,
+            "/// A [Fp1616] is a 32 bit integer where the upper 16 bits represent an integer"
+        );
+        outln!(
+            out,
+            "/// component and the lower 16 bits are a fractional part. This function"
+        );
+        outln!(out, "/// converts this representation to a f32.");
+        outln!(out, "pub fn f32_as_fp1616(input: f32) -> Fp1616 {{");
+        out.indented(|out| {
+            outln!(out, "(input * ((1u32 << 16) as f32)) as _");
         });
         outln!(out, "}}");
     }
