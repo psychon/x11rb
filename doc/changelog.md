@@ -1,4 +1,4 @@
-# Version 0.13.0 (2023-XX-XX)
+# Version 0.13.0 (2023-12-09)
 
 New features:
 * A bitmask enum in the generates code has new methods `bits()` for conversion
