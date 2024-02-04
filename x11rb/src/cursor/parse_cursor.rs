@@ -15,7 +15,7 @@ const IMAGE_MAX_SIZE: u16 = 0x7fff;
 #[derive(Debug)]
 pub(crate) enum Error {
     /// An I/O error occurred
-    Io(std::io::Error),
+    Io,
 
     /// The file did not begin with the expected magic
     InvalidMagic,
@@ -34,8 +34,8 @@ pub(crate) enum Error {
 }
 
 impl From<std::io::Error> for Error {
-    fn from(value: std::io::Error) -> Self {
-        Error::Io(value)
+    fn from(_: std::io::Error) -> Self {
+        Error::Io
     }
 }
 
@@ -191,7 +191,7 @@ pub(crate) fn parse_cursor<R: Read + Seek>(
 #[cfg(test)]
 mod test {
     use super::{find_best_size, parse_cursor, Error, Image, TocEntry, IMAGE_TYPE};
-    use std::io::{Cursor, ErrorKind};
+    use std::io::Cursor;
 
     #[test]
     fn read_3x5_image() {
@@ -320,7 +320,7 @@ mod test {
     fn read_image_too_short() {
         let data = [];
         match Image::read(&mut Cursor::new(&data[..]), IMAGE_TYPE, 4) {
-            Err(Error::Io(ref e)) if e.kind() == ErrorKind::UnexpectedEof => {}
+            Err(Error::Io) => {}
             r => panic!("Unexpected result {:?}", r),
         }
     }
@@ -380,7 +380,7 @@ mod test {
     fn parse_cursor_too_short() {
         let data = [];
         match parse_cursor(&mut Cursor::new(&data[..]), 10) {
-            Err(Error::Io(ref e)) if e.kind() == ErrorKind::UnexpectedEof => {}
+            Err(Error::Io) => {}
             r => panic!("Unexpected result {:?}", r),
         }
     }
