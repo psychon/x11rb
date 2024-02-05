@@ -1,5 +1,8 @@
-use std::{collections::HashMap, io::IoSlice};
-use x11rb::{
+use ::std::{
+    collections::HashMap, io::IoSlice, option::Option as RealOption, result::Result as RealResult,
+    vec::Vec as RealVec,
+};
+use ::x11rb::{
     atom_manager,
     connection::{
         BufWithFds, DiscardMode, ReplyOrError, RequestConnection, RequestKind, SequenceNumber,
@@ -10,6 +13,19 @@ use x11rb::{
     utils::RawFdContainer,
     x11_utils::{ExtensionInformation, Serialize, TryParse, TryParseFd},
 };
+
+// Just to be annoying, overwrite some standard types.
+// We want to make sure atom_manager! does not use these directly.
+mod std {}
+mod x11rb {}
+#[allow(dead_code)]
+type Vec = ();
+#[allow(dead_code)]
+type Result = ();
+#[allow(dead_code)]
+type PhantomData = ();
+#[allow(dead_code)]
+type Option = ();
 
 atom_manager! {
     Atoms: AtomsCookies {
@@ -24,21 +40,21 @@ struct AtomFakeConnection {
     // Mapping from byte string to the corresponding atom value and sequence number.
     // If no entry is found, sending the InternAtom request fails.
     // If the entry does not fit into u16, fetching the reply fails.
-    atoms_and_cookies: HashMap<Vec<u8>, u32>,
+    atoms_and_cookies: HashMap<RealVec<u8>, u32>,
 }
 
 impl RequestConnection for AtomFakeConnection {
-    type Buf = Vec<u8>;
+    type Buf = RealVec<u8>;
 
     fn send_request_with_reply<R>(
         &self,
         bufs: &[IoSlice],
-        _fds: Vec<RawFdContainer>,
-    ) -> Result<Cookie<Self, R>, ConnectionError>
+        _fds: RealVec<RawFdContainer>,
+    ) -> RealResult<Cookie<Self, R>, ConnectionError>
     where
         R: TryParse,
     {
-        let bytes: Vec<u8> = bufs.iter().flat_map(|buf| buf.iter().copied()).collect();
+        let bytes: RealVec<u8> = bufs.iter().flat_map(|buf| buf.iter().copied()).collect();
         // request type and only-if-exists flag
         assert_eq!(bytes[..2], [INTERN_ATOM_REQUEST, 0]);
         // We ignore the length field
@@ -55,8 +71,8 @@ impl RequestConnection for AtomFakeConnection {
     fn send_request_with_reply_with_fds<R>(
         &self,
         _bufs: &[IoSlice],
-        _fds: Vec<RawFdContainer>,
-    ) -> Result<CookieWithFds<Self, R>, ConnectionError>
+        _fds: RealVec<RawFdContainer>,
+    ) -> RealResult<CookieWithFds<Self, R>, ConnectionError>
     where
         R: TryParseFd,
     {
@@ -66,8 +82,8 @@ impl RequestConnection for AtomFakeConnection {
     fn send_request_without_reply(
         &self,
         _bufs: &[IoSlice],
-        _fds: Vec<RawFdContainer>,
-    ) -> Result<VoidCookie<Self>, ConnectionError> {
+        _fds: RealVec<RawFdContainer>,
+    ) -> RealResult<VoidCookie<Self>, ConnectionError> {
         unimplemented!()
     }
 
@@ -78,21 +94,21 @@ impl RequestConnection for AtomFakeConnection {
     fn prefetch_extension_information(
         &self,
         _extension_name: &'static str,
-    ) -> Result<(), ConnectionError> {
+    ) -> RealResult<(), ConnectionError> {
         unimplemented!();
     }
 
     fn extension_information(
         &self,
         _extension_name: &'static str,
-    ) -> Result<Option<ExtensionInformation>, ConnectionError> {
+    ) -> RealResult<RealOption<ExtensionInformation>, ConnectionError> {
         unimplemented!()
     }
 
     fn wait_for_reply_or_raw_error(
         &self,
         sequence: SequenceNumber,
-    ) -> Result<ReplyOrError<Vec<u8>>, ConnectionError> {
+    ) -> RealResult<ReplyOrError<RealVec<u8>>, ConnectionError> {
         let sequence_u16 = match u16::try_from(sequence) {
             Ok(value) => value,
             Err(_) => return Err(ConnectionError::UnsupportedExtension),
@@ -110,21 +126,21 @@ impl RequestConnection for AtomFakeConnection {
     fn wait_for_reply(
         &self,
         _sequence: SequenceNumber,
-    ) -> Result<Option<Vec<u8>>, ConnectionError> {
+    ) -> RealResult<RealOption<RealVec<u8>>, ConnectionError> {
         unimplemented!()
     }
 
     fn wait_for_reply_with_fds_raw(
         &self,
         _sequence: SequenceNumber,
-    ) -> Result<ReplyOrError<BufWithFds<Vec<u8>>, Vec<u8>>, ConnectionError> {
+    ) -> RealResult<ReplyOrError<BufWithFds<RealVec<u8>>, RealVec<u8>>, ConnectionError> {
         unimplemented!()
     }
 
     fn check_for_raw_error(
         &self,
         _sequence: SequenceNumber,
-    ) -> Result<Option<Vec<u8>>, ConnectionError> {
+    ) -> RealResult<RealOption<RealVec<u8>>, ConnectionError> {
         unimplemented!()
     }
 
@@ -136,11 +152,11 @@ impl RequestConnection for AtomFakeConnection {
         unimplemented!()
     }
 
-    fn parse_error(&self, _error: &[u8]) -> Result<x11rb::x11_utils::X11Error, ParseError> {
+    fn parse_error(&self, _error: &[u8]) -> RealResult<::x11rb::x11_utils::X11Error, ParseError> {
         unimplemented!()
     }
 
-    fn parse_event(&self, _event: &[u8]) -> Result<x11rb::protocol::Event, ParseError> {
+    fn parse_event(&self, _event: &[u8]) -> RealResult<::x11rb::protocol::Event, ParseError> {
         unimplemented!()
     }
 }

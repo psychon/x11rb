@@ -97,8 +97,8 @@ macro_rules! atom_manager {
         #[derive(Debug)]
         $(#[$cookie_meta])*
         $vis struct $cookie_name<'a, C: $crate::protocol::xproto::ConnectionExt> {
-            __private_phantom: std::marker::PhantomData<&'a C>,
-            __private_cookies: Vec<$crate::cookie::Cookie<'a, C, $crate::protocol::xproto::InternAtomReply>>,
+            __private_phantom: ::std::marker::PhantomData<&'a C>,
+            __private_cookies: ::std::vec::Vec<$crate::cookie::Cookie<'a, C, $crate::protocol::xproto::InternAtomReply>>,
         }
 
         // Replies
@@ -118,9 +118,10 @@ macro_rules! atom_manager {
                 let names = [
                     $($crate::__atom_manager_atom_value!($field_name$(: $atom_value)?),)*
                 ];
-                let cookies: Result<Vec<_>, _> = names.into_iter().map(|name| _conn.intern_atom(false, name)).collect();
+                let cookies: ::std::result::Result<::std::vec::Vec<_>, _>
+                    = names.into_iter().map(|name| _conn.intern_atom(false, name)).collect();
                 Ok($cookie_name {
-                    __private_phantom: std::marker::PhantomData,
+                    __private_phantom: ::std::marker::PhantomData,
                     __private_cookies: cookies?,
                 })
             }
