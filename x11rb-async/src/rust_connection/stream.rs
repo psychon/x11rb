@@ -6,10 +6,10 @@ use std::pin::Pin;
 use std::task::{Context, Poll};
 
 #[cfg(unix)]
-use std::os::unix::io::{AsRawFd as AsRaw, RawFd};
+use std::os::unix::io::{AsFd, AsRawFd as AsRaw, RawFd};
 
 #[cfg(windows)]
-use std::os::windows::io::{AsRawSocket as AsRaw, RawSocket};
+use std::os::windows::io::{AsRawSocket as AsRaw, AsSocket as AsFd, RawSocket};
 
 use async_io::Async;
 use futures_lite::future;
@@ -46,7 +46,7 @@ pub struct StreamAdaptor<S> {
     inner: Async<S>,
 }
 
-impl<S: AsRaw> StreamAdaptor<S> {
+impl<S: AsFd> StreamAdaptor<S> {
     /// Create a new `StreamAdaptor` from a stream.
     pub fn new(stream: S) -> io::Result<Self> {
         Async::new(stream).map(|inner| Self { inner })
@@ -60,7 +60,12 @@ impl<S> StreamAdaptor<S> {
     }
 
     /// Get a mutable reference to the inner stream.
-    pub fn get_mut(&mut self) -> &mut S {
+    ///
+    /// # Safety
+    ///
+    /// This function inherits its unsafety from [`async_io::Async::get_mut`]. This means that the
+    /// underlying I/O source must not be dropped using this function.
+    pub unsafe fn get_mut(&mut self) -> &mut S {
         self.inner.get_mut()
     }
 
