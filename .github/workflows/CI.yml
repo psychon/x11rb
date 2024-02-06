@@ -19,7 +19,7 @@ jobs:
   code_gen:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - uses: dtolnay/rust-toolchain@stable
     - name: Clear src/protocol directories in x11rb, x11rb-async and x11rb-protocol
       run: rm -rf x11rb/src/protocol/ x11rb-async/src/protocol/ x11rb-protocol/src/protocol/
@@ -31,7 +31,7 @@ jobs:
   clippy:
      runs-on: ubuntu-latest
      steps:
-       - uses: actions/checkout@v3
+       - uses: actions/checkout@v4
        - name: Install clippy
          uses: dtolnay/rust-toolchain@beta
          with:
@@ -46,7 +46,7 @@ jobs:
   clippy-rustfmt:
      runs-on: ubuntu-latest
      steps:
-       - uses: actions/checkout@v3
+       - uses: actions/checkout@v4
        - name: Install rustfmt and clippy
          uses: dtolnay/rust-toolchain@stable
          with:
@@ -85,7 +85,7 @@ jobs:
           - rust: nightly
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - uses: dtolnay/rust-toolchain@master
       with:
         toolchain: ${{ matrix.rust }}
@@ -165,7 +165,7 @@ jobs:
   msrv-check:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - uses: dtolnay/rust-toolchain@1.63.0
 
     # build
@@ -186,7 +186,7 @@ jobs:
       # used to test big endian and lack of 64-bit atomics
       CROSS_TARGET: powerpc-unknown-linux-gnu
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - uses: dtolnay/rust-toolchain@stable
     - name: Install cross rust
       run: rustup target add "$CROSS_TARGET"
@@ -203,7 +203,7 @@ jobs:
   non-linux-unix-test:
     runs-on: macos-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - uses: dtolnay/rust-toolchain@stable
     - name: Run tests
       run: cargo test --verbose --package x11rb --features "$MOST_FEATURES"
@@ -215,7 +215,7 @@ jobs:
       X11RB_EXAMPLE_TIMEOUT: 1
     steps:
     - run: git config --global core.autocrlf input
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - uses: dtolnay/rust-toolchain@stable
 
     - uses: cygwin/cygwin-install-action@v4
