@@ -16,10 +16,10 @@ keywords = ["xcb", "X11", "async"]
 
 [dependencies]
 async-io = "1.13.0"
-async-lock = "2.8.0"
-blocking = "1.3.0"
-event-listener = "2.5.3"
-futures-lite = "1"
+async-lock = "3.3"
+blocking = "1.5"
+event-listener = "5.0"
+futures-lite = "2.2"
 tracing = { version = "0.1.33", default-features = false }
 x11rb = { version = "0.13.0", path = "../x11rb", default-features = false }
 x11rb-protocol = { version = "0.13.0", default-features = false, features = ["std"], path = "../x11rb-protocol" }
@@ -96,7 +96,7 @@ allow-unsafe-code = ["x11rb/allow-unsafe-code"]
 all-features = true
 
 [dev-dependencies]
-async-executor = "1.5.0"
+async-executor = "1.8"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 [target.'cfg(unix)'.dev-dependencies.rustix]
