@@ -6,10 +6,10 @@ use std::pin::Pin;
 use std::task::{Context, Poll};
 
 #[cfg(unix)]
-use std::os::unix::io::{AsFd, AsRawFd as AsRaw, RawFd};
+use std::os::unix::io::AsFd;
 
 #[cfg(windows)]
-use std::os::windows::io::{AsRawSocket as AsRaw, AsSocket as AsFd, RawSocket};
+use std::os::windows::io::AsSocket as AsFd;
 
 use async_io::Async;
 use futures_lite::future;
@@ -50,40 +50,6 @@ impl<S: AsFd> StreamAdaptor<S> {
     /// Create a new `StreamAdaptor` from a stream.
     pub fn new(stream: S) -> io::Result<Self> {
         Async::new(stream).map(|inner| Self { inner })
-    }
-}
-
-impl<S> StreamAdaptor<S> {
-    /// Get a reference to the inner stream.
-    pub fn get_ref(&self) -> &S {
-        self.inner.get_ref()
-    }
-
-    /// Get a mutable reference to the inner stream.
-    ///
-    /// # Safety
-    ///
-    /// This function inherits its unsafety from [`async_io::Async::get_mut`]. This means that the
-    /// underlying I/O source must not be dropped using this function.
-    pub unsafe fn get_mut(&mut self) -> &mut S {
-        self.inner.get_mut()
-    }
-
-    /// Consume this adaptor and return the inner stream.
-    pub fn into_inner(self) -> io::Result<S> {
-        self.inner.into_inner()
-    }
-}
-
-impl<S: AsRaw> AsRaw for StreamAdaptor<S> {
-    #[cfg(unix)]
-    fn as_raw_fd(&self) -> RawFd {
-        self.inner.get_ref().as_raw_fd()
-    }
-
-    #[cfg(windows)]
-    fn as_raw_socket(&self) -> RawSocket {
-        self.inner.get_ref().as_raw_socket()
     }
 }
 
@@ -143,11 +109,11 @@ impl<S: X11rbStream> X11rbStream for StreamAdaptor<S> {
     }
 
     fn read(&self, buf: &mut [u8], fd_storage: &mut Vec<RawFdContainer>) -> io::Result<usize> {
-        self.get_ref().read(buf, fd_storage)
+        self.inner.get_ref().read(buf, fd_storage)
     }
 
     fn write(&self, buf: &[u8], fds: &mut Vec<RawFdContainer>) -> io::Result<usize> {
-        self.get_ref().write(buf, fds)
+        self.inner.get_ref().write(buf, fds)
     }
 
     fn write_vectored(
@@ -155,6 +121,6 @@ impl<S: X11rbStream> X11rbStream for StreamAdaptor<S> {
         bufs: &[io::IoSlice<'_>],
         fds: &mut Vec<RawFdContainer>,
     ) -> io::Result<usize> {
-        self.get_ref().write_vectored(bufs, fds)
+        self.inner.get_ref().write_vectored(bufs, fds)
     }
 }
