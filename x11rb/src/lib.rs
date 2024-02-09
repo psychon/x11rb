@@ -130,6 +130,7 @@
     trivial_numeric_casts,
     unreachable_pub,
     unused_import_braces,
+    unused_must_use,
     unused_results,
     clippy::cast_lossless,
     clippy::needless_pass_by_value,
