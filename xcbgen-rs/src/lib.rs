@@ -13,7 +13,13 @@
     unreachable_pub,
     unused_import_braces,
     unused_must_use,
-    unused_qualifications
+    unused_qualifications,
+    missing_copy_implementations,
+    missing_debug_implementations,
+    rustdoc::private_doc_tests,
+    single_use_lifetimes,
+    clippy::cast_lossless,
+    clippy::needless_pass_by_value
 )]
 #![forbid(unsafe_code)]
 

@@ -475,7 +475,7 @@ pub struct EnumItem {
 }
 
 /// The value of an enum item
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub enum EnumValue {
     /// A `<value>`.
     Value(u32),
