@@ -41,6 +41,19 @@
 //! * `extra-traits`: Implement extra traits for X11 types. This improves the output of the `Debug`
 //!   impl and adds `PartialEq`, `Eq`, `PartialOrd`, `Ord`, and `Hash` where possible.
 
+#![forbid(
+    missing_copy_implementations,
+    rustdoc::private_doc_tests,
+    //single_use_lifetimes,
+    trivial_casts,
+    trivial_numeric_casts,
+    unused_import_braces,
+    unused_must_use,
+    clippy::cast_lossless,
+    clippy::needless_pass_by_value,
+)]
+#![cfg_attr(not(feature = "allow-unsafe-code"), forbid(unsafe_code))]
+
 // -- Public Modules --
 
 pub mod blocking;
