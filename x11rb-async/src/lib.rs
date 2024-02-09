@@ -55,6 +55,8 @@
 // A list of lints that are only #![deny] and not the stronger #![forbid]. Each one has a comment
 // explaining why it gets the weaker treatment.
 #![deny(
+    // #[derive] generates an #[allow] for this
+    unused_qualifications,
     // Not everything in x11rb::protocol has doc comments
     missing_docs,
 )]

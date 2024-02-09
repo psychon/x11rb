@@ -133,8 +133,8 @@ async fn resolve_host(host: &str) -> io::Result<impl Stream<Item = IpAddr>> {
             cx: &mut std::task::Context<'_>,
         ) -> std::task::Poll<Option<Self::Item>> {
             match self.get_mut() {
-                Either::Left(a) => a.poll_next(cx),
-                Either::Right(b) => b.poll_next(cx),
+                Left(a) => a.poll_next(cx),
+                Right(b) => b.poll_next(cx),
             }
         }
     }
