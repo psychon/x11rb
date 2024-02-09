@@ -15,7 +15,7 @@ license = "MIT OR Apache-2.0"
 keywords = ["xcb", "X11", "async"]
 
 [dependencies]
-async-io = "1.13.0"
+async-io = "2.3"
 async-lock = "3.3"
 blocking = "1.5"
 event-listener = "5.0"
