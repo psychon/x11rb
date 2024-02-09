@@ -37,6 +37,7 @@ use x11rb_protocol::DiscardMode;
 /// The [`blocking`] threadpool is used to handle all requests.
 ///
 /// [`blocking`]: https://docs.rs/blocking
+#[derive(Debug)]
 pub struct BlockingConnection<C> {
     inner: Arc<C>,
 }

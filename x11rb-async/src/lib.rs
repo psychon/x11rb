@@ -43,6 +43,7 @@
 
 #![forbid(
     missing_copy_implementations,
+    missing_debug_implementations,
     rustdoc::private_doc_tests,
     //single_use_lifetimes,
     trivial_casts,

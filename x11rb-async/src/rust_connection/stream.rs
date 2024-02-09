@@ -42,6 +42,7 @@ impl<S: for<'a> StreamBase<'a>> Stream for S {}
 pub type DefaultStream = StreamAdaptor<X11rbDefaultStream>;
 
 /// An adaptor that implements a `Stream` for a type that implements `X11rbStream`.
+#[derive(Debug)]
 pub struct StreamAdaptor<S> {
     inner: Async<S>,
 }
