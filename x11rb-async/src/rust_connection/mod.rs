@@ -322,8 +322,6 @@ impl<S: Stream + Send + Sync> RustConnection<S> {
                 .send_request(ReplyFdKind::ReplyWithoutFDs)
                 .expect("This request should not be blocked by syncs");
             inner.discard_reply(seq, DiscardMode::DiscardReplyAndError);
-
-            seq
         };
 
         // Write the entire packet.
@@ -589,7 +587,8 @@ impl<S: Stream + Send + Sync> RequestConnection for RustConnection<S> {
 
     fn prefetch_maximum_request_bytes(&self) -> Pin<Box<dyn Future<Output = ()> + Send + '_>> {
         Box::pin(async move {
-            self.prefetch_len_impl()
+            let _guard = self
+                .prefetch_len_impl()
                 .await
                 .expect("Failed to prefetch maximum request bytes");
         })

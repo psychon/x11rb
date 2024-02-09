@@ -43,7 +43,7 @@ impl Extensions {
             let cookie = crate::protocol::xproto::query_extension(conn, name.as_bytes()).await?;
 
             // Add the extension to the cache.
-            entry.insert(ExtensionState::Loading(cookie.sequence_number()));
+            let _entry = entry.insert(ExtensionState::Loading(cookie.sequence_number()));
 
             std::mem::forget(cookie);
         }
