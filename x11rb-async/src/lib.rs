@@ -52,13 +52,19 @@
     clippy::cast_lossless,
     clippy::needless_pass_by_value,
 )]
+// A list of lints that are only #![deny] and not the stronger #![forbid]. Each one has a comment
+// explaining why it gets the weaker treatment.
+#![deny(
+    // Not everything in x11rb::protocol has doc comments
+    missing_docs,
+)]
 #![cfg_attr(not(feature = "allow-unsafe-code"), forbid(unsafe_code))]
 
 // -- Public Modules --
 
 pub mod blocking;
 pub mod connection;
-#[allow(clippy::type_complexity)]
+#[allow(clippy::type_complexity, missing_docs)]
 #[rustfmt::skip]
 pub mod protocol;
 pub mod rust_connection;
@@ -76,5 +82,6 @@ mod cookie;
 pub use cookie::{Cookie, CookieWithFds, VoidCookie};
 
 pub mod utils {
+    //! Utility functions that are not specific to X11.
     pub use x11rb::utils::RawFdContainer;
 }
