@@ -44,17 +44,19 @@ pub use x11rb_protocol::x11_utils::{
 /// #[derive(Debug)]
 /// /// A handle to a response from the X11 server.
 /// struct AtomCollectionCookie<'c, C: ConnectionExt> {
-///     phantom: std::marker::PhantomData<&'c C>,
-///     _NET_WM_NAME: Cookie<'c, C, InternAtomReply>,
-///     _NET_WM_ICON: Cookie<'c, C, InternAtomReply>,
-///     ATOM_WITH_SPACES: Cookie<'c, C, InternAtomReply>,
-///     WHATEVER: Cookie<'c, C, InternAtomReply>,
+///     // please treat the actual members as private
+///     # phantom: std::marker::PhantomData<&'c C>,
+///     # _NET_WM_NAME: Cookie<'c, C, InternAtomReply>,
+///     # _NET_WM_ICON: Cookie<'c, C, InternAtomReply>,
+///     # ATOM_WITH_SPACES: Cookie<'c, C, InternAtomReply>,
+///     # WHATEVER: Cookie<'c, C, InternAtomReply>,
 /// }
 ///
 /// impl AtomCollection {
 ///     pub fn new<C: ConnectionExt>(
 ///         conn: &C,
 ///     ) -> Result<AtomCollectionCookie<'_, C>, ConnectionError> {
+///         // This is just an example for readability; the actual code is more efficient.
 ///         Ok(AtomCollectionCookie {
 ///             phantom: std::marker::PhantomData,
 ///             _NET_WM_NAME: conn.intern_atom(false, b"_NET_WM_NAME")?,
@@ -70,6 +72,7 @@ pub use x11rb_protocol::x11_utils::{
 ///     C: ConnectionExt,
 /// {
 ///     pub fn reply(self) -> Result<AtomCollection, ReplyError> {
+///         // This is just an example for readability; the actual code is different.
 ///         Ok(AtomCollection {
 ///             _NET_WM_NAME: self._NET_WM_NAME.reply()?.atom,
 ///             _NET_WM_ICON: self._NET_WM_ICON.reply()?.atom,
@@ -94,10 +97,8 @@ macro_rules! atom_manager {
         #[derive(Debug)]
         $(#[$cookie_meta])*
         $vis struct $cookie_name<'a, C: $crate::protocol::xproto::ConnectionExt> {
-            phantom: std::marker::PhantomData<&'a C>,
-            $(
-                $field_name: $crate::cookie::Cookie<'a, C, $crate::protocol::xproto::InternAtomReply>,
-            )*
+            __private_phantom: ::std::marker::PhantomData<&'a C>,
+            __private_cookies: ::std::vec::Vec<$crate::cookie::Cookie<'a, C, $crate::protocol::xproto::InternAtomReply>>,
         }
 
         // Replies
@@ -114,23 +115,24 @@ macro_rules! atom_manager {
             $vis fn new<C: $crate::protocol::xproto::ConnectionExt>(
                 _conn: &C,
             ) -> ::std::result::Result<$cookie_name<'_, C>, $crate::errors::ConnectionError> {
+                let names = [
+                    $($crate::__atom_manager_atom_value!($field_name$(: $atom_value)?),)*
+                ];
+                let cookies: ::std::result::Result<::std::vec::Vec<_>, _>
+                    = names.into_iter().map(|name| _conn.intern_atom(false, name)).collect();
                 Ok($cookie_name {
-                    phantom: std::marker::PhantomData,
-                    $(
-                        $field_name: _conn.intern_atom(
-                            false,
-                            $crate::__atom_manager_atom_value!($field_name$(: $atom_value)?),
-                        )?,
-                    )*
+                    __private_phantom: ::std::marker::PhantomData,
+                    __private_cookies: cookies?,
                 })
             }
         }
 
         impl<'a, C: $crate::protocol::xproto::ConnectionExt> $cookie_name<'a, C> {
             $vis fn reply(self) -> ::std::result::Result<$struct_name, $crate::errors::ReplyError> {
+                let mut replies = self.__private_cookies.into_iter();
                 Ok($struct_name {
                     $(
-                        $field_name: self.$field_name.reply()?.atom,
+                        $field_name: replies.next().expect("new() should have constructed a Vec of the correct size").reply()?.atom,
                     )*
                 })
             }
