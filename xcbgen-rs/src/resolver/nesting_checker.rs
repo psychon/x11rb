@@ -51,8 +51,8 @@ impl NestingChecker {
 
     fn check_type_def(&mut self, type_def: &defs::TypeDef) -> Result<(), ResolveError> {
         match type_def {
-            defs::TypeDef::Struct(struct_def) => self.check_struct(&struct_def.clone()),
-            defs::TypeDef::Union(union_def) => self.check_union(&union_def.clone()),
+            defs::TypeDef::Struct(struct_def) => self.check_struct(struct_def),
+            defs::TypeDef::Union(union_def) => self.check_union(union_def),
             _ => Ok(()),
         }
     }
