@@ -96,7 +96,7 @@ impl FieldDef {
 }
 
 /// A `<pad>` field.
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct PadField {
     /// The kind and size of padding
     pub kind: PadKind,
@@ -377,7 +377,7 @@ pub enum FieldValueSet {
 }
 
 /// The kind of padding a `<pad>` can represent.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Copy)]
 pub enum PadKind {
     /// A fixed size padding of the given size (`bytes` attribute).
     Bytes(u16),

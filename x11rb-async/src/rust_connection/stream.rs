@@ -42,6 +42,7 @@ impl<S: for<'a> StreamBase<'a>> Stream for S {}
 pub type DefaultStream = StreamAdaptor<X11rbDefaultStream>;
 
 /// An adaptor that implements a `Stream` for a type that implements `X11rbStream`.
+#[derive(Debug)]
 pub struct StreamAdaptor<S> {
     inner: Async<S>,
 }
@@ -62,7 +63,7 @@ impl<S> Unpin for Readable<'_, S> {}
 impl<S> Future for Readable<'_, S> {
     type Output = io::Result<()>;
 
-    fn poll(mut self: Pin<&mut Self>, cx: &mut Context) -> Poll<Self::Output> {
+    fn poll(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
         Pin::new(&mut self.0).poll(cx)
     }
 }
@@ -76,7 +77,7 @@ impl<S> Unpin for Writable<'_, S> {}
 impl<S> Future for Writable<'_, S> {
     type Output = io::Result<()>;
 
-    fn poll(mut self: Pin<&mut Self>, cx: &mut Context) -> Poll<Self::Output> {
+    fn poll(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
         Pin::new(&mut self.0).poll(cx)
     }
 }

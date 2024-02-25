@@ -51,15 +51,15 @@ impl NestingChecker {
 
     fn check_type_def(&mut self, type_def: &defs::TypeDef) -> Result<(), ResolveError> {
         match type_def {
-            defs::TypeDef::Struct(struct_def) => self.check_struct(struct_def.clone()),
-            defs::TypeDef::Union(union_def) => self.check_union(union_def.clone()),
+            defs::TypeDef::Struct(struct_def) => self.check_struct(struct_def),
+            defs::TypeDef::Union(union_def) => self.check_union(union_def),
             _ => Ok(()),
         }
     }
 
-    fn check_struct(&mut self, struct_def: Rc<defs::StructDef>) -> Result<(), ResolveError> {
+    fn check_struct(&mut self, struct_def: &Rc<defs::StructDef>) -> Result<(), ResolveError> {
         self.push(NestingStackItem::Struct(struct_def.clone()))?;
-        let struct_def_ptr: *const defs::StructDef = &*struct_def;
+        let struct_def_ptr: *const defs::StructDef = &**struct_def;
         if self.checked.insert(struct_def_ptr as usize) {
             // Not checked yet
             for field in struct_def.fields.borrow().iter() {
@@ -70,9 +70,9 @@ impl NestingChecker {
         Ok(())
     }
 
-    fn check_union(&mut self, union_def: Rc<defs::UnionDef>) -> Result<(), ResolveError> {
+    fn check_union(&mut self, union_def: &Rc<defs::UnionDef>) -> Result<(), ResolveError> {
         self.push(NestingStackItem::Union(union_def.clone()))?;
-        let union_def_ptr: *const defs::UnionDef = &*union_def;
+        let union_def_ptr: *const defs::UnionDef = &**union_def;
         if self.checked.insert(union_def_ptr as usize) {
             // Not checked yet
             for field in union_def.fields.iter() {
@@ -115,8 +115,8 @@ impl NestingChecker {
 
     fn check_type_ref(&mut self, type_: &defs::TypeRef) -> Result<(), ResolveError> {
         match type_ {
-            defs::TypeRef::Struct(struct_def) => self.check_struct(struct_def.upgrade().unwrap()),
-            defs::TypeRef::Union(union_def) => self.check_union(union_def.upgrade().unwrap()),
+            defs::TypeRef::Struct(struct_def) => self.check_struct(&struct_def.upgrade().unwrap()),
+            defs::TypeRef::Union(union_def) => self.check_union(&union_def.upgrade().unwrap()),
             defs::TypeRef::Alias(type_alias_def) => {
                 let type_alias_def = type_alias_def.upgrade().unwrap();
                 self.check_type_ref(type_alias_def.old_name.get_resolved())

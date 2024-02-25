@@ -43,7 +43,7 @@ impl WriteBuffer {
     /// considered corrupted. This mechanism exists to catch futures being dropped without being
     /// polled to completion. In this situation we cannot be sure how many bytes were already
     /// written to the stream, so the complete connection is now broken.
-    pub async fn lock(&self) -> Result<WriteBufferGuard<'_>, ConnectionError> {
+    pub(super) async fn lock(&self) -> Result<WriteBufferGuard<'_>, ConnectionError> {
         let mut lock = self.0.lock().await;
         if std::mem::replace(&mut lock.corrupted, true) {
             return Err(ConnectionError::IoError(io::Error::new(
@@ -58,7 +58,7 @@ impl WriteBuffer {
 
 impl WriteBufferGuard<'_> {
     /// Unlock this guard.
-    pub fn unlock(mut self) {
+    pub(super) fn unlock(mut self) {
         self.0.corrupted = false;
     }
 }
@@ -79,7 +79,7 @@ impl std::ops::DerefMut for WriteBufferGuard<'_> {
 
 impl WriteBufferInner {
     /// Flush the write buffer.
-    pub async fn flush<'b, S: StreamBase<'b>>(
+    pub(super) async fn flush<'b, S: StreamBase<'b>>(
         &mut self,
         stream: &'b S,
     ) -> Result<(), ConnectionError> {
@@ -130,7 +130,7 @@ impl WriteBufferInner {
     }
 
     /// Write a set of buffers to the stream.
-    pub async fn write_all_vectored<'b, S: StreamBase<'b>>(
+    pub(super) async fn write_all_vectored<'b, S: StreamBase<'b>>(
         &mut self,
         stream: &'b S,
         mut bufs: &[io::IoSlice<'_>],

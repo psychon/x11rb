@@ -12,7 +12,7 @@ use once_cell::unsync::OnceCell;
 use crate::defs;
 
 /// An error that occurred while parsing an error.
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub enum ParseError {
     /// The XML tree is in some way malformed.
     ///
@@ -51,6 +51,7 @@ pub enum ParseError {
 /// A `Parser` that adds namespaces to a module.
 ///
 /// One instance of this struct can be used to parse multiple namespaces, one after another.
+#[derive(Debug)]
 pub struct Parser {
     module: Rc<defs::Module>,
 }

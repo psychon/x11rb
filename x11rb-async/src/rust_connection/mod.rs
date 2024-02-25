@@ -322,8 +322,6 @@ impl<S: Stream + Send + Sync> RustConnection<S> {
                 .send_request(ReplyFdKind::ReplyWithoutFDs)
                 .expect("This request should not be blocked by syncs");
             inner.discard_reply(seq, DiscardMode::DiscardReplyAndError);
-
-            seq
         };
 
         // Write the entire packet.
@@ -414,7 +412,7 @@ impl<S: Stream + Send + Sync> RequestConnection for RustConnection<S> {
         &'this self,
         bufs: &'bufs [io::IoSlice<'sl>],
         fds: Vec<RawFdContainer>,
-    ) -> Fut<'future, crate::Cookie<'this, Self, R>, ConnectionError>
+    ) -> Fut<'future, Cookie<'this, Self, R>, ConnectionError>
     where
         'this: 'future,
         'bufs: 'future,
@@ -435,7 +433,7 @@ impl<S: Stream + Send + Sync> RequestConnection for RustConnection<S> {
         &'this self,
         bufs: &'bufs [io::IoSlice<'sl>],
         fds: Vec<RawFdContainer>,
-    ) -> Fut<'future, crate::CookieWithFds<'this, Self, R>, ConnectionError>
+    ) -> Fut<'future, CookieWithFds<'this, Self, R>, ConnectionError>
     where
         'this: 'future,
         'bufs: 'future,
@@ -456,7 +454,7 @@ impl<S: Stream + Send + Sync> RequestConnection for RustConnection<S> {
         &'this self,
         bufs: &'bufs [io::IoSlice<'sl>],
         fds: Vec<RawFdContainer>,
-    ) -> Fut<'future, crate::VoidCookie<'this, Self>, ConnectionError>
+    ) -> Fut<'future, VoidCookie<'this, Self>, ConnectionError>
     where
         'this: 'future,
         'bufs: 'future,
@@ -473,7 +471,7 @@ impl<S: Stream + Send + Sync> RequestConnection for RustConnection<S> {
         &self,
         sequence: SequenceNumber,
         _kind: x11rb::connection::RequestKind,
-        mode: x11rb_protocol::DiscardMode,
+        mode: DiscardMode,
     ) {
         tracing::debug!(
             "Discarding reply to request {} in mode {:?}",
@@ -542,8 +540,7 @@ impl<S: Stream + Send + Sync> RequestConnection for RustConnection<S> {
     fn wait_for_reply_with_fds_raw(
         &self,
         sequence: SequenceNumber,
-    ) -> Fut<'_, ReplyOrError<x11rb::connection::BufWithFds<Self::Buf>, Self::Buf>, ConnectionError>
-    {
+    ) -> Fut<'_, ReplyOrError<BufWithFds<Self::Buf>, Self::Buf>, ConnectionError> {
         Box::pin(
             self.wait_for_reply_with_fds_impl(sequence)
                 .instrument(tracing::info_span!("wait_for_reply_with_fds_raw", sequence)),
@@ -588,19 +585,16 @@ impl<S: Stream + Send + Sync> RequestConnection for RustConnection<S> {
         )
     }
 
-    fn prefetch_maximum_request_bytes(
-        &self,
-    ) -> Pin<Box<dyn futures_lite::Future<Output = ()> + Send + '_>> {
+    fn prefetch_maximum_request_bytes(&self) -> Pin<Box<dyn Future<Output = ()> + Send + '_>> {
         Box::pin(async move {
-            self.prefetch_len_impl()
+            let _guard = self
+                .prefetch_len_impl()
                 .await
                 .expect("Failed to prefetch maximum request bytes");
         })
     }
 
-    fn maximum_request_bytes(
-        &self,
-    ) -> Pin<Box<dyn futures_lite::Future<Output = usize> + Send + '_>> {
+    fn maximum_request_bytes(&self) -> Pin<Box<dyn Future<Output = usize> + Send + '_>> {
         Box::pin(
             async move {
                 let mut mrl = self
@@ -645,7 +639,7 @@ impl<S: Stream + Send + Sync> RequestConnection for RustConnection<S> {
         )
     }
 
-    fn parse_error(&self, error: &[u8]) -> Result<x11rb::x11_utils::X11Error, ParseError> {
+    fn parse_error(&self, error: &[u8]) -> Result<X11Error, ParseError> {
         let extensions = future::block_on(self.extensions.read());
         X11Error::try_parse(error, &*extensions)
     }

@@ -21,6 +21,7 @@ use std::task::{Context, Poll};
 use crate::protocol::record::EnableContextReply;
 
 /// A cookie for a request without a reply.
+#[derive(Debug)]
 pub struct VoidCookie<'conn, C: RequestConnection + ?Sized> {
     conn: &'conn C,
     sequence: SequenceNumber,
@@ -75,6 +76,7 @@ impl<'conn, C: RequestConnection + ?Sized> Drop for VoidCookie<'conn, C> {
 }
 
 /// Helper for cookies that hold a reply.
+#[derive(Debug)]
 struct RawCookie<'a, C: RequestConnection + ?Sized> {
     conn: &'a C,
     sequence: SequenceNumber,
@@ -103,6 +105,7 @@ impl<'a, C: RequestConnection + ?Sized> Drop for RawCookie<'a, C> {
 }
 
 /// A cookie for a request that has a reply.
+#[derive(Debug)]
 pub struct Cookie<'conn, C: RequestConnection + ?Sized, R> {
     raw: RawCookie<'conn, C>,
     capture: PhantomData<R>,
@@ -173,6 +176,7 @@ impl<'conn, C: Connection + ?Sized, R: TryParse> Cookie<'conn, C, R> {
 }
 
 /// A cookie for a request that has a reply containing file descriptors.
+#[derive(Debug)]
 pub struct CookieWithFds<'conn, C: RequestConnection + ?Sized, R> {
     raw: RawCookie<'conn, C>,
     capture: PhantomData<R>,
@@ -233,6 +237,14 @@ macro_rules! multiple_reply_cookie {
 
             // Current wait future we're polling.
             wait: Option<Pin<Box<dyn Future<Output = Result<C::Buf, ReplyError>> + Send + 'conn>>>,
+        }
+
+        impl<'conn, C: RequestConnection + std::fmt::Debug + ?Sized> std::fmt::Debug for $name<'conn, C> {
+            fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                f.debug_struct(stringify!($name))
+                    .field("raw", &self.raw)
+                    .finish_non_exhaustive()
+            }
         }
 
         impl<'conn, C: RequestConnection + ?Sized> $name<'conn, C> {
