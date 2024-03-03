@@ -8,4 +8,5 @@ members = [
     "x11rb-async",
     "cairo-example",
     "xtrace-example",
+    "xkbcommon-example",
 ]
