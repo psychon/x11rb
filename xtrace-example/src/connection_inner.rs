@@ -6,7 +6,6 @@ use x11rb_protocol::x11_utils::{
 };
 
 use std::collections::VecDeque;
-use std::convert::TryInto;
 
 /// Parse some data and print the resulting object.
 ///
