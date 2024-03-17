@@ -1,7 +1,5 @@
 //! Utility functions for working with X11 properties
 
-use std::convert::TryInto;
-
 use crate::connection::RequestConnection;
 use crate::cookie::{Cookie, VoidCookie};
 use crate::errors::{ConnectionError, ParseError, ReplyError};
