@@ -4,8 +4,6 @@
 //! [`Serialize`] traits. These traits are used internally for parsing incoming data and producing
 //! outgoing data when talking with the X11 server.
 
-use core::convert::TryInto;
-
 use alloc::string::String;
 use alloc::vec::Vec;
 

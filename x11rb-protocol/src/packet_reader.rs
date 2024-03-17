@@ -1,6 +1,5 @@
 //! Collects X11 data into "packets" to be parsed by a display.
 
-use core::convert::TryInto;
 use core::fmt;
 use core::mem::replace;
 
