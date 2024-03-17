@@ -679,8 +679,6 @@ fn parse_with_flag<T: TryParse>(
 
 #[cfg(test)]
 mod test {
-    use std::convert::TryInto;
-
     use super::{WmClass, WmHints, WmHintsState, WmSizeHints};
     use crate::protocol::xproto::{Atom, AtomEnum, GetPropertyReply, Gravity};
     use crate::x11_utils::Serialize;

@@ -1,6 +1,5 @@
 use futures_io::{AsyncRead, AsyncWrite};
 use std::cell::RefCell;
-use std::convert::{TryFrom, TryInto};
 use std::io::Result as IOResult;
 use std::sync::atomic::{AtomicBool, Ordering};
 
