@@ -161,7 +161,7 @@ impl Database {
             }
         } else {
             // 5. Load `$HOME/.Xdefaults-[hostname]`
-            let mut file = std::ffi::OsString::from(".Xdefaults-");
+            let mut file = OsString::from(".Xdefaults-");
             file.push(hostname);
             let mut path = match var_os("HOME") {
                 Some(home) => PathBuf::from(home),
