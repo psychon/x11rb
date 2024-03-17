@@ -15,7 +15,6 @@ use x11rb_protocol::{DiscardMode, RawEventAndSeqNumber, SequenceNumber};
 use crate::errors::{ConnectionError, ParseError, ReplyError, ReplyOrIdError};
 use crate::{Cookie, CookieWithFds, VoidCookie};
 
-use std::boxed::Box;
 use std::future::Future;
 use std::io::IoSlice;
 use std::pin::Pin;
