@@ -25,7 +25,6 @@
 //   begins with the second bit of each pixel etc.
 
 use std::borrow::Cow;
-use std::convert::{TryFrom, TryInto};
 
 use crate::connection::Connection;
 use crate::cookie::VoidCookie;
