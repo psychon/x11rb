@@ -1,5 +1,3 @@
-use std::convert::TryFrom;
-
 use xcbgen::defs as xcbdefs;
 
 use super::{
