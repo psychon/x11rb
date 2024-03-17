@@ -120,6 +120,16 @@
 //! The [event_loop_integration](event_loop_integration/index.html) module contains some hints for
 //! integrating x11rb with an event loop as doc comments.
 
+// A list of lints that are only #![deny] and not the stronger #![forbid]. Each one has a comment
+// explaining why it gets the weaker treatment.
+#![deny(
+    // Contains unreachable_code and "?" generates an #[allow] for this
+    unused,
+    // #[derive] generates an #[allow] for this; not part of "unused"
+    unused_qualifications,
+    // Not everything in x11rb::protocol has doc comments
+    missing_docs,
+)]
 #![forbid(
     missing_copy_implementations,
     missing_debug_implementations,
@@ -129,19 +139,10 @@
     trivial_casts,
     trivial_numeric_casts,
     unreachable_pub,
-    unused_import_braces,
     unused_must_use,
     unused_results,
     clippy::cast_lossless,
     clippy::needless_pass_by_value,
-)]
-// A list of lints that are only #![deny] and not the stronger #![forbid]. Each one has a comment
-// explaining why it gets the weaker treatment.
-#![deny(
-    // #[derive] generates an #[allow] for this
-    unused_qualifications,
-    // Not everything in x11rb::protocol has doc comments
-    missing_docs,
 )]
 #![cfg_attr(not(feature = "allow-unsafe-code"), forbid(unsafe_code))]
 

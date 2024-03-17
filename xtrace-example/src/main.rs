@@ -36,17 +36,18 @@
 //! The code in `connection_inner` then handles decoding X11 packets, updating the state of the
 //! connection, and generating output via `println!`.
 
+#![deny(
+    // Contains unreachable_code and "?" generates an #[allow] for this
+    unused,
+    // #[derive] generates an #[allow] for this; not part of "unused"
+    unused_qualifications,
+)]
 #![forbid(
     missing_docs,
     rust_2018_idioms,
     trivial_casts,
     trivial_numeric_casts,
-    unused_import_braces,
     unused_results
-)]
-#![deny(
-    // #[derive] generates an #[allow] for this
-    unused_qualifications,
 )]
 
 use smol::Async;

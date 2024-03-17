@@ -40,6 +40,18 @@
 //! * `extra-traits`: Implement extra traits for types. This improves the output of the `Debug`
 //!   impl and adds `PartialEq`, `Eq`, `PartialOrd`, `Ord`, and `Hash` where possible.
 
+// A list of lints that are only #![deny] and not the stronger #![forbid]. Each one has a comment
+// explaining why it gets the weaker treatment.
+#![deny(
+    // Contains unreachable_code and "?" generates an #[allow] for this
+    unused,
+    // #[derive] generates an #[allow] for this; not part of "unused"
+    unused_qualifications,
+    // serde's Deserialize/Serialize impls add allows for this
+    rust_2018_idioms,
+    // Not everything in x11rb_protocol::protocol has doc comments
+    missing_docs,
+)]
 #![forbid(
     missing_copy_implementations,
     missing_debug_implementations,
@@ -49,21 +61,10 @@
     trivial_numeric_casts,
     unreachable_pub,
     unsafe_code,
-    unused_import_braces,
     unused_must_use,
     unused_results,
     clippy::cast_lossless,
     clippy::needless_pass_by_value,
-)]
-// A list of lints that are only #![deny] and not the stronger #![forbid]. Each one has a comment
-// explaining why it gets the weaker treatment.
-#![deny(
-    // #[derive] generates an #[allow] for this
-    unused_qualifications,
-    // serde's Deserialize/Serialize impls add allows for this
-    rust_2018_idioms,
-    // Not everything in x11rb_protocol::protocol has doc comments
-    missing_docs,
 )]
 #![no_std]
 

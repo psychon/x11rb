@@ -1,7 +1,5 @@
 //! Some wrappers around the generated code to simplify use.
 
-use std::convert::TryInto;
-
 use super::cookie::VoidCookie;
 use super::errors::{ConnectionError, ReplyError};
 use super::protocol::xproto::{Atom, ConnectionExt as XProtoConnectionExt, PropMode, Window};

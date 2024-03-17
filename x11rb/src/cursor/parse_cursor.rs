@@ -4,7 +4,6 @@
 //   Copyright © 2013 Michael Stapelberg
 // and is covered by MIT/X Consortium License
 
-use std::convert::TryInto;
 use std::io::{Read, Seek, SeekFrom};
 
 const FILE_MAGIC: u32 = 0x7275_6358;

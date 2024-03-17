@@ -1,8 +1,6 @@
 //! A pure-rust implementation of a connection to an X11 server.
 
-use std::convert::TryInto;
 use std::io::IoSlice;
-use std::mem::drop;
 use std::sync::{Condvar, Mutex, MutexGuard, TryLockError};
 use std::time::Instant;
 

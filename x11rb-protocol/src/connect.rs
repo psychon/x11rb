@@ -9,7 +9,6 @@ use crate::xauth::{get_auth, Family};
 
 use alloc::{vec, vec::Vec};
 
-use core::convert::TryFrom;
 use core::fmt;
 
 /// The connection handshake used to connect to the X11 server.
@@ -270,7 +269,6 @@ mod tests {
     use crate::protocol::xproto::{ImageOrder, Setup, SetupAuthenticate, SetupFailed};
     use crate::x11_utils::Serialize;
     use alloc::vec;
-    use core::mem::drop;
 
     fn test_setup() -> Setup {
         let mut s = Setup {
