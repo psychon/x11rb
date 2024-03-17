@@ -269,7 +269,6 @@ mod tests {
     use crate::protocol::xproto::{ImageOrder, Setup, SetupAuthenticate, SetupFailed};
     use crate::x11_utils::Serialize;
     use alloc::vec;
-    use core::mem::drop;
 
     fn test_setup() -> Setup {
         let mut s = Setup {
