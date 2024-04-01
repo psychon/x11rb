@@ -3,8 +3,7 @@
     trivial_numeric_casts,
     unsafe_code,
     unreachable_pub,
-    unused_import_braces,
-    unused_must_use,
+    unused,
     unused_qualifications
 )]
 #![forbid(unsafe_code)]

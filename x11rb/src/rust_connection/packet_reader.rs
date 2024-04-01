@@ -1,7 +1,7 @@
 //! Read X11 packets from a reader
 
 use std::io::{Error, ErrorKind, Result};
-use std::{cmp, fmt, io};
+use std::{cmp, fmt};
 
 use super::Stream;
 use crate::utils::RawFdContainer;
@@ -67,7 +67,7 @@ impl PacketReader {
                             out_packets.push(packet);
                         }
                     }
-                    Err(ref e) if e.kind() == io::ErrorKind::WouldBlock => break,
+                    Err(ref e) if e.kind() == ErrorKind::WouldBlock => break,
                     Err(e) => return Err(e),
                 }
             } else {
@@ -81,7 +81,7 @@ impl PacketReader {
                         ));
                     }
                     Ok(n) => n,
-                    Err(ref e) if e.kind() == io::ErrorKind::WouldBlock => break,
+                    Err(ref e) if e.kind() == ErrorKind::WouldBlock => break,
                     Err(e) => return Err(e),
                 };
                 crate::trace!("Read {} bytes into read buffer", nread);

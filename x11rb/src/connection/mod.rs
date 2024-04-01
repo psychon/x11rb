@@ -3,7 +3,6 @@
 //! This module contains the `Connection` trait and related definitions. The code in this module is
 //! used by each concrete implementation of the X11 protocol.
 
-use std::convert::{TryFrom, TryInto};
 use std::io::IoSlice;
 
 use x11rb_protocol::x11_utils::{ReplyFDsRequest, ReplyRequest, VoidRequest};

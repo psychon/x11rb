@@ -1,7 +1,5 @@
 //! Utility functions for working with X11 properties
 
-use std::convert::TryInto;
-
 use crate::connection::RequestConnection;
 use crate::cookie::{Cookie, VoidCookie};
 use crate::errors::{ConnectionError, ParseError, ReplyError};
@@ -572,8 +570,8 @@ impl WmHints {
             conn,
             xproto::PropMode::REPLACE,
             window,
-            xproto::AtomEnum::WM_HINTS,
-            xproto::AtomEnum::WM_HINTS,
+            AtomEnum::WM_HINTS,
+            AtomEnum::WM_HINTS,
             32,
             NUM_WM_HINTS_ELEMENTS,
             &data,
@@ -681,8 +679,6 @@ fn parse_with_flag<T: TryParse>(
 
 #[cfg(test)]
 mod test {
-    use std::convert::TryInto;
-
     use super::{WmClass, WmHints, WmHintsState, WmSizeHints};
     use crate::protocol::xproto::{Atom, AtomEnum, GetPropertyReply, Gravity};
     use crate::x11_utils::Serialize;

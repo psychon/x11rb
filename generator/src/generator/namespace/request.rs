@@ -253,7 +253,7 @@ pub(super) fn generate_request(
         ImplMode::Async,
     );
 
-    super::special_cases::handle_request(request_def, proto_out);
+    special_cases::handle_request(request_def, proto_out);
 
     outln!(proto_out, "");
     outln!(x11rb_out, "");

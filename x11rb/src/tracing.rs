@@ -102,6 +102,7 @@ macro_rules! warning_span {
     ( $name:expr ) => { $crate::tracing::implementation::span!($crate::tracing::Level::Warn, $name, ) };
     ( $name:expr, $($fields:tt)* ) => { $crate::tracing::implementation::span!($crate::tracing::Level::Warn, $name, $($fields)*) };
 }
+#[allow(unused_macro_rules)]
 macro_rules! info_span {
     ( $name:expr ) => { $crate::tracing::implementation::span!($crate::tracing::Level::Info, $name, ) };
     ( $name:expr, $($fields:tt)* ) => { $crate::tracing::implementation::span!($crate::tracing::Level::Info, $name, $($fields)*) };
@@ -110,6 +111,7 @@ macro_rules! debug_span {
     ( $name:expr ) => { $crate::tracing::implementation::span!($crate::tracing::Level::Debug, $name, ) };
     ( $name:expr, $($fields:tt)* ) => { $crate::tracing::implementation::span!($crate::tracing::Level::Debug, $name, $($fields)*) };
 }
+#[allow(unused_macro_rules)]
 macro_rules! trace_span {
     ( $name:expr ) => { $crate::tracing::implementation::span!($crate::tracing::Level::Trace, $name, ) };
     ( $name:expr, $($fields:tt)* ) => { $crate::tracing::implementation::span!($crate::tracing::Level::Trace, $name, $($fields)*) };
