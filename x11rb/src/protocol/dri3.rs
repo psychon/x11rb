@@ -201,6 +201,36 @@ where
     conn.send_request_without_reply(&slices, fds)
 }
 
+pub fn import_syncobj<Conn, A>(conn: &Conn, syncobj: Syncobj, drawable: xproto::Drawable, syncobj_fd: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<RawFdContainer>,
+{
+    let syncobj_fd: RawFdContainer = syncobj_fd.into();
+    let request0 = ImportSyncobjRequest {
+        syncobj,
+        drawable,
+        syncobj_fd,
+    };
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
+    let slices = [IoSlice::new(&bytes[0])];
+    assert_eq!(slices.len(), bytes.len());
+    conn.send_request_without_reply(&slices, fds)
+}
+
+pub fn free_syncobj<Conn>(conn: &Conn, syncobj: Syncobj) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+where
+    Conn: RequestConnection + ?Sized,
+{
+    let request0 = FreeSyncobjRequest {
+        syncobj,
+    };
+    let (bytes, fds) = request0.serialize(major_opcode(conn)?);
+    let slices = [IoSlice::new(&bytes[0])];
+    assert_eq!(slices.len(), bytes.len());
+    conn.send_request_without_reply(&slices, fds)
+}
+
 /// Extension trait defining the requests of this extension.
 pub trait ConnectionExt: RequestConnection {
     fn dri3_query_version(&self, major_version: u32, minor_version: u32) -> Result<Cookie<'_, Self, QueryVersionReply>, ConnectionError>
@@ -246,6 +276,16 @@ pub trait ConnectionExt: RequestConnection {
     fn dri3_set_drm_device_in_use(&self, window: xproto::Window, drm_major: u32, drm_minor: u32) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         set_drm_device_in_use(self, window, drm_major, drm_minor)
+    }
+    fn dri3_import_syncobj<A>(&self, syncobj: Syncobj, drawable: xproto::Drawable, syncobj_fd: A) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    where
+        A: Into<RawFdContainer>,
+    {
+        import_syncobj(self, syncobj, drawable, syncobj_fd)
+    }
+    fn dri3_free_syncobj(&self, syncobj: Syncobj) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    {
+        free_syncobj(self, syncobj)
     }
 }
 

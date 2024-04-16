@@ -34,7 +34,9 @@ pub const X11_EXTENSION_NAME: &str = "DRI3";
 /// by this build of x11rb. For most things, it does not make sense to use this
 /// information. If you need to send a `QueryVersion`, it is recommended to instead
 /// send the maximum version of the extension that you need.
-pub const X11_XML_VERSION: (u32, u32) = (1, 3);
+pub const X11_XML_VERSION: (u32, u32) = (1, 4);
+
+pub type Syncobj = u32;
 
 /// Opcode for the QueryVersion request
 pub const QUERY_VERSION_REQUEST: u8 = 0;
@@ -1346,5 +1348,127 @@ impl Request for SetDRMDeviceInUseRequest {
     }
 }
 impl crate::x11_utils::VoidRequest for SetDRMDeviceInUseRequest {
+}
+
+/// Opcode for the ImportSyncobj request
+pub const IMPORT_SYNCOBJ_REQUEST: u8 = 10;
+#[cfg_attr(feature = "extra-traits", derive(Debug))]
+pub struct ImportSyncobjRequest {
+    pub syncobj: Syncobj,
+    pub drawable: xproto::Drawable,
+    pub syncobj_fd: RawFdContainer,
+}
+impl_debug_if_no_extra_traits!(ImportSyncobjRequest, "ImportSyncobjRequest");
+impl ImportSyncobjRequest {
+    /// Serialize this request into bytes for the provided connection
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
+        let length_so_far = 0;
+        let syncobj_bytes = self.syncobj.serialize();
+        let drawable_bytes = self.drawable.serialize();
+        let mut request0 = vec![
+            major_opcode,
+            IMPORT_SYNCOBJ_REQUEST,
+            0,
+            0,
+            syncobj_bytes[0],
+            syncobj_bytes[1],
+            syncobj_bytes[2],
+            syncobj_bytes[3],
+            drawable_bytes[0],
+            drawable_bytes[1],
+            drawable_bytes[2],
+            drawable_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        ([request0.into()], vec![self.syncobj_fd])
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
+    pub fn try_parse_request_fd(header: RequestHeader, value: &[u8], fds: &mut Vec<RawFdContainer>) -> Result<Self, ParseError> {
+        if header.minor_opcode != IMPORT_SYNCOBJ_REQUEST {
+            return Err(ParseError::InvalidValue);
+        }
+        let (syncobj, remaining) = Syncobj::try_parse(value)?;
+        let (drawable, remaining) = xproto::Drawable::try_parse(remaining)?;
+        if fds.is_empty() { return Err(ParseError::MissingFileDescriptors) }
+        let syncobj_fd = fds.remove(0);
+        let _ = remaining;
+        Ok(ImportSyncobjRequest {
+            syncobj,
+            drawable,
+            syncobj_fd,
+        })
+    }
+}
+impl Request for ImportSyncobjRequest {
+    const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
+
+    fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
+        let (bufs, fds) = self.serialize(major_opcode);
+        // Flatten the buffers into a single vector
+        let buf = bufs.iter().flat_map(|buf| buf.iter().copied()).collect();
+        (buf, fds)
+    }
+}
+impl crate::x11_utils::VoidRequest for ImportSyncobjRequest {
+}
+
+/// Opcode for the FreeSyncobj request
+pub const FREE_SYNCOBJ_REQUEST: u8 = 11;
+#[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct FreeSyncobjRequest {
+    pub syncobj: Syncobj,
+}
+impl_debug_if_no_extra_traits!(FreeSyncobjRequest, "FreeSyncobjRequest");
+impl FreeSyncobjRequest {
+    /// Serialize this request into bytes for the provided connection
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'static, [u8]>; 1]> {
+        let length_so_far = 0;
+        let syncobj_bytes = self.syncobj.serialize();
+        let mut request0 = vec![
+            major_opcode,
+            FREE_SYNCOBJ_REQUEST,
+            0,
+            0,
+            syncobj_bytes[0],
+            syncobj_bytes[1],
+            syncobj_bytes[2],
+            syncobj_bytes[3],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        ([request0.into()], vec![])
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
+    pub fn try_parse_request(header: RequestHeader, value: &[u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != FREE_SYNCOBJ_REQUEST {
+            return Err(ParseError::InvalidValue);
+        }
+        let (syncobj, remaining) = Syncobj::try_parse(value)?;
+        let _ = remaining;
+        Ok(FreeSyncobjRequest {
+            syncobj,
+        })
+    }
+}
+impl Request for FreeSyncobjRequest {
+    const EXTENSION_NAME: Option<&'static str> = Some(X11_EXTENSION_NAME);
+
+    fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
+        let (bufs, fds) = self.serialize(major_opcode);
+        // Flatten the buffers into a single vector
+        let buf = bufs.iter().flat_map(|buf| buf.iter().copied()).collect();
+        (buf, fds)
+    }
+}
+impl crate::x11_utils::VoidRequest for FreeSyncobjRequest {
 }
 

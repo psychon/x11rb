@@ -346,6 +346,8 @@ fn get_request_name_internal(
                     dri3::PIXMAP_FROM_BUFFERS_REQUEST => RequestInfo::KnownExt("DRI3::PixmapFromBuffers"),
                     dri3::BUFFERS_FROM_PIXMAP_REQUEST => RequestInfo::KnownExt("DRI3::BuffersFromPixmap"),
                     dri3::SET_DRM_DEVICE_IN_USE_REQUEST => RequestInfo::KnownExt("DRI3::SetDRMDeviceInUse"),
+                    dri3::IMPORT_SYNCOBJ_REQUEST => RequestInfo::KnownExt("DRI3::ImportSyncobj"),
+                    dri3::FREE_SYNCOBJ_REQUEST => RequestInfo::KnownExt("DRI3::FreeSyncobj"),
                     _ => RequestInfo::UnknownRequest(Some("DRI3"), minor_opcode),
                 }
             }
@@ -470,6 +472,7 @@ fn get_request_name_internal(
                     present::NOTIFY_MSC_REQUEST => RequestInfo::KnownExt("Present::NotifyMSC"),
                     present::SELECT_INPUT_REQUEST => RequestInfo::KnownExt("Present::SelectInput"),
                     present::QUERY_CAPABILITIES_REQUEST => RequestInfo::KnownExt("Present::QueryCapabilities"),
+                    present::PIXMAP_SYNCED_REQUEST => RequestInfo::KnownExt("Present::PixmapSynced"),
                     _ => RequestInfo::UnknownRequest(Some("Present"), minor_opcode),
                 }
             }
@@ -1244,6 +1247,10 @@ pub enum Request<'input> {
     Dri3BuffersFromPixmap(dri3::BuffersFromPixmapRequest),
     #[cfg(feature = "dri3")]
     Dri3SetDRMDeviceInUse(dri3::SetDRMDeviceInUseRequest),
+    #[cfg(feature = "dri3")]
+    Dri3ImportSyncobj(dri3::ImportSyncobjRequest),
+    #[cfg(feature = "dri3")]
+    Dri3FreeSyncobj(dri3::FreeSyncobjRequest),
     GeQueryVersion(ge::QueryVersionRequest),
     #[cfg(feature = "glx")]
     GlxRender(glx::RenderRequest<'input>),
@@ -1457,6 +1464,8 @@ pub enum Request<'input> {
     PresentSelectInput(present::SelectInputRequest),
     #[cfg(feature = "present")]
     PresentQueryCapabilities(present::QueryCapabilitiesRequest),
+    #[cfg(feature = "present")]
+    PresentPixmapSynced(present::PixmapSyncedRequest<'input>),
     #[cfg(feature = "randr")]
     RandrQueryVersion(randr::QueryVersionRequest),
     #[cfg(feature = "randr")]
@@ -2452,6 +2461,8 @@ impl<'input> Request<'input> {
                     dri3::PIXMAP_FROM_BUFFERS_REQUEST => return Ok(Request::Dri3PixmapFromBuffers(dri3::PixmapFromBuffersRequest::try_parse_request_fd(header, remaining, fds)?)),
                     dri3::BUFFERS_FROM_PIXMAP_REQUEST => return Ok(Request::Dri3BuffersFromPixmap(dri3::BuffersFromPixmapRequest::try_parse_request(header, remaining)?)),
                     dri3::SET_DRM_DEVICE_IN_USE_REQUEST => return Ok(Request::Dri3SetDRMDeviceInUse(dri3::SetDRMDeviceInUseRequest::try_parse_request(header, remaining)?)),
+                    dri3::IMPORT_SYNCOBJ_REQUEST => return Ok(Request::Dri3ImportSyncobj(dri3::ImportSyncobjRequest::try_parse_request_fd(header, remaining, fds)?)),
+                    dri3::FREE_SYNCOBJ_REQUEST => return Ok(Request::Dri3FreeSyncobj(dri3::FreeSyncobjRequest::try_parse_request(header, remaining)?)),
                     _ => (),
                 }
             }
@@ -2576,6 +2587,7 @@ impl<'input> Request<'input> {
                     present::NOTIFY_MSC_REQUEST => return Ok(Request::PresentNotifyMSC(present::NotifyMSCRequest::try_parse_request(header, remaining)?)),
                     present::SELECT_INPUT_REQUEST => return Ok(Request::PresentSelectInput(present::SelectInputRequest::try_parse_request(header, remaining)?)),
                     present::QUERY_CAPABILITIES_REQUEST => return Ok(Request::PresentQueryCapabilities(present::QueryCapabilitiesRequest::try_parse_request(header, remaining)?)),
+                    present::PIXMAP_SYNCED_REQUEST => return Ok(Request::PresentPixmapSynced(present::PixmapSyncedRequest::try_parse_request(header, remaining)?)),
                     _ => (),
                 }
             }
@@ -3325,6 +3337,10 @@ impl<'input> Request<'input> {
             Request::Dri3BuffersFromPixmap(_) => Some(parse_reply_fds::<dri3::BuffersFromPixmapRequest>),
             #[cfg(feature = "dri3")]
             Request::Dri3SetDRMDeviceInUse(_) => None,
+            #[cfg(feature = "dri3")]
+            Request::Dri3ImportSyncobj(_) => None,
+            #[cfg(feature = "dri3")]
+            Request::Dri3FreeSyncobj(_) => None,
             Request::GeQueryVersion(_) => Some(parse_reply::<ge::QueryVersionRequest>),
             #[cfg(feature = "glx")]
             Request::GlxRender(_) => None,
@@ -3538,6 +3554,8 @@ impl<'input> Request<'input> {
             Request::PresentSelectInput(_) => None,
             #[cfg(feature = "present")]
             Request::PresentQueryCapabilities(_) => Some(parse_reply::<present::QueryCapabilitiesRequest>),
+            #[cfg(feature = "present")]
+            Request::PresentPixmapSynced(_) => None,
             #[cfg(feature = "randr")]
             Request::RandrQueryVersion(_) => Some(parse_reply::<randr::QueryVersionRequest>),
             #[cfg(feature = "randr")]
@@ -4534,6 +4552,10 @@ impl<'input> Request<'input> {
             Request::Dri3BuffersFromPixmap(req) => Request::Dri3BuffersFromPixmap(req),
             #[cfg(feature = "dri3")]
             Request::Dri3SetDRMDeviceInUse(req) => Request::Dri3SetDRMDeviceInUse(req),
+            #[cfg(feature = "dri3")]
+            Request::Dri3ImportSyncobj(req) => Request::Dri3ImportSyncobj(req),
+            #[cfg(feature = "dri3")]
+            Request::Dri3FreeSyncobj(req) => Request::Dri3FreeSyncobj(req),
             Request::GeQueryVersion(req) => Request::GeQueryVersion(req),
             #[cfg(feature = "glx")]
             Request::GlxRender(req) => Request::GlxRender(req.into_owned()),
@@ -4747,6 +4769,8 @@ impl<'input> Request<'input> {
             Request::PresentSelectInput(req) => Request::PresentSelectInput(req),
             #[cfg(feature = "present")]
             Request::PresentQueryCapabilities(req) => Request::PresentQueryCapabilities(req),
+            #[cfg(feature = "present")]
+            Request::PresentPixmapSynced(req) => Request::PresentPixmapSynced(req.into_owned()),
             #[cfg(feature = "randr")]
             Request::RandrQueryVersion(req) => Request::RandrQueryVersion(req),
             #[cfg(feature = "randr")]

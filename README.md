@@ -58,9 +58,9 @@ Licensed under either of
 
 at your option.
 
-The subdirectory xcb-proto-1.15.2-gb016df1 contains a vendored copy of the
+The subdirectory xcb-proto-1.17.0 contains a vendored copy of the
 package of the same name. It is covered by the MIT license. See
-[xcb-proto-1.15.2-gb016df1/COPYING](xcb-proto-1.15.2/COPYING) for details.
+[xcb-proto-1.17.0/COPYING](xcb-proto-1.17.0/COPYING) for details.
 
 ## Contribution
 

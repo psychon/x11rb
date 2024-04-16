@@ -25,6 +25,8 @@ use crate::errors::ReplyOrIdError;
 use std::future::Future;
 use std::pin::Pin;
 #[allow(unused_imports)]
+use super::dri3;
+#[allow(unused_imports)]
 use super::randr;
 #[allow(unused_imports)]
 use super::sync;
@@ -123,6 +125,34 @@ where
     assert_eq!(slices.len(), bytes.len());
     conn.send_request_with_reply(&slices, fds).await
 }
+pub async fn pixmap_synced<'c, 'input, Conn>(conn: &'c Conn, window: xproto::Window, pixmap: xproto::Pixmap, serial: u32, valid: xfixes::Region, update: xfixes::Region, x_off: i16, y_off: i16, target_crtc: randr::Crtc, acquire_syncobj: dri3::Syncobj, release_syncobj: dri3::Syncobj, acquire_point: u64, release_point: u64, options: u32, target_msc: u64, divisor: u64, remainder: u64, notifies: &'input [Notify]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+where
+    Conn: RequestConnection + ?Sized,
+{
+    let request0 = PixmapSyncedRequest {
+        window,
+        pixmap,
+        serial,
+        valid,
+        update,
+        x_off,
+        y_off,
+        target_crtc,
+        acquire_syncobj,
+        release_syncobj,
+        acquire_point,
+        release_point,
+        options,
+        target_msc,
+        divisor,
+        remainder,
+        notifies: Cow::Borrowed(notifies),
+    };
+    let (bytes, fds) = request0.serialize(major_opcode(conn).await?);
+    let slices = [IoSlice::new(&bytes[0]), IoSlice::new(&bytes[1]), IoSlice::new(&bytes[2])];
+    assert_eq!(slices.len(), bytes.len());
+    conn.send_request_without_reply(&slices, fds).await
+}
 /// Extension trait defining the requests of this extension.
 pub trait ConnectionExt: RequestConnection {
     fn present_query_version(&self, major_version: u32, minor_version: u32) -> Pin<Box<dyn Future<Output = Result<Cookie<'_, Self, QueryVersionReply>, ConnectionError>> + Send + '_>>
@@ -147,6 +177,13 @@ pub trait ConnectionExt: RequestConnection {
     fn present_query_capabilities(&self, target: u32) -> Pin<Box<dyn Future<Output = Result<Cookie<'_, Self, QueryCapabilitiesReply>, ConnectionError>> + Send + '_>>
     {
         Box::pin(query_capabilities(self, target))
+    }
+    fn present_pixmap_synced<'c, 'input, 'future>(&'c self, window: xproto::Window, pixmap: xproto::Pixmap, serial: u32, valid: xfixes::Region, update: xfixes::Region, x_off: i16, y_off: i16, target_crtc: randr::Crtc, acquire_syncobj: dri3::Syncobj, release_syncobj: dri3::Syncobj, acquire_point: u64, release_point: u64, options: u32, target_msc: u64, divisor: u64, remainder: u64, notifies: &'input [Notify]) -> Pin<Box<dyn Future<Output = Result<VoidCookie<'c, Self>, ConnectionError>> + Send + 'future>>
+    where
+        'c: 'future,
+        'input: 'future,
+    {
+        Box::pin(pixmap_synced(self, window, pixmap, serial, valid, update, x_off, y_off, target_crtc, acquire_syncobj, release_syncobj, acquire_point, release_point, options, target_msc, divisor, remainder, notifies))
     }
 }
 

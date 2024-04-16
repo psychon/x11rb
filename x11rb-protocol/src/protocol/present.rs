@@ -23,6 +23,8 @@ use crate::utils::{RawFdContainer, pretty_print_bitmask, pretty_print_enum};
 #[allow(unused_imports)]
 use crate::x11_utils::{Request, RequestHeader, Serialize, TryParse, TryParseFd};
 #[allow(unused_imports)]
+use super::dri3;
+#[allow(unused_imports)]
 use super::randr;
 #[allow(unused_imports)]
 use super::sync;
@@ -40,7 +42,7 @@ pub const X11_EXTENSION_NAME: &str = "Present";
 /// by this build of x11rb. For most things, it does not make sense to use this
 /// information. If you need to send a `QueryVersion`, it is recommended to instead
 /// send the maximum version of the extension that you need.
-pub const X11_XML_VERSION: (u32, u32) = (1, 3);
+pub const X11_XML_VERSION: (u32, u32) = (1, 4);
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -236,6 +238,7 @@ impl Capability {
     pub const FENCE: Self = Self(1 << 1);
     pub const UST: Self = Self(1 << 2);
     pub const ASYNC_MAY_TEAR: Self = Self(1 << 3);
+    pub const SYNCOBJ: Self = Self(1 << 4);
 }
 impl From<Capability> for u8 {
     #[inline]
@@ -287,6 +290,7 @@ impl core::fmt::Debug for Capability  {
             (Self::FENCE.0.into(), "FENCE", "Fence"),
             (Self::UST.0.into(), "UST", "UST"),
             (Self::ASYNC_MAY_TEAR.0.into(), "ASYNC_MAY_TEAR", "AsyncMayTear"),
+            (Self::SYNCOBJ.0.into(), "SYNCOBJ", "Syncobj"),
         ];
         pretty_print_bitmask(fmt, self.0.into(), &variants)
     }
@@ -1089,6 +1093,239 @@ impl Serialize for QueryCapabilitiesReply {
         self.length.serialize_into(bytes);
         self.capabilities.serialize_into(bytes);
     }
+}
+
+/// Opcode for the PixmapSynced request
+pub const PIXMAP_SYNCED_REQUEST: u8 = 5;
+#[derive(Clone, Default)]
+#[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct PixmapSyncedRequest<'input> {
+    pub window: xproto::Window,
+    pub pixmap: xproto::Pixmap,
+    pub serial: u32,
+    pub valid: xfixes::Region,
+    pub update: xfixes::Region,
+    pub x_off: i16,
+    pub y_off: i16,
+    pub target_crtc: randr::Crtc,
+    pub acquire_syncobj: dri3::Syncobj,
+    pub release_syncobj: dri3::Syncobj,
+    pub acquire_point: u64,
+    pub release_point: u64,
+    pub options: u32,
+    pub target_msc: u64,
+    pub divisor: u64,
+    pub remainder: u64,
+    pub notifies: Cow<'input, [Notify]>,
+}
+impl_debug_if_no_extra_traits!(PixmapSyncedRequest<'_>, "PixmapSyncedRequest");
+impl<'input> PixmapSyncedRequest<'input> {
+    /// Serialize this request into bytes for the provided connection
+    pub fn serialize(self, major_opcode: u8) -> BufWithFds<[Cow<'input, [u8]>; 3]> {
+        let length_so_far = 0;
+        let window_bytes = self.window.serialize();
+        let pixmap_bytes = self.pixmap.serialize();
+        let serial_bytes = self.serial.serialize();
+        let valid_bytes = self.valid.serialize();
+        let update_bytes = self.update.serialize();
+        let x_off_bytes = self.x_off.serialize();
+        let y_off_bytes = self.y_off.serialize();
+        let target_crtc_bytes = self.target_crtc.serialize();
+        let acquire_syncobj_bytes = self.acquire_syncobj.serialize();
+        let release_syncobj_bytes = self.release_syncobj.serialize();
+        let acquire_point_bytes = self.acquire_point.serialize();
+        let release_point_bytes = self.release_point.serialize();
+        let options_bytes = self.options.serialize();
+        let target_msc_bytes = self.target_msc.serialize();
+        let divisor_bytes = self.divisor.serialize();
+        let remainder_bytes = self.remainder.serialize();
+        let mut request0 = vec![
+            major_opcode,
+            PIXMAP_SYNCED_REQUEST,
+            0,
+            0,
+            window_bytes[0],
+            window_bytes[1],
+            window_bytes[2],
+            window_bytes[3],
+            pixmap_bytes[0],
+            pixmap_bytes[1],
+            pixmap_bytes[2],
+            pixmap_bytes[3],
+            serial_bytes[0],
+            serial_bytes[1],
+            serial_bytes[2],
+            serial_bytes[3],
+            valid_bytes[0],
+            valid_bytes[1],
+            valid_bytes[2],
+            valid_bytes[3],
+            update_bytes[0],
+            update_bytes[1],
+            update_bytes[2],
+            update_bytes[3],
+            x_off_bytes[0],
+            x_off_bytes[1],
+            y_off_bytes[0],
+            y_off_bytes[1],
+            target_crtc_bytes[0],
+            target_crtc_bytes[1],
+            target_crtc_bytes[2],
+            target_crtc_bytes[3],
+            acquire_syncobj_bytes[0],
+            acquire_syncobj_bytes[1],
+            acquire_syncobj_bytes[2],
+            acquire_syncobj_bytes[3],
+            release_syncobj_bytes[0],
+            release_syncobj_bytes[1],
+            release_syncobj_bytes[2],
+            release_syncobj_bytes[3],
+            acquire_point_bytes[0],
+            acquire_point_bytes[1],
+            acquire_point_bytes[2],
+            acquire_point_bytes[3],
+            acquire_point_bytes[4],
+            acquire_point_bytes[5],
+            acquire_point_bytes[6],
+            acquire_point_bytes[7],
+            release_point_bytes[0],
+            release_point_bytes[1],
+            release_point_bytes[2],
+            release_point_bytes[3],
+            release_point_bytes[4],
+            release_point_bytes[5],
+            release_point_bytes[6],
+            release_point_bytes[7],
+            options_bytes[0],
+            options_bytes[1],
+            options_bytes[2],
+            options_bytes[3],
+            0,
+            0,
+            0,
+            0,
+            target_msc_bytes[0],
+            target_msc_bytes[1],
+            target_msc_bytes[2],
+            target_msc_bytes[3],
+            target_msc_bytes[4],
+            target_msc_bytes[5],
+            target_msc_bytes[6],
+            target_msc_bytes[7],
+            divisor_bytes[0],
+            divisor_bytes[1],
+            divisor_bytes[2],
+            divisor_bytes[3],
+            divisor_bytes[4],
+            divisor_bytes[5],
+            divisor_bytes[6],
+            divisor_bytes[7],
+            remainder_bytes[0],
+            remainder_bytes[1],
+            remainder_bytes[2],
+            remainder_bytes[3],
+            remainder_bytes[4],
+            remainder_bytes[5],
+            remainder_bytes[6],
+            remainder_bytes[7],
+        ];
+        let length_so_far = length_so_far + request0.len();
+        let notifies_bytes = self.notifies.serialize();
+        let length_so_far = length_so_far + notifies_bytes.len();
+        let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+        let length_so_far = length_so_far + padding0.len();
+        assert_eq!(length_so_far % 4, 0);
+        let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+        request0[2..4].copy_from_slice(&length.to_ne_bytes());
+        ([request0.into(), notifies_bytes.into(), padding0.into()], vec![])
+    }
+    /// Parse this request given its header, its body, and any fds that go along with it
+    #[cfg(feature = "request-parsing")]
+    pub fn try_parse_request(header: RequestHeader, value: &'input [u8]) -> Result<Self, ParseError> {
+        if header.minor_opcode != PIXMAP_SYNCED_REQUEST {
+            return Err(ParseError::InvalidValue);
+        }
+        let (window, remaining) = xproto::Window::try_parse(value)?;
+        let (pixmap, remaining) = xproto::Pixmap::try_parse(remaining)?;
+        let (serial, remaining) = u32::try_parse(remaining)?;
+        let (valid, remaining) = xfixes::Region::try_parse(remaining)?;
+        let (update, remaining) = xfixes::Region::try_parse(remaining)?;
+        let (x_off, remaining) = i16::try_parse(remaining)?;
+        let (y_off, remaining) = i16::try_parse(remaining)?;
+        let (target_crtc, remaining) = randr::Crtc::try_parse(remaining)?;
+        let (acquire_syncobj, remaining) = dri3::Syncobj::try_parse(remaining)?;
+        let (release_syncobj, remaining) = dri3::Syncobj::try_parse(remaining)?;
+        let (acquire_point, remaining) = u64::try_parse(remaining)?;
+        let (release_point, remaining) = u64::try_parse(remaining)?;
+        let (options, remaining) = u32::try_parse(remaining)?;
+        let remaining = remaining.get(4..).ok_or(ParseError::InsufficientData)?;
+        let (target_msc, remaining) = u64::try_parse(remaining)?;
+        let (divisor, remaining) = u64::try_parse(remaining)?;
+        let (remainder, remaining) = u64::try_parse(remaining)?;
+        let mut remaining = remaining;
+        // Length is 'everything left in the input'
+        let mut notifies = Vec::new();
+        while !remaining.is_empty() {
+            let (v, new_remaining) = Notify::try_parse(remaining)?;
+            remaining = new_remaining;
+            notifies.push(v);
+        }
+        let _ = remaining;
+        Ok(PixmapSyncedRequest {
+            window,
+            pixmap,
+            serial,
+            valid,
+            update,
+            x_off,
+            y_off,
+            target_crtc,
+            acquire_syncobj,
+            release_syncobj,
+            acquire_point,
+            release_point,
+            options,
+            target_msc,
+            divisor,
+            remainder,
+            notifies: Cow::Owned(notifies),
+        })
+    }
+    /// Clone all borrowed data in this PixmapSyncedRequest.
+    pub fn into_owned(self) -> PixmapSyncedRequest<'static> {
+        PixmapSyncedRequest {
+            window: self.window,
+            pixmap: self.pixmap,
+            serial: self.serial,
+            valid: self.valid,
+            update: self.update,
+            x_off: self.x_off,
+            y_off: self.y_off,
+            target_crtc: self.target_crtc,
+            acquire_syncobj: self.acquire_syncobj,
+            release_syncobj: self.release_syncobj,
+            acquire_point: self.acquire_point,
+            release_point: self.release_point,
+            options: self.options,
+            target_msc: self.target_msc,
+            divisor: self.divisor,
+            remainder: self.remainder,
+            notifies: Cow::Owned(self.notifies.into_owned()),
+        }
+    }
+}
+impl<'input> Request for PixmapSyncedRequest<'input> {
+    const EXTENSION_NAME: core::option::Option<&'static str> = Some(X11_EXTENSION_NAME);
+
+    fn serialize(self, major_opcode: u8) -> BufWithFds<Vec<u8>> {
+        let (bufs, fds) = self.serialize(major_opcode);
+        // Flatten the buffers into a single vector
+        let buf = bufs.iter().flat_map(|buf| buf.iter().copied()).collect();
+        (buf, fds)
+    }
+}
+impl<'input> crate::x11_utils::VoidRequest for PixmapSyncedRequest<'input> {
 }
 
 /// Opcode for the Generic event

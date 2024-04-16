@@ -1,4 +1,4 @@
-PROTO=xcb-proto-1.15.2-13-gb016df1
+PROTO=xcb-proto-1.17.0
 PROTO_OUT=x11rb-protocol/src/protocol
 X11RB_OUT=x11rb/src/protocol
 ASYNC_OUT=x11rb-async/src/protocol
