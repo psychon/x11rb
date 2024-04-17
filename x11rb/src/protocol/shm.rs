@@ -122,10 +122,10 @@ where
 /// * `dst_y` - The Y coordinate on the destination drawable to copy to.
 /// * `depth` - The depth to use.
 /// * `format` - The format of the image being drawn.  If it is XYBitmap, depth must be 1, or a
-/// “BadMatch” error results.  The foreground pixel in the GC determines the source
+/// "BadMatch" error results.  The foreground pixel in the GC determines the source
 /// for the one bits in the image, and the background pixel determines the source
 /// for the zero bits.  For XYPixmap and ZPixmap, the depth must match the depth of
-/// the drawable, or a “BadMatch” error results.
+/// the drawable, or a "BadMatch" error results.
 /// * `send_event` - True if the server should send an XCB_SHM_COMPLETION event when the blit
 /// completes.
 /// * `offset` - The offset that the source image starts at.
@@ -344,10 +344,10 @@ pub trait ConnectionExt: RequestConnection {
     /// * `dst_y` - The Y coordinate on the destination drawable to copy to.
     /// * `depth` - The depth to use.
     /// * `format` - The format of the image being drawn.  If it is XYBitmap, depth must be 1, or a
-    /// “BadMatch” error results.  The foreground pixel in the GC determines the source
+    /// "BadMatch" error results.  The foreground pixel in the GC determines the source
     /// for the one bits in the image, and the background pixel determines the source
     /// for the zero bits.  For XYPixmap and ZPixmap, the depth must match the depth of
-    /// the drawable, or a “BadMatch” error results.
+    /// the drawable, or a "BadMatch" error results.
     /// * `send_event` - True if the server should send an XCB_SHM_COMPLETION event when the blit
     /// completes.
     /// * `offset` - The offset that the source image starts at.

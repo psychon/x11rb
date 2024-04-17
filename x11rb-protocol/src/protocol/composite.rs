@@ -268,7 +268,7 @@ impl Serialize for QueryVersionReply {
 
 /// Opcode for the RedirectWindow request
 pub const REDIRECT_WINDOW_REQUEST: u8 = 1;
-/// Redirect the heirarchy starting at “window” to off-screen storage..
+/// Redirect the hierarchy starting at "window" to off-screen storage..
 ///
 /// The hierarchy starting at 'window' is directed to off-screen
 /// storage.  When all clients enabling redirection terminate,
@@ -279,7 +279,7 @@ pub const REDIRECT_WINDOW_REQUEST: u8 = 1;
 ///
 /// # Fields
 ///
-/// * `window` - The root of the heirarchy to redirect to off-screen storage.
+/// * `window` - The root of the hierarchy to redirect to off-screen storage.
 /// * `update` - Whether contents are automatically mirrored to the parent window.  If one client
 /// already specifies an update type of Manual, any attempt by another to specify a
 /// mode of Manual so will result in an Access error.
@@ -358,7 +358,7 @@ pub const REDIRECT_SUBWINDOWS_REQUEST: u8 = 2;
 ///
 /// # Fields
 ///
-/// * `window` - The root of the heirarchy to redirect to off-screen storage.
+/// * `window` - The root of the hierarchy to redirect to off-screen storage.
 /// * `update` - Whether contents are automatically mirrored to the parent window.  If one client
 /// already specifies an update type of Manual, any attempt by another to specify a
 /// mode of Manual so will result in an Access error.

@@ -59,7 +59,7 @@ where
     conn.send_request_with_reply(&slices, fds)
 }
 
-/// Redirect the heirarchy starting at “window” to off-screen storage..
+/// Redirect the hierarchy starting at "window" to off-screen storage..
 ///
 /// The hierarchy starting at 'window' is directed to off-screen
 /// storage.  When all clients enabling redirection terminate,
@@ -70,7 +70,7 @@ where
 ///
 /// # Fields
 ///
-/// * `window` - The root of the heirarchy to redirect to off-screen storage.
+/// * `window` - The root of the hierarchy to redirect to off-screen storage.
 /// * `update` - Whether contents are automatically mirrored to the parent window.  If one client
 /// already specifies an update type of Manual, any attempt by another to specify a
 /// mode of Manual so will result in an Access error.
@@ -97,7 +97,7 @@ where
 ///
 /// # Fields
 ///
-/// * `window` - The root of the heirarchy to redirect to off-screen storage.
+/// * `window` - The root of the hierarchy to redirect to off-screen storage.
 /// * `update` - Whether contents are automatically mirrored to the parent window.  If one client
 /// already specifies an update type of Manual, any attempt by another to specify a
 /// mode of Manual so will result in an Access error.
@@ -234,7 +234,7 @@ pub trait ConnectionExt: RequestConnection {
     {
         query_version(self, client_major_version, client_minor_version)
     }
-    /// Redirect the heirarchy starting at “window” to off-screen storage..
+    /// Redirect the hierarchy starting at "window" to off-screen storage..
     ///
     /// The hierarchy starting at 'window' is directed to off-screen
     /// storage.  When all clients enabling redirection terminate,
@@ -245,7 +245,7 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # Fields
     ///
-    /// * `window` - The root of the heirarchy to redirect to off-screen storage.
+    /// * `window` - The root of the hierarchy to redirect to off-screen storage.
     /// * `update` - Whether contents are automatically mirrored to the parent window.  If one client
     /// already specifies an update type of Manual, any attempt by another to specify a
     /// mode of Manual so will result in an Access error.
@@ -262,7 +262,7 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # Fields
     ///
-    /// * `window` - The root of the heirarchy to redirect to off-screen storage.
+    /// * `window` - The root of the hierarchy to redirect to off-screen storage.
     /// * `update` - Whether contents are automatically mirrored to the parent window.  If one client
     /// already specifies an update type of Manual, any attempt by another to specify a
     /// mode of Manual so will result in an Access error.
