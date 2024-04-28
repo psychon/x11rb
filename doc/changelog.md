@@ -1,3 +1,25 @@
+# Version 0.13.1 (2024-XX-XX)
+
+New features:
+* Add an `xkbcommon-example` to showcase use of x11rb together with the
+  xkbcommon crate.
+* Update from xcb-proto 1.15.2 to 1.17.0. This brings support for PRESENT 1.4
+  and DRI3 1.4 and fixes some typos in the documentation.
+
+Fixes:
+* Macro hygiene: `atom_manager!` macro now uses`::std` when referring to std
+  items.
+
+Breaking changes:
+* Optimise `atom_manager!` implementation. This changes the contents of the
+  generated `Cookie` struct, but there should be no reasons to access these
+  directly.
+* Remove some unreachable public API from x11rb-async's `StreamAdaptor`.
+
+Minor changes:
+* Fix new compiler warnings and enable more lints.
+* Update dependencies.
+
 # Version 0.13.0 (2023-12-09)
 
 New features:
