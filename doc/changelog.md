@@ -1,4 +1,4 @@
-# Version 0.13.1 (2024-XX-XX)
+# Version 0.13.1 (2024-05-01)
 
 New features:
 * Add an `xkbcommon-example` to showcase use of x11rb together with the
