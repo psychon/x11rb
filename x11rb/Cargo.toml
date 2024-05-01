@@ -1,6 +1,6 @@
 [package]
 name = "x11rb"
-version = "0.13.0"
+version = "0.13.1"
 description = "Rust bindings to X11"
 authors = [
     "Uli Schlachter <psychon@znc.in>",
@@ -15,7 +15,7 @@ license = "MIT OR Apache-2.0"
 keywords = ["xcb", "X11"]
 
 [dependencies]
-x11rb-protocol = { version = "0.13.0", default-features = false, features = ["std"], path = "../x11rb-protocol" }
+x11rb-protocol = { version = "0.13.1", default-features = false, features = ["std"], path = "../x11rb-protocol" }
 libc = { version = "0.2", optional = true }
 libloading = { version = "0.8.0", optional = true }
 once_cell = { version = "1.19", optional = true }
