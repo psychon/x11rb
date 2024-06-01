@@ -228,7 +228,7 @@ where
 /// # Errors
 ///
 /// * `Match` - You created the specified window. This does not make sense, you can only add
-/// windows created by other clients to your save set.
+///   windows created by other clients to your save set.
 /// * `Value` - You specified an invalid mode.
 /// * `Window` - The specified window does not exist.
 ///
@@ -267,12 +267,12 @@ where
 /// # Errors
 ///
 /// * `Match` - The new parent window is not on the same screen as the old parent window.
-/// 
-/// The new parent window is the specified window or an inferior of the specified window.
-/// 
-/// The new parent is InputOnly and the window is not.
-/// 
-/// The specified window has a ParentRelative background and the new parent window is not the same depth as the specified window.
+///   
+///   The new parent window is the specified window or an inferior of the specified window.
+///   
+///   The new parent is InputOnly and the window is not.
+///   
+///   The specified window has a ParentRelative background and the new parent window is not the same depth as the specified window.
 /// * `Window` - The specified window does not exist.
 ///
 /// # See
@@ -413,7 +413,7 @@ where
 /// # Errors
 ///
 /// * `Match` - You specified a Sibling without also specifying StackMode or the window is not
-/// actually a Sibling.
+///   actually a Sibling.
 /// * `Window` - The specified window does not exist. TODO: any other reason?
 /// * `Value` - TODO: reasons?
 ///
@@ -775,8 +775,8 @@ where
 /// * `Window` - The specified `window` does not exist.
 /// * `Atom` - `property` or `type` do not refer to a valid atom.
 /// * `Value` - The specified `long_offset` is beyond the actual property length (e.g. the
-/// property has a length of 3 bytes and you are setting `long_offset` to 1,
-/// resulting in a byte offset of 4).
+///   property has a length of 3 bytes and you are setting `long_offset` to 1,
+///   resulting in a byte offset of 4).
 ///
 /// # See
 ///
@@ -1230,7 +1230,7 @@ where
 /// # Errors
 ///
 /// * `Access` - Another client has already issued a GrabButton with the same button/key
-/// combination on the same window.
+///   combination on the same window.
 /// * `Value` - TODO: reasons?
 /// * `Cursor` - The specified `cursor` does not exist.
 /// * `Window` - The specified `window` does not exist.
@@ -1435,9 +1435,9 @@ where
 /// # Errors
 ///
 /// * `Access` - Another client has already issued a GrabKey with the same button/key
-/// combination on the same window.
+///   combination on the same window.
 /// * `Value` - The key is not `XCB_GRAB_ANY` and not in the range specified by `min_keycode`
-/// and `max_keycode` in the connection setup.
+///   and `max_keycode` in the connection setup.
 /// * `Window` - The specified `window` does not exist.
 ///
 /// # See
@@ -3439,7 +3439,7 @@ pub trait ConnectionExt: RequestConnection {
     /// # Errors
     ///
     /// * `Match` - You created the specified window. This does not make sense, you can only add
-    /// windows created by other clients to your save set.
+    ///   windows created by other clients to your save set.
     /// * `Value` - You specified an invalid mode.
     /// * `Window` - The specified window does not exist.
     ///
@@ -3469,12 +3469,12 @@ pub trait ConnectionExt: RequestConnection {
     /// # Errors
     ///
     /// * `Match` - The new parent window is not on the same screen as the old parent window.
-    /// 
-    /// The new parent window is the specified window or an inferior of the specified window.
-    /// 
-    /// The new parent is InputOnly and the window is not.
-    /// 
-    /// The specified window has a ParentRelative background and the new parent window is not the same depth as the specified window.
+    ///   
+    ///   The new parent window is the specified window or an inferior of the specified window.
+    ///   
+    ///   The new parent is InputOnly and the window is not.
+    ///   
+    ///   The specified window has a ParentRelative background and the new parent window is not the same depth as the specified window.
     /// * `Window` - The specified window does not exist.
     ///
     /// # See
@@ -3572,7 +3572,7 @@ pub trait ConnectionExt: RequestConnection {
     /// # Errors
     ///
     /// * `Match` - You specified a Sibling without also specifying StackMode or the window is not
-    /// actually a Sibling.
+    ///   actually a Sibling.
     /// * `Window` - The specified window does not exist. TODO: any other reason?
     /// * `Value` - TODO: reasons?
     ///
@@ -3867,8 +3867,8 @@ pub trait ConnectionExt: RequestConnection {
     /// * `Window` - The specified `window` does not exist.
     /// * `Atom` - `property` or `type` do not refer to a valid atom.
     /// * `Value` - The specified `long_offset` is beyond the actual property length (e.g. the
-    /// property has a length of 3 bytes and you are setting `long_offset` to 1,
-    /// resulting in a byte offset of 4).
+    ///   property has a length of 3 bytes and you are setting `long_offset` to 1,
+    ///   resulting in a byte offset of 4).
     ///
     /// # See
     ///
@@ -4231,7 +4231,7 @@ pub trait ConnectionExt: RequestConnection {
     /// # Errors
     ///
     /// * `Access` - Another client has already issued a GrabButton with the same button/key
-    /// combination on the same window.
+    ///   combination on the same window.
     /// * `Value` - TODO: reasons?
     /// * `Cursor` - The specified `cursor` does not exist.
     /// * `Window` - The specified `window` does not exist.
@@ -4378,9 +4378,9 @@ pub trait ConnectionExt: RequestConnection {
     /// # Errors
     ///
     /// * `Access` - Another client has already issued a GrabKey with the same button/key
-    /// combination on the same window.
+    ///   combination on the same window.
     /// * `Value` - The key is not `XCB_GRAB_ANY` and not in the range specified by `min_keycode`
-    /// and `max_keycode` in the connection setup.
+    ///   and `max_keycode` in the connection setup.
     /// * `Window` - The specified `window` does not exist.
     ///
     /// # See
