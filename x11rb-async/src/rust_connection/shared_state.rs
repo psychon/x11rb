@@ -115,7 +115,7 @@ impl<S: Stream> SharedState<S> {
 
                 if packet_count > 0 {
                     // Notify any listeners that there is new data.
-                    let _num_notified = self.new_input.notify_additional(std::usize::MAX);
+                    let _num_notified = self.new_input.notify_additional(usize::MAX);
                 } else {
                     // Wait for more data.
                     self.stream.readable().await?;
@@ -223,6 +223,6 @@ impl<S> Drop for BreakOnDrop<S> {
         self.0.driver_dropped.store(true, Ordering::SeqCst);
 
         // Wake up everyone that might be waiting
-        let _num_notified = self.0.new_input.notify_additional(std::usize::MAX);
+        let _num_notified = self.0.new_input.notify_additional(usize::MAX);
     }
 }

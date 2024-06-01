@@ -207,9 +207,9 @@ fn create_core_cursor<C: Connection>(
         0,
         0,
         // background color
-        u16::max_value(),
-        u16::max_value(),
-        u16::max_value(),
+        u16::MAX,
+        u16::MAX,
+        u16::MAX,
     )?;
     Ok(result)
 }

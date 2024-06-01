@@ -723,7 +723,7 @@ impl<S: Stream> RequestConnection for RustConnection<S> {
                     .unwrap_or_else(|| self.setup.maximum_request_length.into())
                     // Turn the u32 into usize, using the max value in case of overflow
                     .try_into()
-                    .unwrap_or(usize::max_value());
+                    .unwrap_or(usize::MAX);
                 let length = length * 4;
                 *max_bytes = Known(length);
                 crate::info!("Maximum request length is {} bytes", length);

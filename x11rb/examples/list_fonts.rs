@@ -8,7 +8,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let (conn, _) = connect(None)?;
 
     println!("DIR  MIN  MAX EXIST DFLT PROP ASC DESC NAME");
-    for reply in conn.list_fonts_with_info(u16::max_value(), b"*")? {
+    for reply in conn.list_fonts_with_info(u16::MAX, b"*")? {
         let reply = reply?;
 
         let dir = if reply.draw_direction == FontDraw::LEFT_TO_RIGHT {

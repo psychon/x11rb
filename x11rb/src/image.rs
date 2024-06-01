@@ -752,7 +752,7 @@ impl<'a> Image<'a> {
         let mut result = Vec::with_capacity(
             (usize::from(self.height()) + lines_per_request - 1) / lines_per_request,
         );
-        let lines_per_request = lines_per_request.try_into().unwrap_or(u16::max_value());
+        let lines_per_request = lines_per_request.try_into().unwrap_or(u16::MAX);
         assert!(lines_per_request > 0);
 
         let (mut y_offset, mut byte_offset) = (0, 0);

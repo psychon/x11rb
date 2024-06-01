@@ -627,7 +627,7 @@ impl<S: Stream + Send + Sync> RequestConnection for RustConnection<S> {
                             .try_into()
                             .ok()
                             .and_then(|x: usize| x.checked_mul(4))
-                            .unwrap_or(std::usize::MAX);
+                            .unwrap_or(usize::MAX);
 
                         *mrl = MaxRequestBytes::Known(total);
                         tracing::debug!("Maximum request length is {} bytes", total);

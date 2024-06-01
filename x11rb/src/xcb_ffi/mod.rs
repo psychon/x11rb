@@ -573,8 +573,8 @@ impl Connection for XCBConnection {
             let id = raw_ffi::xcb_generate_id(self.conn.as_ptr());
             // XCB does not document the behaviour of `xcb_generate_id` when
             // there is an error. Looking at its source code it seems that it
-            // returns `-1` (presumably `u32::max_value()`).
-            if id == u32::max_value() {
+            // returns `-1` (presumably `u32::MAX`).
+            if id == u32::MAX {
                 Err(Self::connection_error_from_connection(self.conn.as_ptr()).into())
             } else {
                 Ok(id)
@@ -613,7 +613,7 @@ unsafe impl as_raw_xcb_connection::AsRawXcbConnection for XCBConnection {
 /// The new sequence number may be before or after the `recent` sequence number.
 fn reconstruct_full_sequence_impl(recent: SequenceNumber, value: u32) -> SequenceNumber {
     // Expand 'value' to a full sequence number. The high bits are copied from 'recent'.
-    let u32_max = SequenceNumber::from(u32::max_value());
+    let u32_max = SequenceNumber::from(u32::MAX);
     let expanded_value = SequenceNumber::from(value) | (recent & !u32_max);
 
     // The "step size" is the difference between two sequence numbers that cannot be told apart
@@ -642,7 +642,7 @@ fn reconstruct_full_sequence_impl(recent: SequenceNumber, value: u32) -> Sequenc
     .unwrap();
     // Just because: Check that the result matches the passed-in value in the low bits
     assert_eq!(
-        result & SequenceNumber::from(u32::max_value()),
+        result & SequenceNumber::from(u32::MAX),
         SequenceNumber::from(value),
     );
     result
@@ -666,10 +666,10 @@ mod test {
     #[test]
     fn reconstruct_full_sequence() {
         use super::reconstruct_full_sequence_impl;
-        let max32 = u32::max_value();
+        let max32 = u32::MAX;
         let max32_: u64 = max32.into();
         let max32_p1 = max32_ + 1;
-        let large_offset = max32_p1 * u64::from(u16::max_value());
+        let large_offset = max32_p1 * u64::from(u16::MAX);
         for &(recent, value, expected) in &[
             (0, 0, 0),
             (0, 10, 10),
