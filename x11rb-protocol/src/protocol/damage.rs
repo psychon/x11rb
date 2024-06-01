@@ -308,7 +308,7 @@ pub const CREATE_REQUEST: u8 = 1;
 /// # Fields
 ///
 /// * `damage` - The ID with which you will refer to the new Damage object, created by
-/// `xcb_generate_id`.
+///   `xcb_generate_id`.
 /// * `drawable` - The ID of the drawable to be monitored.
 /// * `level` - The level of detail to be provided in Damage events.
 #[derive(Clone, Copy, Default)]
@@ -608,8 +608,8 @@ pub const NOTIFY_EVENT: u8 = 0;
 /// # Fields
 ///
 /// * `level` - The level of the damage being reported.
-/// If the 0x80 bit is set, indicates there are subsequent Damage events
-/// being delivered immediately as part of a larger Damage region.
+///   If the 0x80 bit is set, indicates there are subsequent Damage events
+///   being delivered immediately as part of a larger Damage region.
 /// * `drawable` - The drawable for which damage is being reported.
 /// * `damage` - The Damage object being used to track the damage.
 /// * `timestamp` - Time when the event was generated (in milliseconds).

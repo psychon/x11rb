@@ -85,7 +85,7 @@ pub trait Stream {
     /// If `Self` is `Send + Sync` and `read` is used concurrently from more than one thread:
     ///
     /// * Both the data and the file descriptors shall be read in order, but possibly
-    /// interleaved across threads.
+    ///   interleaved across threads.
     /// * Neither the data nor the file descriptors shall be duplicated.
     /// * The returned value shall always be the actual number of bytes read into `buf`.
     fn read(&self, buf: &mut [u8], fd_storage: &mut Vec<RawFdContainer>) -> Result<usize>;
@@ -112,7 +112,7 @@ pub trait Stream {
     /// If `Self` is `Send + Sync` and `write` is used concurrently from more than one thread:
     ///
     /// * Both the data and the file descriptors shall be written in order, but possibly
-    /// interleaved across threads.
+    ///   interleaved across threads.
     /// * Neither the data nor the file descriptors shall be duplicated.
     /// * The returned value shall always be the actual number of bytes written from `buf`.
     fn write(&self, buf: &[u8], fds: &mut Vec<RawFdContainer>) -> Result<usize>;
@@ -427,7 +427,7 @@ impl Stream for DefaultStream {
                 match (&mut &self.inner).write(buf) {
                     Ok(n) => return Ok(n),
                     // try again
-                    Err(ref e) if e.kind() == std::io::ErrorKind::Interrupted => {}
+                    Err(ref e) if e.kind() == ErrorKind::Interrupted => {}
                     Err(e) => return Err(e),
                 }
             }
@@ -450,7 +450,7 @@ impl Stream for DefaultStream {
                 match (&mut &self.inner).write_vectored(bufs) {
                     Ok(n) => return Ok(n),
                     // try again
-                    Err(ref e) if e.kind() == std::io::ErrorKind::Interrupted => {}
+                    Err(ref e) if e.kind() == ErrorKind::Interrupted => {}
                     Err(e) => return Err(e),
                 }
             }

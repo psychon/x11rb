@@ -1115,13 +1115,16 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                     continue;
                 }
                 let text = format!(
-                    " * `{}` - {}",
+                    "`{}` - {}",
                     field.name,
                     field.doc.as_deref().unwrap_or("").trim(),
                 );
+                let mut prefix_char = '*';
                 // Prevent rustdoc interpreting many leading spaces as code examples (?)
                 for line in text.trim().split('\n') {
                     let line = line.trim();
+                    let line = format!("{} {}", prefix_char, line);
+                    prefix_char = ' ';
                     if line.trim().is_empty() {
                         outln!(out, "///");
                     } else {
@@ -1139,12 +1142,14 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             outln!(out, "///");
             for error in doc.errors.iter() {
                 let text = format!(
-                    "* `{}` - {}",
+                    "`{}` - {}",
                     error.type_,
                     error.doc.as_deref().unwrap_or("").trim(),
                 );
+                let mut prefix_char = '*';
                 for line in text.split('\n') {
-                    outln!(out, "/// {}", line.trim_end());
+                    outln!(out, "/// {} {}", prefix_char, line.trim_end());
+                    prefix_char = ' ';
                 }
             }
         }

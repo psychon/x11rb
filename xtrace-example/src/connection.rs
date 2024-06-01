@@ -106,7 +106,7 @@ impl Connection {
                 if let Some(length_field) = packet.get(4..8) {
                     let length_field = u32::from_ne_bytes(length_field.try_into().unwrap());
                     let length_field = usize::try_from(length_field).unwrap();
-                    assert!(length_field <= usize::max_value() / 4);
+                    assert!(length_field <= usize::MAX / 4);
                     4 * length_field
                 } else {
                     0

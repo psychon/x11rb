@@ -3513,11 +3513,11 @@ impl crate::x11_utils::VoidRequest for DeletePointerBarrierRequest {
 /// # Fields
 ///
 /// * `Default` - The default behavior for regular clients: the X11 server won't terminate as long
-/// as such clients are still connected, and should this client disconnect, the
-/// server will continue running so long as other clients (that have not set
-/// XFixesClientDisconnectFlagTerminate) are connected.
+///   as such clients are still connected, and should this client disconnect, the
+///   server will continue running so long as other clients (that have not set
+///   XFixesClientDisconnectFlagTerminate) are connected.
 /// * `Terminate` - Indicates to the X11 server that it can ignore the client and terminate itself
-/// even though the client is still connected to the X11 server.
+///   even though the client is still connected to the X11 server.
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ClientDisconnectFlags(u32);

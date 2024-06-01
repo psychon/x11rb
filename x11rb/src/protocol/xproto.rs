@@ -51,20 +51,20 @@ pub use x11rb_protocol::protocol::xproto::*;
 /// # Fields
 ///
 /// * `wid` - The ID with which you will refer to the new window, created by
-/// `xcb_generate_id`.
+///   `xcb_generate_id`.
 /// * `depth` - Specifies the new window's depth (TODO: what unit?).
 ///
-/// The special value `XCB_COPY_FROM_PARENT` means the depth is taken from the
-/// `parent` window.
+///   The special value `XCB_COPY_FROM_PARENT` means the depth is taken from the
+///   `parent` window.
 /// * `visual` - Specifies the id for the new window's visual.
 ///
-/// The special value `XCB_COPY_FROM_PARENT` means the visual is taken from the
-/// `parent` window.
+///   The special value `XCB_COPY_FROM_PARENT` means the visual is taken from the
+///   `parent` window.
 /// * `class` -
 /// * `parent` - The parent window of the new window.
 /// * `border_width` - TODO:
 ///
-/// Must be zero if the `class` is `InputOnly` or a `xcb_match_error_t` occurs.
+///   Must be zero if the `class` is `InputOnly` or a `xcb_match_error_t` occurs.
 /// * `x` - The X coordinate of the new window.
 /// * `y` - The Y coordinate of the new window.
 /// * `width` - The width of the new window.
@@ -117,8 +117,8 @@ where
 /// * `window` - The window to change.
 /// * `value_mask` -
 /// * `value_list` - Values for each of the attributes specified in the bitmask `value_mask`. The
-/// order has to correspond to the order of possible `value_mask` bits. See the
-/// example.
+///   order has to correspond to the order of possible `value_mask` bits. See the
+///   example.
 ///
 /// # Errors
 ///
@@ -231,7 +231,7 @@ where
 /// # Errors
 ///
 /// * `Match` - You created the specified window. This does not make sense, you can only add
-/// windows created by other clients to your save set.
+///   windows created by other clients to your save set.
 /// * `Value` - You specified an invalid mode.
 /// * `Window` - The specified window does not exist.
 ///
@@ -271,12 +271,12 @@ where
 /// # Errors
 ///
 /// * `Match` - The new parent window is not on the same screen as the old parent window.
-/// 
-/// The new parent window is the specified window or an inferior of the specified window.
-/// 
-/// The new parent is InputOnly and the window is not.
-/// 
-/// The specified window has a ParentRelative background and the new parent window is not the same depth as the specified window.
+///   
+///   The new parent window is the specified window or an inferior of the specified window.
+///   
+///   The new parent is InputOnly and the window is not.
+///   
+///   The specified window has a ParentRelative background and the new parent window is not the same depth as the specified window.
 /// * `Window` - The specified window does not exist.
 ///
 /// # See
@@ -417,12 +417,12 @@ where
 /// * `window` - The window to configure.
 /// * `value_mask` - Bitmask of attributes to change.
 /// * `value_list` - New values, corresponding to the attributes in value_mask. The order has to
-/// correspond to the order of possible `value_mask` bits. See the example.
+///   correspond to the order of possible `value_mask` bits. See the example.
 ///
 /// # Errors
 ///
 /// * `Match` - You specified a Sibling without also specifying StackMode or the window is not
-/// actually a Sibling.
+///   actually a Sibling.
 /// * `Window` - The specified window does not exist. TODO: any other reason?
 /// * `Value` - TODO: reasons?
 ///
@@ -688,8 +688,8 @@ where
 /// * `property` - The property you want to change (an atom).
 /// * `type` - The type of the property you want to change (an atom).
 /// * `format` - Specifies whether the data should be viewed as a list of 8-bit, 16-bit or
-/// 32-bit quantities. Possible values are 8, 16 and 32. This information allows
-/// the X server to correctly perform byte-swap operations as necessary.
+///   32-bit quantities. Possible values are 8, 16 and 32. This information allows
+///   the X server to correctly perform byte-swap operations as necessary.
 /// * `data_len` - Specifies the number of elements (see `format`).
 /// * `data` - The property data.
 ///
@@ -779,21 +779,21 @@ where
 ///
 /// * `window` - The window whose property you want to get.
 /// * `delete` - Whether the property should actually be deleted. For deleting a property, the
-/// specified `type` has to match the actual property type.
+///   specified `type` has to match the actual property type.
 /// * `property` - The property you want to get (an atom).
 /// * `type` - The type of the property you want to get (an atom).
 /// * `long_offset` - Specifies the offset (in 32-bit multiples) in the specified property where the
-/// data is to be retrieved.
+///   data is to be retrieved.
 /// * `long_length` - Specifies how many 32-bit multiples of data should be retrieved (e.g. if you
-/// set `long_length` to 4, you will receive 16 bytes of data).
+///   set `long_length` to 4, you will receive 16 bytes of data).
 ///
 /// # Errors
 ///
 /// * `Window` - The specified `window` does not exist.
 /// * `Atom` - `property` or `type` do not refer to a valid atom.
 /// * `Value` - The specified `long_offset` is beyond the actual property length (e.g. the
-/// property has a length of 3 bytes and you are setting `long_offset` to 1,
-/// resulting in a byte offset of 4).
+///   property has a length of 3 bytes and you are setting `long_offset` to 1,
+///   resulting in a byte offset of 4).
 ///
 /// # See
 ///
@@ -877,15 +877,15 @@ where
 /// * `selection` - The selection.
 /// * `owner` - The new owner of the selection.
 ///
-/// The special value `XCB_NONE` means that the selection will have no owner.
+///   The special value `XCB_NONE` means that the selection will have no owner.
 /// * `time` - Timestamp to avoid race conditions when running X over the network.
 ///
-/// The selection will not be changed if `time` is earlier than the current
-/// last-change time of the `selection` or is later than the current X server time.
-/// Otherwise, the last-change time is set to the specified time.
+///   The selection will not be changed if `time` is earlier than the current
+///   last-change time of the `selection` or is later than the current X server time.
+///   Otherwise, the last-change time is set to the specified time.
 ///
-/// The special value `XCB_CURRENT_TIME` will be replaced with the current server
-/// time.
+///   The special value `XCB_CURRENT_TIME` will be replaced with the current server
+///   time.
 ///
 /// # Errors
 ///
@@ -977,23 +977,23 @@ where
 /// # Fields
 ///
 /// * `destination` - The window to send this event to. Every client which selects any event within
-/// `event_mask` on `destination` will get the event.
+///   `event_mask` on `destination` will get the event.
 ///
-/// The special value `XCB_SEND_EVENT_DEST_POINTER_WINDOW` refers to the window
-/// that contains the mouse pointer.
+///   The special value `XCB_SEND_EVENT_DEST_POINTER_WINDOW` refers to the window
+///   that contains the mouse pointer.
 ///
-/// The special value `XCB_SEND_EVENT_DEST_ITEM_FOCUS` refers to the window which
-/// has the keyboard focus.
+///   The special value `XCB_SEND_EVENT_DEST_ITEM_FOCUS` refers to the window which
+///   has the keyboard focus.
 /// * `event_mask` - Event_mask for determining which clients should receive the specified event.
-/// See `destination` and `propagate`.
+///   See `destination` and `propagate`.
 /// * `propagate` - If `propagate` is true and no clients have selected any event on `destination`,
-/// the destination is replaced with the closest ancestor of `destination` for
-/// which some client has selected a type in `event_mask` and for which no
-/// intervening window has that type in its do-not-propagate-mask. If no such
-/// window exists or if the window is an ancestor of the focus window and
-/// `InputFocus` was originally specified as the destination, the event is not sent
-/// to any clients. Otherwise, the event is reported to every client selecting on
-/// the final destination any of the types specified in `event_mask`.
+///   the destination is replaced with the closest ancestor of `destination` for
+///   which some client has selected a type in `event_mask` and for which no
+///   intervening window has that type in its do-not-propagate-mask. If no such
+///   window exists or if the window is an ancestor of the focus window and
+///   `InputFocus` was originally specified as the destination, the event is not sent
+///   to any clients. Otherwise, the event is reported to every client selecting on
+///   the final destination any of the types specified in `event_mask`.
 /// * `event` - The event to send to the specified `destination`.
 ///
 /// # Errors
@@ -1065,27 +1065,27 @@ where
 ///
 /// * `event_mask` - Specifies which pointer events are reported to the client.
 ///
-/// TODO: which values?
+///   TODO: which values?
 /// * `confine_to` - Specifies the window to confine the pointer in (the user will not be able to
-/// move the pointer out of that window).
+///   move the pointer out of that window).
 ///
-/// The special value `XCB_NONE` means don't confine the pointer.
+///   The special value `XCB_NONE` means don't confine the pointer.
 /// * `cursor` - Specifies the cursor that should be displayed or `XCB_NONE` to not change the
-/// cursor.
+///   cursor.
 /// * `owner_events` - If 1, the `grab_window` will still get the pointer events. If 0, events are not
-/// reported to the `grab_window`.
+///   reported to the `grab_window`.
 /// * `grab_window` - Specifies the window on which the pointer should be grabbed.
 /// * `time` - The time argument allows you to avoid certain circumstances that come up if
-/// applications take a long time to respond or if there are long network delays.
-/// Consider a situation where you have two applications, both of which normally
-/// grab the pointer when clicked on. If both applications specify the timestamp
-/// from the event, the second application may wake up faster and successfully grab
-/// the pointer before the first application. The first application then will get
-/// an indication that the other application grabbed the pointer before its request
-/// was processed.
+///   applications take a long time to respond or if there are long network delays.
+///   Consider a situation where you have two applications, both of which normally
+///   grab the pointer when clicked on. If both applications specify the timestamp
+///   from the event, the second application may wake up faster and successfully grab
+///   the pointer before the first application. The first application then will get
+///   an indication that the other application grabbed the pointer before its request
+///   was processed.
 ///
-/// The special value `XCB_CURRENT_TIME` will be replaced with the current server
-/// time.
+///   The special value `XCB_CURRENT_TIME` will be replaced with the current server
+///   time.
 /// * `pointer_mode` -
 /// * `keyboard_mode` -
 ///
@@ -1166,8 +1166,8 @@ where
 ///
 /// * `time` - Timestamp to avoid race conditions when running X over the network.
 ///
-/// The pointer will not be released if `time` is earlier than the
-/// last-pointer-grab time or later than the current X server time.
+///   The pointer will not be released if `time` is earlier than the
+///   last-pointer-grab time or later than the current X server time.
 /// * `name_len` - Length (in bytes) of `name`.
 /// * `name` - A pattern describing an X core font.
 ///
@@ -1233,21 +1233,21 @@ where
 /// # Fields
 ///
 /// * `owner_events` - If 1, the `grab_window` will still get the pointer events. If 0, events are not
-/// reported to the `grab_window`.
+///   reported to the `grab_window`.
 /// * `grab_window` - Specifies the window on which the pointer should be grabbed.
 /// * `event_mask` - Specifies which pointer events are reported to the client.
 ///
-/// TODO: which values?
+///   TODO: which values?
 /// * `confine_to` - Specifies the window to confine the pointer in (the user will not be able to
-/// move the pointer out of that window).
+///   move the pointer out of that window).
 ///
-/// The special value `XCB_NONE` means don't confine the pointer.
+///   The special value `XCB_NONE` means don't confine the pointer.
 /// * `cursor` - Specifies the cursor that should be displayed or `XCB_NONE` to not change the
-/// cursor.
+///   cursor.
 /// * `modifiers` - The modifiers to grab.
 ///
-/// Using the special value `XCB_MOD_MASK_ANY` means grab the pointer with all
-/// possible modifier combinations.
+///   Using the special value `XCB_MOD_MASK_ANY` means grab the pointer with all
+///   possible modifier combinations.
 /// * `pointer_mode` -
 /// * `keyboard_mode` -
 /// * `button` -
@@ -1255,7 +1255,7 @@ where
 /// # Errors
 ///
 /// * `Access` - Another client has already issued a GrabButton with the same button/key
-/// combination on the same window.
+///   combination on the same window.
 /// * `Value` - TODO: reasons?
 /// * `Cursor` - The specified `cursor` does not exist.
 /// * `Window` - The specified `window` does not exist.
@@ -1334,12 +1334,12 @@ where
 /// # Fields
 ///
 /// * `owner_events` - If 1, the `grab_window` will still get the pointer events. If 0, events are not
-/// reported to the `grab_window`.
+///   reported to the `grab_window`.
 /// * `grab_window` - Specifies the window on which the pointer should be grabbed.
 /// * `time` - Timestamp to avoid race conditions when running X over the network.
 ///
-/// The special value `XCB_CURRENT_TIME` will be replaced with the current server
-/// time.
+///   The special value `XCB_CURRENT_TIME` will be replaced with the current server
+///   time.
 /// * `pointer_mode` -
 /// * `keyboard_mode` -
 ///
@@ -1450,24 +1450,24 @@ where
 /// # Fields
 ///
 /// * `owner_events` - If 1, the `grab_window` will still get the key events. If 0, events are not
-/// reported to the `grab_window`.
+///   reported to the `grab_window`.
 /// * `grab_window` - Specifies the window on which the key should be grabbed.
 /// * `key` - The keycode of the key to grab.
 ///
-/// The special value `XCB_GRAB_ANY` means grab any key.
+///   The special value `XCB_GRAB_ANY` means grab any key.
 /// * `modifiers` - The modifiers to grab.
 ///
-/// Using the special value `XCB_MOD_MASK_ANY` means grab the key with all
-/// possible modifier combinations.
+///   Using the special value `XCB_MOD_MASK_ANY` means grab the key with all
+///   possible modifier combinations.
 /// * `pointer_mode` -
 /// * `keyboard_mode` -
 ///
 /// # Errors
 ///
 /// * `Access` - Another client has already issued a GrabKey with the same button/key
-/// combination on the same window.
+///   combination on the same window.
 /// * `Value` - The key is not `XCB_GRAB_ANY` and not in the range specified by `min_keycode`
-/// and `max_keycode` in the connection setup.
+///   and `max_keycode` in the connection setup.
 /// * `Window` - The specified `window` does not exist.
 ///
 /// # See
@@ -1502,12 +1502,12 @@ where
 ///
 /// * `key` - The keycode of the specified key combination.
 ///
-/// Using the special value `XCB_GRAB_ANY` means releasing all possible key codes.
+///   Using the special value `XCB_GRAB_ANY` means releasing all possible key codes.
 /// * `grab_window` - The window on which the grabbed key combination will be released.
 /// * `modifiers` - The modifiers of the specified key combination.
 ///
-/// Using the special value `XCB_MOD_MASK_ANY` means releasing the key combination
-/// with every possible modifier combination.
+///   Using the special value `XCB_MOD_MASK_ANY` means releasing the key combination
+///   with every possible modifier combination.
 ///
 /// # Errors
 ///
@@ -1547,8 +1547,8 @@ where
 /// * `mode` -
 /// * `time` - Timestamp to avoid race conditions when running X over the network.
 ///
-/// The special value `XCB_CURRENT_TIME` will be replaced with the current server
-/// time.
+///   The special value `XCB_CURRENT_TIME` will be replaced with the current server
+///   time.
 ///
 /// # Errors
 ///
@@ -1599,7 +1599,7 @@ where
 /// # Fields
 ///
 /// * `window` - A window to check if the pointer is on the same screen as `window` (see the
-/// `same_screen` field in the reply).
+///   `same_screen` field in the reply).
 ///
 /// # Errors
 ///
@@ -1669,13 +1669,13 @@ where
 /// # Fields
 ///
 /// * `src_window` - If `src_window` is not `XCB_NONE` (TODO), the move will only take place if the
-/// pointer is inside `src_window` and within the rectangle specified by (`src_x`,
-/// `src_y`, `src_width`, `src_height`). The rectangle coordinates are relative to
-/// `src_window`.
+///   pointer is inside `src_window` and within the rectangle specified by (`src_x`,
+///   `src_y`, `src_width`, `src_height`). The rectangle coordinates are relative to
+///   `src_window`.
 /// * `dst_window` - If `dst_window` is not `XCB_NONE` (TODO), the pointer will be moved to the
-/// offsets (`dst_x`, `dst_y`) relative to `dst_window`. If `dst_window` is
-/// `XCB_NONE` (TODO), the pointer will be moved by the offsets (`dst_x`, `dst_y`)
-/// relative to the current position of the pointer.
+///   offsets (`dst_x`, `dst_y`) relative to `dst_window`. If `dst_window` is
+///   `XCB_NONE` (TODO), the pointer will be moved by the offsets (`dst_x`, `dst_y`)
+///   relative to the current position of the pointer.
 ///
 /// # Errors
 ///
@@ -1719,19 +1719,19 @@ where
 /// # Fields
 ///
 /// * `focus` - The window to focus. All keyboard events will be reported to this window. The
-/// window must be viewable (TODO), or a `xcb_match_error_t` occurs (TODO).
+///   window must be viewable (TODO), or a `xcb_match_error_t` occurs (TODO).
 ///
-/// If `focus` is `XCB_NONE` (TODO), all keyboard events are
-/// discarded until a new focus window is set.
+///   If `focus` is `XCB_NONE` (TODO), all keyboard events are
+///   discarded until a new focus window is set.
 ///
-/// If `focus` is `XCB_POINTER_ROOT` (TODO), focus is on the root window of the
-/// screen on which the pointer is on currently.
+///   If `focus` is `XCB_POINTER_ROOT` (TODO), focus is on the root window of the
+///   screen on which the pointer is on currently.
 /// * `time` - Timestamp to avoid race conditions when running X over the network.
 ///
-/// The special value `XCB_CURRENT_TIME` will be replaced with the current server
-/// time.
+///   The special value `XCB_CURRENT_TIME` will be replaced with the current server
+///   time.
 /// * `revert_to` - Specifies what happens when the `focus` window becomes unviewable (if `focus`
-/// is neither `XCB_NONE` nor `XCB_POINTER_ROOT`).
+///   is neither `XCB_NONE` nor `XCB_POINTER_ROOT`).
 ///
 /// # Errors
 ///
@@ -1908,9 +1908,9 @@ where
 /// * `pattern_len` - The length (in bytes) of `pattern`.
 /// * `pattern` - A font pattern, for example "-misc-fixed-*".
 ///
-/// The asterisk (*) is a wildcard for any number of characters. The question mark
-/// (?) is a wildcard for a single character. Use of uppercase or lowercase does
-/// not matter.
+///   The asterisk (*) is a wildcard for any number of characters. The question mark
+///   (?) is a wildcard for a single character. Use of uppercase or lowercase does
+///   not matter.
 /// * `max_names` - The maximum number of fonts to be returned.
 pub fn list_fonts<'c, 'input, Conn>(conn: &'c Conn, max_names: u16, pattern: &'input [u8]) -> Result<Cookie<'c, Conn, ListFontsReply>, ConnectionError>
 where
@@ -1935,9 +1935,9 @@ where
 /// * `pattern_len` - The length (in bytes) of `pattern`.
 /// * `pattern` - A font pattern, for example "-misc-fixed-*".
 ///
-/// The asterisk (*) is a wildcard for any number of characters. The question mark
-/// (?) is a wildcard for a single character. Use of uppercase or lowercase does
-/// not matter.
+///   The asterisk (*) is a wildcard for any number of characters. The question mark
+///   (?) is a wildcard for a single character. Use of uppercase or lowercase does
+///   not matter.
 /// * `max_names` - The maximum number of fonts to be returned.
 pub fn list_fonts_with_info<'c, 'input, Conn>(conn: &'c Conn, max_names: u16, pattern: &'input [u8]) -> Result<ListFontsWithInfoCookie<'c, Conn>, ConnectionError>
 where
@@ -1986,7 +1986,7 @@ where
 ///
 /// * `depth` - TODO
 /// * `pid` - The ID with which you will refer to the new pixmap, created by
-/// `xcb_generate_id`.
+///   `xcb_generate_id`.
 /// * `drawable` - Drawable to get the screen from.
 /// * `width` - The width of the new pixmap.
 /// * `height` - The height of the new pixmap.
@@ -2050,7 +2050,7 @@ where
 /// # Fields
 ///
 /// * `cid` - The ID with which you will refer to the graphics context, created by
-/// `xcb_generate_id`.
+///   `xcb_generate_id`.
 /// * `drawable` - Drawable to get the root/depth from.
 ///
 /// # Errors
@@ -2089,8 +2089,8 @@ where
 /// * `gc` - The graphics context to change.
 /// * `value_mask` -
 /// * `value_list` - Values for each of the components specified in the bitmask `value_mask`. The
-/// order has to correspond to the order of possible `value_mask` bits. See the
-/// example.
+///   order has to correspond to the order of possible `value_mask` bits. See the
+///   example.
 ///
 /// # Errors
 ///
@@ -2380,7 +2380,7 @@ where
 /// * `drawable` - A drawable (Window or Pixmap) to draw on.
 /// * `gc` - The graphics context to use.
 ///
-/// TODO: document which attributes of a gc are used
+///   TODO: document which attributes of a gc are used
 /// * `segments_len` - The number of `xcb_segment_t` structures in `segments`.
 /// * `segments` - An array of `xcb_segment_t` structures.
 ///
@@ -2462,12 +2462,12 @@ where
 /// * `drawable` - The drawable (Window or Pixmap) to draw on.
 /// * `gc` - The graphics context to use.
 ///
-/// The following graphics context components are used: function, plane-mask,
-/// fill-style, subwindow-mode, clip-x-origin, clip-y-origin, and clip-mask.
+///   The following graphics context components are used: function, plane-mask,
+///   fill-style, subwindow-mode, clip-x-origin, clip-y-origin, and clip-mask.
 ///
-/// The following graphics context mode-dependent components are used:
-/// foreground, background, tile, stipple, tile-stipple-x-origin, and
-/// tile-stipple-y-origin.
+///   The following graphics context mode-dependent components are used:
+///   foreground, background, tile, stipple, tile-stipple-x-origin, and
+///   tile-stipple-y-origin.
 /// * `rectangles_len` - The number of `xcb_rectangle_t` structures in `rectangles`.
 /// * `rectangles` - The rectangles to fill.
 ///
@@ -2596,15 +2596,15 @@ where
 ///
 /// * `drawable` - The drawable (Window or Pixmap) to draw text on.
 /// * `string_len` - The length of the `string`. Note that this parameter limited by 255 due to
-/// using 8 bits!
+///   using 8 bits!
 /// * `string` - The string to draw. Only the first 255 characters are relevant due to the data
-/// type of `string_len`.
+///   type of `string_len`.
 /// * `x` - The x coordinate of the first character, relative to the origin of `drawable`.
 /// * `y` - The y coordinate of the first character, relative to the origin of `drawable`.
 /// * `gc` - The graphics context to use.
 ///
-/// The following graphics context components are used: plane-mask, foreground,
-/// background, font, subwindow-mode, clip-x-origin, clip-y-origin, and clip-mask.
+///   The following graphics context components are used: plane-mask, foreground,
+///   background, font, subwindow-mode, clip-x-origin, clip-y-origin, and clip-mask.
 ///
 /// # Errors
 ///
@@ -2647,16 +2647,16 @@ where
 ///
 /// * `drawable` - The drawable (Window or Pixmap) to draw text on.
 /// * `string_len` - The length of the `string` in characters. Note that this parameter limited by
-/// 255 due to using 8 bits!
+///   255 due to using 8 bits!
 /// * `string` - The string to draw. Only the first 255 characters are relevant due to the data
-/// type of `string_len`. Every character uses 2 bytes (hence the 16 in this
-/// request's name).
+///   type of `string_len`. Every character uses 2 bytes (hence the 16 in this
+///   request's name).
 /// * `x` - The x coordinate of the first character, relative to the origin of `drawable`.
 /// * `y` - The y coordinate of the first character, relative to the origin of `drawable`.
 /// * `gc` - The graphics context to use.
 ///
-/// The following graphics context components are used: plane-mask, foreground,
-/// background, font, subwindow-mode, clip-x-origin, clip-y-origin, and clip-mask.
+///   The following graphics context components are used: plane-mask, foreground,
+///   background, font, subwindow-mode, clip-x-origin, clip-y-origin, and clip-mask.
 ///
 /// # Errors
 ///
@@ -2965,8 +2965,8 @@ where
 /// * `mask_font` - In which font to look for the mask glyph.
 /// * `source_char` - The glyph of `source_font` to use.
 /// * `mask_char` - The glyph of `mask_font` to use as a mask: Pixels which are set to 1 define
-/// which source pixels are displayed. All pixels which are set to 0 are not
-/// displayed.
+///   which source pixels are displayed. All pixels which are set to 0 are not
+///   displayed.
 /// * `fore_red` - The red value of the foreground color.
 /// * `fore_green` - The green value of the foreground color.
 /// * `fore_blue` - The blue value of the foreground color.
@@ -3080,7 +3080,7 @@ where
 ///
 /// * `name_len` - The length of `name` in bytes.
 /// * `name` - The name of the extension to query, for example "RANDR". This is case
-/// sensitive!
+///   sensitive!
 ///
 /// # See
 ///
@@ -3291,10 +3291,10 @@ where
 /// # Fields
 ///
 /// * `resource` - Any resource belonging to the client (for example a Window), used to identify
-/// the client connection.
+///   the client connection.
 ///
-/// The special value of `XCB_KILL_ALL_TEMPORARY`, the resources of all clients
-/// that have terminated in `RetainTemporary` (TODO) are destroyed.
+///   The special value of `XCB_KILL_ALL_TEMPORARY`, the resources of all clients
+///   that have terminated in `RetainTemporary` (TODO) are destroyed.
 ///
 /// # Errors
 ///
@@ -3427,20 +3427,20 @@ pub trait ConnectionExt: RequestConnection {
     /// # Fields
     ///
     /// * `wid` - The ID with which you will refer to the new window, created by
-    /// `xcb_generate_id`.
+    ///   `xcb_generate_id`.
     /// * `depth` - Specifies the new window's depth (TODO: what unit?).
     ///
-    /// The special value `XCB_COPY_FROM_PARENT` means the depth is taken from the
-    /// `parent` window.
+    ///   The special value `XCB_COPY_FROM_PARENT` means the depth is taken from the
+    ///   `parent` window.
     /// * `visual` - Specifies the id for the new window's visual.
     ///
-    /// The special value `XCB_COPY_FROM_PARENT` means the visual is taken from the
-    /// `parent` window.
+    ///   The special value `XCB_COPY_FROM_PARENT` means the visual is taken from the
+    ///   `parent` window.
     /// * `class` -
     /// * `parent` - The parent window of the new window.
     /// * `border_width` - TODO:
     ///
-    /// Must be zero if the `class` is `InputOnly` or a `xcb_match_error_t` occurs.
+    ///   Must be zero if the `class` is `InputOnly` or a `xcb_match_error_t` occurs.
     /// * `x` - The X coordinate of the new window.
     /// * `y` - The Y coordinate of the new window.
     /// * `width` - The width of the new window.
@@ -3474,8 +3474,8 @@ pub trait ConnectionExt: RequestConnection {
     /// * `window` - The window to change.
     /// * `value_mask` -
     /// * `value_list` - Values for each of the attributes specified in the bitmask `value_mask`. The
-    /// order has to correspond to the order of possible `value_mask` bits. See the
-    /// example.
+    ///   order has to correspond to the order of possible `value_mask` bits. See the
+    ///   example.
     ///
     /// # Errors
     ///
@@ -3551,7 +3551,7 @@ pub trait ConnectionExt: RequestConnection {
     /// # Errors
     ///
     /// * `Match` - You created the specified window. This does not make sense, you can only add
-    /// windows created by other clients to your save set.
+    ///   windows created by other clients to your save set.
     /// * `Value` - You specified an invalid mode.
     /// * `Window` - The specified window does not exist.
     ///
@@ -3581,12 +3581,12 @@ pub trait ConnectionExt: RequestConnection {
     /// # Errors
     ///
     /// * `Match` - The new parent window is not on the same screen as the old parent window.
-    /// 
-    /// The new parent window is the specified window or an inferior of the specified window.
-    /// 
-    /// The new parent is InputOnly and the window is not.
-    /// 
-    /// The specified window has a ParentRelative background and the new parent window is not the same depth as the specified window.
+    ///   
+    ///   The new parent window is the specified window or an inferior of the specified window.
+    ///   
+    ///   The new parent is InputOnly and the window is not.
+    ///   
+    ///   The specified window has a ParentRelative background and the new parent window is not the same depth as the specified window.
     /// * `Window` - The specified window does not exist.
     ///
     /// # See
@@ -3679,12 +3679,12 @@ pub trait ConnectionExt: RequestConnection {
     /// * `window` - The window to configure.
     /// * `value_mask` - Bitmask of attributes to change.
     /// * `value_list` - New values, corresponding to the attributes in value_mask. The order has to
-    /// correspond to the order of possible `value_mask` bits. See the example.
+    ///   correspond to the order of possible `value_mask` bits. See the example.
     ///
     /// # Errors
     ///
     /// * `Match` - You specified a Sibling without also specifying StackMode or the window is not
-    /// actually a Sibling.
+    ///   actually a Sibling.
     /// * `Window` - The specified window does not exist. TODO: any other reason?
     /// * `Value` - TODO: reasons?
     ///
@@ -3893,8 +3893,8 @@ pub trait ConnectionExt: RequestConnection {
     /// * `property` - The property you want to change (an atom).
     /// * `type` - The type of the property you want to change (an atom).
     /// * `format` - Specifies whether the data should be viewed as a list of 8-bit, 16-bit or
-    /// 32-bit quantities. Possible values are 8, 16 and 32. This information allows
-    /// the X server to correctly perform byte-swap operations as necessary.
+    ///   32-bit quantities. Possible values are 8, 16 and 32. This information allows
+    ///   the X server to correctly perform byte-swap operations as necessary.
     /// * `data_len` - Specifies the number of elements (see `format`).
     /// * `data` - The property data.
     ///
@@ -3958,21 +3958,21 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// * `window` - The window whose property you want to get.
     /// * `delete` - Whether the property should actually be deleted. For deleting a property, the
-    /// specified `type` has to match the actual property type.
+    ///   specified `type` has to match the actual property type.
     /// * `property` - The property you want to get (an atom).
     /// * `type` - The type of the property you want to get (an atom).
     /// * `long_offset` - Specifies the offset (in 32-bit multiples) in the specified property where the
-    /// data is to be retrieved.
+    ///   data is to be retrieved.
     /// * `long_length` - Specifies how many 32-bit multiples of data should be retrieved (e.g. if you
-    /// set `long_length` to 4, you will receive 16 bytes of data).
+    ///   set `long_length` to 4, you will receive 16 bytes of data).
     ///
     /// # Errors
     ///
     /// * `Window` - The specified `window` does not exist.
     /// * `Atom` - `property` or `type` do not refer to a valid atom.
     /// * `Value` - The specified `long_offset` is beyond the actual property length (e.g. the
-    /// property has a length of 3 bytes and you are setting `long_offset` to 1,
-    /// resulting in a byte offset of 4).
+    ///   property has a length of 3 bytes and you are setting `long_offset` to 1,
+    ///   resulting in a byte offset of 4).
     ///
     /// # See
     ///
@@ -4032,15 +4032,15 @@ pub trait ConnectionExt: RequestConnection {
     /// * `selection` - The selection.
     /// * `owner` - The new owner of the selection.
     ///
-    /// The special value `XCB_NONE` means that the selection will have no owner.
+    ///   The special value `XCB_NONE` means that the selection will have no owner.
     /// * `time` - Timestamp to avoid race conditions when running X over the network.
     ///
-    /// The selection will not be changed if `time` is earlier than the current
-    /// last-change time of the `selection` or is later than the current X server time.
-    /// Otherwise, the last-change time is set to the specified time.
+    ///   The selection will not be changed if `time` is earlier than the current
+    ///   last-change time of the `selection` or is later than the current X server time.
+    ///   Otherwise, the last-change time is set to the specified time.
     ///
-    /// The special value `XCB_CURRENT_TIME` will be replaced with the current server
-    /// time.
+    ///   The special value `XCB_CURRENT_TIME` will be replaced with the current server
+    ///   time.
     ///
     /// # Errors
     ///
@@ -4097,23 +4097,23 @@ pub trait ConnectionExt: RequestConnection {
     /// # Fields
     ///
     /// * `destination` - The window to send this event to. Every client which selects any event within
-    /// `event_mask` on `destination` will get the event.
+    ///   `event_mask` on `destination` will get the event.
     ///
-    /// The special value `XCB_SEND_EVENT_DEST_POINTER_WINDOW` refers to the window
-    /// that contains the mouse pointer.
+    ///   The special value `XCB_SEND_EVENT_DEST_POINTER_WINDOW` refers to the window
+    ///   that contains the mouse pointer.
     ///
-    /// The special value `XCB_SEND_EVENT_DEST_ITEM_FOCUS` refers to the window which
-    /// has the keyboard focus.
+    ///   The special value `XCB_SEND_EVENT_DEST_ITEM_FOCUS` refers to the window which
+    ///   has the keyboard focus.
     /// * `event_mask` - Event_mask for determining which clients should receive the specified event.
-    /// See `destination` and `propagate`.
+    ///   See `destination` and `propagate`.
     /// * `propagate` - If `propagate` is true and no clients have selected any event on `destination`,
-    /// the destination is replaced with the closest ancestor of `destination` for
-    /// which some client has selected a type in `event_mask` and for which no
-    /// intervening window has that type in its do-not-propagate-mask. If no such
-    /// window exists or if the window is an ancestor of the focus window and
-    /// `InputFocus` was originally specified as the destination, the event is not sent
-    /// to any clients. Otherwise, the event is reported to every client selecting on
-    /// the final destination any of the types specified in `event_mask`.
+    ///   the destination is replaced with the closest ancestor of `destination` for
+    ///   which some client has selected a type in `event_mask` and for which no
+    ///   intervening window has that type in its do-not-propagate-mask. If no such
+    ///   window exists or if the window is an ancestor of the focus window and
+    ///   `InputFocus` was originally specified as the destination, the event is not sent
+    ///   to any clients. Otherwise, the event is reported to every client selecting on
+    ///   the final destination any of the types specified in `event_mask`.
     /// * `event` - The event to send to the specified `destination`.
     ///
     /// # Errors
@@ -4172,27 +4172,27 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// * `event_mask` - Specifies which pointer events are reported to the client.
     ///
-    /// TODO: which values?
+    ///   TODO: which values?
     /// * `confine_to` - Specifies the window to confine the pointer in (the user will not be able to
-    /// move the pointer out of that window).
+    ///   move the pointer out of that window).
     ///
-    /// The special value `XCB_NONE` means don't confine the pointer.
+    ///   The special value `XCB_NONE` means don't confine the pointer.
     /// * `cursor` - Specifies the cursor that should be displayed or `XCB_NONE` to not change the
-    /// cursor.
+    ///   cursor.
     /// * `owner_events` - If 1, the `grab_window` will still get the pointer events. If 0, events are not
-    /// reported to the `grab_window`.
+    ///   reported to the `grab_window`.
     /// * `grab_window` - Specifies the window on which the pointer should be grabbed.
     /// * `time` - The time argument allows you to avoid certain circumstances that come up if
-    /// applications take a long time to respond or if there are long network delays.
-    /// Consider a situation where you have two applications, both of which normally
-    /// grab the pointer when clicked on. If both applications specify the timestamp
-    /// from the event, the second application may wake up faster and successfully grab
-    /// the pointer before the first application. The first application then will get
-    /// an indication that the other application grabbed the pointer before its request
-    /// was processed.
+    ///   applications take a long time to respond or if there are long network delays.
+    ///   Consider a situation where you have two applications, both of which normally
+    ///   grab the pointer when clicked on. If both applications specify the timestamp
+    ///   from the event, the second application may wake up faster and successfully grab
+    ///   the pointer before the first application. The first application then will get
+    ///   an indication that the other application grabbed the pointer before its request
+    ///   was processed.
     ///
-    /// The special value `XCB_CURRENT_TIME` will be replaced with the current server
-    /// time.
+    ///   The special value `XCB_CURRENT_TIME` will be replaced with the current server
+    ///   time.
     /// * `pointer_mode` -
     /// * `keyboard_mode` -
     ///
@@ -4255,8 +4255,8 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// * `time` - Timestamp to avoid race conditions when running X over the network.
     ///
-    /// The pointer will not be released if `time` is earlier than the
-    /// last-pointer-grab time or later than the current X server time.
+    ///   The pointer will not be released if `time` is earlier than the
+    ///   last-pointer-grab time or later than the current X server time.
     /// * `name_len` - Length (in bytes) of `name`.
     /// * `name` - A pattern describing an X core font.
     ///
@@ -4313,21 +4313,21 @@ pub trait ConnectionExt: RequestConnection {
     /// # Fields
     ///
     /// * `owner_events` - If 1, the `grab_window` will still get the pointer events. If 0, events are not
-    /// reported to the `grab_window`.
+    ///   reported to the `grab_window`.
     /// * `grab_window` - Specifies the window on which the pointer should be grabbed.
     /// * `event_mask` - Specifies which pointer events are reported to the client.
     ///
-    /// TODO: which values?
+    ///   TODO: which values?
     /// * `confine_to` - Specifies the window to confine the pointer in (the user will not be able to
-    /// move the pointer out of that window).
+    ///   move the pointer out of that window).
     ///
-    /// The special value `XCB_NONE` means don't confine the pointer.
+    ///   The special value `XCB_NONE` means don't confine the pointer.
     /// * `cursor` - Specifies the cursor that should be displayed or `XCB_NONE` to not change the
-    /// cursor.
+    ///   cursor.
     /// * `modifiers` - The modifiers to grab.
     ///
-    /// Using the special value `XCB_MOD_MASK_ANY` means grab the pointer with all
-    /// possible modifier combinations.
+    ///   Using the special value `XCB_MOD_MASK_ANY` means grab the pointer with all
+    ///   possible modifier combinations.
     /// * `pointer_mode` -
     /// * `keyboard_mode` -
     /// * `button` -
@@ -4335,7 +4335,7 @@ pub trait ConnectionExt: RequestConnection {
     /// # Errors
     ///
     /// * `Access` - Another client has already issued a GrabButton with the same button/key
-    /// combination on the same window.
+    ///   combination on the same window.
     /// * `Value` - TODO: reasons?
     /// * `Cursor` - The specified `cursor` does not exist.
     /// * `Window` - The specified `window` does not exist.
@@ -4373,12 +4373,12 @@ pub trait ConnectionExt: RequestConnection {
     /// # Fields
     ///
     /// * `owner_events` - If 1, the `grab_window` will still get the pointer events. If 0, events are not
-    /// reported to the `grab_window`.
+    ///   reported to the `grab_window`.
     /// * `grab_window` - Specifies the window on which the pointer should be grabbed.
     /// * `time` - Timestamp to avoid race conditions when running X over the network.
     ///
-    /// The special value `XCB_CURRENT_TIME` will be replaced with the current server
-    /// time.
+    ///   The special value `XCB_CURRENT_TIME` will be replaced with the current server
+    ///   time.
     /// * `pointer_mode` -
     /// * `keyboard_mode` -
     ///
@@ -4467,24 +4467,24 @@ pub trait ConnectionExt: RequestConnection {
     /// # Fields
     ///
     /// * `owner_events` - If 1, the `grab_window` will still get the key events. If 0, events are not
-    /// reported to the `grab_window`.
+    ///   reported to the `grab_window`.
     /// * `grab_window` - Specifies the window on which the key should be grabbed.
     /// * `key` - The keycode of the key to grab.
     ///
-    /// The special value `XCB_GRAB_ANY` means grab any key.
+    ///   The special value `XCB_GRAB_ANY` means grab any key.
     /// * `modifiers` - The modifiers to grab.
     ///
-    /// Using the special value `XCB_MOD_MASK_ANY` means grab the key with all
-    /// possible modifier combinations.
+    ///   Using the special value `XCB_MOD_MASK_ANY` means grab the key with all
+    ///   possible modifier combinations.
     /// * `pointer_mode` -
     /// * `keyboard_mode` -
     ///
     /// # Errors
     ///
     /// * `Access` - Another client has already issued a GrabKey with the same button/key
-    /// combination on the same window.
+    ///   combination on the same window.
     /// * `Value` - The key is not `XCB_GRAB_ANY` and not in the range specified by `min_keycode`
-    /// and `max_keycode` in the connection setup.
+    ///   and `max_keycode` in the connection setup.
     /// * `Window` - The specified `window` does not exist.
     ///
     /// # See
@@ -4505,12 +4505,12 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// * `key` - The keycode of the specified key combination.
     ///
-    /// Using the special value `XCB_GRAB_ANY` means releasing all possible key codes.
+    ///   Using the special value `XCB_GRAB_ANY` means releasing all possible key codes.
     /// * `grab_window` - The window on which the grabbed key combination will be released.
     /// * `modifiers` - The modifiers of the specified key combination.
     ///
-    /// Using the special value `XCB_MOD_MASK_ANY` means releasing the key combination
-    /// with every possible modifier combination.
+    ///   Using the special value `XCB_MOD_MASK_ANY` means releasing the key combination
+    ///   with every possible modifier combination.
     ///
     /// # Errors
     ///
@@ -4539,8 +4539,8 @@ pub trait ConnectionExt: RequestConnection {
     /// * `mode` -
     /// * `time` - Timestamp to avoid race conditions when running X over the network.
     ///
-    /// The special value `XCB_CURRENT_TIME` will be replaced with the current server
-    /// time.
+    ///   The special value `XCB_CURRENT_TIME` will be replaced with the current server
+    ///   time.
     ///
     /// # Errors
     ///
@@ -4567,7 +4567,7 @@ pub trait ConnectionExt: RequestConnection {
     /// # Fields
     ///
     /// * `window` - A window to check if the pointer is on the same screen as `window` (see the
-    /// `same_screen` field in the reply).
+    ///   `same_screen` field in the reply).
     ///
     /// # Errors
     ///
@@ -4604,13 +4604,13 @@ pub trait ConnectionExt: RequestConnection {
     /// # Fields
     ///
     /// * `src_window` - If `src_window` is not `XCB_NONE` (TODO), the move will only take place if the
-    /// pointer is inside `src_window` and within the rectangle specified by (`src_x`,
-    /// `src_y`, `src_width`, `src_height`). The rectangle coordinates are relative to
-    /// `src_window`.
+    ///   pointer is inside `src_window` and within the rectangle specified by (`src_x`,
+    ///   `src_y`, `src_width`, `src_height`). The rectangle coordinates are relative to
+    ///   `src_window`.
     /// * `dst_window` - If `dst_window` is not `XCB_NONE` (TODO), the pointer will be moved to the
-    /// offsets (`dst_x`, `dst_y`) relative to `dst_window`. If `dst_window` is
-    /// `XCB_NONE` (TODO), the pointer will be moved by the offsets (`dst_x`, `dst_y`)
-    /// relative to the current position of the pointer.
+    ///   offsets (`dst_x`, `dst_y`) relative to `dst_window`. If `dst_window` is
+    ///   `XCB_NONE` (TODO), the pointer will be moved by the offsets (`dst_x`, `dst_y`)
+    ///   relative to the current position of the pointer.
     ///
     /// # Errors
     ///
@@ -4637,19 +4637,19 @@ pub trait ConnectionExt: RequestConnection {
     /// # Fields
     ///
     /// * `focus` - The window to focus. All keyboard events will be reported to this window. The
-    /// window must be viewable (TODO), or a `xcb_match_error_t` occurs (TODO).
+    ///   window must be viewable (TODO), or a `xcb_match_error_t` occurs (TODO).
     ///
-    /// If `focus` is `XCB_NONE` (TODO), all keyboard events are
-    /// discarded until a new focus window is set.
+    ///   If `focus` is `XCB_NONE` (TODO), all keyboard events are
+    ///   discarded until a new focus window is set.
     ///
-    /// If `focus` is `XCB_POINTER_ROOT` (TODO), focus is on the root window of the
-    /// screen on which the pointer is on currently.
+    ///   If `focus` is `XCB_POINTER_ROOT` (TODO), focus is on the root window of the
+    ///   screen on which the pointer is on currently.
     /// * `time` - Timestamp to avoid race conditions when running X over the network.
     ///
-    /// The special value `XCB_CURRENT_TIME` will be replaced with the current server
-    /// time.
+    ///   The special value `XCB_CURRENT_TIME` will be replaced with the current server
+    ///   time.
     /// * `revert_to` - Specifies what happens when the `focus` window becomes unviewable (if `focus`
-    /// is neither `XCB_NONE` nor `XCB_POINTER_ROOT`).
+    ///   is neither `XCB_NONE` nor `XCB_POINTER_ROOT`).
     ///
     /// # Errors
     ///
@@ -4762,9 +4762,9 @@ pub trait ConnectionExt: RequestConnection {
     /// * `pattern_len` - The length (in bytes) of `pattern`.
     /// * `pattern` - A font pattern, for example "-misc-fixed-*".
     ///
-    /// The asterisk (*) is a wildcard for any number of characters. The question mark
-    /// (?) is a wildcard for a single character. Use of uppercase or lowercase does
-    /// not matter.
+    ///   The asterisk (*) is a wildcard for any number of characters. The question mark
+    ///   (?) is a wildcard for a single character. Use of uppercase or lowercase does
+    ///   not matter.
     /// * `max_names` - The maximum number of fonts to be returned.
     fn list_fonts<'c, 'input>(&'c self, max_names: u16, pattern: &'input [u8]) -> Result<Cookie<'c, Self, ListFontsReply>, ConnectionError>
     {
@@ -4779,9 +4779,9 @@ pub trait ConnectionExt: RequestConnection {
     /// * `pattern_len` - The length (in bytes) of `pattern`.
     /// * `pattern` - A font pattern, for example "-misc-fixed-*".
     ///
-    /// The asterisk (*) is a wildcard for any number of characters. The question mark
-    /// (?) is a wildcard for a single character. Use of uppercase or lowercase does
-    /// not matter.
+    ///   The asterisk (*) is a wildcard for any number of characters. The question mark
+    ///   (?) is a wildcard for a single character. Use of uppercase or lowercase does
+    ///   not matter.
     /// * `max_names` - The maximum number of fonts to be returned.
     fn list_fonts_with_info<'c, 'input>(&'c self, max_names: u16, pattern: &'input [u8]) -> Result<ListFontsWithInfoCookie<'c, Self>, ConnectionError>
     {
@@ -4804,7 +4804,7 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// * `depth` - TODO
     /// * `pid` - The ID with which you will refer to the new pixmap, created by
-    /// `xcb_generate_id`.
+    ///   `xcb_generate_id`.
     /// * `drawable` - Drawable to get the screen from.
     /// * `width` - The width of the new pixmap.
     /// * `height` - The height of the new pixmap.
@@ -4846,7 +4846,7 @@ pub trait ConnectionExt: RequestConnection {
     /// # Fields
     ///
     /// * `cid` - The ID with which you will refer to the graphics context, created by
-    /// `xcb_generate_id`.
+    ///   `xcb_generate_id`.
     /// * `drawable` - Drawable to get the root/depth from.
     ///
     /// # Errors
@@ -4874,8 +4874,8 @@ pub trait ConnectionExt: RequestConnection {
     /// * `gc` - The graphics context to change.
     /// * `value_mask` -
     /// * `value_list` - Values for each of the components specified in the bitmask `value_mask`. The
-    /// order has to correspond to the order of possible `value_mask` bits. See the
-    /// example.
+    ///   order has to correspond to the order of possible `value_mask` bits. See the
+    ///   example.
     ///
     /// # Errors
     ///
@@ -5038,7 +5038,7 @@ pub trait ConnectionExt: RequestConnection {
     /// * `drawable` - A drawable (Window or Pixmap) to draw on.
     /// * `gc` - The graphics context to use.
     ///
-    /// TODO: document which attributes of a gc are used
+    ///   TODO: document which attributes of a gc are used
     /// * `segments_len` - The number of `xcb_segment_t` structures in `segments`.
     /// * `segments` - An array of `xcb_segment_t` structures.
     ///
@@ -5074,12 +5074,12 @@ pub trait ConnectionExt: RequestConnection {
     /// * `drawable` - The drawable (Window or Pixmap) to draw on.
     /// * `gc` - The graphics context to use.
     ///
-    /// The following graphics context components are used: function, plane-mask,
-    /// fill-style, subwindow-mode, clip-x-origin, clip-y-origin, and clip-mask.
+    ///   The following graphics context components are used: function, plane-mask,
+    ///   fill-style, subwindow-mode, clip-x-origin, clip-y-origin, and clip-mask.
     ///
-    /// The following graphics context mode-dependent components are used:
-    /// foreground, background, tile, stipple, tile-stipple-x-origin, and
-    /// tile-stipple-y-origin.
+    ///   The following graphics context mode-dependent components are used:
+    ///   foreground, background, tile, stipple, tile-stipple-x-origin, and
+    ///   tile-stipple-y-origin.
     /// * `rectangles_len` - The number of `xcb_rectangle_t` structures in `rectangles`.
     /// * `rectangles` - The rectangles to fill.
     ///
@@ -5127,15 +5127,15 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// * `drawable` - The drawable (Window or Pixmap) to draw text on.
     /// * `string_len` - The length of the `string`. Note that this parameter limited by 255 due to
-    /// using 8 bits!
+    ///   using 8 bits!
     /// * `string` - The string to draw. Only the first 255 characters are relevant due to the data
-    /// type of `string_len`.
+    ///   type of `string_len`.
     /// * `x` - The x coordinate of the first character, relative to the origin of `drawable`.
     /// * `y` - The y coordinate of the first character, relative to the origin of `drawable`.
     /// * `gc` - The graphics context to use.
     ///
-    /// The following graphics context components are used: plane-mask, foreground,
-    /// background, font, subwindow-mode, clip-x-origin, clip-y-origin, and clip-mask.
+    ///   The following graphics context components are used: plane-mask, foreground,
+    ///   background, font, subwindow-mode, clip-x-origin, clip-y-origin, and clip-mask.
     ///
     /// # Errors
     ///
@@ -5165,16 +5165,16 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// * `drawable` - The drawable (Window or Pixmap) to draw text on.
     /// * `string_len` - The length of the `string` in characters. Note that this parameter limited by
-    /// 255 due to using 8 bits!
+    ///   255 due to using 8 bits!
     /// * `string` - The string to draw. Only the first 255 characters are relevant due to the data
-    /// type of `string_len`. Every character uses 2 bytes (hence the 16 in this
-    /// request's name).
+    ///   type of `string_len`. Every character uses 2 bytes (hence the 16 in this
+    ///   request's name).
     /// * `x` - The x coordinate of the first character, relative to the origin of `drawable`.
     /// * `y` - The y coordinate of the first character, relative to the origin of `drawable`.
     /// * `gc` - The graphics context to use.
     ///
-    /// The following graphics context components are used: plane-mask, foreground,
-    /// background, font, subwindow-mode, clip-x-origin, clip-y-origin, and clip-mask.
+    ///   The following graphics context components are used: plane-mask, foreground,
+    ///   background, font, subwindow-mode, clip-x-origin, clip-y-origin, and clip-mask.
     ///
     /// # Errors
     ///
@@ -5292,8 +5292,8 @@ pub trait ConnectionExt: RequestConnection {
     /// * `mask_font` - In which font to look for the mask glyph.
     /// * `source_char` - The glyph of `source_font` to use.
     /// * `mask_char` - The glyph of `mask_font` to use as a mask: Pixels which are set to 1 define
-    /// which source pixels are displayed. All pixels which are set to 0 are not
-    /// displayed.
+    ///   which source pixels are displayed. All pixels which are set to 0 are not
+    ///   displayed.
     /// * `fore_red` - The red value of the foreground color.
     /// * `fore_green` - The green value of the foreground color.
     /// * `fore_blue` - The blue value of the foreground color.
@@ -5352,7 +5352,7 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// * `name_len` - The length of `name` in bytes.
     /// * `name` - The name of the extension to query, for example "RANDR". This is case
-    /// sensitive!
+    ///   sensitive!
     ///
     /// # See
     ///
@@ -5425,10 +5425,10 @@ pub trait ConnectionExt: RequestConnection {
     /// # Fields
     ///
     /// * `resource` - Any resource belonging to the client (for example a Window), used to identify
-    /// the client connection.
+    ///   the client connection.
     ///
-    /// The special value of `XCB_KILL_ALL_TEMPORARY`, the resources of all clients
-    /// that have terminated in `RetainTemporary` (TODO) are destroyed.
+    ///   The special value of `XCB_KILL_ALL_TEMPORARY`, the resources of all clients
+    ///   that have terminated in `RetainTemporary` (TODO) are destroyed.
     ///
     /// # Errors
     ///

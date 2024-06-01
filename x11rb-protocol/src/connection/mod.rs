@@ -99,7 +99,7 @@ impl Connection {
             ReplyFdKind::ReplyWithoutFDs => true,
             ReplyFdKind::ReplyWithFDs => true,
         };
-        if self.next_reply_expected + SequenceNumber::from(u16::max_value()) - 1
+        if self.next_reply_expected + SequenceNumber::from(u16::MAX) - 1
             <= self.last_sequence_written
             && !has_response
         {
@@ -164,10 +164,10 @@ impl Connection {
         let number = u16::from_ne_bytes([buffer[2], buffer[3]]);
 
         // ...and use our state to reconstruct the high bytes
-        let high_bytes = self.last_sequence_read & !SequenceNumber::from(u16::max_value());
+        let high_bytes = self.last_sequence_read & !SequenceNumber::from(u16::MAX);
         let mut full_number = SequenceNumber::from(number) | high_bytes;
         if full_number < self.last_sequence_read {
-            full_number += SequenceNumber::from(u16::max_value()) + 1;
+            full_number += SequenceNumber::from(u16::MAX) + 1;
         }
 
         // Update our state

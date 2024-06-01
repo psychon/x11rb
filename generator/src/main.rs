@@ -7,6 +7,8 @@
     unused_qualifications
 )]
 #![forbid(unsafe_code)]
+// This crate is not shipped to users and does not follow our MSRV
+#![allow(clippy::incompatible_msrv)]
 
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;

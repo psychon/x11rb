@@ -50,7 +50,7 @@ pub const COMPLETION_EVENT: u8 = 0;
 /// * `drawable` - The drawable used in the XCB_SHM_PUT_IMAGE request.
 /// * `minor_event` - The minor opcode used in the request.  Always XCB_SHM_PUT_IMAGE.
 /// * `major_event` - The major opcode used in the request.  Always the opcode of the MIT-SHM
-/// extension.
+///   extension.
 /// * `shmseg` - The shared memory segment used in the request.
 /// * `offset` - The offset in the shared memory segment used in the request.
 #[derive(Clone, Copy, Default)]
@@ -523,21 +523,21 @@ pub const PUT_IMAGE_REQUEST: u8 = 3;
 /// * `src_x` - The source X coordinate of the sub-image to copy.
 /// * `src_y` - The source Y coordinate of the sub-image to copy.
 /// * `src_width` - The width, in source image coordinates, of the data to copy from the source.
-/// The X server will use this to determine the amount of data to copy.  The amount
-/// of the destination image that is overwritten is determined automatically.
+///   The X server will use this to determine the amount of data to copy.  The amount
+///   of the destination image that is overwritten is determined automatically.
 /// * `src_height` - The height, in source image coordinates, of the data to copy from the source.
-/// The X server will use this to determine the amount of data to copy.  The amount
-/// of the destination image that is overwritten is determined automatically.
+///   The X server will use this to determine the amount of data to copy.  The amount
+///   of the destination image that is overwritten is determined automatically.
 /// * `dst_x` - The X coordinate on the destination drawable to copy to.
 /// * `dst_y` - The Y coordinate on the destination drawable to copy to.
 /// * `depth` - The depth to use.
 /// * `format` - The format of the image being drawn.  If it is XYBitmap, depth must be 1, or a
-/// "BadMatch" error results.  The foreground pixel in the GC determines the source
-/// for the one bits in the image, and the background pixel determines the source
-/// for the zero bits.  For XYPixmap and ZPixmap, the depth must match the depth of
-/// the drawable, or a "BadMatch" error results.
+///   "BadMatch" error results.  The foreground pixel in the GC determines the source
+///   for the one bits in the image, and the background pixel determines the source
+///   for the zero bits.  For XYPixmap and ZPixmap, the depth must match the depth of
+///   the drawable, or a "BadMatch" error results.
 /// * `send_event` - True if the server should send an XCB_SHM_COMPLETION event when the blit
-/// completes.
+///   completes.
 /// * `offset` - The offset that the source image starts at.
 #[derive(Clone, Copy, Default)]
 #[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]

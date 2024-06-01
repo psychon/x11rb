@@ -37,7 +37,7 @@
 //!
 //! Additionally, the following flags exist:
 //! * `allow-unsafe-code`: Enable the same feature in x11rb and implement
-//! [`blocking::BlockingConnection`] for [`x11rb::xcb_ffi::XCBConnection`]
+//!   [`blocking::BlockingConnection`] for [`x11rb::xcb_ffi::XCBConnection`]
 //! * `extra-traits`: Implement extra traits for X11 types. This improves the output of the `Debug`
 //!   impl and adds `PartialEq`, `Eq`, `PartialOrd`, `Ord`, and `Hash` where possible.
 
