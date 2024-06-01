@@ -427,7 +427,7 @@ impl Stream for DefaultStream {
                 match (&mut &self.inner).write(buf) {
                     Ok(n) => return Ok(n),
                     // try again
-                    Err(ref e) if e.kind() == std::io::ErrorKind::Interrupted => {}
+                    Err(ref e) if e.kind() == ErrorKind::Interrupted => {}
                     Err(e) => return Err(e),
                 }
             }
@@ -450,7 +450,7 @@ impl Stream for DefaultStream {
                 match (&mut &self.inner).write_vectored(bufs) {
                     Ok(n) => return Ok(n),
                     // try again
-                    Err(ref e) if e.kind() == std::io::ErrorKind::Interrupted => {}
+                    Err(ref e) if e.kind() == ErrorKind::Interrupted => {}
                     Err(e) => return Err(e),
                 }
             }
