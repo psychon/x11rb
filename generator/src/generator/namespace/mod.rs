@@ -1115,13 +1115,16 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                     continue;
                 }
                 let text = format!(
-                    " * `{}` - {}",
+                    "`{}` - {}",
                     field.name,
                     field.doc.as_deref().unwrap_or("").trim(),
                 );
+                let mut prefix_char = '*';
                 // Prevent rustdoc interpreting many leading spaces as code examples (?)
                 for line in text.trim().split('\n') {
                     let line = line.trim();
+                    let line = format!("{} {}", prefix_char, line);
+                    prefix_char = ' ';
                     if line.trim().is_empty() {
                         outln!(out, "///");
                     } else {

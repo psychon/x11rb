@@ -90,7 +90,7 @@ where
 /// # Fields
 ///
 /// * `damage` - The ID with which you will refer to the new Damage object, created by
-/// `xcb_generate_id`.
+///   `xcb_generate_id`.
 /// * `drawable` - The ID of the drawable to be monitored.
 /// * `level` - The level of detail to be provided in Damage events.
 pub fn create<Conn>(conn: &Conn, damage: Damage, drawable: xproto::Drawable, level: ReportLevel) -> Result<VoidCookie<'_, Conn>, ConnectionError>
@@ -226,7 +226,7 @@ pub trait ConnectionExt: RequestConnection {
     /// # Fields
     ///
     /// * `damage` - The ID with which you will refer to the new Damage object, created by
-    /// `xcb_generate_id`.
+    ///   `xcb_generate_id`.
     /// * `drawable` - The ID of the drawable to be monitored.
     /// * `level` - The level of detail to be provided in Damage events.
     fn damage_create(&self, damage: Damage, drawable: xproto::Drawable, level: ReportLevel) -> Result<VoidCookie<'_, Self>, ConnectionError>

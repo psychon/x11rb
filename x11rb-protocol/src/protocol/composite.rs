@@ -281,8 +281,8 @@ pub const REDIRECT_WINDOW_REQUEST: u8 = 1;
 ///
 /// * `window` - The root of the hierarchy to redirect to off-screen storage.
 /// * `update` - Whether contents are automatically mirrored to the parent window.  If one client
-/// already specifies an update type of Manual, any attempt by another to specify a
-/// mode of Manual so will result in an Access error.
+///   already specifies an update type of Manual, any attempt by another to specify a
+///   mode of Manual so will result in an Access error.
 #[derive(Clone, Copy, Default)]
 #[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -360,8 +360,8 @@ pub const REDIRECT_SUBWINDOWS_REQUEST: u8 = 2;
 ///
 /// * `window` - The root of the hierarchy to redirect to off-screen storage.
 /// * `update` - Whether contents are automatically mirrored to the parent window.  If one client
-/// already specifies an update type of Manual, any attempt by another to specify a
-/// mode of Manual so will result in an Access error.
+///   already specifies an update type of Manual, any attempt by another to specify a
+///   mode of Manual so will result in an Access error.
 #[derive(Clone, Copy, Default)]
 #[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -436,9 +436,9 @@ pub const UNREDIRECT_WINDOW_REQUEST: u8 = 3;
 /// # Fields
 ///
 /// * `window` - The window to terminate redirection of.  Must be redirected by the
-/// current client, or a Value error results.
+///   current client, or a Value error results.
 /// * `update` - The update type passed to RedirectWindows.  If this does not match the
-/// previously requested update type, a Value error results.
+///   previously requested update type, a Value error results.
 #[derive(Clone, Copy, Default)]
 #[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -512,10 +512,10 @@ pub const UNREDIRECT_SUBWINDOWS_REQUEST: u8 = 4;
 /// # Fields
 ///
 /// * `window` - The window to terminate redirection of.  Must have previously been
-/// selected for sub-redirection by the current client, or a Value error
-/// results.
+///   selected for sub-redirection by the current client, or a Value error
+///   results.
 /// * `update` - The update type passed to RedirectSubWindows.  If this does not match
-/// the previously requested update type, a Value error results.
+///   the previously requested update type, a Value error results.
 #[derive(Clone, Copy, Default)]
 #[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]

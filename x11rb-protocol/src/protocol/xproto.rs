@@ -1322,20 +1322,20 @@ pub const KEY_PRESS_EVENT: u8 = 2;
 /// # Fields
 ///
 /// * `detail` - The keycode (a number representing a physical key on the keyboard) of the key
-/// which was pressed.
+///   which was pressed.
 /// * `time` - Time when the event was generated (in milliseconds).
 /// * `root` - The root window of `child`.
 /// * `same_screen` - Whether the `event` window is on the same screen as the `root` window.
 /// * `event_x` - If `same_screen` is true, this is the X coordinate relative to the `event`
-/// window's origin. Otherwise, `event_x` will be set to zero.
+///   window's origin. Otherwise, `event_x` will be set to zero.
 /// * `event_y` - If `same_screen` is true, this is the Y coordinate relative to the `event`
-/// window's origin. Otherwise, `event_y` will be set to zero.
+///   window's origin. Otherwise, `event_y` will be set to zero.
 /// * `root_x` - The X coordinate of the pointer relative to the `root` window at the time of
-/// the event.
+///   the event.
 /// * `root_y` - The Y coordinate of the pointer relative to the `root` window at the time of
-/// the event.
+///   the event.
 /// * `state` - The logical state of the pointer buttons and modifier keys just prior to the
-/// event.
+///   event.
 ///
 /// # See
 ///
@@ -1584,20 +1584,20 @@ pub const BUTTON_PRESS_EVENT: u8 = 4;
 /// # Fields
 ///
 /// * `detail` - The keycode (a number representing a physical key on the keyboard) of the key
-/// which was pressed.
+///   which was pressed.
 /// * `time` - Time when the event was generated (in milliseconds).
 /// * `root` - The root window of `child`.
 /// * `same_screen` - Whether the `event` window is on the same screen as the `root` window.
 /// * `event_x` - If `same_screen` is true, this is the X coordinate relative to the `event`
-/// window's origin. Otherwise, `event_x` will be set to zero.
+///   window's origin. Otherwise, `event_x` will be set to zero.
 /// * `event_y` - If `same_screen` is true, this is the Y coordinate relative to the `event`
-/// window's origin. Otherwise, `event_y` will be set to zero.
+///   window's origin. Otherwise, `event_y` will be set to zero.
 /// * `root_x` - The X coordinate of the pointer relative to the `root` window at the time of
-/// the event.
+///   the event.
 /// * `root_y` - The Y coordinate of the pointer relative to the `root` window at the time of
-/// the event.
+///   the event.
 /// * `state` - The logical state of the pointer buttons and modifier keys just prior to the
-/// event.
+///   event.
 ///
 /// # See
 ///
@@ -1843,20 +1843,20 @@ pub const MOTION_NOTIFY_EVENT: u8 = 6;
 /// # Fields
 ///
 /// * `detail` - The keycode (a number representing a physical key on the keyboard) of the key
-/// which was pressed.
+///   which was pressed.
 /// * `time` - Time when the event was generated (in milliseconds).
 /// * `root` - The root window of `child`.
 /// * `same_screen` - Whether the `event` window is on the same screen as the `root` window.
 /// * `event_x` - If `same_screen` is true, this is the X coordinate relative to the `event`
-/// window's origin. Otherwise, `event_x` will be set to zero.
+///   window's origin. Otherwise, `event_x` will be set to zero.
 /// * `event_y` - If `same_screen` is true, this is the Y coordinate relative to the `event`
-/// window's origin. Otherwise, `event_y` will be set to zero.
+///   window's origin. Otherwise, `event_y` will be set to zero.
 /// * `root_x` - The X coordinate of the pointer relative to the `root` window at the time of
-/// the event.
+///   the event.
 /// * `root_y` - The Y coordinate of the pointer relative to the `root` window at the time of
-/// the event.
+///   the event.
 /// * `state` - The logical state of the pointer buttons and modifier keys just prior to the
-/// event.
+///   event.
 ///
 /// # See
 ///
@@ -2175,14 +2175,14 @@ pub const ENTER_NOTIFY_EVENT: u8 = 7;
 ///
 /// * `event` - The window on which the event was generated.
 /// * `child` - If the `event` window has subwindows and the final pointer position is in one
-/// of them, then `child` is set to that subwindow, `XCB_WINDOW_NONE` otherwise.
+///   of them, then `child` is set to that subwindow, `XCB_WINDOW_NONE` otherwise.
 /// * `root` - The root window for the final cursor position.
 /// * `root_x` - The pointer X coordinate relative to `root`'s origin at the time of the event.
 /// * `root_y` - The pointer Y coordinate relative to `root`'s origin at the time of the event.
 /// * `event_x` - If `event` is on the same screen as `root`, this is the pointer X coordinate
-/// relative to the event window's origin.
+///   relative to the event window's origin.
 /// * `event_y` - If `event` is on the same screen as `root`, this is the pointer Y coordinate
-/// relative to the event window's origin.
+///   relative to the event window's origin.
 /// * `mode` -
 #[derive(Clone, Copy, Default)]
 #[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
@@ -2370,7 +2370,7 @@ pub const FOCUS_IN_EVENT: u8 = 9;
 /// # Fields
 ///
 /// * `event` - The window on which the focus event was generated. This is the window used by
-/// the X server to report the event.
+///   the X server to report the event.
 /// * `detail` -
 /// * `mode` -
 #[derive(Clone, Copy, Default)]
@@ -2609,15 +2609,15 @@ pub const EXPOSE_EVENT: u8 = 12;
 ///
 /// * `window` - The exposed (damaged) window.
 /// * `x` - The X coordinate of the left-upper corner of the exposed rectangle, relative to
-/// the `window`'s origin.
+///   the `window`'s origin.
 /// * `y` - The Y coordinate of the left-upper corner of the exposed rectangle, relative to
-/// the `window`'s origin.
+///   the `window`'s origin.
 /// * `width` - The width of the exposed rectangle.
 /// * `height` - The height of the exposed rectangle.
 /// * `count` - The amount of `Expose` events following this one. Simple applications that do
-/// not want to optimize redisplay by distinguishing between subareas of its window
-/// can just ignore all Expose events with nonzero counts and perform full
-/// redisplays on events with zero counts.
+///   not want to optimize redisplay by distinguishing between subareas of its window
+///   can just ignore all Expose events with nonzero counts and perform full
+///   redisplays on events with zero counts.
 #[derive(Clone, Copy, Default)]
 #[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -3347,7 +3347,7 @@ pub const DESTROY_NOTIFY_EVENT: u8 = 17;
 /// # Fields
 ///
 /// * `event` - The reconfigured window or its parent, depending on whether `StructureNotify`
-/// or `SubstructureNotify` was selected.
+///   or `SubstructureNotify` was selected.
 /// * `window` - The window that is destroyed.
 ///
 /// # See
@@ -3465,10 +3465,10 @@ pub const UNMAP_NOTIFY_EVENT: u8 = 18;
 /// # Fields
 ///
 /// * `event` - The reconfigured window or its parent, depending on whether `StructureNotify`
-/// or `SubstructureNotify` was selected.
+///   or `SubstructureNotify` was selected.
 /// * `window` - The window that was unmapped.
 /// * `from_configure` - Set to 1 if the event was generated as a result of a resizing of the window's
-/// parent when `window` had a win_gravity of `UnmapGravity`.
+///   parent when `window` had a win_gravity of `UnmapGravity`.
 ///
 /// # See
 ///
@@ -3596,7 +3596,7 @@ pub const MAP_NOTIFY_EVENT: u8 = 19;
 /// # Fields
 ///
 /// * `event` - The window which was mapped or its parent, depending on whether
-/// `StructureNotify` or `SubstructureNotify` was selected.
+///   `StructureNotify` or `SubstructureNotify` was selected.
 /// * `window` - The window that was mapped.
 /// * `override_redirect` - Window managers should ignore this window if `override_redirect` is 1.
 ///
@@ -3984,15 +3984,15 @@ pub const CONFIGURE_NOTIFY_EVENT: u8 = 22;
 /// # Fields
 ///
 /// * `event` - The reconfigured window or its parent, depending on whether `StructureNotify`
-/// or `SubstructureNotify` was selected.
+///   or `SubstructureNotify` was selected.
 /// * `window` - The window whose size, position, border, and/or stacking order was changed.
 /// * `above_sibling` - If `XCB_NONE`, the `window` is on the bottom of the stack with respect to
-/// sibling windows. However, if set to a sibling window, the `window` is placed on
-/// top of this sibling window.
+///   sibling windows. However, if set to a sibling window, the `window` is placed on
+///   top of this sibling window.
 /// * `x` - The X coordinate of the upper-left outside corner of `window`, relative to the
-/// parent window's origin.
+///   parent window's origin.
 /// * `y` - The Y coordinate of the upper-left outside corner of `window`, relative to the
-/// parent window's origin.
+///   parent window's origin.
 /// * `width` - The inside width of `window`, not including the border.
 /// * `height` - The inside height of `window`, not including the border.
 /// * `border_width` - The border width of `window`.
@@ -4625,7 +4625,7 @@ pub const CIRCULATE_NOTIFY_EVENT: u8 = 26;
 /// # Fields
 ///
 /// * `event` - Either the restacked window or its parent, depending on whether
-/// `StructureNotify` or `SubstructureNotify` was selected.
+///   `StructureNotify` or `SubstructureNotify` was selected.
 /// * `window` - The restacked window.
 /// * `place` -
 ///
@@ -5731,7 +5731,7 @@ pub const COLORMAP_NOTIFY_EVENT: u8 = 32;
 ///
 /// * `window` - The window whose associated colormap is changed, installed or uninstalled.
 /// * `colormap` - The colormap which is changed, installed or uninstalled. This is `XCB_NONE`
-/// when the colormap is changed by a call to `FreeColormap`.
+///   when the colormap is changed by a call to `FreeColormap`.
 /// * `_new` - Indicates whether the colormap was changed (1) or installed/uninstalled (0).
 /// * `state` -
 ///
@@ -6028,7 +6028,7 @@ pub const CLIENT_MESSAGE_EVENT: u8 = 33;
 ///
 /// * `format` - Specifies how to interpret `data`. Can be either 8, 16 or 32.
 /// * `type` - An atom which indicates how the data should be interpreted by the receiving
-/// client.
+///   client.
 /// * `data` - The data itself (20 bytes max).
 ///
 /// # See
@@ -6564,73 +6564,73 @@ impl core::fmt::Debug for WindowClass  {
 /// # Fields
 ///
 /// * `BackPixmap` - Overrides the default background-pixmap. The background pixmap and window must
-/// have the same root and same depth. Any size pixmap can be used, although some
-/// sizes may be faster than others.
+///   have the same root and same depth. Any size pixmap can be used, although some
+///   sizes may be faster than others.
 ///
-/// If `XCB_BACK_PIXMAP_NONE` is specified, the window has no defined background.
-/// The server may fill the contents with the previous screen contents or with
-/// contents of its own choosing.
+///   If `XCB_BACK_PIXMAP_NONE` is specified, the window has no defined background.
+///   The server may fill the contents with the previous screen contents or with
+///   contents of its own choosing.
 ///
-/// If `XCB_BACK_PIXMAP_PARENT_RELATIVE` is specified, the parent's background is
-/// used, but the window must have the same depth as the parent (or a Match error
-/// results).   The parent's background is tracked, and the current version is
-/// used each time the window background is required.
+///   If `XCB_BACK_PIXMAP_PARENT_RELATIVE` is specified, the parent's background is
+///   used, but the window must have the same depth as the parent (or a Match error
+///   results).   The parent's background is tracked, and the current version is
+///   used each time the window background is required.
 /// * `BackPixel` - Overrides `BackPixmap`. A pixmap of undefined size filled with the specified
-/// background pixel is used for the background. Range-checking is not performed,
-/// the background pixel is truncated to the appropriate number of bits.
+///   background pixel is used for the background. Range-checking is not performed,
+///   the background pixel is truncated to the appropriate number of bits.
 /// * `BorderPixmap` - Overrides the default border-pixmap. The border pixmap and window must have the
-/// same root and the same depth. Any size pixmap can be used, although some sizes
-/// may be faster than others.
+///   same root and the same depth. Any size pixmap can be used, although some sizes
+///   may be faster than others.
 ///
-/// The special value `XCB_COPY_FROM_PARENT` means the parent's border pixmap is
-/// copied (subsequent changes to the parent's border attribute do not affect the
-/// child), but the window must have the same depth as the parent.
+///   The special value `XCB_COPY_FROM_PARENT` means the parent's border pixmap is
+///   copied (subsequent changes to the parent's border attribute do not affect the
+///   child), but the window must have the same depth as the parent.
 /// * `BorderPixel` - Overrides `BorderPixmap`. A pixmap of undefined size filled with the specified
-/// border pixel is used for the border. Range checking is not performed on the
-/// border-pixel value, it is truncated to the appropriate number of bits.
+///   border pixel is used for the border. Range checking is not performed on the
+///   border-pixel value, it is truncated to the appropriate number of bits.
 /// * `BitGravity` - Defines which region of the window should be retained if the window is resized.
 /// * `WinGravity` - Defines how the window should be repositioned if the parent is resized (see
-/// `ConfigureWindow`).
+///   `ConfigureWindow`).
 /// * `BackingStore` - A backing-store of `WhenMapped` advises the server that maintaining contents of
-/// obscured regions when the window is mapped would be beneficial. A backing-store
-/// of `Always` advises the server that maintaining contents even when the window
-/// is unmapped would be beneficial. In this case, the server may generate an
-/// exposure event when the window is created. A value of `NotUseful` advises the
-/// server that maintaining contents is unnecessary, although a server may still
-/// choose to maintain contents while the window is mapped. Note that if the server
-/// maintains contents, then the server should maintain complete contents not just
-/// the region within the parent boundaries, even if the window is larger than its
-/// parent. While the server maintains contents, exposure events will not normally
-/// be generated, but the server may stop maintaining contents at any time.
+///   obscured regions when the window is mapped would be beneficial. A backing-store
+///   of `Always` advises the server that maintaining contents even when the window
+///   is unmapped would be beneficial. In this case, the server may generate an
+///   exposure event when the window is created. A value of `NotUseful` advises the
+///   server that maintaining contents is unnecessary, although a server may still
+///   choose to maintain contents while the window is mapped. Note that if the server
+///   maintains contents, then the server should maintain complete contents not just
+///   the region within the parent boundaries, even if the window is larger than its
+///   parent. While the server maintains contents, exposure events will not normally
+///   be generated, but the server may stop maintaining contents at any time.
 /// * `BackingPlanes` - The backing-planes indicates (with bits set to 1) which bit planes of the
-/// window hold dynamic data that must be preserved in backing-stores and during
-/// save-unders.
+///   window hold dynamic data that must be preserved in backing-stores and during
+///   save-unders.
 /// * `BackingPixel` - The backing-pixel specifies what value to use in planes not covered by
-/// backing-planes. The server is free to save only the specified bit planes in the
-/// backing-store or save-under and regenerate the remaining planes with the
-/// specified pixel value. Any bits beyond the specified depth of the window in
-/// these values are simply ignored.
+///   backing-planes. The server is free to save only the specified bit planes in the
+///   backing-store or save-under and regenerate the remaining planes with the
+///   specified pixel value. Any bits beyond the specified depth of the window in
+///   these values are simply ignored.
 /// * `OverrideRedirect` - The override-redirect specifies whether map and configure requests on this
-/// window should override a SubstructureRedirect on the parent, typically to
-/// inform a window manager not to tamper with the window.
+///   window should override a SubstructureRedirect on the parent, typically to
+///   inform a window manager not to tamper with the window.
 /// * `SaveUnder` - If 1, the server is advised that when this window is mapped, saving the
-/// contents of windows it obscures would be beneficial.
+///   contents of windows it obscures would be beneficial.
 /// * `EventMask` - The event-mask defines which events the client is interested in for this window
-/// (or for some event types, inferiors of the window).
+///   (or for some event types, inferiors of the window).
 /// * `DontPropagate` - The do-not-propagate-mask defines which events should not be propagated to
-/// ancestor windows when no client has the event type selected in this window.
+///   ancestor windows when no client has the event type selected in this window.
 /// * `Colormap` - The colormap specifies the colormap that best reflects the true colors of the window. Servers
-/// capable of supporting multiple hardware colormaps may use this information, and window man-
-/// agers may use it for InstallColormap requests. The colormap must have the same visual type
-/// and root as the window (or a Match error results). If CopyFromParent is specified, the parent's
-/// colormap is copied (subsequent changes to the parent's colormap attribute do not affect the child).
-/// However, the window must have the same visual type as the parent (or a Match error results),
-/// and the parent must not have a colormap of None (or a Match error results). For an explanation
-/// of None, see FreeColormap request. The colormap is copied by sharing the colormap object
-/// between the child and the parent, not by making a complete copy of the colormap contents.
+///   capable of supporting multiple hardware colormaps may use this information, and window man-
+///   agers may use it for InstallColormap requests. The colormap must have the same visual type
+///   and root as the window (or a Match error results). If CopyFromParent is specified, the parent's
+///   colormap is copied (subsequent changes to the parent's colormap attribute do not affect the child).
+///   However, the window must have the same visual type as the parent (or a Match error results),
+///   and the parent must not have a colormap of None (or a Match error results). For an explanation
+///   of None, see FreeColormap request. The colormap is copied by sharing the colormap object
+///   between the child and the parent, not by making a complete copy of the colormap contents.
 /// * `Cursor` - If a cursor is specified, it will be used whenever the pointer is in the window. If None is speci-
-/// fied, the parent's cursor will be used when the pointer is in the window, and any change in the
-/// parent's cursor will cause an immediate change in the displayed cursor.
+///   fied, the parent's cursor will be used when the pointer is in the window, and any change in the
+///   parent's cursor will cause an immediate change in the displayed cursor.
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct CW(u32);
@@ -7225,20 +7225,20 @@ pub const CREATE_WINDOW_REQUEST: u8 = 1;
 /// # Fields
 ///
 /// * `wid` - The ID with which you will refer to the new window, created by
-/// `xcb_generate_id`.
+///   `xcb_generate_id`.
 /// * `depth` - Specifies the new window's depth (TODO: what unit?).
 ///
-/// The special value `XCB_COPY_FROM_PARENT` means the depth is taken from the
-/// `parent` window.
+///   The special value `XCB_COPY_FROM_PARENT` means the depth is taken from the
+///   `parent` window.
 /// * `visual` - Specifies the id for the new window's visual.
 ///
-/// The special value `XCB_COPY_FROM_PARENT` means the visual is taken from the
-/// `parent` window.
+///   The special value `XCB_COPY_FROM_PARENT` means the visual is taken from the
+///   `parent` window.
 /// * `class` -
 /// * `parent` - The parent window of the new window.
 /// * `border_width` - TODO:
 ///
-/// Must be zero if the `class` is `InputOnly` or a `xcb_match_error_t` occurs.
+///   Must be zero if the `class` is `InputOnly` or a `xcb_match_error_t` occurs.
 /// * `x` - The X coordinate of the new window.
 /// * `y` - The Y coordinate of the new window.
 /// * `width` - The width of the new window.
@@ -7772,8 +7772,8 @@ pub const CHANGE_WINDOW_ATTRIBUTES_REQUEST: u8 = 2;
 ///
 /// * `window` - The window to change.
 /// * `value_list` - Values for each of the attributes specified in the bitmask `value_mask`. The
-/// order has to correspond to the order of possible `value_mask` bits. See the
-/// example.
+///   order has to correspond to the order of possible `value_mask` bits. See the
+///   example.
 ///
 /// # Errors
 ///
@@ -9202,7 +9202,7 @@ pub const CONFIGURE_WINDOW_REQUEST: u8 = 12;
 ///
 /// * `window` - The window to configure.
 /// * `value_list` - New values, corresponding to the attributes in value_mask. The order has to
-/// correspond to the order of possible `value_mask` bits. See the example.
+///   correspond to the order of possible `value_mask` bits. See the example.
 ///
 /// # Errors
 ///
@@ -9561,11 +9561,11 @@ impl crate::x11_utils::ReplyRequest for GetGeometryRequest {
 ///
 /// * `root` - Root window of the screen containing `drawable`.
 /// * `x` - The X coordinate of `drawable`. If `drawable` is a window, the coordinate
-/// specifies the upper-left outer corner relative to its parent's origin. If
-/// `drawable` is a pixmap, the X coordinate is always 0.
+///   specifies the upper-left outer corner relative to its parent's origin. If
+///   `drawable` is a pixmap, the X coordinate is always 0.
 /// * `y` - The Y coordinate of `drawable`. If `drawable` is a window, the coordinate
-/// specifies the upper-left outer corner relative to its parent's origin. If
-/// `drawable` is a pixmap, the Y coordinate is always 0.
+///   specifies the upper-left outer corner relative to its parent's origin. If
+///   `drawable` is a pixmap, the Y coordinate is always 0.
 /// * `width` - The width of `drawable`.
 /// * `height` - The height of `drawable`.
 /// * `border_width` - The border width (in pixels).
@@ -10148,11 +10148,11 @@ impl GetAtomNameReply {
 ///
 /// * `Replace` - Discard the previous property value and store the new data.
 /// * `Prepend` - Insert the new data before the beginning of existing data. The `format` must
-/// match existing property value. If the property is undefined, it is treated as
-/// defined with the correct type and format with zero-length data.
+///   match existing property value. If the property is undefined, it is treated as
+///   defined with the correct type and format with zero-length data.
 /// * `Append` - Insert the new data after the beginning of existing data. The `format` must
-/// match existing property value. If the property is undefined, it is treated as
-/// defined with the correct type and format with zero-length data.
+///   match existing property value. If the property is undefined, it is treated as
+///   defined with the correct type and format with zero-length data.
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PropMode(u8);
@@ -10230,8 +10230,8 @@ pub const CHANGE_PROPERTY_REQUEST: u8 = 18;
 /// * `property` - The property you want to change (an atom).
 /// * `type` - The type of the property you want to change (an atom).
 /// * `format` - Specifies whether the data should be viewed as a list of 8-bit, 16-bit or
-/// 32-bit quantities. Possible values are 8, 16 and 32. This information allows
-/// the X server to correctly perform byte-swap operations as necessary.
+///   32-bit quantities. Possible values are 8, 16 and 32. This information allows
+///   the X server to correctly perform byte-swap operations as necessary.
 /// * `data_len` - Specifies the number of elements (see `format`).
 /// * `data` - The property data.
 ///
@@ -10523,13 +10523,13 @@ pub const GET_PROPERTY_REQUEST: u8 = 20;
 ///
 /// * `window` - The window whose property you want to get.
 /// * `delete` - Whether the property should actually be deleted. For deleting a property, the
-/// specified `type` has to match the actual property type.
+///   specified `type` has to match the actual property type.
 /// * `property` - The property you want to get (an atom).
 /// * `type` - The type of the property you want to get (an atom).
 /// * `long_offset` - Specifies the offset (in 32-bit multiples) in the specified property where the
-/// data is to be retrieved.
+///   data is to be retrieved.
 /// * `long_length` - Specifies how many 32-bit multiples of data should be retrieved (e.g. if you
-/// set `long_length` to 4, you will receive 16 bytes of data).
+///   set `long_length` to 4, you will receive 16 bytes of data).
 ///
 /// # Errors
 ///
@@ -10827,13 +10827,13 @@ impl GetPropertyReply {
 /// # Fields
 ///
 /// * `format` - Specifies whether the data should be viewed as a list of 8-bit, 16-bit, or
-/// 32-bit quantities. Possible values are 8, 16, and 32. This information allows
-/// the X server to correctly perform byte-swap operations as necessary.
+///   32-bit quantities. Possible values are 8, 16, and 32. This information allows
+///   the X server to correctly perform byte-swap operations as necessary.
 /// * `type` - The actual type of the property (an atom).
 /// * `bytes_after` - The number of bytes remaining to be read in the property if a partial read was
-/// performed.
+///   performed.
 /// * `value_len` - The length of value. You should use the corresponding accessor instead of this
-/// field.
+///   field.
 #[derive(Clone, Default)]
 #[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -11032,15 +11032,15 @@ pub const SET_SELECTION_OWNER_REQUEST: u8 = 22;
 /// * `selection` - The selection.
 /// * `owner` - The new owner of the selection.
 ///
-/// The special value `XCB_NONE` means that the selection will have no owner.
+///   The special value `XCB_NONE` means that the selection will have no owner.
 /// * `time` - Timestamp to avoid race conditions when running X over the network.
 ///
-/// The selection will not be changed if `time` is earlier than the current
-/// last-change time of the `selection` or is later than the current X server time.
-/// Otherwise, the last-change time is set to the specified time.
+///   The selection will not be changed if `time` is earlier than the current
+///   last-change time of the `selection` or is later than the current X server time.
+///   Otherwise, the last-change time is set to the specified time.
 ///
-/// The special value `XCB_CURRENT_TIME` will be replaced with the current server
-/// time.
+///   The special value `XCB_CURRENT_TIME` will be replaced with the current server
+///   time.
 ///
 /// # Errors
 ///
@@ -11439,23 +11439,23 @@ pub const SEND_EVENT_REQUEST: u8 = 25;
 /// # Fields
 ///
 /// * `destination` - The window to send this event to. Every client which selects any event within
-/// `event_mask` on `destination` will get the event.
+///   `event_mask` on `destination` will get the event.
 ///
-/// The special value `XCB_SEND_EVENT_DEST_POINTER_WINDOW` refers to the window
-/// that contains the mouse pointer.
+///   The special value `XCB_SEND_EVENT_DEST_POINTER_WINDOW` refers to the window
+///   that contains the mouse pointer.
 ///
-/// The special value `XCB_SEND_EVENT_DEST_ITEM_FOCUS` refers to the window which
-/// has the keyboard focus.
+///   The special value `XCB_SEND_EVENT_DEST_ITEM_FOCUS` refers to the window which
+///   has the keyboard focus.
 /// * `event_mask` - Event_mask for determining which clients should receive the specified event.
-/// See `destination` and `propagate`.
+///   See `destination` and `propagate`.
 /// * `propagate` - If `propagate` is true and no clients have selected any event on `destination`,
-/// the destination is replaced with the closest ancestor of `destination` for
-/// which some client has selected a type in `event_mask` and for which no
-/// intervening window has that type in its do-not-propagate-mask. If no such
-/// window exists or if the window is an ancestor of the focus window and
-/// `InputFocus` was originally specified as the destination, the event is not sent
-/// to any clients. Otherwise, the event is reported to every client selecting on
-/// the final destination any of the types specified in `event_mask`.
+///   the destination is replaced with the closest ancestor of `destination` for
+///   which some client has selected a type in `event_mask` and for which no
+///   intervening window has that type in its do-not-propagate-mask. If no such
+///   window exists or if the window is an ancestor of the focus window and
+///   `InputFocus` was originally specified as the destination, the event is not sent
+///   to any clients. Otherwise, the event is reported to every client selecting on
+///   the final destination any of the types specified in `event_mask`.
 /// * `event` - The event to send to the specified `destination`.
 ///
 /// # Errors
@@ -11584,8 +11584,8 @@ impl<'input> crate::x11_utils::VoidRequest for SendEventRequest<'input> {
 /// # Fields
 ///
 /// * `Sync` - The state of the keyboard appears to freeze: No further keyboard events are
-/// generated by the server until the grabbing client issues a releasing
-/// `AllowEvents` request or until the keyboard grab is released.
+///   generated by the server until the grabbing client issues a releasing
+///   `AllowEvents` request or until the keyboard grab is released.
 /// * `Async` - Keyboard event processing continues normally.
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -11778,27 +11778,27 @@ pub const GRAB_POINTER_REQUEST: u8 = 26;
 ///
 /// * `event_mask` - Specifies which pointer events are reported to the client.
 ///
-/// TODO: which values?
+///   TODO: which values?
 /// * `confine_to` - Specifies the window to confine the pointer in (the user will not be able to
-/// move the pointer out of that window).
+///   move the pointer out of that window).
 ///
-/// The special value `XCB_NONE` means don't confine the pointer.
+///   The special value `XCB_NONE` means don't confine the pointer.
 /// * `cursor` - Specifies the cursor that should be displayed or `XCB_NONE` to not change the
-/// cursor.
+///   cursor.
 /// * `owner_events` - If 1, the `grab_window` will still get the pointer events. If 0, events are not
-/// reported to the `grab_window`.
+///   reported to the `grab_window`.
 /// * `grab_window` - Specifies the window on which the pointer should be grabbed.
 /// * `time` - The time argument allows you to avoid certain circumstances that come up if
-/// applications take a long time to respond or if there are long network delays.
-/// Consider a situation where you have two applications, both of which normally
-/// grab the pointer when clicked on. If both applications specify the timestamp
-/// from the event, the second application may wake up faster and successfully grab
-/// the pointer before the first application. The first application then will get
-/// an indication that the other application grabbed the pointer before its request
-/// was processed.
+///   applications take a long time to respond or if there are long network delays.
+///   Consider a situation where you have two applications, both of which normally
+///   grab the pointer when clicked on. If both applications specify the timestamp
+///   from the event, the second application may wake up faster and successfully grab
+///   the pointer before the first application. The first application then will get
+///   an indication that the other application grabbed the pointer before its request
+///   was processed.
 ///
-/// The special value `XCB_CURRENT_TIME` will be replaced with the current server
-/// time.
+///   The special value `XCB_CURRENT_TIME` will be replaced with the current server
+///   time.
 /// * `pointer_mode` -
 /// * `keyboard_mode` -
 ///
@@ -12014,8 +12014,8 @@ pub const UNGRAB_POINTER_REQUEST: u8 = 27;
 ///
 /// * `time` - Timestamp to avoid race conditions when running X over the network.
 ///
-/// The pointer will not be released if `time` is earlier than the
-/// last-pointer-grab time or later than the current X server time.
+///   The pointer will not be released if `time` is earlier than the
+///   last-pointer-grab time or later than the current X server time.
 /// * `name_len` - Length (in bytes) of `name`.
 /// * `name` - A pattern describing an X core font.
 ///
@@ -12200,21 +12200,21 @@ pub const GRAB_BUTTON_REQUEST: u8 = 28;
 /// # Fields
 ///
 /// * `owner_events` - If 1, the `grab_window` will still get the pointer events. If 0, events are not
-/// reported to the `grab_window`.
+///   reported to the `grab_window`.
 /// * `grab_window` - Specifies the window on which the pointer should be grabbed.
 /// * `event_mask` - Specifies which pointer events are reported to the client.
 ///
-/// TODO: which values?
+///   TODO: which values?
 /// * `confine_to` - Specifies the window to confine the pointer in (the user will not be able to
-/// move the pointer out of that window).
+///   move the pointer out of that window).
 ///
-/// The special value `XCB_NONE` means don't confine the pointer.
+///   The special value `XCB_NONE` means don't confine the pointer.
 /// * `cursor` - Specifies the cursor that should be displayed or `XCB_NONE` to not change the
-/// cursor.
+///   cursor.
 /// * `modifiers` - The modifiers to grab.
 ///
-/// Using the special value `XCB_MOD_MASK_ANY` means grab the pointer with all
-/// possible modifier combinations.
+///   Using the special value `XCB_MOD_MASK_ANY` means grab the pointer with all
+///   possible modifier combinations.
 /// * `pointer_mode` -
 /// * `keyboard_mode` -
 /// * `button` -
@@ -12504,12 +12504,12 @@ pub const GRAB_KEYBOARD_REQUEST: u8 = 31;
 /// # Fields
 ///
 /// * `owner_events` - If 1, the `grab_window` will still get the pointer events. If 0, events are not
-/// reported to the `grab_window`.
+///   reported to the `grab_window`.
 /// * `grab_window` - Specifies the window on which the pointer should be grabbed.
 /// * `time` - Timestamp to avoid race conditions when running X over the network.
 ///
-/// The special value `XCB_CURRENT_TIME` will be replaced with the current server
-/// time.
+///   The special value `XCB_CURRENT_TIME` will be replaced with the current server
+///   time.
 /// * `pointer_mode` -
 /// * `keyboard_mode` -
 ///
@@ -12843,15 +12843,15 @@ pub const GRAB_KEY_REQUEST: u8 = 33;
 /// # Fields
 ///
 /// * `owner_events` - If 1, the `grab_window` will still get the key events. If 0, events are not
-/// reported to the `grab_window`.
+///   reported to the `grab_window`.
 /// * `grab_window` - Specifies the window on which the key should be grabbed.
 /// * `key` - The keycode of the key to grab.
 ///
-/// The special value `XCB_GRAB_ANY` means grab any key.
+///   The special value `XCB_GRAB_ANY` means grab any key.
 /// * `modifiers` - The modifiers to grab.
 ///
-/// Using the special value `XCB_MOD_MASK_ANY` means grab the key with all
-/// possible modifier combinations.
+///   Using the special value `XCB_MOD_MASK_ANY` means grab the key with all
+///   possible modifier combinations.
 /// * `pointer_mode` -
 /// * `keyboard_mode` -
 ///
@@ -12965,12 +12965,12 @@ pub const UNGRAB_KEY_REQUEST: u8 = 34;
 ///
 /// * `key` - The keycode of the specified key combination.
 ///
-/// Using the special value `XCB_GRAB_ANY` means releasing all possible key codes.
+///   Using the special value `XCB_GRAB_ANY` means releasing all possible key codes.
 /// * `grab_window` - The window on which the grabbed key combination will be released.
 /// * `modifiers` - The modifiers of the specified key combination.
 ///
-/// Using the special value `XCB_MOD_MASK_ANY` means releasing the key combination
-/// with every possible modifier combination.
+///   Using the special value `XCB_MOD_MASK_ANY` means releasing the key combination
+///   with every possible modifier combination.
 ///
 /// # Errors
 ///
@@ -13054,62 +13054,62 @@ impl crate::x11_utils::VoidRequest for UngrabKeyRequest {
 /// # Fields
 ///
 /// * `AsyncPointer` - For AsyncPointer, if the pointer is frozen by the client, pointer event
-/// processing continues normally. If the pointer is frozen twice by the client on
-/// behalf of two separate grabs, AsyncPointer thaws for both. AsyncPointer has no
-/// effect if the pointer is not frozen by the client, but the pointer need not be
-/// grabbed by the client.
+///   processing continues normally. If the pointer is frozen twice by the client on
+///   behalf of two separate grabs, AsyncPointer thaws for both. AsyncPointer has no
+///   effect if the pointer is not frozen by the client, but the pointer need not be
+///   grabbed by the client.
 ///
-/// TODO: rewrite this in more understandable terms.
+///   TODO: rewrite this in more understandable terms.
 /// * `SyncPointer` - For SyncPointer, if the pointer is frozen and actively grabbed by the client,
-/// pointer event processing continues normally until the next ButtonPress or
-/// ButtonRelease event is reported to the client, at which time the pointer again
-/// appears to freeze. However, if the reported event causes the pointer grab to be
-/// released, then the pointer does not freeze. SyncPointer has no effect if the
-/// pointer is not frozen by the client or if the pointer is not grabbed by the
-/// client.
+///   pointer event processing continues normally until the next ButtonPress or
+///   ButtonRelease event is reported to the client, at which time the pointer again
+///   appears to freeze. However, if the reported event causes the pointer grab to be
+///   released, then the pointer does not freeze. SyncPointer has no effect if the
+///   pointer is not frozen by the client or if the pointer is not grabbed by the
+///   client.
 /// * `ReplayPointer` - For ReplayPointer, if the pointer is actively grabbed by the client and is
-/// frozen as the result of an event having been sent to the client (either from
-/// the activation of a GrabButton or from a previous AllowEvents with mode
-/// SyncPointer but not from a GrabPointer), then the pointer grab is released and
-/// that event is completely reprocessed, this time ignoring any passive grabs at
-/// or above (towards the root) the grab-window of the grab just released. The
-/// request has no effect if the pointer is not grabbed by the client or if the
-/// pointer is not frozen as the result of an event.
+///   frozen as the result of an event having been sent to the client (either from
+///   the activation of a GrabButton or from a previous AllowEvents with mode
+///   SyncPointer but not from a GrabPointer), then the pointer grab is released and
+///   that event is completely reprocessed, this time ignoring any passive grabs at
+///   or above (towards the root) the grab-window of the grab just released. The
+///   request has no effect if the pointer is not grabbed by the client or if the
+///   pointer is not frozen as the result of an event.
 /// * `AsyncKeyboard` - For AsyncKeyboard, if the keyboard is frozen by the client, keyboard event
-/// processing continues normally. If the keyboard is frozen twice by the client on
-/// behalf of two separate grabs, AsyncKeyboard thaws for both. AsyncKeyboard has
-/// no effect if the keyboard is not frozen by the client, but the keyboard need
-/// not be grabbed by the client.
+///   processing continues normally. If the keyboard is frozen twice by the client on
+///   behalf of two separate grabs, AsyncKeyboard thaws for both. AsyncKeyboard has
+///   no effect if the keyboard is not frozen by the client, but the keyboard need
+///   not be grabbed by the client.
 /// * `SyncKeyboard` - For SyncKeyboard, if the keyboard is frozen and actively grabbed by the client,
-/// keyboard event processing continues normally until the next KeyPress or
-/// KeyRelease event is reported to the client, at which time the keyboard again
-/// appears to freeze. However, if the reported event causes the keyboard grab to
-/// be released, then the keyboard does not freeze. SyncKeyboard has no effect if
-/// the keyboard is not frozen by the client or if the keyboard is not grabbed by
-/// the client.
+///   keyboard event processing continues normally until the next KeyPress or
+///   KeyRelease event is reported to the client, at which time the keyboard again
+///   appears to freeze. However, if the reported event causes the keyboard grab to
+///   be released, then the keyboard does not freeze. SyncKeyboard has no effect if
+///   the keyboard is not frozen by the client or if the keyboard is not grabbed by
+///   the client.
 /// * `ReplayKeyboard` - For ReplayKeyboard, if the keyboard is actively grabbed by the client and is
-/// frozen as the result of an event having been sent to the client (either from
-/// the activation of a GrabKey or from a previous AllowEvents with mode
-/// SyncKeyboard but not from a GrabKeyboard), then the keyboard grab is released
-/// and that event is completely reprocessed, this time ignoring any passive grabs
-/// at or above (towards the root) the grab-window of the grab just released. The
-/// request has no effect if the keyboard is not grabbed by the client or if the
-/// keyboard is not frozen as the result of an event.
+///   frozen as the result of an event having been sent to the client (either from
+///   the activation of a GrabKey or from a previous AllowEvents with mode
+///   SyncKeyboard but not from a GrabKeyboard), then the keyboard grab is released
+///   and that event is completely reprocessed, this time ignoring any passive grabs
+///   at or above (towards the root) the grab-window of the grab just released. The
+///   request has no effect if the keyboard is not grabbed by the client or if the
+///   keyboard is not frozen as the result of an event.
 /// * `SyncBoth` - For SyncBoth, if both pointer and keyboard are frozen by the client, event
-/// processing (for both devices) continues normally until the next ButtonPress,
-/// ButtonRelease, KeyPress, or KeyRelease event is reported to the client for a
-/// grabbed device (button event for the pointer, key event for the keyboard), at
-/// which time the devices again appear to freeze. However, if the reported event
-/// causes the grab to be released, then the devices do not freeze (but if the
-/// other device is still grabbed, then a subsequent event for it will still cause
-/// both devices to freeze). SyncBoth has no effect unless both pointer and
-/// keyboard are frozen by the client. If the pointer or keyboard is frozen twice
-/// by the client on behalf of two separate grabs, SyncBoth thaws for both (but a
-/// subsequent freeze for SyncBoth will only freeze each device once).
+///   processing (for both devices) continues normally until the next ButtonPress,
+///   ButtonRelease, KeyPress, or KeyRelease event is reported to the client for a
+///   grabbed device (button event for the pointer, key event for the keyboard), at
+///   which time the devices again appear to freeze. However, if the reported event
+///   causes the grab to be released, then the devices do not freeze (but if the
+///   other device is still grabbed, then a subsequent event for it will still cause
+///   both devices to freeze). SyncBoth has no effect unless both pointer and
+///   keyboard are frozen by the client. If the pointer or keyboard is frozen twice
+///   by the client on behalf of two separate grabs, SyncBoth thaws for both (but a
+///   subsequent freeze for SyncBoth will only freeze each device once).
 /// * `AsyncBoth` - For AsyncBoth, if the pointer and the keyboard are frozen by the client, event
-/// processing for both devices continues normally. If a device is frozen twice by
-/// the client on behalf of two separate grabs, AsyncBoth thaws for both. AsyncBoth
-/// has no effect unless both pointer and keyboard are frozen by the client.
+///   processing for both devices continues normally. If a device is frozen twice by
+///   the client on behalf of two separate grabs, AsyncBoth thaws for both. AsyncBoth
+///   has no effect unless both pointer and keyboard are frozen by the client.
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Allow(u8);
@@ -13195,8 +13195,8 @@ pub const ALLOW_EVENTS_REQUEST: u8 = 35;
 /// * `mode` -
 /// * `time` - Timestamp to avoid race conditions when running X over the network.
 ///
-/// The special value `XCB_CURRENT_TIME` will be replaced with the current server
-/// time.
+///   The special value `XCB_CURRENT_TIME` will be replaced with the current server
+///   time.
 ///
 /// # Errors
 ///
@@ -13372,7 +13372,7 @@ pub const QUERY_POINTER_REQUEST: u8 = 38;
 /// # Fields
 ///
 /// * `window` - A window to check if the pointer is on the same screen as `window` (see the
-/// `same_screen` field in the reply).
+///   `same_screen` field in the reply).
 ///
 /// # Errors
 ///
@@ -13438,22 +13438,22 @@ impl crate::x11_utils::ReplyRequest for QueryPointerRequest {
 /// # Fields
 ///
 /// * `same_screen` - If `same_screen` is False, then the pointer is not on the same screen as the
-/// argument window, `child` is None, and `win_x` and `win_y` are zero. If
-/// `same_screen` is True, then `win_x` and `win_y` are the pointer coordinates
-/// relative to the argument window's origin, and child is the child containing the
-/// pointer, if any.
+///   argument window, `child` is None, and `win_x` and `win_y` are zero. If
+///   `same_screen` is True, then `win_x` and `win_y` are the pointer coordinates
+///   relative to the argument window's origin, and child is the child containing the
+///   pointer, if any.
 /// * `root` - The root window the pointer is logically on.
 /// * `child` - The child window containing the pointer, if any, if `same_screen` is true. If
-/// `same_screen` is false, `XCB_NONE` is returned.
+///   `same_screen` is false, `XCB_NONE` is returned.
 /// * `root_x` - The pointer X position, relative to `root`.
 /// * `root_y` - The pointer Y position, relative to `root`.
 /// * `win_x` - The pointer X coordinate, relative to `child`, if `same_screen` is true. Zero
-/// otherwise.
+///   otherwise.
 /// * `win_y` - The pointer Y coordinate, relative to `child`, if `same_screen` is true. Zero
-/// otherwise.
+///   otherwise.
 /// * `mask` - The current logical state of the modifier keys and the buttons. Note that the
-/// logical state of a device (as seen by means of the protocol) may lag the
-/// physical state if device event processing is frozen.
+///   logical state of a device (as seen by means of the protocol) may lag the
+///   physical state if device event processing is frozen.
 #[derive(Clone, Copy, Default)]
 #[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -13916,13 +13916,13 @@ pub const WARP_POINTER_REQUEST: u8 = 41;
 /// # Fields
 ///
 /// * `src_window` - If `src_window` is not `XCB_NONE` (TODO), the move will only take place if the
-/// pointer is inside `src_window` and within the rectangle specified by (`src_x`,
-/// `src_y`, `src_width`, `src_height`). The rectangle coordinates are relative to
-/// `src_window`.
+///   pointer is inside `src_window` and within the rectangle specified by (`src_x`,
+///   `src_y`, `src_width`, `src_height`). The rectangle coordinates are relative to
+///   `src_window`.
 /// * `dst_window` - If `dst_window` is not `XCB_NONE` (TODO), the pointer will be moved to the
-/// offsets (`dst_x`, `dst_y`) relative to `dst_window`. If `dst_window` is
-/// `XCB_NONE` (TODO), the pointer will be moved by the offsets (`dst_x`, `dst_y`)
-/// relative to the current position of the pointer.
+///   offsets (`dst_x`, `dst_y`) relative to `dst_window`. If `dst_window` is
+///   `XCB_NONE` (TODO), the pointer will be moved by the offsets (`dst_x`, `dst_y`)
+///   relative to the current position of the pointer.
 ///
 /// # Errors
 ///
@@ -14036,10 +14036,10 @@ impl crate::x11_utils::VoidRequest for WarpPointerRequest {
 ///
 /// * `None` - The focus reverts to `XCB_NONE`, so no window will have the input focus.
 /// * `PointerRoot` - The focus reverts to `XCB_POINTER_ROOT` respectively. When the focus reverts,
-/// FocusIn and FocusOut events are generated, but the last-focus-change time is
-/// not changed.
+///   FocusIn and FocusOut events are generated, but the last-focus-change time is
+///   not changed.
 /// * `Parent` - The focus reverts to the parent (or closest viewable ancestor) and the new
-/// revert_to value is `XCB_INPUT_FOCUS_NONE`.
+///   revert_to value is `XCB_INPUT_FOCUS_NONE`.
 /// * `FollowKeyboard` - NOT YET DOCUMENTED. Only relevant for the xinput extension.
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -14117,19 +14117,19 @@ pub const SET_INPUT_FOCUS_REQUEST: u8 = 42;
 /// # Fields
 ///
 /// * `focus` - The window to focus. All keyboard events will be reported to this window. The
-/// window must be viewable (TODO), or a `xcb_match_error_t` occurs (TODO).
+///   window must be viewable (TODO), or a `xcb_match_error_t` occurs (TODO).
 ///
-/// If `focus` is `XCB_NONE` (TODO), all keyboard events are
-/// discarded until a new focus window is set.
+///   If `focus` is `XCB_NONE` (TODO), all keyboard events are
+///   discarded until a new focus window is set.
 ///
-/// If `focus` is `XCB_POINTER_ROOT` (TODO), focus is on the root window of the
-/// screen on which the pointer is on currently.
+///   If `focus` is `XCB_POINTER_ROOT` (TODO), focus is on the root window of the
+///   screen on which the pointer is on currently.
 /// * `time` - Timestamp to avoid race conditions when running X over the network.
 ///
-/// The special value `XCB_CURRENT_TIME` will be replaced with the current server
-/// time.
+///   The special value `XCB_CURRENT_TIME` will be replaced with the current server
+///   time.
 /// * `revert_to` - Specifies what happens when the `focus` window becomes unviewable (if `focus`
-/// is neither `XCB_NONE` nor `XCB_POINTER_ROOT`).
+///   is neither `XCB_NONE` nor `XCB_POINTER_ROOT`).
 ///
 /// # Errors
 ///
@@ -15257,9 +15257,9 @@ pub const LIST_FONTS_REQUEST: u8 = 49;
 ///
 /// * `pattern` - A font pattern, for example "-misc-fixed-*".
 ///
-/// The asterisk (*) is a wildcard for any number of characters. The question mark
-/// (?) is a wildcard for a single character. Use of uppercase or lowercase does
-/// not matter.
+///   The asterisk (*) is a wildcard for any number of characters. The question mark
+///   (?) is a wildcard for a single character. Use of uppercase or lowercase does
+///   not matter.
 /// * `max_names` - The maximum number of fonts to be returned.
 #[derive(Clone, Default)]
 #[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
@@ -15412,9 +15412,9 @@ pub const LIST_FONTS_WITH_INFO_REQUEST: u8 = 50;
 ///
 /// * `pattern` - A font pattern, for example "-misc-fixed-*".
 ///
-/// The asterisk (*) is a wildcard for any number of characters. The question mark
-/// (?) is a wildcard for a single character. Use of uppercase or lowercase does
-/// not matter.
+///   The asterisk (*) is a wildcard for any number of characters. The question mark
+///   (?) is a wildcard for a single character. Use of uppercase or lowercase does
+///   not matter.
 /// * `max_names` - The maximum number of fonts to be returned.
 #[derive(Clone, Default)]
 #[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
@@ -15501,8 +15501,8 @@ impl<'input> crate::x11_utils::ReplyRequest for ListFontsWithInfoRequest<'input>
 /// * `font_ascent` - baseline to top edge of raster
 /// * `font_descent` - baseline to bottom edge of raster
 /// * `replies_hint` - An indication of how many more fonts will be returned. This is only a hint and
-/// may be larger or smaller than the number of fonts actually returned. A zero
-/// value does not guarantee that no more fonts will be returned.
+///   may be larger or smaller than the number of fonts actually returned. A zero
+///   value does not guarantee that no more fonts will be returned.
 /// * `draw_direction` -
 #[derive(Clone, Default)]
 #[cfg_attr(feature = "extra-traits", derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash))]
@@ -15825,7 +15825,7 @@ pub const CREATE_PIXMAP_REQUEST: u8 = 53;
 ///
 /// * `depth` - TODO
 /// * `pid` - The ID with which you will refer to the new pixmap, created by
-/// `xcb_generate_id`.
+///   `xcb_generate_id`.
 /// * `drawable` - Drawable to get the screen from.
 /// * `width` - The width of the new pixmap.
 /// * `height` - The height of the new pixmap.
@@ -15994,101 +15994,101 @@ impl crate::x11_utils::VoidRequest for FreePixmapRequest {
 ///
 /// * `Function` - TODO: Refer to GX
 /// * `PlaneMask` - In graphics operations, given a source and destination pixel, the result is
-/// computed bitwise on corresponding bits of the pixels; that is, a Boolean
-/// operation is performed in each bit plane. The plane-mask restricts the
-/// operation to a subset of planes, so the result is:
+///   computed bitwise on corresponding bits of the pixels; that is, a Boolean
+///   operation is performed in each bit plane. The plane-mask restricts the
+///   operation to a subset of planes, so the result is:
 ///
-/// ((src FUNC dst) AND plane-mask) OR (dst AND (NOT plane-mask))
+///   ((src FUNC dst) AND plane-mask) OR (dst AND (NOT plane-mask))
 /// * `Foreground` - Foreground colorpixel.
 /// * `Background` - Background colorpixel.
 /// * `LineWidth` - The line-width is measured in pixels and can be greater than or equal to one, a wide line, or the
-/// special value zero, a thin line.
+///   special value zero, a thin line.
 /// * `LineStyle` - The line-style defines which sections of a line are drawn:
-/// Solid                The full path of the line is drawn.
-/// DoubleDash           The full path of the line is drawn, but the even dashes are filled differently
-/// than the odd dashes (see fill-style), with Butt cap-style used where even and
-/// odd dashes meet.
-/// OnOffDash            Only the even dashes are drawn, and cap-style applies to all internal ends of
-/// the individual dashes (except NotLast is treated as Butt).
+///   Solid                The full path of the line is drawn.
+///   DoubleDash           The full path of the line is drawn, but the even dashes are filled differently
+///   than the odd dashes (see fill-style), with Butt cap-style used where even and
+///   odd dashes meet.
+///   OnOffDash            Only the even dashes are drawn, and cap-style applies to all internal ends of
+///   the individual dashes (except NotLast is treated as Butt).
 /// * `CapStyle` - The cap-style defines how the endpoints of a path are drawn:
-/// NotLast    The result is equivalent to Butt, except that for a line-width of zero the final
-/// endpoint is not drawn.
-/// Butt       The result is square at the endpoint (perpendicular to the slope of the line)
-/// with no projection beyond.
-/// Round      The result is a circular arc with its diameter equal to the line-width, centered
-/// on the endpoint; it is equivalent to Butt for line-width zero.
-/// Projecting The result is square at the end, but the path continues beyond the endpoint for
-/// a distance equal to half the line-width; it is equivalent to Butt for line-width
-/// zero.
+///   NotLast    The result is equivalent to Butt, except that for a line-width of zero the final
+///   endpoint is not drawn.
+///   Butt       The result is square at the endpoint (perpendicular to the slope of the line)
+///   with no projection beyond.
+///   Round      The result is a circular arc with its diameter equal to the line-width, centered
+///   on the endpoint; it is equivalent to Butt for line-width zero.
+///   Projecting The result is square at the end, but the path continues beyond the endpoint for
+///   a distance equal to half the line-width; it is equivalent to Butt for line-width
+///   zero.
 /// * `JoinStyle` - The join-style defines how corners are drawn for wide lines:
-/// Miter               The outer edges of the two lines extend to meet at an angle. However, if the
-/// angle is less than 11 degrees, a Bevel join-style is used instead.
-/// Round               The result is a circular arc with a diameter equal to the line-width, centered
-/// on the joinpoint.
-/// Bevel               The result is Butt endpoint styles, and then the triangular notch is filled.
+///   Miter               The outer edges of the two lines extend to meet at an angle. However, if the
+///   angle is less than 11 degrees, a Bevel join-style is used instead.
+///   Round               The result is a circular arc with a diameter equal to the line-width, centered
+///   on the joinpoint.
+///   Bevel               The result is Butt endpoint styles, and then the triangular notch is filled.
 /// * `FillStyle` - The fill-style defines the contents of the source for line, text, and fill requests. For all text and fill
-/// requests (for example, PolyText8, PolyText16, PolyFillRectangle, FillPoly, and PolyFillArc)
-/// as well as for line requests with line-style Solid, (for example, PolyLine, PolySegment,
-/// PolyRectangle, PolyArc) and for the even dashes for line requests with line-style OnOffDash
-/// or DoubleDash:
-/// Solid                     Foreground
-/// Tiled                     Tile
-/// OpaqueStippled            A tile with the same width and height as stipple but with background
-/// everywhere stipple has a zero and with foreground everywhere stipple
-/// has a one
-/// Stippled                  Foreground masked by stipple
-/// For the odd dashes for line requests with line-style DoubleDash:
-/// Solid                     Background
-/// Tiled                     Same as for even dashes
-/// OpaqueStippled            Same as for even dashes
-/// Stippled                  Background masked by stipple
+///   requests (for example, PolyText8, PolyText16, PolyFillRectangle, FillPoly, and PolyFillArc)
+///   as well as for line requests with line-style Solid, (for example, PolyLine, PolySegment,
+///   PolyRectangle, PolyArc) and for the even dashes for line requests with line-style OnOffDash
+///   or DoubleDash:
+///   Solid                     Foreground
+///   Tiled                     Tile
+///   OpaqueStippled            A tile with the same width and height as stipple but with background
+///   everywhere stipple has a zero and with foreground everywhere stipple
+///   has a one
+///   Stippled                  Foreground masked by stipple
+///   For the odd dashes for line requests with line-style DoubleDash:
+///   Solid                     Background
+///   Tiled                     Same as for even dashes
+///   OpaqueStippled            Same as for even dashes
+///   Stippled                  Background masked by stipple
 /// * `FillRule` -
 /// * `Tile` - The tile/stipple represents an infinite two-dimensional plane with the tile/stipple replicated in all
-/// dimensions. When that plane is superimposed on the drawable for use in a graphics operation,
-/// the upper-left corner of some instance of the tile/stipple is at the coordinates within the drawable
-/// specified by the tile/stipple origin. The tile/stipple and clip origins are interpreted relative to the
-/// origin of whatever destination drawable is specified in a graphics request.
-/// The tile pixmap must have the same root and depth as the gcontext (or a Match error results).
-/// The stipple pixmap must have depth one and must have the same root as the gcontext (or a
-/// Match error results). For fill-style Stippled (but not fill-style
-/// OpaqueStippled), the stipple pattern is tiled in a single plane and acts as an
-/// additional clip mask to be ANDed with the clip-mask.
-/// Any size pixmap can be used for tiling or stippling, although some sizes may be faster to use than
-/// others.
+///   dimensions. When that plane is superimposed on the drawable for use in a graphics operation,
+///   the upper-left corner of some instance of the tile/stipple is at the coordinates within the drawable
+///   specified by the tile/stipple origin. The tile/stipple and clip origins are interpreted relative to the
+///   origin of whatever destination drawable is specified in a graphics request.
+///   The tile pixmap must have the same root and depth as the gcontext (or a Match error results).
+///   The stipple pixmap must have depth one and must have the same root as the gcontext (or a
+///   Match error results). For fill-style Stippled (but not fill-style
+///   OpaqueStippled), the stipple pattern is tiled in a single plane and acts as an
+///   additional clip mask to be ANDed with the clip-mask.
+///   Any size pixmap can be used for tiling or stippling, although some sizes may be faster to use than
+///   others.
 /// * `Stipple` - The tile/stipple represents an infinite two-dimensional plane with the tile/stipple replicated in all
-/// dimensions. When that plane is superimposed on the drawable for use in a graphics operation,
-/// the upper-left corner of some instance of the tile/stipple is at the coordinates within the drawable
-/// specified by the tile/stipple origin. The tile/stipple and clip origins are interpreted relative to the
-/// origin of whatever destination drawable is specified in a graphics request.
-/// The tile pixmap must have the same root and depth as the gcontext (or a Match error results).
-/// The stipple pixmap must have depth one and must have the same root as the gcontext (or a
-/// Match error results). For fill-style Stippled (but not fill-style
-/// OpaqueStippled), the stipple pattern is tiled in a single plane and acts as an
-/// additional clip mask to be ANDed with the clip-mask.
-/// Any size pixmap can be used for tiling or stippling, although some sizes may be faster to use than
-/// others.
+///   dimensions. When that plane is superimposed on the drawable for use in a graphics operation,
+///   the upper-left corner of some instance of the tile/stipple is at the coordinates within the drawable
+///   specified by the tile/stipple origin. The tile/stipple and clip origins are interpreted relative to the
+///   origin of whatever destination drawable is specified in a graphics request.
+///   The tile pixmap must have the same root and depth as the gcontext (or a Match error results).
+///   The stipple pixmap must have depth one and must have the same root as the gcontext (or a
+///   Match error results). For fill-style Stippled (but not fill-style
+///   OpaqueStippled), the stipple pattern is tiled in a single plane and acts as an
+///   additional clip mask to be ANDed with the clip-mask.
+///   Any size pixmap can be used for tiling or stippling, although some sizes may be faster to use than
+///   others.
 /// * `TileStippleOriginX` - TODO
 /// * `TileStippleOriginY` - TODO
 /// * `Font` - Which font to use for the `ImageText8` and `ImageText16` requests.
 /// * `SubwindowMode` - For ClipByChildren, both source and destination windows are additionally
-/// clipped by all viewable InputOutput children. For IncludeInferiors, neither
-/// source nor destination window is
-/// clipped by inferiors. This will result in including subwindow contents in the source and drawing
-/// through subwindow boundaries of the destination. The use of IncludeInferiors with a source or
-/// destination window of one depth with mapped inferiors of differing depth is not illegal, but the
-/// semantics is undefined by the core protocol.
+///   clipped by all viewable InputOutput children. For IncludeInferiors, neither
+///   source nor destination window is
+///   clipped by inferiors. This will result in including subwindow contents in the source and drawing
+///   through subwindow boundaries of the destination. The use of IncludeInferiors with a source or
+///   destination window of one depth with mapped inferiors of differing depth is not illegal, but the
+///   semantics is undefined by the core protocol.
 /// * `GraphicsExposures` - Whether ExposureEvents should be generated (1) or not (0).
 ///
-/// The default is 1.
+///   The default is 1.
 /// * `ClipOriginX` - TODO
 /// * `ClipOriginY` - TODO
 /// * `ClipMask` - The clip-mask restricts writes to the destination drawable. Only pixels where the clip-mask has
-/// bits set to 1 are drawn. Pixels are not drawn outside the area covered by the clip-mask or where
-/// the clip-mask has bits set to 0. The clip-mask affects all graphics requests, but it does not clip
-/// sources. The clip-mask origin is interpreted relative to the origin of whatever destination drawable is specified in a graphics request. If a pixmap is specified as the clip-mask, it must have
-/// depth 1 and have the same root as the gcontext (or a Match error results). If clip-mask is None,
-/// then pixels are always drawn, regardless of the clip origin. The clip-mask can also be set with the
-/// SetClipRectangles request.
+///   bits set to 1 are drawn. Pixels are not drawn outside the area covered by the clip-mask or where
+///   the clip-mask has bits set to 0. The clip-mask affects all graphics requests, but it does not clip
+///   sources. The clip-mask origin is interpreted relative to the origin of whatever destination drawable is specified in a graphics request. If a pixmap is specified as the clip-mask, it must have
+///   depth 1 and have the same root as the gcontext (or a Match error results). If clip-mask is None,
+///   then pixels are always drawn, regardless of the clip origin. The clip-mask can also be set with the
+///   SetClipRectangles request.
 /// * `DashOffset` - TODO
 /// * `DashList` - TODO
 /// * `ArcMode` - TODO
@@ -17139,7 +17139,7 @@ pub const CREATE_GC_REQUEST: u8 = 55;
 /// # Fields
 ///
 /// * `cid` - The ID with which you will refer to the graphics context, created by
-/// `xcb_generate_id`.
+///   `xcb_generate_id`.
 /// * `drawable` - Drawable to get the root/depth from.
 ///
 /// # Errors
@@ -17782,8 +17782,8 @@ pub const CHANGE_GC_REQUEST: u8 = 56;
 ///
 /// * `gc` - The graphics context to change.
 /// * `value_list` - Values for each of the components specified in the bitmask `value_mask`. The
-/// order has to correspond to the order of possible `value_mask` bits. See the
-/// example.
+///   order has to correspond to the order of possible `value_mask` bits. See the
+///   example.
 ///
 /// # Errors
 ///
@@ -18981,7 +18981,7 @@ pub const POLY_SEGMENT_REQUEST: u8 = 66;
 /// * `drawable` - A drawable (Window or Pixmap) to draw on.
 /// * `gc` - The graphics context to use.
 ///
-/// TODO: document which attributes of a gc are used
+///   TODO: document which attributes of a gc are used
 /// * `segments_len` - The number of `xcb_segment_t` structures in `segments`.
 /// * `segments` - An array of `xcb_segment_t` structures.
 ///
@@ -19435,12 +19435,12 @@ pub const POLY_FILL_RECTANGLE_REQUEST: u8 = 70;
 /// * `drawable` - The drawable (Window or Pixmap) to draw on.
 /// * `gc` - The graphics context to use.
 ///
-/// The following graphics context components are used: function, plane-mask,
-/// fill-style, subwindow-mode, clip-x-origin, clip-y-origin, and clip-mask.
+///   The following graphics context components are used: function, plane-mask,
+///   fill-style, subwindow-mode, clip-x-origin, clip-y-origin, and clip-mask.
 ///
-/// The following graphics context mode-dependent components are used:
-/// foreground, background, tile, stipple, tile-stipple-x-origin, and
-/// tile-stipple-y-origin.
+///   The following graphics context mode-dependent components are used:
+///   foreground, background, tile, stipple, tile-stipple-x-origin, and
+///   tile-stipple-y-origin.
 /// * `rectangles_len` - The number of `xcb_rectangle_t` structures in `rectangles`.
 /// * `rectangles` - The rectangles to fill.
 ///
@@ -20187,13 +20187,13 @@ pub const IMAGE_TEXT8_REQUEST: u8 = 76;
 ///
 /// * `drawable` - The drawable (Window or Pixmap) to draw text on.
 /// * `string` - The string to draw. Only the first 255 characters are relevant due to the data
-/// type of `string_len`.
+///   type of `string_len`.
 /// * `x` - The x coordinate of the first character, relative to the origin of `drawable`.
 /// * `y` - The y coordinate of the first character, relative to the origin of `drawable`.
 /// * `gc` - The graphics context to use.
 ///
-/// The following graphics context components are used: plane-mask, foreground,
-/// background, font, subwindow-mode, clip-x-origin, clip-y-origin, and clip-mask.
+///   The following graphics context components are used: plane-mask, foreground,
+///   background, font, subwindow-mode, clip-x-origin, clip-y-origin, and clip-mask.
 ///
 /// # Errors
 ///
@@ -20316,14 +20316,14 @@ pub const IMAGE_TEXT16_REQUEST: u8 = 77;
 ///
 /// * `drawable` - The drawable (Window or Pixmap) to draw text on.
 /// * `string` - The string to draw. Only the first 255 characters are relevant due to the data
-/// type of `string_len`. Every character uses 2 bytes (hence the 16 in this
-/// request's name).
+///   type of `string_len`. Every character uses 2 bytes (hence the 16 in this
+///   request's name).
 /// * `x` - The x coordinate of the first character, relative to the origin of `drawable`.
 /// * `y` - The y coordinate of the first character, relative to the origin of `drawable`.
 /// * `gc` - The graphics context to use.
 ///
-/// The following graphics context components are used: plane-mask, foreground,
-/// background, font, subwindow-mode, clip-x-origin, clip-y-origin, and clip-mask.
+///   The following graphics context components are used: plane-mask, foreground,
+///   background, font, subwindow-mode, clip-x-origin, clip-y-origin, and clip-mask.
 ///
 /// # Errors
 ///
@@ -22618,8 +22618,8 @@ pub const CREATE_GLYPH_CURSOR_REQUEST: u8 = 94;
 /// * `mask_font` - In which font to look for the mask glyph.
 /// * `source_char` - The glyph of `source_font` to use.
 /// * `mask_char` - The glyph of `mask_font` to use as a mask: Pixels which are set to 1 define
-/// which source pixels are displayed. All pixels which are set to 0 are not
-/// displayed.
+///   which source pixels are displayed. All pixels which are set to 0 are not
+///   displayed.
 /// * `fore_red` - The red value of the foreground color.
 /// * `fore_green` - The green value of the foreground color.
 /// * `fore_blue` - The blue value of the foreground color.
@@ -23137,7 +23137,7 @@ pub const QUERY_EXTENSION_REQUEST: u8 = 98;
 /// # Fields
 ///
 /// * `name` - The name of the extension to query, for example "RANDR". This is case
-/// sensitive!
+///   sensitive!
 ///
 /// # See
 ///
@@ -25526,10 +25526,10 @@ pub const KILL_CLIENT_REQUEST: u8 = 113;
 /// # Fields
 ///
 /// * `resource` - Any resource belonging to the client (for example a Window), used to identify
-/// the client connection.
+///   the client connection.
 ///
-/// The special value of `XCB_KILL_ALL_TEMPORARY`, the resources of all clients
-/// that have terminated in `RetainTemporary` (TODO) are destroyed.
+///   The special value of `XCB_KILL_ALL_TEMPORARY`, the resources of all clients
+///   that have terminated in `RetainTemporary` (TODO) are destroyed.
 ///
 /// # Errors
 ///
