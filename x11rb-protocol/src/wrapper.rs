@@ -41,7 +41,8 @@ where
     }
 
     fn size_hint(&self) -> (usize, Option<usize>) {
-        let size = self.0.len() / core::mem::size_of::<T>();
+        use core::mem::size_of;
+        let size = self.0.len() / size_of::<T>();
         (size, Some(size))
     }
 }
