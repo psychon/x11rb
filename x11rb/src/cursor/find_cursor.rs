@@ -217,7 +217,7 @@ pub(crate) fn find_cursor(theme: &str, name: &str) -> Result<Cursor<File>, Error
         None => return Err(Error::NoHomeDir),
     };
     let cursor_path = var("XCURSOR_PATH").unwrap_or_else(|_| {
-        "~/.icons:/usr/share/icons:/usr/share/pixmaps:/usr/X11R6/lib/X11/icons".into()
+        "~/.local/share/icons:~/.icons:/usr/share/icons:/usr/share/pixmaps".into()
     });
     let open_cursor = |file: &Path| File::open(file);
     find_cursor_impl(
