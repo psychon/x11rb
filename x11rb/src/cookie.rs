@@ -63,6 +63,7 @@ use x11rb_protocol::{DiscardMode, SequenceNumber};
 /// See [crate::cookie#requests-without-a-reply] for infos on the different ways to handle X11
 /// errors in response to a request.
 #[derive(Debug)]
+#[must_use]
 pub struct VoidCookie<'a, C>
 where
     C: RequestConnection + ?Sized,
@@ -216,6 +217,7 @@ where
 /// See [crate::cookie#requests-with-a-reply] for infos on the different ways to handle X11
 /// errors in response to a request.
 #[derive(Debug)]
+#[must_use]
 pub struct Cookie<'a, C, R>
 where
     C: RequestConnection + ?Sized,
@@ -313,6 +315,7 @@ where
 /// See [crate::cookie#requests-with-a-reply] for infos on the different ways to handle X11
 /// errors in response to a request.
 #[derive(Debug)]
+#[must_use]
 pub struct CookieWithFds<'a, C, R>
 where
     C: RequestConnection + ?Sized,
