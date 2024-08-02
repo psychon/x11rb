@@ -84,7 +84,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         Some(timeout) => {
             std::thread::spawn(move || {
                 std::thread::sleep(std::time::Duration::from_secs(timeout));
-                ctrl_conn.record_disable_context(rc).unwrap();
+                let _ = ctrl_conn.record_disable_context(rc).unwrap();
                 ctrl_conn.sync().unwrap();
             });
         }

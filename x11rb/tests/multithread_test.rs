@@ -30,7 +30,7 @@ fn multithread_test() {
         // Just anything, we don't care
         let event = ClientMessageEvent::new(32, 0, 1u32, [0, 0, 0, 0, 0]);
 
-        conn1
+        let _ = conn1
             .send_event(false, 0u32, EventMask::NO_EVENT, event)
             .unwrap();
         conn1.flush().unwrap();
