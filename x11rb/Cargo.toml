@@ -22,6 +22,7 @@ once_cell = { version = "1.19", optional = true }
 as-raw-xcb-connection = { version = "1.0", optional = true }
 tracing = { version = "0.1", optional = true, default-features = false }
 rustix = { version = "0.38", default-features = false, features = ["std", "event", "fs", "net", "system"] }
+xcursor = { version = "0.3.7", optional = true }
 
 [target.'cfg(not(unix))'.dependencies]
 gethostname = "0.4"
@@ -37,7 +38,7 @@ tracing-subscriber = "0.3"
 allow-unsafe-code = ["libc", "as-raw-xcb-connection"]
 
 # Enable utility functions in `x11rb::cursor` for loading mouse cursors.
-cursor = ["render", "resource_manager"]
+cursor = ["render", "resource_manager", "xcursor"]
 
 # Enable utility functions in `x11rb::image` for working with image data.
 image = []

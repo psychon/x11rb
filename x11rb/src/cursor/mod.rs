@@ -9,6 +9,7 @@ use crate::protocol::render::{self, Pictformat};
 use crate::protocol::xproto::{self, Font, Window};
 use crate::resource_manager::Database;
 use crate::NONE;
+use xcursor::parser::Image;
 
 use std::fs::File;
 
@@ -217,13 +218,20 @@ fn create_core_cursor<C: Connection>(
 fn create_render_cursor<C: Connection>(
     conn: &C,
     handle: &Handle,
-    image: &parse_cursor::Image,
+    image: &Image,
     storage: &mut Option<(xproto::Pixmap, xproto::Gcontext, u16, u16)>,
 ) -> Result<render::Animcursorelt, ReplyOrIdError> {
+    let to_u16 = |input: u32| {
+        u16::try_from(input).expect(
+            "xcursor-rs has a 16 bit limit on cursor size, but some number does not fit into u16?!",
+        )
+    };
+
     let (cursor, picture) = (conn.generate_id()?, conn.generate_id()?);
+    let (width, height) = (to_u16(image.width), to_u16(image.height));
 
     // Get a pixmap of the right size and a gc for it
-    let (pixmap, gc) = if storage.map(|(_, _, w, h)| (w, h)) == Some((image.width, image.height)) {
+    let (pixmap, gc) = if storage.map(|(_, _, w, h)| (w, h)) == Some((width, height)) {
         storage.map(|(pixmap, gc, _, _)| (pixmap, gc)).unwrap()
     } else {
         let (pixmap, gc) = if let Some((pixmap, gc, _, _)) = storage {
@@ -233,27 +241,25 @@ fn create_render_cursor<C: Connection>(
         } else {
             (conn.generate_id()?, conn.generate_id()?)
         };
-        let _ = xproto::create_pixmap(conn, 32, pixmap, handle.root, image.width, image.height)?;
+        let _ = xproto::create_pixmap(conn, 32, pixmap, handle.root, width, height)?;
         let _ = xproto::create_gc(conn, gc, pixmap, &Default::default())?;
 
-        *storage = Some((pixmap, gc, image.width, image.height));
+        *storage = Some((pixmap, gc, width, height));
         (pixmap, gc)
     };
 
-    // Sigh. We need the pixel data as a bunch of bytes.
-    let pixels = crate::x11_utils::Serialize::serialize(&image.pixels[..]);
     let _ = xproto::put_image(
         conn,
         xproto::ImageFormat::Z_PIXMAP,
         pixmap,
         gc,
-        image.width,
-        image.height,
+        width,
+        height,
         0,
         0,
         0,
         32,
-        &pixels,
+        &image.pixels_rgba,
     )?;
 
     let _ = render::create_picture(
@@ -263,7 +269,13 @@ fn create_render_cursor<C: Connection>(
         handle.picture_format,
         &Default::default(),
     )?;
-    let _ = render::create_cursor(conn, cursor, picture, image.x_hot, image.y_hot)?;
+    let _ = render::create_cursor(
+        conn,
+        cursor,
+        picture,
+        to_u16(image.xhot),
+        to_u16(image.yhot),
+    )?;
     let _ = render::free_picture(conn, picture)?;
 
     Ok(render::Animcursorelt {
