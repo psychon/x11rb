@@ -223,21 +223,22 @@ fn create_render_cursor<C: Connection>(
     let (width, height) = (to_u16(image.width), to_u16(image.height));
 
     // Get a pixmap of the right size and a gc for it
-    let (pixmap, gc) = if storage.map(|(_, _, w, h)| (w, h)) == Some((width, height)) {
-        storage.map(|(pixmap, gc, _, _)| (pixmap, gc)).unwrap()
-    } else {
-        let (pixmap, gc) = if let Some((pixmap, gc, _, _)) = storage {
-            let _ = xproto::free_gc(conn, *gc)?;
-            let _ = xproto::free_pixmap(conn, *pixmap)?;
-            (*pixmap, *gc)
-        } else {
-            (conn.generate_id()?, conn.generate_id()?)
-        };
-        let _ = xproto::create_pixmap(conn, 32, pixmap, handle.root, width, height)?;
-        let _ = xproto::create_gc(conn, gc, pixmap, &Default::default())?;
+    let (pixmap, gc) = match *storage {
+        Some((pixmap, gc, w, h)) if (w, h) == (width, height) => (pixmap, gc),
+        _ => {
+            let (pixmap, gc) = if let Some((pixmap, gc, _, _)) = storage {
+                let _ = xproto::free_gc(conn, *gc)?;
+                let _ = xproto::free_pixmap(conn, *pixmap)?;
+                (*pixmap, *gc)
+            } else {
+                (conn.generate_id()?, conn.generate_id()?)
+            };
+            let _ = xproto::create_pixmap(conn, 32, pixmap, handle.root, width, height)?;
+            let _ = xproto::create_gc(conn, gc, pixmap, &Default::default())?;
 
-        *storage = Some((pixmap, gc, width, height));
-        (pixmap, gc)
+            *storage = Some((pixmap, gc, width, height));
+            (pixmap, gc)
+        }
     };
 
     let _ = xproto::put_image(
