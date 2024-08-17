@@ -210,7 +210,6 @@ fn create_render_cursor<C: Connection>(
         )
     };
 
-    let (cursor, picture) = (conn.generate_id()?, conn.generate_id()?);
     let (width, height) = (to_u16(image.width), to_u16(image.height));
 
     // Get a pixmap of the right size and a gc for it
@@ -246,21 +245,20 @@ fn create_render_cursor<C: Connection>(
         &image.pixels_rgba,
     )?;
 
-    let _ = render::create_picture(
+    let picture = render::PictureWrapper::create_picture(
         conn,
-        picture,
         pixmap,
         handle.picture_format,
         &Default::default(),
     )?;
+    let cursor = conn.generate_id()?;
     let _ = render::create_cursor(
         conn,
         cursor,
-        picture,
+        picture.picture(),
         to_u16(image.xhot),
         to_u16(image.yhot),
     )?;
-    let _ = render::free_picture(conn, picture)?;
 
     Ok(render::Animcursorelt {
         cursor,
