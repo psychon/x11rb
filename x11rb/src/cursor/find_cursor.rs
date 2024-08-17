@@ -96,9 +96,8 @@ static CORE_CURSORS: &[(&str, u16)] = &[
 fn cursor_shape_to_id(name: &str) -> Option<u16> {
     CORE_CURSORS
         .iter()
-        .filter(|&(name2, _)| name == *name2)
+        .find(|&(name2, _)| name == *name2)
         .map(|&(_, id)| id)
-        .next()
 }
 
 #[cfg(test)]
