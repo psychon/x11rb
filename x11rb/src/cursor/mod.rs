@@ -11,8 +11,6 @@ use crate::resource_manager::Database;
 use crate::NONE;
 use xcursor::parser::Image;
 
-use std::fs::File;
-
 mod find_cursor;
 mod parse_cursor;
 
@@ -177,17 +175,11 @@ impl Handle {
     }
 }
 
-fn open_cursor(theme: &Option<String>, name: &str) -> Option<find_cursor::Cursor<File>> {
-    if let Some(theme) = theme {
-        if let Ok(cursor) = find_cursor::find_cursor(theme, name) {
-            return Some(cursor);
-        }
-    }
-    if let Ok(cursor) = find_cursor::find_cursor("default", name) {
-        Some(cursor)
-    } else {
-        None
-    }
+fn open_cursor(theme: &Option<String>, name: &str) -> Option<find_cursor::Cursor> {
+    theme
+        .as_ref()
+        .and_then(|theme| find_cursor::find_cursor(theme, name))
+        .or_else(|| find_cursor::find_cursor("default", name))
 }
 
 fn create_core_cursor<C: Connection>(
