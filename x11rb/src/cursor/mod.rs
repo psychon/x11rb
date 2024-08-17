@@ -6,7 +6,7 @@ use crate::connection::Connection;
 use crate::cookie::Cookie as X11Cookie;
 use crate::errors::{ConnectionError, ReplyOrIdError};
 use crate::protocol::render::{self, Pictformat};
-use crate::protocol::xproto::{self, Font, Window};
+use crate::protocol::xproto::{self, FontWrapper, Window};
 use crate::resource_manager::Database;
 use crate::NONE;
 use xcursor::parser::Image;
@@ -30,7 +30,6 @@ enum RenderSupport {
 /// A cookie for creating a `Handle`
 #[derive(Debug)]
 pub struct Cookie<'a, 'b, C: Connection> {
-    conn: &'a C,
     screen: &'a xproto::Screen,
     resource_database: &'b Database,
     render_info: Option<(
@@ -50,7 +49,6 @@ impl<C: Connection> Cookie<'_, '_, C> {
             picture_format = find_format(&formats.reply()?);
         }
         Self::from_replies(
-            self.conn,
             self.screen,
             self.resource_database,
             render_version,
@@ -72,7 +70,6 @@ impl<C: Connection> Cookie<'_, '_, C> {
             }
         }
         Ok(Some(Self::from_replies(
-            self.conn,
             self.screen,
             self.resource_database,
             render_version,
@@ -81,7 +78,6 @@ impl<C: Connection> Cookie<'_, '_, C> {
     }
 
     fn from_replies(
-        conn: &C,
         screen: &xproto::Screen,
         resource_database: &Database,
         render_version: (u32, u32),
@@ -106,11 +102,8 @@ impl<C: Connection> Cookie<'_, '_, C> {
             _ => 0,
         };
         let cursor_size = get_cursor_size(cursor_size, xft_dpi, screen);
-        let cursor_font = conn.generate_id()?;
-        let _ = xproto::open_font(conn, cursor_font, b"cursor")?;
         Ok(Handle {
             root: screen.root,
-            cursor_font,
             picture_format,
             render_support,
             theme,
@@ -123,7 +116,6 @@ impl<C: Connection> Cookie<'_, '_, C> {
 #[derive(Debug)]
 pub struct Handle {
     root: Window,
-    cursor_font: Font,
     picture_format: Pictformat,
     render_support: RenderSupport,
     theme: Option<String>,
@@ -158,7 +150,6 @@ impl Handle {
             None
         };
         Ok(Cookie {
-            conn,
             screen,
             resource_database,
             render_info,
@@ -184,15 +175,15 @@ fn open_cursor(theme: &Option<String>, name: &str) -> Option<find_cursor::Cursor
 
 fn create_core_cursor<C: Connection>(
     conn: &C,
-    cursor_font: Font,
     cursor: u16,
 ) -> Result<xproto::Cursor, ReplyOrIdError> {
     let result = conn.generate_id()?;
+    let cursor_font = FontWrapper::open_font(conn, b"cursor")?;
     let _ = xproto::create_glyph_cursor(
         conn,
         result,
-        cursor_font,
-        cursor_font,
+        cursor_font.font(),
+        cursor_font.font(),
         cursor,
         cursor + 1,
         // foreground color
@@ -285,9 +276,7 @@ fn load_cursor<C: Connection>(
     // Find the right cursor, load it directly if it is a core cursor
     let cursor_file = match open_cursor(&handle.theme, name) {
         None => return Ok(NONE),
-        Some(find_cursor::Cursor::CoreChar(c)) => {
-            return create_core_cursor(conn, handle.cursor_font, c)
-        }
+        Some(find_cursor::Cursor::CoreChar(c)) => return create_core_cursor(conn, c),
         Some(find_cursor::Cursor::File(f)) => f,
     };
 
