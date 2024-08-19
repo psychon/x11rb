@@ -90,9 +90,11 @@ impl<C: Connection> Cookie<'_, '_, C> {
         } else {
             RenderSupport::None
         };
-        let theme = resource_database
-            .get_string("Xcursor.theme", "")
-            .map(|theme| theme.to_string());
+        let theme = std::env::var("XCURSOR_THEME").ok().or_else(|| {
+            resource_database
+                .get_string("Xcursor.theme", "")
+                .map(|theme| theme.to_string())
+        });
         let cursor_size = match resource_database.get_value("Xcursor.size", "") {
             Ok(Some(value)) => value,
             _ => 0,
