@@ -29,12 +29,12 @@ fn create_window(
     let pixmap_id = conn.generate_id()?;
     let gc_id = conn.generate_id()?;
 
-    conn.create_gc(
+    let _ = conn.create_gc(
         gc_id,
         screen.root,
         &CreateGCAux::default().graphics_exposures(0),
     )?;
-    conn.create_pixmap(
+    let _ = conn.create_pixmap(
         screen.root_depth,
         pixmap_id,
         screen.root,
@@ -42,9 +42,9 @@ fn create_window(
         image.height(),
     )?;
     image.put(conn, pixmap_id, gc_id, 0, 0)?;
-    conn.free_gc(gc_id)?;
+    let _ = conn.free_gc(gc_id)?;
 
-    conn.create_window(
+    let _ = conn.create_window(
         screen.root_depth,
         win_id,
         screen.root,
@@ -57,9 +57,9 @@ fn create_window(
         0,
         &CreateWindowAux::default().background_pixmap(pixmap_id),
     )?;
-    conn.free_pixmap(pixmap_id)?;
+    let _ = conn.free_pixmap(pixmap_id)?;
 
-    conn.change_property32(
+    let _ = conn.change_property32(
         PropMode::REPLACE,
         win_id,
         atoms.WM_PROTOCOLS,
@@ -137,7 +137,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let atoms = Atoms::new(conn)?.reply()?;
     let win_id = create_window(conn, screen, &atoms, &image)?;
-    conn.map_window(win_id)?;
+    let _ = conn.map_window(win_id)?;
 
     util::start_timeout_thread(conn1.clone(), win_id);
 

@@ -43,7 +43,7 @@ fn get_shared_memory_content_at_offset<C: Connection>(
         _ => panic!("I do not know how to handle depth {}", screen.root_depth),
     };
     let pixmap = conn.generate_id()?;
-    conn.shm_create_pixmap(
+    let _ = conn.shm_create_pixmap(
         pixmap,
         screen.root,
         width,
@@ -100,11 +100,11 @@ fn make_file() -> IOResult<File> {
 
 fn send_fd<C: Connection>(conn: &C, screen_num: usize, file: File) -> Result<(), ReplyOrIdError> {
     let shmseg = conn.generate_id()?;
-    conn.shm_attach_fd(shmseg, OwnedFd::from(file), false)?;
+    let _ = conn.shm_attach_fd(shmseg, OwnedFd::from(file), false)?;
 
     use_shared_mem(conn, screen_num, shmseg)?;
 
-    conn.shm_detach(shmseg)?;
+    let _ = conn.shm_detach(shmseg)?;
 
     Ok(())
 }
@@ -128,7 +128,7 @@ fn receive_fd<C: Connection>(conn: &C, screen_num: usize) -> Result<(), ReplyOrI
         )
     };
     if addr == MAP_FAILED {
-        conn.shm_detach(shmseg)?;
+        let _ = conn.shm_detach(shmseg)?;
         return Err(ConnectionError::InsufficientMemory.into());
     }
 
@@ -139,7 +139,7 @@ fn receive_fd<C: Connection>(conn: &C, screen_num: usize) -> Result<(), ReplyOrI
 
     use_shared_mem(conn, screen_num, shmseg)?;
 
-    conn.shm_detach(shmseg)?;
+    let _ = conn.shm_detach(shmseg)?;
     // Let's ignore the munmap() that we should do here
 
     Ok(())
