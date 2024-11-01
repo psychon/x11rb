@@ -160,8 +160,9 @@ async fn main2(file: File) -> Result<(), Box<dyn std::error::Error>> {
         async move {
             // Spawn a task to read from the connection.
             ex.spawn(async move {
-                if let Err(e) = drive.await {
-                    tracing::error!("Error while driving the connection: {}", e);
+                match drive.await {
+                    Err(e) => tracing::error!("Error while driving the connection: {}", e),
+                    _ => unreachable!(),
                 }
             })
             .detach();
