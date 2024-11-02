@@ -54,7 +54,7 @@ pub(super) fn connect_addresses(p: &ParsedDisplay) -> impl Iterator<Item = Conne
     targets.into_iter()
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature = "std"))]
 mod tests {
     // make sure iterator properties are clean
     use super::{super::parse_display, ConnectAddress};

@@ -124,7 +124,7 @@ fn extra_length(buffer: &[u8]) -> usize {
     }
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature = "std"))]
 mod tests {
     use super::PacketReader;
     use alloc::{vec, vec::Vec};

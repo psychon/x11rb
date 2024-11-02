@@ -386,7 +386,7 @@ implement_serialize!(i64: 8);
 forward_float!(f32: u32);
 forward_float!(f64: u64);
 
-#[cfg(test)]
+#[cfg(all(test, feature = "std"))]
 mod float_tests {
     use super::{Serialize, TryParse};
 
