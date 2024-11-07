@@ -105,9 +105,9 @@ jobs:
     - name: cargo build with all features
       run: cargo build --workspace --verbose --all-targets --all-features
 
-    # build no_std
-    - name: cargo build protocol with no default features
-      run: cargo build --manifest-path x11rb-protocol/Cargo.toml --no-default-features --features=all-extensions
+    # test no_std
+    - name: cargo test protocol with no default features
+      run: cargo test --manifest-path x11rb-protocol/Cargo.toml --no-default-features --features=all-extensions
 
     - name: Add rustflag for instrument coverage
       if: matrix.rust == 'nightly'
