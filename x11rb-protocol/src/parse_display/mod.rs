@@ -141,7 +141,7 @@ fn parse_display_direct_path(
     ))
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature = "std"))]
 mod test {
     use super::{
         parse_display, parse_display_with_file_exists_callback, DisplayParsingError, ParsedDisplay,

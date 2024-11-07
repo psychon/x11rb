@@ -1,3 +1,4 @@
+#![cfg(feature = "std")]
 use std::borrow::Cow;
 
 use crate::protocol::{get_request_name, request_name};
