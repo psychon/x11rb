@@ -28,9 +28,16 @@ pub(crate) struct xcb_connection_t {
 }
 
 #[derive(Debug)]
-pub(crate) struct XcbConnectionWrapper {
+#[doc(hidden)]
+pub struct XcbConnectionWrapper {
     ptr: NonNull<xcb_connection_t>,
     should_drop: bool,
+}
+
+unsafe impl as_raw_xcb_connection::AsRawXcbConnection for XcbConnectionWrapper {
+    fn as_raw_xcb_connection(&self) -> *mut as_raw_xcb_connection::xcb_connection_t {
+        self.ptr.as_ptr().cast()
+    }
 }
 
 // libxcb is fully thread-safe (well, except for xcb_disconnect()), so the following is

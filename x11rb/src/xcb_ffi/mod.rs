@@ -45,8 +45,8 @@ pub type BufWithFds = crate::connection::BufWithFds<Buffer>;
 /// interface to this C library.
 #[allow(clippy::upper_case_acronyms)]
 #[derive(Debug)]
-pub struct XCBConnection {
-    conn: raw_ffi::XcbConnectionWrapper,
+pub struct XCBConnection<Conn = raw_ffi::XcbConnectionWrapper> {
+    conn: Conn,
     setup: Setup,
     ext_mgr: Mutex<ExtensionManager>,
     errors: pending_errors::PendingErrors,
@@ -54,41 +54,6 @@ pub struct XCBConnection {
 }
 
 impl XCBConnection {
-    unsafe fn connection_error_from_connection(
-        c: *mut raw_ffi::xcb_connection_t,
-    ) -> ConnectionError {
-        Self::connection_error_from_c_error(raw_ffi::xcb_connection_has_error(c))
-    }
-
-    fn connection_error_from_c_error(error: c_int) -> ConnectionError {
-        use crate::xcb_ffi::raw_ffi::connection_errors::*;
-
-        assert_ne!(error, 0);
-        match error {
-            ERROR => IOError::new(ErrorKind::Other, ConnectionError::UnknownError).into(),
-            EXT_NOTSUPPORTED => ConnectionError::UnsupportedExtension,
-            MEM_INSUFFICIENT => ConnectionError::InsufficientMemory,
-            REQ_LEN_EXCEED => ConnectionError::MaximumRequestLengthExceeded,
-            FDPASSING_FAILED => ConnectionError::FdPassingFailed,
-            _ => ConnectionError::UnknownError,
-            // Not possible here: PARSE_ERR, INVALID_SCREEN
-        }
-    }
-
-    fn connect_error_from_c_error(error: c_int) -> ConnectError {
-        use crate::xcb_ffi::raw_ffi::connection_errors::*;
-
-        assert_ne!(error, 0);
-        match error {
-            ERROR => IOError::new(ErrorKind::Other, ConnectionError::UnknownError).into(),
-            MEM_INSUFFICIENT => ConnectError::InsufficientMemory,
-            PARSE_ERR => DisplayParsingError::Unknown.into(),
-            INVALID_SCREEN => ConnectError::InvalidScreen,
-            _ => ConnectError::UnknownError,
-            // Not possible here: EXT_NOTSUPPORTED, REQ_LEN_EXCEED, FDPASSING_FAILED
-        }
-    }
-
     /// Establish a new connection to an X11 server.
     ///
     /// If a `dpy_name` is provided, it describes the display that should be connected to, for
@@ -136,9 +101,18 @@ impl XCBConnection {
         ptr: *mut c_void,
         should_drop: bool,
     ) -> Result<XCBConnection, ConnectError> {
-        let ptr = ptr as *mut raw_ffi::xcb_connection_t;
-        let conn = raw_ffi::XcbConnectionWrapper::new(ptr, should_drop);
-        let setup = raw_ffi::xcb_get_setup(ptr);
+        Self::from_raw_xcb_connection_inner(raw_ffi::XcbConnectionWrapper::new(
+            ptr.cast(),
+            should_drop,
+        ))
+    }
+}
+
+impl<Conn: as_raw_xcb_connection::AsRawXcbConnection> XCBConnection<Conn> {
+    unsafe fn from_raw_xcb_connection_inner(
+        conn: Conn,
+    ) -> Result<XCBConnection<Conn>, ConnectError> {
+        let setup = raw_ffi::xcb_get_setup(conn.as_raw_xcb_connection().cast());
         Ok(XCBConnection {
             conn,
             setup: Self::parse_setup(setup)?,
@@ -146,6 +120,64 @@ impl XCBConnection {
             errors: Default::default(),
             maximum_sequence_received: AtomicU64::new(0),
         })
+    }
+
+    unsafe fn connection_error_from_connection(
+        c: *mut raw_ffi::xcb_connection_t,
+    ) -> ConnectionError {
+        Self::connection_error_from_c_error(raw_ffi::xcb_connection_has_error(c))
+    }
+
+    fn connection_error_from_c_error(error: c_int) -> ConnectionError {
+        use crate::xcb_ffi::raw_ffi::connection_errors::*;
+
+        assert_ne!(error, 0);
+        match error {
+            ERROR => IOError::new(ErrorKind::Other, ConnectionError::UnknownError).into(),
+            EXT_NOTSUPPORTED => ConnectionError::UnsupportedExtension,
+            MEM_INSUFFICIENT => ConnectionError::InsufficientMemory,
+            REQ_LEN_EXCEED => ConnectionError::MaximumRequestLengthExceeded,
+            FDPASSING_FAILED => ConnectionError::FdPassingFailed,
+            _ => ConnectionError::UnknownError,
+            // Not possible here: PARSE_ERR, INVALID_SCREEN
+        }
+    }
+
+    fn connect_error_from_c_error(error: c_int) -> ConnectError {
+        use crate::xcb_ffi::raw_ffi::connection_errors::*;
+
+        assert_ne!(error, 0);
+        match error {
+            ERROR => IOError::new(ErrorKind::Other, ConnectionError::UnknownError).into(),
+            MEM_INSUFFICIENT => ConnectError::InsufficientMemory,
+            PARSE_ERR => DisplayParsingError::Unknown.into(),
+            INVALID_SCREEN => ConnectError::InvalidScreen,
+            _ => ConnectError::UnknownError,
+            // Not possible here: EXT_NOTSUPPORTED, REQ_LEN_EXCEED, FDPASSING_FAILED
+        }
+    }
+
+    /// Create an `XCBConnection` from an object that implements `AsRawXcbConnection`.
+    pub fn from_existing_connection(conn: Conn) -> Result<Self, ConnectError> {
+        let setup = unsafe { raw_ffi::xcb_get_setup(conn.as_raw_xcb_connection().cast()) };
+        Ok(XCBConnection {
+            conn,
+            setup: unsafe { Self::parse_setup(setup) }?,
+            ext_mgr: Default::default(),
+            errors: Default::default(),
+            maximum_sequence_received: AtomicU64::new(0),
+        })
+    }
+
+    /// Get a reference to the inner managed connection.
+    ///
+    /// It is discouraged to use this inner connection for fetching events.
+    pub fn inner_connection(&self) -> &Conn {
+        &self.conn
+    }
+
+    fn as_ptr(&self) -> *mut raw_ffi::xcb_connection_t {
+        self.conn.as_raw_xcb_connection().cast()
     }
 
     unsafe fn parse_setup(setup: *const raw_ffi::xcb_setup_t) -> Result<Setup, ParseError> {
@@ -214,7 +246,7 @@ impl XCBConnection {
         let seqno = if fds.is_empty() {
             unsafe {
                 raw_ffi::xcb_send_request64(
-                    self.conn.as_ptr(),
+                    self.as_ptr(),
                     flags,
                     &mut new_bufs_ffi[2],
                     &protocol_request,
@@ -229,7 +261,7 @@ impl XCBConnection {
                 let fds_ptr = fds.as_mut_ptr();
                 unsafe {
                     raw_ffi::xcb_send_request_with_fds64(
-                        self.conn.as_ptr(),
+                        self.as_ptr(),
                         flags,
                         &mut new_bufs_ffi[2],
                         &protocol_request,
@@ -244,7 +276,7 @@ impl XCBConnection {
             }
         };
         if seqno == 0 {
-            unsafe { Err(Self::connection_error_from_connection(self.conn.as_ptr())) }
+            unsafe { Err(Self::connection_error_from_connection(self.as_ptr())) }
         } else {
             Ok(seqno)
         }
@@ -253,7 +285,7 @@ impl XCBConnection {
     /// Check if the underlying XCB connection is in an error state.
     pub fn has_error(&self) -> Option<ConnectionError> {
         unsafe {
-            let error = raw_ffi::xcb_connection_has_error(self.conn.as_ptr());
+            let error = raw_ffi::xcb_connection_has_error(self.as_ptr());
             if error == 0 {
                 None
             } else {
@@ -267,7 +299,7 @@ impl XCBConnection {
     /// The returned pointer is valid for as long as the original object was not dropped. No
     /// ownerhsip is transferred.
     pub fn get_raw_xcb_connection(&self) -> *mut c_void {
-        self.conn.as_ptr() as _
+        self.as_ptr().cast()
     }
 
     /// Check if a reply to the given request already received.
@@ -280,7 +312,7 @@ impl XCBConnection {
             let mut reply = null_mut();
             let mut error = null_mut();
             let found =
-                raw_ffi::xcb_poll_for_reply64(self.conn.as_ptr(), sequence, &mut reply, &mut error);
+                raw_ffi::xcb_poll_for_reply64(self.as_ptr(), sequence, &mut reply, &mut error);
             if found == 0 {
                 return Err(());
             }
@@ -355,7 +387,7 @@ impl XCBConnection {
     }
 }
 
-impl RequestConnection for XCBConnection {
+impl<Conn: as_raw_xcb_connection::AsRawXcbConnection> RequestConnection for XCBConnection<Conn> {
     type Buf = CSlice;
 
     fn send_request_with_reply<R>(
@@ -401,7 +433,7 @@ impl RequestConnection for XCBConnection {
         match mode {
             DiscardMode::DiscardReplyAndError => unsafe {
                 // libxcb can throw away everything for us
-                raw_ffi::xcb_discard_reply64(self.conn.as_ptr(), sequence);
+                raw_ffi::xcb_discard_reply64(self.as_ptr(), sequence);
             },
             // We have to check for errors ourselves
             DiscardMode::DiscardReply => self.errors.discard_reply(sequence),
@@ -434,9 +466,9 @@ impl RequestConnection for XCBConnection {
     ) -> Result<ReplyOrError<CSlice>, ConnectionError> {
         unsafe {
             let mut error = null_mut();
-            let reply = raw_ffi::xcb_wait_for_reply64(self.conn.as_ptr(), sequence, &mut error);
+            let reply = raw_ffi::xcb_wait_for_reply64(self.as_ptr(), sequence, &mut error);
             match (reply.is_null(), error.is_null()) {
-                (true, true) => Err(Self::connection_error_from_connection(self.conn.as_ptr())),
+                (true, true) => Err(Self::connection_error_from_connection(self.as_ptr())),
                 (false, true) => Ok(ReplyOrError::Reply(self.wrap_reply(reply as _, sequence))),
                 (true, false) => Ok(ReplyOrError::Error(self.wrap_error(error as _, sequence))),
                 // At least one of these pointers must be NULL.
@@ -497,7 +529,7 @@ impl RequestConnection for XCBConnection {
         let cookie = raw_ffi::xcb_void_cookie_t {
             sequence: sequence as _,
         };
-        let error = unsafe { raw_ffi::xcb_request_check(self.conn.as_ptr(), cookie) };
+        let error = unsafe { raw_ffi::xcb_request_check(self.as_ptr(), cookie) };
         if error.is_null() {
             Ok(None)
         } else {
@@ -506,11 +538,11 @@ impl RequestConnection for XCBConnection {
     }
 
     fn maximum_request_bytes(&self) -> usize {
-        4 * unsafe { raw_ffi::xcb_get_maximum_request_length(self.conn.as_ptr()) as usize }
+        4 * unsafe { raw_ffi::xcb_get_maximum_request_length(self.as_ptr()) as usize }
     }
 
     fn prefetch_maximum_request_bytes(&self) {
-        unsafe { raw_ffi::xcb_prefetch_maximum_request_length(self.conn.as_ptr()) };
+        unsafe { raw_ffi::xcb_prefetch_maximum_request_length(self.as_ptr()) };
     }
 
     fn parse_error(&self, error: &[u8]) -> Result<crate::x11_utils::X11Error, ParseError> {
