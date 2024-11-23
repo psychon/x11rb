@@ -65,7 +65,7 @@ impl<'conn, C: Connection + ?Sized> VoidCookie<'conn, C> {
     }
 }
 
-impl<'conn, C: RequestConnection + ?Sized> Drop for VoidCookie<'conn, C> {
+impl<C: RequestConnection + ?Sized> Drop for VoidCookie<'_, C> {
     fn drop(&mut self) {
         self.conn.discard_reply(
             self.sequence,
@@ -94,7 +94,7 @@ impl<'a, C: RequestConnection + ?Sized> RawCookie<'a, C> {
     }
 }
 
-impl<'a, C: RequestConnection + ?Sized> Drop for RawCookie<'a, C> {
+impl<C: RequestConnection + ?Sized> Drop for RawCookie<'_, C> {
     fn drop(&mut self) {
         self.conn.discard_reply(
             self.sequence,
