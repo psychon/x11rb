@@ -54,7 +54,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let (mut width, mut height) = (100, 100);
 
-    conn.create_window(
+    let _ = conn.create_window(
         screen.root_depth,
         win_id,
         screen.root,
@@ -71,35 +71,35 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     util::start_timeout_thread(conn1.clone(), win_id);
 
     let title = "Simple Window";
-    conn.change_property8(
+    let _ = conn.change_property8(
         PropMode::REPLACE,
         win_id,
         AtomEnum::WM_NAME,
         AtomEnum::STRING,
         title.as_bytes(),
     )?;
-    conn.change_property8(
+    let _ = conn.change_property8(
         PropMode::REPLACE,
         win_id,
         atoms._NET_WM_NAME,
         atoms.UTF8_STRING,
         title.as_bytes(),
     )?;
-    conn.change_property32(
+    let _ = conn.change_property32(
         PropMode::REPLACE,
         win_id,
         atoms.WM_PROTOCOLS,
         AtomEnum::ATOM,
         &[atoms.WM_DELETE_WINDOW],
     )?;
-    conn.change_property8(
+    let _ = conn.change_property8(
         PropMode::REPLACE,
         win_id,
         AtomEnum::WM_CLASS,
         AtomEnum::STRING,
         b"simple_window\0simple_window\0",
     )?;
-    conn.change_property8(
+    let _ = conn.change_property8(
         PropMode::REPLACE,
         win_id,
         AtomEnum::WM_CLIENT_MACHINE,
@@ -116,9 +116,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .reply()?;
     assert_eq!(reply.value, title.as_bytes());
 
-    conn.create_gc(gc_id, win_id, &gc_aux)?;
+    let _ = conn.create_gc(gc_id, win_id, &gc_aux)?;
 
-    conn.map_window(win_id)?;
+    let _ = conn.map_window(win_id)?;
 
     conn.flush()?;
 
@@ -146,7 +146,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                             y: -10,
                         },
                     ];
-                    conn.poly_line(CoordMode::ORIGIN, win_id, gc_id, &points)?;
+                    let _ = conn.poly_line(CoordMode::ORIGIN, win_id, gc_id, &points)?;
                     conn.flush()?;
                 }
             }

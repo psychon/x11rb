@@ -25,7 +25,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Create a window
     let win_id = conn.generate_id()?;
     let win_aux = CreateWindowAux::new().background_pixel(screen.white_pixel);
-    conn.create_window(
+    let _ = conn.create_window(
         COPY_DEPTH_FROM_PARENT,
         win_id,
         screen.root,
@@ -41,7 +41,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Ask for present ConfigureNotify events
     let event_id = conn.generate_id()?;
-    present::select_input(
+    let _ = present::select_input(
         &conn,
         event_id,
         win_id,
@@ -49,7 +49,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     )?;
 
     // Cause an event
-    conn.configure_window(win_id, &ConfigureWindowAux::new().width(20))?;
+    let _ = conn.configure_window(win_id, &ConfigureWindowAux::new().width(20))?;
 
     // Wait for the event
     conn.flush()?;
