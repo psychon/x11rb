@@ -64,6 +64,6 @@ pub fn new_from_resource_manager(conn: &impl Connection) -> Result<Option<Databa
 pub fn new_from_default(conn: &impl Connection) -> Result<Database, ReplyError> {
     Ok(Database::new_from_default(
         &send_request(conn)?,
-        crate::hostname(),
+        gethostname::gethostname(),
     ))
 }
