@@ -255,7 +255,7 @@ impl VariableSize {
             }
 
             if base_overflow {
-                incr = 1 << (incr | base | 1 << 31).trailing_zeros().min(31);
+                incr = 1 << (incr | base | (1 << 31)).trailing_zeros().min(31);
                 Self { base: 0, incr }
             } else {
                 if incr != 0 {
