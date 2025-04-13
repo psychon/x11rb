@@ -139,7 +139,7 @@ mod tests {
     impl Stream for TestStream {
         fn read(&self, buf: &mut [u8], _: &mut Vec<RawFdContainer>) -> Result<usize> {
             let mut data = self.data.borrow_mut();
-            if data.len() == 0 {
+            if data.is_empty() {
                 return Err(Error::from(ErrorKind::WouldBlock));
             }
 
