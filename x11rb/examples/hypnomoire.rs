@@ -40,14 +40,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let white = conn.generate_id()?;
     let black = conn.generate_id()?;
 
-    conn.create_gc(
+    let _ = conn.create_gc(
         white,
         screen.root,
         &CreateGCAux::new()
             .graphics_exposures(0)
             .foreground(screen.white_pixel),
     )?;
-    conn.create_gc(
+    let _ = conn.create_gc(
         black,
         screen.root,
         &CreateGCAux::new()
@@ -93,7 +93,7 @@ fn run<C: Connection>(
         guard.angle_velocity = 0.05;
     }
 
-    conn.create_window(
+    let _ = conn.create_window(
         COPY_DEPTH_FROM_PARENT,
         window,
         screen.root,
@@ -111,16 +111,16 @@ fn run<C: Connection>(
             )
             .do_not_propogate_mask(EventMask::BUTTON_PRESS),
     )?;
-    conn.change_property32(
+    let _ = conn.change_property32(
         PropMode::REPLACE,
         window,
         wm_protocols,
         AtomEnum::ATOM,
         &[wm_delete_window],
     )?;
-    conn.map_window(window)?;
+    let _ = conn.map_window(window)?;
 
-    conn.create_pixmap(
+    let _ = conn.create_pixmap(
         screen.root_depth,
         pixmap,
         window,
@@ -133,7 +133,7 @@ fn run<C: Connection>(
         width: default_size,
         height: default_size,
     };
-    conn.poly_fill_rectangle(pixmap, white, &[rect])?;
+    let _ = conn.poly_fill_rectangle(pixmap, white, &[rect])?;
 
     let mut theta: f64 = 0.0;
     let radius = f64::from(default_size) + 1.0;
@@ -151,7 +151,7 @@ fn run<C: Connection>(
             },
             Point { x, y },
         ];
-        conn.poly_line(CoordMode::PREVIOUS, pixmap, black, &lines)?;
+        let _ = conn.poly_line(CoordMode::PREVIOUS, pixmap, black, &lines)?;
 
         let (sin, cos) = (theta + LAG).sin_cos();
         let (x, y) = ((radius * cos) as i16, (radius * sin) as i16);
@@ -162,9 +162,9 @@ fn run<C: Connection>(
             },
             Point { x, y },
         ];
-        conn.poly_line(CoordMode::PREVIOUS, pixmap, white, &lines)?;
+        let _ = conn.poly_line(CoordMode::PREVIOUS, pixmap, white, &lines)?;
 
-        conn.copy_area(
+        let _ = conn.copy_area(
             pixmap,
             window,
             white,
@@ -209,7 +209,7 @@ where
             Event::Expose(event) => {
                 if let Some(state) = find_window_by_id(&windows, event.window) {
                     let state = state.lock().unwrap();
-                    conn.copy_area(
+                    let _ = conn.copy_area(
                         state.pixmap,
                         state.window,
                         white,

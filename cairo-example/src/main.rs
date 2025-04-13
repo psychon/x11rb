@@ -134,13 +134,13 @@ where
 {
     let window = conn.generate_id()?;
     let colormap = conn.generate_id()?;
-    conn.create_colormap(ColormapAlloc::NONE, colormap, screen.root, visual_id)?;
+    let _ = conn.create_colormap(ColormapAlloc::NONE, colormap, screen.root, visual_id)?;
     let win_aux = CreateWindowAux::new()
         .event_mask(EventMask::EXPOSURE | EventMask::STRUCTURE_NOTIFY)
         .background_pixel(x11rb::NONE)
         .border_pixel(screen.black_pixel)
         .colormap(colormap);
-    conn.create_window(
+    let _ = conn.create_window(
         depth,
         window,
         screen.root,
@@ -155,28 +155,28 @@ where
     )?;
 
     let title = "Simple Window";
-    conn.change_property8(
+    let _ = conn.change_property8(
         PropMode::REPLACE,
         window,
         AtomEnum::WM_NAME,
         AtomEnum::STRING,
         title.as_bytes(),
     )?;
-    conn.change_property8(
+    let _ = conn.change_property8(
         PropMode::REPLACE,
         window,
         atoms._NET_WM_NAME,
         atoms.UTF8_STRING,
         title.as_bytes(),
     )?;
-    conn.change_property32(
+    let _ = conn.change_property32(
         PropMode::REPLACE,
         window,
         atoms.WM_PROTOCOLS,
         AtomEnum::ATOM,
         &[atoms.WM_DELETE_WINDOW],
     )?;
-    conn.change_property8(
+    let _ = conn.change_property8(
         PropMode::REPLACE,
         window,
         AtomEnum::WM_CLASS,
@@ -184,7 +184,7 @@ where
         b"simple_window\0simple_window\0",
     )?;
 
-    conn.map_window(window)?;
+    let _ = conn.map_window(window)?;
     Ok(window)
 }
 
