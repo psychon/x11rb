@@ -293,6 +293,7 @@ fn do_write(
 ) -> Result<usize> {
     use rustix::io::Errno;
     use rustix::net::{sendmsg, SendAncillaryBuffer, SendAncillaryMessage, SendFlags};
+    use std::mem::MaybeUninit;
 
     fn sendmsg_wrapper(
         fd: BorrowedFd<'_>,
@@ -316,7 +317,7 @@ fn do_write(
         let fds = fds.iter().map(|fd| fd.as_fd()).collect::<Vec<_>>();
         let rights = SendAncillaryMessage::ScmRights(&fds);
 
-        let mut cmsg_space = vec![0u8; rights.size()];
+        let mut cmsg_space = vec![MaybeUninit::uninit(); rights.size()];
         let mut cmsg_buffer = SendAncillaryBuffer::new(&mut cmsg_space);
         assert!(cmsg_buffer.push(rights));
 
@@ -346,7 +347,7 @@ impl Stream for DefaultStream {
         let fd = self.as_fd();
         let mut poll_fds = [PollFd::from_borrowed_fd(fd, poll_flags)];
         loop {
-            match poll(&mut poll_fds, -1) {
+            match poll(&mut poll_fds, None) {
                 Ok(_) => break,
                 Err(Errno::INTR) => {}
                 Err(e) => return Err(e.into()),
@@ -362,11 +363,12 @@ impl Stream for DefaultStream {
             use rustix::io::Errno;
             use rustix::net::{recvmsg, RecvAncillaryBuffer, RecvAncillaryMessage};
             use std::io::IoSliceMut;
+            use std::mem::MaybeUninit;
 
             // 1024 bytes on the stack should be enough for more file descriptors than the X server will ever
             // send, as well as the header for the ancillary data. If you can find a case where this can
             // overflow with an actual production X11 server, I'll buy you a steak dinner.
-            let mut cmsg = [0u8; 1024];
+            let mut cmsg = [MaybeUninit::uninit(); 1024];
             let mut iov = [IoSliceMut::new(buf)];
             let mut cmsg_buffer = RecvAncillaryBuffer::new(&mut cmsg);
 
@@ -464,7 +466,7 @@ fn connect_abstract_unix_stream(
 ) -> std::result::Result<RawFdContainer, rustix::io::Errno> {
     use rustix::fs::{fcntl_getfl, fcntl_setfl, OFlags};
     use rustix::net::{
-        connect_unix, socket_with, AddressFamily, SocketAddrUnix, SocketFlags, SocketType,
+        connect, socket_with, AddressFamily, SocketAddrUnix, SocketFlags, SocketType,
     };
 
     let socket = socket_with(
@@ -474,7 +476,7 @@ fn connect_abstract_unix_stream(
         None,
     )?;
 
-    connect_unix(&socket, &SocketAddrUnix::new_abstract_name(path)?)?;
+    connect(&socket, &SocketAddrUnix::new_abstract_name(path)?)?;
 
     // Make the FD non-blocking
     fcntl_setfl(&socket, fcntl_getfl(&socket)? | OFlags::NONBLOCK)?;

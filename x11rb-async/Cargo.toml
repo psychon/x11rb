@@ -100,7 +100,7 @@ async-executor = "1.8"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 [target.'cfg(unix)'.dev-dependencies.rustix]
-version = "0.38"
+version = "1.0"
 default-features = false
 features = ["mm", "pipe"]
 
