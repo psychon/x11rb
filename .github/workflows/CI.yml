@@ -173,9 +173,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    - uses: dtolnay/rust-toolchain@1.63.0
+    - uses: dtolnay/rust-toolchain@1.64.0
 
-    - name: Pin last once_cell release supporting our msrv of Rust 1.63
+    - name: Pin last once_cell release supporting our msrv of Rust 1.64
       run: cargo update --package once_cell --precise 1.20.1
 
     # build
