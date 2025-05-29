@@ -646,7 +646,7 @@ unsafe impl raw_window_handle::HasRawDisplayHandle for XCBConnection {
 
 #[cfg(feature = "raw-window-handle")]
 unsafe impl raw_window_handle::HasRawWindowHandle
-    for crate::protocol::xproto::WindowWrapper<'_, XCBConnection>
+    for crate::protocol::xproto::WindowWrapper<XCBConnection>
 {
     #[inline]
     fn raw_window_handle(&self) -> raw_window_handle::RawWindowHandle {
