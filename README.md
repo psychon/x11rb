@@ -3,7 +3,7 @@
 [![GitHub Actions Status](https://github.com/psychon/x11rb/workflows/CI/badge.svg)](https://github.com/psychon/x11rb/actions)
 [![Crate](https://img.shields.io/crates/v/x11rb.svg)](https://crates.io/crates/x11rb)
 [![API](https://docs.rs/x11rb/badge.svg)](https://docs.rs/x11rb)
-![Minimum rustc version](https://img.shields.io/badge/rustc-1.63+-lightgray.svg)
+![Minimum rustc version](https://img.shields.io/badge/rustc-1.64+-lightgray.svg)
 [![License](https://img.shields.io/crates/l/x11rb.svg)](https://github.com/psychon/x11rb#license)
 
 Feel free to open issues for any problems or questions you might have.

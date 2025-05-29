@@ -183,7 +183,6 @@ mod test;
 
 use errors::ConnectError;
 use protocol::xproto::{Keysym, Timestamp};
-use std::ffi::OsString;
 
 /// Establish a new connection to an X11 server.
 ///
@@ -214,15 +213,3 @@ pub const CURRENT_TIME: Timestamp = 0;
 
 /// This constant can be used to fill unused entries in `Keysym` tables
 pub const NO_SYMBOL: Keysym = 0;
-
-#[cfg(not(unix))]
-fn hostname() -> OsString {
-    gethostname::gethostname()
-}
-
-#[cfg(unix)]
-fn hostname() -> OsString {
-    use std::os::unix::ffi::OsStringExt;
-
-    OsString::from_vec(rustix::system::uname().nodename().to_bytes().to_vec())
-}

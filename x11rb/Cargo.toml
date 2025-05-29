@@ -10,7 +10,7 @@ authors = [
 repository = "https://github.com/psychon/x11rb"
 readme = "../README.md"
 edition = "2021"
-rust-version = "1.63"
+rust-version = "1.64"
 license = "MIT OR Apache-2.0"
 keywords = ["xcb", "X11"]
 
@@ -19,16 +19,14 @@ x11rb-protocol = { version = "0.13.1", default-features = false, features = ["st
 libc = { version = "0.2", optional = true }
 libloading = { version = "0.8.0", optional = true }
 once_cell = { version = "1.19", optional = true }
+raw-window-handle = { version = "0.5.0", optional = true }
 as-raw-xcb-connection = { version = "1.0", optional = true }
 tracing = { version = "0.1", optional = true, default-features = false }
 rustix = { version = "1.0", default-features = false, features = ["std", "event", "fs", "net", "system"] }
 xcursor = { version = "0.3.7", optional = true }
-
-[target.'cfg(not(unix))'.dependencies]
-gethostname = "0.4"
+gethostname = "1.0"
 
 [dev-dependencies]
-gethostname = "0.4"
 polling = "3.4"
 tracing-subscriber = "0.3"
 
