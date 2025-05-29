@@ -63,15 +63,15 @@ impl<'a, C: Connection> WmState<'a, C> {
         let screen = &conn.setup().roots[screen_num];
         let black_gc = conn.generate_id()?;
         let font = conn.generate_id()?;
-        conn.open_font(font, b"9x15")?;
+        let _ = conn.open_font(font, b"9x15")?;
 
         let gc_aux = CreateGCAux::new()
             .graphics_exposures(0)
             .background(screen.white_pixel)
             .foreground(screen.black_pixel)
             .font(font);
-        conn.create_gc(black_gc, screen.root, &gc_aux)?;
-        conn.close_font(font)?;
+        let _ = conn.create_gc(black_gc, screen.root, &gc_aux)?;
+        let _ = conn.close_font(font)?;
 
         let wm_protocols = conn.intern_atom(false, b"WM_PROTOCOLS")?;
         let wm_delete_window = conn.intern_atom(false, b"WM_DELETE_WINDOW")?;
@@ -137,7 +137,7 @@ impl<'a, C: Connection> WmState<'a, C> {
                     | EventMask::ENTER_WINDOW,
             )
             .background_pixel(screen.white_pixel);
-        self.conn.create_window(
+        let _ = self.conn.create_window(
             COPY_DEPTH_FROM_PARENT,
             frame_win,
             screen.root,
@@ -151,14 +151,14 @@ impl<'a, C: Connection> WmState<'a, C> {
             &win_aux,
         )?;
 
-        self.conn.grab_server()?;
-        self.conn.change_save_set(SetMode::INSERT, win)?;
+        let _ = self.conn.grab_server()?;
+        let _ = self.conn.change_save_set(SetMode::INSERT, win)?;
         let cookie = self
             .conn
             .reparent_window(win, frame_win, 0, TITLEBAR_HEIGHT as _)?;
-        self.conn.map_window(win)?;
-        self.conn.map_window(frame_win)?;
-        self.conn.ungrab_server()?;
+        let _ = self.conn.map_window(win)?;
+        let _ = self.conn.map_window(frame_win)?;
+        let _ = self.conn.ungrab_server()?;
 
         self.windows.push(WindowState::new(win, frame_win, geom));
 
@@ -174,7 +174,7 @@ impl<'a, C: Connection> WmState<'a, C> {
     /// Draw the titlebar of a window
     fn redraw_titlebar(&self, state: &WindowState) -> Result<(), ReplyError> {
         let close_x = state.close_x_position();
-        self.conn.poly_line(
+        let _ = self.conn.poly_line(
             CoordMode::ORIGIN,
             state.frame_window,
             self.black_gc,
@@ -186,7 +186,7 @@ impl<'a, C: Connection> WmState<'a, C> {
                 },
             ],
         )?;
-        self.conn.poly_line(
+        let _ = self.conn.poly_line(
             CoordMode::ORIGIN,
             state.frame_window,
             self.black_gc,
@@ -212,7 +212,8 @@ impl<'a, C: Connection> WmState<'a, C> {
                 u32::MAX,
             )?
             .reply()?;
-        self.conn
+        let _ = self
+            .conn
             .image_text8(state.frame_window, self.black_gc, 1, 10, &reply.value)?;
         Ok(())
     }
@@ -289,10 +290,11 @@ impl<'a, C: Connection> WmState<'a, C> {
             if state.window != event.window {
                 return true;
             }
-            conn.change_save_set(SetMode::DELETE, state.window).unwrap();
-            conn.reparent_window(state.window, root, state.x, state.y)
+            let _ = conn.change_save_set(SetMode::DELETE, state.window).unwrap();
+            let _ = conn
+                .reparent_window(state.window, root, state.x, state.y)
                 .unwrap();
-            conn.destroy_window(state.frame_window).unwrap();
+            let _ = conn.destroy_window(state.frame_window).unwrap();
             false
         });
     }
@@ -307,7 +309,7 @@ impl<'a, C: Connection> WmState<'a, C> {
             .sibling(None)
             .stack_mode(None);
         println!("Configure: {:?}", aux);
-        self.conn.configure_window(event.window, &aux)?;
+        let _ = self.conn.configure_window(event.window, &aux)?;
         Ok(())
     }
 
@@ -325,10 +327,11 @@ impl<'a, C: Connection> WmState<'a, C> {
     fn handle_enter(&mut self, event: EnterNotifyEvent) -> Result<(), ReplyError> {
         if let Some(state) = self.find_window_by_id(event.event) {
             // Set the input focus (ignoring ICCCM's WM_PROTOCOLS / WM_TAKE_FOCUS)
-            self.conn
+            let _ = self
+                .conn
                 .set_input_focus(InputFocus::PARENT, state.window, CURRENT_TIME)?;
             // Also raise the window to the top of the stacking order
-            self.conn.configure_window(
+            let _ = self.conn.configure_window(
                 state.frame_window,
                 &ConfigureWindowAux::new().stack_mode(StackMode::ABOVE),
             )?;
@@ -360,7 +363,8 @@ impl<'a, C: Connection> WmState<'a, C> {
                     self.wm_protocols,
                     [self.wm_delete_window, 0, 0, 0, 0],
                 );
-                self.conn
+                let _ = self
+                    .conn
                     .send_event(false, state.window, EventMask::NO_EVENT, event)?;
             }
         }
@@ -372,7 +376,8 @@ impl<'a, C: Connection> WmState<'a, C> {
             let (x, y) = (x + event.root_x, y + event.root_y);
             // Sigh, X11 and its mixing up i16 and i32
             let (x, y) = (x as i32, y as i32);
-            self.conn
+            let _ = self
+                .conn
                 .configure_window(win, &ConfigureWindowAux::new().x(x).y(y))?;
         }
         Ok(())

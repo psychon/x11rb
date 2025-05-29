@@ -180,7 +180,7 @@ fn test_poly_segment() -> Result<(), ReplyError> {
         },
     ];
     let length: u16 = (12 + segments.len() * 8) as u16 / 4;
-    conn.poly_segment(drawable, gc, &segments)?;
+    let _ = conn.poly_segment(drawable, gc, &segments)?;
 
     let mut expected = vec![
         x11rb::protocol::xproto::POLY_SEGMENT_REQUEST,
@@ -208,7 +208,7 @@ fn test_big_requests() -> Result<(), ConnectionError> {
     let padding = 3; // big_buffer's size rounded up to a multiple of 4
     let big_request_length_field = 4;
     let length: u32 = (16 + big_request_length_field + big_buffer.len() as u32 + padding) / 4;
-    conn.poly_text16(drawable, gc, x, y, &big_buffer)?;
+    let _ = conn.poly_text16(drawable, gc, x, y, &big_buffer)?;
 
     let mut expected = vec![
         x11rb::protocol::xproto::POLY_TEXT16_REQUEST,
@@ -261,7 +261,7 @@ fn test_send_event() -> Result<(), ConnectionError> {
     let propagate = true;
     let destination: u32 = 0x1337;
     let event_mask = x11rb_protocol::protocol::xproto::EventMask::BUTTON3_MOTION;
-    conn.send_event(propagate, destination, event_mask, event)?;
+    let _ = conn.send_event(propagate, destination, event_mask, event)?;
 
     let mut expected = vec![x11rb::protocol::xproto::SEND_EVENT_REQUEST, propagate as _];
     expected.extend(((12u16 + 32u16) / 4).to_ne_bytes());

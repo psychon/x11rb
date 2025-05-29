@@ -403,7 +403,7 @@ fn example4() -> Result<(), Box<dyn Error>> {
     let win = conn.generate_id()?;
 
     // Create the window
-    conn.create_window(
+    let _ = conn.create_window(
         COPY_DEPTH_FROM_PARENT,    // depth (same as root)
         win,                       // window Id
         screen.root,               // parent window
@@ -418,7 +418,7 @@ fn example4() -> Result<(), Box<dyn Error>> {
     )?; // masks, not used yet
 
     // Map the window on the screen
-    conn.map_window(win)?;
+    let _ = conn.map_window(win)?;
 
     // Make sure commands are sent before the sleep, so window is shown
     conn.flush()?;
@@ -537,7 +537,7 @@ fn example5() -> Result<(), Box<dyn Error>> {
     let win = screen.root;
     let black = conn.generate_id()?;
     let values = CreateGCAux::default().foreground(screen.black_pixel);
-    conn.create_gc(black, win, &values)?;
+    let _ = conn.create_gc(black, win, &values)?;
 
     Ok(())
 }
@@ -758,7 +758,7 @@ fn example6() -> Result<(), Box<dyn Error>> {
     let values = CreateGCAux::default()
         .foreground(screen.black_pixel)
         .graphics_exposures(0);
-    conn.create_gc(foreground, win, &values)?;
+    let _ = conn.create_gc(foreground, win, &values)?;
 
     // Ask for our window's Id
     let win = conn.generate_id()?;
@@ -767,7 +767,7 @@ fn example6() -> Result<(), Box<dyn Error>> {
     let values = CreateWindowAux::default()
         .background_pixel(screen.white_pixel)
         .event_mask(EventMask::EXPOSURE);
-    conn.create_window(
+    let _ = conn.create_window(
         COPY_DEPTH_FROM_PARENT,    // depth
         win,                       // window Id
         screen.root,               // parent window
@@ -782,7 +782,7 @@ fn example6() -> Result<(), Box<dyn Error>> {
     )?;
 
     // Map the window on the screen
-    conn.map_window(win)?;
+    let _ = conn.map_window(win)?;
 
     // We flush the request
     conn.flush()?;
@@ -791,19 +791,19 @@ fn example6() -> Result<(), Box<dyn Error>> {
         let event = conn.wait_for_event()?;
         if let Event::Expose(_) = event {
             // We draw the points
-            conn.poly_point(CoordMode::ORIGIN, win, foreground, &points)?;
+            let _ = conn.poly_point(CoordMode::ORIGIN, win, foreground, &points)?;
 
             // We draw the polygonal line
-            conn.poly_line(CoordMode::PREVIOUS, win, foreground, &polyline)?;
+            let _ = conn.poly_line(CoordMode::PREVIOUS, win, foreground, &polyline)?;
 
             // We draw the segments
-            conn.poly_segment(win, foreground, &segments)?;
+            let _ = conn.poly_segment(win, foreground, &segments)?;
 
             // We draw the rectangles
-            conn.poly_rectangle(win, foreground, &rectangles)?;
+            let _ = conn.poly_rectangle(win, foreground, &rectangles)?;
 
             // We draw the arcs
-            conn.poly_arc(win, foreground, &arcs)?;
+            let _ = conn.poly_arc(win, foreground, &arcs)?;
 
             // We flush the request
             conn.flush()?;
@@ -1264,7 +1264,7 @@ fn example7() -> Result<(), Box<dyn Error>> {
                 | EventMask::KEY_PRESS
                 | EventMask::KEY_RELEASE,
         );
-    conn.create_window(
+    let _ = conn.create_window(
         COPY_DEPTH_FROM_PARENT,    // depth
         win,                       // window Id
         screen.root,               // parent window
@@ -1279,7 +1279,7 @@ fn example7() -> Result<(), Box<dyn Error>> {
     )?;
 
     // Map the window on the screen
-    conn.map_window(win)?;
+    let _ = conn.map_window(win)?;
     conn.flush()?;
 
     loop {
@@ -1446,8 +1446,8 @@ fn text_draw<C: Connection>(
 ) -> Result<(), Box<dyn Error>> {
     let gc = gc_font_get(conn, screen, window, "7x13")?;
 
-    conn.image_text8(window, gc, x1, y1, label.as_bytes())?;
-    conn.free_gc(gc)?;
+    let _ = conn.image_text8(window, gc, x1, y1, label.as_bytes())?;
+    let _ = conn.free_gc(gc)?;
 
     Ok(())
 }
@@ -1460,16 +1460,16 @@ fn gc_font_get<C: Connection>(
 ) -> Result<Gcontext, ReplyOrIdError> {
     let font = conn.generate_id()?;
 
-    conn.open_font(font, font_name.as_bytes())?;
+    let _ = conn.open_font(font, font_name.as_bytes())?;
 
     let gc = conn.generate_id()?;
     let values = CreateGCAux::default()
         .foreground(screen.black_pixel)
         .background(screen.white_pixel)
         .font(font);
-    conn.create_gc(gc, window, &values)?;
+    let _ = conn.create_gc(gc, window, &values)?;
 
-    conn.close_font(font)?;
+    let _ = conn.close_font(font)?;
 
     Ok(gc)
 }
@@ -1489,7 +1489,7 @@ fn example8() -> Result<(), Box<dyn Error>> {
     let values = CreateWindowAux::default()
         .background_pixel(screen.white_pixel)
         .event_mask(EventMask::KEY_RELEASE | EventMask::EXPOSURE);
-    conn.create_window(
+    let _ = conn.create_window(
         screen.root_depth,
         window,
         screen.root,
@@ -1502,7 +1502,7 @@ fn example8() -> Result<(), Box<dyn Error>> {
         screen.root_visual,
         &values,
     )?;
-    conn.map_window(window)?;
+    let _ = conn.map_window(window)?;
 
     conn.flush()?;
 
@@ -1621,7 +1621,7 @@ fn example9() -> Result<(), Box<dyn Error>> {
     let win = conn.generate_id()?;
 
     // Create the window
-    conn.create_window(
+    let _ = conn.create_window(
         0,
         win,
         screen.root,
@@ -1637,7 +1637,7 @@ fn example9() -> Result<(), Box<dyn Error>> {
 
     // Set the title of the window
     let title = "Hello World !";
-    conn.change_property8(
+    let _ = conn.change_property8(
         PropMode::REPLACE,
         win,
         AtomEnum::WM_NAME,
@@ -1647,7 +1647,7 @@ fn example9() -> Result<(), Box<dyn Error>> {
 
     // Set the title of the window icon
     let title_icon = "Hello World ! (iconified)";
-    conn.change_property8(
+    let _ = conn.change_property8(
         PropMode::REPLACE,
         win,
         AtomEnum::WM_ICON_NAME,
@@ -1656,7 +1656,7 @@ fn example9() -> Result<(), Box<dyn Error>> {
     )?;
 
     // Map the window on the screen
-    conn.map_window(win)?;
+    let _ = conn.map_window(win)?;
 
     conn.flush()?;
 
@@ -2302,9 +2302,9 @@ fn button_draw<C: Connection>(
         },
         Point { x: x1, y: y1 },
     ];
-    conn.poly_line(CoordMode::ORIGIN, window, gc, &points)?;
-    conn.image_text8(window, gc, x1 + inset + 1, y1 - inset - 1, label.as_bytes())?;
-    conn.free_gc(gc)?;
+    let _ = conn.poly_line(CoordMode::ORIGIN, window, gc, &points)?;
+    let _ = conn.image_text8(window, gc, x1 + inset + 1, y1 - inset - 1, label.as_bytes())?;
+    let _ = conn.free_gc(gc)?;
     Ok(())
 }
 
@@ -2317,10 +2317,10 @@ fn cursor_set<C: Connection>(
     cursor_id: u16,
 ) -> Result<(), ReplyOrIdError> {
     let font = conn.generate_id()?;
-    conn.open_font(font, b"cursor")?;
+    let _ = conn.open_font(font, b"cursor")?;
 
     let cursor = conn.generate_id()?;
-    conn.create_glyph_cursor(
+    let _ = conn.create_glyph_cursor(
         cursor,
         font,
         font,
@@ -2339,13 +2339,13 @@ fn cursor_set<C: Connection>(
         .foreground(screen.black_pixel)
         .background(screen.black_pixel)
         .font(font);
-    conn.create_gc(gc, window, &values)?;
+    let _ = conn.create_gc(gc, window, &values)?;
 
     let values = ChangeWindowAttributesAux::default().cursor(cursor);
-    conn.change_window_attributes(window, &values)?;
+    let _ = conn.change_window_attributes(window, &values)?;
 
-    conn.free_cursor(cursor)?;
-    conn.close_font(font)?;
+    let _ = conn.free_cursor(cursor)?;
+    let _ = conn.close_font(font)?;
     Ok(())
 }
 
@@ -2364,7 +2364,7 @@ fn example10() -> Result<(), Box<dyn Error>> {
     let values = CreateWindowAux::default()
         .background_pixel(screen.white_pixel)
         .event_mask(EventMask::KEY_RELEASE | EventMask::BUTTON_PRESS | EventMask::EXPOSURE);
-    conn.create_window(
+    let _ = conn.create_window(
         screen.root_depth,
         window,
         screen.root,
@@ -2377,7 +2377,7 @@ fn example10() -> Result<(), Box<dyn Error>> {
         screen.root_visual,
         &values,
     )?;
-    conn.map_window(window)?;
+    let _ = conn.map_window(window)?;
 
     cursor_set(&conn, screen, window, 68)?;
 

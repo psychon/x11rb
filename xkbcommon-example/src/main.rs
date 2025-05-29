@@ -41,7 +41,7 @@ fn create_window(
 ) -> Result<xproto::Window, ReplyOrIdError> {
     let screen = &conn.setup().roots[screen_num];
     let window = conn.generate_id()?;
-    conn.create_window(
+    let _ = conn.create_window(
         screen.root_depth,
         window,
         screen.root,
@@ -57,28 +57,28 @@ fn create_window(
             .event_mask(EventMask::KEY_PRESS | EventMask::KEY_RELEASE),
     )?;
     let title = "Keyboard tester";
-    conn.change_property8(
+    let _ = conn.change_property8(
         PropMode::REPLACE,
         window,
         xproto::AtomEnum::WM_NAME,
         xproto::AtomEnum::STRING,
         title.as_bytes(),
     )?;
-    conn.change_property8(
+    let _ = conn.change_property8(
         PropMode::REPLACE,
         window,
         atoms._NET_WM_NAME,
         atoms.UTF8_STRING,
         title.as_bytes(),
     )?;
-    conn.change_property32(
+    let _ = conn.change_property32(
         PropMode::REPLACE,
         window,
         atoms.WM_PROTOCOLS,
         xproto::AtomEnum::ATOM,
         &[atoms.WM_DELETE_WINDOW],
     )?;
-    conn.change_property8(
+    let _ = conn.change_property8(
         PropMode::REPLACE,
         window,
         xproto::AtomEnum::WM_CLASS,
@@ -115,7 +115,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         | xkb::MapPart::KEY_BEHAVIORS
         | xkb::MapPart::VIRTUAL_MODS
         | xkb::MapPart::VIRTUAL_MOD_MAP;
-    conn.xkb_select_events(
+    let _ = conn.xkb_select_events(
         xkb::ID::USE_CORE_KBD.into(),
         0u8.into(),
         events,
@@ -138,7 +138,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Create and show a window
     let window = create_window(&conn, screen_num, &atoms)?;
-    conn.map_window(window)?;
+    let _ = conn.map_window(window)?;
     conn.flush()?;
 
     // Main loop; wait for events

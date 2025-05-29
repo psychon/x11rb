@@ -32,7 +32,7 @@ fn draw_eyes<C: Connection>(
     };
     let mut arc2 = arc1;
     arc2.x = arc2.width as _;
-    conn.poly_fill_arc(win_id, black, &[arc1, arc2])?;
+    let _ = conn.poly_fill_arc(win_id, black, &[arc1, arc2])?;
 
     // Draw the white inner part
     for arc in [&mut arc1, &mut arc2].iter_mut() {
@@ -41,7 +41,7 @@ fn draw_eyes<C: Connection>(
         arc.width -= 2 * EYE_SIZE as u16;
         arc.height -= 2 * EYE_SIZE as u16;
     }
-    conn.poly_fill_arc(win_id, white, &[arc1, arc2])?;
+    let _ = conn.poly_fill_arc(win_id, white, &[arc1, arc2])?;
 
     Ok(())
 }
@@ -70,7 +70,7 @@ fn draw_pupils<C: Connection>(
     arc2.y = y2;
 
     // Do the drawing
-    conn.poly_fill_arc(win_id, gc, &[arc1, arc2])?;
+    let _ = conn.poly_fill_arc(win_id, gc, &[arc1, arc2])?;
     Ok(())
 }
 
@@ -170,11 +170,11 @@ fn shape_window<C: Connection>(
         width: window_size.0,
         height: window_size.1,
     };
-    conn.poly_fill_rectangle(pixmap.pixmap(), gc.gcontext(), &[rect])?;
+    let _ = conn.poly_fill_rectangle(pixmap.pixmap(), gc.gcontext(), &[rect])?;
 
     // Draw the eyes as "not transparent"
     let values = ChangeGCAux::new().foreground(1);
-    conn.change_gc(gc.gcontext(), &values)?;
+    let _ = conn.change_gc(gc.gcontext(), &values)?;
     draw_eyes(
         conn,
         pixmap.pixmap(),
@@ -184,7 +184,7 @@ fn shape_window<C: Connection>(
     )?;
 
     // Set the shape of the window
-    conn.shape_mask(shape::SO::SET, shape::SK::BOUNDING, win_id, 0, 0, &pixmap)?;
+    let _ = conn.shape_mask(shape::SO::SET, shape::SK::BOUNDING, win_id, 0, 0, &pixmap)?;
     Ok(())
 }
 
@@ -200,7 +200,7 @@ fn setup_window<C: Connection>(
         .event_mask(EventMask::EXPOSURE | EventMask::STRUCTURE_NOTIFY | EventMask::POINTER_MOTION)
         .background_pixel(screen.white_pixel);
 
-    conn.create_window(
+    let _ = conn.create_window(
         COPY_DEPTH_FROM_PARENT,
         win_id,
         screen.root,
@@ -215,14 +215,14 @@ fn setup_window<C: Connection>(
     )?;
 
     let title = "xeyes";
-    conn.change_property8(
+    let _ = conn.change_property8(
         PropMode::REPLACE,
         win_id,
         AtomEnum::WM_NAME,
         AtomEnum::STRING,
         title.as_bytes(),
     )?;
-    conn.change_property32(
+    let _ = conn.change_property32(
         PropMode::REPLACE,
         win_id,
         wm_protocols,
@@ -230,7 +230,7 @@ fn setup_window<C: Connection>(
         &[wm_delete_window],
     )?;
 
-    conn.map_window(win_id)?;
+    let _ = conn.map_window(win_id)?;
 
     Ok(win_id)
 }
@@ -350,7 +350,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             draw_pupils(&conn, pixmap.pixmap(), black_gc.gcontext(), pos)?;
 
             // Copy drawing from pixmap to window
-            conn.copy_area(
+            let _ = conn.copy_area(
                 pixmap.pixmap(),
                 win_id,
                 white_gc.gcontext(),
