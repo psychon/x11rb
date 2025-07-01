@@ -314,14 +314,14 @@ mod test {
         // Ask for an extension info. FakeConnection will return an error.
         match ext_info.extension_information(&conn, "whatever") {
             Err(ConnectionError::UnknownError) => {}
-            r => panic!("Unexpected result: {:?}", r),
+            r => panic!("Unexpected result: {r:?}"),
         }
 
         // Ask again for the extension information. ExtensionInformation should not try to get the
         // reply again, because that would just hang. Once upon a time, this caused a hang.
         match ext_info.extension_information(&conn, "whatever") {
             Err(ConnectionError::UnknownError) => {}
-            r => panic!("Unexpected result: {:?}", r),
+            r => panic!("Unexpected result: {r:?}"),
         }
     }
 

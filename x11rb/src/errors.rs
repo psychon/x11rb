@@ -21,7 +21,7 @@ impl std::fmt::Display for LibxcbLoadError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             LibxcbLoadError::OpenLibError(lib_name, e) => {
-                write!(f, "failed to open library {:?}: {}", lib_name, e)
+                write!(f, "failed to open library {lib_name:?}: {e}")
             }
             LibxcbLoadError::GetSymbolError(symbol, e) => write!(
                 f,
@@ -118,8 +118,8 @@ impl std::error::Error for ReplyError {}
 impl std::fmt::Display for ReplyError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            ReplyError::ConnectionError(e) => write!(f, "{}", e),
-            ReplyError::X11Error(e) => write!(f, "X11 error {:?}", e),
+            ReplyError::ConnectionError(e) => write!(f, "{e}"),
+            ReplyError::X11Error(e) => write!(f, "X11 error {e:?}"),
         }
     }
 }
@@ -163,8 +163,8 @@ impl std::fmt::Display for ReplyOrIdError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             ReplyOrIdError::IdsExhausted => f.write_str("X11 IDs have been exhausted"),
-            ReplyOrIdError::ConnectionError(e) => write!(f, "{}", e),
-            ReplyOrIdError::X11Error(e) => write!(f, "X11 error {:?}", e),
+            ReplyOrIdError::ConnectionError(e) => write!(f, "{e}"),
+            ReplyOrIdError::X11Error(e) => write!(f, "X11 error {e:?}"),
         }
     }
 }

@@ -62,10 +62,7 @@ fn enqueue_packet_test(c: &mut Criterion) {
                 Many => "many",
             };
 
-            let name = format!(
-                "enqueue_packet {} with {} packets",
-                packet_ty_desc, packet_count_desc
-            );
+            let name = format!("enqueue_packet {packet_ty_desc} with {packet_count_desc} packets");
             group.bench_function(name, |b| {
                 // generate a valid packet with the given first byte and sequence number
                 let mut seqno = 0u16;
@@ -302,7 +299,7 @@ fn serialize_struct(c: &mut Criterion) {
                 Large => "large",
             };
 
-            let name = format!("serialize_struct {} {}", try_desc, size_desc);
+            let name = format!("serialize_struct {try_desc} {size_desc}");
             group.bench_function(name, |b| {
                 b.iter(|| {
                     let bytes = match struct_size {

@@ -66,7 +66,7 @@ mod test {
         let res = find_best_size(&[], 42);
         match res {
             Err(Error::NoImages) => {}
-            r => panic!("Unexpected result {:?}", r),
+            r => panic!("Unexpected result {r:?}"),
         }
     }
 

@@ -133,7 +133,7 @@ fn main() -> Result<ExitCode, Error> {
     let module = xcbgen::defs::Module::new();
     let mut parser = xcbgen::Parser::new(module.clone());
     for file_path in xml_files.iter() {
-        println!("Loading {:?}", file_path);
+        println!("Loading {file_path:?}");
         load_namespace(file_path, &mut parser)?;
     }
 

@@ -39,7 +39,7 @@ mod util {
             );
 
             if let Err(err) = conn.send_event(false, window, EventMask::NO_EVENT, event) {
-                eprintln!("Error while sending event: {:?}", err);
+                eprintln!("Error while sending event: {err:?}");
             }
             if let Err(err) = conn.send_event(
                 false,
@@ -47,7 +47,7 @@ mod util {
                 EventMask::SUBSTRUCTURE_REDIRECT,
                 event,
             ) {
-                eprintln!("Error while sending event: {:?}", err);
+                eprintln!("Error while sending event: {err:?}");
             }
             conn.flush().unwrap();
         });

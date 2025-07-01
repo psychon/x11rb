@@ -803,7 +803,7 @@ mod test {
         assert_eq!(wm_hints.input, Some(true));
         match wm_hints.initial_state {
             Some(WmHintsState::Normal) => {}
-            value => panic!("Expected Some(Normal), but got {:?}", value),
+            value => panic!("Expected Some(Normal), but got {value:?}"),
         }
         assert_eq!(wm_hints.icon_pixmap, None);
         assert_eq!(wm_hints.icon_window, None);

@@ -31,6 +31,6 @@ impl ImplMode {
             ),
         };
 
-        format!("{}{}{}", begin, inner, end)
+        format!("{begin}{inner}{end}")
     }
 }

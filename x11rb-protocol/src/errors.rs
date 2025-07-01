@@ -108,7 +108,7 @@ impl fmt::Display for DisplayParsingError {
                 )
             }
             DisplayParsingError::MalformedValue(dpy) => {
-                write!(f, "Failed to parse value '{}'", dpy)
+                write!(f, "Failed to parse value '{dpy}'")
             }
             DisplayParsingError::NotUnicode => {
                 write!(f, "The value of $DISPLAY is not valid unicode")
@@ -181,8 +181,8 @@ impl fmt::Display for ConnectError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         fn display(f: &mut fmt::Formatter<'_>, prefix: &str, value: &[u8]) -> fmt::Result {
             match core::str::from_utf8(value).ok() {
-                Some(value) => write!(f, "{}: '{}'", prefix, value),
-                None => write!(f, "{}: {:?} [message is not utf8]", prefix, value),
+                Some(value) => write!(f, "{prefix}: '{value}'"),
+                None => write!(f, "{prefix}: {value:?} [message is not utf8]"),
             }
         }
         match self {
@@ -200,8 +200,7 @@ impl fmt::Display for ConnectError {
             }
             ConnectError::Incomplete { expected, received } => write!(
                 f,
-                "Not enough data received to complete the handshake. Expected {}, received {}",
-                expected, received
+                "Not enough data received to complete the handshake. Expected {expected}, received {received}"
             ),
         }
     }

@@ -151,7 +151,7 @@ async fn resolve_host(host: &str) -> io::Result<impl Stream<Item = IpAddr>> {
     }
 
     // Resolve the host using the threadpool.
-    let host = format!("{}:0", host);
+    let host = format!("{host}:0");
     let iter = blocking::unblock(move || {
         use std::net::ToSocketAddrs;
 

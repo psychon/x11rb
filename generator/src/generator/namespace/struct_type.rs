@@ -267,7 +267,7 @@ pub(super) fn emit_struct_type(
             let field_type = generator.field_to_rust_type(field, switch_prefix);
             let name = field.name().unwrap();
             let name = if name == "type" {
-                format!("r#{}", name)
+                format!("r#{name}")
             } else {
                 name.to_string()
             };
@@ -385,7 +385,7 @@ fn emit_fixed_size_struct_serialize(
                     |field_name| {
                         let rust_field_name = to_rust_variable_name(field_name);
                         if !deducible_fields.contains_key(field_name) {
-                            format!("self.{}", rust_field_name)
+                            format!("self.{rust_field_name}")
                         } else {
                             rust_field_name
                         }
@@ -421,7 +421,7 @@ fn emit_fixed_size_struct_serialize(
                         if !deducible_fields.contains_key(field_name)
                             && !external_params.iter().any(|param| param.name == field_name)
                         {
-                            format!("self.{}", rust_field_name)
+                            format!("self.{rust_field_name}")
                         } else {
                             rust_field_name
                         }
@@ -513,7 +513,7 @@ fn emit_variable_size_struct_serialize(
                         if !deducible_fields.contains_key(field_name)
                             && !external_params.iter().any(|param| param.name == field_name)
                         {
-                            format!("self.{}", rust_field_name)
+                            format!("self.{rust_field_name}")
                         } else {
                             rust_field_name
                         }

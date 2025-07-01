@@ -148,15 +148,14 @@ fn receive_fd<C: Connection>(conn: &C, screen_num: usize) -> Result<(), ReplyOrI
 fn main() {
     let file = make_file().expect("Failed to create temporary file for FD passing");
     match connect(None) {
-        Err(err) => eprintln!("Failed to connect to the X11 server: {}", err),
+        Err(err) => eprintln!("Failed to connect to the X11 server: {err}"),
         Ok((conn, screen_num)) => {
             // Check for SHM 1.2 support (needed for fd passing)
             if let Some((major, minor)) = check_shm_version(&conn).unwrap() {
                 if major < 1 || (major == 1 && minor < 2) {
                     eprintln!(
-                        "X11 server supports version {}.{} of the SHM extension, but version 1.2 \
-                         is needed",
-                        major, minor,
+                        "X11 server supports version {major}.{minor} of the SHM extension, but version 1.2 \
+                         is needed"
                     );
                     return;
                 }

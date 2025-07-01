@@ -28,7 +28,7 @@ impl Sections {
             if let Some(prev) = previous {
                 // If the new entry starts with indentation, it belongs to the previous section
                 if Some(&b' ') == entry.as_bytes().first() {
-                    previous = Some(format!("{}\n\n{}", prev, entry));
+                    previous = Some(format!("{prev}\n\n{entry}"));
                 } else {
                     vec.push(prev);
                     previous = Some(entry);

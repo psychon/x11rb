@@ -64,7 +64,7 @@ impl Type {
         match self {
             Type::Simple(ref type_) => type_.into(),
             Type::VariableOwnership(ref type_) | Type::VariableOwnershipRawBytes(ref type_) => {
-                format!("&'input {}", type_).into()
+                format!("&'input {type_}").into()
             }
         }
     }
@@ -74,7 +74,7 @@ impl Type {
         match self {
             Type::Simple(ref type_) => type_.into(),
             Type::VariableOwnership(ref type_) | Type::VariableOwnershipRawBytes(ref type_) => {
-                format!("Cow<'input, {}>", type_).into()
+                format!("Cow<'input, {type_}>").into()
             }
         }
     }
@@ -259,7 +259,7 @@ pub(super) fn generate_request(
     outln!(x11rb_out, "");
 
     if let Some(ref reply) = request_def.reply {
-        let reply_struct_name = format!("{}Reply", name);
+        let reply_struct_name = format!("{name}Reply");
         enum_cases.reply_variants.push(format!(
             "{ns_prefix}{name}({header}::{name}Reply),",
             ns_prefix = ns_prefix,
@@ -309,24 +309,18 @@ pub(super) fn generate_request(
 
         outln!(proto_out, "");
     } else {
-        enum_cases.reply_parse_cases.push(format!(
-            "Request::{ns_prefix}{name}(_) => None,",
-            ns_prefix = ns_prefix,
-            name = name,
-        ));
+        enum_cases
+            .reply_parse_cases
+            .push(format!("Request::{ns_prefix}{name}(_) => None,"));
     }
 
     if gathered.needs_lifetime {
         enum_cases.request_into_owned_cases.push(format!(
-            "Request::{ns_prefix}{name}(req) => Request::{ns_prefix}{name}(req.into_owned()),",
-            ns_prefix = ns_prefix,
-            name = name,
+            "Request::{ns_prefix}{name}(req) => Request::{ns_prefix}{name}(req.into_owned()),"
         ));
     } else {
         enum_cases.request_into_owned_cases.push(format!(
-            "Request::{ns_prefix}{name}(req) => Request::{ns_prefix}{name}(req),",
-            ns_prefix = ns_prefix,
-            name = name,
+            "Request::{ns_prefix}{name}(req) => Request::{ns_prefix}{name}(req),"
         ));
     }
 }
@@ -343,10 +337,7 @@ fn generate_aux(
     if switch_field.kind == xcbdefs::SwitchKind::Case {
         switch::emit_switch_type(generator, switch_field, &aux_name, true, true, None, out);
     } else {
-        let doc = format!(
-            "Auxiliary and optional information for the `{}` function",
-            function_name,
-        );
+        let doc = format!("Auxiliary and optional information for the `{function_name}` function");
         let cases_infos = switch::emit_switch_type(
             generator,
             switch_field,
@@ -543,7 +534,7 @@ fn emit_request_struct(
                     |field_name| {
                         let rust_field_name = to_rust_variable_name(field_name);
                         if !deducible_fields.contains_key(field_name) {
-                            format!("self.{}", rust_field_name)
+                            format!("self.{rust_field_name}")
                         } else {
                             rust_field_name
                         }
@@ -568,7 +559,7 @@ fn emit_request_struct(
                                 align,
                             );
                             next_slice =
-                                Some((format!("padding{}", pad_count), IovecConversion::Into));
+                                Some((format!("padding{pad_count}"), IovecConversion::Into));
                             pad_count += 1;
                         }
                     },
@@ -604,7 +595,7 @@ fn emit_request_struct(
                                     |field_name| {
                                         let rust_field_name = to_rust_variable_name(field_name);
                                         if !deducible_fields.contains_key(field_name) {
-                                            format!("self.{}", rust_field_name)
+                                            format!("self.{rust_field_name}")
                                         } else {
                                             rust_field_name
                                         }
@@ -624,7 +615,7 @@ fn emit_request_struct(
                                     rust_field_name
                                 } else {
                                     // Otherwise a member.
-                                    format!("self.{}", rust_field_name)
+                                    format!("self.{rust_field_name}")
                                 };
 
                                 outln!(
@@ -639,7 +630,7 @@ fn emit_request_struct(
                                     ),
                                 );
                                 for i in 0..field_size {
-                                    fixed_fields_bytes.push(format!("{}[{}]", bytes_name, i));
+                                    fixed_fields_bytes.push(format!("{bytes_name}[{i}]"));
                                 }
                             } else {
                                 outln!(
@@ -662,7 +653,7 @@ fn emit_request_struct(
                             } else {
                                 IovecConversion::None
                             };
-                            next_slice = Some((format!("self.{}", rust_field_name), conversion));
+                            next_slice = Some((format!("self.{rust_field_name}"), conversion));
                         } else {
                             assert_eq!(
                                 list_length, None,
@@ -719,7 +710,7 @@ fn emit_request_struct(
                         );
                         if let Some(field_size) = switch_field.size() {
                             for i in 0..field_size {
-                                fixed_fields_bytes.push(format!("{}[{}]", bytes_name, i));
+                                fixed_fields_bytes.push(format!("{bytes_name}[{i}]"));
                             }
                         } else {
                             next_slice = Some((bytes_name, IovecConversion::Into));
@@ -762,7 +753,7 @@ fn emit_request_struct(
                             ),
                         );
                         for i in 0..field_size {
-                            fixed_fields_bytes.push(format!("{}[{}]", bytes_name, i));
+                            fixed_fields_bytes.push(format!("{bytes_name}[{i}]"));
                         }
                     }
                     xcbdefs::FieldDef::VirtualLen(_) => {}
@@ -806,7 +797,7 @@ fn emit_request_struct(
                             "let length_so_far = length_so_far + request{}.len();",
                             num_fixed_len_slices,
                         );
-                        request_slices.push(format!("request{}.into()", num_fixed_len_slices));
+                        request_slices.push(format!("request{num_fixed_len_slices}.into()"));
                         fixed_fields_bytes.clear();
                         num_fixed_len_slices += 1;
                     }
@@ -819,10 +810,10 @@ fn emit_request_struct(
                         match conversion {
                             IovecConversion::None => request_slices.push(next_slice),
                             IovecConversion::Into => {
-                                request_slices.push(format!("{}.into()", next_slice))
+                                request_slices.push(format!("{next_slice}.into()"))
                             }
                             IovecConversion::CowStripLength => {
-                                request_slices.push(format!("Cow::Owned({}.to_vec())", next_slice))
+                                request_slices.push(format!("Cow::Owned({next_slice}.to_vec())"))
                             }
                         }
                     }
@@ -851,7 +842,7 @@ fn emit_request_struct(
                     "let length_so_far = length_so_far + padding{}.len();",
                     pad_count,
                 );
-                request_slices.push(format!("padding{}.into()", pad_count));
+                request_slices.push(format!("padding{pad_count}.into()"));
             }
 
             outln!(out, "assert_eq!(length_so_far % 4, 0);");
@@ -910,12 +901,7 @@ fn emit_request_struct(
                 slices_arg.push_str(request_slices);
             }
 
-            let result = format!(
-                "([{slices}], {fds})",
-                slices = slices_arg,
-                fds = fds_arg,
-            );
-            outln!(out, "{}", result);
+            outln!(out, "([{slices_arg}], {fds_arg})");
         };
         outln!(
             out,
@@ -1202,12 +1188,12 @@ fn emit_request_function(
         } else {
             "RecordEnableContextCookie"
         };
-        (format!("{}<{}, Conn>", cookie, ret_lifetime), Some(cookie))
+        (format!("{cookie}<{ret_lifetime}, Conn>"), Some(cookie))
     } else {
         let ret_type = match (request_def.reply.is_some(), gathered.reply_has_fds) {
-            (false, _) => format!("VoidCookie<{}, Conn>", ret_lifetime),
-            (true, false) => format!("Cookie<{}, Conn, {}Reply>", ret_lifetime, name),
-            (true, true) => format!("CookieWithFds<{}, Conn, {}Reply>", ret_lifetime, name),
+            (false, _) => format!("VoidCookie<{ret_lifetime}, Conn>"),
+            (true, false) => format!("Cookie<{ret_lifetime}, Conn, {name}Reply>"),
+            (true, true) => format!("CookieWithFds<{ret_lifetime}, Conn, {name}Reply>"),
         };
         (ret_type, None)
     };
@@ -1362,15 +1348,15 @@ fn emit_request_trait_function(
         assert!(request_def.reply.is_some());
         assert!(!gathered.reply_has_fds);
         if is_list_fonts_with_info {
-            format!("ListFontsWithInfoCookie<{}, Self>", ret_lifetime)
+            format!("ListFontsWithInfoCookie<{ret_lifetime}, Self>")
         } else {
-            format!("RecordEnableContextCookie<{}, Self>", ret_lifetime)
+            format!("RecordEnableContextCookie<{ret_lifetime}, Self>")
         }
     } else {
         match (request_def.reply.is_some(), gathered.reply_has_fds) {
-            (false, _) => format!("VoidCookie<{}, Self>", ret_lifetime),
-            (true, false) => format!("Cookie<{}, Self, {}Reply>", ret_lifetime, name),
-            (true, true) => format!("CookieWithFds<{}, Self, {}Reply>", ret_lifetime, name),
+            (false, _) => format!("VoidCookie<{ret_lifetime}, Self>"),
+            (true, false) => format!("Cookie<{ret_lifetime}, Self, {name}Reply>"),
+            (true, true) => format!("CookieWithFds<{ret_lifetime}, Self, {name}Reply>"),
         }
     };
 
@@ -1397,7 +1383,7 @@ fn emit_request_trait_function(
         generator.emit_doc(doc, out, Default::default());
     }
     let real_ret_ty = mode.ret_ty(
-        format!("Result<{}, ConnectionError>", ret_type),
+        format!("Result<{ret_type}, ConnectionError>"),
         needs_lifetime,
     );
     outln!(
@@ -1511,11 +1497,10 @@ fn gather_request_fields(
 
                 if use_into {
                     let preamble_part = format!(
-                        "let {}: {} = {}.into();",
-                        rust_field_name, rust_field_type, rust_field_name,
+                        "let {rust_field_name}: {rust_field_type} = {rust_field_name}.into();"
                     );
                     let generic_param = format!("{}", char::from(letter_iter.next().unwrap()));
-                    let where_ = format!("Into<{}>", rust_field_type);
+                    let where_ = format!("Into<{rust_field_type}>");
                     args.push((rust_field_name.clone(), Type::Simple(generic_param.clone())));
                     request_args.push((rust_field_name, Type::Simple(rust_field_type)));
                     generics.push((generic_param, where_));
@@ -1542,25 +1527,23 @@ fn gather_request_fields(
                     let element_type =
                         generator.field_value_type_to_rust_type(&list_field.element_type);
                     let rust_field_name = to_rust_variable_name(&list_field.name);
-                    let rust_field_type =
-                        if generator.rust_value_type_is_u8(&list_field.element_type) {
-                            if let Some(list_len) = list_field.length() {
-                                Type::VariableOwnershipRawBytes(format!(
-                                    "[{}; {}]",
-                                    element_type, list_len
-                                ))
-                            } else {
-                                Type::VariableOwnershipRawBytes(format!("[{}]", element_type))
-                            }
+                    let rust_field_type = if generator
+                        .rust_value_type_is_u8(&list_field.element_type)
+                    {
+                        if let Some(list_len) = list_field.length() {
+                            Type::VariableOwnershipRawBytes(format!("[{element_type}; {list_len}]"))
                         } else {
-                            assert_eq!(
-                                list_field.length(),
-                                None,
-                                "Fixed length arrays of types other than u8 are not implemented"
-                            );
+                            Type::VariableOwnershipRawBytes(format!("[{element_type}]"))
+                        }
+                    } else {
+                        assert_eq!(
+                            list_field.length(),
+                            None,
+                            "Fixed length arrays of types other than u8 are not implemented"
+                        );
 
-                            Type::VariableOwnership(format!("[{}]", element_type))
-                        };
+                        Type::VariableOwnership(format!("[{element_type}]"))
+                    };
                     args.push((rust_field_name.clone(), rust_field_type.clone()));
                     request_args.push((rust_field_name, rust_field_type));
                 }
@@ -1577,10 +1560,8 @@ fn gather_request_fields(
             xcbdefs::FieldDef::Fd(fd_field) => {
                 let rust_field_name = to_rust_variable_name(&fd_field.name);
                 let generic_param = format!("{}", char::from(letter_iter.next().unwrap()));
-                let preamble_part = format!(
-                    "let {}: RawFdContainer = {}.into();",
-                    rust_field_name, rust_field_name,
-                );
+                let preamble_part =
+                    format!("let {rust_field_name}: RawFdContainer = {rust_field_name}.into();",);
                 args.push((rust_field_name.clone(), Type::Simple(generic_param.clone())));
                 request_args.push((rust_field_name, Type::Simple("RawFdContainer".into())));
                 generics.push((generic_param, "Into<RawFdContainer>".into()));

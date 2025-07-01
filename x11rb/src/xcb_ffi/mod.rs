@@ -746,8 +746,7 @@ mod test {
             let actual = reconstruct_full_sequence_impl(recent, value);
             assert_eq!(
                 actual, expected,
-                "reconstruct({:x}, {:x}) == {:x}, but was {:x}",
-                recent, value, expected, actual,
+                "reconstruct({recent:x}, {value:x}) == {expected:x}, but was {actual:x}"
             );
         }
     }

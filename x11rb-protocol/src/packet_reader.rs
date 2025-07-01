@@ -249,16 +249,16 @@ mod tests {
         // The debug output includes the length of the packet of the packet and how much was
         // already read
         let mut reader = PacketReader::new();
-        assert_eq!(std::format!("{:?}", reader), "PacketReader(0/32)");
+        assert_eq!(std::format!("{reader:?}"), "PacketReader(0/32)");
 
         let _ = reader.advance(15);
-        assert_eq!(std::format!("{:?}", reader), "PacketReader(15/32)");
+        assert_eq!(std::format!("{reader:?}"), "PacketReader(15/32)");
 
         let _ = reader.advance(15);
-        assert_eq!(std::format!("{:?}", reader), "PacketReader(30/32)");
+        assert_eq!(std::format!("{reader:?}"), "PacketReader(30/32)");
 
         let _ = reader.advance(2);
-        assert_eq!(std::format!("{:?}", reader), "PacketReader(0/32)");
+        assert_eq!(std::format!("{reader:?}"), "PacketReader(0/32)");
     }
 
     #[test]
@@ -275,6 +275,6 @@ mod tests {
         reader.buffer()[..second_len].copy_from_slice(&packet[..second_len]);
         let _ = reader.advance(second_len);
 
-        assert_eq!(std::format!("{:?}", reader), "PacketReader(35/1200)");
+        assert_eq!(std::format!("{reader:?}"), "PacketReader(35/1200)");
     }
 }

@@ -283,7 +283,7 @@ mod test_stride {
             (41, 32, 32, 164),
         ] {
             let actual = compute_stride(width, bpp.try_into().unwrap(), pad.try_into().unwrap());
-            assert_eq!(stride, actual, "width={}, bpp={}, pad={}", width, bpp, pad);
+            assert_eq!(stride, actual, "width={width}, bpp={bpp}, pad={pad}");
         }
     }
 }
@@ -410,20 +410,17 @@ mod test_scanline_pad {
             assert_eq!(
                 pad8,
                 ScanlinePad::Pad8.round_to_multiple(value),
-                "value={} for pad8",
-                value,
+                "value={value} for pad8"
             );
             assert_eq!(
                 pad16,
                 ScanlinePad::Pad16.round_to_multiple(value),
-                "value={} for pad16",
-                value,
+                "value={value} for pad16"
             );
             assert_eq!(
                 pad32,
                 ScanlinePad::Pad32.round_to_multiple(value),
-                "value={} for pad32",
-                value,
+                "value={value} for pad32"
             );
         }
     }

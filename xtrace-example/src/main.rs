@@ -102,7 +102,7 @@ async fn handle_client(client: Async<TcpStream>) {
     match handle_client_impl(client).await {
         Ok(()) => {}
         Err(e) if e.kind() == ErrorKind::UnexpectedEof => println!("Something disconnected"),
-        Err(e) => eprintln!("Error in client forwarding: {:?}", e),
+        Err(e) => eprintln!("Error in client forwarding: {e:?}"),
     }
 }
 
@@ -114,10 +114,10 @@ fn spawn_command_line(display: &str) {
         let command = std::process::Command::new(command).args(args).spawn();
         match command {
             Ok(child) => println!("Started child process with ID {}", child.id()),
-            Err(e) => eprintln!("Error while starting child process: {}", e),
+            Err(e) => eprintln!("Error while starting child process: {e}"),
         }
     } else {
-        println!("You can now start programs with DISPLAY=\"{}\"", display);
+        println!("You can now start programs with DISPLAY=\"{display}\"");
         println!(
             "Hint: Alternatively, you could run {} [your-command]",
             std::env::args().next().unwrap(),

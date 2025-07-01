@@ -70,7 +70,7 @@ pub(crate) mod libxcb_library {
         #[cold]
         #[inline(never)]
         fn failed(e: &LibxcbLoadError) -> ! {
-            panic!("failed to load libxcb: {}", e);
+            panic!("failed to load libxcb: {e}");
         }
         match *LIBXCB_LIBRARY {
             Ok(ref library) => library,

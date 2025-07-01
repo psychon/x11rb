@@ -323,10 +323,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     }
                 }
                 Event::Error(error) => {
-                    println!("Unknown error {:?}", error);
+                    println!("Unknown error {error:?}");
                 }
                 event => {
-                    println!("Unknown event {:?}", event);
+                    println!("Unknown event {event:?}");
                 }
             }
 

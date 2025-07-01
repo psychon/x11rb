@@ -171,9 +171,7 @@ async fn main2(file: File) -> Result<(), Box<dyn std::error::Error>> {
             if let Some((major, minor)) = check_shm_version(conn).await? {
                 if major < 1 || (major == 1 && minor < 2) {
                     eprintln!(
-                        "X11 server supports version {}.{} of the SHM extension, but version 1.2 \
-                     is needed",
-                        major, minor,
+                        "X11 server supports version {major}.{minor} of the SHM extension, but version 1.2 is needed"
                     );
                     return Ok(());
                 }

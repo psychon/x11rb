@@ -117,7 +117,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         } else if reply.category == START_OF_DATA {
             println!("Press Escape to exit...");
         } else {
-            println!("Got a reply with an unsupported category: {:?}", reply);
+            println!("Got a reply with an unsupported category: {reply:?}");
         }
     }
     Ok(())
@@ -129,27 +129,27 @@ fn print_reply_data(data: &[u8]) -> Result<(&[u8], bool), ParseError> {
     match data[0] {
         xproto::KEY_PRESS_EVENT => {
             let (event, remaining) = xproto::KeyPressEvent::try_parse(data)?;
-            println!("key press: {:?}", event);
+            println!("key press: {event:?}");
             Ok((remaining, false))
         }
         xproto::KEY_RELEASE_EVENT => {
             let (event, remaining) = xproto::KeyReleaseEvent::try_parse(data)?;
-            println!("key release: {:?}", event);
+            println!("key release: {event:?}");
             Ok((remaining, event.detail == 9))
         }
         xproto::BUTTON_PRESS_EVENT => {
             let (event, remaining) = xproto::ButtonPressEvent::try_parse(data)?;
-            println!("button press: {:?}", event);
+            println!("button press: {event:?}");
             Ok((remaining, false))
         }
         xproto::BUTTON_RELEASE_EVENT => {
             let (event, remaining) = xproto::ButtonReleaseEvent::try_parse(data)?;
-            println!("button release: {:?}", event);
+            println!("button release: {event:?}");
             Ok((remaining, false))
         }
         xproto::MOTION_NOTIFY_EVENT => {
             let (event, remaining) = xproto::MotionNotifyEvent::try_parse(data)?;
-            println!("motion notify: {:?}", event);
+            println!("motion notify: {event:?}");
             Ok((remaining, false))
         }
         0 => {

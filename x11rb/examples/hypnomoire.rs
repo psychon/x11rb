@@ -254,7 +254,7 @@ where
                 return Ok(());
             }
             Event::Error(err) => {
-                eprintln!("Got an X11 error: {:?}", err);
+                eprintln!("Got an X11 error: {err:?}");
             }
             _ => {}
         }

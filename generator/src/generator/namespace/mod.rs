@@ -237,7 +237,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         };
         self.emit_event_opcode(name, number, event_full_def, out);
 
-        let full_name = format!("{}Event", name);
+        let full_name = format!("{name}Event");
 
         let fields = event_full_def.fields.borrow();
         let mut derives = Derives::all();
@@ -346,7 +346,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                         |field_name| {
                             let rust_field_name = to_rust_variable_name(field_name);
                             if !deducible_fields.contains_key(field_name) {
-                                format!("input.{}", rust_field_name)
+                                format!("input.{rust_field_name}")
                             } else {
                                 rust_field_name
                             }
@@ -536,7 +536,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                         )
                     };
                     if let Some(list_length) = list_field.length() {
-                        format!("[{}; {}]", element_type, list_length)
+                        format!("[{element_type}; {list_length}]")
                     } else {
                         unreachable!();
                     }
@@ -956,16 +956,15 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 if let xcbdefs::FieldDef::Normal(normal_field) = field {
                     let rust_type = self.field_value_type_to_rust_type(&normal_field.type_);
                     let rust_list_field_name = to_rust_variable_name(list_field_name);
-                    let msg = format!("`{}` has too many elements", rust_list_field_name);
+                    let msg = format!("`{rust_list_field_name}` has too many elements");
                     let list_len = format!("{}.len()", wrap_field_ref(&rust_list_field_name));
                     let value = match op {
                         DeducibleLengthFieldOp::None => {
-                            format!("{}::try_from({}).expect(\"{}\")", rust_type, list_len, msg)
+                            format!("{rust_type}::try_from({list_len}).expect(\"{msg}\")")
                         }
                         DeducibleLengthFieldOp::Mul(n) => format!(
-                            "{}::try_from({}).ok().and_then(|len| \
-                             len.checked_mul({})).expect(\"{}\")",
-                            rust_type, list_len, n, msg,
+                            "{rust_type}::try_from({list_len}).ok().and_then(|len| \
+                             len.checked_mul({n})).expect(\"{msg}\")"
                         ),
                         DeducibleLengthFieldOp::Div(n) => {
                             outln!(
@@ -977,10 +976,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                                 rust_list_field_name,
                                 n,
                             );
-                            format!(
-                                "{}::try_from({} / {}).expect(\"{}\")",
-                                rust_type, list_len, n, msg,
-                            )
+                            format!("{rust_type}::try_from({list_len} / {n}).expect(\"{msg}\")")
                         }
                     };
                     outln!(out, "let {} = {};", dst_var_name, value);
@@ -1123,7 +1119,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 // Prevent rustdoc interpreting many leading spaces as code examples (?)
                 for line in text.trim().split('\n') {
                     let line = line.trim();
-                    let line = format!("{} {}", prefix_char, line);
+                    let line = format!("{prefix_char} {line}");
                     prefix_char = ' ';
                     if line.trim().is_empty() {
                         outln!(out, "///");
@@ -1305,7 +1301,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 _ => None,
             };
             if let Some(ref type_) = wire_type {
-                write!(s, "{}::from(", type_).unwrap();
+                write!(s, "{type_}::from(").unwrap();
             }
             s.push_str(&wrap_name(&ext_param.name));
             if wire_type.is_some() {
@@ -1325,9 +1321,9 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             xcbdefs::FieldDef::List(list_field) => {
                 let element_type = self.field_value_type_to_rust_type(&list_field.element_type);
                 if let Some(list_len) = list_field.length() {
-                    format!("[{}; {}]", element_type, list_len)
+                    format!("[{element_type}; {list_len}]")
                 } else {
-                    format!("Vec<{}>", element_type)
+                    format!("Vec<{element_type}>")
                 }
             }
             xcbdefs::FieldDef::Switch(switch_field) => {

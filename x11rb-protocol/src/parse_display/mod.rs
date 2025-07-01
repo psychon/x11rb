@@ -211,8 +211,7 @@ mod test {
             assert_eq!(
                 do_parse_display(input).as_ref(),
                 Ok(output),
-                "Failed parsing correctly: {}",
-                input
+                "Failed parsing correctly: {input}"
             );
         }
     }
@@ -224,8 +223,7 @@ mod test {
             Err(DisplayParsingError::MalformedValue(
                 non_existing_file.to_string().into()
             )),
-            "Unexpectedly parsed: {}",
-            non_existing_file
+            "Unexpectedly parsed: {non_existing_file}"
         );
     }
 
@@ -524,8 +522,7 @@ mod test {
             assert_eq!(
                 do_parse_display(input).as_ref(),
                 Ok(output),
-                "Failed parsing correctly: {}",
-                input
+                "Failed parsing correctly: {input}"
             );
         }
     }
@@ -563,8 +560,7 @@ mod test {
                 Err(DisplayParsingError::MalformedValue(
                     input.to_string().into()
                 )),
-                "Unexpectedly parsed: {}",
-                input
+                "Unexpectedly parsed: {input}"
             );
         }
     }
