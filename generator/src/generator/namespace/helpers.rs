@@ -576,7 +576,7 @@ pub(super) fn to_rust_variable_name(name: &str) -> String {
 ///
 /// If name ends with an underscore, it will be trimmed.
 pub(super) fn prefix_var_name(name: &str, prefix: &str) -> String {
-    let mut prefixed = format!("{}_{}", prefix, name);
+    let mut prefixed = format!("{prefix}_{name}");
     if prefixed.ends_with('_') {
         prefixed.truncate(prefixed.len() - 1);
     }
@@ -589,9 +589,9 @@ pub(super) fn prefix_var_name(name: &str, prefix: &str) -> String {
 /// extra one.
 pub(super) fn postfix_var_name(name: &str, postfix: &str) -> String {
     if name.ends_with('_') {
-        format!("{}{}", name, postfix)
+        format!("{name}{postfix}")
     } else {
-        format!("{}_{}", name, postfix)
+        format!("{name}_{postfix}")
     }
 }
 

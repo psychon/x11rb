@@ -296,7 +296,7 @@ mod test {
         ];
         for (data, expected) in tests.iter() {
             let result = parse_query(data);
-            assert_eq!(result.as_ref(), Some(expected), "while parsing {:?}", data);
+            assert_eq!(result.as_ref(), Some(expected), "while parsing {data:?}");
         }
     }
 
@@ -313,9 +313,7 @@ mod test {
             let result = parse_query(data);
             assert!(
                 result.is_none(),
-                "Unexpected success parsing '{:?}': {:?}",
-                data,
-                result,
+                "Unexpected success parsing '{data:?}': {result:?}"
             );
         }
     }
@@ -624,9 +622,9 @@ mod test {
             let mut result = Vec::new();
             parse_database(data, &mut result, |_, _| unreachable!());
             if &result != expected {
-                eprintln!("While testing {:?}", data);
-                eprintln!("Expected: {:?}", expected);
-                eprintln!("Got:      {:?}", result);
+                eprintln!("While testing {data:?}");
+                eprintln!("Expected: {expected:?}");
+                eprintln!("Got:      {result:?}");
                 eprintln!();
                 success = false;
             }
@@ -657,9 +655,9 @@ mod test {
             let mut calls = Vec::new();
             parse_database(data, &mut result, |file, _| calls.push(file.to_vec()));
             if &calls != expected {
-                eprintln!("While testing {:?}", data);
-                eprintln!("Expected: {:?}", expected);
-                eprintln!("Got:      {:?}", calls);
+                eprintln!("While testing {data:?}");
+                eprintln!("Expected: {expected:?}");
+                eprintln!("Got:      {calls:?}");
                 eprintln!();
                 success = false;
             }
@@ -686,17 +684,12 @@ mod test {
     fn run_entry_test(data: &[u8], resource: &[(Binding, Component)], value: &[u8]) {
         match parse_entry(data) {
             (Ok(result), remaining) => {
-                assert_eq!(remaining, b"", "failed to parse {:?}", data);
+                assert_eq!(remaining, b"", "failed to parse {data:?}");
                 assert_eq!(
                     result.components, resource,
-                    "incorrect components when parsing {:?}",
-                    data
+                    "incorrect components when parsing {data:?}",
                 );
-                assert_eq!(
-                    result.value, value,
-                    "incorrect value when parsing {:?}",
-                    data
-                );
+                assert_eq!(result.value, value, "incorrect value when parsing {data:?}");
             }
             (Err(err), _) => panic!("Failed to parse '{:?}': {:?}", data, err),
         }

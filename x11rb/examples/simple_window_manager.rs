@@ -122,7 +122,7 @@ impl<'a, C: Connection> WmState<'a, C> {
         win: Window,
         geom: &GetGeometryReply,
     ) -> Result<(), ReplyOrIdError> {
-        println!("Managing window {:?}", win);
+        println!("Managing window {win:?}");
         let screen = &self.conn.setup().roots[self.screen_num];
         assert!(self.find_window_by_id(win).is_none());
 
@@ -263,7 +263,7 @@ impl<'a, C: Connection> WmState<'a, C> {
             }
         }
 
-        println!("Got event {:?}", event);
+        println!("Got event {event:?}");
         if should_ignore {
             println!("  [ignored]");
             return Ok(());
@@ -306,7 +306,7 @@ impl<'a, C: Connection> WmState<'a, C> {
         let aux = ConfigureWindowAux::from_configure_request(&event)
             .sibling(None)
             .stack_mode(None);
-        println!("Configure: {:?}", aux);
+        println!("Configure: {aux:?}");
         self.conn.configure_window(event.window, &aux)?;
         Ok(())
     }

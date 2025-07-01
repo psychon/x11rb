@@ -596,8 +596,7 @@ mod test {
             let result = match_entry(&entries, resource, class);
             if result != expected {
                 eprintln!(
-                    "While testing resource '{}' and class '{}' with the following input:",
-                    resource, class
+                    "While testing resource '{resource}' and class '{class}' with the following input:"
                 );
                 eprintln!("{}", print_string(data));
                 eprintln!("Expected: {:?}", expected.map(print_string));
@@ -614,6 +613,6 @@ mod test {
     fn print_string(data: &[u8]) -> String {
         std::str::from_utf8(data)
             .map(|s| s.to_string())
-            .unwrap_or_else(|_| format!("{:?}", data))
+            .unwrap_or_else(|_| format!("{data:?}"))
     }
 }

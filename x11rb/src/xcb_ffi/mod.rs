@@ -688,13 +688,7 @@ fn reconstruct_full_sequence_impl(recent: SequenceNumber, value: u32) -> Sequenc
     ]
     .iter()
     .copied()
-    .min_by_key(|&value| {
-        if value > recent {
-            value - recent
-        } else {
-            recent - value
-        }
-    })
+    .min_by_key(|&value| value.abs_diff(recent))
     .unwrap();
     // Just because: Check that the result matches the passed-in value in the low bits
     assert_eq!(
@@ -746,8 +740,7 @@ mod test {
             let actual = reconstruct_full_sequence_impl(recent, value);
             assert_eq!(
                 actual, expected,
-                "reconstruct({:x}, {:x}) == {:x}, but was {:x}",
-                recent, value, expected, actual,
+                "reconstruct({recent:x}, {value:x}) == {expected:x}, but was {actual:x}"
             );
         }
     }

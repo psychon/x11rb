@@ -169,8 +169,7 @@ fn write_code_header(out: &mut Output) {
 fn camel_case_to_snake(arg: &str) -> String {
     assert!(
         arg.bytes().all(|c| c.is_ascii_alphanumeric() || c == b'_'),
-        "{:?}",
-        arg
+        "{arg:?}"
     );
 
     // Matches "[A-Z][a-z0-9]+|[A-Z]+(?![a-z0-9])|[a-z0-9]+"

@@ -209,7 +209,7 @@ fn example1() -> Result<(), Box<dyn Error>> {
     let mut atoms = [Into::<u32>::into(AtomEnum::NONE); COUNT];
 
     // Init names
-    let names = (0..COUNT).map(|i| format!("NAME{}", i)).collect::<Vec<_>>();
+    let names = (0..COUNT).map(|i| format!("NAME{i}")).collect::<Vec<_>>();
 
     // Bad use
     let start = Instant::now();
@@ -217,7 +217,7 @@ fn example1() -> Result<(), Box<dyn Error>> {
         atoms[i] = conn.intern_atom(false, names[i].as_bytes())?.reply()?.atom;
     }
     let diff = start.elapsed();
-    println!("bad use time:  {:?}", diff);
+    println!("bad use time:  {diff:?}");
 
     // Good use
     let start = Instant::now();
@@ -231,7 +231,7 @@ fn example1() -> Result<(), Box<dyn Error>> {
         atoms[i] = atom?.reply()?.atom;
     }
     let diff2 = start.elapsed();
-    println!("good use time: {:?}", diff2);
+    println!("good use time: {diff2:?}");
     println!(
         "ratio:         {:?}",
         diff.as_nanos() as f64 / diff2.as_nanos() as f64
@@ -1238,7 +1238,7 @@ pub struct RenamedKeyPressEvent {
 // those which have been described above.
 
 fn print_modifiers(mask: x11rb::protocol::xproto::KeyButMask) {
-    println!("Modifier mask: {:#?}", mask);
+    println!("Modifier mask: {mask:#?}");
 }
 
 fn example7() -> Result<(), Box<dyn Error>> {
@@ -1344,7 +1344,7 @@ fn example7() -> Result<(), Box<dyn Error>> {
             }
             _ => {
                 // Unknown event type, ignore it
-                println!("Unknown event: {:?}", event);
+                println!("Unknown event: {event:?}");
             }
         }
     }
@@ -2670,7 +2670,7 @@ fn example_get_visual2<C: Connection>(conn: &C, screen_num: usize) {
     for depth in &screen.allowed_depths {
         for visualtype in &depth.visuals {
             if visualtype.visual_id == screen.root_visual {
-                println!("Found: {:?}", visualtype);
+                println!("Found: {visualtype:?}");
             }
         }
     }

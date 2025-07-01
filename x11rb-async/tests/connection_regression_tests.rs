@@ -89,7 +89,7 @@ fn connection_sends_large_request() {
     // Send a large request. This should be larger than the write buffer size, which is 16384 bytes.
     let length = 16384 * 2;
     let res = send_request_via_connection(FakeStream(Arc::clone(&data)), length, Vec::new());
-    assert!(res.is_none(), "{:?}", res);
+    assert!(res.is_none(), "{res:?}");
 
     // Check that all the data was sent
     assert_eq!(data.lock().unwrap().len(), length);
@@ -113,6 +113,6 @@ fn retry_for_left_over_fds() {
             assert_eq!(e.kind(), std::io::ErrorKind::Other);
             assert_eq!(e.to_string(), "Left over FDs after sending the request");
         }
-        e => panic!("Unexpected error: {:?}", e),
+        e => panic!("Unexpected error: {e:?}"),
     }
 }

@@ -547,8 +547,7 @@ pub fn compute_length_field<'b>(
     assert_eq!(
         length % 4,
         0,
-        "The length of X11 requests must be a multiple of 4, got {}",
-        length
+        "The length of X11 requests must be a multiple of 4, got {length}"
     );
     let wire_length = length / 4;
 

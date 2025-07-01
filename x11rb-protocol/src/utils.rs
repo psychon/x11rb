@@ -161,14 +161,14 @@ mod pretty_printer {
         fn test_enum() {
             let cases = [(0, "zero", "ZERO"), (42, "the answer", "ANSWER")];
             let printer = new_enum(0, &cases);
-            assert_eq!(&format!("{}", printer), "zero");
-            assert_eq!(&format!("{:#}", printer), "ZERO");
+            assert_eq!(&format!("{printer}"), "zero");
+            assert_eq!(&format!("{printer:#}"), "ZERO");
             let printer = new_enum(1, &cases);
-            assert_eq!(&format!("{}", printer), "1");
-            assert_eq!(&format!("{:#}", printer), "1");
+            assert_eq!(&format!("{printer}"), "1");
+            assert_eq!(&format!("{printer:#}"), "1");
             let printer = new_enum(42, &cases);
-            assert_eq!(&format!("{}", printer), "the answer");
-            assert_eq!(&format!("{:#}", printer), "ANSWER");
+            assert_eq!(&format!("{printer}"), "the answer");
+            assert_eq!(&format!("{printer:#}"), "ANSWER");
         }
 
         #[test]
@@ -179,17 +179,17 @@ mod pretty_printer {
                 (1 << 0, "unused", "UNUSED"),
             ];
             let printer = new_bitmask(8, &bits);
-            assert_eq!(&format!("{}", printer), "8");
-            assert_eq!(&format!("{:#}", printer), "8");
+            assert_eq!(&format!("{printer}"), "8");
+            assert_eq!(&format!("{printer:#}"), "8");
             let printer = new_bitmask(32, &bits);
-            assert_eq!(&format!("{}", printer), "b5");
-            assert_eq!(&format!("{:#}", printer), "B5");
+            assert_eq!(&format!("{printer}"), "b5");
+            assert_eq!(&format!("{printer:#}"), "B5");
             let printer = new_bitmask(34, &bits);
-            assert_eq!(&format!("{}", printer), "b5 | b1");
-            assert_eq!(&format!("{:#}", printer), "B5 | B1");
+            assert_eq!(&format!("{printer}"), "b5 | b1");
+            assert_eq!(&format!("{printer:#}"), "B5 | B1");
             let printer = new_bitmask(42, &bits);
-            assert_eq!(&format!("{}", printer), "8 | b5 | b1");
-            assert_eq!(&format!("{:#}", printer), "8 | B5 | B1");
+            assert_eq!(&format!("{printer}"), "8 | b5 | b1");
+            assert_eq!(&format!("{printer:#}"), "8 | B5 | B1");
         }
     }
 }

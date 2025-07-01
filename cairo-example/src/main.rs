@@ -114,7 +114,7 @@ fn composite_manager_running(
     conn: &impl Connection,
     screen_num: usize,
 ) -> Result<bool, ReplyError> {
-    let atom = format!("_NET_WM_CM_S{}", screen_num);
+    let atom = format!("_NET_WM_CM_S{screen_num}");
     let atom = conn.intern_atom(false, atom.as_bytes())?.reply()?.atom;
     let owner = conn.get_selection_owner(atom)?.reply()?;
     Ok(owner.owner != x11rb::NONE)
@@ -242,15 +242,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let atoms = AtomCollection::new(&conn)?.reply()?;
     let (mut width, mut height) = (100, 100);
     let (depth, visualid) = choose_visual(&conn, screen_num)?;
-    println!("Using visual {:#x} with depth {}", visualid, depth);
+    println!("Using visual {visualid:#x} with depth {depth}");
 
     // Check if a composite manager is running. In a real application, we should also react to a
     // composite manager starting/stopping at runtime.
     let transparency = composite_manager_running(&conn, screen_num)?;
-    println!(
-        "Composite manager running / working transparency: {:?}",
-        transparency
-    );
+    println!("Composite manager running / working transparency: {transparency:?}");
 
     let window = create_window(&conn, screen, &atoms, (width, height), depth, visualid)?;
 
@@ -276,7 +273,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let mut event_option = Some(event);
         let mut need_redraw = false;
         while let Some(event) = event_option {
-            println!("{:?})", event);
+            println!("{event:?})");
             match event {
                 Event::Expose(_) => {
                     need_redraw = true;

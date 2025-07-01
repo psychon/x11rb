@@ -63,7 +63,7 @@ pub(super) fn emit_field_serialize(
                 );
             }
             for i in 0..field_size {
-                result_bytes.push(format!("{}[{}]", bytes_name, i));
+                result_bytes.push(format!("{bytes_name}[{i}]"));
             }
             Some(bytes_name)
         }
@@ -80,7 +80,7 @@ pub(super) fn emit_field_serialize(
                 for i in 0..list_length {
                     let src_value = format!("{}[{}]", wrap_field_ref(&list_field.name), i);
                     let rust_field_name = to_rust_variable_name(&list_field.name);
-                    let bytes_name = postfix_var_name(&rust_field_name, &format!("{}_bytes", i));
+                    let bytes_name = postfix_var_name(&rust_field_name, &format!("{i}_bytes"));
                     outln!(
                         out,
                         "let {} = {};",
@@ -93,7 +93,7 @@ pub(super) fn emit_field_serialize(
                         ),
                     );
                     for j in 0..element_size {
-                        result_bytes.push(format!("{}[{}]", bytes_name, j));
+                        result_bytes.push(format!("{bytes_name}[{j}]"));
                     }
                 }
                 None
@@ -110,7 +110,7 @@ pub(super) fn emit_field_serialize(
                 wrap_field_ref(&switch_field.name),
             );
             for i in 0..field_size {
-                result_bytes.push(format!("{}[{}]", bytes_name, i));
+                result_bytes.push(format!("{bytes_name}[{i}]"));
             }
             Some(bytes_name)
         }
@@ -145,7 +145,7 @@ pub(super) fn emit_field_serialize(
             outln!(out, "let {0} = {0}.to_ne_bytes();", bytes_name);
 
             for i in 0..4 {
-                result_bytes.push(format!("{}[{}]", bytes_name, i));
+                result_bytes.push(format!("{bytes_name}[{i}]"));
             }
 
             Some(bytes_name)
@@ -426,15 +426,12 @@ pub(super) fn emit_value_serialize(
         let current_wire_size = type_.type_.get_resolved().size().unwrap();
 
         if max_wire_size > 1 && u32::from(max_wire_size / 8) > current_wire_size {
-            format!(
-                "(u{}::from({}) as {}).serialize()",
-                max_wire_size, value, rust_wire_type,
-            )
+            format!("(u{max_wire_size}::from({value}) as {rust_wire_type}).serialize()")
         } else {
-            format!("{}::from({}).serialize()", rust_wire_type, value)
+            format!("{rust_wire_type}::from({value}).serialize()")
         }
     } else {
-        format!("{}.serialize()", value)
+        format!("{value}.serialize()")
     }
 }
 

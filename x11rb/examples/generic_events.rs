@@ -58,7 +58,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Now check that the event really is what we wanted to get
     let event = match event {
         Event::PresentConfigureNotify(event) => event,
-        other => panic!("Unexpected event {:?}", other),
+        other => panic!("Unexpected event {other:?}"),
     };
     println!(
         "Got a Present ConfigureNotify event for event ID 0x{:x} and window 0x{:x}.",

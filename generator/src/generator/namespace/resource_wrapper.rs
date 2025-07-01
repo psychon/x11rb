@@ -211,7 +211,7 @@ fn generate_creator(
             xcbdefs::FieldDef::VirtualLen(_) => unimplemented!(),
             xcbdefs::FieldDef::Fd(fd_field) => {
                 let generic_param = format!("{}", char::from(letter_iter.next().unwrap()));
-                let where_ = format!("{}: Into<RawFdContainer>", generic_param);
+                let where_ = format!("{generic_param}: Into<RawFdContainer>");
                 generics.push(generic_param.clone());
                 wheres.push(where_);
                 (fd_field.name.clone(), generic_param)
@@ -232,7 +232,7 @@ fn generate_creator(
 
                 if use_into {
                     let generic_param = format!("{}", char::from(letter_iter.next().unwrap()));
-                    let where_ = format!("{}: Into<{}>", generic_param, rust_field_type);
+                    let where_ = format!("{generic_param}: Into<{rust_field_type}>");
                     generics.push(generic_param.clone());
                     wheres.push(where_);
                     (rust_field_name, generic_param)
@@ -245,9 +245,9 @@ fn generate_creator(
                 let element_type =
                     generator.field_value_type_to_rust_type(&list_field.element_type);
                 let field_type = if let Some(list_len) = list_field.length() {
-                    format!("&[{}; {}]", element_type, list_len)
+                    format!("&[{element_type}; {list_len}]")
                 } else {
-                    format!("&[{}]", element_type)
+                    format!("&[{element_type}]")
                 };
                 (field_name, field_type)
             }
@@ -260,7 +260,7 @@ fn generate_creator(
             .created_argument
             .eq_ignore_ascii_case(&rust_field_name)
         {
-            write!(function_args, ", {}: {}", rust_field_name, rust_field_type).ok();
+            write!(function_args, ", {rust_field_name}: {rust_field_type}").ok();
 
             forward_args_without_resource.push(rust_field_name.clone());
         }

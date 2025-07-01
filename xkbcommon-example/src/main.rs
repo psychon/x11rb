@@ -25,7 +25,7 @@ fn handle_key(event: xproto::KeyPressEvent, press: bool, state: &xkbc::State) {
     let kind = if press { "  Pressed" } else { "Released" };
     let sym = state.key_get_one_sym(event.detail.into());
     let utf8 = state.key_get_utf8(event.detail.into());
-    println!("{} keysym {sym:?} for utf8 '{utf8}'", kind);
+    println!("{kind} keysym {sym:?} for utf8 '{utf8}'");
 
     // Just as an example on how this works:
     if sym == xkbc::keysyms::KEY_BackSpace.into() {

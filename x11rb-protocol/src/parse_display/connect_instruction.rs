@@ -39,7 +39,7 @@ pub(super) fn connect_addresses(p: &ParsedDisplay) -> impl Iterator<Item = Conne
         targets.push(ConnectAddress::Hostname(host, TCP_PORT_BASE + display));
     } else {
         if protocol.is_none() || protocol.as_deref() == Some("unix") {
-            let file_name = format!("/tmp/.X11-unix/X{}", display);
+            let file_name = format!("/tmp/.X11-unix/X{display}");
             targets.push(ConnectAddress::Socket(file_name));
         }
 

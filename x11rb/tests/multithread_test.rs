@@ -22,7 +22,7 @@ fn multithread_test() {
             cookie.reply().unwrap();
 
             if (i % 50_000) == 0 {
-                eprintln!("{}", i);
+                eprintln!("{i}");
             }
         }
         eprintln!("all replies received successfully");

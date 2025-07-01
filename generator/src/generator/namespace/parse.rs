@@ -129,7 +129,7 @@ pub(super) fn emit_field_parse(
                 );
             } else if let Some(list_len) = list_field.length() {
                 for i in 0..list_len {
-                    let tmp_name = format!("{}_{}", rust_field_name, i);
+                    let tmp_name = format!("{rust_field_name}_{i}");
                     outln!(
                         out,
                         "let ({}_{}, remaining) = {};",
@@ -186,7 +186,7 @@ pub(super) fn emit_field_parse(
         xcbdefs::FieldDef::Switch(switch_field) => {
             let rust_field_name = to_rust_variable_name(&switch_field.name);
             let switch_struct_name = if let FieldContainer::Request(request_name) = container {
-                format!("{}Aux", request_name)
+                format!("{request_name}Aux")
             } else {
                 format!("{}{}", switch_prefix, to_rust_type_name(&switch_field.name))
             };

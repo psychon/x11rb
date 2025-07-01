@@ -231,7 +231,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     loop {
         poll_with_timeout(&poller, conn, Duration::from_millis(1_000))?;
         while let Some(event) = conn.poll_for_event()? {
-            println!("{:?})", event);
+            println!("{event:?})");
             match event {
                 Event::ConfigureNotify(event) => {
                     width = event.width;

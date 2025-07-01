@@ -93,10 +93,7 @@ fn check_visual(screen: &Screen, id: Visualid) -> PixelLayout {
     match visual_type.class {
         VisualClass::TRUE_COLOR | VisualClass::DIRECT_COLOR => {}
         _ => {
-            eprintln!(
-                "The root visual is not true / direct color, but {:?}",
-                visual_type,
-            );
+            eprintln!("The root visual is not true / direct color, but {visual_type:?}");
             std::process::exit(1);
         }
     }
@@ -154,8 +151,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     return Ok(());
                 }
             }
-            Event::Error(err) => println!("Got an unexpected error: {:?}", err),
-            ev => println!("Got an unknown event: {:?}", ev),
+            Event::Error(err) => println!("Got an unexpected error: {err:?}"),
+            ev => println!("Got an unknown event: {ev:?}"),
         }
     }
 }
@@ -232,10 +229,7 @@ mod ppm_parser {
         let max = read_decimal(input)?;
 
         if max != 255 {
-            eprintln!(
-                "Image declares a max pixel value of {}, but I expected 255.",
-                max,
-            );
+            eprintln!("Image declares a max pixel value of {max}, but I expected 255.");
             eprintln!("Something will happen...?");
         }
 

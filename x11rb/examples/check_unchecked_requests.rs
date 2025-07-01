@@ -49,7 +49,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // We can check for errors explicitly
     match conn.destroy_window(INVALID_WINDOW)?.check() {
         Err(ReplyError::X11Error(_)) => {}
-        e => panic!("{:?} unexpected", e),
+        e => panic!("{e:?} unexpected"),
     }
 
     // We can silently ignore the error
@@ -71,7 +71,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let (event, seq2) = conn.wait_for_event_with_sequence()?;
         match event {
             Event::Error(_) => {}
-            event => panic!("Unexpectedly got {:?} instead of an X11 error", event),
+            event => panic!("Unexpectedly got {event:?} instead of an X11 error"),
         }
         assert_eq!(seq, seq2);
     }

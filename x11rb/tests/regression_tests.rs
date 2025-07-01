@@ -243,7 +243,7 @@ fn test_too_large_request() {
     let res = conn.poly_text16(drawable, gc, x, y, &big_buffer);
     match res.unwrap_err() {
         ConnectionError::MaximumRequestLengthExceeded => {}
-        err => panic!("Wrong error: {:?}", err),
+        err => panic!("Wrong error: {err:?}"),
     };
 }
 

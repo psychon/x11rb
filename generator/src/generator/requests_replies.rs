@@ -148,12 +148,12 @@ fn generate_request_naming(out: &mut Output) {
         out.indented(|out| {
             outln!(out, "RequestInfo::Xproto(request) => request.into(),");
             outln!(out, "RequestInfo::KnownExt(ext_and_request) => ext_and_request.into(),");
-            outln!(out, "RequestInfo::UnknownRequest(None, opcode) => alloc::format!(\"xproto::opcode {{}}\", opcode).into(),");
-            outln!(out, "RequestInfo::UnknownRequest(Some(ext), opcode) => alloc::format!(\"{{}}::opcode {{}}\", ext, opcode).into(),");
+            outln!(out, "RequestInfo::UnknownRequest(None, opcode) => alloc::format!(\"xproto::opcode {{opcode}}\").into(),");
+            outln!(out, "RequestInfo::UnknownRequest(Some(ext), opcode) => alloc::format!(\"{{ext}}::opcode {{opcode}}\").into(),");
             outln!(out, "RequestInfo::UnknownExtension(major_opcode, minor_opcode) => match ext_name {{");
             out.indented(|out| {
-                outln!(out, "None => alloc::format!(\"ext {{}}::opcode {{}}\", major_opcode, minor_opcode).into(),");
-                outln!(out, "Some(ext_name) => alloc::format!(\"ext {{}}::opcode {{}}\", ext_name, minor_opcode).into(),");
+                outln!(out, "None => alloc::format!(\"ext {{major_opcode}}::opcode {{minor_opcode}}\").into(),");
+                outln!(out, "Some(ext_name) => alloc::format!(\"ext {{ext_name}}::opcode {{minor_opcode}}\").into(),");
             });
             outln!(out, "}}");
         });

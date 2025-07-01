@@ -61,13 +61,12 @@ mod test {
             let result = db.get_bytes(query, "");
             if result != Some(expected) {
                 eprintln!(
-                    "Queried database for \"{}\" and expected {:?}, but got {:?}",
-                    query, expected, result
+                    "Queried database for \"{query}\" and expected {expected:?}, but got {result:?}"
                 );
                 errors += 1;
             }
         }
-        assert_eq!(errors, 0, "Had {} errors", errors);
+        assert_eq!(errors, 0, "Had {errors} errors");
     }
 
     #[test]

@@ -218,7 +218,7 @@ mod test {
             Ok(0) => panic!("This looks like EOF!?"),
             Ok(_) => {}
             Err(ref e) if e.kind() == ErrorKind::WouldBlock => {}
-            Err(e) => panic!("Unexpected error: {:?}", e),
+            Err(e) => panic!("Unexpected error: {e:?}"),
         }
     }
 }

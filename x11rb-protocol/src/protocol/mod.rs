@@ -1001,11 +1001,11 @@ pub fn get_request_name(
     match info {
         RequestInfo::Xproto(request) => request.into(),
         RequestInfo::KnownExt(ext_and_request) => ext_and_request.into(),
-        RequestInfo::UnknownRequest(None, opcode) => alloc::format!("xproto::opcode {}", opcode).into(),
-        RequestInfo::UnknownRequest(Some(ext), opcode) => alloc::format!("{}::opcode {}", ext, opcode).into(),
+        RequestInfo::UnknownRequest(None, opcode) => alloc::format!("xproto::opcode {opcode}").into(),
+        RequestInfo::UnknownRequest(Some(ext), opcode) => alloc::format!("{ext}::opcode {opcode}").into(),
         RequestInfo::UnknownExtension(major_opcode, minor_opcode) => match ext_name {
-            None => alloc::format!("ext {}::opcode {}", major_opcode, minor_opcode).into(),
-            Some(ext_name) => alloc::format!("ext {}::opcode {}", ext_name, minor_opcode).into(),
+            None => alloc::format!("ext {major_opcode}::opcode {minor_opcode}").into(),
+            Some(ext_name) => alloc::format!("ext {ext_name}::opcode {minor_opcode}").into(),
         }
     }
 }

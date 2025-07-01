@@ -135,9 +135,9 @@ fn expr_to_str_impl(
                         true,
                     );
                     if needs_parens {
-                        format!("({} & {})", lhs_str, rhs_str)
+                        format!("({lhs_str} & {rhs_str})")
                     } else {
-                        format!("{} & {}", lhs_str, rhs_str)
+                        format!("{lhs_str} & {rhs_str}")
                     }
                 }
                 xcbdefs::BinaryOperator::Or => {
@@ -158,9 +158,9 @@ fn expr_to_str_impl(
                         true,
                     );
                     if needs_parens {
-                        format!("({} | {})", lhs_str, rhs_str)
+                        format!("({lhs_str} | {rhs_str})")
                     } else {
-                        format!("{} | {}", lhs_str, rhs_str)
+                        format!("{lhs_str} | {rhs_str}")
                     }
                 }
                 // I'm not sure know how to handle overflow here,
@@ -179,9 +179,9 @@ fn expr_to_str_impl(
                     true,
                 );
                 if needs_parens {
-                    format!("(!{})", rhs_str)
+                    format!("(!{rhs_str})")
                 } else {
-                    format!("!{}", rhs_str)
+                    format!("!{rhs_str}")
                 }
             }
         },
@@ -195,7 +195,7 @@ fn expr_to_str_impl(
                 }
             };
             if let Some(t) = cast_to_type {
-                format!("{}::from({})", t, value)
+                format!("{t}::from({value})")
             } else {
                 value
             }
@@ -203,7 +203,7 @@ fn expr_to_str_impl(
         xcbdefs::Expression::ParamRef(param_ref_expr) => {
             let rust_field_name = to_rust_variable_name(&param_ref_expr.field_name);
             if let Some(t) = cast_to_type {
-                format!("{}::from({})", t, rust_field_name)
+                format!("{t}::from({rust_field_name})")
             } else {
                 rust_field_name
             }
@@ -227,7 +227,7 @@ fn expr_to_str_impl(
                 Some("u32"),
                 true,
             );
-            format!("{}.count_ones()", arg)
+            format!("{arg}.count_ones()")
         }
         xcbdefs::Expression::SumOf(sum_of_expr) => {
             // nested sum-of not supported
@@ -272,7 +272,7 @@ fn expr_to_str_impl(
         }
         xcbdefs::Expression::ListElementRef => {
             if let Some(t) = cast_to_type {
-                format!("{}::from(*x)", t)
+                format!("{t}::from(*x)")
             } else if needs_parens {
                 "(*x)".into()
             } else {
@@ -281,11 +281,11 @@ fn expr_to_str_impl(
         }
         xcbdefs::Expression::Value(value) => {
             let value_str = format_literal_integer(*value);
-            format!("{}u32", value_str)
+            format!("{value_str}u32")
         }
         xcbdefs::Expression::Bit(bit) => {
             let value_str = format_literal_integer(1u32 << *bit);
-            format!("{}u32", value_str)
+            format!("{value_str}u32")
         }
     }
 }

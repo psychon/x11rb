@@ -13,11 +13,11 @@ use std::collections::VecDeque;
 fn print_parse_return<T: TryParse + std::fmt::Debug>(data: &[u8]) -> Result<T, ParseError> {
     match T::try_parse(data) {
         Err(e) => {
-            println!("Error while parsing: {:?}", e);
+            println!("Error while parsing: {e:?}");
             Err(e)
         }
         Ok((obj, _remaining)) => {
-            println!("{:?}", obj);
+            println!("{obj:?}");
             Ok(obj)
         }
     }
@@ -81,7 +81,7 @@ impl ConnectionInner {
                 }
             }
             2 => print_parse::<xproto::SetupAuthenticate>(packet),
-            _ => eprintln!("Unknown server setup response: {:?}", packet),
+            _ => eprintln!("Unknown server setup response: {packet:?}"),
         }
     }
 
@@ -93,17 +93,17 @@ impl ConnectionInner {
 
             let (header, remaining) = parse_request_header(packet, BigRequests::Enabled)?;
             let request = Request::parse(header, remaining, &mut Vec::new(), &inner.ext_info)?;
-            println!("client ({}): {:?}", seqno, request);
+            println!("client ({seqno}): {request:?}");
 
             // Is this a QueryExtension?
             let queried_extension = if let Request::QueryExtension(ref request) = request {
                 match String::from_utf8(request.name.to_vec()) {
                     Ok(name) => {
-                        println!("Extension name: {}", name);
+                        println!("Extension name: {name}");
                         Some(name)
                     }
                     Err(e) => {
-                        println!("Extension name is not utf8: {:?}", e);
+                        println!("Extension name is not utf8: {e:?}");
                         None
                     }
                 }
@@ -123,7 +123,7 @@ impl ConnectionInner {
             Ok(())
         }
         if let Err(e) = do_parse(self, packet) {
-            eprintln!("Error while parsing a client request: {:?}", e);
+            eprintln!("Error while parsing a client request: {e:?}");
         }
     }
 
@@ -142,7 +142,7 @@ impl ConnectionInner {
             Ok(())
         }
         if let Err(e) = do_parse(self, packet) {
-            eprintln!("Error while parsing an X11 error: {:?}", e);
+            eprintln!("Error while parsing an X11 error: {e:?}");
         }
     }
 
@@ -158,7 +158,7 @@ impl ConnectionInner {
             Ok(())
         }
         if let Err(e) = do_parse(self, packet) {
-            eprintln!("Error while parsing an X11 event: {:?}", e);
+            eprintln!("Error while parsing an X11 event: {e:?}");
         }
     }
 
@@ -168,7 +168,7 @@ impl ConnectionInner {
             // Figure out information about the request that is being answered.
             let request = match inner.pending_replies.pop_front() {
                 None => {
-                    println!("server: Got unexpected reply {:?}", packet);
+                    println!("server: Got unexpected reply {packet:?}");
                     return Ok(());
                 }
                 Some(request) => request,
@@ -211,7 +211,7 @@ impl ConnectionInner {
             Ok(())
         }
         if let Err(e) = do_parse(self, packet) {
-            eprintln!("Error while parsing an X11 event: {:?}", e);
+            eprintln!("Error while parsing an X11 event: {e:?}");
         }
     }
 }
