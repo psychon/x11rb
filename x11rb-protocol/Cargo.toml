@@ -14,6 +14,9 @@ rust-version = "1.64"
 license = "MIT OR Apache-2.0"
 keywords = ["xcb", "X11"]
 
+[hints]
+mostly-unused = true
+
 [dependencies]
 serde = { version = "1", features = ["derive"], optional = true }
 

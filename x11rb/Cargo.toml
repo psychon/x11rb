@@ -14,6 +14,9 @@ rust-version = "1.64"
 license = "MIT OR Apache-2.0"
 keywords = ["xcb", "X11"]
 
+[hints]
+mostly-unused = true
+
 [dependencies]
 x11rb-protocol = { version = "0.13.1", default-features = false, features = ["std"], path = "../x11rb-protocol" }
 libc = { version = "0.2", optional = true }
