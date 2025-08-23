@@ -67,7 +67,7 @@ impl RequestConnection for FakeConnection {
         &self,
         bufs: &[IoSlice],
         fds: Vec<RawFdContainer>,
-    ) -> Result<Cookie<Self, R>, ConnectionError>
+    ) -> Result<Cookie<'_, Self, R>, ConnectionError>
     where
         R: TryParse,
     {
@@ -78,7 +78,7 @@ impl RequestConnection for FakeConnection {
         &self,
         _bufs: &[IoSlice],
         _fds: Vec<RawFdContainer>,
-    ) -> Result<CookieWithFds<Self, R>, ConnectionError>
+    ) -> Result<CookieWithFds<'_, Self, R>, ConnectionError>
     where
         R: TryParseFd,
     {
@@ -89,7 +89,7 @@ impl RequestConnection for FakeConnection {
         &self,
         bufs: &[IoSlice],
         fds: Vec<RawFdContainer>,
-    ) -> Result<VoidCookie<Self>, ConnectionError> {
+    ) -> Result<VoidCookie<'_, Self>, ConnectionError> {
         Ok(VoidCookie::new(
             self,
             self.internal_send_request(bufs, fds)?,
