@@ -50,7 +50,7 @@ impl RequestConnection for AtomFakeConnection {
         &self,
         bufs: &[IoSlice],
         _fds: RealVec<RawFdContainer>,
-    ) -> RealResult<Cookie<Self, R>, ConnectionError>
+    ) -> RealResult<Cookie<'_, Self, R>, ConnectionError>
     where
         R: TryParse,
     {
@@ -72,7 +72,7 @@ impl RequestConnection for AtomFakeConnection {
         &self,
         _bufs: &[IoSlice],
         _fds: RealVec<RawFdContainer>,
-    ) -> RealResult<CookieWithFds<Self, R>, ConnectionError>
+    ) -> RealResult<CookieWithFds<'_, Self, R>, ConnectionError>
     where
         R: TryParseFd,
     {
@@ -83,7 +83,7 @@ impl RequestConnection for AtomFakeConnection {
         &self,
         _bufs: &[IoSlice],
         _fds: RealVec<RawFdContainer>,
-    ) -> RealResult<VoidCookie<Self>, ConnectionError> {
+    ) -> RealResult<VoidCookie<'_, Self>, ConnectionError> {
         unimplemented!()
     }
 
