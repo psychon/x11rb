@@ -1,3 +1,37 @@
+# Version 0.13.2 (2025-XX-XX)
+
+New features:
+* Update cursor icon file search path to follow a change in libxcb-cursor which
+  in turn was changed to follow libXcursor.
+* Get cursor theme name from `$XCURSOR_THEME` if set.
+* Added `XCBConnection::from_existing_connection` to allow wrapping anything
+  that implements `AsRawXcbConection`. Without this function, unsafe code was
+  required from the user.
+* Added `raw-window-handle` feature which makes `XCBConnection` implement
+  `HasRawDisplayHandle` and `WindowWrapper` implement `HasRawWindowHandle`.
+* Use new `hints.mostly-unused` Cargo feature. This might improve compilation
+  speed with nightly compilers.
+
+Fixes:
+* Fix missing indentation in doc comments in generated code.
+* Fix a minor X11 resource leak in cursor code.
+* Gate tests behind the features they need so that `cargo test
+  --no-default-features` works. This is now also tested in CI.
+* The `present` feature depends on `dri3` to actually work, but this was not
+  specified in `Cargo.toml`.
+
+Breaking changes:
+* MSRV increased to Rust 1.64.
+
+Minor changes:
+* Various minor changes to fix new compiler and clippy warnings and improve
+  readability.
+* Use existing xcursor-rs crate for cursor and cursor theme file parsing instead
+  of own code.
+* Updated dependencies to rustix 1.0, gethostname 1.0. This required a MSRV
+  increase to Rust 1.64.
+* Pin various dependencies in CI to keep our MSRV check working.
+
 # Version 0.13.1 (2024-05-01)
 
 New features:
