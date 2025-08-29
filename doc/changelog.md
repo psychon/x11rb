@@ -1,4 +1,4 @@
-# Version 0.13.2 (2025-XX-XX)
+# Version 0.13.2 (2025-08-29)
 
 New features:
 * Update cursor icon file search path to follow a change in libxcb-cursor which
