@@ -12,10 +12,7 @@ use alloc::vec::Vec;
 pub enum ConnectAddress<'a> {
     /// Connect to this hostname and port over TCP.
     Hostname(&'a str, u16),
-    /// Connect to this Unix socket.
-    ///
-    /// First, the given path should be attempted in the abstract namespace. Only if that fails,
-    /// then the named socket with the given name should be tried.
+    /// Connect to this Unix socket by path.
     Socket(String),
 }
 
