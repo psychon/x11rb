@@ -167,16 +167,6 @@ impl DefaultStream {
             }
             #[cfg(unix)]
             ConnectAddress::Socket(path) => {
-                // Try abstract unix socket first. If that fails, fall back to normal unix socket
-                #[cfg(any(target_os = "linux", target_os = "android"))]
-                if let Ok(stream) = connect_abstract_unix_stream(path.as_bytes()) {
-                    // TODO: Does it make sense to add a constructor similar to from_unix_stream()?
-                    // If this is done: Move the set_nonblocking() from
-                    // connect_abstract_unix_stream() to that new function.
-                    let stream = DefaultStream { inner: stream };
-                    return Ok((stream, peer_addr::local()));
-                }
-
                 // connect over Unix domain socket
                 let stream = UnixStream::connect(path)?;
                 Self::from_unix_stream(stream)
@@ -458,30 +448,6 @@ impl Stream for DefaultStream {
             }
         }
     }
-}
-
-#[cfg(any(target_os = "linux", target_os = "android"))]
-fn connect_abstract_unix_stream(
-    path: &[u8],
-) -> std::result::Result<RawFdContainer, rustix::io::Errno> {
-    use rustix::fs::{fcntl_getfl, fcntl_setfl, OFlags};
-    use rustix::net::{
-        connect, socket_with, AddressFamily, SocketAddrUnix, SocketFlags, SocketType,
-    };
-
-    let socket = socket_with(
-        AddressFamily::UNIX,
-        SocketType::STREAM,
-        SocketFlags::CLOEXEC,
-        None,
-    )?;
-
-    connect(&socket, &SocketAddrUnix::new_abstract_name(path)?)?;
-
-    // Make the FD non-blocking
-    fcntl_setfl(&socket, fcntl_getfl(&socket)? | OFlags::NONBLOCK)?;
-
-    Ok(socket)
 }
 
 /// Helper code to make sure that received FDs are marked as CLOEXEC
