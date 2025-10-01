@@ -183,6 +183,8 @@ jobs:
       run: cargo update --package tracing-core --precise 0.1.33
     - name: Pin last libloading release supporting our msrv of Rust 1.64
       run: cargo update --package libloading --precise 0.8.8
+    - name: Pin last async-io release supporting our msrv of Rust 1.64
+      run: cargo update --package async-io --precise 2.5.0
 
     # build
     - name: cargo check x11rb-protocol with all features
