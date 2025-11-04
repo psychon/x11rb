@@ -173,19 +173,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    - uses: dtolnay/rust-toolchain@1.64.0
+    - uses: dtolnay/rust-toolchain@1.68.0
 
-    - name: Pin last once_cell release supporting our msrv of Rust 1.64
+    - name: Pin last once_cell release supporting our msrv of Rust 1.68
       run: cargo update --package once_cell --precise 1.20.1
-    - name: Pin last gethostname release supporting our msrv of Rust 1.64
+    - name: Pin last gethostname release supporting our msrv of Rust 1.68
       run: cargo update --package gethostname --precise 1.0.1
-    - name: Pin last tracing-core release supporting our msrv of Rust 1.64
+    - name: Pin last tracing-core release supporting our msrv of Rust 1.68
       run: cargo update --package tracing-core --precise 0.1.33
-    - name: Pin last libloading release supporting our msrv of Rust 1.64
+    - name: Pin last libloading release supporting our msrv of Rust 1.68
       run: cargo update --package libloading --precise 0.8.8
-    - name: Pin last async-io release supporting our msrv of Rust 1.64
+    - name: Pin last async-io release supporting our msrv of Rust 1.68
       run: cargo update --package async-io --precise 2.5.0
-    - name: Pin last polling release supporting our msrv of Rust 1.64
+    - name: Pin last polling release supporting our msrv of Rust 1.68
       run: cargo update --package polling --precise 3.10.0
 
     # build
