@@ -12,6 +12,12 @@ use std::sync::{atomic::Ordering, Mutex};
 
 use libc::c_void;
 
+#[cfg(feature = "raw-window-handle")]
+use raw_window_handle::{
+    DisplayHandle, HandleError, HasDisplayHandle, HasWindowHandle, WindowHandle, XcbDisplayHandle,
+    XcbWindowHandle,
+};
+
 use crate::connection::{
     compute_length_field, Connection, ReplyOrError, RequestConnection, RequestKind,
 };
@@ -634,26 +640,26 @@ impl AsFd for XCBConnection {
 }
 
 #[cfg(feature = "raw-window-handle")]
-unsafe impl raw_window_handle::HasRawDisplayHandle for XCBConnection {
+impl HasDisplayHandle for XCBConnection {
     #[inline]
-    fn raw_display_handle(&self) -> raw_window_handle::RawDisplayHandle {
-        let mut handle = raw_window_handle::XcbDisplayHandle::empty();
-        handle.connection = self.get_raw_xcb_connection();
+    fn display_handle(&self) -> Result<DisplayHandle<'_>, HandleError> {
+        // We do not have/know a screen, but people want this trait implemented anyway. We guess.
+        let screen = 0;
+        let connection = std::ptr::NonNull::new(self.get_raw_xcb_connection());
+        let handle = XcbDisplayHandle::new(connection, screen);
 
-        raw_window_handle::RawDisplayHandle::Xcb(handle)
+        unsafe { Ok(DisplayHandle::borrow_raw(handle.into())) }
     }
 }
 
 #[cfg(feature = "raw-window-handle")]
-unsafe impl raw_window_handle::HasRawWindowHandle
-    for crate::protocol::xproto::WindowWrapper<XCBConnection>
-{
+impl HasWindowHandle for crate::protocol::xproto::WindowWrapper<XCBConnection> {
     #[inline]
-    fn raw_window_handle(&self) -> raw_window_handle::RawWindowHandle {
-        let mut handle = raw_window_handle::XcbWindowHandle::empty();
-        handle.window = self.window();
+    fn window_handle(&self) -> Result<WindowHandle<'_>, HandleError> {
+        let window = std::num::NonZeroU32::new(self.window()).ok_or(HandleError::NotSupported)?;
+        let handle = XcbWindowHandle::new(window);
 
-        raw_window_handle::RawWindowHandle::Xcb(handle)
+        unsafe { Ok(WindowHandle::borrow_raw(handle.into())) }
     }
 }
 
