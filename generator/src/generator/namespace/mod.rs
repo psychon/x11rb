@@ -569,25 +569,28 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                         out,
                     );
                     let field_size = field.size().unwrap();
-                    if bytes_name.is_some() && field_size == union_size {
-                        outln!(out, "Self({})", bytes_name.unwrap());
-                    } else {
-                        outln!(out, "let value = [");
-                        for result_byte in result_bytes.iter() {
-                            outln!(out.indent(), "{},", result_byte);
+                    match bytes_name {
+                        Some(bytes_name) if field_size == union_size => {
+                            outln!(out, "Self({})", bytes_name);
                         }
-                        // This is needed to handle cases such as Behavior.type or
-                        // Action.type from the XKB extension.
-                        //
-                        // FIXME: For those cases it might be better to omit the
-                        // serialize implementation.
-                        if field_size != union_size {
-                            for _ in 0..(union_size - field_size) {
-                                outln!(out.indent(), "0,");
+                        _ => {
+                            outln!(out, "let value = [");
+                            for result_byte in result_bytes.iter() {
+                                outln!(out.indent(), "{},", result_byte);
                             }
+                            // This is needed to handle cases such as Behavior.type or
+                            // Action.type from the XKB extension.
+                            //
+                            // FIXME: For those cases it might be better to omit the
+                            // serialize implementation.
+                            if field_size != union_size {
+                                for _ in 0..(union_size - field_size) {
+                                    outln!(out.indent(), "0,");
+                                }
+                            }
+                            outln!(out, "];");
+                            outln!(out, "Self(value)");
                         }
-                        outln!(out, "];");
-                        outln!(out, "Self(value)");
                     }
                 });
                 outln!(out, "}}");
