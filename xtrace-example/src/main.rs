@@ -88,7 +88,7 @@ async fn handle_client_impl(client: Async<TcpStream>) -> IOResult<()> {
 
     // try_join polls both futures and returns an error once one of them returns an error.
     // (It also returns a result once both futures are done, but that should not matter here).
-    futures_util::try_join!(future1, future2)?;
+    let _ = futures_util::try_join!(future1, future2)?;
 
     Ok(())
 }
