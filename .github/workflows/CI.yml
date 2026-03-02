@@ -187,6 +187,8 @@ jobs:
       run: cargo update --package polling --precise 3.10.0
     - name: Pin last async-lock release supporting our msrv of Rust 1.68
       run: cargo update --package async-lock --precise 3.4.1
+    - name: Pin last unicode-ident release supporting our msrv of Rust 1.68
+      run: cargo update --package unicode-ident --precise 1.0.22
 
     # build
     - name: cargo check x11rb-protocol with all features
