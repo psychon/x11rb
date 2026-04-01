@@ -191,6 +191,8 @@ jobs:
       run: cargo update --package unicode-ident --precise 1.0.22
     - name: Pin last syn release supporting our msrv of Rust 1.68
       run: cargo update --package syn@2.0.117 --precise 2.0.114
+    - name: Pin last quote release supporting our msrv of Rust 1.68
+      run: cargo update --package quote --precise 1.0.44
 
     # build
     - name: cargo check x11rb-protocol with all features
