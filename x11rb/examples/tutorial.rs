@@ -1514,11 +1514,9 @@ fn example8() -> Result<(), Box<dyn Error>> {
                 text_draw(&conn, screen, window, 10, HEIGHT as i16 - 10, text)?;
                 conn.flush()?;
             }
-            Event::KeyRelease(event) => {
-                if event.detail == 9 {
-                    // ESC
-                    return Ok(());
-                }
+            Event::KeyRelease(event) if event.detail == 9 => {
+                // ESC
+                return Ok(());
             }
             _ => {} // Unknown event type, ignore it
         }
@@ -2421,11 +2419,9 @@ fn example10() -> Result<(), Box<dyn Error>> {
                 }
                 conn.flush()?;
             }
-            Event::KeyRelease(event) => {
-                if event.detail == 9 {
-                    // ESC
-                    return Ok(());
-                }
+            Event::KeyRelease(event) if event.detail == 9 => {
+                // ESC
+                return Ok(());
             }
             _ => {} // Unknown event type, ignore it
         }
