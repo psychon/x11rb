@@ -242,11 +242,9 @@ where
                     eprintln!("ButtonRelease on unknown window!");
                 }
             }
-            Event::MapNotify(event) => {
-                if !first_window_mapped {
-                    first_window_mapped = true;
-                    util::start_timeout_thread(conn_arc.clone(), event.window);
-                }
+            Event::MapNotify(event) if !first_window_mapped => {
+                first_window_mapped = true;
+                util::start_timeout_thread(conn_arc.clone(), event.window);
             }
             Event::ClientMessage(_) => {
                 // We simply assume that this is a message to close. Since we are the main thread,
