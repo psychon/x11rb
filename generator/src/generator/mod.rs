@@ -172,6 +172,11 @@ fn camel_case_to_snake(arg: &str) -> String {
         "{arg:?}"
     );
 
+    // Special case: No lower case letter, then pass the input through unmodified
+    if !arg.bytes().any(|c| c.is_ascii_lowercase()) {
+        return arg.to_string();
+    }
+
     // Matches "[A-Z][a-z0-9]+|[A-Z]+(?![a-z0-9])|[a-z0-9]+"
     struct Matcher<'a> {
         remaining: &'a str,
@@ -298,4 +303,18 @@ struct ResourceInfo<'a> {
     resource_name: &'a str,
     create_requests: &'a [CreateInfo<'a>],
     free_request: &'a str,
+}
+
+#[cfg(test)]
+mod test {
+    #[test]
+    fn test_camel_case_to_snake() {
+        // This is what the function should actually do
+        assert_eq!("FD_From_Fence", super::camel_case_to_snake("FDFromFence"));
+
+        // Here are some special cases that should pass through unmodified
+        for input in ["WM_NAME", "CUT_BUFFER0", "Mod1"] {
+            assert_eq!(input, super::camel_case_to_snake(input));
+        }
+    }
 }
