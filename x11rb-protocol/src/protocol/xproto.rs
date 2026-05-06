@@ -5145,14 +5145,14 @@ impl AtomEnum {
     pub const CARDINAL: Self = Self(6);
     pub const COLORMAP: Self = Self(7);
     pub const CURSOR: Self = Self(8);
-    pub const CUT_BUFFE_R0: Self = Self(9);
-    pub const CUT_BUFFE_R1: Self = Self(10);
-    pub const CUT_BUFFE_R2: Self = Self(11);
-    pub const CUT_BUFFE_R3: Self = Self(12);
-    pub const CUT_BUFFE_R4: Self = Self(13);
-    pub const CUT_BUFFE_R5: Self = Self(14);
-    pub const CUT_BUFFE_R6: Self = Self(15);
-    pub const CUT_BUFFE_R7: Self = Self(16);
+    pub const CUT_BUFFER0: Self = Self(9);
+    pub const CUT_BUFFER1: Self = Self(10);
+    pub const CUT_BUFFER2: Self = Self(11);
+    pub const CUT_BUFFER3: Self = Self(12);
+    pub const CUT_BUFFER4: Self = Self(13);
+    pub const CUT_BUFFER5: Self = Self(14);
+    pub const CUT_BUFFER6: Self = Self(15);
+    pub const CUT_BUFFER7: Self = Self(16);
     pub const DRAWABLE: Self = Self(17);
     pub const FONT: Self = Self(18);
     pub const INTEGER: Self = Self(19);
@@ -5261,14 +5261,14 @@ impl core::fmt::Debug for AtomEnum  {
             (Self::CARDINAL.0.into(), "CARDINAL", "CARDINAL"),
             (Self::COLORMAP.0.into(), "COLORMAP", "COLORMAP"),
             (Self::CURSOR.0.into(), "CURSOR", "CURSOR"),
-            (Self::CUT_BUFFE_R0.0.into(), "CUT_BUFFE_R0", "CUT_BUFFER0"),
-            (Self::CUT_BUFFE_R1.0.into(), "CUT_BUFFE_R1", "CUT_BUFFER1"),
-            (Self::CUT_BUFFE_R2.0.into(), "CUT_BUFFE_R2", "CUT_BUFFER2"),
-            (Self::CUT_BUFFE_R3.0.into(), "CUT_BUFFE_R3", "CUT_BUFFER3"),
-            (Self::CUT_BUFFE_R4.0.into(), "CUT_BUFFE_R4", "CUT_BUFFER4"),
-            (Self::CUT_BUFFE_R5.0.into(), "CUT_BUFFE_R5", "CUT_BUFFER5"),
-            (Self::CUT_BUFFE_R6.0.into(), "CUT_BUFFE_R6", "CUT_BUFFER6"),
-            (Self::CUT_BUFFE_R7.0.into(), "CUT_BUFFE_R7", "CUT_BUFFER7"),
+            (Self::CUT_BUFFER0.0.into(), "CUT_BUFFER0", "CUT_BUFFER0"),
+            (Self::CUT_BUFFER1.0.into(), "CUT_BUFFER1", "CUT_BUFFER1"),
+            (Self::CUT_BUFFER2.0.into(), "CUT_BUFFER2", "CUT_BUFFER2"),
+            (Self::CUT_BUFFER3.0.into(), "CUT_BUFFER3", "CUT_BUFFER3"),
+            (Self::CUT_BUFFER4.0.into(), "CUT_BUFFER4", "CUT_BUFFER4"),
+            (Self::CUT_BUFFER5.0.into(), "CUT_BUFFER5", "CUT_BUFFER5"),
+            (Self::CUT_BUFFER6.0.into(), "CUT_BUFFER6", "CUT_BUFFER6"),
+            (Self::CUT_BUFFER7.0.into(), "CUT_BUFFER7", "CUT_BUFFER7"),
             (Self::DRAWABLE.0.into(), "DRAWABLE", "DRAWABLE"),
             (Self::FONT.0.into(), "FONT", "FONT"),
             (Self::INTEGER.0.into(), "INTEGER", "INTEGER"),
