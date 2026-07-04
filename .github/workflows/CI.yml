@@ -175,6 +175,10 @@ jobs:
     - uses: actions/checkout@v4
     - uses: dtolnay/rust-toolchain@1.68.0
 
+    # cairo-example (indirectly) depends on syn v1 which causes ambiguity
+    - name: Remove cairo-example from build
+      run: sed -i -e '/cairo-example/d' Cargo.toml
+
     - name: Pin last once_cell release supporting our msrv of Rust 1.68
       run: cargo update --package once_cell --precise 1.20.1
     - name: Pin last gethostname release supporting our msrv of Rust 1.68
@@ -190,7 +194,7 @@ jobs:
     - name: Pin last unicode-ident release supporting our msrv of Rust 1.68
       run: cargo update --package unicode-ident --precise 1.0.22
     - name: Pin last syn release supporting our msrv of Rust 1.68
-      run: cargo update --package syn@2.0.117 --precise 2.0.114
+      run: cargo update --package syn --precise 2.0.114
     - name: Pin last quote release supporting our msrv of Rust 1.68
       run: cargo update --package quote --precise 1.0.44
 
