@@ -185,7 +185,7 @@ impl ConnectionInner {
 
             // Actually parse the reply
             let (reply, _remaining) = (request.parser)(packet, &mut Vec::new())?;
-            println!("server ({}): {:?}", seqno, &reply);
+            println!("server ({}): {:?}", seqno, reply);
 
             // If it is a reply to a QueryExtension request and the extension is present, update
             // our state (add the extension to our ext_info).
