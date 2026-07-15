@@ -1,3 +1,21 @@
+# Version 0.14.0 (2026-XX-XX)
+
+New features:
+* Allow building with libloading 0.9.
+
+Fixes:
+* Fix `CUT_BUFFER0` to `CUT_BUFFER7` atom names. The generated code previously
+  used `CUT_BUFFE_R0`.
+
+Breaking changes:
+* Drop abstract unix socket support, following a change in libxcb.
+* MSRV increased to Rust 1.68.
+* Update to raw-window-handle 0.6.
+
+Minor changes:
+* Pin various dependencies in CI to keep the MSRV check working.
+* Fix various new clippy and Rust warnings.
+
 # Version 0.13.2 (2025-08-29)
 
 New features:
