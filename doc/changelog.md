@@ -1,4 +1,4 @@
-# Version 0.14.0 (2026-XX-XX)
+# Version 0.14.0 (2026-07-16)
 
 New features:
 * Allow building with libloading 0.9.
