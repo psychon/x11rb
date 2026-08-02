@@ -18,7 +18,7 @@ keywords = ["xcb", "X11"]
 mostly-unused = true
 
 [dependencies]
-serde = { version = "1", features = ["derive"], optional = true }
+serde = { version = "1.0.96", features = ["derive"], optional = true }
 
 [dev-dependencies]
 criterion = "0.5"
