@@ -173,32 +173,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    - uses: dtolnay/rust-toolchain@1.68.0
 
-    # cairo-example (indirectly) depends on syn v1 which causes ambiguity
-    - name: Remove cairo-example from build
-      run: sed -i -e '/cairo-example/d' Cargo.toml
+    - name: Remove non-release workspace members
+      run: sed -i -e '/example/d;/generat/d;/xcbgen/d' Cargo.toml
+    - run: cat Cargo.toml
 
-    - name: Pin last once_cell release supporting our msrv of Rust 1.68
-      run: cargo update --package once_cell --precise 1.20.1
-    - name: Pin last gethostname release supporting our msrv of Rust 1.68
-      run: cargo update --package gethostname --precise 1.0.2
-    - name: Pin last libloading release supporting our msrv of Rust 1.68
-      run: cargo update --package libloading --precise 0.8.8
-    - name: Pin last async-io release supporting our msrv of Rust 1.68
-      run: cargo update --package async-io --precise 2.5.0
-    - name: Pin last polling release supporting our msrv of Rust 1.68
-      run: cargo update --package polling --precise 3.10.0
-    - name: Pin last async-lock release supporting our msrv of Rust 1.68
-      run: cargo update --package async-lock --precise 3.4.1
-    - name: Pin last unicode-ident release supporting our msrv of Rust 1.68
-      run: cargo update --package unicode-ident --precise 1.0.22
-    - name: Pin last syn release supporting our msrv of Rust 1.68
-      run: cargo update --package syn --precise 2.0.114
-    - name: Pin last quote release supporting our msrv of Rust 1.68
-      run: cargo update --package quote --precise 1.0.44
+    # use nightly's -Z minimal-versions to set up Cargo.lock
+    - uses: dtolnay/rust-toolchain@nightly
+    - name: Generate Cargo.lock with minimal versions
+      run: cargo update -Z minimal-versions
 
     # build
+    - uses: dtolnay/rust-toolchain@1.68.0
     - name: cargo check x11rb-protocol with all features
       run: cargo build --package x11rb-protocol --verbose --lib --all-features
     - name: cargo check x11rb with all features
