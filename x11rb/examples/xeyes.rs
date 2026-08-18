@@ -130,7 +130,7 @@ fn compute_pupil(area: (i16, i16, i16, i16), mouse: (i16, i16)) -> (i16, i16) {
     let (cx, cy) = (w * angle.cos(), h * angle.sin());
 
     // ...and also compute the actual point
-    let (x, y) = ((center.0 + cx) as _, (center.1 + cy) as _);
+    let (x, y) = (center.0 + cx, center.1 + cy);
 
     // Return the point that is closer to the center
     if distance_squared(center, mouse) < distance_squared(center, (x, y)) {
