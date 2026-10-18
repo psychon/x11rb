@@ -126,18 +126,29 @@ mod file {
 
     /// Get the file name for `~/.Xauthority` based on environment variables.
     ///
-    /// The code in libXau contains a special case for Windows (looks like cygwin) that is not
-    /// handled here (yet?).
+    /// On Windows, when %HOME% isn't set, libXau uses /users/%USERNAME% instead, but that should
+    /// just be %USERPROFILE%.
     fn get_xauthority_file_name() -> Option<PathBuf> {
         if let Some(name) = var_os("XAUTHORITY") {
             return Some(name.into());
         }
-        var_os("HOME").map(|prefix| {
-            let mut result = PathBuf::new();
-            result.push(prefix);
-            result.push(".Xauthority");
-            result
-        })
+        var_os("HOME")
+            .or({
+                #[cfg(windows)]
+                {
+                    var_os("USERPROFILE")
+                }
+                #[cfg(not(windows))]
+                {
+                    None
+                }
+            })
+            .map(|prefix| {
+                let mut result = PathBuf::new();
+                result.push(prefix);
+                result.push(".Xauthority");
+                result
+            })
     }
 
     /// An iterator over the entries of an `.Xauthority` file
