@@ -5,6 +5,7 @@
 use alloc::string::ToString;
 use alloc::vec::Vec;
 use std::io::Error;
+use std::path::Path;
 
 use crate::protocol::xproto::Family as X11Family;
 
@@ -75,7 +76,7 @@ mod file {
     use std::env::var_os;
     use std::fs::File;
     use std::io::{BufReader, Error, ErrorKind, Read};
-    use std::path::PathBuf;
+    use std::path::{Path, PathBuf};
 
     use super::AuthEntry;
 
@@ -128,7 +129,7 @@ mod file {
     ///
     /// The code in libXau contains a special case for Windows (looks like cygwin) that is not
     /// handled here (yet?).
-    fn get_xauthority_file_name() -> Option<PathBuf> {
+    pub(crate) fn get_xauthority_file_name() -> Option<PathBuf> {
         if let Some(name) = var_os("XAUTHORITY") {
             return Some(name.into());
         }
@@ -145,19 +146,13 @@ mod file {
     pub(crate) struct XAuthorityEntries(BufReader<File>);
 
     impl XAuthorityEntries {
-        /// Open `~/.Xauthority` for reading.
+        /// Open the xauthority file for reading.
         ///
-        /// This function returns `Ok(None)` when the location of the `.Xauthority` file could not
-        /// be determined. If opening the file failed (for example, because it does not exist),
-        /// that error is returned.
-        pub(crate) fn new() -> Result<Option<XAuthorityEntries>, Error> {
-            get_xauthority_file_name()
-                .map(File::open)
-                .transpose()?
-                // At this point we have Option<File> and errors while opening the file were
-                // returned to the caller.
-                .map(|file| Ok(XAuthorityEntries(BufReader::new(file))))
-                .transpose()
+        /// If opening the file failed (for example, because it does not exist), that error is
+        /// returned.
+        pub(crate) fn from(xauthority: impl AsRef<Path>) -> Result<XAuthorityEntries, Error> {
+            File::open(xauthority)
+                .map(|file| XAuthorityEntries(BufReader::new(file)))
         }
     }
 
@@ -246,10 +241,24 @@ pub(crate) type AuthInfo = (Vec<u8>, Vec<u8>);
 /// If successful, this function returns that can be written to the X11 server as authorization
 /// protocol name and data, respectively.
 pub fn get_auth(family: Family, address: &[u8], display: u16) -> Result<Option<AuthInfo>, Error> {
-    match file::XAuthorityEntries::new()? {
-        None => Ok(None),
-        Some(entries) => get_auth_impl(entries, family, address, display),
-    }
+    file::get_xauthority_file_name()
+        .map(|file| get_auth_from(file, family, address, display))
+        .unwrap_or(Ok(None))
+}
+
+/// Get the authentication information necessary for connecting to the given display.
+///
+/// - `xauthority` is the path to the xauthority file to read.
+/// - `family` is the protocol family that is used for connecting; this describes how to interpret
+///   the `address`.
+/// - `address` is the raw bytes describing the address that is being connected to.
+/// - `display` is the display number.
+///
+/// If successful, this function returns that can be written to the X11 server as authorization
+/// protocol name and data, respectively.
+pub fn get_auth_from(xauthority: impl AsRef<Path>, family: Family, address: &[u8], display: u16)
+    -> Result<Option<AuthInfo>, Error> {
+    get_auth_impl(file::XAuthorityEntries::from(xauthority)?, family, address, display)
 }
 
 fn get_auth_impl(
