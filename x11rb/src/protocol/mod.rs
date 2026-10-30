@@ -4,7 +4,7 @@
 //! Bindings to the X11 protocol.
 //!
 //! Each sub-module of this module corresponds to one X11 extension. It contains all the
-//! definitions from that extension. The core X11 protocol is in [`xproto`](xproto/index.html).
+//! definitions from that extension. The core X11 protocol is in [`xproto`].
 
 // Clippy does not like some names from the XML.
 #![allow(clippy::upper_case_acronyms)]

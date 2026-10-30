@@ -16,7 +16,7 @@ pub(super) struct PerModuleEnumCases {
     pub(super) request_into_owned_cases: Vec<String>,
     /// Lines that belong in the Reply enum definition.
     pub(super) reply_variants: Vec<String>,
-    /// Impls for From<ReplyType> for Reply enum.
+    /// Impls for `From<ReplyType>` for Reply enum.
     pub(super) reply_from_cases: Vec<String>,
 }
 
