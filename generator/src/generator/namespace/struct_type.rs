@@ -16,16 +16,12 @@ pub(super) fn emit_struct_type(
     fields: &[xcbdefs::FieldDef],
     external_params: &[xcbdefs::ExternalParam],
     parse_size_constraint: StructSizeConstraint<'_>,
-    generate_serialize: bool,
-    fields_need_serialize: bool,
     doc: Option<&xcbdefs::Doc>,
     out: &mut Output,
 ) {
-    assert!(!generate_serialize || fields_need_serialize);
-
     let deducible_fields = gather_deducible_fields(fields);
 
-    generate_switches_for_fields(generator, switch_prefix, fields, fields_need_serialize, out);
+    generate_switches_for_fields(generator, switch_prefix, fields, out);
 
     let has_fds = fields.iter().any(|field| {
         matches!(
@@ -195,30 +191,28 @@ pub(super) fn emit_struct_type(
     outln!(out.indent(), "}}");
     outln!(out, "}}");
 
-    if generate_serialize {
-        let size = fields
-            .iter()
-            .try_fold(0, |sz, field| Some(sz + field.size()?));
-        if let Some(size) = size {
-            emit_fixed_size_struct_serialize(
-                generator,
-                name,
-                fields,
-                external_params,
-                &deducible_fields,
-                size,
-                out,
-            );
-        } else {
-            emit_variable_size_struct_serialize(
-                generator,
-                name,
-                fields,
-                external_params,
-                &deducible_fields,
-                out,
-            );
-        }
+    let size = fields
+        .iter()
+        .try_fold(0, |sz, field| Some(sz + field.size()?));
+    if let Some(size) = size {
+        emit_fixed_size_struct_serialize(
+            generator,
+            name,
+            fields,
+            external_params,
+            &deducible_fields,
+            size,
+            out,
+        );
+    } else {
+        emit_variable_size_struct_serialize(
+            generator,
+            name,
+            fields,
+            external_params,
+            &deducible_fields,
+            out,
+        );
     }
 
     // Generate accessors for length fields that are not part of the struct.
@@ -309,19 +303,11 @@ fn generate_switches_for_fields(
     generator: &NamespaceGenerator<'_, '_>,
     name_prefix: &str,
     fields: &[xcbdefs::FieldDef],
-    generate_serialize: bool,
     out: &mut Output,
 ) {
     for field in fields.iter() {
         if let xcbdefs::FieldDef::Switch(switch_field) = field {
-            switch::generate_switch(
-                generator,
-                name_prefix,
-                switch_field,
-                true,
-                generate_serialize,
-                out,
-            );
+            switch::generate_switch(generator, name_prefix, switch_field, out);
         }
     }
 }

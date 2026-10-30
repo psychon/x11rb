@@ -12,8 +12,6 @@ pub(super) fn emit_switch_type(
     generator: &NamespaceGenerator<'_, '_>,
     switch: &xcbdefs::SwitchField,
     name: &str,
-    generate_try_parse: bool,
-    generate_serialize: bool,
     doc: Option<&str>,
     out: &mut Output,
 ) -> Vec<CaseInfo> {
@@ -59,14 +57,7 @@ pub(super) fn emit_switch_type(
 
         if let Some(field_index) = single_field_index {
             if let xcbdefs::FieldDef::Switch(ref switch_field) = case.fields.borrow()[field_index] {
-                generate_switch(
-                    generator,
-                    name,
-                    switch_field,
-                    generate_try_parse,
-                    generate_serialize,
-                    out,
-                );
+                generate_switch(generator, name, switch_field, out);
             }
 
             case_infos.push(CaseInfo::SingleField(field_index));
@@ -99,8 +90,6 @@ pub(super) fn emit_switch_type(
                 &case_fields,
                 &ext_params,
                 StructSizeConstraint::None,
-                generate_serialize,
-                generate_serialize,
                 None,
                 out,
             );
@@ -223,9 +212,7 @@ pub(super) fn emit_switch_type(
 
     super::helpers::default_debug_impl(name, out);
 
-    if generate_try_parse {
-        emit_switch_try_parse(generator, switch, name, &case_infos, switch_expr_type, out);
-    }
+    emit_switch_try_parse(generator, switch, name, &case_infos, switch_expr_type, out);
 
     if switch.kind == xcbdefs::SwitchKind::Case {
         outln!(out, "impl {} {{", name);
@@ -271,31 +258,28 @@ pub(super) fn emit_switch_type(
         outln!(out, "}}");
     }
 
-    let generate_switch_expr_fn =
-        generate_serialize && switch.cases.iter().all(|case| case.exprs.len() == 1);
+    let generate_switch_expr_fn = switch.cases.iter().all(|case| case.exprs.len() == 1);
 
-    if generate_serialize {
-        if let Some(size) = switch.size() {
-            emit_fixed_size_switch_serialize(
-                generator,
-                switch,
-                name,
-                &case_infos,
-                switch_expr_type,
-                size,
-                out,
-            );
-        } else {
-            emit_variable_size_switch_serialize(
-                generator,
-                switch,
-                name,
-                &case_infos,
-                switch_expr_type,
-                generate_switch_expr_fn,
-                out,
-            );
-        }
+    if let Some(size) = switch.size() {
+        emit_fixed_size_switch_serialize(
+            generator,
+            switch,
+            name,
+            &case_infos,
+            switch_expr_type,
+            size,
+            out,
+        );
+    } else {
+        emit_variable_size_switch_serialize(
+            generator,
+            switch,
+            name,
+            &case_infos,
+            switch_expr_type,
+            generate_switch_expr_fn,
+            out,
+        );
     }
 
     if generate_switch_expr_fn {
@@ -1001,20 +985,10 @@ pub(super) fn generate_switch(
     generator: &NamespaceGenerator<'_, '_>,
     name_prefix: &str,
     switch: &xcbdefs::SwitchField,
-    generate_try_parse: bool,
-    generate_serialize: bool,
     out: &mut Output,
 ) {
     let switch_name = format!("{}{}", name_prefix, to_rust_type_name(&switch.name));
-    emit_switch_type(
-        generator,
-        switch,
-        &switch_name,
-        generate_try_parse,
-        generate_serialize,
-        None,
-        out,
-    );
+    emit_switch_type(generator, switch, &switch_name, None, out);
     outln!(out, "");
 }
 

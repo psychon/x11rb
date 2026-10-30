@@ -299,8 +299,6 @@ pub(super) fn generate_request(
             &reply_fields,
             &[],
             StructSizeConstraint::EmbeddedLength { minimum: 32 },
-            true,
-            true,
             reply.doc.as_ref(),
             proto_out,
         );
@@ -333,18 +331,11 @@ fn generate_aux(
     let aux_name = format!("{}Aux", request_def.name);
 
     if switch_field.kind == xcbdefs::SwitchKind::Case {
-        switch::emit_switch_type(generator, switch_field, &aux_name, true, true, None, out);
+        switch::emit_switch_type(generator, switch_field, &aux_name, None, out);
     } else {
         let doc = format!("Auxiliary and optional information for the `{function_name}` function");
-        let cases_infos = switch::emit_switch_type(
-            generator,
-            switch_field,
-            &aux_name,
-            true,
-            true,
-            Some(&doc),
-            out,
-        );
+        let cases_infos =
+            switch::emit_switch_type(generator, switch_field, &aux_name, Some(&doc), out);
 
         outln!(out, "impl {} {{", aux_name);
         out.indented(|out| {
