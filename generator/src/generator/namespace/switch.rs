@@ -98,8 +98,6 @@ pub(super) fn emit_switch_type(
                 derives,
                 &case_fields,
                 &ext_params,
-                false,
-                generate_try_parse,
                 StructSizeConstraint::None,
                 generate_serialize,
                 generate_serialize,
