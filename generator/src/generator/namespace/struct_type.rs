@@ -8,7 +8,6 @@ use super::{
     StructSizeConstraint,
 };
 
-// FIXME: `skip_length_field` is broken
 pub(super) fn emit_struct_type(
     generator: &NamespaceGenerator<'_, '_>,
     name: &str,
@@ -16,8 +15,6 @@ pub(super) fn emit_struct_type(
     derives: Derives,
     fields: &[xcbdefs::FieldDef],
     external_params: &[xcbdefs::ExternalParam],
-    skip_length_field: bool,
-    generate_try_parse: bool,
     parse_size_constraint: StructSizeConstraint<'_>,
     generate_serialize: bool,
     fields_need_serialize: bool,
@@ -25,18 +22,10 @@ pub(super) fn emit_struct_type(
     out: &mut Output,
 ) {
     assert!(!generate_serialize || fields_need_serialize);
-    assert!(matches!(parse_size_constraint, StructSizeConstraint::None) || generate_try_parse);
 
     let deducible_fields = gather_deducible_fields(fields);
 
-    generate_switches_for_fields(
-        generator,
-        switch_prefix,
-        fields,
-        generate_try_parse,
-        fields_need_serialize,
-        out,
-    );
+    generate_switches_for_fields(generator, switch_prefix, fields, fields_need_serialize, out);
 
     let has_fds = fields.iter().any(|field| {
         matches!(
@@ -70,145 +59,141 @@ pub(super) fn emit_struct_type(
     for field in fields.iter() {
         if generator.field_is_visible(field, &deducible_fields) {
             let field_name = field.name().unwrap();
-            if !skip_length_field || field_name != "length" {
-                let field_type = generator.field_to_rust_type(field, switch_prefix);
-                outln!(
-                    out.indent(),
-                    "pub {}: {},",
-                    to_rust_variable_name(field_name),
-                    field_type
-                );
-            }
+            let field_type = generator.field_to_rust_type(field, switch_prefix);
+            outln!(
+                out.indent(),
+                "pub {}: {},",
+                to_rust_variable_name(field_name),
+                field_type
+            );
         }
     }
     outln!(out, "}}");
 
     super::helpers::default_debug_impl(name, out);
 
-    if generate_try_parse {
-        let input_name = if !matches!(parse_size_constraint, StructSizeConstraint::None) {
-            "initial_value"
-        } else {
-            "remaining"
-        };
-        if has_fds {
-            assert!(external_params.is_empty());
-            outln!(out, "impl TryParseFd for {} {{", name);
-            outln!(
-                out.indent(),
-                "fn try_parse_fd<'a>({}: &'a [u8], fds: &mut Vec<RawFdContainer>) -> \
+    let input_name = if !matches!(parse_size_constraint, StructSizeConstraint::None) {
+        "initial_value"
+    } else {
+        "remaining"
+    };
+    if has_fds {
+        assert!(external_params.is_empty());
+        outln!(out, "impl TryParseFd for {} {{", name);
+        outln!(
+            out.indent(),
+            "fn try_parse_fd<'a>({}: &'a [u8], fds: &mut Vec<RawFdContainer>) -> \
                  Result<(Self, &'a [u8]), ParseError> {{",
-                input_name,
-            );
-        } else if !external_params.is_empty() {
-            outln!(out, "impl {} {{", name);
-            let p = external_params
+            input_name,
+        );
+    } else if !external_params.is_empty() {
+        outln!(out, "impl {} {{", name);
+        let p = external_params
+            .iter()
+            .map(|ext_param| {
+                format!(
+                    "{}: {}",
+                    to_rust_variable_name(&ext_param.name),
+                    generator.type_to_rust_type(&ext_param.type_),
+                )
+            })
+            .collect::<Vec<_>>();
+        outln!(
+            out.indent(),
+            "pub fn try_parse({}: &[u8], {}) -> Result<(Self, &[u8]), ParseError> {{",
+            input_name,
+            p.join(", "),
+        );
+    } else {
+        outln!(out, "impl TryParse for {} {{", name);
+        outln!(
+            out.indent(),
+            "fn try_parse({}: &[u8]) -> Result<(Self, &[u8]), ParseError> {{",
+            input_name,
+        );
+    }
+
+    out.indented(|out| {
+        out.indented(|out| {
+            if !matches!(parse_size_constraint, StructSizeConstraint::None) {
+                outln!(out, "let remaining = initial_value;");
+            }
+            NamespaceGenerator::emit_let_value_for_dynamic_align(fields, out);
+            for field in fields.iter() {
+                parse::emit_field_parse(
+                    generator,
+                    field,
+                    switch_prefix,
+                    "remaining",
+                    FieldContainer::Other,
+                    out,
+                );
+            }
+            for field in fields.iter() {
+                if !field
+                    .name()
+                    .map(|field_name| deducible_fields.contains_key(field_name))
+                    .unwrap_or(false)
+                {
+                    parse::emit_field_post_parse(field, out);
+                }
+            }
+            let field_names = fields
                 .iter()
-                .map(|ext_param| {
-                    format!(
-                        "{}: {}",
-                        to_rust_variable_name(&ext_param.name),
-                        generator.type_to_rust_type(&ext_param.type_),
-                    )
+                .filter_map(|field| {
+                    if generator.field_is_visible(field, &deducible_fields) {
+                        Some(to_rust_variable_name(field.name().unwrap()))
+                    } else {
+                        None
+                    }
                 })
                 .collect::<Vec<_>>();
             outln!(
-                out.indent(),
-                "pub fn try_parse({}: &[u8], {}) -> Result<(Self, &[u8]), ParseError> {{",
-                input_name,
-                p.join(", "),
+                out,
+                "let result = {} {{ {} }};",
+                name,
+                field_names.join(", ")
             );
-        } else {
-            outln!(out, "impl TryParse for {} {{", name);
-            outln!(
-                out.indent(),
-                "fn try_parse({}: &[u8]) -> Result<(Self, &[u8]), ParseError> {{",
-                input_name,
-            );
-        }
-
-        out.indented(|out| {
-            out.indented(|out| {
-                if !matches!(parse_size_constraint, StructSizeConstraint::None) {
-                    outln!(out, "let remaining = initial_value;");
+            match parse_size_constraint {
+                StructSizeConstraint::None => (),
+                StructSizeConstraint::Fixed(fixed_size) => {
+                    outln!(out, "let _ = remaining;");
+                    outln!(out, "let remaining = initial_value.get({}..)", fixed_size);
+                    outln!(out.indent(), ".ok_or(ParseError::InsufficientData)?;");
                 }
-                NamespaceGenerator::emit_let_value_for_dynamic_align(fields, out);
-                for field in fields.iter() {
-                    parse::emit_field_parse(
-                        generator,
-                        field,
-                        switch_prefix,
-                        "remaining",
-                        FieldContainer::Other,
+                StructSizeConstraint::EmbeddedLength { minimum } => {
+                    outln!(out, "let _ = remaining;");
+                    outln!(
                         out,
+                        "let remaining = initial_value.get({} + length as usize * 4..)",
+                        minimum
                     );
+                    outln!(out.indent(), ".ok_or(ParseError::InsufficientData)?;");
                 }
-                for field in fields.iter() {
-                    if !field
-                        .name()
-                        .map(|field_name| deducible_fields.contains_key(field_name))
-                        .unwrap_or(false)
-                    {
-                        parse::emit_field_post_parse(field, out);
-                    }
+                StructSizeConstraint::LengthExpr(length_expr) => {
+                    outln!(
+                        out,
+                        "let length = {}.try_to_usize()?;",
+                        expr_to_str(
+                            generator,
+                            length_expr,
+                            to_rust_variable_name,
+                            false,
+                            None,
+                            true,
+                        ),
+                    );
+                    outln!(out, "let _ = remaining;");
+                    outln!(out, "let remaining = initial_value.get(length..)");
+                    outln!(out.indent(), ".ok_or(ParseError::InsufficientData)?;");
                 }
-                let field_names = fields
-                    .iter()
-                    .filter_map(|field| {
-                        if generator.field_is_visible(field, &deducible_fields) {
-                            Some(to_rust_variable_name(field.name().unwrap()))
-                        } else {
-                            None
-                        }
-                    })
-                    .collect::<Vec<_>>();
-                outln!(
-                    out,
-                    "let result = {} {{ {} }};",
-                    name,
-                    field_names.join(", ")
-                );
-                match parse_size_constraint {
-                    StructSizeConstraint::None => (),
-                    StructSizeConstraint::Fixed(fixed_size) => {
-                        outln!(out, "let _ = remaining;");
-                        outln!(out, "let remaining = initial_value.get({}..)", fixed_size);
-                        outln!(out.indent(), ".ok_or(ParseError::InsufficientData)?;");
-                    }
-                    StructSizeConstraint::EmbeddedLength { minimum } => {
-                        outln!(out, "let _ = remaining;");
-                        outln!(
-                            out,
-                            "let remaining = initial_value.get({} + length as usize * 4..)",
-                            minimum
-                        );
-                        outln!(out.indent(), ".ok_or(ParseError::InsufficientData)?;");
-                    }
-                    StructSizeConstraint::LengthExpr(length_expr) => {
-                        outln!(
-                            out,
-                            "let length = {}.try_to_usize()?;",
-                            expr_to_str(
-                                generator,
-                                length_expr,
-                                to_rust_variable_name,
-                                false,
-                                None,
-                                true,
-                            ),
-                        );
-                        outln!(out, "let _ = remaining;");
-                        outln!(out, "let remaining = initial_value.get(length..)");
-                        outln!(out.indent(), ".ok_or(ParseError::InsufficientData)?;");
-                    }
-                }
-                outln!(out, "Ok((result, remaining))");
-            })
-        });
+            }
+            outln!(out, "Ok((result, remaining))");
+        })
+    });
 
-        outln!(out.indent(), "}}");
-        outln!(out, "}}");
-    }
+    outln!(out.indent(), "}}");
+    outln!(out, "}}");
 
     if generate_serialize {
         let size = fields
@@ -221,7 +206,6 @@ pub(super) fn emit_struct_type(
                 fields,
                 external_params,
                 &deducible_fields,
-                skip_length_field,
                 size,
                 out,
             );
@@ -232,7 +216,6 @@ pub(super) fn emit_struct_type(
                 fields,
                 external_params,
                 &deducible_fields,
-                skip_length_field,
                 out,
             );
         }
@@ -326,7 +309,6 @@ fn generate_switches_for_fields(
     generator: &NamespaceGenerator<'_, '_>,
     name_prefix: &str,
     fields: &[xcbdefs::FieldDef],
-    generate_try_parse: bool,
     generate_serialize: bool,
     out: &mut Output,
 ) {
@@ -336,7 +318,7 @@ fn generate_switches_for_fields(
                 generator,
                 name_prefix,
                 switch_field,
-                generate_try_parse,
+                true,
                 generate_serialize,
                 out,
             );
@@ -350,7 +332,6 @@ fn emit_fixed_size_struct_serialize(
     fields: &[xcbdefs::FieldDef],
     external_params: &[xcbdefs::ExternalParam],
     deducible_fields: &HashMap<String, DeducibleField>,
-    skip_length_field: bool,
     size: u32,
     out: &mut Output,
 ) {
@@ -375,9 +356,6 @@ fn emit_fixed_size_struct_serialize(
             // This gathers the bytes of the result
             let mut result_bytes = Vec::new();
             for field in fields.iter() {
-                if skip_length_field && field.name() == Some("length") {
-                    continue;
-                }
                 serialize::emit_field_serialize(
                     generator,
                     field,
@@ -409,9 +387,6 @@ fn emit_fixed_size_struct_serialize(
         out.indented(|out| {
             outln!(out, "bytes.reserve({});", size);
             for field in fields.iter() {
-                if skip_length_field && field.name() == Some("length") {
-                    continue;
-                }
                 serialize::emit_field_serialize_into(
                     generator,
                     field,
@@ -442,7 +417,6 @@ fn emit_variable_size_struct_serialize(
     fields: &[xcbdefs::FieldDef],
     external_params: &[xcbdefs::ExternalParam],
     deducible_fields: &HashMap<String, DeducibleField>,
-    skip_length_field: bool,
     out: &mut Output,
 ) {
     let ext_params_arg_defs = generator.ext_params_to_arg_defs(true, external_params);
@@ -501,9 +475,6 @@ fn emit_variable_size_struct_serialize(
             }
 
             for field in fields.iter() {
-                if skip_length_field && field.name() == Some("length") {
-                    continue;
-                }
                 serialize::emit_field_serialize_into(
                     generator,
                     field,

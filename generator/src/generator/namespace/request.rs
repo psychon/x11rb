@@ -298,8 +298,6 @@ pub(super) fn generate_request(
             reply_derives,
             &reply_fields,
             &[],
-            false,
-            true,
             StructSizeConstraint::EmbeddedLength { minimum: 32 },
             true,
             true,
