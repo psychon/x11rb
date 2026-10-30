@@ -12,11 +12,13 @@ pub(super) fn emit_switch_type(
     generator: &NamespaceGenerator<'_, '_>,
     switch: &xcbdefs::SwitchField,
     name: &str,
-    generate_try_parse: bool,
-    generate_serialize: bool,
     doc: Option<&str>,
     out: &mut Output,
 ) -> Vec<CaseInfo> {
+    // TODO: Remove this
+    let generate_try_parse = true;
+    let generate_serialize = true;
+
     let switch_align = switch.alignment.get().unwrap();
     // serializing / parsing wouldn't work correctly otherwise
     assert!(switch_align.internal_align <= switch_align.begin.align());
@@ -59,14 +61,7 @@ pub(super) fn emit_switch_type(
 
         if let Some(field_index) = single_field_index {
             if let xcbdefs::FieldDef::Switch(ref switch_field) = case.fields.borrow()[field_index] {
-                generate_switch(
-                    generator,
-                    name,
-                    switch_field,
-                    generate_try_parse,
-                    generate_serialize,
-                    out,
-                );
+                generate_switch(generator, name, switch_field, out);
             }
 
             case_infos.push(CaseInfo::SingleField(field_index));
@@ -99,8 +94,6 @@ pub(super) fn emit_switch_type(
                 &case_fields,
                 &ext_params,
                 StructSizeConstraint::None,
-                generate_serialize,
-                generate_serialize,
                 None,
                 out,
             );
@@ -1001,20 +994,10 @@ pub(super) fn generate_switch(
     generator: &NamespaceGenerator<'_, '_>,
     name_prefix: &str,
     switch: &xcbdefs::SwitchField,
-    generate_try_parse: bool,
-    generate_serialize: bool,
     out: &mut Output,
 ) {
     let switch_name = format!("{}{}", name_prefix, to_rust_type_name(&switch.name));
-    emit_switch_type(
-        generator,
-        switch,
-        &switch_name,
-        generate_try_parse,
-        generate_serialize,
-        None,
-        out,
-    );
+    emit_switch_type(generator, switch, &switch_name, None, out);
     outln!(out, "");
 }
 

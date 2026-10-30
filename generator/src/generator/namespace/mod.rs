@@ -251,8 +251,6 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             &fields,
             &[],
             size_constraint,
-            true,
-            true,
             event_full_def.doc.as_ref(),
             out,
         );
@@ -402,8 +400,6 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             &struct_def.fields.borrow(),
             &struct_def.external_params.borrow(),
             size_constraint,
-            true,
-            true,
             None,
             out,
         );
