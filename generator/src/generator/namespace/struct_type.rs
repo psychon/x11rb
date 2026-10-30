@@ -19,12 +19,6 @@ pub(super) fn emit_struct_type(
     doc: Option<&xcbdefs::Doc>,
     out: &mut Output,
 ) {
-    // TODO: Remove this
-    let generate_serialize = true;
-    let fields_need_serialize = true;
-
-    assert!(!generate_serialize || fields_need_serialize);
-
     let deducible_fields = gather_deducible_fields(fields);
 
     generate_switches_for_fields(generator, switch_prefix, fields, out);
@@ -197,30 +191,28 @@ pub(super) fn emit_struct_type(
     outln!(out.indent(), "}}");
     outln!(out, "}}");
 
-    if generate_serialize {
-        let size = fields
-            .iter()
-            .try_fold(0, |sz, field| Some(sz + field.size()?));
-        if let Some(size) = size {
-            emit_fixed_size_struct_serialize(
-                generator,
-                name,
-                fields,
-                external_params,
-                &deducible_fields,
-                size,
-                out,
-            );
-        } else {
-            emit_variable_size_struct_serialize(
-                generator,
-                name,
-                fields,
-                external_params,
-                &deducible_fields,
-                out,
-            );
-        }
+    let size = fields
+        .iter()
+        .try_fold(0, |sz, field| Some(sz + field.size()?));
+    if let Some(size) = size {
+        emit_fixed_size_struct_serialize(
+            generator,
+            name,
+            fields,
+            external_params,
+            &deducible_fields,
+            size,
+            out,
+        );
+    } else {
+        emit_variable_size_struct_serialize(
+            generator,
+            name,
+            fields,
+            external_params,
+            &deducible_fields,
+            out,
+        );
     }
 
     // Generate accessors for length fields that are not part of the struct.

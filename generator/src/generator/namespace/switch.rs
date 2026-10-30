@@ -15,10 +15,6 @@ pub(super) fn emit_switch_type(
     doc: Option<&str>,
     out: &mut Output,
 ) -> Vec<CaseInfo> {
-    // TODO: Remove this
-    let generate_try_parse = true;
-    let generate_serialize = true;
-
     let switch_align = switch.alignment.get().unwrap();
     // serializing / parsing wouldn't work correctly otherwise
     assert!(switch_align.internal_align <= switch_align.begin.align());
@@ -216,9 +212,7 @@ pub(super) fn emit_switch_type(
 
     super::helpers::default_debug_impl(name, out);
 
-    if generate_try_parse {
-        emit_switch_try_parse(generator, switch, name, &case_infos, switch_expr_type, out);
-    }
+    emit_switch_try_parse(generator, switch, name, &case_infos, switch_expr_type, out);
 
     if switch.kind == xcbdefs::SwitchKind::Case {
         outln!(out, "impl {} {{", name);
@@ -264,31 +258,28 @@ pub(super) fn emit_switch_type(
         outln!(out, "}}");
     }
 
-    let generate_switch_expr_fn =
-        generate_serialize && switch.cases.iter().all(|case| case.exprs.len() == 1);
+    let generate_switch_expr_fn = switch.cases.iter().all(|case| case.exprs.len() == 1);
 
-    if generate_serialize {
-        if let Some(size) = switch.size() {
-            emit_fixed_size_switch_serialize(
-                generator,
-                switch,
-                name,
-                &case_infos,
-                switch_expr_type,
-                size,
-                out,
-            );
-        } else {
-            emit_variable_size_switch_serialize(
-                generator,
-                switch,
-                name,
-                &case_infos,
-                switch_expr_type,
-                generate_switch_expr_fn,
-                out,
-            );
-        }
+    if let Some(size) = switch.size() {
+        emit_fixed_size_switch_serialize(
+            generator,
+            switch,
+            name,
+            &case_infos,
+            switch_expr_type,
+            size,
+            out,
+        );
+    } else {
+        emit_variable_size_switch_serialize(
+            generator,
+            switch,
+            name,
+            &case_infos,
+            switch_expr_type,
+            generate_switch_expr_fn,
+            out,
+        );
     }
 
     if generate_switch_expr_fn {
