@@ -306,7 +306,7 @@ pub(super) enum StructSizeConstraint<'a> {
         /// The minimum size.
         minimum: u8,
     },
-    /// The size of the struct is calculated from a <length> expression
+    /// The size of the struct is calculated from a `<length>` expression
     LengthExpr(&'a xcbdefs::Expression),
 }
 

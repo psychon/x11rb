@@ -39,8 +39,7 @@ pub(crate) fn generate(module: &xcbgen::defs::Module) -> Vec<Generated> {
         );
         outln!(
             out,
-            "//! definitions from that extension. The core X11 protocol is in \
-             [`xproto`](xproto/index.html).",
+            "//! definitions from that extension. The core X11 protocol is in [`xproto`].",
         );
         outln!(out, "");
         outln!(out, "// Clippy does not like some names from the XML.");
