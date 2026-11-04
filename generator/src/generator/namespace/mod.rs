@@ -1,6 +1,5 @@
 #![allow(clippy::cognitive_complexity, clippy::too_many_arguments)]
 
-use std::borrow::Cow;
 use std::cell::RefCell;
 use std::collections::{HashMap, HashSet};
 use std::fmt::Write;
@@ -1600,9 +1599,12 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
     }
 }
 
-fn add_doc_markup(line: &str) -> Cow<'_, str> {
+fn add_doc_markup(line: &str) -> String {
     // The regex finds URLs and is used to marks them as hyperlinks for rustdoc
     static REGEX: OnceLock<Regex> = OnceLock::new();
     let regex = REGEX.get_or_init(|| Regex::new("https?://[a-zA-Z0-9-_/\\.]+").unwrap());
-    regex.replace_all(line, "<$0>")
+    let line = regex.replace_all(line, "<$0>");
+
+    // Rustdoc uses [markup] for links, xcb-proto has doc samples like point[i]. Escape the [.
+    line.replace("[", "\\[")
 }
