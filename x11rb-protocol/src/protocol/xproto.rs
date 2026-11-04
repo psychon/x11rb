@@ -7212,7 +7212,7 @@ pub const CREATE_WINDOW_REQUEST: u8 = 1;
 /// stacking order with respect to siblings.
 ///
 /// The coordinate system has the X axis horizontal and the Y axis vertical with
-/// the origin [0, 0] at the upper-left corner. Coordinates are integral, in terms
+/// the origin \[0, 0] at the upper-left corner. Coordinates are integral, in terms
 /// of pixels, and coincide with pixel centers. Each window and pixmap has its own
 /// coordinate system. For a window, the origin is inside the border at the inside,
 /// upper-left corner.
@@ -18786,7 +18786,7 @@ impl<'input> crate::x11_utils::VoidRequest for PolyPointRequest<'input> {
 pub const POLY_LINE_REQUEST: u8 = 65;
 /// draw lines.
 ///
-/// Draws `points_len`-1 lines between each pair of points (point[i], point[i+1])
+/// Draws `points_len`-1 lines between each pair of points (point\[i], point\[i+1])
 /// in the `points` array. The lines are drawn in the order listed in the array.
 /// They join correctly at all intermediate points, and if the first and last
 /// points coincide, the first and last lines also join correctly. For any given
@@ -20176,7 +20176,7 @@ pub const IMAGE_TEXT8_REQUEST: u8 = 76;
 ///
 /// Fills the destination rectangle with the background pixel from `gc`, then
 /// paints the text with the foreground pixel from `gc`. The upper-left corner of
-/// the filled rectangle is at [x, y - font-ascent]. The width is overall-width,
+/// the filled rectangle is at \[x, y - font-ascent]. The width is overall-width,
 /// the height is font-ascent + font-descent. The overall-width, font-ascent and
 /// font-descent are as returned by `xcb_query_text_extents` (TODO).
 ///
@@ -20305,7 +20305,7 @@ pub const IMAGE_TEXT16_REQUEST: u8 = 77;
 ///
 /// Fills the destination rectangle with the background pixel from `gc`, then
 /// paints the text with the foreground pixel from `gc`. The upper-left corner of
-/// the filled rectangle is at [x, y - font-ascent]. The width is overall-width,
+/// the filled rectangle is at \[x, y - font-ascent]. The width is overall-width,
 /// the height is font-ascent + font-descent. The overall-width, font-ascent and
 /// font-descent are as returned by `xcb_query_text_extents` (TODO).
 ///
