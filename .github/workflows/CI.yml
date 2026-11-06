@@ -14,6 +14,7 @@ env:
   # sometimes not. Try to make this consistent to stabilise coverage reports.
   # Example: https://app.codecov.io/gh/psychon/x11rb/compare/726/changes
   XENVIRONMENT: this/file/does/not/exit
+  RUSTDOCFLAGS: -D warnings
 
 jobs:
   code_gen:
