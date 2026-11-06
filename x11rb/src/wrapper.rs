@@ -96,7 +96,7 @@ pub trait ConnectionExt: XProtoConnectionExt {
         // all previous requests to be sent.
         // The X11 server is single-threaded and processes requests in-order. Thus, it will only
         // reply to our GetInputFocus after everything before was processed.
-        self.get_input_focus()?.reply().and(Ok(()))
+        self.get_input_focus()?.raw_reply().and(Ok(()))
     }
 }
 impl<C: XProtoConnectionExt + ?Sized> ConnectionExt for C {}
