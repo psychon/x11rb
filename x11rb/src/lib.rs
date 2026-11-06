@@ -117,8 +117,8 @@
 //!
 //! # Integrating x11rb with an Event Loop
 //!
-//! The [event_loop_integration](event_loop_integration/index.html) module contains some hints for
-//! integrating x11rb with an event loop as doc comments.
+//! The [event_loop_integration] module contains some hints for integrating x11rb with an event loop
+//! as doc comments.
 
 // A list of lints that are only #![deny] and not the stronger #![forbid]. Each one has a comment
 // explaining why it gets the weaker treatment.
