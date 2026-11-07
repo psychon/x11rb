@@ -134,9 +134,12 @@ authorization from the authors.
 		<pad bytes="2" />
 	</request>
 
-	<!--
-	I think this is correct.  It works. though I believe nInfo is a bit high...
-	-->
+        <!-- nInfo is the total size of the nested rates lists, including their
+        individual length word. The reply by xorg-server varies with the data it
+        has about the client (i.e. randr_query_version). The RefreshRates list
+        is only appended to the packet with version 1.1 and upwards, but
+        the other fields still get the values as if the list was there! The
+        parser will fail if the server not queried before. -->
 	<request name="GetScreenInfo" opcode="5">
 		<field type="WINDOW" name="window" />
 		<reply>
@@ -151,13 +154,10 @@ authorization from the authors.
 			<field type="CARD16" name="nInfo" />
 			<pad bytes="2" />
 			<list type="ScreenSize" name="sizes">
-			    <fieldref>nSizes</fieldref>
+				<fieldref>nSizes</fieldref>
 			</list>
 			<list type="RefreshRates" name="rates">
-				<op op="-">
-					<fieldref>nInfo</fieldref>
-					<fieldref>nSizes</fieldref>
-				</op>
+				<fieldref>nSizes</fieldref>
 			</list>
 		</reply>
 	</request>
