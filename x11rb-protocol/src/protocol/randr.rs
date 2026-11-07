@@ -844,7 +844,7 @@ impl TryParse for GetScreenInfoReply {
         let (n_info, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::InsufficientData)?;
         let (sizes, remaining) = crate::x11_utils::parse_list::<ScreenSize>(remaining, n_sizes.try_to_usize()?)?;
-        let (rates, remaining) = crate::x11_utils::parse_list::<RefreshRates>(remaining, u32::from(n_info).checked_sub(u32::from(n_sizes)).ok_or(ParseError::InvalidExpression)?.try_to_usize()?)?;
+        let (rates, remaining) = crate::x11_utils::parse_list::<RefreshRates>(remaining, n_sizes.try_to_usize()?)?;
         if response_type != 1 {
             return Err(ParseError::InvalidValue);
         }
@@ -882,7 +882,7 @@ impl Serialize for GetScreenInfoReply {
         self.n_info.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 2]);
         self.sizes.serialize_into(bytes);
-        assert_eq!(self.rates.len(), usize::try_from(u32::from(self.n_info).checked_sub(u32::from(n_sizes)).unwrap()).unwrap(), "`rates` has an incorrect length");
+        assert_eq!(self.rates.len(), usize::try_from(n_sizes).unwrap(), "`rates` has an incorrect length");
         self.rates.serialize_into(bytes);
     }
 }
